@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Rotatif Kredi Hesaplama Platformu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; padding-bottom:60px;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  header.masthead{
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
+    display:flex; justify-content:space-between; align-items:flex-end;
+    border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
+  }
+  .brand-eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; color:var(--brass); text-transform:uppercase; margin-bottom:10px;}
+  .brand-row{
+    display:inline-flex; align-items:center; gap:10px; margin:0 0 18px 2px;
+    padding:6px 18px 6px 8px; border-radius:999px;
+    background:var(--surface-2); border:1px solid var(--hairline);
+  }
+  .brand-row-logo{height:30px; width:30px; border-radius:8px; object-fit:cover; flex-shrink:0;}
+  .brand-row-fallback{
+    display:none; width:30px; height:30px; border-radius:8px; flex-shrink:0;
+    background:var(--grad); align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; color:#fff;
+  }
+  .brand-row-name{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; letter-spacing:.01em;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
+  .meta-block{text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); display:flex; flex-direction:column; align-items:flex-end; gap:2px;}
+  .meta-block .status-dot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--teal); margin-right:6px; box-shadow:0 0 8px var(--teal);}
+  .meta-block .credit-top{font-size:12.5px; letter-spacing:.04em; color:var(--muted); margin-bottom:10px;}
+  .meta-block .credit-top b{color:var(--brass);}
+  .sig-plaque{
+    display:inline-flex; align-items:center; gap:7px; text-align:left; flex-shrink:0;
+    padding:4px 10px 4px 4px; border:1px solid var(--hairline); border-radius:8px; background:var(--surface-2);
+  }
+  .sig-monogram{
+    width:22px; height:22px; border-radius:50%; flex-shrink:0;
+    background:radial-gradient(circle at 35% 30%, #E4C77E, var(--brass) 70%, var(--brass-dim));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:7px; letter-spacing:.02em;
+    color:#181008; border:1px solid var(--brass-dim);
+  }
+  .sig-plaque .sig-label{
+    font-family:'IBM Plex Mono',monospace; font-size:6.5px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:1px;
+  }
+  .sig-plaque .sig-name{
+    font-family:'Great Vibes',cursive; font-weight:400; font-size:15px;
+    line-height:1; letter-spacing:.02em; color:var(--brass);
+  }
+
+  main{max-width:1180px; margin:0 auto; padding:0 24px;}
+  section{padding:44px 0; border-bottom:1px solid var(--hairline);}
+  section:last-child{border-bottom:none;}
+  .section-label{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--brass); text-transform:uppercase; margin-bottom:6px;}
+  .section-title{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:22px; margin-bottom:20px;}
+
+  .calc-grid{display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start;}
+  @media (max-width:900px){.calc-grid{grid-template-columns:1fr;}}
+
+  .input-card{background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:24px;}
+  .field{margin-bottom:18px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block; font-size:12px; color:var(--muted); margin-bottom:7px; letter-spacing:.02em;}
+  .field .input-wrap{position:relative; display:flex; align-items:center;}
+  .field input{
+    width:100%; background:linear-gradient(180deg, var(--surface-2), #182031); border:1px solid var(--hairline); border-radius:8px;
+    padding:11px 44px 11px 14px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:15px; outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input::placeholder{color:var(--muted);}
+  .field input:hover{border-color:#3A4666;}
+  .field input:focus{border-color:var(--brass); box-shadow:0 0 0 3px rgba(198,161,91,0.14);}
+  .field input[type=date]{color-scheme:dark;}
+  .field .unit{position:absolute; right:14px; color:var(--muted); font-size:12.5px; font-family:'IBM Plex Mono',monospace; pointer-events:none;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .field-row-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:18px;}
+  @media (max-width:520px){.field-row-3{grid-template-columns:1fr 1fr;}}
+  .field input.small{padding:8px 34px 8px 10px; font-size:13px;}
+  .field-row-3 .unit{right:10px; font-size:11px;}
+  .adv-toggle{
+    display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; color:var(--muted);
+    margin-top:18px; padding-top:16px; border-top:1px solid var(--hairline); user-select:none;
+  }
+  .adv-toggle:hover{color:var(--text);}
+  .adv-body{display:none; margin-top:14px;}
+  .adv-body.open{display:block;}
+  .gun-tool{background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:14px; margin-top:14px;}
+  .gun-tool .field-row{margin-bottom:10px;}
+  .gun-result{font-size:12px; color:var(--muted);}
+  .gun-result b{color:var(--brass); font-family:'IBM Plex Mono',monospace;}
+  .btn{
+    background:var(--brass); color:#181008; border:none; border-radius:8px; padding:9px 16px;
+    font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer; transition:opacity .15s;
+  }
+  .btn:hover{opacity:0.88;}
+  .btn.ghost{background:transparent; border:1px solid var(--hairline); color:var(--muted);}
+  .btn.ghost:hover{color:var(--text); border-color:var(--brass-dim);}
+  .btn.small{padding:6px 12px; font-size:11.5px;}
+
+  .result-card{background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:24px;}
+  .result-hero{text-align:center; padding:18px 0 22px; border-bottom:1px solid var(--hairline); margin-bottom:18px;}
+  .result-hero .label{font-size:12px; color:var(--muted); letter-spacing:.04em; margin-bottom:8px;}
+  .result-hero .value{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:34px; color:var(--brass);}
+  .result-hero .sub{font-size:12px; color:var(--muted); margin-top:6px;}
+  .result-rows{display:flex; flex-direction:column; gap:0;}
+  .result-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(42,52,72,0.5);}
+  .result-row:last-child{border-bottom:none;}
+  .result-row .rlabel{font-size:12.5px; color:var(--muted);}
+  .result-row .rvalue{font-family:'IBM Plex Mono',monospace; font-size:13.5px; font-weight:600; color:var(--text);}
+  .result-row.total .rvalue{color:var(--brass); font-size:15px;}
+  .result-row.fark .rvalue{color:var(--amber);}
+  .badge-formula{
+    display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:5px; padding:1px 6px; margin-left:8px;
+  }
+
+  .formula-panel{background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:22px;}
+  .formula-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
+  @media (max-width:760px){.formula-grid{grid-template-columns:1fr;}}
+  .formula-item{background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:14px 16px;}
+  .formula-item .fname{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; color:var(--brass); margin-bottom:6px;}
+  .formula-item .fexpr{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--text);}
+  .formula-item .fnote{font-size:11px; color:var(--muted); margin-top:6px;}
+
+  .tranche-toolbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;}
+  .io-toolbar{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+  .io-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    color:var(--text); font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;
+    padding:9px 14px; cursor:pointer; transition:border-color .15s ease, background .15s ease;
+  }
+  .io-btn:hover{ border-color:var(--brass-dim); background:var(--surface); }
+  .io-msg{ font-size:12px; margin-top:10px; min-height:0; }
+  .io-msg.ok{ color:var(--teal); }
+  .io-msg.err{ color:var(--coral); }
+  .table-scroll{overflow-x:auto;}
+  table{width:100%; border-collapse:collapse; font-size:12px; min-width:920px;}
+  thead th{text-align:right; padding:9px 8px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hairline); white-space:nowrap;}
+  thead th:first-child{text-align:left;}
+  tbody td{padding:6px 8px; border-bottom:1px solid rgba(42,52,72,0.5); font-family:'IBM Plex Mono',monospace; text-align:right; white-space:nowrap;}
+  tbody td:first-child{text-align:left;}
+  tbody td input{
+    width:100%; min-width:80px; background:linear-gradient(180deg, var(--surface-2), #182031); border:1px solid var(--hairline); border-radius:6px;
+    padding:6px 8px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; outline:none; text-align:right;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  tbody td input:hover{border-color:#3A4666;}
+  tbody td input:focus{border-color:var(--brass); box-shadow:0 0 0 3px rgba(198,161,91,0.14);}
+  tbody tr:hover{background:rgba(198,161,91,0.04);}
+  tbody tr.total-row{background:var(--surface-2); font-weight:700;}
+  tbody tr.total-row td{color:var(--brass); border-bottom:none;}
+  .del-btn{background:none; border:none; color:var(--muted); cursor:pointer; font-size:15px; line-height:1; padding:2px 6px;}
+  .del-btn:hover{color:var(--red);}
+
+  footer{max-width:1180px; margin:0 auto; padding:28px 24px 0; color:var(--muted); font-size:11.5px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  .flag{color:var(--brass); font-size:11.5px;}
+  footer .credit{width:100%; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); margin-top:6px; display:flex; align-items:center; justify-content:flex-end; gap:8px;}
+  .signature-pill{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 12px 4px 5px; border-radius:999px;
+    background:var(--surface-2); border:1px solid var(--hairline);
+  }
+  .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
+  .credit-fallback{
+    display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center;
+    background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff;
+  }
+  footer .credit b{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <h1 class="title">Rotatif Kredi Hesaplama Platformu</h1>
+    <div class="subtitle">Tutar, oran ve vade girin — faiz, komisyon, BSMV ve toplam geri ödeme anında hesaplansın</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- QUICK CALCULATOR -->
+  <section id="quick">
+    <div class="section-title">Parametreleri Girin</div>
+    <div class="calc-grid">
+      <div class="input-card">
+        <div class="field">
+          <label>Kredi Tutarı</label>
+          <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num" id="qTutar" value="1.000.000" data-decimals="2"><span class="unit">TL</span></div>
+        </div>
+        <div class="field-row-3">
+          <div class="field">
+            <label>Vade</label>
+            <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num small" id="qVade" value="365" data-decimals="0"><span class="unit">gün</span></div>
+          </div>
+          <div class="field">
+            <label>Yıllık Faiz Oranı</label>
+            <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num small" id="qOran" value="45" data-decimals="2"><span class="unit">%</span></div>
+          </div>
+          <div class="field">
+            <label>Komisyon Oranı</label>
+            <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num small" id="qKomOran" value="1" data-decimals="2"><span class="unit">%</span></div>
+          </div>
+        </div>
+
+        <div class="adv-toggle" id="advToggle">
+          <span id="advIcon">▸</span> Gelişmiş ayarlar (BSMV oranı, tarihten vade hesapla)
+        </div>
+        <div class="flag" style="margin-top:8px;">⚠ BSMV oranı ve gün bazları (365 / 360) kaynak dosyadaki sabit değerlerdir; mevzuat değişirse "Gelişmiş ayarlar"dan güncelleyin.</div>
+        <div class="adv-body" id="advBody">
+          <div class="field">
+            <label>BSMV Oranı <span style="color:var(--muted)">(faiz ve komisyon üzerinden alınan vergi)</span></label>
+            <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num" id="qBsmv" value="5" data-decimals="2"><span class="unit">%</span></div>
+          </div>
+          <div class="gun-tool">
+            <div style="font-size:12px; color:var(--brass); margin-bottom:10px; font-weight:600;">İki Tarih Arası Gün Hesaplama</div>
+            <div class="field-row">
+              <div class="field">
+                <label>Kullanım Tarihi</label>
+                <div class="input-wrap"><input type="date" id="gunBaslangic"></div>
+              </div>
+              <div class="field">
+                <label>Vade Tarihi</label>
+                <div class="input-wrap"><input type="date" id="gunBitis"></div>
+              </div>
+            </div>
+            <div class="gun-result">Gün sayısı (başlangıç hariç, banka usulü): <b id="gunSonuc">—</b></div>
+            <button class="btn small ghost" id="gunUygula" style="margin-top:10px;">Vade alanına aktar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-hero">
+          <div class="label">TOPLAM GERİ ÖDEME</div>
+          <div class="value" id="rToplamGeri">—</div>
+          <div class="sub" id="rToplamGeriSub">—</div>
+        </div>
+        <div class="result-rows">
+          <div class="result-row"><div class="rlabel">Vade Sonu Faiz</div><div class="rvalue" id="rFaiz">—</div></div>
+          <div class="result-row"><div class="rlabel">Faiz BSMV</div><div class="rvalue" id="rFaizBsmv">—</div></div>
+          <div class="result-row"><div class="rlabel">Komisyon Tutarı</div><div class="rvalue" id="rKomisyon">—</div></div>
+          <div class="result-row"><div class="rlabel">Komisyon BSMV</div><div class="rvalue" id="rKomisyonBsmv">—</div></div>
+          <div class="result-row total"><div class="rlabel">Kredi Geri Ödeme <span style="color:var(--muted); font-size:11px;">(anapara+faiz+faiz BSMV)</span></div><div class="rvalue" id="rKrediGeri">—</div></div>
+          <div class="result-row fark"><div class="rlabel">Toplam Fark <span style="color:var(--muted); font-size:11px;">(anapara hariç ek maliyet)</span></div><div class="rvalue" id="rFark">—</div></div>
+          <div class="result-row"><div class="rlabel">Efektif Yıllık Maliyet Oranı <span class="badge-formula">ek gösterge</span></div><div class="rvalue" id="rEfektif">—</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MULTI-TRANCHE TABLE -->
+  <section id="tranches">
+    <div class="section-label">Çoklu Çekim</div>
+    <div class="section-title">Rotatif Kredi Çekim Tablosu</div>
+    <div class="tranche-toolbar">
+      <div style="font-size:12px; color:var(--muted);">Rotatif kredide birden fazla eş zamanlı çekim olabilir — her satır ayrı bir çekimi temsil eder.</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn ghost small" id="addFromQuick">Hızlı hesaptan satır ekle</button>
+        <button class="btn small" id="addRow">+ Satır Ekle</button>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Tutar</th><th>Vade</th><th>Oran %</th><th>Kom.Oran %</th>
+            <th>Faiz</th><th>Faiz BSMV</th><th>Komisyon</th><th>Kom. BSMV</th><th>Toplam Geri Ödeme</th><th>Toplam Fark</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="trancheBody"></tbody>
+      </table>
+    </div>
+    <div class="io-toolbar">
+      <button type="button" class="io-btn" id="exportExcelBtn">⬇ Excel'e Aktar</button>
+      <button type="button" class="io-btn" id="exportPdfBtn">⬇ PDF'e Aktar</button>
+      <button type="button" class="io-btn" id="importExcelBtn">⬆ Excel'den Yükle</button>
+      <input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none;">
+    </div>
+    <div class="io-msg" id="ioMsg"></div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="credit">
+    <span>powered by</span>
+    <span class="signature-pill">
+      <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+      <span id="credit-fallback" class="credit-fallback">M</span>
+      <b>mmgcreativity</b>
+    </span>
+  </div>
+</footer>
+
+<script>
+
+function fmtTL(n){ if(!isFinite(n)) return '—'; return n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' TL'; }
+function fmtPct(n){ return n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' %'; }
+
+function parseTR(str){
+  if(!str) return 0;
+  const cleaned = String(str).replace(/\./g, '').replace(',', '.');
+  const v = parseFloat(cleaned);
+  return isFinite(v) ? v : 0;
+}
+function formatTRLive(raw){
+  raw = raw.replace(/[^\d,]/g, '');
+  const firstComma = raw.indexOf(',');
+  if(firstComma !== -1){
+    raw = raw.slice(0, firstComma+1) + raw.slice(firstComma+1).replace(/,/g, '');
+  }
+  let [intPart, decPart] = raw.split(',');
+  intPart = (intPart || '').replace(/^0+(?=\d)/, '');
+  intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  if(decPart !== undefined){
+    decPart = decPart.slice(0,2);
+    return intPart + ',' + decPart;
+  }
+  return intPart;
+}
+function attachTRFormatting(el){
+  el.addEventListener('input', ()=>{
+    const pos = el.selectionStart;
+    const before = el.value;
+    el.value = formatTRLive(el.value);
+    const diff = el.value.length - before.length;
+    const newPos = Math.max(0, (pos||0) + diff);
+    try { el.setSelectionRange(newPos, newPos); } catch(e){}
+  });
+  el.addEventListener('blur', ()=>{
+    const decimals = +el.dataset.decimals || 0;
+    const v = parseTR(el.value);
+    el.value = v.toLocaleString('tr-TR', {minimumFractionDigits: decimals>0?2:0, maximumFractionDigits: decimals>0?2:0});
+  });
+}
+function num(id){ return parseTR(document.getElementById(id).value); }
+
+function hesapla(tutar, vade, oranPct, komOranPct, bsmvPct){
+  const oran = oranPct/100, komOran = komOranPct/100, bsmv = bsmvPct/100;
+  const faiz = tutar * oran * vade / 365;
+  const faizBsmv = faiz * bsmv;
+  const komisyon = tutar * komOran * vade / 360;
+  const komisyonBsmv = komisyon * bsmv;
+  const krediGeri = tutar + faiz + faizBsmv;
+  const toplamGeri = tutar + faiz + komisyon + faizBsmv + komisyonBsmv;
+  const toplamFark = faiz + faizBsmv + komisyon + komisyonBsmv;
+  const efektif = vade>0 ? (toplamFark/tutar)*(365/vade)*100 : 0;
+  return {faiz, faizBsmv, komisyon, komisyonBsmv, krediGeri, toplamGeri, toplamFark, efektif};
+}
+
+function updateQuick(){
+  const tutar = num('qTutar'), vade = num('qVade'), oran = num('qOran'), komOran = num('qKomOran'), bsmv = num('qBsmv');
+  const r = hesapla(tutar, vade, oran, komOran, bsmv);
+  document.getElementById('rToplamGeri').textContent = fmtTL(r.toplamGeri);
+  document.getElementById('rToplamGeriSub').textContent = fmtTL(tutar) + ' anapara üzerinden';
+  document.getElementById('rFaiz').textContent = fmtTL(r.faiz);
+  document.getElementById('rFaizBsmv').textContent = fmtTL(r.faizBsmv);
+  document.getElementById('rKomisyon').textContent = fmtTL(r.komisyon);
+  document.getElementById('rKomisyonBsmv').textContent = fmtTL(r.komisyonBsmv);
+  document.getElementById('rKrediGeri').textContent = fmtTL(r.krediGeri);
+  document.getElementById('rFark').textContent = fmtTL(r.toplamFark);
+  document.getElementById('rEfektif').textContent = fmtPct(r.efektif);
+}
+['qTutar','qVade','qOran','qKomOran','qBsmv'].forEach(id=>{
+  const el = document.getElementById(id);
+  attachTRFormatting(el);
+  el.addEventListener('input', ()=>{ updateQuick(); if(typeof recalcDisplay==='function' && trancheBody.querySelector('.total-row')) recalcDisplay(); });
+});
+updateQuick();
+
+// ---- Advanced toggle ----
+const advToggle = document.getElementById('advToggle');
+const advBody = document.getElementById('advBody');
+const advIcon = document.getElementById('advIcon');
+advToggle.addEventListener('click', ()=>{
+  advBody.classList.toggle('open');
+  advIcon.textContent = advBody.classList.contains('open') ? '▾' : '▸';
+});
+
+// ---- Gun hesaplama tool ----
+function updateGun(){
+  const b = document.getElementById('gunBaslangic').value;
+  const s = document.getElementById('gunBitis').value;
+  const out = document.getElementById('gunSonuc');
+  if(!b || !s){ out.textContent = '—'; return; }
+  const d1 = new Date(b), d2 = new Date(s);
+  const diff = Math.round((d2-d1)/86400000) - 1;
+  out.textContent = diff >= 0 ? diff + ' gün' : (diff) + ' gün (bitiş tarihi başlangıçtan önce)';
+}
+document.getElementById('gunBaslangic').addEventListener('input', updateGun);
+document.getElementById('gunBitis').addEventListener('input', updateGun);
+document.getElementById('gunUygula').addEventListener('click', ()=>{
+  const b = document.getElementById('gunBaslangic').value;
+  const s = document.getElementById('gunBitis').value;
+  if(!b || !s) return;
+  const d1 = new Date(b), d2 = new Date(s);
+  const diff = Math.round((d2-d1)/86400000) - 1;
+  if(diff > 0){ document.getElementById('qVade').value = diff.toLocaleString('tr-TR'); updateQuick(); }
+});
+
+// ---- Tranche table ----
+const trancheBody = document.getElementById('trancheBody');
+let trancheRows = [];
+let rowIdCounter = 0;
+
+function addTrancheRow(data){
+  const id = rowIdCounter++;
+  trancheRows.push({id, tutar: data?.tutar ?? 0, vade: data?.vade ?? 30, oran: data?.oran ?? 45, komOran: data?.komOran ?? 1});
+  renderTranches();
+}
+function removeTrancheRow(id){
+  trancheRows = trancheRows.filter(r=>r.id!==id);
+  renderTranches();
+}
+function recalcDisplay(){
+  const bsmv = num('qBsmv');
+  let totals = {tutar:0, faiz:0, faizBsmv:0, komisyon:0, komisyonBsmv:0, toplamGeri:0, toplamFark:0};
+  trancheRows.forEach(row=>{
+    const r = hesapla(row.tutar, row.vade, row.oran, row.komOran, bsmv);
+    totals.tutar += row.tutar; totals.faiz += r.faiz; totals.faizBsmv += r.faizBsmv;
+    totals.komisyon += r.komisyon; totals.komisyonBsmv += r.komisyonBsmv;
+    totals.toplamGeri += r.toplamGeri; totals.toplamFark += r.toplamFark;
+    const anyInput = trancheBody.querySelector(`input[data-id="${row.id}"]`);
+    const tr = anyInput ? anyInput.closest('tr') : null;
+    if(tr){
+      const tds = tr.querySelectorAll('td');
+      tds[5].textContent = fmtTL(r.faiz);
+      tds[6].textContent = fmtTL(r.faizBsmv);
+      tds[7].textContent = fmtTL(r.komisyon);
+      tds[8].textContent = fmtTL(r.komisyonBsmv);
+      tds[9].textContent = fmtTL(r.toplamGeri);
+      tds[10].textContent = fmtTL(r.toplamFark);
+    }
+  });
+  const totalTr = trancheBody.querySelector('tr.total-row');
+  if(totalTr){
+    const tds = totalTr.querySelectorAll('td');
+    tds[1].textContent = fmtTL(totals.tutar);
+    tds[5].textContent = fmtTL(totals.faiz);
+    tds[6].textContent = fmtTL(totals.faizBsmv);
+    tds[7].textContent = fmtTL(totals.komisyon);
+    tds[8].textContent = fmtTL(totals.komisyonBsmv);
+    tds[9].textContent = fmtTL(totals.toplamGeri);
+    tds[10].textContent = fmtTL(totals.toplamFark);
+  }
+}
+
+function renderTranches(){
+  trancheBody.innerHTML = '';
+  let totals = {tutar:0, faiz:0, faizBsmv:0, komisyon:0, komisyonBsmv:0, toplamGeri:0, toplamFark:0};
+  trancheRows.forEach((row, idx)=>{
+    const bsmv = num('qBsmv');
+    const r = hesapla(row.tutar, row.vade, row.oran, row.komOran, bsmv);
+    totals.tutar += row.tutar; totals.faiz += r.faiz; totals.faizBsmv += r.faizBsmv;
+    totals.komisyon += r.komisyon; totals.komisyonBsmv += r.komisyonBsmv;
+    totals.toplamGeri += r.toplamGeri; totals.toplamFark += r.toplamFark;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${idx+1}</td>
+      <td><input type="text" inputmode="decimal" class="tr-num" value="${row.tutar.toLocaleString('tr-TR')}" data-field="tutar" data-decimals="2" data-id="${row.id}"></td>
+      <td><input type="text" inputmode="decimal" class="tr-num" value="${row.vade.toLocaleString('tr-TR')}" data-field="vade" data-decimals="0" data-id="${row.id}" style="min-width:60px;"></td>
+      <td><input type="text" inputmode="decimal" class="tr-num" value="${row.oran.toLocaleString('tr-TR')}" data-field="oran" data-decimals="2" data-id="${row.id}" style="min-width:60px;"></td>
+      <td><input type="text" inputmode="decimal" class="tr-num" value="${row.komOran.toLocaleString('tr-TR')}" data-field="komOran" data-decimals="2" data-id="${row.id}" style="min-width:60px;"></td>
+      <td>${fmtTL(r.faiz)}</td>
+      <td>${fmtTL(r.faizBsmv)}</td>
+      <td>${fmtTL(r.komisyon)}</td>
+      <td>${fmtTL(r.komisyonBsmv)}</td>
+      <td>${fmtTL(r.toplamGeri)}</td>
+      <td>${fmtTL(r.toplamFark)}</td>
+      <td><button class="del-btn" data-del="${row.id}" aria-label="Satırı sil">✕</button></td>
+    `;
+    trancheBody.appendChild(tr);
+  });
+
+  const totalTr = document.createElement('tr');
+  totalTr.className = 'total-row';
+  totalTr.innerHTML = `
+    <td>TOPLAM</td><td>${fmtTL(totals.tutar)}</td><td></td><td></td><td></td>
+    <td>${fmtTL(totals.faiz)}</td><td>${fmtTL(totals.faizBsmv)}</td><td>${fmtTL(totals.komisyon)}</td>
+    <td>${fmtTL(totals.komisyonBsmv)}</td><td>${fmtTL(totals.toplamGeri)}</td><td>${fmtTL(totals.toplamFark)}</td><td></td>
+  `;
+  trancheBody.appendChild(totalTr);
+
+  trancheBody.querySelectorAll('input.tr-num').forEach(inp=>{
+    attachTRFormatting(inp);
+    inp.addEventListener('input', e=>{
+      const id = +e.target.dataset.id, field = e.target.dataset.field;
+      const row = trancheRows.find(r=>r.id===id);
+      if(!row) return;
+      row[field] = parseTR(e.target.value);
+      recalcDisplay();
+    });
+    inp.addEventListener('blur', ()=> renderTranches());
+  });
+  trancheBody.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.addEventListener('click', e=> removeTrancheRow(+e.target.dataset.del));
+  });
+}
+
+document.getElementById('addRow').addEventListener('click', ()=> addTrancheRow());
+document.getElementById('addFromQuick').addEventListener('click', ()=>{
+  addTrancheRow({tutar:num('qTutar'), vade:num('qVade'), oran:num('qOran'), komOran:num('qKomOran')});
+});
+
+// Seed with the example from the source workbook
+addTrancheRow({tutar:9000000, vade:365, oran:45, komOran:1});
+addTrancheRow({tutar:50000000, vade:30, oran:45, komOran:1});
+
+// ---- Excel / PDF Aktarma & Excel'den Yükleme ----
+function showIoMsg(msg, isError){
+  const el = document.getElementById('ioMsg');
+  el.textContent = msg;
+  el.className = 'io-msg ' + (isError ? 'err' : 'ok');
+  setTimeout(() => { el.textContent = ''; el.className = 'io-msg'; }, 4000);
+}
+
+function buildTrancheRows(){
+  const bsmv = num('qBsmv');
+  const header = ['Tutar','Vade (gün)','Oran %','Kom.Oran %','Faiz','Faiz BSMV','Komisyon','Kom. BSMV','Toplam Geri Ödeme','Toplam Fark'];
+  const rows = [header];
+  trancheRows.forEach(row=>{
+    const r = hesapla(row.tutar, row.vade, row.oran, row.komOran, bsmv);
+    rows.push([row.tutar, row.vade, row.oran, row.komOran, r.faiz, r.faizBsmv, r.komisyon, r.komisyonBsmv, r.toplamGeri, r.toplamFark]);
+  });
+  return rows;
+}
+
+document.getElementById('exportExcelBtn').addEventListener('click', () => {
+  try{
+    const rows = buildTrancheRows();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = rows[0].map(()=>({wch:16}));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Rotatif Kredi Çekimleri');
+    XLSX.writeFile(wb, 'rotatif-kredi-cekim-tablosu.xlsx');
+    showIoMsg('Excel dosyası indirildi.');
+  } catch(e){ showIoMsg('Excel oluşturulurken hata oluştu.', true); }
+});
+
+document.getElementById('exportPdfBtn').addEventListener('click', () => {
+  try{
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape' });
+    doc.setFontSize(14);
+    doc.text('Rotatif Kredi Çekim Tablosu', 14, 16);
+    doc.setFontSize(10);
+    doc.text('mmgcreativity.com', 14, 22);
+    const rows = buildTrancheRows();
+    doc.autoTable({
+      startY: 28,
+      head: [rows[0]],
+      body: rows.slice(1).map(r => [
+        fmtTL(r[0]), r[1], fmtPct(r[2]), fmtPct(r[3]),
+        fmtTL(r[4]), fmtTL(r[5]), fmtTL(r[6]), fmtTL(r[7]), fmtTL(r[8]), fmtTL(r[9])
+      ]),
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [198,161,91] }
+    });
+    doc.save('rotatif-kredi-cekim-tablosu.pdf');
+    showIoMsg('PDF dosyası indirildi.');
+  } catch(e){ showIoMsg('PDF oluşturulurken hata oluştu.', true); }
+});
+
+document.getElementById('importExcelBtn').addEventListener('click', () => {
+  document.getElementById('importExcelInput').click();
+});
+
+document.getElementById('importExcelInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      const parsed = [];
+      for(let i=1; i<rows.length; i++){
+        const row = rows[i];
+        if(!row || row.length < 4) continue;
+        const tutar = parseFloat(String(row[0]).replace(/\./g,'').replace(',', '.'));
+        const vade = parseFloat(String(row[1]).replace(',', '.'));
+        const oran = parseFloat(String(row[2]).replace(',', '.'));
+        const komOran = parseFloat(String(row[3]).replace(',', '.'));
+        if(![tutar, vade, oran, komOran].every(isFinite)) continue;
+        parsed.push({tutar, vade, oran, komOran});
+      }
+      if(parsed.length === 0){
+        showIoMsg('Dosyada uygun satır bulunamadı. Sütun sırası: Tutar, Vade (gün), Oran %, Kom.Oran %.', true);
+        return;
+      }
+      trancheRows = [];
+      parsed.forEach(p => addTrancheRow(p));
+      showIoMsg(parsed.length + ' satır yüklendi (mevcut satırların yerine geçti).');
+    } catch(err){
+      showIoMsg('Dosya okunamadı. Lütfen .xlsx formatında bir dosya yükleyin.', true);
+    }
+    e.target.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+});
+</script>
+
+</body>
+</html>

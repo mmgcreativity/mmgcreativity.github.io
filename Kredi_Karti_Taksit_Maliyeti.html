@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Kredi Kartı Taksit Maliyeti</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.06), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.05), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; padding-bottom:60px;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  header.masthead{
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
+    border-bottom:1px solid var(--hairline);
+  }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
+
+  main{ max-width:1180px; margin:0 auto; padding:36px 24px; }
+  .section-title{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:20px; margin-bottom:20px;}
+
+  .calc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:36px; }
+  @media (max-width:800px){ .calc-grid{ grid-template-columns:1fr; } .table-desc{ white-space:normal !important; } }
+
+  .input-card, .result-card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:28px;
+  }
+  .field{ margin-bottom:20px; }
+  .field label{ display:block; font-size:13px; color:var(--muted); margin-bottom:8px; }
+  .input-wrap{
+    display:flex; align-items:center; background:var(--surface-2); border:1px solid var(--hairline);
+    border-radius:8px; padding:12px 14px;
+  }
+  .input-wrap input, .input-wrap select{
+    background:none; border:none; outline:none; color:var(--text); font-family:'IBM Plex Mono',monospace;
+    font-size:16px; font-weight:600; width:100%;
+  }
+  .custom-select{ position:relative; }
+  .select-trigger{
+    width:100%; display:flex; align-items:center; justify-content:space-between;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    padding:12px 14px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:600;
+    cursor:pointer; transition:border-color .15s ease;
+  }
+  .select-trigger:hover{ border-color:var(--brass-dim); }
+  .select-trigger .chevron{ color:var(--muted); font-size:12px; transition:transform .15s ease; }
+  .custom-select.open .select-trigger .chevron{ transform:rotate(180deg); }
+  .select-options{
+    display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:20;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px;
+    max-height:260px; overflow-y:auto; box-shadow:0 12px 30px rgba(0,0,0,0.45);
+  }
+  .custom-select.open .select-options{ display:block; }
+  .select-option{
+    padding:11px 14px; font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--text);
+    cursor:pointer; transition:background .12s ease;
+  }
+  .select-option:hover{ background:var(--surface); }
+  .select-option.selected{ background:rgba(198,161,91,0.12); color:var(--brass); }
+  .input-wrap .unit{ color:var(--muted); font-size:12px; font-family:'IBM Plex Mono',monospace; }
+  .ref-line{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); margin-top:8px; padding:0 2px; }
+  .ref-line b{ color:var(--text); }
+
+  .blokaj-tabs{ display:flex; flex-wrap:wrap; gap:8px; }
+  .blokaj-tab{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:999px;
+    color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:600;
+    padding:8px 16px; cursor:pointer; transition:all .15s ease;
+  }
+  .blokaj-tab:hover{ border-color:var(--brass-dim); color:var(--text); }
+  .blokaj-tab.active{ background:rgba(198,161,91,0.14); border-color:var(--brass-dim); color:var(--brass); }
+
+  .result-headline{ text-align:center; padding:10px 0 24px; border-bottom:1px solid var(--hairline); margin-bottom:20px; }
+  .result-headline .label{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; color:var(--muted); text-transform:uppercase; }
+  .result-headline .value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:34px; color:var(--brass); margin:6px 0; }
+  .result-headline .sub{ font-size:12.5px; color:var(--muted); }
+  .result-row{ display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--hairline); font-size:14px; }
+  .result-row:last-child{ border-bottom:none; }
+  .result-row .val{ font-family:'IBM Plex Mono',monospace; font-weight:600; }
+  .result-row.accent .val{ color:var(--brass); }
+
+  .table-section{ margin-top:8px; }
+  .table-desc{ color:var(--muted); font-size:13.5px; margin-bottom:16px; max-width:640px; }
+  .table-scroll{ overflow-x:auto; }
+  table.rates{ width:100%; min-width:760px; border-collapse:collapse; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
+  table.rates td:not(:first-child), table.rates th:not(:first-child){ text-align:center; }
+  table.rates th[data-key].selected-col, table.rates td.selected-col{ background:rgba(198,161,91,0.08); }
+  table.rates th{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; color:var(--muted); text-transform:uppercase;
+    text-align:left; padding:12px 14px; background:var(--surface-2); border-bottom:1px solid var(--hairline);
+  }
+  table.rates td{ padding:4px 14px; border-bottom:1px solid var(--hairline); font-size:13.5px; }
+  table.rates tr:last-child td{ border-bottom:none; }
+  table.rates tr.selected-row{ background:rgba(198,161,91,0.08); }
+  table.rates input.rate-input{
+    width:70px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px;
+    color:var(--brass); font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13.5px;
+    padding:4px 8px; text-align:right;
+  }
+  table.rates input.rate-input:focus{ outline:none; border-color:var(--brass-dim); }
+  .reset-link{
+    display:inline-block; margin-top:14px; font-family:'IBM Plex Mono',monospace; font-size:11.5px;
+    color:var(--muted); text-decoration:none; cursor:pointer;
+  }
+  .reset-link:hover{ color:var(--coral); }
+  .io-toolbar{ display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
+  .io-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    color:var(--text); font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;
+    padding:9px 14px; cursor:pointer; transition:border-color .15s ease, background .15s ease;
+  }
+  .io-btn:hover{ border-color:var(--brass-dim); background:var(--surface); }
+  .io-msg{ font-size:12px; margin-top:10px; min-height:0; }
+  .io-msg.ok{ color:var(--teal); }
+  .io-msg.err{ color:var(--coral); }
+
+  .flag{ color:var(--brass); font-size:11.5px; margin-top:14px; }
+
+  footer{max-width:1180px; margin:0 auto; padding:28px 24px 0; color:var(--muted); font-size:11.5px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  footer .credit{width:100%; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); margin-top:6px; display:flex; align-items:center; justify-content:flex-end; gap:8px;}
+  .signature-pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 12px 4px 5px; border-radius:999px; background:var(--surface-2); border:1px solid var(--hairline); }
+  .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
+  .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff; }
+  footer .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <h1 class="title">Kredi Kartı Taksit Maliyeti</h1>
+  <div class="subtitle">Komisyon veya müşteriye vade farkı yansıtma senaryoları için elinize geçmesini istediğiniz net tutardan yola çıkarak girmeniz/yansıtmanız gereken brüt tutarı hesaplayın</div>
+</header>
+
+<main>
+  <section id="reverse">
+    <div class="section-title">Ne Kadar Girmeliyim / Yansıtmalıyım?</div>
+    <p class="table-desc" style="max-width:none; white-space:nowrap;">Elinize geçmesini istediğiniz net tutarı biliyorsanız, komisyon/vade farkı düşüldükten sonra bu tutara ulaşmak için girmeniz veya müşteriye yansıtmanız gereken tutarı hesaplayın.</p>
+    <div class="field" style="max-width:none;">
+      <label>Blokaj Süresi (paranın hesaba geçme süresi)</label>
+      <div class="blokaj-tabs" id="blokajTabs">
+        <button class="blokaj-tab active" data-key="ertesi">Ertesi gün</button>
+        <button class="blokaj-tab" data-key="gun3">3 gün</button>
+        <button class="blokaj-tab" data-key="gun7">7 gün</button>
+        <button class="blokaj-tab" data-key="gun15">15 gün</button>
+        <button class="blokaj-tab" data-key="gun30">30 gün</button>
+        <button class="blokaj-tab" data-key="gun45">45 gün</button>
+      </div>
+    </div>
+    <div class="calc-grid">
+      <div class="input-card">
+        <div class="field">
+          <label>Elime Geçmesini İstediğim Net Tutar</label>
+          <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num" id="revNet" value="100.000" data-decimals="2"><span class="unit">TL</span></div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Taksit Sayısı</label>
+          <div class="custom-select" id="revTaksitCustom">
+            <button type="button" class="select-trigger" id="revTaksitTrigger">
+              <span id="revTaksitTriggerLabel">12 Taksit</span>
+              <span class="chevron">▾</span>
+            </button>
+            <div class="select-options" id="revTaksitOptions"></div>
+          </div>
+          <div class="ref-line">
+            <span>Kullanılan Oran: <b id="revOranRef">—</b> %</span>
+            <span>Bu oranı aşağıdaki tablodan değiştirebilirsiniz</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-headline">
+          <div class="label">Girmeniz/Yansıtmanız Gereken Tutar</div>
+          <div class="value" id="revGross">0,00 TL</div>
+          <div class="sub" id="revNetSub">0,00 TL net elinize geçmesi için</div>
+        </div>
+        <div class="result-row">
+          <span>Kesinti (Komisyon/Vade Farkı)</span>
+          <span class="val" id="revKesinti">0,00 TL</span>
+        </div>
+        <div class="result-row accent">
+          <span>Taksit Başına Tutar</span>
+          <span class="val" id="revTaksitTutari">0,00 TL</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <div class="section-title">Taksit Oranları</div>
+    <p class="table-desc">Aşağıdaki oranlar varsayılan/örnek değerlerdir. Kendi oranlarınızı biliyorsanız, kutulara girip güncelleyebilirsiniz — hesaplama otomatik olarak yeni oranlara göre çalışır. Her sütun ayrı bir blokaj süresine ait, dilediğiniz sütunu düzenleyebilirsiniz.</p>
+    <div class="table-scroll">
+      <table class="rates" id="ratesTable">
+        <thead>
+          <tr>
+            <th>Taksit</th>
+            <th data-key="ertesi">Ertesi gün</th>
+            <th data-key="gun3">3 gün</th>
+            <th data-key="gun7">7 gün</th>
+            <th data-key="gun15">15 gün</th>
+            <th data-key="gun30">30 gün</th>
+            <th data-key="gun45">45 gün</th>
+          </tr>
+        </thead>
+        <tbody id="ratesBody"></tbody>
+      </table>
+    </div>
+    <a class="reset-link" id="resetRates">↺ Tüm oranları varsayılana sıfırla</a>
+    <div class="io-toolbar">
+      <button type="button" class="io-btn" id="exportExcelBtn">⬇ Excel'e Aktar</button>
+      <button type="button" class="io-btn" id="exportPdfBtn">⬇ PDF'e Aktar</button>
+      <button type="button" class="io-btn" id="importExcelBtn">⬆ Excel'den Yükle</button>
+      <input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none;">
+    </div>
+    <div class="io-msg" id="ioMsg"></div>
+    <div class="flag">⚠ Vade farkı oranları banka, kart programı ve kampanya dönemine göre değişir. Kesin oranlar için bankanızın güncel bilgilerine başvurun.</div>
+  </section>
+</main>
+
+<footer>
+  <div class="credit">
+    <span>powered by</span>
+    <span class="signature-pill">
+      <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+      <span id="credit-fallback" class="credit-fallback">M</span>
+      <b>mmgcreativity</b>
+    </span>
+  </div>
+</footer>
+
+<script>
+  const RATE_SETS = {
+    ertesi: {1:3.50,  2:5.75,  3:7.75,  4:9.50,  5:11.50, 6:13.25, 7:15.25, 8:17.25, 9:19.00, 10:21.00, 11:22.75, 12:24.50},
+    gun3:   {1:3.00,  2:5.50,  3:7.50,  4:9.25,  5:11.25, 6:13.00, 7:15.00, 8:17.00, 9:18.75, 10:20.75, 11:22.50, 12:24.25},
+    gun7:   {1:2.75,  2:5.25,  3:7.25,  4:9.00,  5:11.00, 6:12.75, 7:14.75, 8:16.75, 9:18.50, 10:20.50, 11:22.25, 12:24.00},
+    gun15:  {1:2.25,  2:4.50,  3:6.50,  4:8.25,  5:10.25, 6:12.00, 7:14.00, 8:15.75, 9:17.75, 10:19.50, 11:21.50, 12:23.25},
+    gun30:  {1:1.00,  2:3.25,  3:5.25,  4:7.00,  5:9.00,  6:10.75, 7:12.75, 8:14.50, 9:16.50, 10:18.25, 11:20.25, 12:22.00},
+    gun45:  {1:0.00,  2:2.00,  3:4.00,  4:5.75,  5:7.75,  6:9.50,  7:11.50, 8:13.25, 9:15.25, 10:17.00, 11:19.00, 12:20.75}
+  };
+
+  let currentBlokaj = 'ertesi';
+  const RATE_DEFAULTS = JSON.parse(JSON.stringify(RATE_SETS));
+
+  function fmtTR(n, decimals){
+    return n.toLocaleString('tr-TR', {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+  }
+  function parseTR(str){
+    if(!str) return 0;
+    const cleaned = String(str).replace(/\./g, '').replace(',', '.');
+    const v = parseFloat(cleaned);
+    return isFinite(v) ? v : 0;
+  }
+  function num(id){ return parseTR(document.getElementById(id).value); }
+
+  function formatTRLive(raw){
+    raw = raw.replace(/[^\d,]/g, '');
+    const firstComma = raw.indexOf(',');
+    if(firstComma !== -1){
+      raw = raw.slice(0, firstComma+1) + raw.slice(firstComma+1).replace(/,/g, '');
+    }
+    let [intPart, decPart] = raw.split(',');
+    intPart = (intPart || '').replace(/^0+(?=\d)/, '');
+    intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    if(decPart !== undefined){
+      decPart = decPart.slice(0,2);
+      return intPart + ',' + decPart;
+    }
+    return intPart;
+  }
+  function attachTRFormatting(el){
+    el.addEventListener('input', ()=>{
+      const pos = el.selectionStart;
+      const before = el.value;
+      el.value = formatTRLive(el.value);
+      const diff = el.value.length - before.length;
+      const newPos = Math.max(0, (pos||0) + diff);
+      try { el.setSelectionRange(newPos, newPos); } catch(e){}
+    });
+    el.addEventListener('blur', ()=>{
+      const decimals = +el.dataset.decimals || 0;
+      const v = parseTR(el.value);
+      el.value = v.toLocaleString('tr-TR', {minimumFractionDigits: decimals>0?2:0, maximumFractionDigits: decimals>0?2:0});
+    });
+  }
+
+  const BLOKAJ_KEYS = ['ertesi','gun3','gun7','gun15','gun30','gun45'];
+
+  const ratesBody = document.getElementById('ratesBody');
+  function renderRatesTable(){
+    ratesBody.innerHTML = '';
+    for(let n=1; n<=12; n++){
+      const tr = document.createElement('tr');
+      if(n === revSelectedTaksit) tr.classList.add('selected-row');
+      let cells = `<td>${n}</td>`;
+      BLOKAJ_KEYS.forEach(key => {
+        const isSelected = key === currentBlokaj ? ' selected-col' : '';
+        cells += `<td class="${isSelected.trim()}"><input type="text" inputmode="decimal" class="rate-input" data-n="${n}" data-key="${key}" data-decimals="2" value="${fmtTR(RATE_SETS[key][n], 2)}"></td>`;
+      });
+      tr.innerHTML = cells;
+      ratesBody.appendChild(tr);
+    }
+    ratesBody.querySelectorAll('.rate-input').forEach(inp => {
+      attachTRFormatting(inp);
+      inp.addEventListener('input', () => {
+        const n = +inp.dataset.n;
+        const key = inp.dataset.key;
+        RATE_SETS[key][n] = parseTR(inp.value);
+        if(key === currentBlokaj) calculateReverse();
+      });
+    });
+    document.querySelectorAll('#ratesTable th[data-key]').forEach(th => {
+      th.classList.toggle('selected-col', th.dataset.key === currentBlokaj);
+    });
+  }
+
+  document.getElementById('resetRates').addEventListener('click', () => {
+    for(const key of BLOKAJ_KEYS){
+      for(const k in RATE_DEFAULTS[key]){ RATE_SETS[key][k] = RATE_DEFAULTS[key][k]; }
+    }
+    renderRatesTable();
+    calculateReverse();
+  });
+
+  const blokajTabs = document.getElementById('blokajTabs');
+  blokajTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.blokaj-tab');
+    if(!btn) return;
+    currentBlokaj = btn.dataset.key;
+    blokajTabs.querySelectorAll('.blokaj-tab').forEach(b => b.classList.toggle('active', b === btn));
+    renderRatesTable();
+    calculateReverse();
+  });
+
+  let revSelectedTaksit = 12;
+  const revTaksitCustom = document.getElementById('revTaksitCustom');
+  const revTaksitTrigger = document.getElementById('revTaksitTrigger');
+  const revTaksitTriggerLabel = document.getElementById('revTaksitTriggerLabel');
+  const revTaksitOptions = document.getElementById('revTaksitOptions');
+
+  for(let n=1; n<=12; n++){
+    const opt = document.createElement('div');
+    opt.className = 'select-option' + (n===12 ? ' selected' : '');
+    opt.dataset.n = n;
+    opt.textContent = n === 1 ? 'Peşin' : (n + ' Taksit');
+    revTaksitOptions.appendChild(opt);
+  }
+
+  function selectRevTaksit(n){
+    revSelectedTaksit = n;
+    revTaksitTriggerLabel.textContent = n === 1 ? 'Peşin' : (n + ' Taksit');
+    revTaksitOptions.querySelectorAll('.select-option').forEach(o => {
+      o.classList.toggle('selected', +o.dataset.n === n);
+    });
+    revTaksitCustom.classList.remove('open');
+    renderRatesTable();
+    calculateReverse();
+  }
+
+  revTaksitTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    revTaksitCustom.classList.toggle('open');
+  });
+  revTaksitOptions.addEventListener('click', (e) => {
+    const opt = e.target.closest('.select-option');
+    if(opt) selectRevTaksit(+opt.dataset.n);
+  });
+  document.addEventListener('click', (e) => {
+    if(!revTaksitCustom.contains(e.target)) revTaksitCustom.classList.remove('open');
+  });
+
+  function calculateReverse(){
+    const net = parseTR(document.getElementById('revNet').value);
+    const n = revSelectedTaksit;
+    const oran = RATE_SETS[currentBlokaj][n];
+
+    document.getElementById('revOranRef').textContent = fmtTR(oran, 2);
+
+    const oranOran = oran/100;
+    if(oranOran >= 1){
+      document.getElementById('revGross').textContent = '—';
+      document.getElementById('revNetSub').textContent = 'Bu oranla hesaplama yapılamıyor';
+      document.getElementById('revKesinti').textContent = '—';
+      document.getElementById('revTaksitTutari').textContent = '—';
+      return;
+    }
+
+    const gross = net / (1 - oranOran);
+    const kesinti = gross - net;
+    const taksitTutari = n > 0 ? gross / n : 0;
+
+    document.getElementById('revGross').textContent = fmtTR(gross, 2) + ' TL';
+    document.getElementById('revNetSub').textContent = fmtTR(net, 2) + ' TL net elinize geçmesi için';
+    document.getElementById('revKesinti').textContent = fmtTR(kesinti, 2) + ' TL';
+    document.getElementById('revTaksitTutari').textContent = fmtTR(taksitTutari, 2) + ' TL';
+  }
+
+  attachTRFormatting(document.getElementById('revNet'));
+  document.getElementById('revNet').addEventListener('input', calculateReverse);
+  renderRatesTable();
+  calculateReverse();
+
+  // ---- Excel / PDF Aktarma & Excel'den Yükleme ----
+  const BLOKAJ_LABELS = { ertesi:'Ertesi gün', gun3:'3 gün', gun7:'7 gün', gun15:'15 gün', gun30:'30 gün', gun45:'45 gün' };
+
+  function showIoMsg(msg, isError){
+    const el = document.getElementById('ioMsg');
+    el.textContent = msg;
+    el.className = 'io-msg ' + (isError ? 'err' : 'ok');
+    setTimeout(() => { el.textContent = ''; el.className = 'io-msg'; }, 4000);
+  }
+
+  function buildTableRows(){
+    const header = ['Taksit'].concat(BLOKAJ_KEYS.map(k => BLOKAJ_LABELS[k]));
+    const rows = [header];
+    for(let n=1; n<=12; n++){
+      rows.push([n].concat(BLOKAJ_KEYS.map(k => RATE_SETS[k][n])));
+    }
+    return rows;
+  }
+
+  document.getElementById('exportExcelBtn').addEventListener('click', () => {
+    try{
+      const rows = buildTableRows();
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{wch:8}].concat(BLOKAJ_KEYS.map(()=>({wch:12})));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Taksit Oranları');
+      XLSX.writeFile(wb, 'kredi-karti-taksit-maliyeti.xlsx');
+      showIoMsg('Excel dosyası indirildi.');
+    } catch(e){ showIoMsg('Excel oluşturulurken hata oluştu.', true); }
+  });
+
+  document.getElementById('exportPdfBtn').addEventListener('click', () => {
+    try{
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape' });
+      doc.setFontSize(14);
+      doc.text('Kredi Kartı Taksit Maliyeti', 14, 16);
+      doc.setFontSize(10);
+      doc.text('mmgcreativity.com', 14, 22);
+      const rows = buildTableRows();
+      doc.autoTable({
+        startY: 28,
+        head: [rows[0]],
+        body: rows.slice(1).map(r => [r[0]].concat(r.slice(1).map(v => fmtTR(v,2)+'%'))),
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [198,161,91] }
+      });
+      doc.save('kredi-karti-taksit-maliyeti.pdf');
+      showIoMsg('PDF dosyası indirildi.');
+    } catch(e){ showIoMsg('PDF oluşturulurken hata oluştu.', true); }
+  });
+
+  document.getElementById('importExcelBtn').addEventListener('click', () => {
+    document.getElementById('importExcelInput').click();
+  });
+
+  document.getElementById('importExcelInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try{
+        const data = new Uint8Array(evt.target.result);
+        const wb = XLSX.read(data, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        let updated = 0;
+        for(let i=1; i<rows.length; i++){
+          const row = rows[i];
+          if(!row || row.length < 2) continue;
+          const n = parseInt(row[0]);
+          if(!n || n < 1 || n > 12) continue;
+          BLOKAJ_KEYS.forEach((key, idx) => {
+            const v = parseFloat(String(row[idx+1]).replace(',', '.'));
+            if(isFinite(v)) RATE_SETS[key][n] = v;
+          });
+          updated++;
+        }
+        if(updated === 0){
+          showIoMsg('Dosyada uygun satır bulunamadı. Sütun sırası: Taksit, Ertesi gün, 3 gün, 7 gün, 15 gün, 30 gün, 45 gün.', true);
+          return;
+        }
+        renderRatesTable();
+        calculateReverse();
+        showIoMsg(updated + ' satır güncellendi.');
+      } catch(err){
+        showIoMsg('Dosya okunamadı. Lütfen .xlsx formatında bir dosya yükleyin.', true);
+      }
+      e.target.value = '';
+    };
+    reader.readAsArrayBuffer(file);
+  });
+</script>
+
+</body>
+</html>
