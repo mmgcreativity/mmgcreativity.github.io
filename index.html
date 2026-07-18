@@ -119,19 +119,6 @@
   .nav-title{ font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:0; }
   .nav-desc{ font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
 
-  .sidebar-foot{
-    padding:16px 24px 20px; border-top:1px solid var(--hairline);
-    font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--muted);
-    display:flex; justify-content:space-between; align-items:center;
-  }
-  .clock-dot{ width:6px; height:6px; border-radius:50%; background:var(--teal); display:inline-block; margin-right:6px; box-shadow:0 0 6px var(--teal); }
-  .sidebar-logout{
-    display:block; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px;
-    color:var(--muted); text-decoration:none; border:1px solid var(--hairline); padding:8px 12px;
-    border-radius:6px; transition:border-color .15s ease, color .15s ease;
-  }
-  .sidebar-logout:hover{ color:var(--coral); border-color:var(--coral); }
-
   /* ---------- Main ---------- */
   main{ flex:1; height:100vh; display:flex; flex-direction:column; min-width:0; }
   .topbar{
@@ -325,7 +312,6 @@
     .nav-item{ flex-direction:column; text-align:center; min-width:120px; gap:6px; margin-bottom:0; }
     .nav-item.active::before{ left:8px; right:8px; top:auto; bottom:-8px; width:auto; height:3px; }
     .nav-desc{ display:none; }
-    .sidebar-foot{ display:none; }
     main{ height:auto; }
     .frame-wrap{ height:85vh; }
     .hero{ padding:22px 20px 20px; }
@@ -374,10 +360,10 @@
   .auth-di-5{ width:30px; height:30px; top:48%; right:8%; color:var(--coral); --r:14deg; animation-delay:-4.5s; animation-duration:9s; }
   .auth-di-6{ width:34px; height:34px; top:65%; left:22%; color:var(--azure); --r:-10deg; animation-delay:-1s; animation-duration:7.5s; }
 
-  .auth-brand-logo{ position:relative; height:96px; width:96px; border-radius:26px; object-fit:cover; margin-bottom:22px; box-shadow:0 20px 50px rgba(0,0,0,0.4); }
+  .auth-brand-logo{ position:relative; height:136px; width:136px; border-radius:32px; object-fit:cover; margin-bottom:22px; box-shadow:0 20px 50px rgba(0,0,0,0.4); }
   .auth-brand-fallback{
-    display:none; position:relative; height:96px; width:96px; border-radius:26px; align-items:center; justify-content:center;
-    background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; color:#fff; font-size:40px;
+    display:none; position:relative; height:136px; width:136px; border-radius:32px; align-items:center; justify-content:center;
+    background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; color:#fff; font-size:56px;
     margin-bottom:22px; box-shadow:0 20px 50px rgba(0,0,0,0.4);
   }
   .auth-brand-title{
@@ -468,7 +454,7 @@
 
     <img class="auth-brand-logo" src="logo.png" alt="mmgcreativity" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
     <div class="auth-brand-fallback">M</div>
-    <div class="auth-brand-title">Dijital Finans Asistanınız</div>
+    <div class="auth-brand-title">Dijital Finans Asistanı</div>
     <div class="auth-brand-tagline">Finansal kararlarınızın dijital iş ortağı</div>
     <div class="auth-brand-desc">Hesabınıza giriş yapın, kendi banka oranlarınızı kaydedin ve her ziyaretinizde kaldığınız yerden devam edin.</div>
   </div>
@@ -568,15 +554,6 @@
       </span>
     </button>
   </nav>
-
-  <div class="sidebar-foot" style="flex-direction:column; align-items:stretch; gap:10px; border-top:1px solid var(--hairline);">
-    <div style="display:flex; align-items:center; justify-content:flex-end;">
-      <button type="button" class="theme-toggle" id="themeToggle" title="Görünüm modu">
-        <span id="themeToggleIcon">☾</span><span class="theme-toggle-label" id="themeToggleLabel">Koyu Mod</span>
-      </button>
-    </div>
-    <a id="logoutBtn" href="#" class="sidebar-logout">Oturumu Kapat</a>
-  </div>
 </aside>
 
 <div class="top-right-badge" id="topRightBadge">
@@ -607,6 +584,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>
       <span>Fotoğrafı / Logoyu Değiştir</span>
     </button>
+    <button type="button" class="account-dropdown-item" id="themeToggle" title="Görünüm modu">
+      <span id="themeToggleIcon" style="width:17px; display:inline-flex; justify-content:center;">☾</span>
+      <span id="themeToggleLabel">Koyu Mod</span>
+    </button>
     <button type="button" class="account-dropdown-item account-dropdown-item-danger" id="dropdownLogoutBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
       <span>Oturumu Kapat</span>
@@ -633,7 +614,7 @@
         <svg class="deco deco-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
         <svg class="deco deco-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
       </div>
-      <h1 class="hero-title">Dijital Finans Asistanınız</h1>
+      <h1 class="hero-title">Dijital Finans Asistanı</h1>
       <p class="hero-tagline">Finansal kararlarınızın dijital iş ortağı</p>
       <p class="hero-desc">Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.</p>
     </section>
@@ -801,6 +782,8 @@
     const nameEl = document.getElementById('userBadgeName');
     const dropdownName = document.getElementById('accountDropdownName');
     const dropdownSub = document.getElementById('accountDropdownSub');
+    const isRealUser = !!state && state.startsWith('user:');
+    dropdownLogoutBtn.querySelector('span').textContent = isRealUser ? 'Oturumu Kapat' : 'Oturum Aç';
     if(!state){
       badge.style.display = 'none';
       dropdownName.textContent = 'Misafir';
@@ -904,7 +887,7 @@
 
   dropdownLogoutBtn.addEventListener('click', () => {
     toggleAccountDropdown(false);
-    document.getElementById('logoutBtn').click();
+    performLogout();
   });
 
   // NOT: Varsayılan olarak giriş ekranı HER ziyarette gösteriliyor.
@@ -1069,8 +1052,7 @@
     }
   });
 
-  document.getElementById('logoutBtn').addEventListener('click', async (e) => {
-    e.preventDefault();
+  async function performLogout(){
     try { await signOut(auth); } catch(err){ /* önemli değil */ }
     localStorage.removeItem('mmg_auth_state');
     localStorage.removeItem('mmg_remember');
@@ -1084,7 +1066,7 @@
     document.getElementById('rememberMe').checked = false;
     setAuthMode('login');
     openAuthOverlay();
-  });
+  }
 
   // ---- Açık / Koyu Görünüm Modu ----
   // NOT: Bu anahtar şu an kabuk (sidebar, üst bar, hero) için çalışıyor.
