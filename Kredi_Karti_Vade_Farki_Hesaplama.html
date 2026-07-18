@@ -40,7 +40,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>mmgcreativity — Kredi Kartı Vade Farkı Hesaplama</title>
+<title>mmgcreativity — Ortalama Vade Hesaplama</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -85,8 +85,8 @@
   .calc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:36px; }
   @media (max-width:800px){ .calc-grid{ grid-template-columns:1fr; } .table-desc{ white-space:normal !important; } }
 
-  .input-card, .result-card{
-    background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:28px;
+  .input-card{
+    padding:0;
   }
   .field{ margin-bottom:20px; }
   .field label{ display:block; font-size:13px; color:var(--muted); margin-bottom:8px; }
@@ -135,19 +135,20 @@
   .result-row.accent .val{ color:var(--brass); }
 
   .table-section{ margin-top:8px; }
-  .table-desc{ color:var(--muted); font-size:13.5px; margin-bottom:16px; max-width:640px; }
+  .table-desc{ color:var(--muted); font-size:13.5px; margin-bottom:16px; max-width:none; }
   table.rates{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
   table.rates th{
     font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; color:var(--muted); text-transform:uppercase;
-    text-align:left; padding:12px 14px; background:var(--surface-2); border-bottom:1px solid var(--hairline);
+    text-align:center; padding:12px 14px; background:var(--surface-2); border-bottom:1px solid var(--hairline);
   }
-  table.rates td{ padding:9px 14px; border-bottom:1px solid var(--hairline); font-size:13.5px; }
+  table.rates td{ padding:9px 14px; border-bottom:1px solid var(--hairline); font-size:13.5px; text-align:center; }
+  table.rates td[id^="toplam-cell-"]{ font-family:'IBM Plex Mono',monospace; color:var(--brass); font-weight:600; }
   table.rates tr:last-child td{ border-bottom:none; }
   table.rates tr.selected-row{ background:rgba(198,161,91,0.08); }
   table.rates input.rate-input{
     width:70px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px;
     color:var(--brass); font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13.5px;
-    padding:6px 8px; text-align:right;
+    padding:6px 8px; text-align:center;
   }
   table.rates input.rate-input:focus{ outline:none; border-color:var(--brass-dim); }
   .reset-link{
@@ -179,64 +180,13 @@
 <body>
 
 <header class="masthead">
-  <h1 class="title">Kredi Kartı Taksit Vade Komisyon Hesaplama</h1>
-  <div class="subtitle">Taksit sayınızı seçin, vade farkı oranlarını dilerseniz kendinize göre düzenleyin — toplam maliyeti anında görün</div>
+  <h1 class="title">Ortalama Vade Hesaplama</h1>
+  <div class="subtitle">Taksitlerin kaç günde bir yansıyacağını girin — her taksit sayısı için vade ve ortalama vadeyi anında görün</div>
 </header>
 
 <main>
-  <section id="quick">
-    <div class="section-title">Kredi Kartı Taksit Vade Farkı Hesaplama</div>
-    <div class="calc-grid">
-      <div class="input-card">
-        <div class="field">
-          <label>Alışveriş Tutarı</label>
-          <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num" id="qTutar" value="10.000" data-decimals="2"><span class="unit">TL</span></div>
-        </div>
-        <div class="field">
-          <label>Taksit Sayısı</label>
-          <div class="custom-select" id="taksitCustom">
-            <button type="button" class="select-trigger" id="taksitTrigger">
-              <span id="taksitTriggerLabel">1 Taksit</span>
-              <span class="chevron">▾</span>
-            </button>
-            <div class="select-options" id="taksitOptions"></div>
-          </div>
-          <div class="ref-line">
-            <span>Vade: <b id="refVade">—</b> gün</span>
-            <span>Ortalama Vade: <b id="refOrtVade">—</b> gün</span>
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:0;">
-          <label>Vade Farkı Oranı (bu taksit için)</label>
-          <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num" id="qOran" value="2,75" data-decimals="2"><span class="unit">%</span></div>
-        </div>
-      </div>
-
-      <div class="result-card">
-        <div class="result-headline">
-          <div class="label">Toplam Ödeme</div>
-          <div class="value" id="rToplam">0,00 TL</div>
-          <div class="sub" id="rAnapara">0,00 TL anapara üzerinden</div>
-        </div>
-        <div class="result-row">
-          <span>Vade Farkı Tutarı</span>
-          <span class="val" id="rVadeFarki">0,00 TL</span>
-        </div>
-        <div class="result-row">
-          <span>Taksit Başına Tutar</span>
-          <span class="val" id="rTaksitTutari">0,00 TL</span>
-        </div>
-        <div class="result-row accent">
-          <span>Efektif Aylık Maliyet Oranı</span>
-          <span class="val" id="rEfektif">0,00 %</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section class="table-section">
-    <div class="section-title">Taksit ve Vade Farkı Tablosu</div>
-    <p class="table-desc">Aşağıdaki oranlar ve gün değerleri varsayılan/örnek değerlerdir. Kartınızın veya kampanyanızın gerçek oranlarını ve vade günlerini biliyorsanız, tablodaki kutulara kendi değerlerinizi girip güncelleyebilirsiniz — hesaplama otomatik olarak yeni değerlere göre çalışır.</p>
+    <p class="table-desc">Aşağıdaki gün değerleri örnek değerlerdir. Kartınızın gerçek vade günlerini biliyorsanız, tablodaki kutulara kendi değerlerinizi girip güncelleyebilirsiniz — ortalama vade otomatik olarak yeniden hesaplanır.</p>
     <div class="field" style="max-width:280px;">
       <label>Taksitler kaç günde bir yansıyacak</label>
       <div class="input-wrap"><input type="text" inputmode="numeric" class="tr-num" id="qInterval" value="30" data-decimals="0"><span class="unit">gün</span></div>
@@ -245,25 +195,25 @@
       <thead>
         <tr>
           <th>Taksit</th>
-          <th>Vade (gün)</th>
+          <th>Taksit Vade (gün)</th>
+          <th>Toplam Vade (gün)</th>
           <th>Ortalama Vade (gün)</th>
-          <th>Vade Farkı Oranı (%)</th>
         </tr>
       </thead>
       <tbody id="ratesBody"></tbody>
     </table>
-    <a class="reset-link" id="resetRates">↺ Varsayılan oranlara ve günlere sıfırla</a>
+    <a class="reset-link" id="resetRates">↺ Varsayılan günlere sıfırla</a>
     <div class="io-toolbar">
-      <button type="button" class="io-btn" id="saveRatesBtn" style="border-color:var(--brass-dim); color:var(--brass);">☁ Oranlarımı Kaydet</button>
       <button type="button" class="io-btn" id="exportExcelBtn">⬇ Excel'e Aktar</button>
       <button type="button" class="io-btn" id="exportPdfBtn">⬇ PDF'e Aktar</button>
       <button type="button" class="io-btn" id="importExcelBtn">⬆ Excel'den Yükle</button>
       <button type="button" class="io-btn" id="downloadTemplateBtn">📄 Şablonu İndir</button>
       <input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none;">
     </div>
+    <div class="io-msg" id="memberNotice" style="color:var(--muted);">🔒 Excel/PDF aktarma ve şablon özellikleri şimdilik yalnızca üye girişi yapan kullanıcılar için aktiftir.</div>
     <div class="io-msg" id="ioMsg"></div>
     <div class="io-msg" id="cloudMsg" style="color:var(--muted);"></div>
-    <div class="flag">⚠ Vade farkı oranları banka, kart programı ve kampanya dönemine göre değişir. Kesin oranlar için bankanızın güncel bilgilerine başvurun.</div>
+    <div class="flag">⚠ Vade günleri banka, kart programı ve kampanya dönemine göre değişir. Kesin bilgiler için bankanızın güncel verilerine başvurun.</div>
   </section>
 </main>
 
@@ -279,33 +229,29 @@
 </footer>
 
 <script>
-  const DEFAULTS = {
-    1:  {vade:30,  ort:30,  oran:2.75},
-    2:  {vade:60,  ort:45,  oran:5.25},
-    3:  {vade:90,  ort:60,  oran:7.25},
-    4:  {vade:120, ort:75,  oran:9.00},
-    5:  {vade:150, ort:90,  oran:11.00},
-    6:  {vade:180, ort:105, oran:13.00},
-    7:  {vade:210, ort:120, oran:14.75},
-    8:  {vade:240, ort:135, oran:16.75},
-    9:  {vade:270, ort:150, oran:18.50},
-    10: {vade:300, ort:165, oran:20.50},
-    11: {vade:330, ort:180, oran:22.25},
-    12: {vade:360, ort:195, oran:25.00}
-  };
+  const DEFAULT_TAKSIT_VADE = 30; // varsayılan: her taksit için gün aralığı
 
-  let rates = {};
-  let vades = {};
-  for(const k in DEFAULTS){
-    rates[k] = DEFAULTS[k].oran;
-    vades[k] = DEFAULTS[k].vade;
+  let taksitVades = {};   // ELLE GİRİLEN: her taksidin kendi vadesi (gün)
+  let vades = {};         // TÜRETİLEN: kümülatif Toplam Vade (computeOrt bunu kullanır, dokunulmadı)
+
+  for(let n=1; n<=12; n++){
+    taksitVades[n] = DEFAULT_TAKSIT_VADE;
   }
+
+  function recomputeToplam(){
+    let running = 0;
+    for(let n=1; n<=12; n++){
+      running += taksitVades[n];
+      vades[n] = running;
+    }
+  }
+  recomputeToplam();
 
   function computeOrt(n){
     let sum = 0;
     for(let i=1; i<=n; i++){ sum += vades[i]; }
     const avg = sum / n;
-    return (avg % 1 === 0) ? String(avg) : avg.toLocaleString('tr-TR', {minimumFractionDigits:1, maximumFractionDigits:1});
+    return avg.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
   }
 
   function fmtTR(n, decimals){
@@ -350,56 +296,16 @@
     });
   }
 
-  let selectedTaksit = 1;
-  const taksitCustom = document.getElementById('taksitCustom');
-  const taksitTrigger = document.getElementById('taksitTrigger');
-  const taksitTriggerLabel = document.getElementById('taksitTriggerLabel');
-  const taksitOptions = document.getElementById('taksitOptions');
-
-  for(let n=1; n<=12; n++){
-    const opt = document.createElement('div');
-    opt.className = 'select-option' + (n===1 ? ' selected' : '');
-    opt.dataset.n = n;
-    opt.textContent = n + ' Taksit';
-    taksitOptions.appendChild(opt);
-  }
-
-  function selectTaksit(n){
-    selectedTaksit = n;
-    taksitTriggerLabel.textContent = n + ' Taksit';
-    taksitOptions.querySelectorAll('.select-option').forEach(o => {
-      o.classList.toggle('selected', +o.dataset.n === n);
-    });
-    taksitCustom.classList.remove('open');
-    document.getElementById('qOran').value = fmtTR(rates[n], 2);
-    updateRefLine(n);
-    renderRatesTable(n);
-    calculate();
-  }
-
-  taksitTrigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    taksitCustom.classList.toggle('open');
-  });
-  taksitOptions.addEventListener('click', (e) => {
-    const opt = e.target.closest('.select-option');
-    if(opt) selectTaksit(+opt.dataset.n);
-  });
-  document.addEventListener('click', (e) => {
-    if(!taksitCustom.contains(e.target)) taksitCustom.classList.remove('open');
-  });
-
   const ratesBody = document.getElementById('ratesBody');
-  function renderRatesTable(selectedN){
+  function renderRatesTable(){
     ratesBody.innerHTML = '';
     for(let n=1; n<=12; n++){
       const tr = document.createElement('tr');
-      if(n === selectedN) tr.classList.add('selected-row');
       tr.innerHTML = `
         <td>${n}</td>
-        <td><input type="text" inputmode="numeric" class="rate-input day-input" data-n="${n}" data-field="vade" data-decimals="0" value="${vades[n]}"></td>
+        <td><input type="text" inputmode="numeric" class="rate-input day-input" data-n="${n}" data-field="taksitvade" data-decimals="0" value="${taksitVades[n]}"></td>
+        <td id="toplam-cell-${n}">${vades[n]}</td>
         <td id="ort-cell-${n}">${computeOrt(n)}</td>
-        <td><input type="text" inputmode="decimal" class="rate-input" data-n="${n}" data-field="oran" data-decimals="2" value="${fmtTR(rates[n], 2)}"></td>
       `;
       ratesBody.appendChild(tr);
     }
@@ -407,96 +313,45 @@
       attachTRFormatting(inp);
       inp.addEventListener('input', () => {
         const n = +inp.dataset.n;
-        const field = inp.dataset.field;
         const v = parseTR(inp.value);
-        if(field === 'oran'){
-          rates[n] = v;
-          if(selectedTaksit === n){
-            document.getElementById('qOran').value = fmtTR(rates[n], 2);
-          }
-          calculate();
-          if(typeof calculateReverse === 'function') calculateReverse();
-        } else if(field === 'vade'){
-          vades[n] = v;
-          refreshOrts();
-          updateRefLine(selectedTaksit);
-          calculate();
-          if(typeof calculateReverse === 'function') calculateReverse();
-        }
+        taksitVades[n] = v;
+        recomputeToplam();
+        refreshDerived();
       });
     });
   }
 
-  function refreshOrts(){
+  function refreshDerived(){
     for(let n=1; n<=12; n++){
-      const cell = document.getElementById('ort-cell-' + n);
-      if(cell) cell.textContent = computeOrt(n);
+      const toplamCell = document.getElementById('toplam-cell-' + n);
+      const ortCell = document.getElementById('ort-cell-' + n);
+      if(toplamCell) toplamCell.textContent = vades[n];
+      if(ortCell) ortCell.textContent = computeOrt(n);
     }
   }
 
   document.getElementById('qInterval').addEventListener('input', () => {
     const interval = num('qInterval');
     for(let n=1; n<=12; n++){
-      vades[n] = interval * n;
+      taksitVades[n] = interval;
     }
-    renderRatesTable(selectedTaksit);
-    updateRefLine(selectedTaksit);
-    calculate();
-    if(typeof calculateReverse === 'function') calculateReverse();
+    recomputeToplam();
+    renderRatesTable();
   });
   attachTRFormatting(document.getElementById('qInterval'));
 
-  function updateRefLine(n){
-    document.getElementById('refVade').textContent = vades[n];
-    document.getElementById('refOrtVade').textContent = computeOrt(n);
-  }
-
-  function calculate(){
-    const tutar = num('qTutar');
-    const n = selectedTaksit;
-    const oran = num('qOran');
-
-    const vadeFarki = tutar * (oran/100);
-    const toplam = tutar + vadeFarki;
-    const taksitTutari = n > 0 ? toplam / n : 0;
-    const efektifAylik = n > 0 ? oran / n : 0;
-
-    document.getElementById('rToplam').textContent = fmtTR(toplam, 2) + ' TL';
-    document.getElementById('rAnapara').textContent = fmtTR(tutar, 2) + ' TL anapara üzerinden';
-    document.getElementById('rVadeFarki').textContent = fmtTR(vadeFarki, 2) + ' TL';
-    document.getElementById('rTaksitTutari').textContent = fmtTR(taksitTutari, 2) + ' TL';
-    document.getElementById('rEfektif').textContent = fmtTR(efektifAylik, 2) + ' %';
-  }
-
-  document.getElementById('qTutar').addEventListener('input', calculate);
-  attachTRFormatting(document.getElementById('qTutar'));
-  attachTRFormatting(document.getElementById('qOran'));
-  document.getElementById('qOran').addEventListener('input', () => {
-    const n = selectedTaksit;
-    rates[n] = num('qOran');
-    renderRatesTable(n);
-    calculate();
-  });
-
   document.getElementById('resetRates').addEventListener('click', () => {
-    for(const k in DEFAULTS){
-      rates[k] = DEFAULTS[k].oran;
-      vades[k] = DEFAULTS[k].vade;
+    for(let n=1; n<=12; n++){
+      taksitVades[n] = DEFAULT_TAKSIT_VADE;
     }
-    document.getElementById('qInterval').value = '30';
-    const n = selectedTaksit;
-    document.getElementById('qOran').value = fmtTR(rates[n], 2);
-    renderRatesTable(n);
-    updateRefLine(n);
-    calculate();
-    if(typeof calculateReverse === 'function') calculateReverse();
+    document.getElementById('qInterval').value = String(DEFAULT_TAKSIT_VADE);
+    recomputeToplam();
+    renderRatesTable();
   });
 
-  updateRefLine(1);
-  renderRatesTable(1);
-  calculate();
+  renderRatesTable();
 
-  // ---- Firebase: Oranları Kaydetme / Yükleme ----
+  // ---- Firebase: Vadeleri Kaydetme / Yükleme ----
   function showCloudMsg(msg){
     const el = document.getElementById('cloudMsg');
     el.textContent = msg;
@@ -509,46 +364,43 @@
       const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', uid, 'rates', 'kkVadeFarki'));
       if(snap.exists()){
         const data = snap.data();
-        if(data.vades){ for(const k in data.vades){ vades[k] = data.vades[k]; } }
-        if(data.rates){ for(const k in data.rates){ rates[k] = data.rates[k]; } }
+        if(data.taksitVades){ for(const k in data.taksitVades){ taksitVades[k] = data.taksitVades[k]; } }
         if(data.interval){ document.getElementById('qInterval').value = String(data.interval); }
-        renderRatesTable(selectedTaksit);
-        updateRefLine(selectedTaksit);
-        calculate();
-        if(typeof calculateReverse === 'function') calculateReverse();
-        showCloudMsg('Kayıtlı oranlarınız yüklendi.');
+        recomputeToplam();
+        renderRatesTable();
+        showCloudMsg('Kayıtlı vadeleriniz yüklendi.');
       }
     } catch(err){
       // Sessizce geç: kayıtlı veri yoksa veya erişilemezse varsayılanlarla devam edilir
     }
   }
 
-  document.getElementById('saveRatesBtn').addEventListener('click', async () => {
-    const user = window.mmgCloud.currentUser;
-    if(!user){
-      showCloudMsg('Oranlarınızı kaydetmek için giriş yapmanız (misafir değil, gerçek hesapla) gerekiyor.');
-      return;
-    }
-    try{
-      const cloud = window.mmgCloud;
-      await cloud.setDoc(cloud.doc(cloud.db, 'users', user.uid, 'rates', 'kkVadeFarki'), {
-        vades: vades,
-        rates: rates,
-        interval: num('qInterval'),
-        updatedAt: new Date().toISOString()
-      });
-      showCloudMsg('Oranlarınız bulutta kaydedildi. ✓');
-    } catch(err){
-      showCloudMsg('Kaydedilirken bir hata oluştu.');
-    }
-  });
-
   document.addEventListener('mmg-auth-ready', (e) => {
     const user = e.detail.user;
     if(user){
       loadCloudRates(user.uid);
     }
+    updateMemberGate();
   });
+
+  // ---- Excel/PDF/Şablon araçlarını yalnızca üyelere açık tutan kontrol ----
+  function isMember(){
+    return !!(window.mmgCloud && window.mmgCloud.currentUser);
+  }
+
+  function requireMember(){
+    if(!isMember()){
+      showIoMsg('Bu özelliği kullanmak için üye girişi yapmanız gerekiyor (misafir modunda kullanılamaz).', true);
+      return false;
+    }
+    return true;
+  }
+
+  function updateMemberGate(){
+    const notice = document.getElementById('memberNotice');
+    notice.style.display = isMember() ? 'none' : 'block';
+  }
+  updateMemberGate();
 
   // ---- Excel / PDF Aktarma & Excel'den Yükleme ----
   function showIoMsg(msg, isError){
@@ -559,65 +411,103 @@
   }
 
   function buildTableRows(){
-    const rows = [['Taksit', 'Vade (gün)', 'Ortalama Vade (gün)', 'Vade Farkı Oranı (%)']];
+    const rows = [['Taksit', 'Taksit Vade (gün)', 'Toplam Vade (gün)', 'Ortalama Vade (gün)']];
     for(let n=1; n<=12; n++){
-      rows.push([n, vades[n], computeOrt(n), rates[n]]);
+      rows.push([n, taksitVades[n], vades[n], computeOrt(n)]);
     }
     return rows;
   }
 
   document.getElementById('exportExcelBtn').addEventListener('click', () => {
+    if(!requireMember()) return;
     try{
       const rows = buildTableRows();
       const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols'] = [{wch:8},{wch:12},{wch:18},{wch:18}];
+      ws['!cols'] = [{wch:8},{wch:16},{wch:16},{wch:18}];
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Vade Farkı Tablosu');
-      XLSX.writeFile(wb, 'kredi-karti-vade-farki-tablosu.xlsx');
+      XLSX.utils.book_append_sheet(wb, ws, 'Ortalama Vade Tablosu');
+      XLSX.writeFile(wb, 'ortalama-vade-tablosu.xlsx');
       showIoMsg('Excel dosyası indirildi.');
     } catch(e){ showIoMsg('Excel oluşturulurken hata oluştu.', true); }
   });
 
-  document.getElementById('exportPdfBtn').addEventListener('click', () => {
+  // mmgcreativity: logo.png'yi çalışma anında okuyup PDF'e gömmek için yardımcı fonksiyon
+  function mmgGetLogoDataUrl(){
+    return fetch('logo.png')
+      .then(r => r.blob())
+      .then(blob => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      }))
+      .catch(() => null);
+  }
+
+  document.getElementById('exportPdfBtn').addEventListener('click', async () => {
+    if(!requireMember()) return;
     try{
+      const logoDataUrl = await mmgGetLogoDataUrl();
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
+      const titleX = logoDataUrl ? 30 : 14;
+      if(logoDataUrl){
+        try{ doc.addImage(logoDataUrl, 'PNG', 14, 8, 14, 14); } catch(imgErr){ /* logo eklenemezse sessizce geç */ }
+      }
       doc.setFontSize(14);
-      doc.text('Kredi Kartı Vade Farkı Hesaplama', 14, 16);
+      doc.text('Ortalama Vade Hesaplama', titleX, 16);
       doc.setFontSize(10);
-      doc.text('mmgcreativity.com', 14, 22);
+      doc.text('mmgcreativity.com', titleX, 22);
       doc.autoTable({
         startY: 28,
-        head: [['Taksit', 'Vade (gün)', 'Ortalama Vade (gün)', 'Vade Farkı Oranı (%)']],
-        body: buildTableRows().slice(1).map(r => [r[0], r[1], r[2], fmtTR(r[3],2)+'%']),
+        head: [['Taksit', 'Taksit Vade (gün)', 'Toplam Vade (gün)', 'Ortalama Vade (gün)']],
+        body: buildTableRows().slice(1).map(r => [r[0], r[1], r[2], r[3]]),
         styles: { fontSize: 9 },
-        headStyles: { fillColor: [198,161,91] }
+        headStyles: { fillColor: [198,161,91] },
+        didDrawPage: function(data){
+          const pageHeight = doc.internal.pageSize.getHeight();
+          const pageWidth = doc.internal.pageSize.getWidth();
+          doc.setDrawColor(198,161,91);
+          doc.setLineWidth(0.3);
+          doc.line(14, pageHeight - 14, pageWidth - 14, pageHeight - 14);
+          doc.setFontSize(8);
+          doc.setTextColor(130,130,130);
+          doc.text('mmgcreativity.com · Dijital Finans Asistanı', 14, pageHeight - 9);
+          const dateStr = new Date().toLocaleString('tr-TR');
+          doc.text('Oluşturulma: ' + dateStr, pageWidth - 14, pageHeight - 9, { align: 'right' });
+        }
       });
-      doc.save('kredi-karti-vade-farki-tablosu.pdf');
+      doc.save('ortalama-vade-tablosu.pdf');
       showIoMsg('PDF dosyası indirildi.');
     } catch(e){ showIoMsg('PDF oluşturulurken hata oluştu.', true); }
   });
 
   document.getElementById('importExcelBtn').addEventListener('click', () => {
+    if(!requireMember()) return;
     document.getElementById('importExcelInput').click();
   });
 
   document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
+    if(!requireMember()) return;
     try{
-      const rows = [['Taksit', 'Vade (gün)', 'Ortalama Vade (gün)', 'Vade Farkı Oranı (%)']];
+      const rows = [['Taksit', 'Taksit Vade (gün)', 'Toplam Vade (gün)', 'Ortalama Vade (gün)']];
+      let running = 0;
       for(let n=1; n<=12; n++){
-        rows.push([n, DEFAULTS[n].vade, DEFAULTS[n].ort, DEFAULTS[n].oran]);
+        running += DEFAULT_TAKSIT_VADE;
+        const ort = (running / n).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+        rows.push([n, DEFAULT_TAKSIT_VADE, running, ort]);
       }
       const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols'] = [{wch:8},{wch:12},{wch:18},{wch:18}];
+      ws['!cols'] = [{wch:8},{wch:16},{wch:16},{wch:18}];
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Şablon');
-      XLSX.writeFile(wb, 'kredi-karti-vade-farki-sablon.xlsx');
+      XLSX.writeFile(wb, 'ortalama-vade-sablon.xlsx');
       showIoMsg('Şablon indirildi. Doldurup "Excel\'den Yükle" ile geri yükleyebilirsiniz.');
     } catch(e){ showIoMsg('Şablon oluşturulurken hata oluştu.', true); }
   });
 
   document.getElementById('importExcelInput').addEventListener('change', (e) => {
+    if(!requireMember()) { e.target.value = ''; return; }
     const file = e.target.files[0];
     if(!file) return;
     const reader = new FileReader();
@@ -630,23 +520,19 @@
         let updated = 0;
         for(let i=1; i<rows.length; i++){
           const row = rows[i];
-          if(!row || row.length < 4) continue;
+          if(!row || row.length < 2) continue;
           const n = parseInt(row[0]);
           if(!n || n < 1 || n > 12) continue;
-          const vade = parseFloat(String(row[1]).replace(',', '.'));
-          const oran = parseFloat(String(row[3]).replace(',', '.'));
-          if(isFinite(vade)) vades[n] = vade;
-          if(isFinite(oran)) rates[n] = oran;
+          const tv = parseFloat(String(row[1]).replace(',', '.'));
+          if(isFinite(tv)) taksitVades[n] = tv;
           updated++;
         }
         if(updated === 0){
-          showIoMsg('Dosyada uygun satır bulunamadı. Sütun sırası: Taksit, Vade (gün), Ortalama Vade (gün), Vade Farkı Oranı (%).', true);
+          showIoMsg('Dosyada uygun satır bulunamadı. Sütun sırası: Taksit, Taksit Vade (gün), Toplam Vade (gün), Ortalama Vade (gün).', true);
           return;
         }
-        renderRatesTable(selectedTaksit);
-        updateRefLine(selectedTaksit);
-        calculate();
-        if(typeof calculateReverse === 'function') calculateReverse();
+        recomputeToplam();
+        renderRatesTable();
         showIoMsg(updated + ' satır güncellendi.');
       } catch(err){
         showIoMsg('Dosya okunamadı. Lütfen .xlsx formatında bir dosya yükleyin.', true);

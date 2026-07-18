@@ -40,7 +40,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>mmgcreativity — Kredi Kartı Taksit Maliyeti</title>
+<title>mmgcreativity — Kredi Kartı Vade Farkı Hesaplama</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -179,7 +179,7 @@
 <body>
 
 <header class="masthead">
-  <h1 class="title">Kredi Kartı Taksit Maliyeti</h1>
+  <h1 class="title">Kredi Kartı Vade Farkı Hesaplama</h1>
   <div class="subtitle">Komisyon veya müşteriye vade farkı yansıtma senaryoları için elinize geçmesini istediğiniz net tutardan yola çıkarak girmeniz/yansıtmanız gereken brüt tutarı hesaplayın</div>
 </header>
 
@@ -190,9 +190,9 @@
     <div class="field" style="max-width:none;">
       <label>Blokaj Süresi (paranın hesaba geçme süresi)</label>
       <div class="blokaj-tabs" id="blokajTabs">
-        <button class="blokaj-tab active" data-key="ertesi">Ertesi gün</button>
+        <button class="blokaj-tab" data-key="ertesi">Ertesi gün</button>
         <button class="blokaj-tab" data-key="gun3">3 gün</button>
-        <button class="blokaj-tab" data-key="gun7">7 gün</button>
+        <button class="blokaj-tab active" data-key="gun7">7 gün</button>
         <button class="blokaj-tab" data-key="gun15">15 gün</button>
         <button class="blokaj-tab" data-key="gun30">30 gün</button>
         <button class="blokaj-tab" data-key="gun45">45 gün</button>
@@ -240,7 +240,7 @@
 
   <section class="table-section">
     <div class="section-title">Taksit Oranları</div>
-    <p class="table-desc">Aşağıdaki oranlar varsayılan/örnek değerlerdir. Kendi oranlarınızı biliyorsanız, kutulara girip güncelleyebilirsiniz — hesaplama otomatik olarak yeni oranlara göre çalışır. Her sütun ayrı bir blokaj süresine ait, dilediğiniz sütunu düzenleyebilirsiniz.</p>
+    <p class="table-desc">Aşağıdaki oranlar örnek değerlerdir. Kendi oranlarınızı biliyorsanız, kutulara girip güncelleyebilirsiniz — hesaplama otomatik olarak yeni oranlara göre çalışır. Her sütun ayrı bir blokaj süresine ait, dilediğiniz sütunu düzenleyebilirsiniz.</p>
     <div class="table-scroll">
       <table class="rates" id="ratesTable">
         <thead>
@@ -258,14 +258,14 @@
       </table>
     </div>
     <a class="reset-link" id="resetRates">↺ Tüm oranları varsayılana sıfırla</a>
-    <div class="io-toolbar">
-      <button type="button" class="io-btn" id="saveRatesBtn" style="border-color:var(--brass-dim); color:var(--brass);">☁ Oranlarımı Kaydet</button>
+    <div class="io-toolbar" id="ioToolbar">
       <button type="button" class="io-btn" id="exportExcelBtn">⬇ Excel'e Aktar</button>
       <button type="button" class="io-btn" id="exportPdfBtn">⬇ PDF'e Aktar</button>
       <button type="button" class="io-btn" id="importExcelBtn">⬆ Excel'den Yükle</button>
       <button type="button" class="io-btn" id="downloadTemplateBtn">📄 Şablonu İndir</button>
       <input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none;">
     </div>
+    <div class="io-msg" id="memberNotice" style="color:var(--muted);">🔒 Excel/PDF aktarma ve şablon özellikleri şimdilik yalnızca üye girişi yapan kullanıcılar için aktiftir.</div>
     <div class="io-msg" id="ioMsg"></div>
     <div class="io-msg" id="cloudMsg" style="color:var(--muted);"></div>
     <div class="flag">⚠ Vade farkı oranları banka, kart programı ve kampanya dönemine göre değişir. Kesin oranlar için bankanızın güncel bilgilerine başvurun.</div>
@@ -293,7 +293,7 @@
     gun45:  {1:0.00,  2:2.00,  3:4.00,  4:5.75,  5:7.75,  6:9.50,  7:11.50, 8:13.25, 9:15.25, 10:17.00, 11:19.00, 12:20.75}
   };
 
-  let currentBlokaj = 'ertesi';
+  let currentBlokaj = 'gun7';
   const RATE_DEFAULTS = JSON.parse(JSON.stringify(RATE_SETS));
 
   function fmtTR(n, decimals){
@@ -483,31 +483,36 @@
     }
   }
 
-  document.getElementById('saveRatesBtn').addEventListener('click', async () => {
-    const user = window.mmgCloud.currentUser;
-    if(!user){
-      showCloudMsg('Oranlarınızı kaydetmek için giriş yapmanız (misafir değil, gerçek hesapla) gerekiyor.');
-      return;
-    }
-    try{
-      const cloud = window.mmgCloud;
-      await cloud.setDoc(cloud.doc(cloud.db, 'users', user.uid, 'rates', 'kkTaksitMaliyeti'), {
-        rateSets: RATE_SETS,
-        updatedAt: new Date().toISOString()
-      });
-      showCloudMsg('Oranlarınız bulutta kaydedildi. ✓');
-    } catch(err){
-      showCloudMsg('Kaydedilirken bir hata oluştu.');
-    }
-  });
-
   document.addEventListener('mmg-auth-ready', (e) => {
     const user = e.detail.user;
     if(user){
       loadCloudRates(user.uid);
     }
+    updateMemberGate();
   });
 
+  // ---- Excel/PDF/Şablon araçlarını yalnızca üyelere açık tutan kontrol ----
+  function isMember(){
+    return !!(window.mmgCloud && window.mmgCloud.currentUser);
+  }
+
+  function requireMember(){
+    if(!isMember()){
+      showIoMsg('Bu özelliği kullanmak için üye girişi yapmanız gerekiyor (misafir modunda kullanılamaz).', true);
+      return false;
+    }
+    return true;
+  }
+
+  function updateMemberGate(){
+    const notice = document.getElementById('memberNotice');
+    if(isMember()){
+      notice.style.display = 'none';
+    } else {
+      notice.style.display = 'block';
+    }
+  }
+  updateMemberGate();
 
   const BLOKAJ_LABELS = { ertesi:'Ertesi gün', gun3:'3 gün', gun7:'7 gün', gun15:'15 gün', gun30:'30 gün', gun45:'45 gün' };
 
@@ -528,6 +533,7 @@
   }
 
   document.getElementById('exportExcelBtn').addEventListener('click', () => {
+    if(!requireMember()) return;
     try{
       const rows = buildTableRows();
       const ws = XLSX.utils.aoa_to_sheet(rows);
@@ -539,21 +545,52 @@
     } catch(e){ showIoMsg('Excel oluşturulurken hata oluştu.', true); }
   });
 
-  document.getElementById('exportPdfBtn').addEventListener('click', () => {
+  // mmgcreativity: logo.png'yi çalışma anında okuyup PDF'e gömmek için yardımcı fonksiyon
+  function mmgGetLogoDataUrl(){
+    return fetch('logo.png')
+      .then(r => r.blob())
+      .then(blob => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      }))
+      .catch(() => null);
+  }
+
+  document.getElementById('exportPdfBtn').addEventListener('click', async () => {
+    if(!requireMember()) return;
     try{
+      const logoDataUrl = await mmgGetLogoDataUrl();
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape' });
+      const titleX = logoDataUrl ? 30 : 14;
+      if(logoDataUrl){
+        try{ doc.addImage(logoDataUrl, 'PNG', 14, 8, 14, 14); } catch(imgErr){ /* logo eklenemezse sessizce geç */ }
+      }
       doc.setFontSize(14);
-      doc.text('Kredi Kartı Taksit Maliyeti', 14, 16);
+      doc.text('Kredi Kartı Vade Farkı Hesaplama', titleX, 16);
       doc.setFontSize(10);
-      doc.text('mmgcreativity.com', 14, 22);
+      doc.text('mmgcreativity.com', titleX, 22);
       const rows = buildTableRows();
       doc.autoTable({
         startY: 28,
         head: [rows[0]],
         body: rows.slice(1).map(r => [r[0]].concat(r.slice(1).map(v => fmtTR(v,2)+'%'))),
         styles: { fontSize: 9 },
-        headStyles: { fillColor: [198,161,91] }
+        headStyles: { fillColor: [198,161,91] },
+        didDrawPage: function(data){
+          const pageHeight = doc.internal.pageSize.getHeight();
+          const pageWidth = doc.internal.pageSize.getWidth();
+          doc.setDrawColor(198,161,91);
+          doc.setLineWidth(0.3);
+          doc.line(14, pageHeight - 14, pageWidth - 14, pageHeight - 14);
+          doc.setFontSize(8);
+          doc.setTextColor(130,130,130);
+          doc.text('mmgcreativity.com · Dijital Finans Asistanı', 14, pageHeight - 9);
+          const dateStr = new Date().toLocaleString('tr-TR');
+          doc.text('Oluşturulma: ' + dateStr, pageWidth - 14, pageHeight - 9, { align: 'right' });
+        }
       });
       doc.save('kredi-karti-taksit-maliyeti.pdf');
       showIoMsg('PDF dosyası indirildi.');
@@ -561,10 +598,12 @@
   });
 
   document.getElementById('importExcelBtn').addEventListener('click', () => {
+    if(!requireMember()) return;
     document.getElementById('importExcelInput').click();
   });
 
   document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
+    if(!requireMember()) return;
     try{
       const header = ['Taksit'].concat(BLOKAJ_KEYS.map(k => BLOKAJ_LABELS[k]));
       const rows = [header];
@@ -581,6 +620,7 @@
   });
 
   document.getElementById('importExcelInput').addEventListener('change', (e) => {
+    if(!requireMember()) { e.target.value = ''; return; }
     const file = e.target.files[0];
     if(!file) return;
     const reader = new FileReader();
