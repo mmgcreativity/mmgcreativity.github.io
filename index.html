@@ -2,6 +2,14 @@
 <html lang="tr">
 <head>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WVWJ4VZE0C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WVWJ4VZE0C');
+</script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +25,16 @@
     --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
     --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
     --sidebar-w:280px;
+  }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
+  }
+  html.theme-light body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.05), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.04), transparent 60%),
+      var(--bg);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{height:100%;}
@@ -106,6 +124,12 @@
     display:flex; justify-content:space-between; align-items:center;
   }
   .clock-dot{ width:6px; height:6px; border-radius:50%; background:var(--teal); display:inline-block; margin-right:6px; box-shadow:0 0 6px var(--teal); }
+  .sidebar-logout{
+    display:block; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px;
+    color:var(--muted); text-decoration:none; border:1px solid var(--hairline); padding:8px 12px;
+    border-radius:6px; transition:border-color .15s ease, color .15s ease;
+  }
+  .sidebar-logout:hover{ color:var(--coral); border-color:var(--coral); }
 
   /* ---------- Main ---------- */
   main{ flex:1; height:100vh; display:flex; flex-direction:column; min-width:0; }
@@ -121,6 +145,16 @@
     transition:border-color .15s ease, color .15s ease;
   }
   .topbar-actions a:hover{ color:var(--coral); border-color:var(--coral); }
+  .theme-toggle{
+    font-size:14px; background:transparent; border:1px solid var(--hairline); border-radius:6px;
+    color:var(--muted); padding:6px 10px; cursor:pointer; transition:border-color .15s ease, color .15s ease;
+  }
+  .theme-toggle:hover{ color:var(--brass); border-color:var(--brass-dim); }
+  .user-badge{
+    display:flex; align-items:center; gap:7px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+    color:var(--text); padding:6px 12px; border:1px solid var(--hairline); border-radius:6px; background:var(--surface-2);
+  }
+  .user-badge-dot{ width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 6px var(--teal); flex-shrink:0; }
 
   .frame-wrap{ flex:1; position:relative; background:var(--bg); }
   iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
@@ -331,6 +365,11 @@
   .auth-field input:focus{ border-color:var(--brass-dim); }
   .auth-error{ color:var(--coral); font-size:12.5px; margin-bottom:14px; display:none; }
   .auth-error.show{ display:block; }
+  .auth-remember{
+    display:flex; align-items:center; gap:8px; margin-bottom:16px; cursor:pointer;
+    font-size:13px; color:var(--muted); user-select:none;
+  }
+  .auth-remember input[type="checkbox"]{ width:15px; height:15px; accent-color:var(--brass); cursor:pointer; }
   .auth-submit{
     width:100%; padding:13px; border-radius:9px; border:none; cursor:pointer;
     background:var(--grad); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px;
@@ -403,6 +442,10 @@
           <label>Şifre (Tekrar)</label>
           <input type="password" id="authPasswordConfirm" placeholder="••••••••">
         </div>
+        <label class="auth-remember">
+          <input type="checkbox" id="rememberMe">
+          <span>Oturumu açık tut</span>
+        </label>
         <button type="submit" class="auth-submit" id="authSubmitBtn">Giriş Yap</button>
       </form>
 
@@ -455,17 +498,27 @@
         <span class="nav-title">Rehber</span>
       </span>
     </button>
+
+    <button class="nav-item" data-target="iletisim.html" data-title="İletişim">
+      <span class="nav-text-wrap">
+        <span class="nav-title">İletişim</span>
+      </span>
+    </button>
   </nav>
+
+  <div class="sidebar-foot" style="flex-direction:column; align-items:stretch; gap:10px; border-top:1px solid var(--hairline);">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <span class="user-badge" id="userBadge" style="display:none;">
+        <span class="user-badge-dot"></span>
+        <span id="userBadgeName">Misafir</span>
+      </span>
+      <button type="button" class="theme-toggle" id="themeToggle" title="Görünüm modu">☾</button>
+    </div>
+    <a id="logoutBtn" href="#" class="sidebar-logout">Oturumu Kapat</a>
+  </div>
 </aside>
 
 <main>
-  <div class="topbar" id="topbar" style="display:none;">
-    <div></div>
-    <div class="topbar-actions">
-      <a id="refresh-btn" href="#">Yenile</a>
-    </div>
-  </div>
-
   <div class="frame-wrap" id="frame-wrap" style="display:none;">
     <iframe id="app-frame" src=""></iframe>
   </div>
@@ -545,9 +598,7 @@
   const navItems = document.querySelectorAll('.nav-item, .app-card');
   const homeScreen = document.getElementById('home-screen');
   const frameWrap = document.getElementById('frame-wrap');
-  const topbar = document.getElementById('topbar');
   const iframe = document.getElementById('app-frame');
-  const refreshBtn = document.getElementById('refresh-btn');
 
   function setActive(target){
     document.querySelectorAll('.nav-item').forEach(el=>{
@@ -559,24 +610,17 @@
     if(target === 'home'){
       homeScreen.style.display = 'block';
       frameWrap.style.display = 'none';
-      topbar.style.display = 'none';
       setActive('home');
       return;
     }
     homeScreen.style.display = 'none';
     frameWrap.style.display = 'block';
-    topbar.style.display = 'flex';
     iframe.src = target;
     setActive(target);
   }
 
   navItems.forEach(el=>{
     el.addEventListener('click', ()=> openTarget(el.dataset.target, el.dataset.title));
-  });
-
-  refreshBtn.addEventListener('click', (e)=>{
-    e.preventDefault();
-    iframe.src = iframe.src;
   });
 
   openTarget('home', 'Ana Sayfa');
@@ -626,14 +670,38 @@
   function closeAuthOverlay(){
     authOverlay.classList.add('hidden');
   }
+  function openAuthOverlay(){
+    authOverlay.classList.remove('hidden');
+  }
 
-  // Sayfa daha önce ziyaret edilmiş mi (misafir ya da üye) kontrolü
-  if(localStorage.getItem('mmg_auth_state')){
+  function updateUserBadge(){
+    const state = localStorage.getItem('mmg_auth_state');
+    const badge = document.getElementById('userBadge');
+    const nameEl = document.getElementById('userBadgeName');
+    if(!state){
+      badge.style.display = 'none';
+      return;
+    }
+    badge.style.display = 'flex';
+    if(state === 'guest'){
+      nameEl.textContent = 'Misafir';
+    } else if(state.startsWith('user:')){
+      nameEl.textContent = state.slice(5);
+    }
+  }
+
+  // NOT: Varsayılan olarak giriş ekranı HER ziyarette gösteriliyor.
+  // Kullanıcı "Oturumu açık tut" kutusunu işaretlerse, bir sonraki
+  // ziyarette ekran atlanır ve doğrudan siteye geçilir.
+  updateUserBadge();
+  if(localStorage.getItem('mmg_auth_state') && localStorage.getItem('mmg_remember') === '1'){
     closeAuthOverlay();
   }
 
   guestBtn.addEventListener('click', () => {
     localStorage.setItem('mmg_auth_state', 'guest');
+    localStorage.setItem('mmg_remember', document.getElementById('rememberMe').checked ? '1' : '0');
+    updateUserBadge();
     closeAuthOverlay();
   });
 
@@ -642,6 +710,7 @@
     hideAuthError();
     const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value;
+    const remember = document.getElementById('rememberMe').checked;
 
     if(authMode === 'signup'){
       const confirm = document.getElementById('authPasswordConfirm').value;
@@ -655,12 +724,44 @@
       }
       // TODO: Firebase createUserWithEmailAndPassword(auth, email, password)
       localStorage.setItem('mmg_auth_state', 'user:' + email);
+      localStorage.setItem('mmg_remember', remember ? '1' : '0');
+      updateUserBadge();
       closeAuthOverlay();
     } else {
       // TODO: Firebase signInWithEmailAndPassword(auth, email, password)
       localStorage.setItem('mmg_auth_state', 'user:' + email);
+      localStorage.setItem('mmg_remember', remember ? '1' : '0');
+      updateUserBadge();
       closeAuthOverlay();
     }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    localStorage.removeItem('mmg_auth_state');
+    localStorage.removeItem('mmg_remember');
+    updateUserBadge();
+    document.getElementById('authEmail').value = '';
+    document.getElementById('authPassword').value = '';
+    document.getElementById('rememberMe').checked = false;
+    setAuthMode('login');
+    openAuthOverlay();
+  });
+
+  // ---- Açık / Koyu Görünüm Modu ----
+  // NOT: Bu anahtar şu an kabuk (sidebar, üst bar, hero) için çalışıyor.
+  // İçerideki hesaplayıcı sayfaları (iframe içinde ayrı dosyalar) için
+  // aynı anahtarın oraya da yansıması ayrı bir adımda yapılacak.
+  const themeToggle = document.getElementById('themeToggle');
+  function applyTheme(mode){
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+    themeToggle.textContent = mode === 'light' ? '☀' : '☾';
+    localStorage.setItem('mmg_theme', mode);
+  }
+  applyTheme(localStorage.getItem('mmg_theme') || 'dark');
+  themeToggle.addEventListener('click', () => {
+    const isLight = document.documentElement.classList.contains('theme-light');
+    applyTheme(isLight ? 'dark' : 'light');
   });
 </script>
 
