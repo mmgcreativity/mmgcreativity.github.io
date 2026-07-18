@@ -908,9 +908,12 @@
       'auth/wrong-password': 'Şifre hatalı.',
       'auth/invalid-credential': 'E-posta veya şifre hatalı.',
       'auth/too-many-requests': 'Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.',
-      'auth/network-request-failed': 'Bağlantı hatası. İnternetinizi kontrol edin.'
+      'auth/network-request-failed': 'Bağlantı hatası. İnternetinizi kontrol edin.',
+      'auth/operation-not-allowed': 'Google ile giriş şu an aktif değil. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
+      'auth/unauthorized-domain': 'Bu site adresi Firebase\'de yetkili domainler listesinde değil. (Firebase Console → Authentication → Settings → Authorized domains)',
+      'auth/popup-blocked': 'Tarayıcınız açılır pencereyi (popup) engelledi. Popup engelleyiciyi kapatıp tekrar deneyin.'
     };
-    return map[code] || 'Bir hata oluştu, lütfen tekrar deneyin.';
+    return map[code] || ('Bir hata oluştu (' + (code || 'bilinmiyor') + '), lütfen tekrar deneyin.');
   }
 
   // Sıradaki müşteri numarasını atomik olarak üretir (1001'den başlar)
