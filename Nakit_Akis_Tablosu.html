@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WVWJ4VZE0C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WVWJ4VZE0C');
+</script>
+<script src="mmg-odemeler-sync.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  const auth = getAuth(fbApp);
+  const db = getFirestore(fbApp);
+
+  window.mmgCloud = { auth, db, doc, getDoc, setDoc, deleteDoc, collection, getDocs, currentUser: null };
+
+  onAuthStateChanged(auth, (user) => {
+    window.mmgCloud.currentUser = user;
+    document.dispatchEvent(new CustomEvent('mmg-auth-ready', { detail: { user } }));
+  });
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Nakit Akış Tablosu</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.06), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.05), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; padding-bottom:60px;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  header.masthead{
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
+    border-bottom:1px solid var(--hairline);
+  }
+  .masthead-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
+  .guide-btn{
+    display:inline-flex; align-items:center; gap:8px; flex-shrink:0;
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:600; color:var(--text);
+    text-decoration:none; border:1px solid var(--hairline); background:var(--surface-2);
+    padding:10px 16px; border-radius:8px; transition:border-color .15s ease, color .15s ease;
+  }
+  .guide-btn:hover{ color:var(--coral); border-color:var(--coral); }
+  .masthead-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+  main{ max-width:1180px; margin:0 auto; padding:36px 24px; }
+  .section-title{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:20px; margin-bottom:20px;}
+
+  /* ---- Ay/Yıl kontrolleri ---- */
+  .controls-row{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:14px; margin-bottom:32px; }
+  .field{ margin-bottom:0; }
+  .field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:8px; }
+  .custom-select{ position:relative; width:170px; }
+  .select-trigger{
+    width:100%; display:flex; align-items:center; justify-content:space-between;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    padding:12px 14px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:14.5px; font-weight:600;
+    cursor:pointer; transition:border-color .15s ease;
+  }
+  .select-trigger:hover{ border-color:var(--brass-dim); }
+  .select-trigger .chevron{ color:var(--muted); font-size:12px; transition:transform .15s ease; }
+  .custom-select.open .select-trigger .chevron{ transform:rotate(180deg); }
+  .select-options{
+    display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:30;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px;
+    max-height:260px; overflow-y:auto; box-shadow:0 12px 30px rgba(0,0,0,0.45);
+  }
+  .custom-select.open .select-options{ display:block; }
+  .select-option{
+    padding:10px 14px; font-family:'IBM Plex Mono',monospace; font-size:13.5px; color:var(--text);
+    cursor:pointer; transition:background .12s ease;
+  }
+  .select-option:hover{ background:var(--surface); }
+  .select-option.selected{ background:rgba(198,161,91,0.12); color:var(--brass); }
+  .ghost-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    color:var(--text); font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
+    padding:12px 16px; cursor:pointer; transition:border-color .15s ease, background .15s ease; white-space:nowrap;
+  }
+  .ghost-btn:hover{ border-color:var(--brass-dim); background:var(--surface); }
+  .controls-spacer{ flex:1; }
+
+  /* ---- Özet kartları ---- */
+  .summary-cards{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; margin-bottom:36px; }
+  .summary-card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:20px 22px;
+    position:relative; overflow:hidden;
+  }
+  .summary-card::before{ content:''; position:absolute; top:0; left:0; right:0; height:3px; opacity:.9; }
+  .summary-card.sc-gelir::before{ background:var(--teal); }
+  .summary-card.sc-gider::before{ background:var(--red); }
+  .summary-card.sc-net::before{ background:var(--grad); }
+  .summary-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
+  .summary-value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:26px; }
+  .summary-value.pos{ color:var(--teal); }
+  .summary-value.neg{ color:var(--red); }
+  .summary-sub{ font-size:12px; color:var(--muted); margin-top:6px; }
+  @media (max-width:720px){ .summary-cards{ grid-template-columns:1fr; } }
+
+  /* ---- Hafta kartları ---- */
+  .weeks-container{ display:flex; flex-direction:column; gap:16px; margin-bottom:40px; }
+  .week-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
+  .week-header{
+    display:flex; align-items:center; justify-content:space-between; padding:14px 18px;
+    background:var(--surface-2); border-bottom:1px solid var(--hairline);
+  }
+  .week-header-left{ display:flex; align-items:baseline; gap:10px; }
+  .week-title{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14.5px; }
+  .week-range{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); }
+  .week-net{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:14px; }
+  .week-net.pos{ color:var(--teal); }
+  .week-net.neg{ color:var(--red); }
+
+  table.day-table{ width:100%; border-collapse:collapse; }
+  table.day-table th{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:var(--muted); text-transform:uppercase;
+    text-align:right; padding:9px 16px; border-bottom:1px solid var(--hairline);
+  }
+  table.day-table th:first-child{ text-align:left; }
+  table.day-table td{ padding:10px 16px; border-bottom:1px solid var(--hairline); font-size:13.5px; text-align:right; vertical-align:middle; }
+  table.day-table td:first-child{ text-align:left; }
+  table.day-table tr:last-child > td{ border-bottom:none; }
+  table.day-table tr.drawer-row > td{ border-bottom:1px solid var(--hairline); }
+  table.day-table tr.today-row td:first-child{ color:var(--brass); font-weight:700; }
+  .date-cell .dow{ color:var(--muted); font-size:11px; margin-left:6px; }
+  .amt-btn{
+    background:none; border:none; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13.5px;
+    padding:4px 8px; border-radius:6px; transition:background .12s ease;
+  }
+  .amt-btn:hover{ background:var(--surface-2); }
+  .amt-btn.gider{ color:var(--red); }
+  .amt-btn.gelir{ color:var(--teal); }
+  .amt-btn .caret{ font-size:10px; color:var(--muted); margin-left:4px; }
+  .net-cell{ font-family:'IBM Plex Mono',monospace; font-weight:700; }
+  .net-cell.pos{ color:var(--teal); }
+  .net-cell.neg{ color:var(--red); }
+  .net-cell.zero{ color:var(--muted); }
+
+  tr.drawer-row td{ background:var(--surface-2); text-align:left; padding:16px 20px; }
+  .drawer-inner{ display:flex; flex-direction:column; gap:10px; }
+  .drawer-title{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .item-list{ display:flex; flex-direction:column; gap:6px; }
+  .item-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px;
+  }
+  .item-row-main{ display:flex; align-items:center; gap:10px; min-width:0; }
+  .item-desc{ font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px; }
+  .item-cat{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; padding:3px 8px; border-radius:999px; white-space:nowrap;
+    border:1px solid var(--hairline);
+  }
+  .item-amount{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13px; white-space:nowrap; }
+  .item-del{
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:2px 6px; border-radius:5px; transition:color .12s ease;
+  }
+  .item-del:hover{ color:var(--red); }
+  .empty-day{ color:var(--muted); font-size:12.5px; padding:6px 2px; }
+
+  .add-item-form{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:4px; }
+  .add-item-form input[type="text"], .add-item-form input.amount-in{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:7px; color:var(--text);
+    font-family:'Inter',sans-serif; font-size:13px; padding:9px 11px; outline:none; transition:border-color .15s ease;
+  }
+  .add-item-form input.amount-in{ font-family:'IBM Plex Mono',monospace; width:110px; }
+  .add-item-form input:focus{ border-color:var(--brass-dim); }
+  .add-item-form .desc-in{ flex:1; min-width:140px; }
+  .add-item-form select.cat-in{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:7px; color:var(--text);
+    font-family:'Inter',sans-serif; font-size:12.5px; padding:9px 8px; outline:none; cursor:pointer;
+  }
+  .add-item-form .add-btn{
+    background:var(--grad); border:none; color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:12.5px; padding:9px 16px; border-radius:7px; cursor:pointer; transition:opacity .15s ease;
+  }
+  .add-item-form .add-btn:hover{ opacity:.9; }
+
+  /* ---- Raporlar ---- */
+  .reports-section{ margin-bottom:40px; }
+  .reports-list{ display:flex; flex-direction:column; gap:10px; }
+  .report-item{
+    display:flex; gap:12px; align-items:flex-start; background:var(--surface); border:1px solid var(--hairline);
+    border-left:3px solid var(--hairline); border-radius:8px; padding:14px 16px; font-size:13.5px; color:var(--text);
+  }
+  .report-item .ric{ font-size:15px; line-height:1.3; }
+  .report-item.warn{ border-left-color:var(--amber); }
+  .report-item.bad{ border-left-color:var(--red); }
+  .report-item.good{ border-left-color:var(--teal); }
+  .report-item.info{ border-left-color:var(--azure); }
+  .report-item b{ color:var(--brass); }
+  .reports-empty{ color:var(--muted); font-size:13.5px; }
+
+  .report-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:0; }
+  .report-tab{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    color:var(--muted); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px;
+    padding:12px 18px; cursor:pointer; transition:all .15s ease;
+  }
+  .report-tab:hover{ color:var(--text); border-color:var(--brass-dim); }
+  .report-tab.active{ background:var(--grad); color:#fff; border-color:transparent; }
+
+  .report-picker{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:18px; }
+  .report-picker:empty{ margin-bottom:0; }
+  .picker-pill{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:999px;
+    color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600;
+    padding:7px 14px; cursor:pointer; transition:all .15s ease; white-space:nowrap;
+  }
+  .picker-pill:hover{ border-color:var(--brass-dim); color:var(--text); }
+  .picker-pill.active{ background:rgba(198,161,91,0.16); border-color:var(--brass); color:var(--brass); }
+  .picker-pill.today-pill{ box-shadow:0 0 0 1px var(--teal) inset; }
+
+  .report-scope-summary{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; margin-bottom:20px; }
+  @media (max-width:720px){ .report-scope-summary{ grid-template-columns:1fr; } }
+  .rss-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:10px; padding:14px 16px; }
+  .rss-label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rss-value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; }
+  .rss-value.pos{ color:var(--teal); }
+  .rss-value.neg{ color:var(--red); }
+
+  .scope-items-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
+  @media (max-width:720px){ .scope-items-grid{ grid-template-columns:1fr; } }
+  .scope-items-col{ background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:16px; }
+
+  .breakdown{ margin-top:22px; display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+
+  /* ---- Raporlar başlığı + Arşivle butonu ---- */
+  .reports-title-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .archive-save-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; color:var(--brass);
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; padding:9px 16px;
+    cursor:pointer; transition:all .15s ease; white-space:nowrap;
+  }
+  .archive-save-btn:hover{ border-color:var(--brass); background:rgba(198,161,91,0.10); }
+
+  /* ---- Arşiv sekmesi ---- */
+  .archive-wrap{ margin-bottom:40px; }
+  .archive-wrap .section-title{ margin-bottom:16px; }
+  .list-empty{ color:var(--muted); font-size:13px; }
+  .archive-list{ display:flex; flex-direction:column; gap:14px; }
+  .archive-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:18px 20px; }
+  .archive-card-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+  .archive-card-scope-badge{
+    display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em;
+    padding:3px 9px; border-radius:999px; border:1px solid var(--hairline); color:var(--muted); text-transform:uppercase; margin-bottom:6px;
+  }
+  .archive-card-label{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; }
+  .archive-card-meta{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); margin-top:4px; }
+  .archive-card-nums{ display:flex; gap:16px; font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; white-space:nowrap; }
+  .archive-card-actions{ display:flex; gap:8px; }
+  .archive-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px; color:var(--text);
+    font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; padding:6px 12px; cursor:pointer; transition:border-color .15s ease;
+  }
+  .archive-btn:hover{ border-color:var(--brass-dim); }
+  .archive-card-detail{ display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--hairline); }
+  .archive-card.expanded .archive-card-detail{ display:block; }
+  @media (max-width:720px){ .breakdown{ grid-template-columns:1fr; } }
+  .breakdown-col h3{ font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600; margin-bottom:12px; }
+  .bd-row{ margin-bottom:10px; }
+  .bd-row-top{ display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:5px; }
+  .bd-row-top .bd-cat{ color:var(--text); }
+  .bd-row-top .bd-val{ font-family:'IBM Plex Mono',monospace; color:var(--muted); }
+  .bd-bar-track{ height:6px; border-radius:4px; background:var(--surface-2); overflow:hidden; }
+  .bd-bar-fill{ height:100%; border-radius:4px; }
+
+  /* ---- IO / dışa aktarma ---- */
+  .table-section{ margin-top:8px; }
+  .io-toolbar{ display:flex; flex-wrap:wrap; gap:10px; margin-top:6px; }
+  .io-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    color:var(--text); font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;
+    padding:9px 14px; cursor:pointer; transition:border-color .15s ease, background .15s ease;
+  }
+  .io-btn:hover{ border-color:var(--brass-dim); background:var(--surface); }
+  .io-msg{ font-size:12px; margin-top:10px; min-height:0; }
+  .io-msg.ok{ color:var(--teal); }
+  .io-msg.err{ color:var(--coral); }
+  .flag{ color:var(--brass); font-size:11.5px; margin-top:14px; }
+
+  footer{max-width:1180px; margin:0 auto; padding:28px 24px 0; color:var(--muted); font-size:11.5px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  footer .credit{width:100%; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); margin-top:6px; display:flex; align-items:center; justify-content:flex-end; gap:8px;}
+  .signature-pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 12px 4px 5px; border-radius:999px; background:var(--surface-2); border:1px solid var(--hairline); }
+  .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
+  .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff; }
+  footer .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-row">
+    <div>
+      <h1 class="title">Nakit Akış Tablosu</h1>
+      <div class="subtitle">Ayı seçin, günlük gider ve gelirlerinizi girin — haftalık ve aylık durumunuzu anında görün</div>
+    </div>
+    <div class="masthead-actions">
+      <a href="index.html" class="guide-btn">← Ana Sayfa</a>
+      <a href="rehber-nakit-akis-tablosu.html" class="guide-btn">📖 Rehber</a>
+      <a href="Odemeler.html" class="guide-btn">💳 Ödemeler</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="table-section">
+
+    <div class="controls-row">
+      <div class="field">
+        <label>Ay</label>
+        <div class="custom-select" id="monthSelect">
+          <button type="button" class="select-trigger" id="monthTrigger"><span id="monthTriggerLabel">—</span><span class="chevron">▾</span></button>
+          <div class="select-options" id="monthOptions"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Yıl</label>
+        <div class="custom-select" id="yearSelect" style="width:110px;">
+          <button type="button" class="select-trigger" id="yearTrigger"><span id="yearTriggerLabel">—</span><span class="chevron">▾</span></button>
+          <div class="select-options" id="yearOptions"></div>
+        </div>
+      </div>
+      <button type="button" class="ghost-btn" id="gotoTodayBtn">📍 Bugüne Git</button>
+
+      <div class="controls-spacer"></div>
+
+      <div class="report-tabs" id="reportTabs">
+        <button type="button" class="report-tab" data-tab="gunluk">Günlük</button>
+        <button type="button" class="report-tab" data-tab="haftalik">Haftalık</button>
+        <button type="button" class="report-tab" data-tab="aylik">Aylık</button>
+        <button type="button" class="report-tab" data-tab="yillik">Yıllık</button>
+        <button type="button" class="report-tab" data-tab="arsiv">Arşiv</button>
+      </div>
+
+      <div class="controls-spacer"></div>
+
+      <button type="button" class="ghost-btn" id="demoFillBtn">✨ Örnek Verilerle Doldur</button>
+      <button type="button" class="ghost-btn" id="clearMonthBtn">🗑 Bu Ayı Temizle</button>
+      <button type="button" class="ghost-btn" id="archiveSaveBtnTop">🗄 Arşive Ekle</button>
+    </div>
+
+    <div class="report-picker" id="reportPicker"></div>
+
+    <div class="summary-cards" id="summaryCardsSection">
+      <div class="summary-card sc-gelir">
+        <div class="summary-label" id="sumGelirLabel">Gelir</div>
+        <div class="summary-value pos" id="sumGelir">0,00 TL</div>
+        <div class="summary-sub" id="sumGelirSub">&nbsp;</div>
+      </div>
+      <div class="summary-card sc-gider">
+        <div class="summary-label" id="sumGiderLabel">Gider</div>
+        <div class="summary-value neg" id="sumGider">0,00 TL</div>
+        <div class="summary-sub" id="sumGiderSub">&nbsp;</div>
+      </div>
+      <div class="summary-card sc-net">
+        <div class="summary-label" id="sumNetLabel">Net Durum</div>
+        <div class="summary-value" id="sumNet">0,00 TL</div>
+        <div class="summary-sub" id="sumNetSub">&nbsp;</div>
+      </div>
+    </div>
+
+    <div class="weeks-container" id="weeksContainer"></div>
+
+    <div class="archive-wrap" id="archiveContainer" style="display:none;">
+      <div class="section-title">Arşivlenmiş Raporlarım</div>
+      <div class="archive-list" id="archiveList"></div>
+    </div>
+
+    <section class="reports-section" id="reportsSection">
+      <div class="reports-title-row">
+        <div class="section-title" style="margin-bottom:0;">Raporlar</div>
+        <button type="button" class="archive-save-btn" id="archiveSaveBtn">🗄 Bu Raporu Arşivle</button>
+      </div>
+
+      <div class="reports-list" id="reportsList"></div>
+      <div class="breakdown" id="breakdownWrap" style="display:none;">
+        <div class="breakdown-col">
+          <h3>Gider Dağılımı (kategoriye göre)</h3>
+          <div id="bdGider"></div>
+        </div>
+        <div class="breakdown-col">
+          <h3>Gelir Dağılımı (kategoriye göre)</h3>
+          <div id="bdGelir"></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="io-toolbar">
+      <button type="button" class="io-btn" id="exportExcelBtn">⬇ Excel'e Aktar</button>
+      <button type="button" class="io-btn" id="exportPdfBtn">⬇ PDF'e Aktar</button>
+    </div>
+    <div class="io-msg" id="memberNotice" style="color:var(--muted);">🔒 Excel/PDF dışa aktarma ve cihazlar arası bulut senkronizasyonu şimdilik yalnızca üye girişi yapan kullanıcılar için aktiftir. Misafir modunda verileriniz yalnızca bu tarayıcıda saklanır.</div>
+    <div class="io-msg" id="ioMsg"></div>
+    <div class="io-msg" id="cloudMsg" style="color:var(--muted);"></div>
+    <div class="flag">⚠ Bu araç yalnızca kendi kayıtlarınızı takip etmeniz içindir; banka veya muhasebe sisteminizin yerini tutmaz.</div>
+  </section>
+</main>
+
+<footer>
+  <div class="credit">
+    <span>powered by</span>
+    <span class="signature-pill">
+      <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+      <span id="credit-fallback" class="credit-fallback">M</span>
+      <b>mmgcreativity</b>
+    </span>
+  </div>
+</footer>
+
+<script>
+  // ================== Sabitler ==================
+  const AY_ADLARI = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  const GUN_ADLARI = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+  const GIDER_CATS = ['Kira','Maaş / Personel','Tedarikçi / Stok','Kredi / Taksit Ödemesi','Kredi Kartı','Vergi / SGK','Fatura','Teminat Mektubu','Komisyon','Diğer Gider'];
+  const GELIR_CATS = ['Satış Geliri','Tahsilat','Yatırım Geliri','Diğer Gelir'];
+  const CAT_COLORS = ['coral','magenta','violet','azure','teal','amber','red','blue'];
+  const CAT_ALL = GIDER_CATS.concat(GELIR_CATS);
+
+  function catColorVar(cat){
+    const idx = CAT_ALL.indexOf(cat);
+    const c = CAT_COLORS[(idx >= 0 ? idx : 0) % CAT_COLORS.length];
+    return 'var(--' + c + ')';
+  }
+
+  // ================== TR sayı biçimlendirme ==================
+  function fmtTR(n, decimals){
+    decimals = decimals === undefined ? 2 : decimals;
+    return (n||0).toLocaleString('tr-TR', {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+  }
+  function fmtMoney(n){ return fmtTR(n,2) + ' TL'; }
+  function parseTR(str){
+    if(!str) return 0;
+    const cleaned = String(str).replace(/\./g, '').replace(',', '.');
+    const v = parseFloat(cleaned);
+    return isFinite(v) ? v : 0;
+  }
+  function formatTRLive(raw){
+    raw = raw.replace(/[^\d,]/g, '');
+    const firstComma = raw.indexOf(',');
+    if(firstComma !== -1){
+      raw = raw.slice(0, firstComma+1) + raw.slice(firstComma+1).replace(/,/g, '');
+    }
+    let [intPart, decPart] = raw.split(',');
+    intPart = (intPart || '').replace(/^0+(?=\d)/, '');
+    intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    if(decPart !== undefined){
+      decPart = decPart.slice(0,2);
+      return intPart + ',' + decPart;
+    }
+    return intPart;
+  }
+  function attachTRFormatting(el){
+    el.addEventListener('input', ()=>{
+      const pos = el.selectionStart;
+      const before = el.value;
+      el.value = formatTRLive(el.value);
+      const diff = el.value.length - before.length;
+      const newPos = Math.max(0, (pos||0) + diff);
+      try { el.setSelectionRange(newPos, newPos); } catch(e){}
+    });
+  }
+
+  function pad2(n){ return n < 10 ? '0'+n : ''+n; }
+  function dayKey(y,m,d){ return y + '-' + pad2(m+1) + '-' + pad2(d); }
+  function monthKeyOf(y,m){ return y + '-' + pad2(m+1); }
+  function getWeekdayMon0(date){ const d = date.getDay(); return d===0 ? 6 : d-1; }
+
+  // ================== Durum ==================
+  const today = new Date();
+  let selYear = today.getFullYear();
+  let selMonth = today.getMonth(); // 0-11
+  let monthData = {}; // { 'YYYY-MM-DD': { gider:[{id,desc,category,amount}], gelir:[...], expanded:{gider:false,gelir:false} } }
+  let saveTimer = null;
+  let reportTab = 'gunluk'; // 'gunluk' | 'haftalik' | 'aylik' | 'yillik' | 'arsiv'
+  let reportDay = today.getDate();
+  let reportWeekIdx = 0;
+  let lastReportSnapshot = null; // en son üretilen raporun anlık görüntüsü (arşive kaydetmek için)
+
+  function ensureDay(key){
+    if(!monthData[key]) monthData[key] = { gider:[], gelir:[], expanded:{gider:false, gelir:false} };
+    return monthData[key];
+  }
+
+  function buildWeeks(year, monthIdx){
+    const firstDay = new Date(year, monthIdx, 1);
+    const daysInMonth = new Date(year, monthIdx+1, 0).getDate();
+    const offset = getWeekdayMon0(firstDay);
+    const weeks = [];
+    for(let d=1; d<=daysInMonth; d++){
+      const weekIdx = Math.floor((offset + (d-1)) / 7);
+      if(!weeks[weekIdx]) weeks[weekIdx] = [];
+      weeks[weekIdx].push(d);
+    }
+    return weeks.filter(w => w && w.length);
+  }
+
+  // ================== Kalıcılık (localStorage + Firestore) ==================
+  function localKey(mk){ return 'mmg_nat_' + mk; }
+  function saveLocal(mk){
+    try{ localStorage.setItem(localKey(mk), JSON.stringify(monthData)); }catch(e){}
+  }
+  function loadLocal(mk){
+    try{
+      const raw = localStorage.getItem(localKey(mk));
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return null;
+  }
+
+  function scheduleSave(){
+    saveLocal(monthKeyOf(selYear, selMonth));
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=>{
+      if(isMember()) saveCloud(monthKeyOf(selYear, selMonth));
+    }, 900);
+  }
+
+  async function saveCloud(mk){
+    if(!isMember()) return;
+    try{
+      const cloud = window.mmgCloud;
+      await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk), {
+        data: monthData, updatedAt: new Date().toISOString()
+      });
+      showCloudMsg('Kaydedildi ✓');
+    }catch(err){ /* sessizce geç */ }
+  }
+
+  async function loadCloud(mk){
+    if(!isMember()) return null;
+    try{
+      const cloud = window.mmgCloud;
+      const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk));
+      if(snap.exists()) return snap.data().data || null;
+    }catch(err){ /* sessizce geç */ }
+    return null;
+  }
+
+  function resetReportSelection(){
+    const isCurrentMonth = (selYear === today.getFullYear() && selMonth === today.getMonth());
+    reportDay = isCurrentMonth ? today.getDate() : 1;
+    reportWeekIdx = 0;
+    if(isCurrentMonth){
+      const weeks = buildWeeks(selYear, selMonth);
+      weeks.forEach((week, idx) => { if(week.indexOf(today.getDate()) !== -1) reportWeekIdx = idx; });
+    }
+  }
+
+  async function loadMonth(){
+    const mk = monthKeyOf(selYear, selMonth);
+    const local = loadLocal(mk);
+    monthData = local || {};
+    resetReportSelection();
+    render();
+    if(isMember()){
+      const cloud = await loadCloud(mk);
+      if(cloud){
+        monthData = cloud;
+        render();
+        showCloudMsg('Bulut verileriniz yüklendi.');
+      }
+    }
+  }
+
+  function showCloudMsg(msg){
+    const el = document.getElementById('cloudMsg');
+    el.textContent = msg;
+    clearTimeout(el._t);
+    el._t = setTimeout(()=>{ el.textContent = ''; }, 4000);
+  }
+  function showIoMsg(msg, isError){
+    const el = document.getElementById('ioMsg');
+    el.textContent = msg;
+    el.className = 'io-msg ' + (isError ? 'err' : 'ok');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.textContent = ''; el.className = 'io-msg'; }, 4000);
+  }
+
+  function isMember(){ return !!(window.mmgCloud && window.mmgCloud.currentUser); }
+  function requireMember(){
+    if(!isMember()){
+      showIoMsg('Bu özelliği kullanmak için üye girişi yapmanız gerekiyor (misafir modunda kullanılamaz).', true);
+      return false;
+    }
+    return true;
+  }
+  function updateMemberGate(){
+    document.getElementById('memberNotice').style.display = isMember() ? 'none' : 'block';
+  }
+
+  document.addEventListener('mmg-auth-ready', async () => {
+    updateMemberGate();
+    if(isMember() && window.mmgMergeCloudPaymentsAndSync){
+      await window.mmgMergeCloudPaymentsAndSync(); // bulut ödemelerini kontrol et, vadesi gelenleri işle
+    }
+    loadMonth();
+  });
+
+  // ================== Ay / Yıl seçiciler ==================
+  const monthSelectEl = document.getElementById('monthSelect');
+  const monthTrigger = document.getElementById('monthTrigger');
+  const monthTriggerLabel = document.getElementById('monthTriggerLabel');
+  const monthOptions = document.getElementById('monthOptions');
+  const yearSelectEl = document.getElementById('yearSelect');
+  const yearTrigger = document.getElementById('yearTrigger');
+  const yearTriggerLabel = document.getElementById('yearTriggerLabel');
+  const yearOptions = document.getElementById('yearOptions');
+
+  AY_ADLARI.forEach((name, idx) => {
+    const opt = document.createElement('div');
+    opt.className = 'select-option';
+    opt.dataset.m = idx;
+    opt.textContent = name;
+    monthOptions.appendChild(opt);
+  });
+  const yearNow = today.getFullYear();
+  for(let y = yearNow-1; y <= yearNow+2; y++){
+    const opt = document.createElement('div');
+    opt.className = 'select-option';
+    opt.dataset.y = y;
+    opt.textContent = y;
+    yearOptions.appendChild(opt);
+  }
+
+  function refreshSelectUI(){
+    monthTriggerLabel.textContent = AY_ADLARI[selMonth];
+    yearTriggerLabel.textContent = selYear;
+    monthOptions.querySelectorAll('.select-option').forEach(o => o.classList.toggle('selected', +o.dataset.m === selMonth));
+    yearOptions.querySelectorAll('.select-option').forEach(o => o.classList.toggle('selected', +o.dataset.y === selYear));
+  }
+
+  monthTrigger.addEventListener('click', (e)=>{ e.stopPropagation(); monthSelectEl.classList.toggle('open'); yearSelectEl.classList.remove('open'); });
+  yearTrigger.addEventListener('click', (e)=>{ e.stopPropagation(); yearSelectEl.classList.toggle('open'); monthSelectEl.classList.remove('open'); });
+  monthOptions.addEventListener('click', (e)=>{
+    const opt = e.target.closest('.select-option'); if(!opt) return;
+    selMonth = +opt.dataset.m; monthSelectEl.classList.remove('open'); refreshSelectUI(); loadMonth();
+  });
+  yearOptions.addEventListener('click', (e)=>{
+    const opt = e.target.closest('.select-option'); if(!opt) return;
+    selYear = +opt.dataset.y; yearSelectEl.classList.remove('open'); refreshSelectUI(); loadMonth();
+  });
+  document.addEventListener('click', (e)=>{
+    if(!monthSelectEl.contains(e.target)) monthSelectEl.classList.remove('open');
+    if(!yearSelectEl.contains(e.target)) yearSelectEl.classList.remove('open');
+  });
+
+  document.getElementById('gotoTodayBtn').addEventListener('click', ()=>{
+    selYear = today.getFullYear(); selMonth = today.getMonth();
+    refreshSelectUI(); loadMonth();
+  });
+
+  document.getElementById('clearMonthBtn').addEventListener('click', ()=>{
+    if(!confirm('Bu ayın tüm kayıtlarını silmek istediğinize emin misiniz?')) return;
+    monthData = {};
+    scheduleSave();
+    render();
+  });
+
+  document.getElementById('demoFillBtn').addEventListener('click', ()=>{
+    const weeks = buildWeeks(selYear, selMonth);
+    const patternGider = [100,50,25,250,500,10,30];
+    const patternGelir = [10,50,100,12,24,32,33];
+    let i = 0;
+    weeks.forEach(week => week.forEach(d => {
+      const key = dayKey(selYear, selMonth, d);
+      const day = ensureDay(key);
+      day.gider.push({ id: 'demo'+i, desc:'Örnek Ödeme', category:'Diğer Gider', amount: patternGider[i % patternGider.length] });
+      day.gelir.push({ id: 'demo2'+i, desc:'Örnek Tahsilat', category:'Diğer Gelir', amount: patternGelir[i % patternGelir.length] });
+      i++;
+    }));
+    scheduleSave();
+    render();
+    showIoMsg('Örnek veriler bu aya yüklendi.');
+  });
+
+  // ================== Render ==================
+  const weeksContainer = document.getElementById('weeksContainer');
+
+  function dayTotal(key, type){
+    const day = monthData[key];
+    if(!day) return 0;
+    return day[type].reduce((s,i)=>s+i.amount, 0);
+  }
+
+  function renderItemsHtml(key, type){
+    const day = monthData[key];
+    const items = day ? day[type] : [];
+    const cats = type === 'gider' ? GIDER_CATS : GELIR_CATS;
+    let html = '<div class="drawer-inner">';
+    html += '<div class="drawer-title">' + (type==='gider' ? 'Giderler' : 'Gelirler') + '</div>';
+    if(!items || items.length === 0){
+      html += '<div class="empty-day">Bu güne ait ' + (type==='gider'?'gider':'gelir') + ' kaydı yok.</div>';
+    } else {
+      html += '<div class="item-list">';
+      items.forEach(it => {
+        html += '<div class="item-row">' +
+          '<div class="item-row-main">' +
+            '<span class="item-desc">' + escapeHtml(it.desc || '(açıklama yok)') + '</span>' +
+            '<span class="item-cat" style="color:'+catColorVar(it.category)+';border-color:'+catColorVar(it.category)+'44;">' + escapeHtml(it.category) + '</span>' +
+          '</div>' +
+          '<div class="item-row-main">' +
+            '<span class="item-amount" style="color:'+ (type==='gider' ? 'var(--red)' : 'var(--teal)') +';">' + fmtMoney(it.amount) + '</span>' +
+            '<button type="button" class="item-del" data-action="delete-item" data-day="'+key+'" data-type="'+type+'" data-id="'+it.id+'">✕</button>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+    html += '<div class="add-item-form" data-day="'+key+'" data-type="'+type+'">' +
+      '<input type="text" class="desc-in" placeholder="Açıklama (örn. Kira, Elektrik faturası...)">' +
+      '<select class="cat-in">' + cats.map(c=>'<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>').join('') + '</select>' +
+      '<input type="text" inputmode="decimal" class="amount-in" placeholder="0,00" data-decimals="2">' +
+      '<button type="button" class="add-btn" data-action="add-item" data-day="'+key+'" data-type="'+type+'">+ Ekle</button>' +
+    '</div>';
+    html += '</div>';
+    return html;
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function formatDayKeyLabel(key){
+    const parts = key.split('-').map(Number);
+    return parts[2] + ' ' + AY_ADLARI[parts[1]-1];
+  }
+
+  function scopeDayKeysCurrent(){
+    const weeks = buildWeeks(selYear, selMonth);
+    if(reportTab === 'gunluk'){
+      return [dayKey(selYear, selMonth, reportDay)];
+    }
+    if(reportTab === 'haftalik'){
+      const week = weeks[reportWeekIdx] || weeks[0] || [];
+      return week.map(d => dayKey(selYear, selMonth, d));
+    }
+    const all = [];
+    weeks.forEach(w => w.forEach(d => all.push(dayKey(selYear, selMonth, d))));
+    return all;
+  }
+
+  function buildWeekCardHtml(week, wIdx){
+    const todayKey = dayKey(today.getFullYear(), today.getMonth(), today.getDate());
+    let weekGider = 0, weekGelir = 0;
+    const first = week[0], last = week[week.length-1];
+    const rangeLabel = first + ' - ' + last + ' ' + AY_ADLARI[selMonth];
+
+    let rowsHtml = '';
+    week.forEach(d => {
+      const key = dayKey(selYear, selMonth, d);
+      const day = monthData[key];
+      const gTot = dayTotal(key, 'gider');
+      const iTot = dayTotal(key, 'gelir');
+      weekGider += gTot; weekGelir += iTot;
+      const net = iTot - gTot;
+      const netClass = net > 0 ? 'pos' : (net < 0 ? 'neg' : 'zero');
+      const dateObj = new Date(selYear, selMonth, d);
+      const dow = GUN_ADLARI[getWeekdayMon0(dateObj)];
+      const isToday = key === todayKey;
+      const giderOpen = day && day.expanded.gider;
+      const gelirOpen = day && day.expanded.gelir;
+
+      rowsHtml += '<tr class="' + (isToday ? 'today-row' : '') + '">' +
+        '<td class="date-cell">' + d + ' ' + AY_ADLARI[selMonth] + '<span class="dow">' + dow + '</span></td>' +
+        '<td><button type="button" class="amt-btn gider" data-action="toggle" data-day="'+key+'" data-type="gider">' + fmtMoney(gTot) + '<span class="caret">'+(giderOpen?'▲':'▼')+'</span></button></td>' +
+        '<td><button type="button" class="amt-btn gelir" data-action="toggle" data-day="'+key+'" data-type="gelir">' + fmtMoney(iTot) + '<span class="caret">'+(gelirOpen?'▲':'▼')+'</span></button></td>' +
+        '<td class="net-cell ' + netClass + '">' + (net>=0?'':'-') + fmtMoney(Math.abs(net)) + '</td>' +
+      '</tr>';
+
+      if(giderOpen){
+        rowsHtml += '<tr class="drawer-row"><td colspan="4">' + renderItemsHtml(key, 'gider') + '</td></tr>';
+      }
+      if(gelirOpen){
+        rowsHtml += '<tr class="drawer-row"><td colspan="4">' + renderItemsHtml(key, 'gelir') + '</td></tr>';
+      }
+    });
+
+    const weekNet = weekGelir - weekGider;
+    const weekNetClass = weekNet >= 0 ? 'pos' : 'neg';
+
+    return '<div class="week-card">' +
+      '<div class="week-header">' +
+        '<div class="week-header-left"><span class="week-title">' + (wIdx+1) + '. Hafta</span><span class="week-range">' + rangeLabel + '</span></div>' +
+        '<span class="week-net ' + weekNetClass + '">' + (weekNet>=0?'+':'-') + fmtMoney(Math.abs(weekNet)) + '</span>' +
+      '</div>' +
+      '<table class="day-table"><thead><tr><th>Tarih</th><th>Gider</th><th>Gelir</th><th>Net</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
+    '</div>';
+  }
+
+  function buildDayDetailHtml(d){
+    const key = dayKey(selYear, selMonth, d);
+    ensureDay(key);
+    const dateObj = new Date(selYear, selMonth, d);
+    const dow = GUN_ADLARI[getWeekdayMon0(dateObj)];
+    return '<div class="week-card">' +
+      '<div class="week-header">' +
+        '<div class="week-header-left"><span class="week-title">' + d + ' ' + AY_ADLARI[selMonth] + ' ' + selYear + '</span><span class="week-range">' + dow + '</span></div>' +
+      '</div>' +
+      '<div class="scope-items-grid" style="padding:18px; margin-bottom:0;">' +
+        '<div class="scope-items-col">' + renderItemsHtml(key,'gider') + '</div>' +
+        '<div class="scope-items-col">' + renderItemsHtml(key,'gelir') + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function updateModeVisibility(){
+    const isArchive = reportTab === 'arsiv';
+    weeksContainer.style.display = isArchive ? 'none' : '';
+    document.getElementById('summaryCardsSection').style.display = isArchive ? 'none' : '';
+    document.getElementById('reportsSection').style.display = isArchive ? 'none' : '';
+    document.getElementById('archiveContainer').style.display = isArchive ? '' : 'none';
+    document.getElementById('reportPicker').style.display = isArchive ? 'none' : '';
+  }
+
+  function render(){
+    renderTabsUI();
+    updateModeVisibility();
+
+    if(reportTab === 'arsiv'){
+      renderArchiveTab();
+      return;
+    }
+
+    const weeks = buildWeeks(selYear, selMonth);
+    renderPicker();
+
+    if(reportTab === 'gunluk'){
+      weeksContainer.innerHTML = buildDayDetailHtml(reportDay);
+    } else if(reportTab === 'haftalik'){
+      const week = weeks[reportWeekIdx] || weeks[0] || [];
+      weeksContainer.innerHTML = week.length ? buildWeekCardHtml(week, reportWeekIdx) : '<div class="reports-empty">Bu ayda bu haftaya ait gün bulunamadı.</div>';
+    } else if(reportTab === 'yillik'){
+      weeksContainer.innerHTML = '<div class="reports-empty">Yıllık veriler yükleniyor…</div>';
+      document.getElementById('reportsList').innerHTML = '';
+      document.getElementById('breakdownWrap').style.display = 'none';
+      renderYearlyView();
+      return;
+    } else {
+      let mainHtml = '';
+      weeks.forEach((week, wIdx) => { mainHtml += buildWeekCardHtml(week, wIdx); });
+      weeksContainer.innerHTML = mainHtml;
+    }
+
+    renderSummaryAndReports();
+  }
+
+  function renderTabsUI(){
+    document.querySelectorAll('#reportTabs .report-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === reportTab));
+  }
+
+  function renderPicker(){
+    const picker = document.getElementById('reportPicker');
+    const weeks = buildWeeks(selYear, selMonth);
+    if(reportTab === 'gunluk'){
+      const todayKey = dayKey(today.getFullYear(), today.getMonth(), today.getDate());
+      let html = '';
+      weeks.forEach(week => week.forEach(d => {
+        const key = dayKey(selYear, selMonth, d);
+        const isToday = key === todayKey;
+        html += '<button type="button" class="picker-pill '+(d===reportDay?'active':'')+' '+(isToday?'today-pill':'')+'" data-day="'+d+'" title="'+(isToday?'Bugün':'')+'">'+d+'</button>';
+      }));
+      picker.innerHTML = html;
+    } else if(reportTab === 'haftalik'){
+      let html = '';
+      weeks.forEach((week, idx) => {
+        html += '<button type="button" class="picker-pill '+(idx===reportWeekIdx?'active':'')+'" data-week="'+idx+'">'+(idx+1)+'. Hafta</button>';
+      });
+      picker.innerHTML = html;
+    } else {
+      picker.innerHTML = '';
+    }
+  }
+
+  document.getElementById('reportTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.report-tab');
+    if(!btn) return;
+    reportTab = btn.dataset.tab;
+    render();
+  });
+  document.getElementById('reportPicker').addEventListener('click', (e) => {
+    const dayBtn = e.target.closest('[data-day]');
+    if(dayBtn){ reportDay = +dayBtn.dataset.day; render(); return; }
+    const weekBtn = e.target.closest('[data-week]');
+    if(weekBtn){ reportWeekIdx = +weekBtn.dataset.week; render(); return; }
+  });
+
+  // ================== Yıllık görünüm ==================
+  async function loadMonthDataRaw(y, m){
+    const mk = monthKeyOf(y, m);
+    let data = loadLocal(mk) || {};
+    if(isMember()){
+      try{
+        const cloud = window.mmgCloud;
+        const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk));
+        if(snap.exists() && snap.data().data) data = snap.data().data;
+      }catch(err){ /* sessizce geç */ }
+    }
+    return data;
+  }
+
+  async function loadYearData(y){
+    const months = [];
+    for(let m=0; m<12; m++){
+      const data = await loadMonthDataRaw(y, m);
+      let g = 0, i = 0;
+      const byCatG = {}, byCatI = {};
+      Object.values(data).forEach(day => {
+        (day.gider||[]).forEach(it => { g += it.amount; byCatG[it.category] = (byCatG[it.category]||0) + it.amount; });
+        (day.gelir||[]).forEach(it => { i += it.amount; byCatI[it.category] = (byCatI[it.category]||0) + it.amount; });
+      });
+      months.push({ y, m, gider: g, gelir: i, byCatG, byCatI });
+    }
+    return months;
+  }
+
+  function buildYearTableHtml(months){
+    let rows = '', totalG = 0, totalI = 0;
+    months.forEach(mo => {
+      totalG += mo.gider; totalI += mo.gelir;
+      const net = mo.gelir - mo.gider;
+      const netClass = net > 0 ? 'pos' : (net < 0 ? 'neg' : 'zero');
+      rows += '<tr>' +
+        '<td class="date-cell"><button type="button" class="amt-btn" style="color:var(--text);" data-action="goto-month" data-m="'+mo.m+'">' + AY_ADLARI[mo.m] + '</button></td>' +
+        '<td style="color:var(--red);">' + fmtMoney(mo.gider) + '</td>' +
+        '<td style="color:var(--teal);">' + fmtMoney(mo.gelir) + '</td>' +
+        '<td class="net-cell ' + netClass + '">' + (net>=0?'':'-') + fmtMoney(Math.abs(net)) + '</td>' +
+      '</tr>';
+    });
+    const totalNet = totalI - totalG;
+    return '<div class="week-card">' +
+      '<div class="week-header">' +
+        '<div class="week-header-left"><span class="week-title">' + selYear + ' Yılı</span><span class="week-range">Ocak - Aralık · bir aya tıklayarak o ayı açabilirsiniz</span></div>' +
+        '<span class="week-net ' + (totalNet>=0?'pos':'neg') + '">' + (totalNet>=0?'+':'-') + fmtMoney(Math.abs(totalNet)) + '</span>' +
+      '</div>' +
+      '<table class="day-table"><thead><tr><th>Ay</th><th>Gider</th><th>Gelir</th><th>Net</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+    '</div>';
+  }
+
+  async function renderYearlyView(){
+    const requestYear = selYear;
+    const months = await loadYearData(selYear);
+    if(reportTab !== 'yillik' || selYear !== requestYear) return; // sekme/yıl değiştiyse eski sonucu uygulama
+
+    weeksContainer.innerHTML = buildYearTableHtml(months);
+
+    let gTotal = 0, iTotal = 0;
+    const giderByCat = {}, gelirByCat = {};
+    months.forEach(mo => {
+      gTotal += mo.gider; iTotal += mo.gelir;
+      Object.entries(mo.byCatG).forEach(([c,v]) => { giderByCat[c] = (giderByCat[c]||0) + v; });
+      Object.entries(mo.byCatI).forEach(([c,v]) => { gelirByCat[c] = (gelirByCat[c]||0) + v; });
+    });
+    const net = iTotal - gTotal;
+
+    document.getElementById('sumGelirLabel').textContent = 'Gelir · ' + selYear;
+    document.getElementById('sumGiderLabel').textContent = 'Gider · ' + selYear;
+    document.getElementById('sumNetLabel').textContent = 'Net Durum · ' + selYear;
+    document.getElementById('sumGider').textContent = fmtMoney(gTotal);
+    document.getElementById('sumGelir').textContent = fmtMoney(iTotal);
+    const netEl = document.getElementById('sumNet');
+    netEl.textContent = (net>=0?'':'-') + fmtMoney(Math.abs(net));
+    netEl.className = 'summary-value ' + (net >= 0 ? 'pos' : 'neg');
+    document.getElementById('sumNetSub').textContent = net >= 0 ? (selYear + ' yılında fazla veriyorsunuz') : (selYear + ' yılında açık veriyorsunuz');
+
+    const reportsList = document.getElementById('reportsList');
+    const bdWrap = document.getElementById('breakdownWrap');
+    const items = [];
+
+    if(gTotal === 0 && iTotal === 0){
+      reportsList.innerHTML = '<div class="reports-empty">' + selYear + ' yılı için henüz kayıt yok.</div>';
+      bdWrap.style.display = 'none';
+      lastReportSnapshot = null;
+      return;
+    }
+
+    if(net < 0){
+      items.push({cls:'bad', icon:'⚠️', text: selYear + ' yılında yaklaşık <b>' + fmtMoney(Math.abs(net)) + '</b> açık verdiniz.'});
+    } else if(net === 0){
+      items.push({cls:'info', icon:'ℹ️', text: selYear + ' yılında gelir ve gideriniz dengede.'});
+    } else {
+      items.push({cls:'good', icon:'✅', text: selYear + ' yılında net <b>' + fmtMoney(net) + '</b> fazla verdiniz.'});
+    }
+
+    let maxGiderMonth = null, maxGiderVal = -Infinity, worstNetMonth = null, worstNetVal = Infinity;
+    months.forEach(mo => {
+      if(mo.gider > maxGiderVal){ maxGiderVal = mo.gider; maxGiderMonth = mo; }
+      const n = mo.gelir - mo.gider;
+      if(n < worstNetVal){ worstNetVal = n; worstNetMonth = mo; }
+    });
+    if(maxGiderVal > 0){
+      items.push({cls:'info', icon:'📅', text:'En yüksek gider ayınız: <b>' + AY_ADLARI[maxGiderMonth.m] + '</b> (' + fmtMoney(maxGiderVal) + ').'});
+    }
+    if(worstNetMonth && worstNetVal < 0){
+      items.push({cls:'warn', icon:'⚠️', text:'En çok açık verdiğiniz ay: <b>' + AY_ADLARI[worstNetMonth.m] + '</b> (' + fmtMoney(Math.abs(worstNetVal)) + ' açık).'});
+    }
+
+    const giderCatSorted = Object.entries(giderByCat).sort((a,b)=>b[1]-a[1]);
+    const gelirCatSorted = Object.entries(gelirByCat).sort((a,b)=>b[1]-a[1]);
+    if(giderCatSorted.length){
+      const [topCat, topVal] = giderCatSorted[0];
+      const pct = gTotal > 0 ? (topVal/gTotal*100) : 0;
+      if(pct >= 25){
+        const isCredit = /kredi/i.test(topCat);
+        items.push({
+          cls: isCredit ? 'warn' : 'info',
+          icon: isCredit ? '💳' : '📊',
+          text: '<b>' + escapeHtml(topCat) + '</b> kalemi, yıllık giderinizin yaklaşık <b>%' + pct.toFixed(0) + '</b>\'ini oluşturuyor' + (isCredit ? ' — yıl boyunca kredi/kredi kartı yükünüz dikkat çekici seviyede.' : '.')
+        });
+      }
+    }
+
+    const prevMonths = await loadYearData(selYear-1);
+    if(reportTab !== 'yillik' || selYear !== requestYear) return;
+    let prevG = 0, prevI = 0;
+    prevMonths.forEach(mo => { prevG += mo.gider; prevI += mo.gelir; });
+    pushCompareInsights(items, gTotal, prevG, iTotal, prevI, 'geçen yıla göre');
+
+    reportsList.innerHTML = items.map(it =>
+      '<div class="report-item ' + it.cls + '"><span class="ric">' + it.icon + '</span><span>' + it.text + '</span></div>'
+    ).join('');
+
+    lastReportSnapshot = {
+      scope: 'yillik',
+      label: currentScopeLabel(),
+      gTotal, iTotal, net,
+      giderByCat: Object.assign({}, giderByCat),
+      gelirByCat: Object.assign({}, gelirByCat),
+      insights: items.slice()
+    };
+
+    if(giderCatSorted.length || gelirCatSorted.length){
+      bdWrap.style.display = 'grid';
+      document.getElementById('bdGider').innerHTML = renderBreakdown(giderCatSorted, gTotal);
+      document.getElementById('bdGelir').innerHTML = renderBreakdown(gelirCatSorted, iTotal);
+    } else {
+      bdWrap.style.display = 'none';
+    }
+  }
+
+  // ================== Arşiv ==================
+  function currentScopeLabel(){
+    if(reportTab === 'gunluk'){
+      return reportDay + ' ' + AY_ADLARI[selMonth] + ' ' + selYear;
+    }
+    if(reportTab === 'haftalik'){
+      const weeks = buildWeeks(selYear, selMonth);
+      const week = weeks[reportWeekIdx] || weeks[0] || [];
+      const rangeTxt = week.length ? (week[0] + ' - ' + week[week.length-1] + ' ' + AY_ADLARI[selMonth]) : '';
+      return (reportWeekIdx+1) + '. Hafta (' + rangeTxt + ') · ' + selYear;
+    }
+    if(reportTab === 'yillik'){
+      return selYear + ' Yılı';
+    }
+    return AY_ADLARI[selMonth] + ' ' + selYear;
+  }
+
+  function scopeBadgeLabel(scope){
+    return scope === 'gunluk' ? 'Günlük' : scope === 'haftalik' ? 'Haftalık' : scope === 'yillik' ? 'Yıllık' : 'Aylık';
+  }
+
+  function localArchiveKey(){ return 'mmg_nat_archive'; }
+  function loadLocalArchive(){
+    try{
+      const raw = localStorage.getItem(localArchiveKey());
+      return raw ? JSON.parse(raw) : [];
+    }catch(err){ return []; }
+  }
+  function saveLocalArchive(list){
+    try{ localStorage.setItem(localArchiveKey(), JSON.stringify(list)); }catch(err){}
+  }
+
+  async function saveArchiveEntry(entry){
+    const list = loadLocalArchive();
+    list.unshift(entry);
+    saveLocalArchive(list);
+    if(isMember()){
+      try{
+        const cloud = window.mmgCloud;
+        await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'archive', entry.id), entry);
+      }catch(err){ /* sessizce geç, yerelde zaten kayıtlı */ }
+    }
+  }
+
+  async function deleteArchiveEntry(id){
+    const list = loadLocalArchive().filter(e => e.id !== id);
+    saveLocalArchive(list);
+    if(isMember()){
+      try{
+        const cloud = window.mmgCloud;
+        await cloud.deleteDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'archive', id));
+      }catch(err){ /* sessizce geç */ }
+    }
+  }
+
+  async function loadArchiveList(){
+    const local = loadLocalArchive();
+    let cloudList = [];
+    if(isMember()){
+      try{
+        const cloud = window.mmgCloud;
+        const snaps = await cloud.getDocs(cloud.collection(cloud.db, 'users', cloud.currentUser.uid, 'archive'));
+        snaps.forEach(d => cloudList.push(d.data()));
+      }catch(err){ /* sessizce geç */ }
+    }
+    const map = {};
+    local.forEach(e => { map[e.id] = e; });
+    cloudList.forEach(e => { map[e.id] = e; }); // buluttaki varsa güncel kabul edilir
+    return Object.values(map).sort((a,b) => (b.savedAt||'').localeCompare(a.savedAt||''));
+  }
+
+  function buildArchiveCardHtml(entry){
+    const net = entry.net;
+    const savedDateObj = new Date(entry.savedAt);
+    const savedLabel = isNaN(savedDateObj) ? '' : savedDateObj.toLocaleString('tr-TR', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+    const giderCatSorted = Object.entries(entry.giderByCat||{}).sort((a,b)=>b[1]-a[1]);
+    const gelirCatSorted = Object.entries(entry.gelirByCat||{}).sort((a,b)=>b[1]-a[1]);
+    const insightsHtml = (entry.insights||[]).map(it =>
+      '<div class="report-item ' + it.cls + '"><span class="ric">' + it.icon + '</span><span>' + it.text + '</span></div>'
+    ).join('') || '<div class="list-empty">Kayıtlı analiz yok.</div>';
+    const breakdownHtml = (giderCatSorted.length || gelirCatSorted.length) ?
+      '<div class="breakdown">' +
+        '<div class="breakdown-col"><h3>Gider Dağılımı</h3>' + renderBreakdown(giderCatSorted, entry.gTotal) + '</div>' +
+        '<div class="breakdown-col"><h3>Gelir Dağılımı</h3>' + renderBreakdown(gelirCatSorted, entry.iTotal) + '</div>' +
+      '</div>' : '';
+    return '<div class="archive-card" id="arc-' + entry.id + '">' +
+      '<div class="archive-card-top">' +
+        '<div>' +
+          '<span class="archive-card-scope-badge">' + scopeBadgeLabel(entry.scope) + '</span>' +
+          '<div class="archive-card-label">' + escapeHtml(entry.label) + '</div>' +
+          '<div class="archive-card-meta">Kaydedilme: ' + savedLabel + '</div>' +
+        '</div>' +
+        '<div class="archive-card-nums">' +
+          '<span style="color:var(--teal);">+' + fmtMoney(entry.iTotal) + '</span>' +
+          '<span style="color:var(--red);">-' + fmtMoney(entry.gTotal) + '</span>' +
+          '<span style="color:' + (net>=0?'var(--teal)':'var(--red)') + ';">' + (net>=0?'':'-') + fmtMoney(Math.abs(net)) + '</span>' +
+        '</div>' +
+        '<div class="archive-card-actions">' +
+          '<button type="button" class="archive-btn" data-action="toggle-archive" data-id="' + entry.id + '">Detay</button>' +
+          '<button type="button" class="archive-btn" data-action="delete-archive" data-id="' + entry.id + '">Sil</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="archive-card-detail">' +
+        '<div class="reports-list">' + insightsHtml + '</div>' +
+        breakdownHtml +
+      '</div>' +
+    '</div>';
+  }
+
+  async function renderArchiveTab(){
+    const wrap = document.getElementById('archiveList');
+    wrap.innerHTML = '<div class="list-empty">Yükleniyor…</div>';
+    const list = await loadArchiveList();
+    if(reportTab !== 'arsiv') return;
+    if(!list.length){
+      wrap.innerHTML = '<div class="list-empty">Henüz arşivlenmiş bir raporunuz yok. Günlük, Haftalık, Aylık veya Yıllık sekmelerinde "🗄 Bu Raporu Arşivle" butonuna basarak raporlarınızı buraya kaydedebilirsiniz.</div>';
+      return;
+    }
+    wrap.innerHTML = list.map(entry => buildArchiveCardHtml(entry)).join('');
+  }
+
+  async function saveCurrentReportToArchive(){
+    if(!lastReportSnapshot){ showIoMsg('Kaydedilecek bir rapor bulunamadı. Önce Günlük, Haftalık, Aylık veya Yıllık sekmesinde veri girişi yapın.', true); return; }
+    const entry = Object.assign({}, lastReportSnapshot, {
+      id: 'arc_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      savedAt: new Date().toISOString()
+    });
+    await saveArchiveEntry(entry);
+    showIoMsg('Rapor arşive kaydedildi.');
+  }
+
+  document.getElementById('archiveSaveBtn').addEventListener('click', saveCurrentReportToArchive);
+  document.getElementById('archiveSaveBtnTop').addEventListener('click', saveCurrentReportToArchive);
+
+  document.getElementById('archiveList').addEventListener('click', async (e) => {
+    const toggleBtn = e.target.closest('[data-action="toggle-archive"]');
+    if(toggleBtn){
+      const card = document.getElementById('arc-' + toggleBtn.dataset.id);
+      if(card) card.classList.toggle('expanded');
+      return;
+    }
+    const delBtn = e.target.closest('[data-action="delete-archive"]');
+    if(delBtn){
+      if(!confirm('Bu arşivlenmiş raporu silmek istediğinize emin misiniz?')) return;
+      await deleteArchiveEntry(delBtn.dataset.id);
+      renderArchiveTab();
+      return;
+    }
+  });
+
+
+  function pushCompareInsights(items, curGider, prevGider, curGelir, prevGelir, phrase){
+    if(prevGider > 0){
+      const diffPct = ((curGider - prevGider) / prevGider) * 100;
+      if(Math.abs(diffPct) >= 5){
+        items.push({cls: diffPct>0?'warn':'good', icon: diffPct>0?'📈':'📉', text:'Gideriniz '+phrase+' <b>%'+Math.abs(diffPct).toFixed(0)+'</b> '+(diffPct>0?'arttı':'azaldı')+'.'});
+      }
+    }
+    if(prevGelir > 0){
+      const diffPctG = ((curGelir - prevGelir) / prevGelir) * 100;
+      if(Math.abs(diffPctG) >= 5){
+        items.push({cls: diffPctG>0?'good':'warn', icon: diffPctG>0?'📈':'📉', text:'Geliriniz '+phrase+' <b>%'+Math.abs(diffPctG).toFixed(0)+'</b> '+(diffPctG>0?'arttı':'azaldı')+'.'});
+      }
+    }
+  }
+
+  // ================== Özet kartları + Raporlar (tab'a göre) ==================
+  function renderSummaryAndReports(){
+    const keys = scopeDayKeysCurrent();
+    let gTotal = 0, iTotal = 0;
+    const giderByCat = {}, gelirByCat = {};
+    keys.forEach(key => {
+      const day = monthData[key];
+      if(!day) return;
+      day.gider.forEach(it => { gTotal += it.amount; giderByCat[it.category] = (giderByCat[it.category]||0) + it.amount; });
+      day.gelir.forEach(it => { iTotal += it.amount; gelirByCat[it.category] = (gelirByCat[it.category]||0) + it.amount; });
+    });
+    const net = iTotal - gTotal;
+
+    const periodWord = reportTab === 'gunluk' ? 'Bugün' : reportTab === 'haftalik' ? 'Bu hafta' : 'Bu ay';
+    const periodTag  = reportTab === 'gunluk' ? 'Bugün'  : reportTab === 'haftalik' ? 'Bu Hafta' : 'Bu Ay';
+
+    document.getElementById('sumGelirLabel').textContent = 'Gelir · ' + periodTag;
+    document.getElementById('sumGiderLabel').textContent = 'Gider · ' + periodTag;
+    document.getElementById('sumNetLabel').textContent = 'Net Durum · ' + periodTag;
+    document.getElementById('sumGider').textContent = fmtMoney(gTotal);
+    document.getElementById('sumGelir').textContent = fmtMoney(iTotal);
+    const netEl = document.getElementById('sumNet');
+    netEl.textContent = (net>=0?'':'-') + fmtMoney(Math.abs(net));
+    netEl.className = 'summary-value ' + (net >= 0 ? 'pos' : 'neg');
+    document.getElementById('sumNetSub').textContent = net >= 0 ? (periodWord + ' fazla veriyorsunuz') : (periodWord + ' açık veriyorsunuz');
+
+    const reportsList = document.getElementById('reportsList');
+    const bdWrap = document.getElementById('breakdownWrap');
+    const items = [];
+
+    if(gTotal === 0 && iTotal === 0){
+      const emptyMsg = reportTab === 'gunluk' ? 'Bu gün için henüz kayıt yok. Yukarıdan gider veya gelir ekleyebilirsiniz.' :
+                        reportTab === 'haftalik' ? 'Bu hafta için henüz kayıt yok.' :
+                        'Bu ay için henüz kayıt yok. Bir tarihe ait gider veya gelire tıklayarak eklemeye başlayabilirsiniz.';
+      reportsList.innerHTML = '<div class="reports-empty">' + emptyMsg + '</div>';
+      bdWrap.style.display = 'none';
+      lastReportSnapshot = null;
+      return;
+    }
+
+    if(net < 0){
+      items.push({cls:'bad', icon:'⚠️', text: periodWord + ' yaklaşık <b>' + fmtMoney(Math.abs(net)) + '</b> açık verdiniz. Gelirlerinizi artırmayı veya giderlerinizi gözden geçirmeyi düşünebilirsiniz.'});
+    } else if(net === 0){
+      items.push({cls:'info', icon:'ℹ️', text: periodWord + ' gelir ve gideriniz tam olarak dengede.'});
+    } else {
+      items.push({cls:'good', icon:'✅', text: periodWord + ' net <b>' + fmtMoney(net) + '</b> fazla verdiniz.'});
+    }
+
+    if(reportTab === 'aylik'){
+      const weeks = buildWeeks(selYear, selMonth);
+      let maxGiderWeekIdx = -1, maxGiderWeekVal = -Infinity;
+      weeks.forEach((week, idx) => {
+        let wg = 0;
+        week.forEach(d => { wg += dayTotal(dayKey(selYear, selMonth, d), 'gider'); });
+        if(wg > maxGiderWeekVal){ maxGiderWeekVal = wg; maxGiderWeekIdx = idx; }
+      });
+      if(maxGiderWeekVal > 0){
+        items.push({cls:'info', icon:'📅', text:'En yüksek gider haftanız: <b>' + (maxGiderWeekIdx+1) + '. Hafta</b> (' + fmtMoney(maxGiderWeekVal) + ').'});
+      }
+    }
+
+    if(reportTab === 'haftalik'){
+      let maxDayKey = null, maxDayVal = -Infinity;
+      keys.forEach(key => { const g = dayTotal(key,'gider'); if(g > maxDayVal){ maxDayVal = g; maxDayKey = key; } });
+      if(maxDayVal > 0){
+        items.push({cls:'info', icon:'📅', text:'Bu haftanın en yüksek gider günü: <b>' + formatDayKeyLabel(maxDayKey) + '</b> (' + fmtMoney(maxDayVal) + ').'});
+      }
+    }
+
+    if(reportTab === 'gunluk'){
+      const allItems = [];
+      keys.forEach(key => {
+        const day = monthData[key];
+        if(!day) return;
+        day.gider.forEach(it => allItems.push(Object.assign({type:'gider'}, it)));
+        day.gelir.forEach(it => allItems.push(Object.assign({type:'gelir'}, it)));
+      });
+      if(allItems.length){
+        const top = allItems.slice().sort((a,b)=>b.amount-a.amount)[0];
+        items.push({cls:'info', icon:'🔎', text:'En yüksek kalem: <b>' + escapeHtml(top.desc || top.category) + '</b> (' + fmtMoney(top.amount) + ', ' + (top.type==='gider'?'gider':'gelir') + ').'});
+      }
+    }
+
+    const giderCatSorted = Object.entries(giderByCat).sort((a,b)=>b[1]-a[1]);
+    const gelirCatSorted = Object.entries(gelirByCat).sort((a,b)=>b[1]-a[1]);
+
+    if(giderCatSorted.length){
+      const [topCat, topVal] = giderCatSorted[0];
+      const pct = gTotal > 0 ? (topVal/gTotal*100) : 0;
+      if(pct >= 30){
+        const isCredit = /kredi/i.test(topCat);
+        items.push({
+          cls: isCredit ? 'warn' : 'info',
+          icon: isCredit ? '💳' : '📊',
+          text: '<b>' + escapeHtml(topCat) + '</b> kalemi, ' + periodWord.toLowerCase() + ' giderinizin yaklaşık <b>%' + pct.toFixed(0) + '</b>\'ini oluşturuyor' + (isCredit ? ' — kredi/kredi kartı yükünüz dikkat çekici seviyede.' : '.')
+        });
+      }
+    }
+    if(gelirCatSorted.length === 1 && iTotal > 0 && keys.length > 1){
+      items.push({cls:'warn', icon:'🎯', text: periodWord + ' geliriniz tamamen <b>' + escapeHtml(gelirCatSorted[0][0]) + '</b> kaynağına bağlı. Gelir çeşitliliğinizi artırmayı düşünebilirsiniz.'});
+    }
+
+    if(reportTab === 'aylik'){
+      const prevM = selMonth === 0 ? 11 : selMonth-1;
+      const prevY = selMonth === 0 ? selYear-1 : selYear;
+      const prevData = loadLocal(monthKeyOf(prevY, prevM));
+      if(prevData){
+        let prevGider = 0, prevGelir = 0;
+        Object.values(prevData).forEach(day => {
+          prevGider += (day.gider||[]).reduce((s,i)=>s+i.amount,0);
+          prevGelir += (day.gelir||[]).reduce((s,i)=>s+i.amount,0);
+        });
+        pushCompareInsights(items, gTotal, prevGider, iTotal, prevGelir, 'geçen aya göre');
+      }
+    } else if(reportTab === 'haftalik'){
+      const weeks = buildWeeks(selYear, selMonth);
+      if(reportWeekIdx > 0){
+        const prevWeek = weeks[reportWeekIdx-1] || [];
+        let prevGider = 0, prevGelir = 0;
+        prevWeek.forEach(d => { const k = dayKey(selYear, selMonth, d); prevGider += dayTotal(k,'gider'); prevGelir += dayTotal(k,'gelir'); });
+        pushCompareInsights(items, gTotal, prevGider, iTotal, prevGelir, 'önceki haftaya göre');
+      }
+    } else if(reportTab === 'gunluk'){
+      if(reportDay > 1){
+        const prevKey = dayKey(selYear, selMonth, reportDay-1);
+        const prevDay = monthData[prevKey];
+        if(prevDay){
+          const prevGider = (prevDay.gider||[]).reduce((s,i)=>s+i.amount,0);
+          const prevGelir = (prevDay.gelir||[]).reduce((s,i)=>s+i.amount,0);
+          pushCompareInsights(items, gTotal, prevGider, iTotal, prevGelir, 'bir önceki güne göre');
+        }
+      }
+    }
+
+    reportsList.innerHTML = items.map(it =>
+      '<div class="report-item ' + it.cls + '"><span class="ric">' + it.icon + '</span><span>' + it.text + '</span></div>'
+    ).join('');
+
+    lastReportSnapshot = {
+      scope: reportTab,
+      label: currentScopeLabel(),
+      gTotal, iTotal, net,
+      giderByCat: Object.assign({}, giderByCat),
+      gelirByCat: Object.assign({}, gelirByCat),
+      insights: items.slice()
+    };
+
+    if(giderCatSorted.length || gelirCatSorted.length){
+      bdWrap.style.display = 'grid';
+      document.getElementById('bdGider').innerHTML = renderBreakdown(giderCatSorted, gTotal);
+      document.getElementById('bdGelir').innerHTML = renderBreakdown(gelirCatSorted, iTotal);
+    } else {
+      bdWrap.style.display = 'none';
+    }
+  }
+
+  function renderBreakdown(sortedEntries, total){
+    if(!sortedEntries.length) return '<div class="reports-empty">Kayıt yok.</div>';
+    const max = sortedEntries[0][1];
+    return sortedEntries.map(([cat,val]) => {
+      const pct = total > 0 ? (val/total*100) : 0;
+      const widthPct = max > 0 ? (val/max*100) : 0;
+      return '<div class="bd-row">' +
+        '<div class="bd-row-top"><span class="bd-cat">' + escapeHtml(cat) + '</span><span class="bd-val">' + fmtMoney(val) + ' · %' + pct.toFixed(0) + '</span></div>' +
+        '<div class="bd-bar-track"><div class="bd-bar-fill" style="width:'+widthPct+'%; background:'+catColorVar(cat)+';"></div></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ================== Etkileşim (delegasyon) ==================
+  weeksContainer.addEventListener('click', (e) => {
+    const gotoMonthBtn = e.target.closest('[data-action="goto-month"]');
+    if(gotoMonthBtn){
+      selMonth = +gotoMonthBtn.dataset.m;
+      reportTab = 'aylik';
+      refreshSelectUI();
+      loadMonth();
+      return;
+    }
+    const toggleBtn = e.target.closest('[data-action="toggle"]');
+    if(toggleBtn){
+      const key = toggleBtn.dataset.day, type = toggleBtn.dataset.type;
+      const day = ensureDay(key);
+      day.expanded[type] = !day.expanded[type];
+      render();
+      return;
+    }
+    const delBtn = e.target.closest('[data-action="delete-item"]');
+    if(delBtn){
+      const key = delBtn.dataset.day, type = delBtn.dataset.type, id = delBtn.dataset.id;
+      const day = monthData[key];
+      if(day){
+        day[type] = day[type].filter(it => it.id !== id);
+        scheduleSave();
+        render();
+      }
+      return;
+    }
+    const addBtn = e.target.closest('[data-action="add-item"]');
+    if(addBtn){
+      const key = addBtn.dataset.day, type = addBtn.dataset.type;
+      const form = addBtn.closest('.add-item-form');
+      const descIn = form.querySelector('.desc-in');
+      const catIn = form.querySelector('.cat-in');
+      const amountIn = form.querySelector('.amount-in');
+      const amount = parseTR(amountIn.value);
+      if(amount <= 0){ showIoMsg('Lütfen geçerli bir tutar girin.', true); amountIn.focus(); return; }
+      const day = ensureDay(key);
+      day.expanded[type] = true;
+      day[type].push({ id: 'it_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), desc: descIn.value.trim(), category: catIn.value, amount });
+      scheduleSave();
+      render();
+      return;
+    }
+  });
+  weeksContainer.addEventListener('input', (e) => {
+    if(e.target.classList.contains('amount-in')){
+      const pos = e.target.selectionStart;
+      const before = e.target.value;
+      e.target.value = formatTRLive(e.target.value);
+      const diff = e.target.value.length - before.length;
+      const newPos = Math.max(0, (pos||0) + diff);
+      try{ e.target.setSelectionRange(newPos, newPos); }catch(err){}
+    }
+  });
+  weeksContainer.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' && e.target.closest('.add-item-form')){
+      e.preventDefault();
+      const form = e.target.closest('.add-item-form');
+      form.querySelector('.add-btn').click();
+    }
+  });
+
+  // ================== Excel / PDF dışa aktarma ==================
+  function buildExportRows(){
+    const weeks = buildWeeks(selYear, selMonth);
+    const rows = [['Hafta','Tarih','Gün','Gider','Gelir','Net','Haftalık Net']];
+    weeks.forEach((week, wIdx) => {
+      let weekNet = 0;
+      week.forEach(d => {
+        const key = dayKey(selYear, selMonth, d);
+        const g = dayTotal(key,'gider'), i = dayTotal(key,'gelir');
+        weekNet += (i-g);
+      });
+      week.forEach((d, di) => {
+        const key = dayKey(selYear, selMonth, d);
+        const dateObj = new Date(selYear, selMonth, d);
+        const dow = GUN_ADLARI[getWeekdayMon0(dateObj)];
+        const g = dayTotal(key,'gider'), i = dayTotal(key,'gelir');
+        rows.push([
+          di === 0 ? ((wIdx+1) + '. Hafta') : '',
+          d + ' ' + AY_ADLARI[selMonth] + ' ' + selYear,
+          dow, g, i, i-g,
+          di === 0 ? weekNet : ''
+        ]);
+      });
+    });
+    return rows;
+  }
+  function buildItemRows(){
+    const rows = [['Tarih','Tür','Kategori','Açıklama','Tutar']];
+    Object.keys(monthData).sort().forEach(key => {
+      const day = monthData[key];
+      (day.gider||[]).forEach(it => rows.push([key,'Gider',it.category,it.desc,it.amount]));
+      (day.gelir||[]).forEach(it => rows.push([key,'Gelir',it.category,it.desc,it.amount]));
+    });
+    return rows;
+  }
+
+  document.getElementById('exportExcelBtn').addEventListener('click', () => {
+    if(!requireMember()) return;
+    try{
+      const wb = XLSX.utils.book_new();
+      const ws1 = XLSX.utils.aoa_to_sheet(buildExportRows());
+      ws1['!cols'] = [{wch:12},{wch:18},{wch:8},{wch:12},{wch:12},{wch:12},{wch:14}];
+      XLSX.utils.book_append_sheet(wb, ws1, 'Nakit Akışı');
+      const ws2 = XLSX.utils.aoa_to_sheet(buildItemRows());
+      ws2['!cols'] = [{wch:12},{wch:8},{wch:22},{wch:28},{wch:12}];
+      XLSX.utils.book_append_sheet(wb, ws2, 'Kalemler');
+      XLSX.writeFile(wb, 'nakit-akis-' + monthKeyOf(selYear, selMonth) + '.xlsx');
+      showIoMsg('Excel dosyası indirildi.');
+    } catch(e){ showIoMsg('Excel oluşturulurken hata oluştu.', true); }
+  });
+
+  function mmgGetLogoDataUrl(){
+    return fetch('logo.png')
+      .then(r => r.blob())
+      .then(blob => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      }))
+      .catch(() => null);
+  }
+
+  document.getElementById('exportPdfBtn').addEventListener('click', async () => {
+    if(!requireMember()) return;
+    try{
+      const logoDataUrl = await mmgGetLogoDataUrl();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const titleX = logoDataUrl ? 30 : 14;
+      if(logoDataUrl){
+        try{ doc.addImage(logoDataUrl, 'PNG', 14, 8, 14, 14); } catch(imgErr){}
+      }
+      doc.setFontSize(14);
+      doc.text('Nakit Akış Tablosu — ' + AY_ADLARI[selMonth] + ' ' + selYear, titleX, 16);
+      doc.setFontSize(10);
+      doc.text('mmgcreativity.com', titleX, 22);
+      const rows = buildExportRows();
+      doc.autoTable({
+        startY: 28,
+        head: [rows[0]],
+        body: rows.slice(1).map(r => r.map(v => typeof v === 'number' ? fmtMoney(v) : v)),
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [198,161,91] },
+        didDrawPage: function(data){
+          const pageHeight = doc.internal.pageSize.getHeight();
+          const pageWidth = doc.internal.pageSize.getWidth();
+          doc.setDrawColor(198,161,91);
+          doc.setLineWidth(0.3);
+          doc.line(14, pageHeight - 14, pageWidth - 14, pageHeight - 14);
+          doc.setFontSize(8);
+          doc.setTextColor(130,130,130);
+          doc.text('mmgcreativity.com · Dijital Finans Asistanı', 14, pageHeight - 9);
+          const dateStr = new Date().toLocaleString('tr-TR');
+          doc.text('Oluşturulma: ' + dateStr, pageWidth - 14, pageHeight - 9, { align: 'right' });
+        }
+      });
+      doc.save('nakit-akis-' + monthKeyOf(selYear, selMonth) + '.pdf');
+      showIoMsg('PDF dosyası indirildi.');
+    } catch(e){ showIoMsg('PDF oluşturulurken hata oluştu.', true); }
+  });
+
+  // ================== Başlangıç ==================
+  if(window.mmgRunPaymentSync) window.mmgRunPaymentSync(); // vadesi gelen ödemeleri tabloya işle
+  refreshSelectUI();
+  updateMemberGate();
+  loadMonth();
+</script>
+
+<button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır">↓</button>
+<style>
+  #mmgScrollDownBtn{
+    position:fixed; right:20px; bottom:20px; z-index:500;
+    width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
+    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B);
+    font-size:20px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(0,0,0,0.35); transition:opacity .2s ease, transform .2s ease;
+    opacity:0; pointer-events:none;
+  }
+  #mmgScrollDownBtn.show{ opacity:1; pointer-events:auto; }
+  #mmgScrollDownBtn:hover{ transform:translateY(2px); }
+</style>
+<script>
+(function(){
+  var btn = document.getElementById('mmgScrollDownBtn');
+  function nearBottom(){
+    return (window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 40);
+  }
+  function updateVisibility(){
+    if(document.body.scrollHeight <= window.innerHeight + 60 || nearBottom()){
+      btn.classList.remove('show');
+    } else {
+      btn.classList.add('show');
+    }
+  }
+  btn.addEventListener('click', function(){
+    window.scrollBy({ top: window.innerHeight * 0.85, behavior: 'smooth' });
+  });
+  window.addEventListener('scroll', updateVisibility);
+  window.addEventListener('resize', updateVisibility);
+  updateVisibility();
+})();
+</script>
+
+</body>
+</html>

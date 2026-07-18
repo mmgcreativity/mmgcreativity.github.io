@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WVWJ4VZE0C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WVWJ4VZE0C');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Hesaplama Araçları</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.06), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.05), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; padding-bottom:60px;
+  }
+
+  header.masthead{
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
+    border-bottom:1px solid var(--hairline);
+  }
+  .masthead-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px; max-width:640px;}
+  .guide-btn{
+    display:inline-flex; align-items:center; gap:8px; flex-shrink:0;
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:600; color:var(--text);
+    text-decoration:none; border:1px solid var(--hairline); background:var(--surface-2);
+    padding:10px 16px; border-radius:8px; transition:border-color .15s ease, color .15s ease;
+  }
+  .guide-btn:hover{ color:var(--coral); border-color:var(--coral); }
+
+  main{ max-width:1180px; margin:0 auto; padding:36px 24px; }
+
+  /* ---- Masaüstü: sekme + iframe ---- */
+  .cat-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  .cat-tab{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    color:var(--muted); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13.5px;
+    padding:12px 20px; cursor:pointer; transition:all .15s ease;
+  }
+  .cat-tab:hover{ color:var(--text); border-color:var(--brass-dim); }
+  .cat-tab.active{ background:var(--grad); color:#fff; border-color:transparent; }
+
+  .frame-wrap{
+    position:relative; background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
+    overflow:hidden; height:78vh;
+  }
+  .frame-wrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+
+  .desktop-only{ display:block; }
+  .mobile-only{ display:none; }
+
+  /* ---- Mobil: dikey kart listesi (iframe yok, tam sayfa geçiş) ---- */
+  .tool-cards{ display:flex; flex-direction:column; gap:14px; }
+  .tool-card{
+    display:block; background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
+    padding:22px 24px; text-decoration:none; color:var(--text); position:relative; overflow:hidden;
+  }
+  .tool-card::before{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--grad); }
+  .tool-card h3{ font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; margin-bottom:6px; }
+  .tool-card p{ font-size:13px; color:var(--muted); }
+  .tool-card .arrow{ position:absolute; top:20px; right:22px; color:var(--muted); }
+
+  @media (max-width:860px){
+    .desktop-only{ display:none; }
+    .mobile-only{ display:block; }
+  }
+
+  footer{max-width:1180px; margin:36px auto 0; padding:28px 24px 0; color:var(--muted); font-size:11.5px; display:flex; justify-content:flex-end; border-top:1px solid var(--hairline);}
+  .credit{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); display:flex; align-items:center; gap:8px; padding-top:14px; }
+  .signature-pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 12px 4px 5px; border-radius:999px; background:var(--surface-2); border:1px solid var(--hairline); }
+  .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
+  .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff; }
+  .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-row">
+    <div>
+      <h1 class="title">Hesaplama Araçları</h1>
+      <div class="subtitle">Rotatif kredi, kredi kartı vade farkı ve ortalama vade hesaplamalarınızı tek yerden yapın.</div>
+    </div>
+    <a href="index.html" class="guide-btn">← Ana Sayfa</a>
+  </div>
+</header>
+
+<main>
+  <!-- Masaüstü: sekmeler + iframe -->
+  <div class="desktop-only">
+    <div class="cat-tabs" id="toolTabs">
+      <button type="button" class="cat-tab" data-file="Rotatif_Kredi_Hesaplama_Platformu.html" data-hash="rotatif">Rotatif Kredi</button>
+      <button type="button" class="cat-tab" data-file="Kredi_Karti_Taksit_Maliyeti.html" data-hash="vadefarki">Kredi Kartı Vade Farkı</button>
+      <button type="button" class="cat-tab" data-file="Kredi_Karti_Vade_Farki_Hesaplama.html" data-hash="ortalamavade">Ortalama Vade</button>
+    </div>
+    <div class="frame-wrap">
+      <iframe id="toolFrame" src=""></iframe>
+    </div>
+  </div>
+
+  <!-- Mobil: doğrudan bağlantı kartları -->
+  <div class="mobile-only">
+    <div class="tool-cards">
+      <a class="tool-card" href="Rotatif_Kredi_Hesaplama_Platformu.html">
+        <span class="arrow">↗</span>
+        <h3>Rotatif Kredi Hesaplama</h3>
+        <p>Tutar, oran ve vade girin — faiz, komisyon, BSMV ve toplam geri ödeme anında hesaplansın.</p>
+      </a>
+      <a class="tool-card" href="Kredi_Karti_Taksit_Maliyeti.html">
+        <span class="arrow">↗</span>
+        <h3>Kredi Kartı Vade Farkı Hesaplama</h3>
+        <p>Net tutardan yola çıkarak girmeniz veya müşteriye yansıtmanız gereken brüt tutarı hesaplayın.</p>
+      </a>
+      <a class="tool-card" href="Kredi_Karti_Vade_Farki_Hesaplama.html">
+        <span class="arrow">↗</span>
+        <h3>Ortalama Vade Hesaplama</h3>
+        <p>Taksitlerin kaç günde bir yansıyacağını girin — her taksit sayısı için ortalama vadeyi görün.</p>
+      </a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="credit">
+    <span>powered by</span>
+    <span class="signature-pill">
+      <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+      <span id="credit-fallback" class="credit-fallback">M</span>
+      <b>mmgcreativity</b>
+    </span>
+  </div>
+</footer>
+
+<script>
+  const tabs = document.querySelectorAll('.cat-tab');
+  const frame = document.getElementById('toolFrame');
+
+  function activateTab(hash){
+    let matched = false;
+    tabs.forEach(t => {
+      const isMatch = t.dataset.hash === hash;
+      t.classList.toggle('active', isMatch);
+      if(isMatch){ frame.src = t.dataset.file; matched = true; }
+    });
+    if(!matched){
+      // geçersiz/olmayan hash — ilk sekmeyi varsayılan aç
+      tabs[0].classList.add('active');
+      frame.src = tabs[0].dataset.file;
+    }
+  }
+
+  tabs.forEach(t => {
+    t.addEventListener('click', () => {
+      history.replaceState(null, '', '#' + t.dataset.hash);
+      activateTab(t.dataset.hash);
+    });
+  });
+
+  // Rehber sayfalarından #vadefarki, #ortalamavade, #rotatif gibi doğrudan bağlantılarla gelinebilir
+  activateTab(location.hash.replace('#',''));
+</script>
+
+</body>
+</html>

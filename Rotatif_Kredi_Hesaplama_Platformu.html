@@ -37,6 +37,12 @@
     -webkit-font-smoothing:antialiased; padding-bottom:60px;
   }
   .mono{font-family:'IBM Plex Mono',monospace;}
+  .back-link{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); text-decoration:none;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .back-link:hover{ color:var(--coral); border-color:var(--coral); }
   header.masthead{
     max-width:1180px; margin:0 auto; padding:36px 24px 24px;
     display:flex; justify-content:space-between; align-items:flex-end;
@@ -214,6 +220,7 @@
     <h1 class="title">Rotatif Kredi Hesaplama Platformu</h1>
     <div class="subtitle">Tutar, oran ve vade girin — faiz, komisyon, BSMV ve toplam geri ödeme anında hesaplansın</div>
   </div>
+  <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
 </header>
 
 <main>

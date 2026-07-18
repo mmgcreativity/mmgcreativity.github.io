@@ -559,24 +559,23 @@
       </span>
     </button>
 
-    <button class="nav-item" data-target="Rotatif_Kredi_Hesaplama_Platformu.html" data-title="Rotatif Kredi Hesaplama">
+    <button class="nav-item" data-target="Hesaplama_Araclari.html" data-title="Hesaplama Araçları">
       <span class="nav-text-wrap">
-        <span class="nav-title">Rotatif Kredi</span>
-        <span class="nav-desc">Hesaplama Platformu</span>
+        <span class="nav-title">Hesaplama</span>
+        <span class="nav-desc">Araçları</span>
       </span>
     </button>
 
-    <button class="nav-item" data-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-title="Kredi Kartı Vade Farkı">
+    <button class="nav-item" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
       <span class="nav-text-wrap">
-        <span class="nav-title">Kredi Kartı Vade Farkı</span>
-        <span class="nav-desc">Hesaplama</span>
+        <span class="nav-title">Nakit Akış</span>
+        <span class="nav-desc">Tablosu</span>
       </span>
     </button>
 
-    <button class="nav-item" data-target="Kredi_Karti_Taksit_Maliyeti.html" data-title="Kredi Kartı Taksit Maliyeti">
+    <button class="nav-item" data-target="Odemeler.html" data-title="Ödemeler">
       <span class="nav-text-wrap">
-        <span class="nav-title">Kredi Kartı Taksit</span>
-        <span class="nav-desc">Maliyeti</span>
+        <span class="nav-title">Ödemeler</span>
       </span>
     </button>
 
@@ -589,6 +588,13 @@
     <button class="nav-item" data-target="iletisim.html" data-title="İletişim">
       <span class="nav-text-wrap">
         <span class="nav-title">İletişim</span>
+      </span>
+    </button>
+
+    <button class="nav-item" data-target="talep-oneri-sikayet.html" data-title="Talep, Öneri, Şikayet">
+      <span class="nav-text-wrap">
+        <span class="nav-title">Talep, Öneri</span>
+        <span class="nav-desc">Şikayet</span>
       </span>
     </button>
   </nav>
@@ -708,29 +714,23 @@
         <svg class="deco deco-13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3.2"/><circle cx="7" cy="9" r=".6" fill="currentColor" stroke="none"/></svg>
       </div>
       <div class="card-grid">
-        <button class="app-card" data-target="Rotatif_Kredi_Hesaplama_Platformu.html" data-title="Rotatif Kredi Hesaplama">
+        <button class="app-card" data-target="Hesaplama_Araclari.html" data-title="Hesaplama Araçları">
           <span class="card-arrow">↗</span>
-          <h3>Rotatif Kredi Hesaplama</h3>
-          <p>Bankaların 3 aylık periyotlarda uyguladığı devre sonu faizini pratik şekilde hesaplayın, bütçe planlamanızı buna göre yapın.</p>
+          <h3>Hesaplama Araçları</h3>
+          <p>Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.</p>
         </button>
 
-        <button class="app-card" data-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-title="Kredi Kartı Vade Farkı">
+        <button class="app-card" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
           <span class="card-arrow">↗</span>
-          <h3>Kredi Kartı Vade Farkı Hesaplama</h3>
-          <p>Taksitli alışverişlerde ödeyeceğiniz vade farkını önceden görün, en uygun taksit sayısına siz karar verin.</p>
-        </button>
-
-        <button class="app-card" data-target="Kredi_Karti_Taksit_Maliyeti.html" data-title="Kredi Kartı Taksit Maliyeti">
-          <span class="card-arrow">↗</span>
-          <h3>Kredi Kartı Taksit Maliyeti</h3>
-          <p>Blokaj süresine göre (ertesi gün, 3, 7, 15, 30, 45 gün) komisyon/vade farkı oranlarını görün, net tutardan yola çıkarak girmeniz gereken brüt tutarı hesaplayın.</p>
-        </button>
-
-        <div class="app-card soon">
-          <span class="soon-badge mono">YAKINDA</span>
           <h3>Nakit Akış Tablosu</h3>
-          <p>Gelir ve giderlerinizi aylık bazda takip edin, nakit akışınızın geleceğini görerek daha rahat planlama yapın.</p>
-        </div>
+          <p>Ay ay, gün gün gelir ve giderlerinizi girin; haftalık ve aylık durumunuzu, kategori dağılımınızı ve otomatik uyarılarınızı anında görün.</p>
+        </button>
+
+        <button class="app-card" data-target="Odemeler.html" data-title="Ödemeler">
+          <span class="card-arrow">↗</span>
+          <h3>Ödemeler</h3>
+          <p>Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli ödemelerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
+        </button>
       </div>
     </section>
   </div>
@@ -770,6 +770,12 @@
       homeScreen.style.display = 'block';
       frameWrap.style.display = 'none';
       setActive('home');
+      return;
+    }
+    // Mobilde iframe içi kaydırma (touch-scroll) güvenilir çalışmadığı için
+    // dar ekranlarda iframe yerine doğrudan tam sayfa geçişi yapılır.
+    if(window.innerWidth <= 860){
+      window.location.href = target;
       return;
     }
     homeScreen.style.display = 'none';
