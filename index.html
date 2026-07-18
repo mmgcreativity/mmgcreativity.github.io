@@ -149,7 +149,15 @@
 
   .top-right-badge{
     position:fixed; top:18px; right:22px; z-index:400;
+    display:flex; align-items:center; gap:10px;
   }
+  .theme-toggle-standalone{
+    display:flex; align-items:center; gap:7px;
+    font-size:14px; background:var(--surface); border:1px solid var(--hairline); border-radius:8px;
+    color:var(--muted); padding:9px 13px; cursor:pointer; transition:border-color .15s ease, color .15s ease;
+    font-family:'IBM Plex Mono',monospace; box-shadow:0 6px 16px rgba(0,0,0,0.3);
+  }
+  .theme-toggle-standalone:hover{ color:var(--brass); border-color:var(--brass-dim); }
   .account-trigger{
     display:flex; align-items:center; gap:10px; background:transparent; border:none;
     cursor:pointer; padding:0; font-family:inherit;
@@ -557,6 +565,10 @@
 </aside>
 
 <div class="top-right-badge" id="topRightBadge">
+  <button type="button" class="theme-toggle-standalone" id="themeToggle" title="Görünüm modu">
+    <span id="themeToggleIcon">☾</span><span id="themeToggleLabel">Koyu Mod</span>
+  </button>
+
   <button type="button" class="account-trigger" id="accountTrigger">
     <span class="avatar-wrap" id="avatarWrap">
       <img id="avatarImg" alt="" style="display:none;">
@@ -583,10 +595,6 @@
     <button type="button" class="account-dropdown-item" id="changePhotoBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>
       <span>Fotoğrafı / Logoyu Değiştir</span>
-    </button>
-    <button type="button" class="account-dropdown-item" id="themeToggle" title="Görünüm modu">
-      <span id="themeToggleIcon" style="width:17px; display:inline-flex; justify-content:center;">☾</span>
-      <span id="themeToggleLabel">Koyu Mod</span>
     </button>
     <button type="button" class="account-dropdown-item account-dropdown-item-danger" id="dropdownLogoutBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
@@ -890,12 +898,11 @@
     performLogout();
   });
 
-  // NOT: Varsayılan olarak giriş ekranı HER ziyarette gösteriliyor.
-  // Kullanıcı "Oturumu açık tut" kutusunu işaretlerse, bir sonraki
-  // ziyarette ekran atlanır ve doğrudan siteye geçilir.
+  // NOT: Aktif bir oturum (giriş yapılmış ya da misafir) varsa,
+  // sayfa her yenilendiğinde tekrar giriş ekranı gösterilmez.
   updateUserBadge();
   setAvatar(localStorage.getItem('mmg_avatar'));
-  if(localStorage.getItem('mmg_auth_state') && localStorage.getItem('mmg_remember') === '1'){
+  if(localStorage.getItem('mmg_auth_state')){
     closeAuthOverlay();
   }
 
