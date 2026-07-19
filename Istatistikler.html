@@ -99,6 +99,29 @@
   .state-box .big{ font-size:28px; margin-bottom:10px; }
   .state-box a{ color:var(--brass); }
   .empty-note{ text-align:center; color:var(--muted); padding:24px; font-size:13px; }
+
+  tbody tr.clickable-row{ cursor:pointer; }
+  tbody tr.clickable-row:hover{ background:rgba(198,161,91,0.06); }
+
+  .user-modal-overlay{
+    position:fixed; inset:0; background:rgba(5,8,14,0.7); display:flex; align-items:center; justify-content:center;
+    z-index:100; padding:20px;
+  }
+  .user-modal{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:28px;
+    max-width:420px; width:100%; position:relative; max-height:85vh; overflow-y:auto;
+  }
+  .user-modal-close{
+    position:absolute; top:16px; right:16px; background:var(--surface-2); border:1px solid var(--hairline);
+    color:var(--muted); border-radius:8px; width:28px; height:28px; cursor:pointer; font-size:14px;
+  }
+  .user-modal-close:hover{ color:var(--text); border-color:var(--brass-dim); }
+  .um-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; margin-bottom:4px; padding-right:30px; }
+  .um-sub{ color:var(--muted); font-size:12.5px; margin-bottom:18px; }
+  .um-row{ display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid rgba(42,52,72,0.5); font-size:13px; }
+  .um-row:last-child{ border-bottom:none; }
+  .um-row-label{ color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.04em; flex-shrink:0; }
+  .um-row-value{ text-align:right; word-break:break-word; }
 </style>
 </head>
 <body>
@@ -133,7 +156,10 @@
     <div id="userDetailWrap" class="user-detail-wrap" hidden>
       <div class="toolbar">
         <div class="user-detail-title" id="userDetailTitle">Kullanıcılar</div>
-        <button class="btn" id="closeUserDetailBtn">✕ Kapat</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn" id="refreshUsersBtn">↻ Yenile</button>
+          <button class="btn" id="closeUserDetailBtn">✕ Kapat</button>
+        </div>
       </div>
       <table>
         <thead>
@@ -189,6 +215,13 @@
     </table>
   </div>
 </main>
+
+<div class="user-modal-overlay" id="userModalOverlay" hidden>
+  <div class="user-modal">
+    <button class="user-modal-close" id="userModalClose">✕</button>
+    <div id="userModalBody"></div>
+  </div>
+</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
@@ -246,9 +279,12 @@
       allUsers.push({
         id: d.id,
         username: u.username || u.email || '(isimsiz)',
+        email: u.email || null,
         customerNumber: u.customerNumber || '—',
         isPremium: u.isPremium === true,
+        isAdmin: u.isAdmin === true,
         referredBy: u.referredBy || null,
+        premiumBenefit: u.premiumBenefit || null,
         createdAt: u.createdAt || null
       });
     });
@@ -280,7 +316,7 @@
       }catch(e){ count = 0; }
       try{
         const usersOfCode = await getDocs(collection(db, 'referrals', c.id, 'users'));
-        usersOfCode.forEach(ud => usedByUsers.push(ud.data()));
+        usersOfCode.forEach(ud => usedByUsers.push({ id: ud.id, ...ud.data() }));
       }catch(e){ usedByUsers = []; }
 
       const benefitLabel = c.benefitType === 'free'
@@ -297,7 +333,7 @@
         ? '<button class="toggle-users-btn" data-idx="' + i + '">' + r.usedByUsers.length + ' kullanıcıyı göster</button>' +
           '<div class="code-users-detail" id="codeUsers' + i + '">' +
             r.usedByUsers.map(u =>
-              '<div class="code-user-row">' + escapeHtml(u.username || u.email || '(isimsiz)') +
+              '<div class="code-user-row clickable-row" data-user-id="' + escapeHtml(u.id) + '">' + escapeHtml(u.username || u.email || '(isimsiz)') +
               ' <span style="color:var(--muted);">— ' + fmtDate(u.joinedAt) + '</span></div>'
             ).join('') +
           '</div>'
@@ -318,6 +354,12 @@
         btn.textContent = isOpen
           ? 'Gizle'
           : (detail.querySelectorAll('.code-user-row').length + ' kullanıcıyı göster');
+      });
+    });
+    tblReferralBody.querySelectorAll('.code-user-row.clickable-row').forEach(row => {
+      row.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openUserModal(row.dataset.userId);
       });
     });
   }
@@ -388,11 +430,48 @@
         ? '<span class="badge-pill premium">★ Premium</span>'
         : '<span class="badge-pill member">Standart</span>';
       const refHtml = u.referredBy ? '<span class="code-tag">' + escapeHtml(u.referredBy) + '</span>' : '<span class="comment-empty">—</span>';
-      return '<tr><td>' + escapeHtml(u.username) + '</td><td>#' + escapeHtml(String(u.customerNumber)) + '</td>' +
+      return '<tr class="clickable-row" data-user-id="' + escapeHtml(u.id) + '"><td>' + escapeHtml(u.username) + '</td><td>#' + escapeHtml(String(u.customerNumber)) + '</td>' +
         '<td>' + statusHtml + '</td><td>' + refHtml + '</td><td class="date-cell">' + fmtDate(u.createdAt) + '</td></tr>';
     }).join('') : '<tr><td colspan="5" style="text-align:center; color:var(--muted); padding:24px;">Bu kategoride kullanıcı yok.</td></tr>';
     userDetailWrap.hidden = false;
+
+    tblUserDetailBody.querySelectorAll('tr.clickable-row').forEach(row => {
+      row.addEventListener('click', () => openUserModal(row.dataset.userId));
+    });
   }
+
+  // ---------------- Kullanıcı detay modalı ----------------
+  const userModalOverlay = document.getElementById('userModalOverlay');
+  const userModalBody = document.getElementById('userModalBody');
+  const userModalClose = document.getElementById('userModalClose');
+
+  function openUserModal(userId){
+    const u = allUsers.find(x => x.id === userId);
+    if(!u) return;
+    const statusHtml = u.isPremium ? '<span class="badge-pill premium">★ Premium</span>' : '<span class="badge-pill member">Standart</span>';
+    const adminHtml = u.isAdmin ? '<span class="badge-pill admin">Admin</span>' : '';
+    let benefitText = '—';
+    if(u.premiumBenefit){
+      benefitText = u.premiumBenefit.type === 'free'
+        ? 'Ücretsiz premium (' + escapeHtml(u.premiumBenefit.code || '') + ')'
+        : '%' + (u.premiumBenefit.discountPercent || 0) + ' indirim (' + escapeHtml(u.premiumBenefit.code || '') + ')';
+    }
+    userModalBody.innerHTML =
+      '<div class="um-name">' + escapeHtml(u.username) + '</div>' +
+      '<div class="um-sub">' + statusHtml + ' ' + adminHtml + '</div>' +
+      '<div class="um-row"><span class="um-row-label">E-posta</span><span class="um-row-value">' + escapeHtml(u.email || '—') + '</span></div>' +
+      '<div class="um-row"><span class="um-row-label">Müşteri No</span><span class="um-row-value">#' + escapeHtml(String(u.customerNumber)) + '</span></div>' +
+      '<div class="um-row"><span class="um-row-label">Referans Kodu</span><span class="um-row-value">' + (u.referredBy ? escapeHtml(u.referredBy) : '—') + '</span></div>' +
+      '<div class="um-row"><span class="um-row-label">Premium Faydası</span><span class="um-row-value">' + benefitText + '</span></div>' +
+      '<div class="um-row"><span class="um-row-label">Kayıt Tarihi</span><span class="um-row-value">' + fmtDate(u.createdAt) + '</span></div>' +
+      '<div class="um-row"><span class="um-row-label">Kullanıcı UID</span><span class="um-row-value" style="font-family:\'IBM Plex Mono\',monospace; font-size:11px;">' + escapeHtml(u.id) + '</span></div>';
+    userModalOverlay.hidden = false;
+  }
+
+  userModalClose.addEventListener('click', () => { userModalOverlay.hidden = true; });
+  userModalOverlay.addEventListener('click', (e) => {
+    if(e.target.id === 'userModalOverlay') userModalOverlay.hidden = true;
+  });
 
   document.querySelectorAll('.summary-card.clickable').forEach(card => {
     card.addEventListener('click', () => {
@@ -412,6 +491,21 @@
   closeUserDetailBtn.addEventListener('click', () => {
     userDetailWrap.hidden = true;
     document.querySelectorAll('.summary-card.clickable').forEach(c => c.classList.remove('active'));
+  });
+
+  document.getElementById('refreshUsersBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('refreshUsersBtn');
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Yükleniyor…';
+    try{
+      await loadUsersAndReferrals();
+      const activeCard = document.querySelector('.summary-card.clickable.active');
+      if(activeCard) renderUserDetail(activeCard.dataset.userFilter);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   });
 
   async function loadFeedback(){
