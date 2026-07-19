@@ -22,6 +22,12 @@
 
   .summary-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:10px; }
   .summary-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:18px 20px; }
+  .summary-card.clickable{ cursor:pointer; transition:border-color .15s ease, transform .15s ease; }
+  .summary-card.clickable:hover{ border-color:var(--brass-dim); transform:translateY(-1px); }
+  .summary-card.clickable.active{ border-color:var(--brass); background:rgba(198,161,91,0.05); }
+  .tap-hint{ float:right; opacity:0.5; font-size:10px; text-transform:none; letter-spacing:0; }
+  .user-detail-wrap{ margin-bottom:10px; }
+  .user-detail-title{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px; }
   .summary-label{ font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; font-family:'IBM Plex Mono',monospace; margin-bottom:8px; }
   .summary-value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:26px; }
   .summary-value.good{ color:var(--teal); }
@@ -106,22 +112,35 @@
 
     <h2 class="section-title">👥 Kullanıcı Özeti</h2>
     <div class="summary-grid">
-      <div class="summary-card">
-        <div class="summary-label">Toplam Kullanıcı</div>
+      <div class="summary-card clickable" data-user-filter="all">
+        <div class="summary-label">Toplam Kullanıcı <span class="tap-hint">tıkla ▾</span></div>
         <div class="summary-value azure" id="statUserTotal">—</div>
       </div>
-      <div class="summary-card">
-        <div class="summary-label">Standart Üye</div>
+      <div class="summary-card clickable" data-user-filter="member">
+        <div class="summary-label">Standart Üye <span class="tap-hint">tıkla ▾</span></div>
         <div class="summary-value" id="statUserMember">—</div>
       </div>
-      <div class="summary-card">
-        <div class="summary-label">Premium Üye</div>
+      <div class="summary-card clickable" data-user-filter="premium">
+        <div class="summary-label">Premium Üye <span class="tap-hint">tıkla ▾</span></div>
         <div class="summary-value brass" id="statUserPremium">—</div>
       </div>
-      <div class="summary-card">
-        <div class="summary-label">Referansla Katılan</div>
+      <div class="summary-card clickable" data-user-filter="referred">
+        <div class="summary-label">Referansla Katılan <span class="tap-hint">tıkla ▾</span></div>
         <div class="summary-value" id="statUserReferred">—</div>
       </div>
+    </div>
+
+    <div id="userDetailWrap" class="user-detail-wrap" hidden>
+      <div class="toolbar">
+        <div class="user-detail-title" id="userDetailTitle">Kullanıcılar</div>
+        <button class="btn" id="closeUserDetailBtn">✕ Kapat</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Kullanıcı</th><th>Müşteri No</th><th>Durum</th><th>Referans</th><th>Kayıt Tarihi</th></tr>
+        </thead>
+        <tbody id="tblUserDetailBody"></tbody>
+      </table>
     </div>
 
     <h2 class="section-title">🎟️ Referans Kodu Kullanımı</h2>
@@ -216,16 +235,26 @@
   }
 
   // ---------------- Kullanıcı Özeti + Referans Kodu Kullanımı ----------------
+  let allUsers = [];
+
   async function loadUsersAndReferrals(){
     // 1) Tüm kullanıcıları çek → toplam / üye / premium / referansla katılan sayıları
     const usersSnap = await getDocs(collection(db, 'users'));
-    let total = 0, premium = 0, referred = 0;
+    allUsers = [];
     usersSnap.forEach(d => {
       const u = d.data();
-      total++;
-      if(u.isPremium === true) premium++;
-      if(u.referredBy) referred++;
+      allUsers.push({
+        id: d.id,
+        username: u.username || u.email || '(isimsiz)',
+        customerNumber: u.customerNumber || '—',
+        isPremium: u.isPremium === true,
+        referredBy: u.referredBy || null,
+        createdAt: u.createdAt || null
+      });
     });
+    const total = allUsers.length;
+    const premium = allUsers.filter(u => u.isPremium).length;
+    const referred = allUsers.filter(u => !!u.referredBy).length;
     document.getElementById('statUserTotal').textContent = total;
     document.getElementById('statUserPremium').textContent = premium;
     document.getElementById('statUserMember').textContent = total - premium;
@@ -331,6 +360,58 @@
       currentFilter = btn.dataset.filter;
       render();
     });
+  });
+
+  // ---------------- Kullanıcı Özeti kart tıklama ----------------
+  const userDetailWrap = document.getElementById('userDetailWrap');
+  const userDetailTitle = document.getElementById('userDetailTitle');
+  const tblUserDetailBody = document.getElementById('tblUserDetailBody');
+  const closeUserDetailBtn = document.getElementById('closeUserDetailBtn');
+
+  const userFilterLabels = {
+    all: 'Tüm Kullanıcılar',
+    member: 'Standart Üyeler',
+    premium: 'Premium Üyeler',
+    referred: 'Referansla Katılanlar'
+  };
+
+  function renderUserDetail(filterKey){
+    const filtered = allUsers.filter(u => {
+      if(filterKey === 'member') return !u.isPremium;
+      if(filterKey === 'premium') return u.isPremium;
+      if(filterKey === 'referred') return !!u.referredBy;
+      return true;
+    });
+    userDetailTitle.textContent = userFilterLabels[filterKey] + ' (' + filtered.length + ')';
+    tblUserDetailBody.innerHTML = filtered.length ? filtered.map(u => {
+      const statusHtml = u.isPremium
+        ? '<span class="badge-pill premium">★ Premium</span>'
+        : '<span class="badge-pill member">Standart</span>';
+      const refHtml = u.referredBy ? '<span class="code-tag">' + escapeHtml(u.referredBy) + '</span>' : '<span class="comment-empty">—</span>';
+      return '<tr><td>' + escapeHtml(u.username) + '</td><td>#' + escapeHtml(String(u.customerNumber)) + '</td>' +
+        '<td>' + statusHtml + '</td><td>' + refHtml + '</td><td class="date-cell">' + fmtDate(u.createdAt) + '</td></tr>';
+    }).join('') : '<tr><td colspan="5" style="text-align:center; color:var(--muted); padding:24px;">Bu kategoride kullanıcı yok.</td></tr>';
+    userDetailWrap.hidden = false;
+  }
+
+  document.querySelectorAll('.summary-card.clickable').forEach(card => {
+    card.addEventListener('click', () => {
+      const key = card.dataset.userFilter;
+      const alreadyActive = card.classList.contains('active');
+      document.querySelectorAll('.summary-card.clickable').forEach(c => c.classList.remove('active'));
+      if(alreadyActive){
+        userDetailWrap.hidden = true;
+        return;
+      }
+      card.classList.add('active');
+      renderUserDetail(key);
+      card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    });
+  });
+
+  closeUserDetailBtn.addEventListener('click', () => {
+    userDetailWrap.hidden = true;
+    document.querySelectorAll('.summary-card.clickable').forEach(c => c.classList.remove('active'));
   });
 
   async function loadFeedback(){
