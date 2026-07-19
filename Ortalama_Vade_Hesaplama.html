@@ -62,7 +62,7 @@
   .mono{font-family:'IBM Plex Mono',monospace;}
 
   header.masthead{
-    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
+    max-width:1180px; margin:0 auto; padding:20px 24px 14px;
     display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;
     border-bottom:1px solid var(--hairline);
   }
@@ -86,7 +86,7 @@
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
 
-  main{ max-width:1180px; margin:0 auto; padding:36px 24px; }
+  main{ max-width:1180px; margin:0 auto; padding:18px 24px 24px; }
   .section-title{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:20px; margin-bottom:20px;}
 
   .calc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:36px; }
@@ -141,21 +141,29 @@
   .result-row .val{ font-family:'IBM Plex Mono',monospace; font-weight:600; }
   .result-row.accent .val{ color:var(--brass); }
 
-  .table-section{ margin-top:8px; }
-  .table-desc{ color:var(--muted); font-size:13.5px; margin-bottom:16px; max-width:none; }
-  table.rates{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
-  table.rates th{
-    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; color:var(--muted); text-transform:uppercase;
-    text-align:center; padding:12px 14px; background:var(--surface-2); border-bottom:1px solid var(--hairline);
+  .table-section{ margin-top:0; }
+  .layout-row{ display:grid; grid-template-columns:220px 1fr; gap:20px; align-items:start; }
+  .info-col{ display:flex; flex-direction:column; gap:14px; }
+  .table-desc{ color:var(--muted); font-size:12.5px; line-height:1.4; margin:0; max-width:220px; }
+  .info-col .field{ margin-bottom:0; max-width:220px; }
+  @media (max-width:800px){
+    .layout-row{ grid-template-columns:1fr; }
+    .table-desc{ max-width:none; }
+    .info-col .field{ max-width:none; }
   }
-  table.rates td{ padding:9px 14px; border-bottom:1px solid var(--hairline); font-size:13.5px; text-align:center; }
+  table.rates{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; table-layout:fixed; }
+  table.rates th{
+    font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.04em; color:var(--muted); text-transform:uppercase;
+    text-align:center; padding:7px 8px; background:var(--surface-2); border-bottom:1px solid var(--hairline);
+  }
+  table.rates td{ padding:4.5px 8px; border-bottom:1px solid var(--hairline); font-size:12px; text-align:center; overflow:hidden; text-overflow:ellipsis; }
   table.rates td[id^="toplam-cell-"]{ font-family:'IBM Plex Mono',monospace; color:var(--brass); font-weight:600; }
   table.rates tr:last-child td{ border-bottom:none; }
   table.rates tr.selected-row{ background:rgba(198,161,91,0.08); }
   table.rates input.rate-input{
-    width:70px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px;
-    color:var(--brass); font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13.5px;
-    padding:6px 8px; text-align:center;
+    width:100%; max-width:60px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px;
+    color:var(--brass); font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:12px;
+    padding:3.5px 4px; text-align:center;
   }
   table.rates input.rate-input:focus{ outline:none; border-color:var(--brass-dim); }
   .reset-link{
@@ -196,31 +204,37 @@
 
 <main>
   <section class="table-section">
-    <p class="table-desc">Aşağıdaki gün değerleri örnek değerlerdir. Kartınızın gerçek vade günlerini biliyorsanız, tablodaki kutulara kendi değerlerinizi girip güncelleyebilirsiniz — ortalama vade otomatik olarak yeniden hesaplanır.</p>
-    <div class="field" style="max-width:280px;">
-      <label>Taksitler kaç günde bir yansıyacak</label>
-      <div class="input-wrap"><input type="text" inputmode="numeric" class="tr-num" id="qInterval" value="30" data-decimals="0"><span class="unit">gün</span></div>
+    <div class="layout-row">
+      <div class="info-col">
+        <p class="table-desc">Aşağıdaki gün değerleri örnektir. Gerçek vadeyi biliyorsanız tablodan güncelleyin, ortalama vade otomatik hesaplanır.</p>
+        <div class="field">
+          <label>Taksitler kaç günde bir yansıyacak</label>
+          <div class="input-wrap"><input type="text" inputmode="numeric" class="tr-num" id="qInterval" value="30" data-decimals="0"><span class="unit">gün</span></div>
+        </div>
+      </div>
+      <div>
+        <table class="rates" id="ratesTable">
+          <thead>
+            <tr>
+              <th>Taksit</th>
+              <th>Taksit Vade (gün)</th>
+              <th>Toplam Vade (gün)</th>
+              <th>Ortalama Vade (gün)</th>
+            </tr>
+          </thead>
+          <tbody id="ratesBody"></tbody>
+        </table>
+        <a class="reset-link" id="resetRates">↺ Varsayılan günlere sıfırla</a>
+        <div class="io-toolbar">
+          <button type="button" class="io-btn" id="exportExcelBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
+          <button type="button" class="io-btn" id="exportPdfBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
+        </div>
+        <div class="io-msg" id="memberNotice" style="color:var(--muted);">🔒 Excel/PDF aktarma özellikleri şimdilik yalnızca üye girişi yapan kullanıcılar için aktiftir.</div>
+        <div class="io-msg" id="ioMsg"></div>
+        <div class="io-msg" id="cloudMsg" style="color:var(--muted);"></div>
+        <div class="flag">⚠ Vade günleri banka, kart programı ve kampanya dönemine göre değişir. Kesin bilgiler için bankanızın güncel verilerine başvurun.</div>
+      </div>
     </div>
-    <table class="rates" id="ratesTable">
-      <thead>
-        <tr>
-          <th>Taksit</th>
-          <th>Taksit Vade (gün)</th>
-          <th>Toplam Vade (gün)</th>
-          <th>Ortalama Vade (gün)</th>
-        </tr>
-      </thead>
-      <tbody id="ratesBody"></tbody>
-    </table>
-    <a class="reset-link" id="resetRates">↺ Varsayılan günlere sıfırla</a>
-    <div class="io-toolbar">
-      <button type="button" class="io-btn" id="exportExcelBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
-      <button type="button" class="io-btn" id="exportPdfBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
-    </div>
-    <div class="io-msg" id="memberNotice" style="color:var(--muted);">🔒 Excel/PDF aktarma özellikleri şimdilik yalnızca üye girişi yapan kullanıcılar için aktiftir.</div>
-    <div class="io-msg" id="ioMsg"></div>
-    <div class="io-msg" id="cloudMsg" style="color:var(--muted);"></div>
-    <div class="flag">⚠ Vade günleri banka, kart programı ve kampanya dönemine göre değişir. Kesin bilgiler için bankanızın güncel verilerine başvurun.</div>
   </section>
 </main>
 
