@@ -249,7 +249,11 @@
     background:var(--surface); border:1px solid var(--hairline); border-radius:16px;
     padding:28px; box-shadow:0 24px 60px rgba(0,0,0,0.5);
   }
-  .account-info-modal-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .account-info-modal-header{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;
+    position:sticky; top:-28px; background:var(--surface); padding:28px 0 10px; margin:-28px 0 0;
+    z-index:2;
+  }
   .account-info-modal-header h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; }
   .account-info-close{
     background:transparent; border:1px solid var(--hairline); border-radius:7px; color:var(--muted);
