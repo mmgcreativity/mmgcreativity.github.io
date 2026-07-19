@@ -113,6 +113,9 @@ function mmgApplyTurkishFont(doc){
     --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
   }
   *{box-sizing:border-box; margin:0; padding:0;}
+  @media (max-width: 700px){
+    .io-two-col{ grid-template-columns:1fr !important; }
+  }
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.06), transparent 60%),
@@ -299,7 +302,7 @@ function mmgApplyTurkishFont(doc){
   }
   .doc-preview .doc-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; }
   .doc-preview .doc-logo{ height:44px; max-width:160px; object-fit:contain; }
-  .doc-preview .doc-date{ font-size:12.5px; color:#555; margin-left:auto; }
+  .doc-preview .doc-date{ font-size:12.5px; color:#555; margin-left:auto; font-weight:700; }
   .doc-preview .doc-addressee{ font-weight:700; margin-bottom:22px; font-size:13.5px; text-align:center; }
   .doc-preview .doc-body{ margin-bottom:24px; color:#222; text-indent:32px; text-align:justify; line-height:1.5; }
   .doc-preview table{ width:100%; border-collapse:collapse; margin-bottom:20px; border:1px solid #222; }
@@ -417,7 +420,7 @@ function mmgApplyTurkishFont(doc){
             <option value="serbest">Serbest Metin</option>
           </select>
         </div>
-        <div class="xrow" style="grid-template-columns:78px auto; display:none; flex:0 0 auto; border-top:none !important; margin-top:0;" id="paraBirimiSlotHavale">
+        <div class="xrow" style="grid-template-columns:78px auto; display:none; flex:0 0 auto; border-top:none !important; margin-top:0; margin-left:auto;" id="paraBirimiSlotHavale">
           <label>Para Birimi</label>
           <select id="paraBirimiSelect" style="width:75px;">
             <option value="TL">TL</option>
@@ -522,31 +525,35 @@ function mmgApplyTurkishFont(doc){
         </div>
         <div class="io-msg" id="ioMsg"></div>
 
-        <div style="display:grid; grid-template-columns:1fr; gap:16px; align-items:start; margin-top:16px;">
+        <div class="io-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; margin-top:16px;">
         <div class="form-card" style="margin-top:0; margin-bottom:0;">
-          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:6px;">
+          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
             <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Firma Logonuz</span>
-            <div id="logoPreviewWrap" style="width:132px; height:132px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
-              <img id="companyLogoPreview" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
-              <span id="companyLogoPlaceholder" style="font-size:13px; color:var(--muted); text-align:center; padding:6px; line-height:1.3;">Görüntü Yok</span>
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
+              <div id="logoPreviewWrap" style="width:76px; height:38px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
+                <img id="companyLogoPreview" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
+                <span id="companyLogoPlaceholder" style="font-size:9.5px; color:var(--muted); text-align:center; padding:2px; line-height:1.15;">Görüntü Yok</span>
+              </div>
+              <button type="button" class="io-btn" id="uploadLogoBtn" style="flex-shrink:0; height:38px; box-sizing:border-box;">⬆ Yükle</button>
+              <button type="button" class="io-btn" id="removeLogoBtn" style="display:none; flex-shrink:0; height:38px; box-sizing:border-box; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
+              <input type="file" id="companyLogoInput" accept="image/*" style="display:none;">
             </div>
-            <button type="button" class="io-btn" id="uploadLogoBtn" style="flex-shrink:0;">⬆ Yükle</button>
-            <button type="button" class="io-btn" id="removeLogoBtn" style="display:none; flex-shrink:0; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
-            <input type="file" id="companyLogoInput" accept="image/*" style="display:none;">
           </div>
           <p style="font-size:11.5px; color:var(--muted);">Yüklediğiniz logo, hesabınıza kaydedilir ve hazırladığınız tüm talimat belgelerinin üst kısmında otomatik olarak görünür.</p>
         </div>
 
         <div class="form-card" style="margin-top:0; margin-bottom:0;">
-          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:6px;">
+          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
             <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Kaşe / İmza</span>
-            <div id="stampPreviewWrap" style="width:132px; height:132px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
-              <img id="stampPreview" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
-              <span id="stampPlaceholder" style="font-size:13px; color:var(--muted); text-align:center; padding:6px; line-height:1.3;">Görüntü Yok</span>
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
+              <div id="stampPreviewWrap" style="width:76px; height:38px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
+                <img id="stampPreview" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
+                <span id="stampPlaceholder" style="font-size:9.5px; color:var(--muted); text-align:center; padding:2px; line-height:1.15;">Görüntü Yok</span>
+              </div>
+              <button type="button" class="io-btn" id="uploadStampBtn" style="flex-shrink:0; height:38px; box-sizing:border-box;">⬆ Yükle</button>
+              <button type="button" class="io-btn" id="removeStampBtn" style="display:none; flex-shrink:0; height:38px; box-sizing:border-box; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
+              <input type="file" id="stampInput" accept="image/*" style="display:none;">
             </div>
-            <button type="button" class="io-btn" id="uploadStampBtn" style="flex-shrink:0;">⬆ Yükle</button>
-            <button type="button" class="io-btn" id="removeStampBtn" style="display:none; flex-shrink:0; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
-            <input type="file" id="stampInput" accept="image/*" style="display:none;">
           </div>
           <p style="font-size:11.5px; color:var(--muted);">Yüklediğiniz kaşe/imza görseli hesabınıza kaydedilir ve hazırladığınız talimat belgelerinde "Kaşe / İmza" alanında otomatik olarak görünür.</p>
         </div>
@@ -1678,7 +1685,9 @@ function mmgApplyTurkishFont(doc){
     }
     doc.setFontSize(mmgFS(11.5));
     doc.setTextColor(90,90,90);
+    doc.setFont(mmgFontFamilyName(), 'bold');
     doc.text(tarih.toLocaleDateString('tr-TR'), pageWidth - 14, 50, { align: 'right' });
+    doc.setFont(mmgFontFamilyName(), 'normal');
 
     doc.setFontSize(mmgFS(14.5));
     doc.setTextColor(20,20,20);
@@ -1917,7 +1926,7 @@ function mmgApplyTurkishFont(doc){
         { id:'glTur', label:'Mektup Türü', type:'select', options:['Kesin','Süresiz','Geçici'] },
         { id:'glSube', label:'Teslim Alınacak Şube', type:'text' }
       ],
-      body: v => (v.glFirma || 'Firmamız') + ' Firmamız adına aşağıdaki bilgilere istinaden teminat mektubu talep edilmektedir.',
+      body: v => (v.glFirma || 'Firmamız') + ' adına aşağıdaki bilgilere istinaden teminat mektubu talep edilmektedir.',
       infoRows: v => [['Firma', v.glFirma||'—'],['Muhatap', v.glMuhatap||'—'],['Tutar', fmtTR(v.glTutar,2)+' TL'],['Konu', v.glKonu||'—'],['Tür', v.glTur||'—'],['Teslim Alınacak Şube', v.glSube||'—']],
       fileName: 'teminat-mektubu-talep-talimati.pdf',
       shareTitle: 'Teminat Mektubu Talep Talimatı'
@@ -2195,7 +2204,9 @@ function mmgApplyTurkishFont(doc){
     }
     doc.setFontSize(mmgFS(11.5));
     doc.setTextColor(90,90,90);
+    doc.setFont(mmgFontFamilyName(), 'bold');
     doc.text(tarih.toLocaleDateString('tr-TR'), pageWidth - 14, 50, { align: 'right' });
+    doc.setFont(mmgFontFamilyName(), 'normal');
 
     doc.setFontSize(mmgFS(14.5));
     doc.setTextColor(20,20,20);
@@ -2213,8 +2224,8 @@ function mmgApplyTurkishFont(doc){
     doc.autoTable({
       startY: tableStartY,
       body: cfg.infoRows(v),
-      styles: { fontSize: mmgFS(12), font: mmgFontFamilyName(), cellPadding: 3 },
-      theme: 'plain',
+      styles: { fontSize: mmgFS(12), font: mmgFontFamilyName(), cellPadding: 3, lineColor: [0,0,0], lineWidth: 0.2, textColor: [20,20,20] },
+      theme: 'grid',
       columnStyles: { 0: { fontStyle: 'bold', cellWidth: 65 } }
     });
 
@@ -2401,7 +2412,9 @@ function mmgApplyTurkishFont(doc){
 
     doc.setFontSize(mmgFS(10));
     doc.setTextColor(90,90,90);
+    doc.setFont(mmgFontFamilyName(), 'bold');
     doc.text(tarih.toLocaleDateString('tr-TR'), pageWidth - 14, 50, { align: 'right' });
+    doc.setFont(mmgFontFamilyName(), 'normal');
 
     doc.setFontSize(mmgFS(12));
     doc.setTextColor(20,20,20);
@@ -2966,6 +2979,14 @@ function mmgApplyTurkishFont(doc){
   const commentBox = document.getElementById('mmgRateComment');
   const submitBtn = document.getElementById('mmgRateSubmitBtn');
 
+  // Beğen butonu: günde bir kez gösterilir, tıklanınca (etkileşim alınca) o gün için kaybolur.
+  const MMG_RATE_TODAY = new Date().toISOString().slice(0,10);
+  try{
+    if(localStorage.getItem('mmg_rate_btn_interacted_date') === MMG_RATE_TODAY){
+      btn.style.display = 'none';
+    }
+  }catch(e){}
+
   let likedValue = null; // 1 = beğendi, 0 = beğenmedi, null = henüz seçilmedi
 
   function selectThumb(val){
@@ -3019,7 +3040,11 @@ function mmgApplyTurkishFont(doc){
   }
 
   submitBtn.addEventListener('click', submitFeedback);
-  btn.addEventListener('click', openOverlay);
+  btn.addEventListener('click', () => {
+    openOverlay();
+    try{ localStorage.setItem('mmg_rate_btn_interacted_date', MMG_RATE_TODAY); }catch(e){}
+    btn.style.display = 'none';
+  });
   closeBtn.addEventListener('click', closeOverlay);
   skipBtn.addEventListener('click', closeOverlay);
   overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });

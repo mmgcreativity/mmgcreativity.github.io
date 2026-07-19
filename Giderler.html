@@ -1113,6 +1113,14 @@
   const commentBox = document.getElementById('mmgRateComment');
   const submitBtn = document.getElementById('mmgRateSubmitBtn');
 
+  // Beğen butonu: günde bir kez gösterilir, tıklanınca (etkileşim alınca) o gün için kaybolur.
+  const MMG_RATE_TODAY = new Date().toISOString().slice(0,10);
+  try{
+    if(localStorage.getItem('mmg_rate_btn_interacted_date') === MMG_RATE_TODAY){
+      btn.style.display = 'none';
+    }
+  }catch(e){}
+
   let likedValue = null; // 1 = beğendi, 0 = beğenmedi, null = henüz seçilmedi
 
   function selectThumb(val){
@@ -1166,7 +1174,11 @@
   }
 
   submitBtn.addEventListener('click', submitFeedback);
-  btn.addEventListener('click', openOverlay);
+  btn.addEventListener('click', () => {
+    openOverlay();
+    try{ localStorage.setItem('mmg_rate_btn_interacted_date', MMG_RATE_TODAY); }catch(e){}
+    btn.style.display = 'none';
+  });
   closeBtn.addEventListener('click', closeOverlay);
   skipBtn.addEventListener('click', closeOverlay);
   overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });

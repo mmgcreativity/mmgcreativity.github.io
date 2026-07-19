@@ -3,13 +3,17 @@
 <head>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-WVWJ4VZE0C"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BFZXS7R9BN"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-WVWJ4VZE0C');
+  gtag('config', 'G-BFZXS7R9BN');
 </script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,8 +60,7 @@
     display:flex; flex-direction:column; overflow-y:auto;
   }
   .brand{
-    padding:36px 24px 36px; border-bottom:1px solid var(--hairline); position:relative; overflow:hidden;
-    min-height:96px; display:flex; align-items:center; justify-content:center;
+    padding:22px 24px 20px; border-bottom:1px solid var(--hairline); position:relative; overflow:hidden;
   }
   .brand::before{
     content:''; position:absolute; top:-40px; left:-20px; width:160px; height:160px;
@@ -65,13 +68,13 @@
     pointer-events:none;
   }
   .brand-row{
-    display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:0; position:relative; width:100%;
+    display:block; margin-bottom:0; position:relative; text-align:center;
   }
-  .brand-row-logo{ height:140px; width:140px; border-radius:26px; object-fit:cover; display:inline-block; filter:drop-shadow(0 4px 14px rgba(0,0,0,0.35)); }
+  .brand-row-logo{ height:264px; width:auto; max-width:100%; display:inline-block; object-fit:contain; filter:drop-shadow(0 4px 14px rgba(0,0,0,0.35)); }
   .brand-row-fallback{
-    display:none; width:140px; height:140px; border-radius:26px; margin:0;
+    display:none; width:216px; height:216px; border-radius:32px; margin:0 auto;
     background:var(--grad); align-items:center; justify-content:center;
-    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:50px; color:#fff;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:48px; color:#fff;
     box-shadow:0 4px 14px rgba(0,0,0,0.35);
   }
   .brand-title{
@@ -83,7 +86,7 @@
     text-align:center; position:relative;
   }
 
-  nav{ padding:18px 12px 84px; flex:1; }
+  nav{ padding:18px 12px; flex:1; }
   .nav-label{
     font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.16em;
     color:var(--muted); text-transform:uppercase; padding:8px 12px 10px;
@@ -118,15 +121,19 @@
   .nav-text-wrap{ display:flex; flex-direction:row; align-items:baseline; gap:5px; min-width:0; flex-wrap:nowrap; overflow:hidden; }
   .nav-title{ font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:0; }
   .nav-desc{ font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
-  .nav-drawer-chevron{ margin-left:auto; font-size:11px; color:var(--muted); transition:transform .18s ease; flex-shrink:0; }
-  .nav-item[aria-expanded="true"] .nav-drawer-chevron{ transform:rotate(180deg); color:var(--brass); }
-  .nav-drawer{
-    display:flex; flex-direction:column; gap:2px; margin:2px 0 8px 20px; padding-left:10px;
-    border-left:2px solid var(--hairline);
+
+  .sidebar-foot{
+    padding:16px 24px 20px; border-top:1px solid var(--hairline);
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--muted);
+    display:flex; justify-content:space-between; align-items:center;
   }
-  .nav-drawer[hidden]{ display:none; }
-  .nav-subitem{ padding:9px 14px; margin-bottom:0; }
-  .nav-subitem .nav-title{ font-size:12.5px; font-weight:600; }
+  .clock-dot{ width:6px; height:6px; border-radius:50%; background:var(--teal); display:inline-block; margin-right:6px; box-shadow:0 0 6px var(--teal); }
+  .sidebar-logout{
+    display:block; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px;
+    color:var(--muted); text-decoration:none; border:1px solid var(--hairline); padding:8px 12px;
+    border-radius:6px; transition:border-color .15s ease, color .15s ease;
+  }
+  .sidebar-logout:hover{ color:var(--coral); border-color:var(--coral); }
 
   /* ---------- Main ---------- */
   main{ flex:1; height:100vh; display:flex; flex-direction:column; min-width:0; }
@@ -143,101 +150,15 @@
   }
   .topbar-actions a:hover{ color:var(--coral); border-color:var(--coral); }
   .theme-toggle{
-    display:flex; align-items:center; gap:7px;
     font-size:14px; background:transparent; border:1px solid var(--hairline); border-radius:6px;
     color:var(--muted); padding:6px 10px; cursor:pointer; transition:border-color .15s ease, color .15s ease;
-    font-family:'IBM Plex Mono',monospace;
   }
   .theme-toggle:hover{ color:var(--brass); border-color:var(--brass-dim); }
-  .theme-toggle-label{ font-size:11px; }
   .user-badge{
     display:flex; align-items:center; gap:7px; font-family:'IBM Plex Mono',monospace; font-size:11px;
     color:var(--text); padding:6px 12px; border:1px solid var(--hairline); border-radius:6px; background:var(--surface-2);
   }
   .user-badge-dot{ width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 6px var(--teal); flex-shrink:0; }
-
-  .top-right-badge{
-    position:fixed; bottom:18px; left:22px; z-index:400;
-    display:flex; align-items:center; gap:10px;
-  }
-  .theme-toggle-standalone{
-    display:flex; align-items:center; gap:7px;
-    font-size:11px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px;
-    color:var(--text); padding:6px 12px; cursor:pointer; transition:border-color .15s ease, color .15s ease;
-    font-family:'IBM Plex Mono',monospace; box-shadow:0 6px 16px rgba(0,0,0,0.3);
-  }
-  .theme-toggle-standalone #themeToggleIcon{ font-size:13px; }
-  .theme-toggle-standalone:hover{ color:var(--brass); border-color:var(--brass-dim); }
-  .account-trigger{
-    display:flex; align-items:center; gap:10px; background:transparent; border:none;
-    cursor:pointer; padding:0; font-family:inherit;
-  }
-  .top-right-badge .user-badge{
-    box-shadow:0 6px 16px rgba(0,0,0,0.3);
-  }
-  .avatar-wrap{
-    width:38px; height:38px; border-radius:50%; overflow:hidden;
-    border:1px solid var(--hairline); background:var(--surface-2); flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 6px 16px rgba(0,0,0,0.3); transition:border-color .15s ease;
-  }
-  .account-trigger:hover .avatar-wrap{ border-color:var(--brass-dim); }
-  .avatar-wrap img{ width:100%; height:100%; object-fit:cover; }
-  .avatar-wrap svg{ width:20px; height:20px; color:var(--muted); }
-  .avatar-wrap-lg{ width:52px; height:52px; }
-  .avatar-wrap-lg svg{ width:26px; height:26px; }
-
-  .account-dropdown{
-    position:absolute; bottom:calc(100% + 12px); top:auto; left:0; right:auto; width:250px;
-    background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
-    box-shadow:0 16px 40px rgba(0,0,0,0.45); padding:16px; z-index:401;
-  }
-  .account-dropdown[hidden]{ display:none; }
-  .account-dropdown-header{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
-  .account-dropdown-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--text); }
-  .account-dropdown-sub{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); margin-top:3px; }
-  .account-dropdown-divider{ height:1px; background:var(--hairline); margin:0 -16px 8px; }
-  .account-dropdown-item{
-    display:flex; align-items:center; gap:10px; width:100%; text-align:left;
-    background:transparent; border:none; border-radius:9px; padding:10px 8px; cursor:pointer;
-    font-family:'Inter',sans-serif; font-size:13px; font-weight:600; color:var(--text);
-    transition:background .15s ease;
-  }
-  .account-dropdown-item:hover{ background:var(--surface-2); }
-  .account-dropdown-item svg{ width:17px; height:17px; color:var(--brass); flex-shrink:0; }
-  .account-dropdown-item-danger:hover{ background:rgba(226,84,75,0.10); }
-  .account-dropdown-item-danger svg{ color:var(--red); }
-  .account-dropdown-item-danger span{ color:var(--red); }
-
-  .account-info-overlay{
-    position:fixed; inset:0; z-index:900; background:rgba(5,8,14,0.7);
-    display:flex; align-items:center; justify-content:center; padding:24px;
-  }
-  .account-info-overlay[hidden]{ display:none; }
-  .account-info-modal{
-    width:100%; max-width:440px; max-height:88vh; overflow-y:auto;
-    background:var(--surface); border:1px solid var(--hairline); border-radius:16px;
-    padding:28px; box-shadow:0 24px 60px rgba(0,0,0,0.5);
-  }
-  .account-info-modal-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
-  .account-info-modal-header h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; }
-  .account-info-close{
-    background:transparent; border:1px solid var(--hairline); border-radius:7px; color:var(--muted);
-    width:30px; height:30px; cursor:pointer; font-size:14px; transition:color .15s ease, border-color .15s ease;
-  }
-  .account-info-close:hover{ color:var(--coral); border-color:var(--coral); }
-  .account-info-sub{ color:var(--muted); font-size:13px; margin-bottom:22px; }
-  #accountInfoForm select, #accountInfoForm textarea{
-    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
-    padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
-    transition:border-color .15s ease; resize:vertical;
-  }
-  #accountInfoForm select:focus, #accountInfoForm textarea:focus{ border-color:var(--brass-dim); }
-  .account-info-saved{
-    display:none; text-align:center; color:var(--teal); font-family:'IBM Plex Mono',monospace;
-    font-size:12px; margin-top:10px;
-  }
-  .account-info-saved.show{ display:block; }
 
   .frame-wrap{ flex:1; position:relative; background:var(--bg); }
   iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
@@ -273,6 +194,13 @@
     background:rgba(255,107,74,0.10); border:1px solid rgba(255,107,74,0.25);
     padding:5px 12px; border-radius:999px; margin-bottom:20px; position:relative;
   }
+  .hero-logo-row{ display:flex; align-items:center; gap:16px; margin-bottom:14px; position:relative; }
+  .hero-logo{ height:56px; width:56px; border-radius:14px; object-fit:cover; box-shadow:0 6px 18px rgba(0,0,0,0.35); }
+  .hero-logo-fallback{
+    display:none; height:56px; width:56px; border-radius:14px; align-items:center; justify-content:center;
+    background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; color:#fff; font-size:24px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.35);
+  }
   .hero-title{
     font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:30px;
     letter-spacing:-0.02em; margin-bottom:8px; position:relative; max-width:640px;
@@ -291,7 +219,7 @@
     font-size:10.5px; letter-spacing:.16em; color:var(--muted); text-transform:uppercase; margin-bottom:16px;
   }
 
-  .card-grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:18px; max-width:980px; position:relative; }
+  .card-grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; max-width:980px; position:relative; }
   .app-card{
     background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
     padding:24px; cursor:pointer; text-align:left; color:var(--text);
@@ -331,33 +259,6 @@
   ::-webkit-scrollbar-thumb{ background:var(--hairline); border-radius:4px; }
 
   footer{ padding:0 48px 32px; }
-  .footer-top{
-    display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:36px 0 28px;
-    border-bottom:1px solid var(--hairline); margin-bottom:20px;
-  }
-  @media (max-width:720px){ .footer-top{ grid-template-columns:1fr; gap:28px; } }
-  .footer-col-title{
-    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; letter-spacing:.08em;
-    text-transform:uppercase; color:var(--text); margin-bottom:16px;
-  }
-  .social-icon-row{ display:flex; flex-wrap:wrap; gap:10px; }
-  .social-icon{
-    width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    color:#fff; transition:transform .15s ease, opacity .15s ease; flex-shrink:0;
-  }
-  .social-icon:hover{ transform:translateY(-2px); opacity:.9; }
-  .social-icon svg{ width:18px; height:18px; }
-  .app-badge-row{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
-  .app-badge{
-    display:flex; align-items:center; gap:8px; border:1px solid var(--hairline); border-radius:9px;
-    padding:8px 14px; text-decoration:none; color:var(--text); transition:border-color .15s ease;
-  }
-  .app-badge:hover{ border-color:var(--brass-dim); }
-  .app-badge svg{ width:20px; height:20px; flex-shrink:0; }
-  .app-badge-text{ display:flex; flex-direction:column; line-height:1.2; }
-  .app-badge-text span{ font-size:9.5px; color:var(--muted); }
-  .app-badge-text b{ font-family:'Space Grotesk',sans-serif; font-size:13px; }
-  .footer-desc{ font-size:12.5px; color:var(--muted); max-width:420px; line-height:1.6; }
   .legal-links{
     display:flex; flex-wrap:wrap; gap:18px; justify-content:flex-end;
     font-family:'IBM Plex Mono',monospace; font-size:11px; margin-bottom:10px;
@@ -387,6 +288,7 @@
     .nav-item{ flex-direction:column; text-align:center; min-width:120px; gap:6px; margin-bottom:0; }
     .nav-item.active::before{ left:8px; right:8px; top:auto; bottom:-8px; width:auto; height:3px; }
     .nav-desc{ display:none; }
+    .sidebar-foot{ display:none; }
     main{ height:auto; }
     .frame-wrap{ height:85vh; }
     .hero{ padding:22px 20px 20px; }
@@ -435,10 +337,10 @@
   .auth-di-5{ width:30px; height:30px; top:48%; right:8%; color:var(--coral); --r:14deg; animation-delay:-4.5s; animation-duration:9s; }
   .auth-di-6{ width:34px; height:34px; top:65%; left:22%; color:var(--azure); --r:-10deg; animation-delay:-1s; animation-duration:7.5s; }
 
-  .auth-brand-logo{ position:relative; height:136px; width:136px; border-radius:32px; object-fit:cover; margin-bottom:22px; box-shadow:0 20px 50px rgba(0,0,0,0.4); }
+  .auth-brand-logo{ position:relative; height:96px; width:96px; border-radius:26px; object-fit:cover; margin-bottom:22px; box-shadow:0 20px 50px rgba(0,0,0,0.4); }
   .auth-brand-fallback{
-    display:none; position:relative; height:136px; width:136px; border-radius:32px; align-items:center; justify-content:center;
-    background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; color:#fff; font-size:56px;
+    display:none; position:relative; height:96px; width:96px; border-radius:26px; align-items:center; justify-content:center;
+    background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; color:#fff; font-size:40px;
     margin-bottom:22px; box-shadow:0 20px 50px rgba(0,0,0,0.4);
   }
   .auth-brand-title{
@@ -495,13 +397,9 @@
   }
   .auth-guest:hover{ border-color:var(--brass-dim); background:var(--surface-2); }
   .auth-google{
-    width:100%; padding:12px; border-radius:9px; cursor:pointer; text-align:center;
-    background:var(--surface-2); border:1px solid var(--hairline); color:var(--text); font-family:'Inter',sans-serif;
-    font-size:13.5px; font-weight:600; transition:border-color .15s ease, background .15s ease;
-    display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px;
+    display:flex; align-items:center; justify-content:center; gap:10px;
   }
-  .auth-google:hover{ border-color:var(--brass-dim); }
-  .auth-google:disabled{ opacity:0.6; cursor:default; }
+  .auth-google svg{ width:18px; height:18px; flex-shrink:0; }
 
   @media (max-width:820px){
     #authOverlay{ flex-direction:column; overflow-y:auto; }
@@ -529,7 +427,7 @@
 
     <img class="auth-brand-logo" src="logo.png" alt="mmgcreativity" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
     <div class="auth-brand-fallback">M</div>
-    <div class="auth-brand-title">Dijital Finans Asistanı</div>
+    <div class="auth-brand-title">Dijital Finans Asistanınız</div>
     <div class="auth-brand-tagline">Finansal kararlarınızın dijital iş ortağı</div>
     <div class="auth-brand-desc">Hesabınıza giriş yapın, kendi banka oranlarınızı kaydedin ve her ziyaretinizde kaldığınız yerden devam edin.</div>
   </div>
@@ -547,10 +445,6 @@
       <div class="auth-error" id="authError"></div>
 
       <form id="authForm">
-        <div class="auth-field" id="authUsernameWrap" style="display:none;">
-          <label>Kullanıcı Adı</label>
-          <input type="text" id="authUsername" placeholder="ör. mutlu.guler">
-        </div>
         <div class="auth-field">
           <label>E-posta</label>
           <input type="email" id="authEmail" placeholder="ornek@eposta.com" required>
@@ -563,10 +457,6 @@
           <label>Şifre (Tekrar)</label>
           <input type="password" id="authPasswordConfirm" placeholder="••••••••">
         </div>
-        <div class="auth-field" id="authReferralWrap" style="display:none;">
-          <label>Referans Kodu <span style="color:var(--muted); font-weight:400;">(varsa, opsiyonel)</span></label>
-          <input type="text" id="authReferralCode" placeholder="ör. AHMET10">
-        </div>
         <label class="auth-remember">
           <input type="checkbox" id="rememberMe">
           <span>Oturumu açık tut</span>
@@ -575,8 +465,9 @@
       </form>
 
       <div class="auth-divider">veya</div>
-      <button type="button" class="auth-google" id="googleBtn">
-        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6 29.6 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4C29.6 35.4 26.9 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.6 5.1C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.7l6.6 5.4C41.5 36.2 44 30.6 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+
+      <button type="button" class="auth-guest auth-google" id="googleBtn" style="margin-bottom:10px;">
+        <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6 29.6 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4C29.6 35.4 26.9 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.6 5.1C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.8l6.6 5.4C41.4 36 44 30.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
         <span>Google ile devam et</span>
       </button>
       <button type="button" class="auth-guest" id="guestBtn">Misafir olarak gir</button>
@@ -597,51 +488,28 @@
     <button class="nav-item" data-target="home" data-title="Ana Sayfa">
       <span class="nav-text-wrap">
         <span class="nav-title">Ana Sayfa</span>
+        <span class="nav-desc">Genel bakış</span>
       </span>
     </button>
 
-    <button class="nav-item" id="hesaplamaAraclariToggle" data-drawer-toggle="true" data-title="Hesaplama Araçları" aria-expanded="false">
+    <button class="nav-item" data-target="Rotatif_Kredi_Hesaplama_Platformu.html" data-title="Rotatif Kredi Hesaplama">
       <span class="nav-text-wrap">
-        <span class="nav-title">Hesaplama</span>
-        <span class="nav-desc">Araçları</span>
-      </span>
-      <span class="nav-drawer-chevron" id="hesaplamaChevron">▾</span>
-    </button>
-    <div class="nav-drawer" id="hesaplamaDrawer" hidden>
-      <button class="nav-item nav-subitem" data-target="Ortalama_Vade_Hesaplama.html" data-title="Ortalama Vade Hesaplama">
-        <span class="nav-text-wrap"><span class="nav-title">Ortalama Vade Hesaplama</span></span>
-      </button>
-      <button class="nav-item nav-subitem" data-target="Rotatif_Kredi_Hesaplama_Platformu.html" data-title="Rotatif Kredi Hesaplama">
-        <span class="nav-text-wrap"><span class="nav-title">Rotatif Kredi Hesaplama</span></span>
-      </button>
-      <button class="nav-item nav-subitem" data-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-title="Kredi Kartı Vade Farkı Hesaplama">
-        <span class="nav-text-wrap"><span class="nav-title">Kredi Kartı Vade Farkı</span></span>
-      </button>
-    </div>
-
-    <button class="nav-item" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
-      <span class="nav-text-wrap">
-        <span class="nav-title">Nakit Akış</span>
-        <span class="nav-desc">Tablosu</span>
+        <span class="nav-title">Rotatif Kredi</span>
+        <span class="nav-desc">Hesaplama Platformu</span>
       </span>
     </button>
 
-    <button class="nav-item" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
+    <button class="nav-item" data-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-title="Kredi Kartı Vade Farkı">
       <span class="nav-text-wrap">
-        <span class="nav-title">Talimat</span>
-        <span class="nav-desc">Hazırlama</span>
+        <span class="nav-title">Kredi Kartı Vade Farkı</span>
+        <span class="nav-desc">Hesaplama</span>
       </span>
     </button>
 
-    <button class="nav-item" data-target="Giderler.html" data-title="Giderler">
+    <button class="nav-item" data-target="Kredi_Karti_Taksit_Maliyeti.html" data-title="Kredi Kartı Taksit Maliyeti">
       <span class="nav-text-wrap">
-        <span class="nav-title">Giderler</span>
-      </span>
-    </button>
-
-    <button class="nav-item" data-target="Gelirler.html" data-title="Gelirler">
-      <span class="nav-text-wrap">
-        <span class="nav-title">Gelirler</span>
+        <span class="nav-title">Kredi Kartı Taksit</span>
+        <span class="nav-desc">Maliyeti</span>
       </span>
     </button>
 
@@ -656,129 +524,25 @@
         <span class="nav-title">İletişim</span>
       </span>
     </button>
-  </nav>
-</aside>
 
-<div class="top-right-badge" id="topRightBadge">
-  <button type="button" class="account-trigger" id="accountTrigger">
-    <span class="avatar-wrap" id="avatarWrap">
-      <img id="avatarImg" alt="" style="display:none;">
-      <svg id="avatarDefaultIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg>
-    </span>
-    <span class="user-badge" id="userBadge" style="display:none;">
-      <span class="user-badge-dot"></span>
-      <span id="userBadgeName">Misafir</span>
-    </span>
-  </button>
-
-  <button type="button" class="theme-toggle-standalone" id="themeToggle" title="Görünüm modu">
-    <span id="themeToggleIcon">☾</span><span id="themeToggleLabel">Koyu Mod</span>
-  </button>
-
-  <div class="account-dropdown" id="accountDropdown" hidden>
-    <div class="account-dropdown-header">
-      <span class="avatar-wrap avatar-wrap-lg">
-        <img id="avatarImgLg" alt="" style="display:none;">
-        <svg id="avatarDefaultIconLg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg>
+    <button class="nav-item" data-target="admin.html" data-title="Admin Paneli" id="adminNavItem" style="display:none;">
+      <span class="nav-text-wrap">
+        <span class="nav-title">🔐 Admin Paneli</span>
       </span>
-      <div class="account-dropdown-info">
-        <div class="account-dropdown-name" id="accountDropdownName">Misafir</div>
-        <div class="account-dropdown-sub" id="accountDropdownSub"></div>
-      </div>
+    </button>
+  </nav>
+
+  <div class="sidebar-foot" style="flex-direction:column; align-items:stretch; gap:10px; border-top:1px solid var(--hairline);">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <span class="user-badge" id="userBadge" style="display:none;">
+        <span class="user-badge-dot"></span>
+        <span id="userBadgeName">Misafir</span>
+      </span>
+      <button type="button" class="theme-toggle" id="themeToggle" title="Görünüm modu">☾</button>
     </div>
-    <div class="account-dropdown-divider"></div>
-    <button type="button" class="account-dropdown-item" id="accountInfoBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M6 16c0-1.8 1.5-3 3-3s3 1.2 3 3"/><path d="M14 9h4"/><path d="M14 13h4"/></svg>
-      <span>Hesabım</span>
-    </button>
-    <button type="button" class="account-dropdown-item" id="changePhotoBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>
-      <span>Fotoğrafı / Logoyu Değiştir</span>
-    </button>
-    <button type="button" class="account-dropdown-item" id="adminPanelBtn" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z"/></svg>
-      <span>Referans Kodu Yönetimi</span>
-    </button>
-    <button type="button" class="account-dropdown-item account-dropdown-item-danger" id="dropdownLogoutBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-      <span>Oturumu Kapat</span>
-    </button>
+    <a id="logoutBtn" href="#" class="sidebar-logout">Oturumu Kapat</a>
   </div>
-
-  <input type="file" id="avatarInput" accept="image/*" style="display:none;">
-</div>
-
-<div class="account-info-overlay" id="mmgAdminOverlay" hidden>
-  <div class="account-info-modal" style="max-width:520px;">
-    <div class="account-info-modal-header">
-      <h2>Referans Kodu Yönetimi</h2>
-      <button type="button" class="account-info-close" id="mmgAdminClose" title="Kapat">✕</button>
-    </div>
-    <p class="account-info-sub">Yeni bir referans kodu tanımlayın: bu kodla kayıt olan üyelere ücretsiz ya da indirimli premium tanınır.</p>
-
-    <form id="mmgAdminForm" style="display:grid; gap:12px; margin-bottom:20px;">
-      <div class="auth-field">
-        <label>Kod</label>
-        <input type="text" id="mmgAdminCode" placeholder="ör. AHMET10" style="text-transform:uppercase;">
-      </div>
-      <div class="auth-field">
-        <label>Fayda Türü</label>
-        <select id="mmgAdminBenefitType">
-          <option value="free">Ücretsiz Premium</option>
-          <option value="discount">İndirimli Premium</option>
-        </select>
-      </div>
-      <div class="auth-field" id="mmgAdminDiscountWrap">
-        <label>İndirim Yüzdesi</label>
-        <input type="number" id="mmgAdminDiscountPercent" min="1" max="100" placeholder="ör. 20" value="20">
-      </div>
-      <button type="submit" class="auth-submit" style="margin-top:4px;">Kodu Kaydet</button>
-    </form>
-
-    <div id="mmgAdminMsg" style="font-size:12.5px; margin-bottom:14px;"></div>
-
-    <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; margin-bottom:10px;">Tanımlı Kodlar</div>
-    <div id="mmgAdminCodeList" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto;"></div>
-  </div>
-</div>
-
-<div class="account-info-overlay" id="accountInfoOverlay" hidden>
-  <div class="account-info-modal">
-    <div class="account-info-modal-header">
-      <h2>Hesabım</h2>
-      <button type="button" class="account-info-close" id="accountInfoClose" title="Kapat">✕</button>
-    </div>
-    <p class="account-info-sub">Firma ya da kişisel bilgilerinizi girin. Bu bilgiler yalnızca sizin hesabınızda saklanır.</p>
-
-    <form id="accountInfoForm">
-      <div class="auth-field">
-        <label>Hesap Türü</label>
-        <select id="profileType">
-          <option value="bireysel">Bireysel</option>
-          <option value="firma">Firma</option>
-        </select>
-      </div>
-      <div class="auth-field">
-        <label id="profileNameLabel">Ad Soyad</label>
-        <input type="text" id="profileName" placeholder="Ad Soyad">
-      </div>
-      <div class="auth-field">
-        <label>Telefon</label>
-        <input type="tel" id="profilePhone" placeholder="05xx xxx xx xx">
-      </div>
-      <div class="auth-field">
-        <label>E-posta</label>
-        <input type="email" id="profileEmail" placeholder="ornek@eposta.com">
-      </div>
-      <div class="auth-field">
-        <label>Adres</label>
-        <textarea id="profileAddress" rows="3" placeholder="Adres bilgisi"></textarea>
-      </div>
-      <button type="submit" class="auth-submit" id="profileSaveBtn">Kaydet</button>
-      <div class="account-info-saved" id="profileSavedMsg">Kaydedildi ✓</div>
-    </form>
-  </div>
-</div>
+</aside>
 
 <main>
   <div class="frame-wrap" id="frame-wrap" style="display:none;">
@@ -797,8 +561,14 @@
         <svg class="deco deco-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
         <svg class="deco deco-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
       </div>
-      <h1 class="hero-title">Dijital Finans Asistanı</h1>
-      <p class="hero-tagline">Finansal kararlarınızın dijital iş ortağı</p>
+      <div class="hero-logo-row">
+        <img src="logo.png" alt="mmgcreativity" class="hero-logo" onerror="this.style.display='none'; document.getElementById('hero-logo-fallback').style.display='flex';">
+        <span id="hero-logo-fallback" class="hero-logo-fallback">M</span>
+        <div>
+          <h1 class="hero-title" style="margin-bottom:2px;">Dijital Finans Asistanınız</h1>
+          <p class="hero-tagline" style="margin-bottom:0;">Finansal kararlarınızın dijital iş ortağı</p>
+        </div>
+      </div>
       <p class="hero-desc">Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.</p>
     </section>
 
@@ -811,101 +581,53 @@
         <svg class="deco deco-13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3.2"/><circle cx="7" cy="9" r=".6" fill="currentColor" stroke="none"/></svg>
       </div>
       <div class="card-grid">
-        <button class="app-card" data-target="Hesaplama_Araclari.html" data-title="Hesaplama Araçları">
+        <button class="app-card" data-target="Rotatif_Kredi_Hesaplama_Platformu.html" data-title="Rotatif Kredi Hesaplama">
           <span class="card-arrow">↗</span>
-          <h3>Hesaplama Araçları</h3>
-          <p>Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.</p>
+          <h3>Rotatif Kredi Hesaplama</h3>
+          <p>Bankaların 3 aylık periyotlarda uyguladığı devre sonu faizini pratik şekilde hesaplayın, bütçe planlamanızı buna göre yapın.</p>
         </button>
 
-        <button class="app-card" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
+        <button class="app-card" data-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-title="Kredi Kartı Vade Farkı">
           <span class="card-arrow">↗</span>
+          <h3>Kredi Kartı Vade Farkı Hesaplama</h3>
+          <p>Taksitli alışverişlerde ödeyeceğiniz vade farkını önceden görün, en uygun taksit sayısına siz karar verin.</p>
+        </button>
+
+        <button class="app-card" data-target="Kredi_Karti_Taksit_Maliyeti.html" data-title="Kredi Kartı Taksit Maliyeti">
+          <span class="card-arrow">↗</span>
+          <h3>Kredi Kartı Taksit Maliyeti</h3>
+          <p>Blokaj süresine göre (ertesi gün, 3, 7, 15, 30, 45 gün) komisyon/vade farkı oranlarını görün, net tutardan yola çıkarak girmeniz gereken brüt tutarı hesaplayın.</p>
+        </button>
+
+        <div class="app-card soon">
+          <span class="soon-badge mono">YAKINDA</span>
           <h3>Nakit Akış Tablosu</h3>
-          <p>Ay ay, gün gün gelir ve giderlerinizi girin; haftalık ve aylık durumunuzu, kategori dağılımınızı ve otomatik uyarılarınızı anında görün.</p>
-        </button>
-
-        <button class="app-card" data-target="Giderler.html" data-title="Giderler">
-          <span class="card-arrow">↗</span>
-          <h3>Giderler</h3>
-          <p>Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
-        </button>
-
-        <button class="app-card" data-target="Gelirler.html" data-title="Gelirler">
-          <span class="card-arrow">↗</span>
-          <h3>Gelirler</h3>
-          <p>Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
-        </button>
-
-        <button class="app-card" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
-          <span class="card-arrow">↗</span>
-          <h3>Talimat Hazırlama</h3>
-          <p>Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.</p>
-        </button>
+          <p>Gelir ve giderlerinizi aylık bazda takip edin, nakit akışınızın geleceğini görerek daha rahat planlama yapın.</p>
+        </div>
       </div>
     </section>
-
-    <footer>
-      <div class="footer-top">
-        <div>
-          <div class="footer-col-title">Bizi Takip Edin</div>
-          <div class="social-icon-row">
-            <a href="https://facebook.com/profile.php?id=61591997071236" target="_blank" rel="noopener" class="social-icon" style="background:#1877F2;" title="Facebook" aria-label="Facebook">
-              <svg viewBox="0 0 24 24" fill="#fff"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>
-            </a>
-            <a href="https://x.com/mmgcreativity" target="_blank" rel="noopener" class="social-icon" style="background:#000;" title="X (Twitter)" aria-label="X">
-              <svg viewBox="0 0 24 24" fill="#fff"><path d="M18.9 3H21l-6.6 7.5L22 21h-6.1l-4.8-6.3L5.6 21H3.4l7-8-6.9-10h6.2l4.4 5.8L18.9 3zM17.8 19.3h1.7L7.9 4.6H6l11.8 14.7z"/></svg>
-            </a>
-            <a href="https://instagram.com/mmgcreativity" target="_blank" rel="noopener" class="social-icon" style="background:radial-gradient(circle at 30% 110%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);" title="Instagram" aria-label="Instagram">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="#fff"/></svg>
-            </a>
-            <a href="https://www.linkedin.com/in/mmg-creativity-undefined-41352a423/" target="_blank" rel="noopener" class="social-icon" style="background:#0A66C2;" title="LinkedIn" aria-label="LinkedIn">
-              <svg viewBox="0 0 24 24" fill="#fff"><path d="M6.9 8.6H3.6V20h3.3V8.6zM5.3 3.5A1.9 1.9 0 1 0 5.3 7.3 1.9 1.9 0 0 0 5.3 3.5zM20.4 20h-3.3v-5.9c0-1.4 0-3.2-2-3.2s-2.3 1.5-2.3 3.1V20H9.6V8.6h3.2v1.6h.1c.4-.8 1.5-1.7 3.1-1.7 3.3 0 3.9 2.2 3.9 5V20z"/></svg>
-            </a>
-            <a href="https://wa.me/90XXXXXXXXXX" target="_blank" rel="noopener" class="social-icon" style="background:#25D366;" title="WhatsApp" aria-label="WhatsApp">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.4"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.8L3.5 20.5l4.3-1.2A8.5 8.5 0 1 0 12 3.5z"/><path d="M8.7 8.5c-.2.4-.7 1.3-.2 2.4.6 1.3 2.1 2.9 3.6 3.6 1 .5 2 .2 2.3-.2l.3-.5c.1-.2 0-.4-.1-.5l-1.1-.8c-.2-.1-.4-.1-.6 0l-.4.4c-.1.1-.3.1-.5 0-.5-.3-1.3-1-1.7-1.7-.1-.2 0-.3 0-.5l.4-.4c.1-.2.1-.3 0-.5l-.6-1.2c-.1-.2-.3-.3-.5-.3h-.5c-.1 0-.3 0-.4.2z" fill="#fff"/></svg>
-            </a>
-            <a href="https://youtube.com/@mmgcreativity" target="_blank" rel="noopener" class="social-icon" style="background:#FF0000;" title="YouTube" aria-label="YouTube">
-              <svg viewBox="0 0 24 24" fill="#fff"><path d="M22 12s0-3.2-.4-4.7c-.2-.9-.9-1.6-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.5c-.9.2-1.6.9-1.8 1.8C2 8.8 2 12 2 12s0 3.2.4 4.7c.2.9.9 1.6 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.5c.9-.2 1.6-.9 1.8-1.8.4-1.5.4-4.7.4-4.7zM10 15.3V8.7l5.3 3.3-5.3 3.3z"/></svg>
-            </a>
-            <a href="https://tiktok.com/@mmgcreativity" target="_blank" rel="noopener" class="social-icon" style="background:#000;" title="TikTok" aria-label="TikTok">
-              <svg viewBox="0 0 24 24" fill="#fff"><path d="M16.6 5.8c-.9-.9-1.4-2.1-1.4-3.4h-3.1v13.6c0 1.4-1.1 2.5-2.5 2.5s-2.5-1.1-2.5-2.5 1.1-2.5 2.5-2.5c.3 0 .5 0 .8.1V10.5c-.3 0-.5-.1-.8-.1-3.1 0-5.6 2.5-5.6 5.6S6.5 21.6 9.6 21.6s5.6-2.5 5.6-5.6V9.1c1.2.9 2.7 1.4 4.3 1.4V7.4c-1 0-1.9-.3-2.9-1.2z"/></svg>
-            </a>
-          </div>
-        </div>
-        <div>
-          <div class="footer-col-title">Uygulamamızı İndirin</div>
-          <div class="app-badge-row">
-            <a href="#" class="app-badge">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 1.4c.1 1.1-.3 2.2-1 3-.7.8-1.8 1.5-2.9 1.4-.1-1.1.4-2.2 1-3 .8-.8 2-1.4 2.9-1.4zM20.6 17c-.5 1.2-.8 1.7-1.5 2.8-1 1.5-2.4 3.4-4.1 3.4-1.5 0-1.9-1-4-1-2 0-2.5 1-4 1-1.7 0-3-1.7-4-3.2C.6 16.9-.6 12.1 1 8.9c.8-1.6 2.2-2.6 3.7-2.6 1.6 0 2.6 1 3.9 1 1.3 0 2.1-1 3.9-1 1.4 0 2.8.8 3.7 2-3.3 1.8-2.8 6.4.4 7.7z"/></svg>
-              <span class="app-badge-text"><span>Hemen İndirin</span><b>App Store</b></span>
-            </a>
-            <a href="#" class="app-badge">
-              <svg viewBox="0 0 24 24"><path d="M3.6 2.6a1 1 0 0 0-.6.9v17a1 1 0 0 0 .6.9l9.7-9.4-9.7-9.4z" fill="#00d2ff"/><path d="M13.3 12l3-2.9 3.9 2.2c.9.5.9 1.4 0 1.9l-3.9 2.2-3-2.4z" fill="#ffd200"/><path d="M13.3 12L3.6 2.6c.2 0 .5 0 .7.1l11 6.3-2 2.9z" fill="#00e676"/><path d="M13.3 12l2 2.9-11 6.3c-.2.1-.5.1-.7.1L13.3 12z" fill="#ff3d57"/></svg>
-              <span class="app-badge-text"><span>Hemen İndirin</span><b>Google Play</b></span>
-            </a>
-          </div>
-          <div class="footer-desc">Dijital Finans Asistanı: firmanızın ve bireysel finans işlerinizin dijital ortağı. Hesaplama araçları, nakit akış takibi ve talimat hazırlama tek platformda.</div>
-        </div>
-      </div>
-      <div class="legal-links">
-        <a href="hakkinda.html" target="_blank">Hakkında</a>
-        <a href="iletisim.html" target="_blank">İletişim</a>
-        <a href="gizlilik-politikasi.html" target="_blank">Gizlilik Politikası</a>
-        <a href="kullanim-sartlari.html" target="_blank">Kullanım Şartları</a>
-      </div>
-      <div class="credit">
-        <span>Powered by</span>
-        <span class="signature-pill">
-          <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
-          <span id="credit-fallback" class="credit-fallback">M</span>
-          <b>mmgcreativity</b>
-        </span>
-      </div>
-    </footer>
   </div>
+
+  <footer>
+    <div class="legal-links">
+      <a href="hakkinda.html" target="_blank">Hakkında</a>
+      <a href="iletisim.html" target="_blank">İletişim</a>
+      <a href="gizlilik-politikasi.html" target="_blank">Gizlilik Politikası</a>
+      <a href="kullanim-sartlari.html" target="_blank">Kullanım Şartları</a>
+    </div>
+    <div class="credit">
+      <span>powered by</span>
+      <span class="signature-pill">
+        <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+        <span id="credit-fallback" class="credit-fallback">M</span>
+        <b>mmgcreativity</b>
+      </span>
+    </div>
+  </footer>
 </main>
 
 <script>
-  const navItems = document.querySelectorAll('.nav-item:not([data-drawer-toggle]), .app-card');
+  const navItems = document.querySelectorAll('.nav-item, .app-card');
   const homeScreen = document.getElementById('home-screen');
   const frameWrap = document.getElementById('frame-wrap');
   const iframe = document.getElementById('app-frame');
@@ -923,12 +645,6 @@
       setActive('home');
       return;
     }
-    // Mobilde iframe içi kaydırma (touch-scroll) güvenilir çalışmadığı için
-    // dar ekranlarda iframe yerine doğrudan tam sayfa geçişi yapılır.
-    if(window.innerWidth <= 860){
-      window.location.href = target;
-      return;
-    }
     homeScreen.style.display = 'none';
     frameWrap.style.display = 'block';
     iframe.src = target;
@@ -939,29 +655,11 @@
     el.addEventListener('click', ()=> openTarget(el.dataset.target, el.dataset.title));
   });
 
-  // ---- Hesaplama Araçları çekmecesi ----
-  const hesaplamaToggle = document.getElementById('hesaplamaAraclariToggle');
-  const hesaplamaDrawer = document.getElementById('hesaplamaDrawer');
-  hesaplamaToggle.addEventListener('click', ()=>{
-    const isOpen = hesaplamaToggle.getAttribute('aria-expanded') === 'true';
-    hesaplamaToggle.setAttribute('aria-expanded', String(!isOpen));
-    hesaplamaDrawer.hidden = isOpen;
-  });
-
   openTarget('home', 'Ana Sayfa');
 </script>
 
-<script type="module">
-  // ---- Firebase ----
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-  import {
-    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup
-  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-  import {
-    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment
-  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
+<script>
+  // ---- Firebase başlatma ----
   const firebaseConfig = {
     apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
     authDomain: "mmgcreativity-31263.firebaseapp.com",
@@ -971,97 +669,13 @@
     appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
     measurementId: "G-X8HEZRNWWS"
   };
-  const fbApp = initializeApp(firebaseConfig);
-  const auth = getAuth(fbApp);
-  const db = getFirestore(fbApp);
-  const googleProvider = new GoogleAuthProvider();
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+</script>
 
-  // ---- Yönetici kontrolü, premium/reklamsız durumu ----
-  onAuthStateChanged(auth, async (user) => {
-    const adminBtn = document.getElementById('adminPanelBtn');
-    if(!user){ if(adminBtn) adminBtn.style.display = 'none'; return; }
-    try{
-      const snap = await getDoc(doc(db, 'users', user.uid));
-      const data = snap.exists() ? snap.data() : {};
-      if(adminBtn) adminBtn.style.display = data.isAdmin ? 'flex' : 'none';
-      // Premium üye reklamsız deneyim: adsbygoogle script'ini reklamsız kullanıcılar için hiç yüklemiyoruz
-      if(data.isPremium){
-        document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
-        window.adsbygoogle = { push: function(){} }; // olası hataları sessizce yut
-      }
-    } catch(e){ /* sessizce geç */ }
-  });
-
-  document.getElementById('adminPanelBtn').addEventListener('click', () => {
-    document.getElementById('accountDropdown').hidden = true;
-    document.getElementById('mmgAdminOverlay').hidden = false;
-    mmgLoadAdminCodes();
-  });
-  document.getElementById('mmgAdminClose').addEventListener('click', () => {
-    document.getElementById('mmgAdminOverlay').hidden = true;
-  });
-  document.getElementById('mmgAdminOverlay').addEventListener('click', (e) => {
-    if(e.target.id === 'mmgAdminOverlay') document.getElementById('mmgAdminOverlay').hidden = true;
-  });
-  document.getElementById('mmgAdminBenefitType').addEventListener('change', (e) => {
-    document.getElementById('mmgAdminDiscountWrap').style.display = e.target.value === 'discount' ? 'block' : 'none';
-  });
-
-  async function mmgLoadAdminCodes(){
-    const listEl = document.getElementById('mmgAdminCodeList');
-    listEl.innerHTML = '<div style="font-size:12px; color:var(--muted);">Yükleniyor…</div>';
-    try{
-      const snap = await getDocs(collection(db, 'referralCodes'));
-      const codes = [];
-      snap.forEach(d => codes.push({ id: d.id, ...d.data() }));
-      if(!codes.length){
-        listEl.innerHTML = '<div style="font-size:12px; color:var(--muted);">Henüz tanımlı bir referans kodu yok.</div>';
-        return;
-      }
-      listEl.innerHTML = codes.map(c => {
-        const benefitLabel = c.benefitType === 'free' ? 'Ücretsiz Premium' : ('%' + (c.discountPercent||0) + ' İndirim');
-        return '<div style="display:flex; align-items:center; justify-content:space-between; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px;">' +
-          '<div><b style="font-family:\'IBM Plex Mono\',monospace;">' + c.id + '</b><div style="font-size:11.5px; color:var(--muted);">' + benefitLabel + '</div></div>' +
-          '<button type="button" class="mmg-admin-del" data-code="' + c.id + '" style="background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:12px;">Sil</button>' +
-          '</div>';
-      }).join('');
-      listEl.querySelectorAll('.mmg-admin-del').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          if(!confirm('"' + btn.dataset.code + '" kodunu silmek istediğinize emin misiniz?')) return;
-          await deleteDoc(doc(db, 'referralCodes', btn.dataset.code));
-          mmgLoadAdminCodes();
-        });
-      });
-    } catch(e){
-      listEl.innerHTML = '<div style="font-size:12px; color:var(--red,#e2544b);">Kodlar yüklenemedi.</div>';
-    }
-  }
-
-  document.getElementById('mmgAdminForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const msgEl = document.getElementById('mmgAdminMsg');
-    const code = document.getElementById('mmgAdminCode').value.trim().toUpperCase();
-    const benefitType = document.getElementById('mmgAdminBenefitType').value;
-    const discountPercent = parseInt(document.getElementById('mmgAdminDiscountPercent').value, 10) || 0;
-    if(!code){ msgEl.textContent = 'Lütfen bir kod girin.'; msgEl.style.color = 'var(--red,#e2544b)'; return; }
-    try{
-      await setDoc(doc(db, 'referralCodes', code), {
-        benefitType: benefitType,
-        discountPercent: benefitType === 'discount' ? discountPercent : 0,
-        active: true,
-        createdAt: serverTimestamp()
-      });
-      msgEl.textContent = '"' + code + '" kodu kaydedildi. ✓';
-      msgEl.style.color = 'var(--teal,#3FB68A)';
-      document.getElementById('mmgAdminCode').value = '';
-      mmgLoadAdminCodes();
-    } catch(err){
-      msgEl.textContent = 'Kod kaydedilemedi, tekrar deneyin.';
-      msgEl.style.color = 'var(--red,#e2544b)';
-    }
-  });
-
-  // ---- Karşılama / Üyelik Ekranı ----
+<script>
+  // ---- Karşılama / Üyelik Ekranı (Gerçek Firebase Authentication) ----
   const authOverlay = document.getElementById('authOverlay');
   const authForm = document.getElementById('authForm');
   const authError = document.getElementById('authError');
@@ -1071,9 +685,9 @@
   const tabLogin = document.getElementById('tabLogin');
   const tabSignup = document.getElementById('tabSignup');
   const passwordConfirmWrap = document.getElementById('authPasswordConfirmWrap');
-  const usernameWrap = document.getElementById('authUsernameWrap');
-  const referralWrap = document.getElementById('authReferralWrap');
   const guestBtn = document.getElementById('guestBtn');
+  const googleBtn = document.getElementById('googleBtn');
+  const adminNavItem = document.getElementById('adminNavItem');
 
   let authMode = 'login';
 
@@ -1082,8 +696,6 @@
     tabLogin.classList.toggle('active', mode === 'login');
     tabSignup.classList.toggle('active', mode === 'signup');
     passwordConfirmWrap.style.display = mode === 'signup' ? 'block' : 'none';
-    usernameWrap.style.display = mode === 'signup' ? 'block' : 'none';
-    referralWrap.style.display = mode === 'signup' ? 'block' : 'none';
     authTitle.textContent = mode === 'login' ? 'Tekrar hoş geldiniz' : 'Hesap oluşturun';
     authSub.textContent = mode === 'login' ? 'Kaldığınız yerden devam etmek için giriş yapın' : 'Oranlarınızı ve tercihlerinizi kaydetmek için ücretsiz hesap açın';
     authSubmitBtn.textContent = mode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur';
@@ -1109,290 +721,69 @@
     authOverlay.classList.remove('hidden');
   }
 
-  function updateUserBadge(customerNumber, username){
-    const state = localStorage.getItem('mmg_auth_state');
+  function updateUserBadge(user){
     const badge = document.getElementById('userBadge');
     const nameEl = document.getElementById('userBadgeName');
-    const dropdownName = document.getElementById('accountDropdownName');
-    const dropdownSub = document.getElementById('accountDropdownSub');
-    const isRealUser = !!state && state.startsWith('user:');
-    dropdownLogoutBtn.querySelector('span').textContent = isRealUser ? 'Oturumu Kapat' : 'Oturum Aç';
-    if(!state){
+    if(!user){
       badge.style.display = 'none';
-      dropdownName.textContent = 'Misafir';
-      dropdownSub.textContent = 'Giriş yapmadınız';
       return;
     }
     badge.style.display = 'flex';
-    if(state === 'guest'){
-      nameEl.textContent = 'Misafir';
-      dropdownName.textContent = 'Misafir';
-      dropdownSub.textContent = 'Misafir modundasınız';
-    } else if(state.startsWith('user:')){
-      const email = state.slice(5);
-      const no = customerNumber || localStorage.getItem('mmg_customer_no');
-      const uname = username || localStorage.getItem('mmg_username');
-      nameEl.textContent = uname ? (uname + ' · #' + (no || '----')) : email;
-      dropdownName.textContent = uname || email;
-      dropdownSub.textContent = no ? ('Kullanıcı Kodu: #' + no) : email;
+    nameEl.textContent = user.isAnonymous ? 'Misafir' : (user.email || user.displayName || 'Kullanıcı');
+  }
+
+  async function checkAdminAndUpdateNav(user){
+    if(!user){
+      adminNavItem.style.display = 'none';
+      return;
+    }
+    try{
+      const tokenResult = await user.getIdTokenResult(true);
+      adminNavItem.style.display = tokenResult.claims.admin ? 'flex' : 'none';
+    }catch(e){
+      adminNavItem.style.display = 'none';
     }
   }
 
-  // ---- Profil fotoğrafı / firma logosu ----
-  const avatarImg = document.getElementById('avatarImg');
-  const avatarDefaultIcon = document.getElementById('avatarDefaultIcon');
-  const avatarImgLg = document.getElementById('avatarImgLg');
-  const avatarDefaultIconLg = document.getElementById('avatarDefaultIconLg');
-  const avatarInput = document.getElementById('avatarInput');
-
-  function setAvatar(dataUrl){
-    if(dataUrl){
-      avatarImg.src = dataUrl; avatarImg.style.display = 'block';
-      avatarDefaultIcon.style.display = 'none';
-      avatarImgLg.src = dataUrl; avatarImgLg.style.display = 'block';
-      avatarDefaultIconLg.style.display = 'none';
+  auth.onAuthStateChanged(async (user) => {
+    updateUserBadge(user);
+    await checkAdminAndUpdateNav(user);
+    if(user){
+      closeAuthOverlay();
     } else {
-      avatarImg.style.display = 'none'; avatarDefaultIcon.style.display = 'block';
-      avatarImgLg.style.display = 'none'; avatarDefaultIconLg.style.display = 'block';
-    }
-  }
-
-  async function saveAvatarToCloud(dataUrl){
-    const state = localStorage.getItem('mmg_auth_state');
-    if(!state || state === 'guest') return; // misafir oturumu bulutta saklanmaz
-    const user = auth.currentUser;
-    if(!user) return;
-    try{
-      await setDoc(doc(db, 'users', user.uid), { avatarBase64: dataUrl }, { merge: true });
-    } catch(err){ /* bulut kaydı başarısız olsa da sessizce geç, yerelde zaten kayıtlı */ }
-  }
-
-  avatarInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const img = new Image();
-      img.onload = () => {
-        const size = 160;
-        const canvas = document.createElement('canvas');
-        canvas.width = size; canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        const scale = Math.max(size / img.width, size / img.height);
-        const w = img.width * scale, h = img.height * scale;
-        ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        setAvatar(dataUrl);
-        localStorage.setItem('mmg_avatar', dataUrl);
-        saveAvatarToCloud(dataUrl);
-      };
-      img.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  // ---- Hesap açılır menüsü ----
-  const accountTrigger = document.getElementById('accountTrigger');
-  const accountDropdown = document.getElementById('accountDropdown');
-  const changePhotoBtn = document.getElementById('changePhotoBtn');
-  const dropdownLogoutBtn = document.getElementById('dropdownLogoutBtn');
-
-  function toggleAccountDropdown(forceState){
-    const shouldShow = typeof forceState === 'boolean' ? forceState : accountDropdown.hidden;
-    accountDropdown.hidden = !shouldShow;
-  }
-
-  accountTrigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleAccountDropdown();
-  });
-
-  document.addEventListener('click', (e) => {
-    if(!accountDropdown.hidden && !accountDropdown.contains(e.target) && !accountTrigger.contains(e.target)){
-      toggleAccountDropdown(false);
+      openAuthOverlay();
     }
   });
 
-  changePhotoBtn.addEventListener('click', () => {
-    toggleAccountDropdown(false);
-    avatarInput.click();
-  });
-
-  dropdownLogoutBtn.addEventListener('click', () => {
-    toggleAccountDropdown(false);
-    performLogout();
-  });
-
-  // ---- Hesabım (profil bilgileri) ----
-  const accountInfoBtn = document.getElementById('accountInfoBtn');
-  const accountInfoOverlay = document.getElementById('accountInfoOverlay');
-  const accountInfoClose = document.getElementById('accountInfoClose');
-  const accountInfoForm = document.getElementById('accountInfoForm');
-  const profileType = document.getElementById('profileType');
-  const profileName = document.getElementById('profileName');
-  const profileNameLabel = document.getElementById('profileNameLabel');
-  const profilePhone = document.getElementById('profilePhone');
-  const profileEmail = document.getElementById('profileEmail');
-  const profileAddress = document.getElementById('profileAddress');
-  const profileSaveBtn = document.getElementById('profileSaveBtn');
-  const profileSavedMsg = document.getElementById('profileSavedMsg');
-
-  function getCachedProfile(){
-    try{ return JSON.parse(localStorage.getItem('mmg_profile') || '{}'); } catch(e){ return {}; }
-  }
-
-  function updateProfileNameLabel(){
-    profileNameLabel.textContent = profileType.value === 'firma' ? 'Firma Adı' : 'Ad Soyad';
-    profileName.placeholder = profileType.value === 'firma' ? 'Firma Adı' : 'Ad Soyad';
-  }
-  profileType.addEventListener('change', updateProfileNameLabel);
-
-  function loadProfileIntoForm(profile){
-    const p = profile || getCachedProfile();
-    profileType.value = p.type || 'bireysel';
-    profileName.value = p.name || '';
-    profilePhone.value = p.phone || '';
-    const state = localStorage.getItem('mmg_auth_state');
-    const defaultEmail = (state && state.startsWith('user:')) ? state.slice(5) : '';
-    profileEmail.value = p.email || defaultEmail;
-    profileAddress.value = p.address || '';
-    updateProfileNameLabel();
-  }
-
-  async function saveProfileToCloud(profile){
-    const state = localStorage.getItem('mmg_auth_state');
-    if(!state || state === 'guest') return; // misafir bulutta saklanmaz
-    const user = auth.currentUser;
-    if(!user) return;
+  guestBtn.addEventListener('click', async () => {
+    hideAuthError();
     try{
-      await setDoc(doc(db, 'users', user.uid), { profile: profile }, { merge: true });
-    } catch(err){ /* bulut kaydı başarısız olsa da yerelde zaten kayıtlı */ }
-  }
-
-  accountInfoBtn.addEventListener('click', () => {
-    toggleAccountDropdown(false);
-    loadProfileIntoForm();
-    accountInfoOverlay.hidden = false;
+      await auth.signInAnonymously();
+    }catch(e){
+      showAuthError('Misafir girişi başarısız: ' + e.message);
+    }
   });
 
-  accountInfoClose.addEventListener('click', () => { accountInfoOverlay.hidden = true; });
-  accountInfoOverlay.addEventListener('click', (e) => {
-    if(e.target === accountInfoOverlay) accountInfoOverlay.hidden = true;
-  });
-
-  accountInfoForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const profile = {
-      type: profileType.value,
-      name: profileName.value.trim(),
-      phone: profilePhone.value.trim(),
-      email: profileEmail.value.trim(),
-      address: profileAddress.value.trim()
-    };
-    localStorage.setItem('mmg_profile', JSON.stringify(profile));
-    profileSaveBtn.disabled = true;
-    await saveProfileToCloud(profile);
-    profileSaveBtn.disabled = false;
-    profileSavedMsg.classList.add('show');
-    setTimeout(() => profileSavedMsg.classList.remove('show'), 2000);
-  });
-
-  // NOT: Aktif bir oturum (giriş yapılmış ya da misafir) varsa,
-  // sayfa her yenilendiğinde tekrar giriş ekranı gösterilmez.
-  updateUserBadge();
-  setAvatar(localStorage.getItem('mmg_avatar'));
-  if(localStorage.getItem('mmg_auth_state')){
-    closeAuthOverlay();
-  }
-
-  function mapFirebaseError(code){
-    const map = {
-      'auth/email-already-in-use': 'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.',
-      'auth/invalid-email': 'Geçerli bir e-posta adresi girin.',
-      'auth/weak-password': 'Şifre en az 6 karakter olmalı.',
-      'auth/user-not-found': 'Bu e-posta ile kayıtlı bir hesap bulunamadı.',
-      'auth/wrong-password': 'Şifre hatalı.',
-      'auth/invalid-credential': 'E-posta veya şifre hatalı.',
-      'auth/too-many-requests': 'Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.',
-      'auth/network-request-failed': 'Bağlantı hatası. İnternetinizi kontrol edin.',
-      'auth/operation-not-allowed': 'Google ile giriş şu an aktif değil. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
-      'auth/unauthorized-domain': 'Bu site adresi Firebase\'de yetkili domainler listesinde değil. (Firebase Console → Authentication → Settings → Authorized domains)',
-      'auth/popup-blocked': 'Tarayıcınız açılır pencereyi (popup) engelledi. Popup engelleyiciyi kapatıp tekrar deneyin.'
-    };
-    return map[code] || ('Bir hata oluştu (' + (code || 'bilinmiyor') + '), lütfen tekrar deneyin.');
-  }
-
-  // Sıradaki müşteri numarasını atomik olarak üretir (1001'den başlar)
-  async function getNextCustomerNumber(){
-    const counterRef = doc(db, 'meta', 'counters');
-    const newNumber = await runTransaction(db, async (tx) => {
-      const snap = await tx.get(counterRef);
-      const current = snap.exists() ? (snap.data().userCount || 1000) : 1000;
-      const next = current + 1;
-      tx.set(counterRef, { userCount: next }, { merge: true });
-      return next;
-    });
-    return newNumber;
-  }
-
-  guestBtn.addEventListener('click', () => {
-    localStorage.setItem('mmg_auth_state', 'guest');
-    localStorage.setItem('mmg_remember', document.getElementById('rememberMe').checked ? '1' : '0');
-    updateUserBadge();
-    closeAuthOverlay();
-  });
-
-  const googleBtn = document.getElementById('googleBtn');
   googleBtn.addEventListener('click', async () => {
     hideAuthError();
-    googleBtn.disabled = true;
-    const remember = document.getElementById('rememberMe').checked;
     try{
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      const email = user.email;
-      let customerNumber = null;
-      let username = null;
-      let avatar = null;
-      let profile = null;
-
-      const userRef = doc(db, 'users', user.uid);
-      const snap = await getDoc(userRef);
-      if(snap.exists()){
-        customerNumber = snap.data().customerNumber;
-        username = snap.data().username;
-        avatar = snap.data().avatarBase64 || null;
-        profile = snap.data().profile || null;
-      } else {
-        customerNumber = await getNextCustomerNumber();
-        username = (user.displayName || email.split('@')[0]).trim();
-        await setDoc(userRef, {
-          email: email,
-          username: username,
-          customerNumber: customerNumber,
-          createdAt: serverTimestamp()
-        });
-      }
-      // Bulutta özel bir avatar yoksa, Google profil fotoğrafını göster (sadece görüntüleme; bizim sunucumuzda saklanmıyor)
-      if(!avatar && user.photoURL) avatar = user.photoURL;
-
-      localStorage.setItem('mmg_auth_state', 'user:' + email);
-      if(customerNumber) localStorage.setItem('mmg_customer_no', String(customerNumber));
-      if(username) localStorage.setItem('mmg_username', username);
-      if(avatar) localStorage.setItem('mmg_avatar', avatar); else localStorage.removeItem('mmg_avatar');
-      if(profile) localStorage.setItem('mmg_profile', JSON.stringify(profile));
-      setAvatar(avatar);
-      localStorage.setItem('mmg_remember', remember ? '1' : '0');
-      updateUserBadge(customerNumber, username);
-      closeAuthOverlay();
-    } catch(err){
-      if(err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request'){
-        showAuthError(mapFirebaseError(err.code));
-      }
-    } finally {
-      googleBtn.disabled = false;
+      await auth.signInWithPopup(googleProvider);
+    }catch(e){
+      showAuthError('Google girişi başarısız: ' + e.message);
     }
   });
+
+  function firebaseErrorMessage(err){
+    switch(err.code){
+      case 'auth/invalid-email': return 'Geçersiz e-posta adresi.';
+      case 'auth/user-not-found': return 'Böyle bir kullanıcı bulunamadı.';
+      case 'auth/wrong-password': return 'Şifre hatalı.';
+      case 'auth/invalid-credential': return 'E-posta veya şifre hatalı.';
+      case 'auth/email-already-in-use': return 'Bu e-posta zaten kayıtlı.';
+      case 'auth/weak-password': return 'Şifre çok zayıf.';
+      default: return 'Bir hata oluştu: ' + err.message;
+    }
+  }
 
   authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -1401,18 +792,11 @@
     const password = document.getElementById('authPassword').value;
     const remember = document.getElementById('rememberMe').checked;
 
-    authSubmitBtn.disabled = true;
-    const originalLabel = authSubmitBtn.textContent;
-    authSubmitBtn.textContent = 'Lütfen bekleyin...';
-
     try{
+      await auth.setPersistence(remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION);
+
       if(authMode === 'signup'){
         const confirm = document.getElementById('authPasswordConfirm').value;
-        const username = document.getElementById('authUsername').value.trim();
-        if(!username){
-          showAuthError('Lütfen bir kullanıcı adı belirleyin.');
-          return;
-        }
         if(password !== confirm){
           showAuthError('Şifreler eşleşmiyor.');
           return;
@@ -1421,120 +805,29 @@
           showAuthError('Şifre en az 6 karakter olmalı.');
           return;
         }
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        const customerNumber = await getNextCustomerNumber();
-        const referralCodeRaw = document.getElementById('authReferralCode').value.trim();
-        const referralCode = referralCodeRaw ? referralCodeRaw.toUpperCase() : null;
-
-        // Referans kodu tanımlıysa (owner tarafından oluşturulmuşsa) faydasını (ücretsiz/indirimli) belirle
-        let premiumBenefit = null;
-        if(referralCode){
-          try{
-            const codeSnap = await getDoc(doc(db, 'referralCodes', referralCode));
-            if(codeSnap.exists() && codeSnap.data().active !== false){
-              const cd = codeSnap.data();
-              premiumBenefit = {
-                type: cd.benefitType || 'discount',
-                discountPercent: cd.discountPercent || 0,
-                code: referralCode
-              };
-            }
-          } catch(codeErr){ /* kod tanımlı değilse veya okunamazsa sessizce geç */ }
-        }
-
-        await setDoc(doc(db, 'users', cred.user.uid), {
-          email: email,
-          username: username,
-          customerNumber: customerNumber,
-          referredBy: referralCode,
-          isPremium: premiumBenefit && premiumBenefit.type === 'free' ? true : false,
-          premiumBenefit: premiumBenefit,
-          createdAt: serverTimestamp()
-        });
-        // Referans istatistiği: hangi kodun kaç kişi getirdiğini ve kimleri getirdiğini kaydet
-        if(referralCode){
-          try{
-            await setDoc(doc(db, 'referrals', referralCode), {
-              code: referralCode,
-              count: increment(1),
-              lastUsedAt: serverTimestamp()
-            }, { merge: true });
-            await setDoc(doc(db, 'referrals', referralCode, 'users', cred.user.uid), {
-              email: email,
-              username: username,
-              customerNumber: customerNumber,
-              joinedAt: serverTimestamp()
-            });
-          } catch(refErr){
-            // Referans istatistiği kaydedilemezse sessizce geç, kayıt işlemini engellemesin
-          }
-        }
-        localStorage.setItem('mmg_auth_state', 'user:' + email);
-        localStorage.setItem('mmg_customer_no', String(customerNumber));
-        localStorage.setItem('mmg_username', username);
-        localStorage.setItem('mmg_remember', remember ? '1' : '0');
-        updateUserBadge(customerNumber, username);
-        closeAuthOverlay();
+        await auth.createUserWithEmailAndPassword(email, password);
       } else {
-        const cred = await signInWithEmailAndPassword(auth, email, password);
-        let customerNumber = null;
-        let username = null;
-        let avatar = null;
-        let profile = null;
-        try{
-          const snap = await getDoc(doc(db, 'users', cred.user.uid));
-          if(snap.exists()){
-            customerNumber = snap.data().customerNumber;
-            username = snap.data().username;
-            avatar = snap.data().avatarBase64 || null;
-            profile = snap.data().profile || null;
-          }
-        } catch(err){ /* profil okunamadıysa sessizce geç */ }
-        localStorage.setItem('mmg_auth_state', 'user:' + email);
-        if(customerNumber) localStorage.setItem('mmg_customer_no', String(customerNumber));
-        if(username) localStorage.setItem('mmg_username', username);
-        if(avatar) { localStorage.setItem('mmg_avatar', avatar); setAvatar(avatar); }
-        if(profile) localStorage.setItem('mmg_profile', JSON.stringify(profile));
-        localStorage.setItem('mmg_remember', remember ? '1' : '0');
-        updateUserBadge(customerNumber, username);
-        closeAuthOverlay();
+        await auth.signInWithEmailAndPassword(email, password);
       }
-    } catch(err){
-      showAuthError(mapFirebaseError(err.code));
-    } finally {
-      authSubmitBtn.disabled = false;
-      authSubmitBtn.textContent = originalLabel;
+    }catch(err){
+      showAuthError(firebaseErrorMessage(err));
     }
   });
 
-  async function performLogout(){
-    try { await signOut(auth); } catch(err){ /* önemli değil */ }
-    localStorage.removeItem('mmg_auth_state');
-    localStorage.removeItem('mmg_remember');
-    localStorage.removeItem('mmg_customer_no');
-    localStorage.removeItem('mmg_username');
-    localStorage.removeItem('mmg_avatar');
-    localStorage.removeItem('mmg_profile');
-    setAvatar(null);
-    updateUserBadge();
+  document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await auth.signOut();
     document.getElementById('authEmail').value = '';
     document.getElementById('authPassword').value = '';
     document.getElementById('rememberMe').checked = false;
     setAuthMode('login');
-    openAuthOverlay();
-  }
+  });
 
   // ---- Açık / Koyu Görünüm Modu ----
-  // NOT: Bu anahtar şu an kabuk (sidebar, üst bar, hero) için çalışıyor.
-  // İçerideki hesaplayıcı sayfaları (iframe içinde ayrı dosyalar) için
-  // aynı anahtarın oraya da yansıması ayrı bir adımda yapılacak.
   const themeToggle = document.getElementById('themeToggle');
-  const themeToggleIcon = document.getElementById('themeToggleIcon');
-  const themeToggleLabel = document.getElementById('themeToggleLabel');
   function applyTheme(mode){
     document.documentElement.classList.toggle('theme-light', mode === 'light');
-    themeToggleIcon.textContent = mode === 'light' ? '☀' : '☾';
-    themeToggleLabel.textContent = mode === 'light' ? 'Açık Mod' : 'Koyu Mod';
+    themeToggle.textContent = mode === 'light' ? '☀' : '☾';
     localStorage.setItem('mmg_theme', mode);
   }
   applyTheme(localStorage.getItem('mmg_theme') || 'dark');
@@ -1543,231 +836,6 @@
     applyTheme(isLight ? 'dark' : 'light');
   });
 </script>
-
-<button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır">↓</button>
-<style>
-  #mmgScrollDownBtn{
-    position:fixed; right:20px; bottom:20px; z-index:500;
-    width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
-    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B);
-    font-size:20px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 8px 20px rgba(0,0,0,0.35); transition:opacity .2s ease, transform .2s ease;
-    opacity:0; pointer-events:none;
-  }
-  #mmgScrollDownBtn.show{ opacity:1; pointer-events:auto; }
-  #mmgScrollDownBtn:hover{ transform:translateY(2px); }
-</style>
-<script>
-(function(){
-  var btn = document.getElementById('mmgScrollDownBtn');
-  function nearBottom(){
-    return (window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 40);
-  }
-  function updateVisibility(){
-    if(document.body.scrollHeight <= window.innerHeight + 60 || nearBottom()){
-      btn.classList.remove('show');
-    } else {
-      btn.classList.add('show');
-    }
-  }
-  btn.addEventListener('click', function(){
-    window.scrollBy({ top: window.innerHeight * 0.85, behavior: 'smooth' });
-  });
-  window.addEventListener('scroll', updateVisibility);
-  window.addEventListener('resize', updateVisibility);
-  updateVisibility();
-})();
-</script>
-
-<script>
-(function(){
-  // Sol üstteki logo kutusunun alt çizgisini, sağdaki hero panelinin alt çizgisiyle
-  // her zaman aynı hizada tutar (metin uzunluğu ya da ekran boyutu değişse bile).
-  function alignBrandWithHero(){
-    var heroEl = document.querySelector('.hero');
-    var brandEl = document.querySelector('.brand');
-    if(!heroEl || !brandEl) return;
-    brandEl.style.minHeight = heroEl.offsetHeight + 'px';
-  }
-  window.addEventListener('load', alignBrandWithHero);
-  window.addEventListener('resize', alignBrandWithHero);
-  setTimeout(alignBrandWithHero, 300);
-})();
-</script>
-
-
-<!-- ================== mmgcreativity: Beğen / Geri Bildirim Widget'ı (tüm sayfalarda ortak) ================== -->
-<button id="mmgRateBtn" title="Sitemizi Değerlendirin" aria-label="Sitemizi Değerlendirin" style="font-size:20px;">👍</button>
-<div id="mmgRateOverlay" hidden>
-  <div id="mmgRatePanel">
-    <button type="button" id="mmgRateCloseBtn" aria-label="Kapat">✕</button>
-
-    <div id="mmgRateStepScore">
-      <div class="mmg-rate-title">Sitemizi beğendiniz mi?</div>
-      <div class="mmg-rate-thumbs">
-        <button type="button" class="mmg-rate-thumb" id="mmgThumbUp" data-liked="1">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 22V11M2 13v7a2 2 0 0 0 2 2h12.6a2 2 0 0 0 2-1.7l1.3-8A2 2 0 0 0 18 10h-5.6l.9-4.4a1.7 1.7 0 0 0-3-1.4L7 11"/></svg>
-          <span>Evet</span>
-        </button>
-        <button type="button" class="mmg-rate-thumb" id="mmgThumbDown" data-liked="0">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 2v11M22 11V4a2 2 0 0 0-2-2H7.4a2 2 0 0 0-2 1.7l-1.3 8A2 2 0 0 0 6 14h5.6l-.9 4.4a1.7 1.7 0 0 0 3 1.4L17 13"/></svg>
-          <span>Hayır</span>
-        </button>
-      </div>
-      <textarea id="mmgRateComment" class="mmg-rate-comment" placeholder="Yorumunuz (opsiyonel)" rows="3"></textarea>
-      <button type="button" class="mmg-rate-btn-primary" id="mmgRateSubmitBtn">Gönder</button>
-    </div>
-
-    <div id="mmgRateStepStore" hidden>
-      <div class="mmg-rate-title">Teşekkürler! 🎉</div>
-      <div class="mmg-rate-sub">Bu memnuniyetinizi Play Store'da da bizimle paylaşır mısınız? Yorumunuz bizim için çok değerli.</div>
-      <div class="mmg-rate-actions">
-        <a href="https://play.google.com/store/apps/details?id=com.mmgcreativity.dijitalfinans" target="_blank" rel="noopener" class="mmg-rate-btn-primary" id="mmgRatePlayStoreBtn">Play Store'a Git</a>
-        <button type="button" class="mmg-rate-btn-secondary" id="mmgRateSkipBtn">Belki Sonra</button>
-      </div>
-    </div>
-
-    <div id="mmgRateStepThanks" hidden>
-      <div class="mmg-rate-title">Teşekkürler!</div>
-      <div class="mmg-rate-sub">Geri bildiriminiz bize ulaştı, uygulamayı geliştirmemize yardımcı oluyor.</div>
-    </div>
-  </div>
-</div>
-<style>
-  #mmgRateBtn{
-    position:fixed; bottom:18px; left:22px; z-index:800;
-    width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
-    background:var(--surface-2,#1B2536); color:var(--teal,#3FB68A); font-size:19px;
-    cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,0.35);
-    display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, transform .15s ease;
-  }
-  #mmgRateBtn:hover{ border-color:var(--teal,#3FB68A); transform:translateY(-1px); }
-  #mmgRateOverlay{
-    position:fixed; inset:0; z-index:900; background:rgba(5,8,14,0.65);
-    display:flex; align-items:center; justify-content:center; padding:20px;
-  }
-  #mmgRateOverlay[hidden]{ display:none; }
-  #mmgRatePanel{
-    position:relative; width:100%; max-width:360px; background:var(--surface,#141C2B);
-    border:1px solid var(--hairline,#2A3448); border-radius:18px; padding:28px 24px;
-    box-shadow:0 24px 60px rgba(0,0,0,0.5); font-family:'Inter',sans-serif;
-  }
-  #mmgRateCloseBtn{
-    position:absolute; top:14px; right:14px; background:none; border:none;
-    color:var(--muted,#8D96AC); cursor:pointer; font-size:14px; padding:4px;
-  }
-  #mmgRateCloseBtn:hover{ color:var(--text,#EAEDF3); }
-  .mmg-rate-title{
-    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:var(--text,#EAEDF3);
-    margin-bottom:16px; text-align:center;
-  }
-  .mmg-rate-sub{
-    font-size:13px; color:var(--muted,#8D96AC); text-align:center; margin-bottom:20px; line-height:1.5;
-  }
-  .mmg-rate-thumbs{ display:flex; gap:12px; margin-bottom:16px; }
-  .mmg-rate-thumb{
-    flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;
-    background:var(--surface-2,#1B2536); border:1.5px solid var(--hairline,#2A3448); border-radius:12px;
-    color:var(--muted,#8D96AC); padding:16px 0; cursor:pointer; transition:all .15s ease;
-    font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
-  }
-  .mmg-rate-thumb:hover{ border-color:var(--brass-dim,#8A7440); color:var(--text,#EAEDF3); }
-  .mmg-rate-thumb.active#mmgThumbUp{ border-color:var(--teal,#3FB68A); color:var(--teal,#3FB68A); background:rgba(63,182,138,0.1); }
-  .mmg-rate-thumb.active#mmgThumbDown{ border-color:var(--red,#E2544B); color:var(--red,#E2544B); background:rgba(226,84,75,0.1); }
-  .mmg-rate-comment{
-    width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448);
-    border-radius:8px; padding:10px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13px;
-    resize:vertical; outline:none; margin-bottom:14px;
-  }
-  .mmg-rate-comment:focus{ border-color:var(--brass-dim,#8A7440); }
-  .mmg-rate-comment::placeholder{ color:var(--muted,#8D96AC); }
-  .mmg-rate-actions{ display:flex; flex-direction:column; gap:10px; }
-  .mmg-rate-btn-primary{
-    display:block; width:100%; box-sizing:border-box; text-align:center; background:var(--brass,#C6A15B); color:#1a1a1a; border:none;
-    border-radius:8px; padding:12px 0; font-family:'Inter',sans-serif; font-weight:700; font-size:14px;
-    cursor:pointer; text-decoration:none; transition:opacity .15s ease;
-  }
-  .mmg-rate-btn-primary:hover{ opacity:0.9; }
-  .mmg-rate-btn-secondary{
-    background:none; border:none; color:var(--muted,#8D96AC); font-family:'Inter',sans-serif; font-size:12.5px;
-    cursor:pointer; text-decoration:underline; padding:4px;
-  }
-  .mmg-rate-btn-secondary:hover{ color:var(--text,#EAEDF3); }
-</style>
-<script>
-(function(){
-  const btn = document.getElementById('mmgRateBtn');
-  const overlay = document.getElementById('mmgRateOverlay');
-  const closeBtn = document.getElementById('mmgRateCloseBtn');
-  const stepScore = document.getElementById('mmgRateStepScore');
-  const stepStore = document.getElementById('mmgRateStepStore');
-  const stepThanks = document.getElementById('mmgRateStepThanks');
-  const skipBtn = document.getElementById('mmgRateSkipBtn');
-  const thumbUp = document.getElementById('mmgThumbUp');
-  const thumbDown = document.getElementById('mmgThumbDown');
-  const commentBox = document.getElementById('mmgRateComment');
-  const submitBtn = document.getElementById('mmgRateSubmitBtn');
-
-  let likedValue = null; // 1 = beğendi, 0 = beğenmedi, null = henüz seçilmedi
-
-  function selectThumb(val){
-    likedValue = val;
-    thumbUp.classList.toggle('active', val === 1);
-    thumbDown.classList.toggle('active', val === 0);
-  }
-  thumbUp.addEventListener('click', () => selectThumb(1));
-  thumbDown.addEventListener('click', () => selectThumb(0));
-
-  function openOverlay(){
-    stepScore.hidden = false;
-    stepStore.hidden = true;
-    stepThanks.hidden = true;
-    selectThumb(null);
-    commentBox.value = '';
-    overlay.hidden = false;
-  }
-  function closeOverlay(){ overlay.hidden = true; }
-
-  async function submitFeedback(){
-    if(likedValue === null){
-      thumbUp.style.borderColor = 'var(--red,#E2544B)';
-      thumbDown.style.borderColor = 'var(--red,#E2544B)';
-      setTimeout(() => { thumbUp.style.borderColor=''; thumbDown.style.borderColor=''; }, 900);
-      return;
-    }
-    const comment = commentBox.value.trim();
-    try{ localStorage.setItem('mmg_feedback_liked', String(likedValue)); }catch(e){}
-    try{ localStorage.setItem('mmg_feedback_comment', comment); }catch(e){}
-    try{ localStorage.setItem('mmg_feedback_date', new Date().toISOString()); }catch(e){}
-
-    try{
-      if(window.mmgCloud && window.mmgCloud.currentUser && window.mmgCloud.setDoc && window.mmgCloud.doc){
-        const cloud = window.mmgCloud;
-        await cloud.setDoc(cloud.doc(cloud.db, 'feedback', cloud.currentUser.uid + '_' + Date.now()), {
-          liked: !!likedValue,
-          comment: comment || null,
-          page: location.pathname.split('/').pop(),
-          ratedAt: new Date().toISOString()
-        }, { merge: true });
-      }
-    }catch(e){ /* sessizce geç */ }
-
-    stepScore.hidden = true;
-    if(likedValue === 1){
-      stepStore.hidden = false;
-    } else {
-      stepThanks.hidden = false;
-    }
-  }
-
-  submitBtn.addEventListener('click', submitFeedback);
-  btn.addEventListener('click', openOverlay);
-  closeBtn.addEventListener('click', closeOverlay);
-  skipBtn.addEventListener('click', closeOverlay);
-  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });
-})();
-</script>
-<!-- ================== /Beğen Widget'ı ================== -->
 
 </body>
 </html>

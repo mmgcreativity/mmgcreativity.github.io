@@ -224,7 +224,11 @@
 
   tr.drawer-row td{ background:var(--surface-2); text-align:left; padding:16px 20px; }
   .drawer-inner{ display:flex; flex-direction:column; gap:10px; }
-  .drawer-title{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .drawer-title{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14.5px; color:var(--text); }
+  .drawer-header-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:12px; }
+  .drawer-header-row .drawer-title{ flex-shrink:0; padding-bottom:9px; }
+  .drawer-header-row .add-item-form{ flex:1; min-width:280px; margin-top:0; }
+  @media (max-width:560px){ .drawer-header-row .drawer-title{ padding-bottom:0; } }
   .item-list{ display:flex; flex-direction:column; gap:6px; }
   .item-row{
     display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -243,21 +247,21 @@
   .item-del:hover{ color:var(--red); }
   .empty-day{ color:var(--muted); font-size:12.5px; padding:6px 2px; }
 
-  .add-item-form{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:4px; }
-  .add-item-form input[type="text"], .add-item-form input.amount-in{
-    background:var(--surface); border:1px solid var(--hairline); border-radius:7px; color:var(--text);
+  .add-item-form{ display:grid; grid-template-columns:1.6fr 1fr 0.9fr auto; gap:10px; align-items:end; margin-top:4px; }
+  @media (max-width:640px){ .add-item-form{ grid-template-columns:1fr 1fr; } }
+  .add-item-form .field{ margin-bottom:0; min-width:0; }
+  .add-item-form .field label{ display:block; font-size:11.5px; color:var(--muted); margin-bottom:6px; }
+  .add-item-form input[type="text"], .add-item-form input.amount-in, .add-item-form select.cat-in{
+    width:100%; background:var(--surface); border:1px solid var(--hairline); border-radius:7px; color:var(--text);
     font-family:'Inter',sans-serif; font-size:13px; padding:9px 11px; outline:none; transition:border-color .15s ease;
+    box-sizing:border-box;
   }
-  .add-item-form input.amount-in{ font-family:'IBM Plex Mono',monospace; width:110px; }
-  .add-item-form input:focus{ border-color:var(--brass-dim); }
-  .add-item-form .desc-in{ flex:1; min-width:140px; }
-  .add-item-form select.cat-in{
-    background:var(--surface); border:1px solid var(--hairline); border-radius:7px; color:var(--text);
-    font-family:'Inter',sans-serif; font-size:12.5px; padding:9px 8px; outline:none; cursor:pointer;
-  }
+  .add-item-form input.amount-in{ font-family:'IBM Plex Mono',monospace; }
+  .add-item-form input:focus, .add-item-form select:focus{ border-color:var(--brass-dim); }
+  .add-item-form select.cat-in{ cursor:pointer; font-size:12.5px; }
   .add-item-form .add-btn{
     background:var(--grad); border:none; color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700;
-    font-size:12.5px; padding:9px 16px; border-radius:7px; cursor:pointer; transition:opacity .15s ease;
+    font-size:12.5px; padding:9px 16px; border-radius:7px; cursor:pointer; transition:opacity .15s ease; white-space:nowrap;
   }
   .add-item-form .add-btn:hover{ opacity:.9; }
 
@@ -328,8 +332,7 @@
   .rss-value.pos{ color:var(--teal); }
   .rss-value.neg{ color:var(--red); }
 
-  .scope-items-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
-  @media (max-width:720px){ .scope-items-grid{ grid-template-columns:1fr; } }
+  .scope-items-grid{ display:grid; grid-template-columns:1fr; gap:20px; margin-bottom:24px; }
   .scope-items-col{ background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:16px; }
 
   .breakdown{ margin-top:22px; display:grid; grid-template-columns:1fr 1fr; gap:24px; }
@@ -716,8 +719,11 @@
     el._t = setTimeout(() => { el.textContent = ''; el.className = 'io-msg'; }, 4000);
   }
 
+  // GEÇİCİ: önizleme için Excel/PDF dışa aktarma kilidi devre dışı. Yayına almadan önce bu satırı false yapın!
+  const MMG_GATE_DISABLED_FOR_PREVIEW = true;
   function isMember(){ return !!(window.mmgCloud && window.mmgCloud.currentUser); }
   function requireMember(){
+    if(MMG_GATE_DISABLED_FOR_PREVIEW) return true;
     if(!isMember()){
       showIoMsg('Bu özelliği kullanmak için üye girişi yapmanız gerekiyor (misafir modunda kullanılamaz).', true);
       return false;
@@ -725,7 +731,7 @@
     return true;
   }
   function updateMemberGate(){
-    document.getElementById('memberNotice').style.display = isMember() ? 'none' : 'block';
+    document.getElementById('memberNotice').style.display = (MMG_GATE_DISABLED_FOR_PREVIEW || isMember()) ? 'none' : 'block';
   }
 
   async function migrateLocalGuestDataToCloud(){
@@ -959,10 +965,19 @@
     const items = day ? day[type] : [];
     const cats = type === 'gider' ? GIDER_CATS : GELIR_CATS;
     let html = '<div class="drawer-inner">';
-    html += '<div class="drawer-title">' + (type==='gider' ? 'Giderler' : 'Gelirler') + '</div>';
-    if(!items || items.length === 0){
-      html += '<div class="empty-day">Bu güne ait ' + (type==='gider'?'gider':'gelir') + ' kaydı yok.</div>';
-    } else {
+    html += '<div class="drawer-header-row">';
+    html += '<div class="drawer-title">' + (type==='gider' ? 'Gider' : 'Gelir') + '</div>';
+    html += '<div class="add-item-form" data-day="'+key+'" data-type="'+type+'">' +
+      '<div class="field"><label>Açıklama <span style="color:var(--muted); font-weight:400;">(opsiyonel)</span></label>' +
+        '<input type="text" class="desc-in" placeholder="örn. Kira, Elektrik faturası..."></div>' +
+      '<div class="field"><label>Kategori</label>' +
+        '<select class="cat-in">' + cats.map(c=>'<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>').join('') + '</select></div>' +
+      '<div class="field"><label>Tutar</label>' +
+        '<input type="text" inputmode="decimal" class="amount-in" placeholder="0,00" data-decimals="2"></div>' +
+      '<button type="button" class="add-btn" data-action="add-item" data-day="'+key+'" data-type="'+type+'">+ Ekle</button>' +
+    '</div>';
+    html += '</div>';
+    if(items && items.length > 0){
       html += '<div class="item-list">';
       items.forEach(it => {
         html += '<div class="item-row">' +
@@ -978,12 +993,6 @@
       });
       html += '</div>';
     }
-    html += '<div class="add-item-form" data-day="'+key+'" data-type="'+type+'">' +
-      '<input type="text" class="desc-in" placeholder="Açıklama (örn. Kira, Elektrik faturası...)">' +
-      '<select class="cat-in">' + cats.map(c=>'<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>').join('') + '</select>' +
-      '<input type="text" inputmode="decimal" class="amount-in" placeholder="0,00" data-decimals="2">' +
-      '<button type="button" class="add-btn" data-action="add-item" data-day="'+key+'" data-type="'+type+'">+ Ekle</button>' +
-    '</div>';
     html += '</div>';
     return html;
   }
@@ -2188,6 +2197,14 @@
   const commentBox = document.getElementById('mmgRateComment');
   const submitBtn = document.getElementById('mmgRateSubmitBtn');
 
+  // Beğen butonu: günde bir kez gösterilir, tıklanınca (etkileşim alınca) o gün için kaybolur.
+  const MMG_RATE_TODAY = new Date().toISOString().slice(0,10);
+  try{
+    if(localStorage.getItem('mmg_rate_btn_interacted_date') === MMG_RATE_TODAY){
+      btn.style.display = 'none';
+    }
+  }catch(e){}
+
   let likedValue = null; // 1 = beğendi, 0 = beğenmedi, null = henüz seçilmedi
 
   function selectThumb(val){
@@ -2241,7 +2258,11 @@
   }
 
   submitBtn.addEventListener('click', submitFeedback);
-  btn.addEventListener('click', openOverlay);
+  btn.addEventListener('click', () => {
+    openOverlay();
+    try{ localStorage.setItem('mmg_rate_btn_interacted_date', MMG_RATE_TODAY); }catch(e){}
+    btn.style.display = 'none';
+  });
   closeBtn.addEventListener('click', closeOverlay);
   skipBtn.addEventListener('click', closeOverlay);
   overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });

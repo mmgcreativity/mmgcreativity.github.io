@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Paneli — mmgcreativity</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --coral:#FF6B4A; --teal:#3FB68A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .box{ max-width:480px; width:100%; text-align:center; }
+  h1{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:24px; margin-bottom:14px; }
+  p{ color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:8px; }
+  .badge{
+    display:inline-block; font-size:11px; letter-spacing:.1em; color:var(--teal);
+    background:rgba(63,182,138,0.1); border:1px solid rgba(63,182,138,0.3);
+    padding:5px 14px; border-radius:999px; margin-bottom:18px; font-family:'IBM Plex Mono',monospace;
+  }
+  .panel-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:28px; }
+  .panel-card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
+    padding:20px; text-align:left;
+  }
+  .panel-card h3{ font-size:14px; margin-bottom:6px; }
+  .panel-card p{ font-size:12.5px; margin-bottom:0; }
+</style>
+</head>
+<body>
+  <div class="box" id="content">
+    <p>Yükleniyor…</p>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+      authDomain: "mmgcreativity-31263.firebaseapp.com",
+      projectId: "mmgcreativity-31263",
+      storageBucket: "mmgcreativity-31263.firebasestorage.app",
+      messagingSenderId: "243143536600",
+      appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+      measurementId: "G-X8HEZRNWWS"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const content = document.getElementById('content');
+
+    auth.onAuthStateChanged(async (user) => {
+      if(!user){
+        content.innerHTML = '<h1>🔒 Giriş gerekli</h1><p>Bu sayfayı görüntülemek için ana sayfadan giriş yapmanız gerekiyor.</p>';
+        return;
+      }
+      try{
+        const tokenResult = await user.getIdTokenResult(true);
+        if(!tokenResult.claims.admin){
+          content.innerHTML = '<h1>⛔ Yetkiniz yok</h1><p>Bu sayfaya sadece admin yetkisi olan kullanıcılar erişebilir.</p>';
+          return;
+        }
+        content.innerHTML = `
+          <div class="badge">✓ ADMİN OLARAK GİRİŞ YAPILDI</div>
+          <h1>🔐 Admin Paneli</h1>
+          <p>Hoş geldiniz, ${user.email || user.displayName || 'Admin'}.</p>
+          <div class="panel-grid">
+            <div class="panel-card">
+              <h3>👥 Kullanıcılar</h3>
+              <p>Kullanıcı listesi ve yönetimi (yakında)</p>
+            </div>
+            <div class="panel-card">
+              <h3>📊 İstatistikler</h3>
+              <p>Kullanım verileri (yakında)</p>
+            </div>
+            <div class="panel-card">
+              <h3>⚙️ Ayarlar</h3>
+              <p>Site ayarları (yakında)</p>
+            </div>
+            <div class="panel-card">
+              <h3>📝 İçerik</h3>
+              <p>İçerik yönetimi (yakında)</p>
+            </div>
+          </div>
+        `;
+      }catch(e){
+        content.innerHTML = '<h1>❌ Hata</h1><p>' + e.message + '</p>';
+      }
+    });
+  </script>
+</body>
+</html>

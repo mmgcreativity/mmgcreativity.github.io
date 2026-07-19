@@ -3,12 +3,12 @@
 <head>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-WVWJ4VZE0C"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BFZXS7R9BN"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-WVWJ4VZE0C');
+  gtag('config', 'G-BFZXS7R9BN');
 </script>
 
 <meta charset="UTF-8">
@@ -81,43 +81,8 @@
   <div class="cta">
     <strong>Kendi rakamlarınızla hesaplamak ister misiniz?</strong>
     <p style="margin-top:8px; margin-bottom:0;">Rotatif Kredi Hesaplama aracımızla tutar, vade ve faiz oranınızı girerek toplam maliyetinizi saniyeler içinde görün.</p>
-    <a href="Hesaplama_Araclari.html#rotatif" class="btn">Hesaplama Aracını Aç →</a>
+    <a href="Rotatif_Kredi_Hesaplama.html" class="btn">Hesaplama Aracını Aç →</a>
   </div>
 </div>
-<button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır">↓</button>
-<style>
-  #mmgScrollDownBtn{
-    position:fixed; right:20px; bottom:20px; z-index:500;
-    width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
-    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B);
-    font-size:20px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 8px 20px rgba(0,0,0,0.35); transition:opacity .2s ease, transform .2s ease;
-    opacity:0; pointer-events:none;
-  }
-  #mmgScrollDownBtn.show{ opacity:1; pointer-events:auto; }
-  #mmgScrollDownBtn:hover{ transform:translateY(2px); }
-</style>
-<script>
-(function(){
-  var btn = document.getElementById('mmgScrollDownBtn');
-  function nearBottom(){
-    return (window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 40);
-  }
-  function updateVisibility(){
-    if(document.body.scrollHeight <= window.innerHeight + 60 || nearBottom()){
-      btn.classList.remove('show');
-    } else {
-      btn.classList.add('show');
-    }
-  }
-  btn.addEventListener('click', function(){
-    window.scrollBy({ top: window.innerHeight * 0.85, behavior: 'smooth' });
-  });
-  window.addEventListener('scroll', updateVisibility);
-  window.addEventListener('resize', updateVisibility);
-  updateVisibility();
-})();
-</script>
-
 </body>
 </html>
