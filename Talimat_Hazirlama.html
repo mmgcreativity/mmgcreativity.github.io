@@ -1748,38 +1748,67 @@ function mmgApplyTurkishFont(doc){
     } catch(e){ showIoMsg('PDF oluşturulurken hata oluştu.', true); }
   });
 
+  // ---- PDF'i doğrudan yazdır (HTML sayfası değil, indirilen PDF ile birebir aynı çıktı) ----
+  function mmgPrintPdf(doc){
+    try{
+      const blobUrl = doc.output('bloburl');
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = 'none';
+      iframe.src = blobUrl;
+      document.body.appendChild(iframe);
+      iframe.onload = () => {
+        setTimeout(() => {
+          try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch(e){}
+        }, 200);
+      };
+    } catch(err){
+      window.print(); // beklenmedik bir hata olursa eski yönteme geri düş
+    }
+  }
+
   document.getElementById('printBtn').addEventListener('click', () => {
-    window.print();
+    const { doc } = buildHavalePdf();
+    mmgPrintPdf(doc);
   });
 
-  document.getElementById('shareBtn').addEventListener('click', () => {
+  document.getElementById('shareBtn').addEventListener('click', async () => {
     try{
-      const { ozet } = buildHavalePdf();
-      openMailDirect('Banka Havale Talimatı', ozet, showIoMsg);
+      const { doc, ozet } = buildHavalePdf();
+      await mmgShareAsPdf(doc, 'banka-havale-talimati.pdf', 'Banka Havale Talimatı', ozet, showIoMsg);
     } catch(e){
-      showIoMsg('E-posta açılırken bir hata oluştu.', true);
+      showIoMsg('Paylaşılırken bir hata oluştu.', true);
     }
   });
 
-  // ---- Doğrudan E-posta ile Gönderim (Outlook / varsayılan mail istemcisi) ----
-  function openMailDirect(title, ozet, showMsgFn){
-    window.open('mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(ozet), '_blank');
-    showMsgFn('E-posta uygulaması açıldı.');
+  // ---- PDF'i indirmeden, gerçek dosya olarak paylaş (mümkünse) ----
+  async function mmgShareAsPdf(doc, filename, title, ozet, showMsgFn){
+    try{
+      const blob = doc.output('blob');
+      const file = new File([blob], filename, { type: 'application/pdf' });
+      if(navigator.canShare && navigator.canShare({ files: [file] })){
+        await navigator.share({ files: [file], title: title, text: ozet });
+        showMsgFn('Paylaşım penceresi açıldı.');
+        return;
+      }
+    } catch(err){
+      if(err && err.name === 'AbortError') return; // kullanıcı paylaşımı iptal etti
+    }
+    // Bu cihaz/tarayıcı dosya paylaşımını desteklemiyor: PDF'i indirip metin penceresini açıyoruz
+    doc.save(filename);
+    showMsgFn('Bu tarayıcı PDF\'i doğrudan paylaşmayı desteklemiyor; dosya indirildi, açılan pencereye elle ekleyebilirsiniz.');
   }
 
-  // ---- Doğrudan WhatsApp ile Gönderim ----
-  function openWhatsappDirect(ozet, showMsgFn){
-    window.open('https://wa.me/?text=' + encodeURIComponent(ozet), '_blank');
-    showMsgFn('PDF dosyası indirildi. Açılan WhatsApp sohbetine ayrıca dosya olarak ekleyebilirsiniz.');
-  }
-
-  document.getElementById('shareWaBtn').addEventListener('click', () => {
+  document.getElementById('shareWaBtn').addEventListener('click', async () => {
     try{
       const { doc, ozet } = buildHavalePdf();
-      doc.save('banka-havale-talimati.pdf');
-      openWhatsappDirect(ozet, showIoMsg);
+      await mmgShareAsPdf(doc, 'banka-havale-talimati.pdf', 'Banka Havale Talimatı', ozet, showIoMsg);
     } catch(e){
-      showIoMsg('WhatsApp açılırken bir hata oluştu.', true);
+      showIoMsg('Paylaşılırken bir hata oluştu.', true);
     }
   });
 
@@ -2227,27 +2256,27 @@ function mmgApplyTurkishFont(doc){
   });
 
   document.getElementById('printGenericBtn').addEventListener('click', () => {
-    window.print();
+    const { doc } = buildGenericPdf();
+    mmgPrintPdf(doc);
   });
 
-  document.getElementById('shareGenericBtn').addEventListener('click', () => {
-    try{
-      const cfg = LETTER_TYPES[currentGenericType];
-      const { ozet } = buildGenericPdf();
-      openMailDirect(cfg.shareTitle, ozet, showIoMsgGeneric);
-    } catch(e){
-      showIoMsgGeneric('E-posta açılırken bir hata oluştu.', true);
-    }
-  });
-
-  document.getElementById('shareGenericWaBtn').addEventListener('click', () => {
+  document.getElementById('shareGenericBtn').addEventListener('click', async () => {
     try{
       const cfg = LETTER_TYPES[currentGenericType];
       const { doc, ozet } = buildGenericPdf();
-      doc.save(cfg.fileName);
-      openWhatsappDirect(ozet, showIoMsgGeneric);
+      await mmgShareAsPdf(doc, cfg.fileName, cfg.shareTitle, ozet, showIoMsgGeneric);
     } catch(e){
-      showIoMsgGeneric('WhatsApp açılırken bir hata oluştu.', true);
+      showIoMsgGeneric('Paylaşılırken bir hata oluştu.', true);
+    }
+  });
+
+  document.getElementById('shareGenericWaBtn').addEventListener('click', async () => {
+    try{
+      const cfg = LETTER_TYPES[currentGenericType];
+      const { doc, ozet } = buildGenericPdf();
+      await mmgShareAsPdf(doc, cfg.fileName, cfg.shareTitle, ozet, showIoMsgGeneric);
+    } catch(e){
+      showIoMsgGeneric('Paylaşılırken bir hata oluştu.', true);
     }
   });
 
@@ -2421,25 +2450,25 @@ function mmgApplyTurkishFont(doc){
   });
 
   document.getElementById('printSmBtn').addEventListener('click', () => {
-    window.print();
+    const { doc } = buildSmPdf();
+    mmgPrintPdf(doc);
   });
 
-  document.getElementById('shareSmBtn').addEventListener('click', () => {
+  document.getElementById('shareSmBtn').addEventListener('click', async () => {
     try{
-      const { ozet } = buildSmPdf();
-      openMailDirect('Talimat', ozet, showIoMsgSm);
+      const { doc, ozet } = buildSmPdf();
+      await mmgShareAsPdf(doc, 'serbest-metin-talimati.pdf', 'Talimat', ozet, showIoMsgSm);
     } catch(e){
-      showIoMsgSm('E-posta açılırken bir hata oluştu.', true);
+      showIoMsgSm('Paylaşılırken bir hata oluştu.', true);
     }
   });
 
-  document.getElementById('shareSmWaBtn').addEventListener('click', () => {
+  document.getElementById('shareSmWaBtn').addEventListener('click', async () => {
     try{
       const { doc, ozet } = buildSmPdf();
-      doc.save('serbest-metin-talimati.pdf');
-      openWhatsappDirect(ozet, showIoMsgSm);
+      await mmgShareAsPdf(doc, 'serbest-metin-talimati.pdf', 'Talimat', ozet, showIoMsgSm);
     } catch(e){
-      showIoMsgSm('WhatsApp açılırken bir hata oluştu.', true);
+      showIoMsgSm('Paylaşılırken bir hata oluştu.', true);
     }
   });
 </script>
