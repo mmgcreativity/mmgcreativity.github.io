@@ -63,38 +63,61 @@
   .mono{font-family:'IBM Plex Mono',monospace;}
 
   header.masthead{
-    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
+    max-width:1180px; margin:0 auto; padding:22px 24px 16px;
     border-bottom:1px solid var(--hairline);
   }
   .masthead-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
-  .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(20px,3.2vw,30px); letter-spacing:-0.01em; color:var(--text);}
+  .subtitle{color:var(--muted); font-size:13.5px; margin-top:4px;}
   .guide-btn{
     display:inline-flex; align-items:center; gap:8px; flex-shrink:0;
     font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:600; color:var(--text);
     text-decoration:none; border:1px solid var(--hairline); background:var(--surface-2);
-    padding:10px 16px; border-radius:8px; transition:border-color .15s ease, color .15s ease;
+    padding:8px 14px; border-radius:8px; transition:border-color .15s ease, color .15s ease;
   }
   .guide-btn:hover{ color:var(--coral); border-color:var(--coral); }
   .masthead-actions{ display:flex; gap:10px; flex-wrap:wrap; }
 
-  main{ max-width:1180px; margin:0 auto; padding:36px 24px; }
+  main{ max-width:1180px; margin:0 auto; padding:20px 24px; }
   .section-title{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:20px; margin-bottom:20px;}
 
   /* ---- Ay/Yıl kontrolleri ---- */
-  .controls-row{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:14px; margin-bottom:32px; }
+  .controls-row{ display:flex; flex-direction:column; align-items:flex-start; gap:10px; margin-bottom:12px; }
+  .date-controls-group{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+  .action-controls-grid{ display:flex; flex-wrap:wrap; gap:10px; }
   .field{ margin-bottom:0; }
   .field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:8px; }
+  .month-nav{
+    display:flex; align-items:stretch; gap:0; background:var(--surface-2); border:1px solid var(--hairline);
+    border-radius:10px;
+  }
+  .month-nav > *:not(:first-child){ border-left:1px solid var(--hairline); }
+  .month-nav > *:first-child{ border-radius:10px 0 0 10px; }
+  .month-nav > *:last-child{ border-radius:0 10px 10px 0; }
+  .month-nav .custom-select{ width:78px; }
+  .month-nav .select-trigger{
+    border:none; border-radius:inherit; background:transparent; padding:8px 4px; font-size:12.5px;
+  }
+  .nav-arrow-btn{
+    background:transparent; border:none; color:var(--muted); font-size:11.5px; cursor:pointer;
+    padding:0 8px; transition:color .15s ease, background .15s ease; font-family:'Inter',sans-serif;
+    border-radius:inherit;
+  }
+  .nav-arrow-btn:hover{ color:var(--brass); background:var(--surface); }
+  .day-nav-arrows{ display:flex; gap:4px; }
+  .day-nav-arrows .nav-arrow-btn{
+    border:1px solid var(--hairline); border-radius:6px; padding:6px 10px; background:var(--surface-2);
+  }
+  .day-nav-arrows .nav-arrow-btn:disabled{ opacity:.3; cursor:default; }
+  .day-nav-arrows .nav-arrow-btn:disabled:hover{ background:var(--surface-2); color:var(--muted); }
   .custom-select{ position:relative; width:170px; }
   .select-trigger{
-    width:100%; display:flex; align-items:center; justify-content:space-between;
+    width:100%; display:flex; align-items:center; justify-content:center;
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
-    padding:12px 14px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:14.5px; font-weight:600;
-    cursor:pointer; transition:border-color .15s ease;
+    padding:10px 10px; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
+    cursor:pointer; transition:border-color .15s ease, background .15s ease, color .15s ease;
   }
-  .select-trigger:hover{ border-color:var(--brass-dim); }
-  .select-trigger .chevron{ color:var(--muted); font-size:12px; transition:transform .15s ease; }
-  .custom-select.open .select-trigger .chevron{ transform:rotate(180deg); }
+  .select-trigger:hover{ border-color:var(--brass); background:var(--surface); color:var(--brass); }
   .select-options{
     display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:30;
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px;
@@ -102,41 +125,59 @@
   }
   .custom-select.open .select-options{ display:block; }
   .select-option{
-    padding:10px 14px; font-family:'IBM Plex Mono',monospace; font-size:13.5px; color:var(--text);
+    padding:10px 14px; font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600; color:var(--text);
     cursor:pointer; transition:background .12s ease;
   }
   .select-option:hover{ background:var(--surface); }
   .select-option.selected{ background:rgba(198,161,91,0.12); color:var(--brass); }
   .ghost-btn{
-    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
-    color:var(--text); font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
-    padding:12px 16px; cursor:pointer; transition:border-color .15s ease, background .15s ease; white-space:nowrap;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:9px;
+    color:var(--text); font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600;
+    padding:0 9px; height:38px; display:inline-flex; align-items:center; cursor:pointer;
+    transition:border-color .15s ease, background .15s ease; white-space:nowrap;
   }
   .ghost-btn:hover{ border-color:var(--brass-dim); background:var(--surface); }
   .controls-spacer{ flex:1; }
+  .top-combined-row{ display:flex; flex-wrap:nowrap; align-items:center; gap:8px; overflow-x:auto; padding-bottom:2px; }
+  .top-combined-row::-webkit-scrollbar{ height:0; }
+  .top-combined-row .report-tabs{ flex-shrink:0; }
+  .top-combined-row .date-controls-group{ flex-shrink:0; }
 
   /* ---- Özet kartları ---- */
-  .summary-cards{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; margin-bottom:36px; }
+  .content-grid{ display:grid; grid-template-columns:1fr 240px; gap:18px; align-items:start; margin-bottom:20px; }
+  .content-main{ min-width:0; }
+  .content-side{ display:flex; flex-direction:column; }
+  .summary-cards{ display:flex; flex-direction:column; gap:12px; }
+  @media (max-width:900px){ .content-grid{ grid-template-columns:1fr; } .content-side{ order:-1; } .summary-cards{ flex-direction:row; flex-wrap:wrap; } .summary-cards .summary-card{ flex:1; min-width:160px; } }
   .summary-card{
-    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:20px 22px;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:16px 18px;
     position:relative; overflow:hidden;
   }
-  .summary-card::before{ content:''; position:absolute; top:0; left:0; right:0; height:3px; opacity:.9; }
+  .summary-card::before{ content:''; position:absolute; top:0; left:0; right:0; height:4px; opacity:.9; }
   .summary-card.sc-gelir::before{ background:var(--teal); }
   .summary-card.sc-gider::before{ background:var(--red); }
   .summary-card.sc-net::before{ background:var(--grad); }
-  .summary-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
+  .summary-label{
+    display:flex; align-items:center; gap:8px; font-family:'Space Grotesk',sans-serif; font-weight:600;
+    font-size:14px; letter-spacing:.02em; color:var(--text); text-transform:none; margin-bottom:8px;
+  }
+  .summary-label-icon{
+    display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:6px;
+    font-size:10px; flex-shrink:0;
+  }
+  .sc-gelir .summary-label-icon{ background:rgba(63,182,138,0.15); color:var(--teal); }
+  .sc-gider .summary-label-icon{ background:rgba(226,84,75,0.15); color:var(--red); }
+  .sc-net .summary-label-icon{ background:rgba(198,161,91,0.15); color:var(--brass); }
   .summary-value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:26px; }
   .summary-value.pos{ color:var(--teal); }
   .summary-value.neg{ color:var(--red); }
   .summary-sub{ font-size:12px; color:var(--muted); margin-top:6px; }
-  @media (max-width:720px){ .summary-cards{ grid-template-columns:1fr; } }
 
   /* ---- Hafta kartları ---- */
-  .weeks-container{ display:flex; flex-direction:column; gap:16px; margin-bottom:40px; }
+  .weeks-container{ display:flex; flex-direction:column; gap:12px; margin-bottom:24px; }
   .week-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
   .week-header{
-    display:flex; align-items:center; justify-content:space-between; padding:14px 18px;
+    display:flex; align-items:center; justify-content:space-between; padding:11px 16px;
     background:var(--surface-2); border-bottom:1px solid var(--hairline);
   }
   .week-header-left{ display:flex; align-items:baseline; gap:10px; }
@@ -149,10 +190,10 @@
   table.day-table{ width:100%; border-collapse:collapse; }
   table.day-table th{
     font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:var(--muted); text-transform:uppercase;
-    text-align:right; padding:9px 16px; border-bottom:1px solid var(--hairline);
+    text-align:right; padding:7px 16px; border-bottom:1px solid var(--hairline);
   }
   table.day-table th:first-child{ text-align:left; }
-  table.day-table td{ padding:10px 16px; border-bottom:1px solid var(--hairline); font-size:13.5px; text-align:right; vertical-align:middle; }
+  table.day-table td{ padding:7px 16px; border-bottom:1px solid var(--hairline); font-size:13.5px; text-align:right; vertical-align:middle; }
   table.day-table td:first-child{ text-align:left; }
   table.day-table tr:last-child > td{ border-bottom:none; }
   table.day-table tr.drawer-row > td{ border-bottom:1px solid var(--hairline); }
@@ -233,8 +274,10 @@
   }
   .report-tab:hover{ color:var(--text); border-color:var(--brass-dim); }
   .report-tab.active{ background:var(--grad); color:#fff; border-color:transparent; }
+  .report-tabs-primary{ gap:5px; }
+  .report-tabs-primary .report-tab{ font-size:12px; padding:9px 10px; border-radius:8px; }
 
-  .report-picker{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:18px; }
+  .report-picker{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
   .report-picker:empty{ margin-bottom:0; }
   .picker-pill{
     background:var(--surface); border:1px solid var(--hairline); border-radius:999px;
@@ -244,6 +287,28 @@
   .picker-pill:hover{ border-color:var(--brass-dim); color:var(--text); }
   .picker-pill.active{ background:rgba(198,161,91,0.16); border-color:var(--brass); color:var(--brass); }
   .picker-pill.today-pill{ box-shadow:0 0 0 1px var(--teal) inset; }
+
+  .calendar-picker{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
+    padding:16px 18px 18px; margin-bottom:18px; max-width:440px;
+  }
+  .calendar-dow-row{ display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; margin-bottom:8px; }
+  .calendar-dow{
+    text-align:center; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em;
+    color:var(--muted); text-transform:uppercase; padding-bottom:4px;
+  }
+  .calendar-grid{ display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; }
+  .calendar-day{
+    aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;
+    background:var(--surface-2); border:1px solid transparent; border-radius:9px;
+    color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600;
+    cursor:pointer; transition:all .15s ease; position:relative;
+  }
+  .calendar-day:hover{ border-color:var(--brass-dim); }
+  .calendar-day.active{ background:var(--grad); color:#fff; }
+  .calendar-day.today:not(.active){ box-shadow:0 0 0 1.5px var(--teal) inset; color:var(--teal); }
+  .calendar-day.empty{ background:none; cursor:default; pointer-events:none; }
+  @media (max-width:480px){ .calendar-picker{ max-width:none; } }
 
   .report-scope-summary{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; margin-bottom:20px; }
   @media (max-width:720px){ .report-scope-summary{ grid-template-columns:1fr; } }
@@ -290,6 +355,21 @@
   .archive-btn:hover{ border-color:var(--brass-dim); }
   .archive-card-detail{ display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--hairline); }
   .archive-card.expanded .archive-card-detail{ display:block; }
+  .archive-weekly{ margin-bottom:20px; }
+  .archive-weekly h3{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px; margin-bottom:10px; }
+  .archive-week-row{
+    display:flex; justify-content:space-between; align-items:center; padding:9px 0;
+    border-bottom:1px solid var(--hairline); font-size:13.5px;
+  }
+  .archive-week-row:last-child{ border-bottom:none; }
+  .aw-label{ color:var(--text); }
+  .aw-net{ font-family:'IBM Plex Mono',monospace; font-weight:700; }
+  .aw-net.pos{ color:var(--teal); }
+  .aw-net.neg{ color:var(--red); }
+  .aw-net.zero{ color:var(--muted); }
+  .archive-week-total{ margin-top:4px; padding-top:12px; border-top:1px solid var(--hairline); }
+  .archive-week-total .aw-label{ font-family:'Space Grotesk',sans-serif; font-weight:700; }
+  .archive-week-total .aw-net{ font-size:15px; }
   @media (max-width:720px){ .breakdown{ grid-template-columns:1fr; } }
   .breakdown-col h3{ font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600; margin-bottom:12px; }
   .bd-row{ margin-bottom:10px; }
@@ -327,12 +407,13 @@
   <div class="masthead-row">
     <div>
       <h1 class="title">Nakit Akış Tablosu</h1>
-      <div class="subtitle">Ayı seçin, günlük gider ve gelirlerinizi girin — haftalık ve aylık durumunuzu anında görün</div>
+      <div class="subtitle">Tarih seçin ve günlük, haftalık, aylık ve yıllık dönemlerde gelir gider analizinizi görün.</div>
     </div>
     <div class="masthead-actions">
       <a href="index.html" class="guide-btn">← Ana Sayfa</a>
       <a href="rehber-nakit-akis-tablosu.html" class="guide-btn">📖 Rehber</a>
-      <a href="Odemeler.html" class="guide-btn">💳 Ödemeler</a>
+      <a href="Giderler.html" class="guide-btn">💳 Giderler</a>
+      <a href="Gelirler.html" class="guide-btn">💰 Gelirler</a>
     </div>
   </div>
 </header>
@@ -340,71 +421,79 @@
 <main>
   <section class="table-section">
 
-    <div class="controls-row">
-      <div class="field">
-        <label>Ay</label>
-        <div class="custom-select" id="monthSelect">
-          <button type="button" class="select-trigger" id="monthTrigger"><span id="monthTriggerLabel">—</span><span class="chevron">▾</span></button>
-          <div class="select-options" id="monthOptions"></div>
+    <div class="content-grid">
+      <div class="content-main">
+        <div class="controls-row" id="secondaryControls">
+          <div class="top-combined-row">
+            <div class="report-tabs report-tabs-primary" id="reportTabs">
+              <button type="button" class="report-tab" data-tab="gunluk">Günlük</button>
+              <button type="button" class="report-tab" data-tab="haftalik">Haftalık</button>
+              <button type="button" class="report-tab" data-tab="aylik">Aylık</button>
+              <button type="button" class="report-tab" data-tab="yillik">Yıllık</button>
+            </div>
+            <div class="date-controls-group" id="dateNavGroup">
+              <div class="month-nav">
+                <button type="button" class="nav-arrow-btn" id="prevMonthBtn" title="Önceki">◀</button>
+                <div class="custom-select" id="daySelect" style="width:46px; display:none;">
+                  <button type="button" class="select-trigger" id="dayTrigger"><span id="dayTriggerLabel">—</span></button>
+                  <div class="select-options" id="dayOptions"></div>
+                </div>
+                <div class="custom-select" id="monthSelect">
+                  <button type="button" class="select-trigger" id="monthTrigger"><span id="monthTriggerLabel">—</span></button>
+                  <div class="select-options" id="monthOptions"></div>
+                </div>
+                <div class="custom-select" id="yearSelect" style="width:66px;">
+                  <button type="button" class="select-trigger" id="yearTrigger"><span id="yearTriggerLabel">—</span></button>
+                  <div class="select-options" id="yearOptions"></div>
+                </div>
+                <button type="button" class="nav-arrow-btn" id="nextMonthBtn" title="Sonraki">▶</button>
+              </div>
+              <button type="button" class="ghost-btn" id="gotoTodayBtn">📍 Bugün</button>
+              <button type="button" class="ghost-btn" id="manualSaveBtn">💾 Kaydet</button>
+              <button type="button" class="ghost-btn" id="clearMonthBtn">🗑 Temizle</button>
+              <button type="button" class="ghost-btn" id="undoClearBtn" style="display:none;">↩ Geri Al</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-picker" id="reportPicker"></div>
+
+        <div class="weeks-container" id="weeksContainer"></div>
+
+        <div class="archive-wrap" id="archiveContainer" style="display:none;">
+          <div class="section-title">Arşivlenmiş Raporlarım</div>
+          <div class="archive-list" id="archiveList"></div>
         </div>
       </div>
-      <div class="field">
-        <label>Yıl</label>
-        <div class="custom-select" id="yearSelect" style="width:110px;">
-          <button type="button" class="select-trigger" id="yearTrigger"><span id="yearTriggerLabel">—</span><span class="chevron">▾</span></button>
-          <div class="select-options" id="yearOptions"></div>
+
+      <div class="content-side" id="contentSide">
+        <div class="summary-cards" id="summaryCardsSection">
+          <div class="summary-card sc-gelir">
+            <div class="summary-label"><span class="summary-label-icon">▲</span><span id="sumGelirLabel">Gelir</span></div>
+            <div class="summary-value pos" id="sumGelir">0,00 TL</div>
+            <div class="summary-sub" id="sumGelirSub">&nbsp;</div>
+          </div>
+          <div class="summary-card sc-gider">
+            <div class="summary-label"><span class="summary-label-icon">▼</span><span id="sumGiderLabel">Gider</span></div>
+            <div class="summary-value neg" id="sumGider">0,00 TL</div>
+            <div class="summary-sub" id="sumGiderSub">&nbsp;</div>
+          </div>
+          <div class="summary-card sc-net">
+            <div class="summary-label"><span class="summary-label-icon">◆</span><span id="sumNetLabel">Net Durum</span></div>
+            <div class="summary-value" id="sumNet">0,00 TL</div>
+            <div class="summary-sub" id="sumNetSub">&nbsp;</div>
+          </div>
         </div>
       </div>
-      <button type="button" class="ghost-btn" id="gotoTodayBtn">📍 Bugüne Git</button>
-
-      <div class="controls-spacer"></div>
-
-      <div class="report-tabs" id="reportTabs">
-        <button type="button" class="report-tab" data-tab="gunluk">Günlük</button>
-        <button type="button" class="report-tab" data-tab="haftalik">Haftalık</button>
-        <button type="button" class="report-tab" data-tab="aylik">Aylık</button>
-        <button type="button" class="report-tab" data-tab="yillik">Yıllık</button>
-        <button type="button" class="report-tab" data-tab="arsiv">Arşiv</button>
-      </div>
-
-      <div class="controls-spacer"></div>
-
-      <button type="button" class="ghost-btn" id="demoFillBtn">✨ Örnek Verilerle Doldur</button>
-      <button type="button" class="ghost-btn" id="clearMonthBtn">🗑 Bu Ayı Temizle</button>
-      <button type="button" class="ghost-btn" id="archiveSaveBtnTop">🗄 Arşive Ekle</button>
-    </div>
-
-    <div class="report-picker" id="reportPicker"></div>
-
-    <div class="summary-cards" id="summaryCardsSection">
-      <div class="summary-card sc-gelir">
-        <div class="summary-label" id="sumGelirLabel">Gelir</div>
-        <div class="summary-value pos" id="sumGelir">0,00 TL</div>
-        <div class="summary-sub" id="sumGelirSub">&nbsp;</div>
-      </div>
-      <div class="summary-card sc-gider">
-        <div class="summary-label" id="sumGiderLabel">Gider</div>
-        <div class="summary-value neg" id="sumGider">0,00 TL</div>
-        <div class="summary-sub" id="sumGiderSub">&nbsp;</div>
-      </div>
-      <div class="summary-card sc-net">
-        <div class="summary-label" id="sumNetLabel">Net Durum</div>
-        <div class="summary-value" id="sumNet">0,00 TL</div>
-        <div class="summary-sub" id="sumNetSub">&nbsp;</div>
-      </div>
-    </div>
-
-    <div class="weeks-container" id="weeksContainer"></div>
-
-    <div class="archive-wrap" id="archiveContainer" style="display:none;">
-      <div class="section-title">Arşivlenmiş Raporlarım</div>
-      <div class="archive-list" id="archiveList"></div>
     </div>
 
     <section class="reports-section" id="reportsSection">
       <div class="reports-title-row">
         <div class="section-title" style="margin-bottom:0;">Raporlar</div>
-        <button type="button" class="archive-save-btn" id="archiveSaveBtn">🗄 Bu Raporu Arşivle</button>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button type="button" class="archive-save-btn" id="archiveSaveBtn">🗄 Bu Raporu Arşivle</button>
+          <button type="button" class="archive-save-btn" id="viewArchiveBtn">📁 Arşiv</button>
+        </div>
       </div>
 
       <div class="reports-list" id="reportsList"></div>
@@ -421,8 +510,8 @@
     </section>
 
     <div class="io-toolbar">
-      <button type="button" class="io-btn" id="exportExcelBtn">⬇ Excel'e Aktar</button>
-      <button type="button" class="io-btn" id="exportPdfBtn">⬇ PDF'e Aktar</button>
+      <button type="button" class="io-btn" id="exportExcelBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
+      <button type="button" class="io-btn" id="exportPdfBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
     </div>
     <div class="io-msg" id="memberNotice" style="color:var(--muted);">🔒 Excel/PDF dışa aktarma ve cihazlar arası bulut senkronizasyonu şimdilik yalnızca üye girişi yapan kullanıcılar için aktiftir. Misafir modunda verileriniz yalnızca bu tarayıcıda saklanır.</div>
     <div class="io-msg" id="ioMsg"></div>
@@ -433,7 +522,7 @@
 
 <footer>
   <div class="credit">
-    <span>powered by</span>
+    <span>Powered by</span>
     <span class="signature-pill">
       <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
       <span id="credit-fallback" class="credit-fallback">M</span>
@@ -447,7 +536,7 @@
   const AY_ADLARI = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
   const GUN_ADLARI = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
   const GIDER_CATS = ['Kira','Maaş / Personel','Tedarikçi / Stok','Kredi / Taksit Ödemesi','Kredi Kartı','Vergi / SGK','Fatura','Teminat Mektubu','Komisyon','Diğer Gider'];
-  const GELIR_CATS = ['Satış Geliri','Tahsilat','Yatırım Geliri','Diğer Gelir'];
+  const GELIR_CATS = ['Nakit Tahsilat','Çek Tahsilatı','Senet Tahsilatı','POS Tahsilatı','Faiz Geliri'];
   const CAT_COLORS = ['coral','magenta','violet','azure','teal','amber','red','blue'];
   const CAT_ALL = GIDER_CATS.concat(GELIR_CATS);
 
@@ -583,6 +672,12 @@
 
   async function loadMonth(){
     const mk = monthKeyOf(selYear, selMonth);
+    if(mk !== clearedBackupKey){
+      clearedBackup = null;
+      clearedBackupKey = null;
+      const undoBtn = document.getElementById('undoClearBtn');
+      if(undoBtn) undoBtn.style.display = 'none';
+    }
     const local = loadLocal(mk);
     monthData = local || {};
     resetReportSelection();
@@ -623,15 +718,66 @@
     document.getElementById('memberNotice').style.display = isMember() ? 'none' : 'block';
   }
 
+  async function migrateLocalGuestDataToCloud(){
+    if(!isMember()) return false;
+    const cloud = window.mmgCloud;
+    const prefix = 'mmg_nat_';
+    let migratedAny = false;
+    for(let i=0; i<localStorage.length; i++){
+      const key = localStorage.key(i);
+      if(!key || key.indexOf(prefix) !== 0) continue;
+      const mk = key.slice(prefix.length);
+      if(!/^\d{4}-\d{2}$/.test(mk)) continue; // 'archive' gibi ay formatında olmayan anahtarları atla
+      let localData;
+      try{ localData = JSON.parse(localStorage.getItem(key)); }catch(e){ continue; }
+      if(!localData || Object.keys(localData).length === 0) continue;
+      try{
+        const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk));
+        if(snap.exists() && snap.data().data){
+          const cloudData = snap.data().data;
+          const merged = Object.assign({}, cloudData);
+          let changed = false;
+          Object.keys(localData).forEach(dk => {
+            const localDay = localData[dk] || {};
+            const cloudDay = merged[dk] ? Object.assign({}, merged[dk]) : { gider:[], gelir:[], expanded:{gider:false, gelir:false} };
+            ['gider','gelir'].forEach(type => {
+              const existingIds = new Set((cloudDay[type]||[]).map(it => it.id));
+              (localDay[type]||[]).forEach(it => {
+                if(!existingIds.has(it.id)){ cloudDay[type] = (cloudDay[type]||[]).concat([it]); changed = true; }
+              });
+            });
+            merged[dk] = cloudDay;
+          });
+          if(changed){
+            await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk), { data: merged, updatedAt: new Date().toISOString() });
+            migratedAny = true;
+          }
+        } else {
+          await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk), { data: localData, updatedAt: new Date().toISOString() });
+          migratedAny = true;
+        }
+      }catch(err){ /* sessizce geç, bir sonraki aya devam et */ }
+    }
+    return migratedAny;
+  }
+
   document.addEventListener('mmg-auth-ready', async () => {
     updateMemberGate();
     if(isMember() && window.mmgMergeCloudPaymentsAndSync){
       await window.mmgMergeCloudPaymentsAndSync(); // bulut ödemelerini kontrol et, vadesi gelenleri işle
     }
+    if(isMember()){
+      const migrated = await migrateLocalGuestDataToCloud();
+      if(migrated) showCloudMsg('Misafir modunda girdiğiniz veriler hesabınıza aktarıldı ✓');
+    }
     loadMonth();
   });
 
-  // ================== Ay / Yıl seçiciler ==================
+  // ================== Gün / Ay / Yıl seçiciler ==================
+  const daySelectEl = document.getElementById('daySelect');
+  const dayTrigger = document.getElementById('dayTrigger');
+  const dayTriggerLabel = document.getElementById('dayTriggerLabel');
+  const dayOptions = document.getElementById('dayOptions');
   const monthSelectEl = document.getElementById('monthSelect');
   const monthTrigger = document.getElementById('monthTrigger');
   const monthTriggerLabel = document.getElementById('monthTriggerLabel');
@@ -657,15 +803,37 @@
     yearOptions.appendChild(opt);
   }
 
-  function refreshSelectUI(){
-    monthTriggerLabel.textContent = AY_ADLARI[selMonth];
-    yearTriggerLabel.textContent = selYear;
-    monthOptions.querySelectorAll('.select-option').forEach(o => o.classList.toggle('selected', +o.dataset.m === selMonth));
-    yearOptions.querySelectorAll('.select-option').forEach(o => o.classList.toggle('selected', +o.dataset.y === selYear));
+  function refreshDayOptions(){
+    const lastDate = new Date(selYear, selMonth+1, 0).getDate();
+    dayOptions.innerHTML = '';
+    for(let d=1; d<=lastDate; d++){
+      const opt = document.createElement('div');
+      opt.className = 'select-option';
+      opt.dataset.d = d;
+      opt.textContent = d;
+      dayOptions.appendChild(opt);
+    }
+    if(reportDay > lastDate) reportDay = lastDate;
   }
 
-  monthTrigger.addEventListener('click', (e)=>{ e.stopPropagation(); monthSelectEl.classList.toggle('open'); yearSelectEl.classList.remove('open'); });
-  yearTrigger.addEventListener('click', (e)=>{ e.stopPropagation(); yearSelectEl.classList.toggle('open'); monthSelectEl.classList.remove('open'); });
+  function refreshSelectUI(){
+    refreshDayOptions();
+    dayTriggerLabel.textContent = reportDay;
+    monthTriggerLabel.textContent = AY_ADLARI[selMonth];
+    yearTriggerLabel.textContent = selYear;
+    dayOptions.querySelectorAll('.select-option').forEach(o => o.classList.toggle('selected', +o.dataset.d === reportDay));
+    monthOptions.querySelectorAll('.select-option').forEach(o => o.classList.toggle('selected', +o.dataset.m === selMonth));
+    yearOptions.querySelectorAll('.select-option').forEach(o => o.classList.toggle('selected', +o.dataset.y === selYear));
+    daySelectEl.style.display = (reportTab === 'gunluk') ? '' : 'none';
+  }
+
+  dayTrigger.addEventListener('click', (e)=>{ e.stopPropagation(); daySelectEl.classList.toggle('open'); monthSelectEl.classList.remove('open'); yearSelectEl.classList.remove('open'); });
+  monthTrigger.addEventListener('click', (e)=>{ e.stopPropagation(); monthSelectEl.classList.toggle('open'); yearSelectEl.classList.remove('open'); daySelectEl.classList.remove('open'); });
+  yearTrigger.addEventListener('click', (e)=>{ e.stopPropagation(); yearSelectEl.classList.toggle('open'); monthSelectEl.classList.remove('open'); daySelectEl.classList.remove('open'); });
+  dayOptions.addEventListener('click', (e)=>{
+    const opt = e.target.closest('.select-option'); if(!opt) return;
+    reportDay = +opt.dataset.d; daySelectEl.classList.remove('open'); refreshSelectUI(); render();
+  });
   monthOptions.addEventListener('click', (e)=>{
     const opt = e.target.closest('.select-option'); if(!opt) return;
     selMonth = +opt.dataset.m; monthSelectEl.classList.remove('open'); refreshSelectUI(); loadMonth();
@@ -675,37 +843,96 @@
     selYear = +opt.dataset.y; yearSelectEl.classList.remove('open'); refreshSelectUI(); loadMonth();
   });
   document.addEventListener('click', (e)=>{
+    if(!daySelectEl.contains(e.target)) daySelectEl.classList.remove('open');
     if(!monthSelectEl.contains(e.target)) monthSelectEl.classList.remove('open');
     if(!yearSelectEl.contains(e.target)) yearSelectEl.classList.remove('open');
   });
 
   document.getElementById('gotoTodayBtn').addEventListener('click', ()=>{
+    reportTab = 'gunluk';
     selYear = today.getFullYear(); selMonth = today.getMonth();
     refreshSelectUI(); loadMonth();
   });
 
+  document.getElementById('prevMonthBtn').addEventListener('click', async ()=>{
+    if(reportTab === 'yillik'){ selYear -= 1; refreshSelectUI(); loadMonth(); return; }
+    if(reportTab === 'gunluk'){
+      let newDay = reportDay - 1;
+      if(newDay < 1){
+        if(selMonth === 0){ selMonth = 11; selYear -= 1; } else { selMonth -= 1; }
+        newDay = new Date(selYear, selMonth+1, 0).getDate();
+        await loadMonth();
+      }
+      reportDay = newDay;
+      refreshSelectUI(); render();
+      return;
+    }
+    if(selMonth === 0){ selMonth = 11; selYear -= 1; } else { selMonth -= 1; }
+    refreshSelectUI(); loadMonth();
+  });
+  document.getElementById('nextMonthBtn').addEventListener('click', async ()=>{
+    if(reportTab === 'yillik'){ selYear += 1; refreshSelectUI(); loadMonth(); return; }
+    if(reportTab === 'gunluk'){
+      const lastDate = new Date(selYear, selMonth+1, 0).getDate();
+      let newDay = reportDay + 1;
+      if(newDay > lastDate){
+        if(selMonth === 11){ selMonth = 0; selYear += 1; } else { selMonth += 1; }
+        newDay = 1;
+        await loadMonth();
+      }
+      reportDay = newDay;
+      refreshSelectUI(); render();
+      return;
+    }
+    if(selMonth === 11){ selMonth = 0; selYear += 1; } else { selMonth += 1; }
+    refreshSelectUI(); loadMonth();
+  });
+
+  document.getElementById('manualSaveBtn').addEventListener('click', async ()=>{
+    const mk = monthKeyOf(selYear, selMonth);
+    saveLocal(mk);
+    clearTimeout(saveTimer);
+    if(isMember()){
+      await saveCloud(mk);
+    } else {
+      showIoMsg('Kaydedildi (bu tarayıcıda).');
+    }
+  });
+
+  let clearedBackup = null;
+  let clearedBackupKey = null;
+
   document.getElementById('clearMonthBtn').addEventListener('click', ()=>{
     if(!confirm('Bu ayın tüm kayıtlarını silmek istediğinize emin misiniz?')) return;
+    clearedBackup = JSON.parse(JSON.stringify(monthData));
+    clearedBackupKey = monthKeyOf(selYear, selMonth);
     monthData = {};
     scheduleSave();
     render();
+    document.getElementById('undoClearBtn').style.display = '';
+    showIoMsg('Ay temizlendi. "Geri Al" ile eski haline döndürebilirsiniz.');
   });
 
-  document.getElementById('demoFillBtn').addEventListener('click', ()=>{
-    const weeks = buildWeeks(selYear, selMonth);
-    const patternGider = [100,50,25,250,500,10,30];
-    const patternGelir = [10,50,100,12,24,32,33];
-    let i = 0;
-    weeks.forEach(week => week.forEach(d => {
-      const key = dayKey(selYear, selMonth, d);
-      const day = ensureDay(key);
-      day.gider.push({ id: 'demo'+i, desc:'Örnek Ödeme', category:'Diğer Gider', amount: patternGider[i % patternGider.length] });
-      day.gelir.push({ id: 'demo2'+i, desc:'Örnek Tahsilat', category:'Diğer Gelir', amount: patternGelir[i % patternGelir.length] });
-      i++;
-    }));
-    scheduleSave();
-    render();
-    showIoMsg('Örnek veriler bu aya yüklendi.');
+  document.getElementById('undoClearBtn').addEventListener('click', ()=>{
+    if(clearedBackup && clearedBackupKey === monthKeyOf(selYear, selMonth)){
+      monthData = clearedBackup;
+      scheduleSave();
+      render();
+      showIoMsg('Geri alındı.');
+    }
+    clearedBackup = null;
+    clearedBackupKey = null;
+    document.getElementById('undoClearBtn').style.display = 'none';
+  });
+
+  document.getElementById('manualSaveBtn').addEventListener('click', async ()=>{
+    const mk = monthKeyOf(selYear, selMonth);
+    saveLocal(mk);
+    if(isMember()){
+      await saveCloud(mk);
+    } else {
+      showIoMsg('Kaydedildi ✓ (bu tarayıcıda saklanıyor).');
+    }
   });
 
   // ================== Render ==================
@@ -840,11 +1067,25 @@
 
   function updateModeVisibility(){
     const isArchive = reportTab === 'arsiv';
+    const isYearly = reportTab === 'yillik';
     weeksContainer.style.display = isArchive ? 'none' : '';
     document.getElementById('summaryCardsSection').style.display = isArchive ? 'none' : '';
+    document.getElementById('contentSide').style.display = isArchive ? 'none' : '';
     document.getElementById('reportsSection').style.display = isArchive ? 'none' : '';
     document.getElementById('archiveContainer').style.display = isArchive ? '' : 'none';
     document.getElementById('reportPicker').style.display = isArchive ? 'none' : '';
+
+    // Arşiv sekmesinde tarih/ay-yıl grubu gereksiz (kendi listesi var) — ama sekmeler her zaman görünür kalmalı
+    document.getElementById('dateNavGroup').style.display = isArchive ? 'none' : '';
+
+    // Yıllık sekmede ay seçimi anlamsız — sadece yıl kalsın
+    document.getElementById('monthSelect').style.display = isYearly ? 'none' : '';
+    document.getElementById('prevMonthBtn').title = isYearly ? 'Önceki yıl' : 'Önceki ay';
+    document.getElementById('nextMonthBtn').title = isYearly ? 'Sonraki yıl' : 'Sonraki ay';
+
+    // "Temizle" yalnızca tek bir ay üzerinde anlamlı
+    document.getElementById('manualSaveBtn').style.display = isYearly ? 'none' : '';
+    document.getElementById('clearMonthBtn').style.display = isYearly ? 'none' : '';
   }
 
   function render(){
@@ -886,16 +1127,7 @@
   function renderPicker(){
     const picker = document.getElementById('reportPicker');
     const weeks = buildWeeks(selYear, selMonth);
-    if(reportTab === 'gunluk'){
-      const todayKey = dayKey(today.getFullYear(), today.getMonth(), today.getDate());
-      let html = '';
-      weeks.forEach(week => week.forEach(d => {
-        const key = dayKey(selYear, selMonth, d);
-        const isToday = key === todayKey;
-        html += '<button type="button" class="picker-pill '+(d===reportDay?'active':'')+' '+(isToday?'today-pill':'')+'" data-day="'+d+'" title="'+(isToday?'Bugün':'')+'">'+d+'</button>';
-      }));
-      picker.innerHTML = html;
-    } else if(reportTab === 'haftalik'){
+    if(reportTab === 'haftalik'){
       let html = '';
       weeks.forEach((week, idx) => {
         html += '<button type="button" class="picker-pill '+(idx===reportWeekIdx?'active':'')+'" data-week="'+idx+'">'+(idx+1)+'. Hafta</button>';
@@ -910,6 +1142,7 @@
     const btn = e.target.closest('.report-tab');
     if(!btn) return;
     reportTab = btn.dataset.tab;
+    refreshSelectUI();
     render();
   });
   document.getElementById('reportPicker').addEventListener('click', (e) => {
@@ -956,8 +1189,8 @@
       const netClass = net > 0 ? 'pos' : (net < 0 ? 'neg' : 'zero');
       rows += '<tr>' +
         '<td class="date-cell"><button type="button" class="amt-btn" style="color:var(--text);" data-action="goto-month" data-m="'+mo.m+'">' + AY_ADLARI[mo.m] + '</button></td>' +
-        '<td style="color:var(--red);">' + fmtMoney(mo.gider) + '</td>' +
-        '<td style="color:var(--teal);">' + fmtMoney(mo.gelir) + '</td>' +
+        '<td><button type="button" class="amt-btn" style="color:var(--red);" data-action="goto-month" data-m="'+mo.m+'">' + fmtMoney(mo.gider) + '</button></td>' +
+        '<td><button type="button" class="amt-btn" style="color:var(--teal);" data-action="goto-month" data-m="'+mo.m+'">' + fmtMoney(mo.gelir) + '</button></td>' +
         '<td class="net-cell ' + netClass + '">' + (net>=0?'':'-') + fmtMoney(Math.abs(net)) + '</td>' +
       '</tr>';
     });
@@ -1157,6 +1390,22 @@
         '<div class="breakdown-col"><h3>Gider Dağılımı</h3>' + renderBreakdown(giderCatSorted, entry.gTotal) + '</div>' +
         '<div class="breakdown-col"><h3>Gelir Dağılımı</h3>' + renderBreakdown(gelirCatSorted, entry.iTotal) + '</div>' +
       '</div>' : '';
+    const weeklyHtml = (entry.weeks && entry.weeks.length) ?
+      '<div class="archive-weekly">' +
+        '<h3>Hafta Hafta Durum</h3>' +
+        entry.weeks.map(w => {
+          const wNet = w.net;
+          const wClass = wNet > 0 ? 'pos' : (wNet < 0 ? 'neg' : 'zero');
+          return '<div class="archive-week-row">' +
+            '<span class="aw-label">' + escapeHtml(w.label) + '</span>' +
+            '<span class="aw-net ' + wClass + '">' + (wNet>=0?'+':'-') + fmtMoney(Math.abs(wNet)) + '</span>' +
+          '</div>';
+        }).join('') +
+        '<div class="archive-week-row archive-week-total">' +
+          '<span class="aw-label">Genel Sonuç (' + escapeHtml(entry.label) + ')</span>' +
+          '<span class="aw-net ' + (net>=0?'pos':'neg') + '">' + (net>=0?'+':'-') + fmtMoney(Math.abs(net)) + '</span>' +
+        '</div>' +
+      '</div>' : '';
     return '<div class="archive-card" id="arc-' + entry.id + '">' +
       '<div class="archive-card-top">' +
         '<div>' +
@@ -1175,6 +1424,7 @@
         '</div>' +
       '</div>' +
       '<div class="archive-card-detail">' +
+        weeklyHtml +
         '<div class="reports-list">' + insightsHtml + '</div>' +
         breakdownHtml +
       '</div>' +
@@ -1204,7 +1454,11 @@
   }
 
   document.getElementById('archiveSaveBtn').addEventListener('click', saveCurrentReportToArchive);
-  document.getElementById('archiveSaveBtnTop').addEventListener('click', saveCurrentReportToArchive);
+  document.getElementById('viewArchiveBtn').addEventListener('click', ()=>{
+    reportTab = 'arsiv';
+    refreshSelectUI();
+    render();
+  });
 
   document.getElementById('archiveList').addEventListener('click', async (e) => {
     const toggleBtn = e.target.closest('[data-action="toggle-archive"]');
@@ -1251,8 +1505,23 @@
     });
     const net = iTotal - gTotal;
 
-    const periodWord = reportTab === 'gunluk' ? 'Bugün' : reportTab === 'haftalik' ? 'Bu hafta' : 'Bu ay';
-    const periodTag  = reportTab === 'gunluk' ? 'Bugün'  : reportTab === 'haftalik' ? 'Bu Hafta' : 'Bu Ay';
+    const todayKey = dayKey(today.getFullYear(), today.getMonth(), today.getDate());
+    let periodWord, periodTag;
+    if(reportTab === 'gunluk'){
+      const isToday = dayKey(selYear, selMonth, reportDay) === todayKey;
+      periodTag = isToday ? 'Bugün' : (reportDay + ' ' + AY_ADLARI[selMonth]);
+      periodWord = isToday ? 'Bugün' : periodTag;
+    } else if(reportTab === 'haftalik'){
+      const weeksNow = buildWeeks(selYear, selMonth);
+      const curWeek = weeksNow[reportWeekIdx] || [];
+      const isCurrentWeek = curWeek.some(d => dayKey(selYear, selMonth, d) === todayKey);
+      periodTag = isCurrentWeek ? 'Bu Hafta' : (AY_ADLARI[selMonth] + ' ' + (reportWeekIdx+1) + '. Hafta');
+      periodWord = isCurrentWeek ? 'Bu hafta' : periodTag;
+    } else {
+      const isCurrentMonth = (selYear === today.getFullYear() && selMonth === today.getMonth());
+      periodTag = isCurrentMonth ? 'Bu Ay' : (AY_ADLARI[selMonth] + ' ' + selYear);
+      periodWord = isCurrentMonth ? 'Bu ay' : periodTag;
+    }
 
     document.getElementById('sumGelirLabel').textContent = 'Gelir · ' + periodTag;
     document.getElementById('sumGiderLabel').textContent = 'Gider · ' + periodTag;
@@ -1286,13 +1555,19 @@
       items.push({cls:'good', icon:'✅', text: periodWord + ' net <b>' + fmtMoney(net) + '</b> fazla verdiniz.'});
     }
 
+    let monthlyWeeks = null;
     if(reportTab === 'aylik'){
       const weeks = buildWeeks(selYear, selMonth);
       let maxGiderWeekIdx = -1, maxGiderWeekVal = -Infinity;
-      weeks.forEach((week, idx) => {
-        let wg = 0;
-        week.forEach(d => { wg += dayTotal(dayKey(selYear, selMonth, d), 'gider'); });
+      monthlyWeeks = weeks.map((week, idx) => {
+        let wg = 0, wi = 0;
+        week.forEach(d => {
+          wg += dayTotal(dayKey(selYear, selMonth, d), 'gider');
+          wi += dayTotal(dayKey(selYear, selMonth, d), 'gelir');
+        });
         if(wg > maxGiderWeekVal){ maxGiderWeekVal = wg; maxGiderWeekIdx = idx; }
+        const first = week[0], last = week[week.length-1];
+        return { label: (idx+1) + '. Hafta (' + first + '-' + last + ' ' + AY_ADLARI[selMonth] + ')', gider: wg, gelir: wi, net: wi - wg };
       });
       if(maxGiderWeekVal > 0){
         items.push({cls:'info', icon:'📅', text:'En yüksek gider haftanız: <b>' + (maxGiderWeekIdx+1) + '. Hafta</b> (' + fmtMoney(maxGiderWeekVal) + ').'});
@@ -1382,7 +1657,8 @@
       gTotal, iTotal, net,
       giderByCat: Object.assign({}, giderByCat),
       gelirByCat: Object.assign({}, gelirByCat),
-      insights: items.slice()
+      insights: items.slice(),
+      weeks: monthlyWeeks
     };
 
     if(giderCatSorted.length || gelirCatSorted.length){
@@ -1614,6 +1890,321 @@
   updateVisibility();
 })();
 </script>
+
+<!-- ================== mmgcreativity: Hesap Makinesi Widget (tüm sayfalarda ortak) ================== -->
+<button id="mmgCalcBtn" title="Hesap Makinesi" aria-label="Hesap Makinesi">🧮</button>
+<div id="mmgCalcPanel" hidden>
+  <div class="mmg-calc-head">
+    <span>Hesap Makinesi</span>
+    <button type="button" id="mmgCalcCloseBtn" aria-label="Kapat">✕</button>
+  </div>
+  <input id="mmgCalcDisplay" readonly value="0">
+  <div class="mmg-calc-grid">
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-act="clear">C</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-act="back">⌫</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-act="percent">%</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-op="/">÷</button>
+
+    <button type="button" class="mmg-calc-btn" data-num="7">7</button>
+    <button type="button" class="mmg-calc-btn" data-num="8">8</button>
+    <button type="button" class="mmg-calc-btn" data-num="9">9</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-op="*">×</button>
+
+    <button type="button" class="mmg-calc-btn" data-num="4">4</button>
+    <button type="button" class="mmg-calc-btn" data-num="5">5</button>
+    <button type="button" class="mmg-calc-btn" data-num="6">6</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-op="-">−</button>
+
+    <button type="button" class="mmg-calc-btn" data-num="1">1</button>
+    <button type="button" class="mmg-calc-btn" data-num="2">2</button>
+    <button type="button" class="mmg-calc-btn" data-num="3">3</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-op="+">+</button>
+
+    <button type="button" class="mmg-calc-btn" data-num="0" style="grid-column:span 2;">0</button>
+    <button type="button" class="mmg-calc-btn" data-act="dot">,</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-eq" data-act="equals">=</button>
+  </div>
+</div>
+<style>
+  #mmgCalcBtn{
+    position:fixed; top:16px; right:16px; z-index:800;
+    width:42px; height:42px; border-radius:11px; border:1px solid var(--hairline,#2A3448);
+    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B); font-size:19px;
+    cursor:pointer; box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, transform .15s ease;
+  }
+  #mmgCalcBtn:hover{ border-color:var(--brass-dim,#8A7440); transform:translateY(-1px); }
+  #mmgCalcPanel{
+    position:fixed; top:64px; right:16px; z-index:801; width:236px;
+    background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448); border-radius:14px;
+    padding:14px; box-shadow:0 24px 60px rgba(0,0,0,0.5); font-family:'IBM Plex Mono',monospace;
+  }
+  #mmgCalcPanel[hidden]{ display:none; }
+  .mmg-calc-head{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+    font-size:11.5px; color:var(--muted,#8D96AC); text-transform:uppercase; letter-spacing:.06em;
+  }
+  #mmgCalcCloseBtn{
+    background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:13px; padding:2px 4px;
+  }
+  #mmgCalcCloseBtn:hover{ color:var(--text,#EAEDF3); }
+  #mmgCalcDisplay{
+    width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448);
+    border-radius:8px; padding:12px 10px; color:var(--text,#EAEDF3); font-size:22px; text-align:right;
+    margin-bottom:10px; font-family:'IBM Plex Mono',monospace;
+  }
+  .mmg-calc-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+  .mmg-calc-btn{
+    background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px;
+    color:var(--text,#EAEDF3); font-family:'IBM Plex Mono',monospace; font-size:15px; font-weight:600;
+    padding:10px 0; cursor:pointer; transition:border-color .15s ease, background .15s ease;
+  }
+  .mmg-calc-btn:hover{ border-color:var(--brass-dim,#8A7440); background:var(--surface,#141C2B); }
+  .mmg-calc-op{ color:var(--brass,#C6A15B); }
+  .mmg-calc-eq{ background:var(--brass,#C6A15B); border-color:var(--brass,#C6A15B); color:#1a1a1a; }
+  .mmg-calc-eq:hover{ opacity:0.9; }
+  @media (max-width:480px){
+    #mmgCalcPanel{ right:8px; left:8px; width:auto; }
+    #mmgCalcBtn{ right:8px; }
+  }
+</style>
+<script>
+(function(){
+  const btn = document.getElementById('mmgCalcBtn');
+  const panel = document.getElementById('mmgCalcPanel');
+  const closeBtn = document.getElementById('mmgCalcCloseBtn');
+  const display = document.getElementById('mmgCalcDisplay');
+
+  let current = '0';
+  let previous = null;
+  let operator = null;
+  let justEvaluated = false;
+
+  function render(){
+    display.value = current.replace('.', ',');
+  }
+
+  function inputNum(n){
+    if(justEvaluated){ current = '0'; justEvaluated = false; }
+    if(current === '0' && n !== ','){ current = String(n); }
+    else { current += String(n); }
+    render();
+  }
+
+  function inputDot(){
+    if(justEvaluated){ current = '0'; justEvaluated = false; }
+    if(!current.includes('.')) current += '.';
+    render();
+  }
+
+  function clearAll(){
+    current = '0'; previous = null; operator = null; justEvaluated = false;
+    render();
+  }
+
+  function backspace(){
+    if(justEvaluated){ clearAll(); return; }
+    current = current.length > 1 ? current.slice(0, -1) : '0';
+    render();
+  }
+
+  function percent(){
+    current = String(parseFloat(current) / 100);
+    render();
+  }
+
+  function chooseOperator(op){
+    if(operator !== null && !justEvaluated) compute();
+    previous = current;
+    operator = op;
+    justEvaluated = false;
+    current = '0';
+  }
+
+  function compute(){
+    if(operator === null || previous === null) return;
+    const a = parseFloat(previous), b = parseFloat(current);
+    let result = 0;
+    switch(operator){
+      case '+': result = a + b; break;
+      case '-': result = a - b; break;
+      case '*': result = a * b; break;
+      case '/': result = b !== 0 ? a / b : 0; break;
+    }
+    current = String(Math.round(result * 1e10) / 1e10);
+    operator = null;
+    previous = null;
+    justEvaluated = true;
+    render();
+  }
+
+  document.querySelectorAll('.mmg-calc-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      const num = b.dataset.num;
+      const op = b.dataset.op;
+      const act = b.dataset.act;
+      if(num !== undefined) inputNum(num);
+      else if(op !== undefined) chooseOperator(op);
+      else if(act === 'clear') clearAll();
+      else if(act === 'back') backspace();
+      else if(act === 'percent') percent();
+      else if(act === 'dot') inputDot();
+      else if(act === 'equals') compute();
+    });
+  });
+
+  btn.addEventListener('click', () => {
+    panel.hidden = !panel.hidden;
+  });
+  closeBtn.addEventListener('click', () => { panel.hidden = true; });
+  document.addEventListener('click', (e) => {
+    if(!panel.hidden && !panel.contains(e.target) && e.target !== btn){
+      panel.hidden = true;
+    }
+  });
+})();
+</script>
+<!-- ================== /Hesap Makinesi Widget ================== -->
+
+<!-- ================== mmgcreativity: Değerlendirme (Beğen) Widget'ı (tüm sayfalarda ortak) ================== -->
+<button id="mmgRateBtn" title="Bizi Değerlendirin" aria-label="Bizi Değerlendirin">⭐</button>
+<div id="mmgRateOverlay" hidden>
+  <div id="mmgRatePanel">
+    <button type="button" id="mmgRateCloseBtn" aria-label="Kapat">✕</button>
+
+    <div id="mmgRateStepScore">
+      <div class="mmg-rate-title">Bizi değerlendirin</div>
+      <div class="mmg-rate-sub">Deneyiminizi 10 üzerinden puanlar mısınız?</div>
+      <div class="mmg-rate-grid" id="mmgRateGrid"></div>
+    </div>
+
+    <div id="mmgRateStepStore" hidden>
+      <div class="mmg-rate-title">Teşekkürler! 🎉</div>
+      <div class="mmg-rate-sub">Bu memnuniyetinizi Play Store'da da bizimle paylaşır mısınız? Yorumunuz bizim için çok değerli.</div>
+      <div class="mmg-rate-actions">
+        <a href="https://play.google.com/store/apps/details?id=com.mmgcreativity.dijitalfinans" target="_blank" rel="noopener" class="mmg-rate-btn-primary" id="mmgRatePlayStoreBtn">Play Store'a Git</a>
+        <button type="button" class="mmg-rate-btn-secondary" id="mmgRateSkipBtn">Belki Sonra</button>
+      </div>
+    </div>
+
+    <div id="mmgRateStepThanks" hidden>
+      <div class="mmg-rate-title">Teşekkürler!</div>
+      <div class="mmg-rate-sub">Geri bildiriminiz bize ulaştı, uygulamayı geliştirmemize yardımcı oluyor.</div>
+    </div>
+  </div>
+</div>
+<style>
+  #mmgRateBtn{
+    position:fixed; bottom:18px; left:22px; z-index:800;
+    width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
+    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B); font-size:19px;
+    cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,0.35);
+    display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, transform .15s ease;
+  }
+  #mmgRateBtn:hover{ border-color:var(--brass-dim,#8A7440); transform:translateY(-1px); }
+  #mmgRateOverlay{
+    position:fixed; inset:0; z-index:900; background:rgba(5,8,14,0.65);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  #mmgRateOverlay[hidden]{ display:none; }
+  #mmgRatePanel{
+    position:relative; width:100%; max-width:360px; background:var(--surface,#141C2B);
+    border:1px solid var(--hairline,#2A3448); border-radius:18px; padding:28px 24px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.5); font-family:'Inter',sans-serif;
+  }
+  #mmgRateCloseBtn{
+    position:absolute; top:14px; right:14px; background:none; border:none;
+    color:var(--muted,#8D96AC); cursor:pointer; font-size:14px; padding:4px;
+  }
+  #mmgRateCloseBtn:hover{ color:var(--text,#EAEDF3); }
+  .mmg-rate-title{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:var(--text,#EAEDF3);
+    margin-bottom:8px; text-align:center;
+  }
+  .mmg-rate-sub{
+    font-size:13px; color:var(--muted,#8D96AC); text-align:center; margin-bottom:20px; line-height:1.5;
+  }
+  .mmg-rate-grid{
+    display:grid; grid-template-columns:repeat(5,1fr); gap:8px;
+  }
+  .mmg-rate-num{
+    background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px;
+    color:var(--text,#EAEDF3); font-family:'IBM Plex Mono',monospace; font-size:15px; font-weight:600;
+    padding:12px 0; cursor:pointer; transition:all .15s ease;
+  }
+  .mmg-rate-num:hover{ border-color:var(--brass,#C6A15B); color:var(--brass,#C6A15B); }
+  .mmg-rate-actions{ display:flex; flex-direction:column; gap:10px; }
+  .mmg-rate-btn-primary{
+    display:block; text-align:center; background:var(--brass,#C6A15B); color:#1a1a1a; border:none;
+    border-radius:8px; padding:12px 0; font-family:'Inter',sans-serif; font-weight:700; font-size:14px;
+    cursor:pointer; text-decoration:none; transition:opacity .15s ease;
+  }
+  .mmg-rate-btn-primary:hover{ opacity:0.9; }
+  .mmg-rate-btn-secondary{
+    background:none; border:none; color:var(--muted,#8D96AC); font-family:'Inter',sans-serif; font-size:12.5px;
+    cursor:pointer; text-decoration:underline; padding:4px;
+  }
+  .mmg-rate-btn-secondary:hover{ color:var(--text,#EAEDF3); }
+</style>
+<script>
+(function(){
+  const btn = document.getElementById('mmgRateBtn');
+  const overlay = document.getElementById('mmgRateOverlay');
+  const closeBtn = document.getElementById('mmgRateCloseBtn');
+  const grid = document.getElementById('mmgRateGrid');
+  const stepScore = document.getElementById('mmgRateStepScore');
+  const stepStore = document.getElementById('mmgRateStepStore');
+  const stepThanks = document.getElementById('mmgRateStepThanks');
+  const skipBtn = document.getElementById('mmgRateSkipBtn');
+
+  for(let i = 1; i <= 10; i++){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mmg-rate-num';
+    b.textContent = i;
+    b.addEventListener('click', () => submitRating(i));
+    grid.appendChild(b);
+  }
+
+  function openOverlay(){
+    stepScore.hidden = false;
+    stepStore.hidden = true;
+    stepThanks.hidden = true;
+    overlay.hidden = false;
+  }
+  function closeOverlay(){ overlay.hidden = true; }
+
+  async function submitRating(score){
+    try{ localStorage.setItem('mmg_rating_score', String(score)); }catch(e){}
+    try{ localStorage.setItem('mmg_rating_date', new Date().toISOString()); }catch(e){}
+
+    // Giriş yapmış kullanıcı varsa (window.mmgCloud), puanı Firestore'a da kaydet (istatistik için)
+    try{
+      if(window.mmgCloud && window.mmgCloud.currentUser && window.mmgCloud.setDoc && window.mmgCloud.doc){
+        const cloud = window.mmgCloud;
+        await cloud.setDoc(cloud.doc(cloud.db, 'ratings', cloud.currentUser.uid), {
+          score: score,
+          page: location.pathname.split('/').pop(),
+          ratedAt: new Date().toISOString()
+        }, { merge: true });
+      }
+    }catch(e){ /* sessizce geç */ }
+
+    stepScore.hidden = true;
+    if(score >= 8){
+      stepStore.hidden = false;
+    } else {
+      stepThanks.hidden = false;
+    }
+  }
+
+  btn.addEventListener('click', openOverlay);
+  closeBtn.addEventListener('click', closeOverlay);
+  skipBtn.addEventListener('click', closeOverlay);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });
+})();
+</script>
+<!-- ================== /Değerlendirme Widget'ı ================== -->
 
 </body>
 </html>
