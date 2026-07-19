@@ -227,12 +227,12 @@
   }
   .account-info-close:hover{ color:var(--coral); border-color:var(--coral); }
   .account-info-sub{ color:var(--muted); font-size:13px; margin-bottom:22px; }
-  #accountInfoForm select, #accountInfoForm textarea{
+  #accountInfoForm select, #accountInfoForm textarea, #mmgAdminForm select, #mmgAdminForm input{
     width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
     padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
     transition:border-color .15s ease; resize:vertical;
   }
-  #accountInfoForm select:focus, #accountInfoForm textarea:focus{ border-color:var(--brass-dim); }
+  #accountInfoForm select:focus, #accountInfoForm textarea:focus, #mmgAdminForm select:focus, #mmgAdminForm input:focus{ border-color:var(--brass-dim); }
   .account-info-saved{
     display:none; text-align:center; color:var(--teal); font-family:'IBM Plex Mono',monospace;
     font-size:12px; margin-top:10px;
@@ -737,12 +737,17 @@
           <option value="discount">İndirimli Premium</option>
         </select>
       </div>
-      <div class="auth-field" id="mmgAdminDiscountWrap">
+      <div class="auth-field" id="mmgAdminDiscountWrap" style="display:none;">
         <label>İndirim Yüzdesi</label>
         <input type="number" id="mmgAdminDiscountPercent" min="1" max="100" placeholder="ör. 20" value="20">
       </div>
+      <div class="auth-field">
+        <label>Kullanım Limiti <span style="color:var(--muted); font-weight:400;">(boş = sınırsız, örn. 1 = tek kişi)</span></label>
+        <input type="number" id="mmgAdminMaxUses" min="1" placeholder="Sınırsız için boş bırakın">
+      </div>
       <button type="submit" class="auth-submit" style="margin-top:4px;">Kodu Kaydet</button>
     </form>
+
 
     <div id="mmgAdminMsg" style="font-size:12.5px; margin-bottom:14px;"></div>
 
@@ -1032,10 +1037,17 @@
         listEl.innerHTML = '<div style="font-size:12px; color:var(--muted);">Henüz tanımlı bir referans kodu yok.</div>';
         return;
       }
+      const usageCounts = {};
+      try{
+        const refSnap = await getDocs(collection(db, 'referrals'));
+        refSnap.forEach(d => { usageCounts[d.id] = (d.data().count || 0); });
+      }catch(e){ /* istatistik okunamazsa 0 say */ }
       listEl.innerHTML = codes.map(c => {
         const benefitLabel = c.benefitType === 'free' ? 'Ücretsiz Premium' : ('%' + (c.discountPercent||0) + ' İndirim');
+        const used = usageCounts[c.id] || 0;
+        const limitLabel = c.maxUses ? (used + ' / ' + c.maxUses + ' kullanıldı') : (used + ' kullanıldı · Sınırsız');
         return '<div style="display:flex; align-items:center; justify-content:space-between; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px;">' +
-          '<div><b style="font-family:\'IBM Plex Mono\',monospace;">' + c.id + '</b><div style="font-size:11.5px; color:var(--muted);">' + benefitLabel + '</div></div>' +
+          '<div><b style="font-family:\'IBM Plex Mono\',monospace;">' + c.id + '</b><div style="font-size:11.5px; color:var(--muted);">' + benefitLabel + ' · ' + limitLabel + '</div></div>' +
           '<button type="button" class="mmg-admin-del" data-code="' + c.id + '" style="background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:12px;">Sil</button>' +
           '</div>';
       }).join('');
@@ -1057,17 +1069,21 @@
     const code = document.getElementById('mmgAdminCode').value.trim().toUpperCase();
     const benefitType = document.getElementById('mmgAdminBenefitType').value;
     const discountPercent = parseInt(document.getElementById('mmgAdminDiscountPercent').value, 10) || 0;
+    const maxUsesRaw = document.getElementById('mmgAdminMaxUses').value.trim();
+    const maxUses = maxUsesRaw ? parseInt(maxUsesRaw, 10) : null;
     if(!code){ msgEl.textContent = 'Lütfen bir kod girin.'; msgEl.style.color = 'var(--red,#e2544b)'; return; }
     try{
       await setDoc(doc(db, 'referralCodes', code), {
         benefitType: benefitType,
         discountPercent: benefitType === 'discount' ? discountPercent : 0,
+        maxUses: maxUses,
         active: true,
         createdAt: serverTimestamp()
       });
       msgEl.textContent = '"' + code + '" kodu kaydedildi. ✓';
       msgEl.style.color = 'var(--teal,#3FB68A)';
       document.getElementById('mmgAdminCode').value = '';
+      document.getElementById('mmgAdminMaxUses').value = '';
       mmgLoadAdminCodes();
     } catch(err){
       msgEl.textContent = 'Kod kaydedilemedi, tekrar deneyin.';
@@ -1443,16 +1459,28 @@
 
         // Referans kodu tanımlıysa (owner tarafından oluşturulmuşsa) faydasını (ücretsiz/indirimli) belirle
         let premiumBenefit = null;
+        let referralLimitReached = false;
         if(referralCode){
           try{
             const codeSnap = await getDoc(doc(db, 'referralCodes', referralCode));
             if(codeSnap.exists() && codeSnap.data().active !== false){
               const cd = codeSnap.data();
-              premiumBenefit = {
-                type: cd.benefitType || 'discount',
-                discountPercent: cd.discountPercent || 0,
-                code: referralCode
-              };
+              let usedCount = 0;
+              if(cd.maxUses){
+                try{
+                  const usageSnap = await getDoc(doc(db, 'referrals', referralCode));
+                  usedCount = usageSnap.exists() ? (usageSnap.data().count || 0) : 0;
+                }catch(usageErr){ usedCount = 0; }
+              }
+              if(cd.maxUses && usedCount >= cd.maxUses){
+                referralLimitReached = true;
+              } else {
+                premiumBenefit = {
+                  type: cd.benefitType || 'discount',
+                  discountPercent: cd.discountPercent || 0,
+                  code: referralCode
+                };
+              }
             }
           } catch(codeErr){ /* kod tanımlı değilse veya okunamazsa sessizce geç */ }
         }
@@ -1495,6 +1523,8 @@
           } else {
             alert('🎉 "' + premiumBenefit.code + '" kodunu kullandınız!\nHesabınıza %' + premiumBenefit.discountPercent + ' indirimli premium tanımlandı.');
           }
+        } else if(referralLimitReached){
+          alert('"' + referralCode + '" kodu kullanım limitine ulaştığı için geçerli değil.');
         }
         closeAuthOverlay();
       } else {
