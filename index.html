@@ -1349,7 +1349,8 @@
     return newNumber;
   }
 
-  guestBtn.addEventListener('click', () => {
+  guestBtn.addEventListener('click', async () => {
+    try{ await signOut(auth); }catch(e){ /* zaten oturum yoksa sessizce geç */ }
     localStorage.setItem('mmg_auth_state', 'guest');
     localStorage.setItem('mmg_remember', document.getElementById('rememberMe').checked ? '1' : '0');
     updateUserBadge();
@@ -1488,6 +1489,13 @@
         localStorage.setItem('mmg_username', username);
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
+        if(premiumBenefit){
+          if(premiumBenefit.type === 'free'){
+            alert('🎉 "' + premiumBenefit.code + '" kodunu kullandınız!\nHesabınıza ücretsiz premium tanımlandı.');
+          } else {
+            alert('🎉 "' + premiumBenefit.code + '" kodunu kullandınız!\nHesabınıza %' + premiumBenefit.discountPercent + ' indirimli premium tanımlandı.');
+          }
+        }
         closeAuthOverlay();
       } else {
         const cred = await signInWithEmailAndPassword(auth, email, password);
@@ -1649,7 +1657,7 @@
 </div>
 <style>
   #mmgRateBtn{
-    position:fixed; bottom:18px; left:22px; z-index:800;
+    position:fixed; bottom:84px; left:22px; z-index:800;
     width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
     background:var(--surface-2,#1B2536); color:var(--teal,#3FB68A); font-size:19px;
     cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,0.35);
