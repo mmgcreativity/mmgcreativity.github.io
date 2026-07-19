@@ -1498,7 +1498,7 @@ function mmgApplyTurkishFont(doc){
     const pb = getParaBirimi();
 
     document.getElementById('docDate').textContent = tarih.toLocaleDateString('tr-TR');
-    document.getElementById('docAddressee').textContent = gonderenBanka + ' ŞUBE MÜDÜRLÜĞÜNE';
+    document.getElementById('docAddressee').textContent = (gonderenBanka + ' ŞUBE MÜDÜRLÜĞÜNE').toUpperCase();
     document.getElementById('docBody').textContent =
       gonderenIban + ' IBAN nolu ' + gonderenFirma + ' hesabından aşağıda detayı verilen para transferi işleminin yapılmasını rica ederiz.';
     document.getElementById('docTableBody').innerHTML = aliciRows.length
@@ -2162,7 +2162,7 @@ function mmgApplyTurkishFont(doc){
     const tarihVal = document.getElementById('fTarih').value;
     const tarih = tarihVal ? new Date(tarihVal + 'T00:00:00') : new Date();
     document.getElementById('docDateGeneric').textContent = tarih.toLocaleDateString('tr-TR');
-    document.getElementById('docAddresseeGeneric').textContent = banka + ' ŞUBE MÜDÜRLÜĞÜNE';
+    document.getElementById('docAddresseeGeneric').textContent = (banka + ' ŞUBE MÜDÜRLÜĞÜNE').toUpperCase();
     document.getElementById('docBodyGeneric').textContent = cfg.body(v);
     document.getElementById('docInfoTableGeneric').innerHTML = cfg.infoRows(v).map(r =>
       '<tr><td style="font-weight:600; color:var(--muted);">' + r[0] + '</td><td>' + r[1] + '</td></tr>'

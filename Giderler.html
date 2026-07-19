@@ -222,7 +222,7 @@
   <div class="masthead-row">
     <div>
       <h1 class="title">Giderler</h1>
-      <div class="subtitle">Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi buradan takip edin. Vadesi geldiğinde, girişte belirttiğiniz tercihe göre Nakit Akış Tablosu'na otomatik işlenir.</div>
+      <div class="subtitle">Faturalar, kredi kartları, komisyonlar, vergiler ve kiralar gibi düzenli giderlerinizi buradan takip edin.<br>Vadesi geldiğinde, girişte belirttiğiniz tercihe göre Nakit Akış Tablosu'na otomatik işlenir.</div>
     </div>
     <div class="masthead-actions">
       <a href="index.html" class="guide-btn">← Ana Sayfa</a>
@@ -245,13 +245,6 @@
     <div class="content-main">
       <div class="add-payment-card">
         <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:24px;">
-          <div style="flex:0 0 auto;">
-            <div class="wizard-step-label">Gider Filtreleme</div>
-            <div class="mmg-dropdown" id="catFilterDropdown">
-              <button type="button" class="mmg-dropdown-trigger" id="catFilterTrigger">📋 Tümü <span class="chev">▾</span></button>
-              <div class="mmg-dropdown-menu" id="catFilterMenu" hidden></div>
-            </div>
-          </div>
           <div style="flex:1; min-width:220px;">
             <h3 id="addPaymentTitle" style="margin-bottom:12px;">Yeni Gider Ekle</h3>
             <div id="wizardStep1">
@@ -259,6 +252,13 @@
                 <button type="button" class="mmg-dropdown-trigger" id="typeChipTrigger">Gider türü seçin <span class="chev">▾</span></button>
                 <div class="mmg-dropdown-menu" id="typeChipMenu" hidden></div>
               </div>
+            </div>
+          </div>
+          <div style="flex:0 0 auto;">
+            <div class="wizard-step-label">Gider Filtreleme</div>
+            <div class="mmg-dropdown" id="catFilterDropdown">
+              <button type="button" class="mmg-dropdown-trigger" id="catFilterTrigger">📋 Tümü <span class="chev">▾</span></button>
+              <div class="mmg-dropdown-menu" id="catFilterMenu" hidden></div>
             </div>
           </div>
         </div>
@@ -1113,14 +1113,6 @@
   const commentBox = document.getElementById('mmgRateComment');
   const submitBtn = document.getElementById('mmgRateSubmitBtn');
 
-  // Beğen butonu: günde bir kez gösterilir, tıklanınca (etkileşim alınca) o gün için kaybolur.
-  const MMG_RATE_TODAY = new Date().toISOString().slice(0,10);
-  try{
-    if(localStorage.getItem('mmg_rate_btn_interacted_date') === MMG_RATE_TODAY){
-      btn.style.display = 'none';
-    }
-  }catch(e){}
-
   let likedValue = null; // 1 = beğendi, 0 = beğenmedi, null = henüz seçilmedi
 
   function selectThumb(val){
@@ -1174,11 +1166,7 @@
   }
 
   submitBtn.addEventListener('click', submitFeedback);
-  btn.addEventListener('click', () => {
-    openOverlay();
-    try{ localStorage.setItem('mmg_rate_btn_interacted_date', MMG_RATE_TODAY); }catch(e){}
-    btn.style.display = 'none';
-  });
+  btn.addEventListener('click', openOverlay);
   closeBtn.addEventListener('click', closeOverlay);
   skipBtn.addEventListener('click', closeOverlay);
   overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });

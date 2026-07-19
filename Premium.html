@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Premium'a Geç</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --teal:#3FB68A;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+  main{ max-width:520px; margin:0 auto; padding:56px 24px 60px; }
+  .back{ display:inline-block; margin-bottom:24px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); text-decoration:none; border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; }
+  .back:hover{ color:var(--coral); border-color:var(--coral); }
+  .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; color:var(--brass); text-transform:uppercase; margin-bottom:10px; }
+  h1{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,30px); margin-bottom:10px; }
+  .sub{ color:var(--muted); font-size:14px; margin-bottom:28px; line-height:1.6; }
+
+  .plan-card{ background:var(--surface); border:1px solid var(--brass-dim); border-radius:16px; padding:28px; margin-bottom:20px; position:relative; overflow:hidden; }
+  .plan-card::before{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--grad); }
+  .plan-price{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:36px; margin-bottom:4px; }
+  .plan-price span{ font-size:15px; color:var(--muted); font-weight:500; }
+  .plan-list{ list-style:none; margin:20px 0; padding:0; }
+  .plan-list li{ padding:8px 0; font-size:13.5px; color:var(--text); display:flex; align-items:center; gap:10px; }
+  .plan-list li::before{ content:'✓'; color:var(--teal); font-weight:700; }
+
+  .pay-btn{
+    width:100%; background:var(--grad); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:15px; padding:15px; border:none; border-radius:10px; cursor:pointer; transition:opacity .15s ease;
+  }
+  .pay-btn:hover{ opacity:0.92; }
+  .pay-btn:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .state-box{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:32px 24px;
+    text-align:center; color:var(--muted); font-size:13.5px; line-height:1.6; margin-bottom:20px;
+  }
+  .state-box .big{ font-size:26px; margin-bottom:10px; }
+  .state-box a{ color:var(--brass); }
+
+  .paytr-frame-wrap{ margin-top:20px; border-radius:12px; overflow:hidden; border:1px solid var(--hairline); }
+  .paytr-frame-wrap iframe{ width:100%; height:640px; border:none; display:block; }
+
+  .msg{ font-size:12.5px; margin-top:12px; text-align:center; }
+  .msg.err{ color:var(--red); }
+  .msg.ok{ color:var(--teal); }
+
+  .secure-note{ margin-top:18px; font-size:11.5px; color:var(--muted); text-align:center; line-height:1.6; }
+</style>
+</head>
+<body>
+<main>
+  <a href="index.html" class="back">← Ana Sayfaya Dön</a>
+  <div class="eyebrow">Premium Üyelik</div>
+  <h1>Premium'a Geç</h1>
+  <p class="sub">Rotatif Kredi'de Excel/PDF aktarma ve çoklu çekim, sınırsız Nakit Akış Tablosu kullanımı ve reklamsız deneyim premium üyelere özeldir.</p>
+
+  <div id="stateArea"></div>
+
+  <div id="planArea" hidden>
+    <div class="plan-card">
+      <div class="plan-price">₺99<span> / ay</span></div>
+      <ul class="plan-list">
+        <li>Reklamsız deneyim</li>
+        <li>Rotatif Kredi'de Excel / PDF dışa aktarma</li>
+        <li>Çoklu çekim (birden fazla satır) kullanımı</li>
+        <li>Nakit Akış Tablosu'nda süre sınırı yok</li>
+      </ul>
+      <button class="pay-btn" id="payBtn">Şimdi Öde</button>
+      <div class="msg" id="payMsg"></div>
+    </div>
+    <div class="paytr-frame-wrap" id="paytrFrameWrap" hidden>
+      <iframe id="paytrFrame" src=""></iframe>
+    </div>
+    <p class="secure-note">Kart bilgileriniz bu siteye hiçbir zaman ulaşmaz; ödeme, sağlayıcının güvenli (3D Secure) sayfasında yapılır.</p>
+  </div>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  const auth = getAuth(fbApp);
+  const db = getFirestore(fbApp);
+  // Cloud Functions'ı hangi bölgeye deploy ettiyseniz burada da aynısını yazın (index.js'teki region ile eşleşmeli)
+  const functions = getFunctions(fbApp, 'europe-west1');
+  const createPremiumPayment = httpsCallable(functions, 'createPremiumPayment');
+
+  const stateArea = document.getElementById('stateArea');
+  const planArea = document.getElementById('planArea');
+  const payBtn = document.getElementById('payBtn');
+  const payMsg = document.getElementById('payMsg');
+  const paytrFrameWrap = document.getElementById('paytrFrameWrap');
+  const paytrFrame = document.getElementById('paytrFrame');
+
+  function showState(html){
+    planArea.hidden = true;
+    stateArea.innerHTML = '<div class="state-box">' + html + '</div>';
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if(!user){
+      showState(
+        '<div class="big">🔑</div>' +
+        'Premium\'a geçmek için önce giriş yapmanız gerekiyor.<br><br>' +
+        '<a href="index.html">Ana Sayfaya dönüp giriş yapın</a>, sonra bu sayfayı yeniden açın.'
+      );
+      return;
+    }
+    try{
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      const data = snap.exists() ? snap.data() : {};
+      if(data.isPremium === true){
+        showState('<div class="big">⭐</div>Zaten premium üyesiniz — teşekkürler!');
+        return;
+      }
+    }catch(e){ /* sessizce geç, ödeme denemesine izin ver */ }
+    stateArea.innerHTML = '';
+    planArea.hidden = false;
+  });
+
+  payBtn.addEventListener('click', async () => {
+    payBtn.disabled = true;
+    payMsg.textContent = '';
+    payMsg.className = 'msg';
+    const originalText = payBtn.textContent;
+    payBtn.textContent = 'Yönlendiriliyor…';
+    try{
+      const { data } = await createPremiumPayment();
+      if(data.provider === 'iyzico' && data.redirectUrl){
+        window.location.href = data.redirectUrl;
+        return;
+      }
+      if(data.provider === 'paytr' && data.iframeToken){
+        paytrFrame.src = 'https://www.paytr.com/odeme/guvenli/' + data.iframeToken;
+        paytrFrameWrap.hidden = false;
+        payBtn.style.display = 'none';
+        paytrFrameWrap.scrollIntoView({ behavior:'smooth' });
+        return;
+      }
+      throw new Error('Beklenmeyen yanıt.');
+    } catch(e){
+      payMsg.textContent = 'Ödeme başlatılamadı: ' + (e.message || 'bilinmeyen hata');
+      payMsg.classList.add('err');
+      payBtn.disabled = false;
+      payBtn.textContent = originalText;
+    }
+  });
+</script>
+</body>
+</html>
