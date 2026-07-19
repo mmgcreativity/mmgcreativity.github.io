@@ -238,6 +238,7 @@
     font-size:12px; margin-top:10px;
   }
   .account-info-saved.show{ display:block; }
+  #deleteAccountBtn:hover{ background:rgba(226,84,75,0.10); }
 
   .frame-wrap{ flex:1; position:relative; background:var(--bg); }
   iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
@@ -635,13 +636,6 @@
       </span>
     </button>
 
-    <button class="nav-item" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
-      <span class="nav-text-wrap">
-        <span class="nav-title">Talimat</span>
-        <span class="nav-desc">Hazırlama</span>
-      </span>
-    </button>
-
     <button class="nav-item" data-target="Giderler.html" data-title="Giderler">
       <span class="nav-text-wrap">
         <span class="nav-title">Giderler</span>
@@ -651,6 +645,13 @@
     <button class="nav-item" data-target="Gelirler.html" data-title="Gelirler">
       <span class="nav-text-wrap">
         <span class="nav-title">Gelirler</span>
+      </span>
+    </button>
+
+    <button class="nav-item" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
+      <span class="nav-text-wrap">
+        <span class="nav-title">Talimat</span>
+        <span class="nav-desc">Hazırlama</span>
       </span>
     </button>
 
@@ -791,6 +792,29 @@
       <button type="submit" class="auth-submit" id="profileSaveBtn">Kaydet</button>
       <div class="account-info-saved" id="profileSavedMsg">Kaydedildi ✓</div>
     </form>
+
+    <div style="border-top:1px solid var(--hairline); margin-top:22px; padding-top:18px;">
+      <button type="button" id="deleteAccountBtn" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; background:transparent; border:1px solid rgba(226,84,75,0.35); border-radius:9px; padding:12px; color:var(--red,#E2544B); font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer; transition:background .15s ease;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        <span>Hesabımı Kalıcı Olarak Sil</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="account-info-overlay" id="deleteAccountOverlay" hidden>
+  <div class="account-info-modal" style="max-width:420px;">
+    <div class="account-info-modal-header">
+      <h2>Hesabı Sil</h2>
+      <button type="button" class="account-info-close" id="deleteAccountClose" title="Kapat">✕</button>
+    </div>
+    <p class="account-info-sub">Bu işlem geri alınamaz. Hesabınız, kayıtlı oranlarınız ve profil bilgileriniz kalıcı olarak silinecek.</p>
+    <div class="auth-field" id="deleteReauthWrap" style="display:none;">
+      <label>Devam etmek için şifrenizi girin</label>
+      <input type="password" id="deleteReauthPassword" placeholder="••••••••">
+    </div>
+    <div class="auth-error" id="deleteAccountError"></div>
+    <button type="button" class="auth-submit" id="deleteAccountConfirmBtn" style="background:var(--red,#E2544B);">Evet, Hesabımı Sil</button>
   </div>
 </div>
 
@@ -975,7 +999,8 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import {
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup
+    signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup,
+    deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment
@@ -1325,6 +1350,119 @@
     profileSaveBtn.disabled = false;
     profileSavedMsg.classList.add('show');
     setTimeout(() => profileSavedMsg.classList.remove('show'), 2000);
+  });
+
+  // ---- Hesabı Sil ----
+  const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+  const deleteAccountOverlay = document.getElementById('deleteAccountOverlay');
+  const deleteAccountClose = document.getElementById('deleteAccountClose');
+  const deleteAccountConfirmBtn = document.getElementById('deleteAccountConfirmBtn');
+  const deleteReauthWrap = document.getElementById('deleteReauthWrap');
+  const deleteReauthPassword = document.getElementById('deleteReauthPassword');
+  const deleteAccountError = document.getElementById('deleteAccountError');
+
+  function showDeleteAccountError(msg){
+    deleteAccountError.textContent = msg;
+    deleteAccountError.classList.add('show');
+  }
+  function hideDeleteAccountError(){
+    deleteAccountError.classList.remove('show');
+    deleteAccountError.textContent = '';
+  }
+
+  deleteAccountBtn.addEventListener('click', () => {
+    const state = localStorage.getItem('mmg_auth_state');
+    if(!state || state === 'guest'){
+      alert('Misafir modunda silinecek bir hesap bulunmuyor.');
+      return;
+    }
+    hideDeleteAccountError();
+    deleteReauthWrap.style.display = 'none';
+    deleteReauthPassword.value = '';
+    deleteAccountOverlay.hidden = false;
+  });
+
+  deleteAccountClose.addEventListener('click', () => { deleteAccountOverlay.hidden = true; });
+  deleteAccountOverlay.addEventListener('click', (e) => {
+    if(e.target === deleteAccountOverlay) deleteAccountOverlay.hidden = true;
+  });
+
+  // Kullanıcıya ait tüm bulut verilerini (kayıtlı oranlar + profil belgesi) siler
+  async function deleteAllUserData(uid){
+    try{
+      const ratesSnap = await getDocs(collection(db, 'users', uid, 'rates'));
+      for(const d of ratesSnap.docs){
+        try{ await deleteDoc(d.ref); } catch(e){ /* tek bir kayıt silinemezse devam et */ }
+      }
+    } catch(e){ /* alt koleksiyon okunamazsa sessizce geç */ }
+    try{ await deleteDoc(doc(db, 'users', uid)); } catch(e){ /* sessizce geç */ }
+  }
+
+  async function finishAccountDeletion(){
+    accountInfoOverlay.hidden = true;
+    deleteAccountOverlay.hidden = true;
+    localStorage.removeItem('mmg_auth_state');
+    localStorage.removeItem('mmg_remember');
+    localStorage.removeItem('mmg_customer_no');
+    localStorage.removeItem('mmg_username');
+    localStorage.removeItem('mmg_avatar');
+    localStorage.removeItem('mmg_profile');
+    setAvatar(null);
+    updateUserBadge();
+    document.getElementById('authEmail').value = '';
+    document.getElementById('authPassword').value = '';
+    setAuthMode('login');
+    openAuthOverlay();
+    alert('Hesabınız kalıcı olarak silindi.');
+  }
+
+  deleteAccountConfirmBtn.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if(!user){ deleteAccountOverlay.hidden = true; return; }
+    hideDeleteAccountError();
+    deleteAccountConfirmBtn.disabled = true;
+    const originalLabel = deleteAccountConfirmBtn.textContent;
+    deleteAccountConfirmBtn.textContent = 'Siliniyor...';
+    const uid = user.uid;
+    try{
+      await deleteAllUserData(uid);
+      await deleteUser(user);
+      await finishAccountDeletion();
+    } catch(err){
+      if(err.code === 'auth/requires-recent-login'){
+        const isGoogleUser = user.providerData.some(p => p.providerId === 'google.com');
+        if(isGoogleUser){
+          try{
+            await reauthenticateWithPopup(user, googleProvider);
+            await deleteAllUserData(uid);
+            await deleteUser(user);
+            await finishAccountDeletion();
+          } catch(reauthErr){
+            showDeleteAccountError('Kimlik doğrulama başarısız oldu. Lütfen tekrar deneyin.');
+          }
+        } else {
+          deleteReauthWrap.style.display = 'block';
+          if(!deleteReauthPassword.value){
+            showDeleteAccountError('Devam etmek için lütfen şifrenizi girin, ardından tekrar "Evet, Hesabımı Sil" butonuna basın.');
+          } else {
+            try{
+              const cred = EmailAuthProvider.credential(user.email, deleteReauthPassword.value);
+              await reauthenticateWithCredential(user, cred);
+              await deleteAllUserData(uid);
+              await deleteUser(user);
+              await finishAccountDeletion();
+            } catch(reauthErr){
+              showDeleteAccountError(mapFirebaseError(reauthErr.code));
+            }
+          }
+        }
+      } else {
+        showDeleteAccountError(mapFirebaseError(err.code));
+      }
+    } finally {
+      deleteAccountConfirmBtn.disabled = false;
+      deleteAccountConfirmBtn.textContent = originalLabel;
+    }
   });
 
   // NOT: Aktif bir oturum (giriş yapılmış ya da misafir) varsa,
