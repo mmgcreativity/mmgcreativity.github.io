@@ -40,7 +40,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>mmgcreativity — Kredi Kartı Vade Farkı Hesaplama</title>
+<title>mmgcreativity — Ortalama Vade Hesaplama</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -72,6 +72,17 @@
     transition:border-color .15s ease, color .15s ease;
   }
   .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  .brand-row{
+    display:inline-flex; align-items:center; gap:12px; margin-bottom:18px;
+    padding:10px 20px 10px 10px; border-radius:999px; position:relative;
+    background:var(--surface-2); border:1px solid var(--hairline);
+  }
+  .brand-row-logo{ height:38px; width:38px; border-radius:8px; object-fit:cover; flex-shrink:0; }
+  .brand-row-fallback{
+    display:none; width:38px; height:38px; border-radius:8px; flex-shrink:0;
+    background:var(--grad); align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px; color:#fff;
+  }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
 
@@ -81,8 +92,8 @@
   .calc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:36px; }
   @media (max-width:800px){ .calc-grid{ grid-template-columns:1fr; } .table-desc{ white-space:normal !important; } }
 
-  .input-card, .result-card{
-    background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:28px;
+  .input-card{
+    padding:0;
   }
   .field{ margin-bottom:20px; }
   .field label{ display:block; font-size:13px; color:var(--muted); margin-bottom:8px; }
@@ -94,6 +105,7 @@
     background:none; border:none; outline:none; color:var(--text); font-family:'IBM Plex Mono',monospace;
     font-size:16px; font-weight:600; width:100%;
   }
+  .input-wrap select{ cursor:pointer; }
   .custom-select{ position:relative; }
   .select-trigger{
     width:100%; display:flex; align-items:center; justify-content:space-between;
@@ -120,15 +132,6 @@
   .ref-line{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); margin-top:8px; padding:0 2px; }
   .ref-line b{ color:var(--text); }
 
-  .blokaj-tabs{ display:flex; flex-wrap:wrap; gap:8px; }
-  .blokaj-tab{
-    background:var(--surface-2); border:1px solid var(--hairline); border-radius:999px;
-    color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:600;
-    padding:8px 16px; cursor:pointer; transition:all .15s ease;
-  }
-  .blokaj-tab:hover{ border-color:var(--brass-dim); color:var(--text); }
-  .blokaj-tab.active{ background:rgba(198,161,91,0.14); border-color:var(--brass-dim); color:var(--brass); }
-
   .result-headline{ text-align:center; padding:10px 0 24px; border-bottom:1px solid var(--hairline); margin-bottom:20px; }
   .result-headline .label{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; color:var(--muted); text-transform:uppercase; }
   .result-headline .value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:34px; color:var(--brass); margin:6px 0; }
@@ -139,22 +142,20 @@
   .result-row.accent .val{ color:var(--brass); }
 
   .table-section{ margin-top:8px; }
-  .table-desc{ color:var(--muted); font-size:13.5px; margin-bottom:16px; max-width:640px; }
-  .table-scroll{ overflow-x:auto; }
-  table.rates{ width:100%; min-width:760px; border-collapse:collapse; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
-  table.rates td:not(:first-child), table.rates th:not(:first-child){ text-align:center; }
-  table.rates th[data-key].selected-col, table.rates td.selected-col{ background:rgba(198,161,91,0.08); }
+  .table-desc{ color:var(--muted); font-size:13.5px; margin-bottom:16px; max-width:none; }
+  table.rates{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
   table.rates th{
     font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; color:var(--muted); text-transform:uppercase;
-    text-align:left; padding:12px 14px; background:var(--surface-2); border-bottom:1px solid var(--hairline);
+    text-align:center; padding:12px 14px; background:var(--surface-2); border-bottom:1px solid var(--hairline);
   }
-  table.rates td{ padding:4px 14px; border-bottom:1px solid var(--hairline); font-size:13.5px; }
+  table.rates td{ padding:9px 14px; border-bottom:1px solid var(--hairline); font-size:13.5px; text-align:center; }
+  table.rates td[id^="toplam-cell-"]{ font-family:'IBM Plex Mono',monospace; color:var(--brass); font-weight:600; }
   table.rates tr:last-child td{ border-bottom:none; }
   table.rates tr.selected-row{ background:rgba(198,161,91,0.08); }
   table.rates input.rate-input{
     width:70px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px;
     color:var(--brass); font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13.5px;
-    padding:4px 8px; text-align:right;
+    padding:6px 8px; text-align:center;
   }
   table.rates input.rate-input:focus{ outline:none; border-color:var(--brass-dim); }
   .reset-link{
@@ -187,98 +188,39 @@
 
 <header class="masthead">
   <div>
-    <h1 class="title">Kredi Kartı Vade Farkı Hesaplama</h1>
-    <div class="subtitle">Komisyon veya müşteriye vade farkı yansıtma senaryoları için elinize geçmesini istediğiniz net tutardan yola çıkarak girmeniz/yansıtmanız gereken brüt tutarı hesaplayın</div>
+    <h1 class="title">Ortalama Vade Hesaplama</h1>
+    <div class="subtitle">Taksitlerin kaç günde bir yansıyacağını girin — her taksit sayısı için vade ve ortalama vadeyi anında görün</div>
   </div>
   <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
 </header>
 
 <main>
-  <section id="reverse">
-    <div class="section-title">Ne Kadar Girmeliyim / Yansıtmalıyım?</div>
-    <p class="table-desc" style="max-width:none; white-space:nowrap;">Elinize geçmesini istediğiniz net tutarı biliyorsanız, komisyon/vade farkı düşüldükten sonra bu tutara ulaşmak için girmeniz veya müşteriye yansıtmanız gereken tutarı hesaplayın.</p>
-    <div class="field" style="max-width:none;">
-      <label>Blokaj Süresi (paranın hesaba geçme süresi)</label>
-      <div class="blokaj-tabs" id="blokajTabs">
-        <button class="blokaj-tab" data-key="ertesi">Ertesi gün</button>
-        <button class="blokaj-tab" data-key="gun3">3 gün</button>
-        <button class="blokaj-tab active" data-key="gun7">7 gün</button>
-        <button class="blokaj-tab" data-key="gun15">15 gün</button>
-        <button class="blokaj-tab" data-key="gun30">30 gün</button>
-        <button class="blokaj-tab" data-key="gun45">45 gün</button>
-      </div>
-    </div>
-    <div class="calc-grid">
-      <div class="input-card">
-        <div class="field">
-          <label>Elime Geçmesini İstediğim Net Tutar</label>
-          <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num" id="revNet" value="100.000" data-decimals="2"><span class="unit">TL</span></div>
-        </div>
-        <div class="field" style="margin-bottom:0;">
-          <label>Taksit Sayısı</label>
-          <div class="custom-select" id="revTaksitCustom">
-            <button type="button" class="select-trigger" id="revTaksitTrigger">
-              <span id="revTaksitTriggerLabel">12 Taksit</span>
-              <span class="chevron">▾</span>
-            </button>
-            <div class="select-options" id="revTaksitOptions"></div>
-          </div>
-          <div class="ref-line">
-            <span>Kullanılan Oran: <b id="revOranRef">—</b> %</span>
-            <span>Bu oranı aşağıdaki tablodan değiştirebilirsiniz</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="result-card">
-        <div class="result-headline">
-          <div class="label">Girmeniz/Yansıtmanız Gereken Tutar</div>
-          <div class="value" id="revGross">0,00 TL</div>
-          <div class="sub" id="revNetSub">0,00 TL net elinize geçmesi için</div>
-        </div>
-        <div class="result-row">
-          <span>Kesinti (Komisyon/Vade Farkı)</span>
-          <span class="val" id="revKesinti">0,00 TL</span>
-        </div>
-        <div class="result-row accent">
-          <span>Taksit Başına Tutar</span>
-          <span class="val" id="revTaksitTutari">0,00 TL</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section class="table-section">
-    <div class="section-title">Taksit Oranları</div>
-    <p class="table-desc">Aşağıdaki oranlar örnek değerlerdir. Kendi oranlarınızı biliyorsanız, kutulara girip güncelleyebilirsiniz — hesaplama otomatik olarak yeni oranlara göre çalışır. Her sütun ayrı bir blokaj süresine ait, dilediğiniz sütunu düzenleyebilirsiniz.</p>
-    <div class="table-scroll">
-      <table class="rates" id="ratesTable">
-        <thead>
-          <tr>
-            <th>Taksit</th>
-            <th data-key="ertesi">Ertesi gün</th>
-            <th data-key="gun3">3 gün</th>
-            <th data-key="gun7">7 gün</th>
-            <th data-key="gun15">15 gün</th>
-            <th data-key="gun30">30 gün</th>
-            <th data-key="gun45">45 gün</th>
-          </tr>
-        </thead>
-        <tbody id="ratesBody"></tbody>
-      </table>
+    <p class="table-desc">Aşağıdaki gün değerleri örnek değerlerdir. Kartınızın gerçek vade günlerini biliyorsanız, tablodaki kutulara kendi değerlerinizi girip güncelleyebilirsiniz — ortalama vade otomatik olarak yeniden hesaplanır.</p>
+    <div class="field" style="max-width:280px;">
+      <label>Taksitler kaç günde bir yansıyacak</label>
+      <div class="input-wrap"><input type="text" inputmode="numeric" class="tr-num" id="qInterval" value="30" data-decimals="0"><span class="unit">gün</span></div>
     </div>
-    <a class="reset-link" id="resetRates">↺ Tüm oranları varsayılana sıfırla</a>
-    <div class="io-toolbar" id="ioToolbar">
+    <table class="rates" id="ratesTable">
+      <thead>
+        <tr>
+          <th>Taksit</th>
+          <th>Taksit Vade (gün)</th>
+          <th>Toplam Vade (gün)</th>
+          <th>Ortalama Vade (gün)</th>
+        </tr>
+      </thead>
+      <tbody id="ratesBody"></tbody>
+    </table>
+    <a class="reset-link" id="resetRates">↺ Varsayılan günlere sıfırla</a>
+    <div class="io-toolbar">
       <button type="button" class="io-btn" id="exportExcelBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
       <button type="button" class="io-btn" id="exportPdfBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
-      <button type="button" class="io-btn" id="importExcelBtn">⬆ Excel'den Yükle</button>
-      <button type="button" class="io-btn" id="downloadTemplateBtn">📄 Şablonu İndir</button>
-      <input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none;">
     </div>
-    <div class="io-msg" id="memberNotice" style="color:var(--muted);">🔒 Excel/PDF aktarma ve şablon özellikleri şimdilik yalnızca üye girişi yapan kullanıcılar için aktiftir.</div>
+    <div class="io-msg" id="memberNotice" style="color:var(--muted);">🔒 Excel/PDF aktarma özellikleri şimdilik yalnızca üye girişi yapan kullanıcılar için aktiftir.</div>
     <div class="io-msg" id="ioMsg"></div>
     <div class="io-msg" id="cloudMsg" style="color:var(--muted);"></div>
-    <div class="flag">⚠ Vade farkı oranları banka, kart programı ve kampanya dönemine göre değişir. Kesin oranlar için bankanızın güncel bilgilerine başvurun.</div>
+    <div class="flag">⚠ Vade günleri banka, kart programı ve kampanya dönemine göre değişir. Kesin bilgiler için bankanızın güncel verilerine başvurun.</div>
   </section>
 </main>
 
@@ -294,17 +236,30 @@
 </footer>
 
 <script>
-  const RATE_SETS = {
-    ertesi: {1:3.50,  2:5.75,  3:7.75,  4:9.50,  5:11.50, 6:13.25, 7:15.25, 8:17.25, 9:19.00, 10:21.00, 11:22.75, 12:24.50},
-    gun3:   {1:3.00,  2:5.50,  3:7.50,  4:9.25,  5:11.25, 6:13.00, 7:15.00, 8:17.00, 9:18.75, 10:20.75, 11:22.50, 12:24.25},
-    gun7:   {1:2.75,  2:5.25,  3:7.25,  4:9.00,  5:11.00, 6:12.75, 7:14.75, 8:16.75, 9:18.50, 10:20.50, 11:22.25, 12:24.00},
-    gun15:  {1:2.25,  2:4.50,  3:6.50,  4:8.25,  5:10.25, 6:12.00, 7:14.00, 8:15.75, 9:17.75, 10:19.50, 11:21.50, 12:23.25},
-    gun30:  {1:1.00,  2:3.25,  3:5.25,  4:7.00,  5:9.00,  6:10.75, 7:12.75, 8:14.50, 9:16.50, 10:18.25, 11:20.25, 12:22.00},
-    gun45:  {1:0.00,  2:2.00,  3:4.00,  4:5.75,  5:7.75,  6:9.50,  7:11.50, 8:13.25, 9:15.25, 10:17.00, 11:19.00, 12:20.75}
-  };
+  const DEFAULT_TAKSIT_VADE = 30; // varsayılan: her taksit için gün aralığı
 
-  let currentBlokaj = 'gun7';
-  const RATE_DEFAULTS = JSON.parse(JSON.stringify(RATE_SETS));
+  let taksitVades = {};   // ELLE GİRİLEN: her taksidin kendi vadesi (gün)
+  let vades = {};         // TÜRETİLEN: kümülatif Toplam Vade (computeOrt bunu kullanır, dokunulmadı)
+
+  for(let n=1; n<=12; n++){
+    taksitVades[n] = DEFAULT_TAKSIT_VADE;
+  }
+
+  function recomputeToplam(){
+    let running = 0;
+    for(let n=1; n<=12; n++){
+      running += taksitVades[n];
+      vades[n] = running;
+    }
+  }
+  recomputeToplam();
+
+  function computeOrt(n){
+    let sum = 0;
+    for(let i=1; i<=n; i++){ sum += vades[i]; }
+    const avg = sum / n;
+    return avg.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
 
   function fmtTR(n, decimals){
     return n.toLocaleString('tr-TR', {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
@@ -348,123 +303,62 @@
     });
   }
 
-  const BLOKAJ_KEYS = ['ertesi','gun3','gun7','gun15','gun30','gun45'];
-
   const ratesBody = document.getElementById('ratesBody');
   function renderRatesTable(){
     ratesBody.innerHTML = '';
     for(let n=1; n<=12; n++){
       const tr = document.createElement('tr');
-      if(n === revSelectedTaksit) tr.classList.add('selected-row');
-      let cells = `<td>${n}</td>`;
-      BLOKAJ_KEYS.forEach(key => {
-        const isSelected = key === currentBlokaj ? ' selected-col' : '';
-        cells += `<td class="${isSelected.trim()}"><input type="text" inputmode="decimal" class="rate-input" data-n="${n}" data-key="${key}" data-decimals="2" value="${fmtTR(RATE_SETS[key][n], 2)}"></td>`;
-      });
-      tr.innerHTML = cells;
+      tr.innerHTML = `
+        <td>${n}</td>
+        <td><input type="text" inputmode="numeric" class="rate-input day-input" data-n="${n}" data-field="taksitvade" data-decimals="0" value="${taksitVades[n]}"></td>
+        <td id="toplam-cell-${n}">${vades[n]}</td>
+        <td id="ort-cell-${n}">${computeOrt(n)}</td>
+      `;
       ratesBody.appendChild(tr);
     }
     ratesBody.querySelectorAll('.rate-input').forEach(inp => {
       attachTRFormatting(inp);
       inp.addEventListener('input', () => {
         const n = +inp.dataset.n;
-        const key = inp.dataset.key;
-        RATE_SETS[key][n] = parseTR(inp.value);
-        if(key === currentBlokaj) calculateReverse();
+        const v = parseTR(inp.value);
+        taksitVades[n] = v;
+        recomputeToplam();
+        refreshDerived();
       });
     });
-    document.querySelectorAll('#ratesTable th[data-key]').forEach(th => {
-      th.classList.toggle('selected-col', th.dataset.key === currentBlokaj);
-    });
   }
+
+  function refreshDerived(){
+    for(let n=1; n<=12; n++){
+      const toplamCell = document.getElementById('toplam-cell-' + n);
+      const ortCell = document.getElementById('ort-cell-' + n);
+      if(toplamCell) toplamCell.textContent = vades[n];
+      if(ortCell) ortCell.textContent = computeOrt(n);
+    }
+  }
+
+  document.getElementById('qInterval').addEventListener('input', () => {
+    const interval = num('qInterval');
+    for(let n=1; n<=12; n++){
+      taksitVades[n] = interval;
+    }
+    recomputeToplam();
+    renderRatesTable();
+  });
+  attachTRFormatting(document.getElementById('qInterval'));
 
   document.getElementById('resetRates').addEventListener('click', () => {
-    for(const key of BLOKAJ_KEYS){
-      for(const k in RATE_DEFAULTS[key]){ RATE_SETS[key][k] = RATE_DEFAULTS[key][k]; }
+    for(let n=1; n<=12; n++){
+      taksitVades[n] = DEFAULT_TAKSIT_VADE;
     }
+    document.getElementById('qInterval').value = String(DEFAULT_TAKSIT_VADE);
+    recomputeToplam();
     renderRatesTable();
-    calculateReverse();
   });
 
-  const blokajTabs = document.getElementById('blokajTabs');
-  blokajTabs.addEventListener('click', (e) => {
-    const btn = e.target.closest('.blokaj-tab');
-    if(!btn) return;
-    currentBlokaj = btn.dataset.key;
-    blokajTabs.querySelectorAll('.blokaj-tab').forEach(b => b.classList.toggle('active', b === btn));
-    renderRatesTable();
-    calculateReverse();
-  });
-
-  let revSelectedTaksit = 12;
-  const revTaksitCustom = document.getElementById('revTaksitCustom');
-  const revTaksitTrigger = document.getElementById('revTaksitTrigger');
-  const revTaksitTriggerLabel = document.getElementById('revTaksitTriggerLabel');
-  const revTaksitOptions = document.getElementById('revTaksitOptions');
-
-  for(let n=1; n<=12; n++){
-    const opt = document.createElement('div');
-    opt.className = 'select-option' + (n===12 ? ' selected' : '');
-    opt.dataset.n = n;
-    opt.textContent = n === 1 ? 'Peşin' : (n + ' Taksit');
-    revTaksitOptions.appendChild(opt);
-  }
-
-  function selectRevTaksit(n){
-    revSelectedTaksit = n;
-    revTaksitTriggerLabel.textContent = n === 1 ? 'Peşin' : (n + ' Taksit');
-    revTaksitOptions.querySelectorAll('.select-option').forEach(o => {
-      o.classList.toggle('selected', +o.dataset.n === n);
-    });
-    revTaksitCustom.classList.remove('open');
-    renderRatesTable();
-    calculateReverse();
-  }
-
-  revTaksitTrigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    revTaksitCustom.classList.toggle('open');
-  });
-  revTaksitOptions.addEventListener('click', (e) => {
-    const opt = e.target.closest('.select-option');
-    if(opt) selectRevTaksit(+opt.dataset.n);
-  });
-  document.addEventListener('click', (e) => {
-    if(!revTaksitCustom.contains(e.target)) revTaksitCustom.classList.remove('open');
-  });
-
-  function calculateReverse(){
-    const net = parseTR(document.getElementById('revNet').value);
-    const n = revSelectedTaksit;
-    const oran = RATE_SETS[currentBlokaj][n];
-
-    document.getElementById('revOranRef').textContent = fmtTR(oran, 2);
-
-    const oranOran = oran/100;
-    if(oranOran >= 1){
-      document.getElementById('revGross').textContent = '—';
-      document.getElementById('revNetSub').textContent = 'Bu oranla hesaplama yapılamıyor';
-      document.getElementById('revKesinti').textContent = '—';
-      document.getElementById('revTaksitTutari').textContent = '—';
-      return;
-    }
-
-    const gross = net / (1 - oranOran);
-    const kesinti = gross - net;
-    const taksitTutari = n > 0 ? gross / n : 0;
-
-    document.getElementById('revGross').textContent = fmtTR(gross, 2) + ' TL';
-    document.getElementById('revNetSub').textContent = fmtTR(net, 2) + ' TL net elinize geçmesi için';
-    document.getElementById('revKesinti').textContent = fmtTR(kesinti, 2) + ' TL';
-    document.getElementById('revTaksitTutari').textContent = fmtTR(taksitTutari, 2) + ' TL';
-  }
-
-  attachTRFormatting(document.getElementById('revNet'));
-  document.getElementById('revNet').addEventListener('input', calculateReverse);
   renderRatesTable();
-  calculateReverse();
 
-  // ---- Firebase: Oranları Kaydetme / Yükleme ----
+  // ---- Firebase: Vadeleri Kaydetme / Yükleme ----
   function showCloudMsg(msg){
     const el = document.getElementById('cloudMsg');
     el.textContent = msg;
@@ -474,19 +368,14 @@
   async function loadCloudRates(uid){
     try{
       const cloud = window.mmgCloud;
-      const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', uid, 'rates', 'kkTaksitMaliyeti'));
+      const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', uid, 'rates', 'kkVadeFarki'));
       if(snap.exists()){
         const data = snap.data();
-        if(data.rateSets){
-          for(const key of BLOKAJ_KEYS){
-            if(data.rateSets[key]){
-              for(const k in data.rateSets[key]){ RATE_SETS[key][k] = data.rateSets[key][k]; }
-            }
-          }
-        }
+        if(data.taksitVades){ for(const k in data.taksitVades){ taksitVades[k] = data.taksitVades[k]; } }
+        if(data.interval){ document.getElementById('qInterval').value = String(data.interval); }
+        recomputeToplam();
         renderRatesTable();
-        calculateReverse();
-        showCloudMsg('Kayıtlı oranlarınız yüklendi.');
+        showCloudMsg('Kayıtlı vadeleriniz yüklendi.');
       }
     } catch(err){
       // Sessizce geç: kayıtlı veri yoksa veya erişilemezse varsayılanlarla devam edilir
@@ -516,16 +405,11 @@
 
   function updateMemberGate(){
     const notice = document.getElementById('memberNotice');
-    if(isMember()){
-      notice.style.display = 'none';
-    } else {
-      notice.style.display = 'block';
-    }
+    notice.style.display = isMember() ? 'none' : 'block';
   }
   updateMemberGate();
 
-  const BLOKAJ_LABELS = { ertesi:'Ertesi gün', gun3:'3 gün', gun7:'7 gün', gun15:'15 gün', gun30:'30 gün', gun45:'45 gün' };
-
+  // ---- Excel / PDF Aktarma & Excel'den Yükleme ----
   function showIoMsg(msg, isError){
     const el = document.getElementById('ioMsg');
     el.textContent = msg;
@@ -534,10 +418,9 @@
   }
 
   function buildTableRows(){
-    const header = ['Taksit'].concat(BLOKAJ_KEYS.map(k => BLOKAJ_LABELS[k]));
-    const rows = [header];
+    const rows = [['Taksit', 'Taksit Vade (gün)', 'Toplam Vade (gün)', 'Ortalama Vade (gün)']];
     for(let n=1; n<=12; n++){
-      rows.push([n].concat(BLOKAJ_KEYS.map(k => RATE_SETS[k][n])));
+      rows.push([n, taksitVades[n], vades[n], computeOrt(n)]);
     }
     return rows;
   }
@@ -547,10 +430,10 @@
     try{
       const rows = buildTableRows();
       const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols'] = [{wch:8}].concat(BLOKAJ_KEYS.map(()=>({wch:12})));
+      ws['!cols'] = [{wch:8},{wch:16},{wch:16},{wch:18}];
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Taksit Oranları');
-      XLSX.writeFile(wb, 'kredi-karti-taksit-maliyeti.xlsx');
+      XLSX.utils.book_append_sheet(wb, ws, 'Ortalama Vade Tablosu');
+      XLSX.writeFile(wb, 'ortalama-vade-tablosu.xlsx');
       showIoMsg('Excel dosyası indirildi.');
     } catch(e){ showIoMsg('Excel oluşturulurken hata oluştu.', true); }
   });
@@ -573,20 +456,19 @@
     try{
       const logoDataUrl = await mmgGetLogoDataUrl();
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'landscape' });
+      const doc = new jsPDF();
       const titleX = logoDataUrl ? 30 : 14;
       if(logoDataUrl){
         try{ doc.addImage(logoDataUrl, 'PNG', 14, 8, 14, 14); } catch(imgErr){ /* logo eklenemezse sessizce geç */ }
       }
       doc.setFontSize(14);
-      doc.text('Kredi Kartı Vade Farkı Hesaplama', titleX, 16);
+      doc.text('Ortalama Vade Hesaplama', titleX, 16);
       doc.setFontSize(10);
       doc.text('mmgcreativity.com', titleX, 22);
-      const rows = buildTableRows();
       doc.autoTable({
         startY: 28,
-        head: [rows[0]],
-        body: rows.slice(1).map(r => [r[0]].concat(r.slice(1).map(v => fmtTR(v,2)+'%'))),
+        head: [['Taksit', 'Taksit Vade (gün)', 'Toplam Vade (gün)', 'Ortalama Vade (gün)']],
+        body: buildTableRows().slice(1).map(r => [r[0], r[1], r[2], r[3]]),
         styles: { fontSize: 9 },
         headStyles: { fillColor: [198,161,91] },
         didDrawPage: function(data){
@@ -602,70 +484,11 @@
           doc.text('Oluşturulma: ' + dateStr, pageWidth - 14, pageHeight - 9, { align: 'right' });
         }
       });
-      doc.save('kredi-karti-taksit-maliyeti.pdf');
+      doc.save('ortalama-vade-tablosu.pdf');
       showIoMsg('PDF dosyası indirildi.');
     } catch(e){ showIoMsg('PDF oluşturulurken hata oluştu.', true); }
   });
 
-  document.getElementById('importExcelBtn').addEventListener('click', () => {
-    if(!requireMember()) return;
-    document.getElementById('importExcelInput').click();
-  });
-
-  document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
-    if(!requireMember()) return;
-    try{
-      const header = ['Taksit'].concat(BLOKAJ_KEYS.map(k => BLOKAJ_LABELS[k]));
-      const rows = [header];
-      for(let n=1; n<=12; n++){
-        rows.push([n].concat(BLOKAJ_KEYS.map(k => RATE_DEFAULTS[k][n])));
-      }
-      const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols'] = [{wch:8}].concat(BLOKAJ_KEYS.map(()=>({wch:12})));
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Şablon');
-      XLSX.writeFile(wb, 'kredi-karti-taksit-maliyeti-sablon.xlsx');
-      showIoMsg('Şablon indirildi. Doldurup "Excel\'den Yükle" ile geri yükleyebilirsiniz.');
-    } catch(e){ showIoMsg('Şablon oluşturulurken hata oluştu.', true); }
-  });
-
-  document.getElementById('importExcelInput').addEventListener('change', (e) => {
-    if(!requireMember()) { e.target.value = ''; return; }
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      try{
-        const data = new Uint8Array(evt.target.result);
-        const wb = XLSX.read(data, { type: 'array' });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
-        let updated = 0;
-        for(let i=1; i<rows.length; i++){
-          const row = rows[i];
-          if(!row || row.length < 2) continue;
-          const n = parseInt(row[0]);
-          if(!n || n < 1 || n > 12) continue;
-          BLOKAJ_KEYS.forEach((key, idx) => {
-            const v = parseFloat(String(row[idx+1]).replace(',', '.'));
-            if(isFinite(v)) RATE_SETS[key][n] = v;
-          });
-          updated++;
-        }
-        if(updated === 0){
-          showIoMsg('Dosyada uygun satır bulunamadı. Sütun sırası: Taksit, Ertesi gün, 3 gün, 7 gün, 15 gün, 30 gün, 45 gün.', true);
-          return;
-        }
-        renderRatesTable();
-        calculateReverse();
-        showIoMsg(updated + ' satır güncellendi.');
-      } catch(err){
-        showIoMsg('Dosya okunamadı. Lütfen .xlsx formatında bir dosya yükleyin.', true);
-      }
-      e.target.value = '';
-    };
-    reader.readAsArrayBuffer(file);
-  });
 </script>
 
 <button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır">↓</button>
