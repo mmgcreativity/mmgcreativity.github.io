@@ -1,1 +1,12 @@
-
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.mmgcreativity.dijitalfinans",
+      "sha256_cert_fingerprints": [
+        "C3:B2:E4:28:60:72:44:7A:F1:7B:4E:55:EA:59:38:09:F2:9B:4D:8E:3E:33:02:75:68:88:B2:03:45:B7:F4:7D"
+      ]
+    }
+  }
+]
