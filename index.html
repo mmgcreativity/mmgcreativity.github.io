@@ -128,6 +128,36 @@
   .nav-subitem{ padding:9px 14px; margin-bottom:0; }
   .nav-subitem .nav-title{ font-size:12.5px; font-weight:600; }
 
+  /* ---------- Favori yıldızı ---------- */
+  .fav-star{
+    flex-shrink:0; width:18px; height:18px; display:flex; align-items:center; justify-content:center;
+    color:var(--muted); opacity:0.55; transition:color .15s ease, opacity .15s ease, transform .15s ease;
+    background:none; border:none; padding:0; cursor:pointer;
+  }
+  .fav-star:hover{ opacity:1; transform:scale(1.15); }
+  .fav-star svg{ width:15px; height:15px; }
+  .fav-star.is-fav{ color:var(--brass); opacity:1; }
+  .fav-star.is-fav svg{ fill:var(--brass); }
+
+  .nav-fav-pinned{ display:flex; flex-direction:column; gap:2px; margin-bottom:10px; }
+  .nav-fav-pinned[hidden]{ display:none; }
+  .nav-fav-pinned .nav-item{ background:rgba(198,161,91,0.06); border-color:rgba(198,161,91,0.18); }
+  .nav-fav-label{
+    font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.14em; color:var(--brass-dim);
+    text-transform:uppercase; padding:2px 16px 6px;
+  }
+  .nav-fav-divider{ height:1px; background:var(--hairline); margin:4px 12px 12px; }
+
+  .fav-star-card{
+    position:absolute; top:14px; left:14px; z-index:2; width:26px; height:26px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center; background:rgba(13,20,32,0.55);
+    color:var(--muted); opacity:0.6; transition:all .15s ease; border:none; cursor:pointer;
+  }
+  .fav-star-card:hover{ opacity:1; transform:scale(1.1); }
+  .fav-star-card svg{ width:15px; height:15px; }
+  .fav-star-card.is-fav{ color:var(--brass); opacity:1; background:rgba(198,161,91,0.14); }
+  .fav-star-card.is-fav svg{ fill:var(--brass); }
+
   /* ---------- Main ---------- */
   main{ flex:1; height:100vh; display:flex; flex-direction:column; min-width:0; }
   .topbar{
@@ -321,7 +351,7 @@
   }
   .app-card .card-icon{ width:24px; height:24px; color:var(--brass); transition:color .2s ease; }
   .app-card:hover .card-icon{ color:var(--coral); }
-  .app-card h3{ font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600; margin-bottom:8px; }
+  .app-card h3{ font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600; margin-bottom:8px; padding-left:30px; }
   .app-card p{ font-size:12.5px; color:var(--muted); line-height:1.55; }
   .card-arrow{ position:absolute; top:22px; right:20px; color:var(--muted); font-size:16px; transition:transform .15s ease, color .15s ease; }
   .app-card:hover .card-arrow{ transform:translate(3px,-3px); color:var(--coral); }
@@ -604,7 +634,14 @@
 
   <nav>
 
+    <div class="nav-fav-pinned" id="navFavPinned" hidden>
+      <div class="nav-fav-label">★ Favoriler</div>
+      <div id="navFavList"></div>
+      <div class="nav-fav-divider"></div>
+    </div>
+
     <button class="nav-item" data-target="home" data-title="Ana Sayfa">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="home" data-fav-title="Ana Sayfa" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title">Ana Sayfa</span>
       </span>
@@ -619,17 +656,21 @@
     </button>
     <div class="nav-drawer" id="hesaplamaDrawer" hidden>
       <button class="nav-item nav-subitem" data-target="Ortalama_Vade_Hesaplama.html" data-title="Ortalama Vade Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Ortalama_Vade_Hesaplama.html" data-fav-title="Ortalama Vade Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title">Ortalama Vade Hesaplama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="Rotatif_Kredi_Hesaplama.html" data-title="Rotatif Kredi Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Rotatif_Kredi_Hesaplama.html" data-fav-title="Rotatif Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title">Rotatif Kredi Hesaplama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-title="Kredi Kartı Vade Farkı Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-fav-title="Kredi Kartı Vade Farkı" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title">Kredi Kartı Vade Farkı</span></span>
       </button>
     </div>
 
     <button class="nav-item" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title">Nakit Akış</span>
         <span class="nav-desc">Tablosu</span>
@@ -637,18 +678,21 @@
     </button>
 
     <button class="nav-item" data-target="Giderler.html" data-title="Giderler">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title">Giderler</span>
       </span>
     </button>
 
     <button class="nav-item" data-target="Gelirler.html" data-title="Gelirler">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title">Gelirler</span>
       </span>
     </button>
 
     <button class="nav-item" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title">Talimat</span>
         <span class="nav-desc">Hazırlama</span>
@@ -656,14 +700,23 @@
     </button>
 
     <button class="nav-item" data-target="rehber.html" data-title="Rehber">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title">Rehber</span>
       </span>
     </button>
 
     <button class="nav-item" data-target="iletisim.html" data-title="İletişim">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="iletisim.html" data-fav-title="İletişim" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title">İletişim</span>
+      </span>
+    </button>
+
+    <button class="nav-item" id="begenIstatistikleriNav" data-target="Begen_Istatistikleri.html" data-title="Beğen İstatistikleri" style="display:none;">
+      <span class="nav-text-wrap">
+        <span class="nav-title">Beğen</span>
+        <span class="nav-desc">İstatistikleri</span>
       </span>
     </button>
   </nav>
@@ -853,32 +906,37 @@
         <svg class="deco deco-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2l2.4 6.8L21 11l-6.6 2.2L12 20l-2.4-6.8L3 11l6.6-2.2z"/></svg>
         <svg class="deco deco-13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3.2"/><circle cx="7" cy="9" r=".6" fill="currentColor" stroke="none"/></svg>
       </div>
-      <div class="card-grid">
+      <div class="card-grid" id="cardGrid">
         <button class="app-card" data-target="Hesaplama_Araclari.html" data-title="Hesaplama Araçları">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3>Hesaplama Araçları</h3>
           <p>Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.</p>
         </button>
 
         <button class="app-card" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3>Nakit Akış Tablosu</h3>
           <p>Ay ay, gün gün gelir ve giderlerinizi girin; haftalık ve aylık durumunuzu, kategori dağılımınızı ve otomatik uyarılarınızı anında görün.</p>
         </button>
 
         <button class="app-card" data-target="Giderler.html" data-title="Giderler">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3>Giderler</h3>
           <p>Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
         </button>
 
         <button class="app-card" data-target="Gelirler.html" data-title="Gelirler">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3>Gelirler</h3>
           <p>Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
         </button>
 
         <button class="app-card" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3>Talimat Hazırlama</h3>
           <p>Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.</p>
@@ -992,6 +1050,111 @@
   });
 
   openTarget('home', 'Ana Sayfa');
+
+  // ---- Favoriler ----
+  const FAV_KEY = 'mmg_nav_favorites';
+  const STAR_SVG = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg>';
+
+  function getFavorites(){
+    try{ return JSON.parse(localStorage.getItem(FAV_KEY)) || []; }catch(e){ return []; }
+  }
+  function setFavorites(arr){
+    try{ localStorage.setItem(FAV_KEY, JSON.stringify(arr)); }catch(e){}
+  }
+  function isFavorite(target){
+    return getFavorites().includes(target);
+  }
+  function toggleFavorite(target){
+    let favs = getFavorites();
+    if(favs.includes(target)){
+      favs = favs.filter(t => t !== target);
+    } else {
+      favs.unshift(target);
+    }
+    setFavorites(favs);
+    renderFavorites();
+  }
+
+  function renderFavStarStates(){
+    document.querySelectorAll('.fav-star, .fav-star-card').forEach(star=>{
+      star.classList.toggle('is-fav', isFavorite(star.dataset.favTarget));
+    });
+  }
+
+  function renderNavFavPinned(){
+    const favs = getFavorites();
+    const pinnedWrap = document.getElementById('navFavPinned');
+    const pinnedList = document.getElementById('navFavList');
+    // Sadece nav içinde gerçekten var olan hedefleri göster
+    const knownTargets = new Map();
+    document.querySelectorAll('.fav-star[data-fav-target]').forEach(s=>{
+      knownTargets.set(s.dataset.favTarget, s.dataset.favTitle || s.dataset.favTarget);
+    });
+    const favInNav = favs.filter(t => knownTargets.has(t));
+    if(favInNav.length === 0){
+      pinnedWrap.hidden = true;
+      pinnedList.innerHTML = '';
+      return;
+    }
+    pinnedWrap.hidden = false;
+    pinnedList.innerHTML = favInNav.map(t => {
+      const title = knownTargets.get(t);
+      return '<button class="nav-item" data-target="' + t + '" data-title="' + title + '">' +
+        '<span class="fav-star is-fav" role="button" tabindex="0" data-fav-target="' + t + '" data-fav-title="' + title + '" title="Favorilerden çıkar" aria-label="Favorilerden çıkar">' + STAR_SVG + '</span>' +
+        '<span class="nav-text-wrap"><span class="nav-title">' + title + '</span></span>' +
+      '</button>';
+    }).join('');
+    // Yeni oluşturulan pinned butonlara olay dinleyicileri ekle
+    pinnedList.querySelectorAll('.nav-item').forEach(el=>{
+      el.addEventListener('click', ()=> openTarget(el.dataset.target, el.dataset.title));
+    });
+    pinnedList.querySelectorAll('.fav-star').forEach(star=>{
+      star.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        toggleFavorite(star.dataset.favTarget);
+      });
+    });
+  }
+
+  function sortCardGrid(){
+    const grid = document.getElementById('cardGrid');
+    if(!grid) return;
+    const favs = getFavorites();
+    const cards = Array.from(grid.querySelectorAll('.app-card'));
+    cards.forEach((c, i)=>{ if(c.dataset.origIndex === undefined) c.dataset.origIndex = i; });
+    cards.sort((a,b)=>{
+      const fa = favs.indexOf(a.dataset.target);
+      const fb = favs.indexOf(b.dataset.target);
+      if(fa === -1 && fb === -1) return (+a.dataset.origIndex) - (+b.dataset.origIndex);
+      if(fa === -1) return 1;
+      if(fb === -1) return -1;
+      return fa - fb;
+    });
+    cards.forEach(c => grid.appendChild(c));
+  }
+
+  function renderFavorites(){
+    renderFavStarStates();
+    renderNavFavPinned();
+    sortCardGrid();
+  }
+
+  // Mevcut (statik) yıldızlara olay dinleyicisi ekle
+  document.querySelectorAll('.fav-star[data-fav-target], .fav-star-card[data-fav-target]').forEach(star=>{
+    star.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      toggleFavorite(star.dataset.favTarget);
+    });
+    star.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        e.stopPropagation();
+        toggleFavorite(star.dataset.favTarget);
+      }
+    });
+  });
+
+  renderFavorites();
 </script>
 
 <script type="module">
@@ -1023,11 +1186,13 @@
   // ---- Yönetici kontrolü, premium/reklamsız durumu ----
   onAuthStateChanged(auth, async (user) => {
     const adminBtn = document.getElementById('adminPanelBtn');
-    if(!user){ if(adminBtn) adminBtn.style.display = 'none'; return; }
+    const begenNav = document.getElementById('begenIstatistikleriNav');
+    if(!user){ if(adminBtn) adminBtn.style.display = 'none'; if(begenNav) begenNav.style.display = 'none'; return; }
     try{
       const snap = await getDoc(doc(db, 'users', user.uid));
       const data = snap.exists() ? snap.data() : {};
       if(adminBtn) adminBtn.style.display = data.isAdmin ? 'flex' : 'none';
+      if(begenNav) begenNav.style.display = data.isAdmin ? 'flex' : 'none';
       // Premium üye reklamsız deneyim: adsbygoogle script'ini reklamsız kullanıcılar için hiç yüklemiyoruz
       if(data.isPremium){
         document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
