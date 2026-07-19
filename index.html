@@ -1162,7 +1162,7 @@
       const email = state.slice(5);
       const no = customerNumber || localStorage.getItem('mmg_customer_no');
       const uname = username || localStorage.getItem('mmg_username');
-      nameEl.textContent = uname ? (uname + ' · #' + (no || '----')) : email;
+      nameEl.textContent = no ? ('#' + no) : (uname || email);
       dropdownName.textContent = uname || email;
       dropdownSub.textContent = no ? ('Kullanıcı Kodu: #' + no) : email;
     }
@@ -1333,6 +1333,12 @@
   setAvatar(localStorage.getItem('mmg_avatar'));
   if(localStorage.getItem('mmg_auth_state')){
     closeAuthOverlay();
+  }
+  // Güvenlik önlemi: Kayıtlı durum "misafir" olduğu halde Firebase'de hâlâ
+  // gerçek bir oturum (örn. eski admin girişi) açıksa, tutarsızlığı önlemek
+  // için o oturumu kapat.
+  if(localStorage.getItem('mmg_auth_state') === 'guest' && auth.currentUser){
+    signOut(auth).catch(()=>{});
   }
 
   function mapFirebaseError(code){
