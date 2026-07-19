@@ -31,7 +31,6 @@
     color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
     -webkit-font-smoothing:antialiased; padding-bottom:60px;
   }
-
   header.masthead{
     max-width:1180px; margin:0 auto; padding:36px 24px 24px;
     border-bottom:1px solid var(--hairline);
@@ -58,13 +57,11 @@
   }
   .cat-tab:hover{ color:var(--text); border-color:var(--brass-dim); }
   .cat-tab.active{ background:var(--grad); color:#fff; border-color:transparent; }
-
   .frame-wrap{
     position:relative; background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
     overflow:hidden; height:78vh;
   }
   .frame-wrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
-
   .desktop-only{ display:block; }
   .mobile-only{ display:none; }
 
@@ -109,8 +106,8 @@
   <div class="desktop-only">
     <div class="cat-tabs" id="toolTabs">
       <button type="button" class="cat-tab" data-file="Rotatif_Kredi_Hesaplama_Platformu.html" data-hash="rotatif">Rotatif Kredi</button>
-      <button type="button" class="cat-tab" data-file="Kredi_Karti_Taksit_Maliyeti.html" data-hash="vadefarki">Kredi Kartı Vade Farkı</button>
-      <button type="button" class="cat-tab" data-file="Kredi_Karti_Vade_Farki_Hesaplama.html" data-hash="ortalamavade">Ortalama Vade</button>
+      <button type="button" class="cat-tab" data-file="Kredi_Karti_Vade_Farki_Hesaplama.html" data-hash="vadefarki">Kredi Kartı Vade Farkı</button>
+      <button type="button" class="cat-tab" data-file="Ortalama_Vade_Hesaplama.html" data-hash="ortalamavade">Ortalama Vade</button>
     </div>
     <div class="frame-wrap">
       <iframe id="toolFrame" src=""></iframe>
@@ -125,12 +122,12 @@
         <h3>Rotatif Kredi Hesaplama</h3>
         <p>Tutar, oran ve vade girin — faiz, komisyon, BSMV ve toplam geri ödeme anında hesaplansın.</p>
       </a>
-      <a class="tool-card" href="Kredi_Karti_Taksit_Maliyeti.html">
+      <a class="tool-card" href="Kredi_Karti_Vade_Farki_Hesaplama.html">
         <span class="arrow">↗</span>
         <h3>Kredi Kartı Vade Farkı Hesaplama</h3>
         <p>Net tutardan yola çıkarak girmeniz veya müşteriye yansıtmanız gereken brüt tutarı hesaplayın.</p>
       </a>
-      <a class="tool-card" href="Kredi_Karti_Vade_Farki_Hesaplama.html">
+      <a class="tool-card" href="Ortalama_Vade_Hesaplama.html">
         <span class="arrow">↗</span>
         <h3>Ortalama Vade Hesaplama</h3>
         <p>Taksitlerin kaç günde bir yansıyacağını girin — her taksit sayısı için ortalama vadeyi görün.</p>
