@@ -1073,8 +1073,16 @@
   }
 
   function renderFavStarStates(){
+    const favs = getFavorites();
     document.querySelectorAll('.fav-star, .fav-star-card').forEach(star=>{
-      star.classList.toggle('is-fav', isFavorite(star.dataset.favTarget));
+      star.classList.toggle('is-fav', favs.includes(star.dataset.favTarget));
+    });
+    // Nav'daki orijinal öğeyi favorilendiyse gizle (üstteki pinned listede zaten gösteriliyor), değilse geri göster
+    document.querySelectorAll('.fav-star[data-fav-target]').forEach(star=>{
+      if(star.closest('#navFavPinned')) return; // pinned listedeki kopyaları hariç tut
+      const item = star.closest('.nav-item');
+      if(!item) return;
+      item.style.display = favs.includes(star.dataset.favTarget) ? 'none' : '';
     });
   }
 
