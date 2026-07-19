@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WVWJ4VZE0C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WVWJ4VZE0C');
+</script>
+<script src="mmg-odemeler-sync.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  const auth = getAuth(fbApp);
+  const db = getFirestore(fbApp);
+
+  window.mmgCloud = { auth, db, doc, getDoc, setDoc, deleteDoc, collection, getDocs, currentUser: null };
+
+  onAuthStateChanged(auth, async (user) => {
+    window.mmgCloud.currentUser = user;
+    document.dispatchEvent(new CustomEvent('mmg-auth-ready', { detail: { user } }));
+    // Premium üye reklamsız deneyim
+    if(user){
+      try{
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if(snap.exists() && snap.data().isPremium){
+          document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
+          window.adsbygoogle = { push: function(){} };
+        }
+      } catch(e){ /* sessizce geç */ }
+    }
+  });
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Giderler</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.06), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.05), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; padding-bottom:60px;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  header.masthead{
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
+    border-bottom:1px solid var(--hairline);
+  }
+  .masthead-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px; max-width:640px;}
+  .guide-btn{
+    display:inline-flex; align-items:center; gap:8px; flex-shrink:0;
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:600; color:var(--text);
+    text-decoration:none; border:1px solid var(--hairline); background:var(--surface-2);
+    padding:10px 16px; border-radius:8px; transition:border-color .15s ease, color .15s ease;
+  }
+  .guide-btn:hover{ color:var(--coral); border-color:var(--coral); }
+  .masthead-actions{ display:flex; gap:10px; flex-wrap:wrap; flex-shrink:0; }
+
+  main{ max-width:1180px; margin:0 auto; padding:36px 24px; }
+  .section-title{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:20px; margin-bottom:20px;}
+
+  /* ---- Kontrol satırı ---- */
+  .controls-row{ display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom:24px; }
+  .sync-status{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); }
+  .sync-status b{ color:var(--teal); }
+  .ghost-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    color:var(--text); font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
+    padding:10px 16px; cursor:pointer; transition:border-color .15s ease, background .15s ease; white-space:nowrap;
+  }
+  .ghost-btn:hover{ border-color:var(--brass-dim); background:var(--surface); }
+  .controls-spacer{ flex:1; }
+
+  /* ---- Kategori sekmeleri ---- */
+  /* ---- Açılır pencere (dropdown) ortak yapı ---- */
+  .mmg-dropdown{ position:relative; display:inline-block; margin-bottom:28px; }
+  .mmg-dropdown-trigger{
+    display:flex; align-items:center; gap:8px; background:var(--surface-2); border:1px solid var(--hairline);
+    border-radius:8px; color:var(--text); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px;
+    padding:10px 14px; cursor:pointer; transition:border-color .15s ease; min-width:200px;
+  }
+  .mmg-dropdown-trigger:hover{ border-color:var(--brass-dim); }
+  .mmg-dropdown-trigger .chev{ margin-left:auto; font-size:10px; color:var(--muted); transition:transform .15s ease; }
+  .mmg-dropdown.open .mmg-dropdown-trigger .chev{ transform:rotate(180deg); }
+  .mmg-dropdown-menu{
+    position:absolute; top:calc(100% + 6px); left:0; z-index:200; min-width:220px; max-height:320px; overflow-y:auto;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:10px; box-shadow:0 16px 40px rgba(0,0,0,0.4);
+    padding:6px;
+  }
+  .mmg-dropdown-menu[hidden]{ display:none; }
+  .mmg-dropdown-item{
+    display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none;
+    color:var(--text); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px;
+    padding:9px 10px; border-radius:7px; cursor:pointer; transition:background .12s ease;
+  }
+  .mmg-dropdown-item:hover{ background:var(--surface-2); }
+  .mmg-dropdown-item.active{ background:var(--grad); color:#fff; }
+
+  /* ---- İçerik grid'i (sağda özet kartları) ---- */
+  .content-grid{ display:grid; grid-template-columns:1fr 260px; gap:20px; align-items:start; }
+  .content-main{ min-width:0; }
+  .content-side{ display:flex; flex-direction:column; }
+  @media (max-width:900px){ .content-grid{ grid-template-columns:1fr; } .content-side{ order:-1; } .summary-cards{ flex-direction:row !important; flex-wrap:wrap; } .summary-cards .summary-card{ flex:1; min-width:160px; } }
+
+  /* ---- Özet kartları ---- */
+  .summary-cards{ display:flex; flex-direction:column; gap:12px; }
+  .summary-card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:18px 20px;
+    position:relative; overflow:hidden;
+  }
+  .summary-card::before{ content:''; position:absolute; top:0; left:0; right:0; height:3px; opacity:.9; }
+  .summary-card.sc-a::before{ background:var(--amber); }
+  .summary-card.sc-b::before{ background:var(--azure); }
+  .summary-card.sc-c::before{ background:var(--grad); }
+  .summary-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
+  .summary-value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:24px; }
+  .summary-sub{ font-size:12px; color:var(--muted); margin-top:6px; }
+
+  /* ---- Ekleme formu: adım adım sihirbaz ---- */
+  .add-payment-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:22px 24px; margin-bottom:32px; }
+  .add-payment-card h3{ font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; margin-bottom:16px; }
+  .wizard-step-label{ font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; letter-spacing:normal; text-transform:none; color:var(--text); margin-bottom:12px; }
+  .selected-type-row{ display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+  .selected-type-badge{
+    display:inline-flex; align-items:center; gap:8px; background:rgba(198,161,91,0.14); border:1px solid var(--brass);
+    color:var(--brass); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13.5px;
+    padding:9px 16px; border-radius:10px;
+  }
+  .change-type-link{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--muted); text-decoration:underline;
+    cursor:pointer; background:none; border:none;
+  }
+  .change-type-link:hover{ color:var(--coral); }
+  .add-payment-grid{ display:grid; grid-template-columns:1.6fr 0.8fr 1fr 1fr auto; gap:12px; align-items:end; }
+  @media (max-width:900px){ .add-payment-grid{ grid-template-columns:1fr 1fr; } }
+  .field{ margin-bottom:0; }
+  .field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:8px; }
+  .field input, .field select{
+    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    padding:11px 13px; color:var(--text); font-family:'Inter',sans-serif; font-size:13.5px; outline:none;
+    transition:border-color .15s ease; color-scheme:dark;
+  }
+  .field input:focus, .field select:focus{ border-color:var(--brass-dim); }
+  .field select{ cursor:pointer; }
+  .add-payment-btn{
+    background:var(--grad); border:none; color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:13.5px; padding:11px 20px; border-radius:8px; cursor:pointer; transition:opacity .15s ease; white-space:nowrap;
+  }
+  .add-payment-btn:hover{ opacity:.9; }
+
+  /* ---- Gider listesi ---- */
+  .payment-list{ display:flex; flex-direction:column; gap:10px; }
+  .payment-row{
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:10px; padding:14px 18px;
+  }
+  .payment-row-main{ min-width:0; flex:1; }
+  .payment-row-desc{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .payment-row-meta{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--muted); margin-top:5px; }
+  .payment-cat-badge{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; padding:3px 9px; border-radius:999px;
+    border:1px solid var(--hairline); color:var(--muted); white-space:nowrap;
+  }
+  .status-badge{ font-family:'IBM Plex Mono',monospace; font-size:10px; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+  .status-badge.warn{ background:rgba(227,162,60,0.14); color:var(--amber); }
+  .status-badge.good{ background:rgba(63,182,138,0.14); color:var(--teal); }
+  .status-badge.info{ background:rgba(62,143,224,0.14); color:var(--azure); }
+  .recur-badge{ font-family:'IBM Plex Mono',monospace; font-size:10px; padding:3px 9px; border-radius:999px; border:1px solid var(--hairline); color:var(--violet); white-space:nowrap; }
+  .payment-row-right{ display:flex; align-items:center; gap:16px; flex-shrink:0; }
+  .payment-amount{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:15px; color:var(--red); white-space:nowrap; }
+  .payment-row-actions{ display:flex; gap:8px; }
+  .row-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px; color:var(--text);
+    font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; padding:6px 12px; cursor:pointer; transition:border-color .15s ease;
+    text-decoration:none; white-space:nowrap;
+  }
+  .row-btn:hover{ border-color:var(--brass-dim); }
+  .row-btn.danger:hover{ border-color:var(--red); color:var(--red); }
+  .list-empty{ color:var(--muted); font-size:13.5px; }
+
+  footer{max-width:1180px; margin:0 auto; padding:28px 24px 0; color:var(--muted); font-size:11.5px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  footer .credit{width:100%; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); margin-top:6px; display:flex; align-items:center; justify-content:flex-end; gap:8px;}
+  .signature-pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 12px 4px 5px; border-radius:999px; background:var(--surface-2); border:1px solid var(--hairline); }
+  .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
+  .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff; }
+  footer .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-row">
+    <div>
+      <h1 class="title">Giderler</h1>
+      <div class="subtitle">Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi buradan takip edin. Vadesi geldiğinde, girişte belirttiğiniz tercihe göre Nakit Akış Tablosu'na otomatik işlenir.</div>
+    </div>
+    <div class="masthead-actions">
+      <a href="index.html" class="guide-btn">← Ana Sayfa</a>
+      <a href="rehber-giderler.html" class="guide-btn">📖 Rehber</a>
+      <a href="Gelirler.html" class="guide-btn">💰 Gelirler</a>
+      <a href="Nakit_Akis_Tablosu.html" class="guide-btn">📊 Nakit Akış Tablosu</a>
+      <a href="Talimat_Hazirlama.html" class="guide-btn">📝 Talimat Hazırlama</a>
+      <button type="button" class="ghost-btn" id="syncNowBtn">🔄 Şimdi Senkronize Et</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="controls-row" style="display:none;">
+    <div class="sync-status" id="syncStatus" style="display:none;">Senkronizasyon kontrol ediliyor…</div>
+
+  </div>
+
+  <div class="content-grid">
+    <div class="content-main">
+      <div class="add-payment-card">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:24px;">
+          <div style="flex:0 0 auto;">
+            <div class="wizard-step-label">Gider Filtreleme</div>
+            <div class="mmg-dropdown" id="catFilterDropdown">
+              <button type="button" class="mmg-dropdown-trigger" id="catFilterTrigger">📋 Tümü <span class="chev">▾</span></button>
+              <div class="mmg-dropdown-menu" id="catFilterMenu" hidden></div>
+            </div>
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <h3 id="addPaymentTitle" style="margin-bottom:12px;">Yeni Gider Ekle</h3>
+            <div id="wizardStep1">
+              <div class="mmg-dropdown" id="typeChipDropdown">
+                <button type="button" class="mmg-dropdown-trigger" id="typeChipTrigger">Gider türü seçin <span class="chev">▾</span></button>
+                <div class="mmg-dropdown-menu" id="typeChipMenu" hidden></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="wizardStep2" style="display:none;">
+          <div class="selected-type-row">
+            <span class="selected-type-badge" id="selectedTypeBadge"></span>
+            <button type="button" class="change-type-link" id="changeTypeBtn">değiştir</button>
+          </div>
+          <div class="add-payment-grid">
+            <div class="field">
+              <label>Açıklama <span style="color:var(--muted); font-weight:400;">(opsiyonel)</span></label>
+              <input type="text" id="newDesc" placeholder="örn. Ofis Elektrik Faturası">
+            </div>
+            <div class="field">
+              <label>Tutar</label>
+              <input type="text" id="newAmount" inputmode="decimal" placeholder="0,00">
+            </div>
+            <div class="field">
+              <label>Vade Tarihi</label>
+              <input type="date" id="newDueDate">
+            </div>
+            <div class="field">
+              <label>Tekrarlansın mı?</label>
+              <select id="newRecurrence">
+                <option value="yok">Tekrarlanmasın</option>
+                <option value="haftalik">Evet, her hafta</option>
+                <option value="aylik">Evet, her ay</option>
+                <option value="yillik">Evet, her yıl</option>
+              </select>
+            </div>
+            <button type="button" class="add-payment-btn" id="addPaymentBtn">+ Ekle</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title" id="listTitle">Giderler</div>
+      <div class="payment-list" id="paymentList"></div>
+    </div>
+
+    <div class="content-side">
+      <div class="summary-cards">
+        <div class="summary-card sc-a">
+          <div class="summary-label">Bekleyen Toplam</div>
+          <div class="summary-value" id="sumPending">0,00 TL</div>
+          <div class="summary-sub" id="sumPendingSub">&nbsp;</div>
+        </div>
+        <div class="summary-card sc-b">
+          <div class="summary-label">Yaklaşan Vade</div>
+          <div class="summary-value" id="sumNextDue" style="font-size:17px;">—</div>
+          <div class="summary-sub" id="sumNextDueSub">&nbsp;</div>
+        </div>
+        <div class="summary-card sc-c">
+          <div class="summary-label">Toplam Kayıt</div>
+          <div class="summary-value" id="sumCount">0</div>
+          <div class="summary-sub" id="sumCountSub">&nbsp;</div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="analysis-title">📊 Gider Analizi</div>
+        <div class="analysis-sub">Bu ay ile önceki ayın kategori bazlı karşılaştırması</div>
+        <div id="analysisList"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<style>
+  .analysis-card{
+    margin-top:16px; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:18px;
+  }
+  .analysis-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; margin-bottom:4px; }
+  .analysis-sub{ font-size:11.5px; color:var(--muted); margin-bottom:14px; }
+  .analysis-item{
+    display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-top:1px solid var(--hairline);
+    font-size:12.5px; line-height:1.5;
+  }
+  .analysis-item:first-child{ border-top:none; }
+  .analysis-icon{ flex-shrink:0; font-size:15px; margin-top:1px; }
+  .analysis-item.up .analysis-cat{ color:var(--red); }
+  .analysis-item.down .analysis-cat{ color:var(--teal); }
+  .analysis-item.new .analysis-cat{ color:var(--amber); }
+  .analysis-cat{ font-weight:700; }
+  .analysis-empty{ font-size:12px; color:var(--muted); padding:6px 0; }
+</style>
+
+<footer>
+  <div class="credit">
+    <span>powered by</span>
+    <span class="signature-pill">
+      <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+      <span id="credit-fallback" class="credit-fallback">M</span>
+      <b>mmgcreativity</b>
+    </span>
+  </div>
+</footer>
+
+<script>
+  // ================== Yardımcılar ==================
+  function pad2(n){ return n < 10 ? '0'+n : ''+n; }
+  function fmtTR(n, decimals){
+    decimals = decimals === undefined ? 2 : decimals;
+    return (n||0).toLocaleString('tr-TR', {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+  }
+  function fmtMoney(n){ return fmtTR(n,2) + ' TL'; }
+  function parseTR(str){
+    if(!str) return 0;
+    const cleaned = String(str).replace(/\./g, '').replace(',', '.');
+    const v = parseFloat(cleaned);
+    return isFinite(v) ? v : 0;
+  }
+  function formatTRLive(raw){
+    raw = raw.replace(/[^\d,]/g, '');
+    const firstComma = raw.indexOf(',');
+    if(firstComma !== -1){
+      raw = raw.slice(0, firstComma+1) + raw.slice(firstComma+1).replace(/,/g, '');
+    }
+    let [intPart, decPart] = raw.split(',');
+    intPart = (intPart || '').replace(/^0+(?=\d)/, '');
+    intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    if(decPart !== undefined){
+      decPart = decPart.slice(0,2);
+      return intPart + ',' + decPart;
+    }
+    return intPart;
+  }
+  function attachTRFormatting(el){
+    el.addEventListener('input', ()=>{
+      const pos = el.selectionStart;
+      const before = el.value;
+      el.value = formatTRLive(el.value);
+      const diff = el.value.length - before.length;
+      const newPos = Math.max(0, (pos||0) + diff);
+      try { el.setSelectionRange(newPos, newPos); } catch(e){}
+    });
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function todayKey(){ const t = new Date(); return t.getFullYear() + '-' + pad2(t.getMonth()+1) + '-' + pad2(t.getDate()); }
+  function fmtDateLabel(dstr){
+    if(!dstr) return '—';
+    const p = dstr.split('-').map(Number);
+    const AY = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+    return p[2] + ' ' + AY[p[1]-1] + ' ' + p[0];
+  }
+  function recurrenceLabel(r){
+    return r==='haftalik' ? 'Her Hafta' : r==='aylik' ? 'Her Ay' : r==='yillik' ? 'Her Yıl' : 'Tek Seferlik';
+  }
+
+  // Harici mmg-odemeler-sync.js yüklenmediyse (veya henüz hazır değilse) yerel bir yedek kullan
+  if(!window.mmgLocalPaymentsAPI){
+    window.mmgLocalPaymentsAPI = {
+      load(){
+        try{
+          const raw = localStorage.getItem('mmg_odemeler_list');
+          return raw ? JSON.parse(raw) : [];
+        } catch(e){ return []; }
+      },
+      save(list){
+        try{ localStorage.setItem('mmg_odemeler_list', JSON.stringify(list)); } catch(e){}
+      }
+    };
+  }
+
+  const CATS = window.MMG_PAYMENT_CATEGORIES || [
+    { id:'fatura', icon:'🧾', label:'Fatura' },
+    { id:'kredi', icon:'🏦', label:'Kredi' },
+    { id:'kredi-karti', icon:'💳', label:'Kredi Kartı' },
+    { id:'kira', icon:'🏠', label:'Kira' },
+    { id:'vergi-sgk', icon:'📋', label:'Vergi/SGK' },
+    { id:'maas', icon:'👤', label:'Maaş' },
+    { id:'tedarikci', icon:'📦', label:'Tedarikçi' },
+    { id:'komisyon', icon:'🔗', label:'Komisyon' },
+    { id:'nakit', icon:'💵', label:'Nakit' },
+    { id:'diger', icon:'✳️', label:'Diğer' }
+  ];
+  let activeCat = 'tumu';
+  let selectedPaymentType = null;
+  let isMemberFlag = false;
+
+  function isMember(){ return !!(window.mmgCloud && window.mmgCloud.currentUser); }
+
+  // ================== Açılır Filtre Menüsü ==================
+  const catFilterDropdown = document.getElementById('catFilterDropdown');
+  const catFilterTrigger = document.getElementById('catFilterTrigger');
+  const catFilterMenu = document.getElementById('catFilterMenu');
+
+  function buildDropdownItem(icon, label, catId, onSelect){
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'mmg-dropdown-item';
+    item.dataset.cat = catId;
+    item.innerHTML = icon + ' ' + label;
+    item.addEventListener('click', () => onSelect(catId, icon, label));
+    return item;
+  }
+
+  catFilterMenu.appendChild(buildDropdownItem('📋', 'Tümü', 'tumu', (id, icon, label) => {
+    activeCat = id;
+    catFilterTrigger.innerHTML = icon + ' ' + label + ' <span class="chev">▾</span>';
+    catFilterMenu.hidden = true;
+    catFilterDropdown.classList.remove('open');
+    resetWizard();
+    renderAll();
+  }));
+  CATS.forEach(c => {
+    catFilterMenu.appendChild(buildDropdownItem(c.icon, c.label, c.id, (id, icon, label) => {
+      activeCat = id;
+      catFilterTrigger.innerHTML = icon + ' ' + label + ' <span class="chev">▾</span>';
+      catFilterMenu.hidden = true;
+      catFilterDropdown.classList.remove('open');
+      resetWizard();
+      renderAll();
+    }));
+  });
+
+  catFilterTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const willOpen = catFilterMenu.hidden;
+    catFilterMenu.hidden = !willOpen;
+    catFilterDropdown.classList.toggle('open', willOpen);
+    if(willOpen){
+      const otherMenu = document.getElementById('typeChipMenu');
+      const otherDropdown = document.getElementById('typeChipDropdown');
+      if(otherMenu){ otherMenu.hidden = true; otherDropdown.classList.remove('open'); }
+    }
+  });
+
+  document.getElementById('newDueDate').value = todayKey();
+  attachTRFormatting(document.getElementById('newAmount'));
+
+  // ================== Senkronizasyon ==================
+  function showSyncStatus(msg){
+    document.getElementById('syncStatus').innerHTML = msg;
+  }
+
+  function runLocalSyncAndReport(){
+    const result = window.mmgRunPaymentSync ? window.mmgRunPaymentSync() : {count:0, months:[]};
+    if(result.count > 0){
+      showSyncStatus('<b>' + result.count + ' kalem</b> Nakit Akış Tablosu\'na aktarıldı.');
+    } else {
+      showSyncStatus('Vadesi gelen bekleyen gider yok, her şey güncel.');
+    }
+    return result;
+  }
+
+  document.getElementById('syncNowBtn').addEventListener('click', async () => {
+    showSyncStatus('Kontrol ediliyor…');
+    if(isMember() && window.mmgMergeCloudPaymentsAndSync){
+      await window.mmgMergeCloudPaymentsAndSync();
+    } else {
+      window.mmgRunPaymentSync();
+    }
+    runLocalSyncAndReport();
+    renderAll();
+  });
+
+  // ================== Adım adım ödeme türü sihirbazı ==================
+  const wizardStep1 = document.getElementById('wizardStep1');
+  const wizardStep2 = document.getElementById('wizardStep2');
+  const typeChipDropdown = document.getElementById('typeChipDropdown');
+  const typeChipTrigger = document.getElementById('typeChipTrigger');
+  const typeChipMenu = document.getElementById('typeChipMenu');
+  const selectedTypeBadge = document.getElementById('selectedTypeBadge');
+
+  // "Teminat Mektubu" bu listede gösterilmiyor (henüz ayrı bir akışı yok)
+  CATS.filter(c => c.label !== 'Teminat Mektubu').forEach(c => {
+    typeChipMenu.appendChild(buildDropdownItem(c.icon, c.label, c.id, (id) => {
+      chooseType(id);
+      typeChipMenu.hidden = true;
+      typeChipDropdown.classList.remove('open');
+    }));
+  });
+
+  typeChipTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const willOpen = typeChipMenu.hidden;
+    typeChipMenu.hidden = !willOpen;
+    typeChipDropdown.classList.toggle('open', willOpen);
+    if(willOpen){ catFilterMenu.hidden = true; catFilterDropdown.classList.remove('open'); }
+  });
+
+  document.addEventListener('click', () => {
+    catFilterMenu.hidden = true;
+    catFilterDropdown.classList.remove('open');
+    typeChipMenu.hidden = true;
+    typeChipDropdown.classList.remove('open');
+  });
+
+  function chooseType(catId){
+    selectedPaymentType = catId;
+    const c = catInfo(catId);
+    selectedTypeBadge.innerHTML = c.icon + ' ' + c.label;
+    typeChipTrigger.innerHTML = c.icon + ' ' + c.label + ' <span class="chev">▾</span>';
+    wizardStep1.style.display = 'none';
+    wizardStep2.style.display = 'block';
+  }
+
+  function resetWizard(){
+    selectedPaymentType = null;
+    if(activeCat !== 'tumu'){
+      chooseType(activeCat);
+    } else {
+      typeChipTrigger.innerHTML = 'Gider türü seçin <span class="chev">▾</span>';
+      wizardStep1.style.display = 'block';
+      wizardStep2.style.display = 'none';
+    }
+  }
+
+  document.getElementById('changeTypeBtn').addEventListener('click', () => {
+    selectedPaymentType = null;
+    wizardStep1.style.display = 'block';
+    wizardStep2.style.display = 'none';
+  });
+
+  resetWizard();
+
+  // ================== Ekleme ==================
+  document.getElementById('addPaymentBtn').addEventListener('click', async () => {
+    let desc = document.getElementById('newDesc').value.trim();
+    const amount = parseTR(document.getElementById('newAmount').value);
+    const dueDate = document.getElementById('newDueDate').value;
+    const recurrence = document.getElementById('newRecurrence').value;
+    const cat = activeCat === 'tumu' ? selectedPaymentType : activeCat;
+
+    if(!cat){ alert('Lütfen önce gider türünü seçin.'); return; }
+    if(amount <= 0){ alert('Lütfen geçerli bir tutar girin.'); return; }
+    if(!dueDate){ alert('Lütfen bir vade tarihi seçin.'); return; }
+    if(!desc){ desc = catInfo(cat).label || 'Gider'; }
+
+    const item = {
+      id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      category: cat,
+      subCategory: '',
+      desc: desc,
+      amount: amount,
+      dueDate: dueDate,
+      recurrence: recurrence,
+      lastTransferredDate: null,
+      paused: false,
+      createdAt: new Date().toISOString()
+    };
+
+    const list = window.mmgLocalPaymentsAPI.load();
+    list.push(item);
+    window.mmgLocalPaymentsAPI.save(list);
+
+    document.getElementById('newDesc').value = '';
+    document.getElementById('newAmount').value = '';
+    document.getElementById('newDueDate').value = todayKey();
+    document.getElementById('newRecurrence').value = 'yok';
+    if(activeCat === 'tumu'){ resetWizard(); }
+
+    if(isMember()){
+      try{
+        const cloud = window.mmgCloud;
+        await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'odemeler', item.id), item);
+      }catch(e){ /* sessizce geç */ }
+    }
+
+    runLocalSyncAndReport();
+    renderAll();
+  });
+
+  // ================== Liste + özet ==================
+  function catInfo(id){ return CATS.find(c => c.id === id) || CATS[CATS.length-1]; }
+
+  function paymentStatus(item, tKey){
+    const isFuture = item.dueDate > tKey;
+    if(isFuture){
+      return { label: 'Bekliyor', cls: 'warn' };
+    }
+    if(item.lastTransferredDate === item.dueDate){
+      return { label: 'Aktarıldı', cls: 'good' };
+    }
+    return { label: 'Aktarılıyor…', cls: 'info' };
+  }
+
+  function buildPaymentRowHtml(item, tKey){
+    const cat = catInfo(item.category);
+    const status = paymentStatus(item, tKey);
+    let metaParts = ['Vade: ' + fmtDateLabel(item.dueDate)];
+    if(item.lastTransferredDate){ metaParts.push('Son aktarım: ' + fmtDateLabel(item.lastTransferredDate)); }
+    return '<div class="payment-row" data-id="' + item.id + '">' +
+      '<div class="payment-row-main">' +
+        '<div class="payment-row-desc">' +
+          escapeHtml(item.desc) +
+          (activeCat === 'tumu' ? '<span class="payment-cat-badge">' + cat.icon + ' ' + cat.label + '</span>' : '') +
+          (item.subCategory ? '<span class="payment-cat-badge" style="color:var(--brass); border-color:var(--brass);">🏷 ' + escapeHtml(item.subCategory) + '</span>' : '') +
+          '<span class="status-badge ' + status.cls + '">' + status.label + '</span>' +
+          (item.recurrence !== 'yok' ? '<span class="recur-badge">↻ ' + recurrenceLabel(item.recurrence) + '</span>' : '') +
+        '</div>' +
+        '<div class="payment-row-meta">' + metaParts.join(' · ') + '</div>' +
+      '</div>' +
+      '<div class="payment-row-right">' +
+        '<div class="payment-amount">' + fmtMoney(item.amount) + '</div>' +
+        '<div class="payment-row-actions">' +
+          '<button type="button" class="row-btn danger" data-action="delete-payment" data-id="' + item.id + '">Sil</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderAll(){
+    const tKey = todayKey();
+    const all = window.mmgLocalPaymentsAPI.load();
+    const filtered = activeCat === 'tumu' ? all : all.filter(p => p.category === activeCat);
+    const sorted = filtered.slice().sort((a,b) => a.dueDate.localeCompare(b.dueDate));
+
+    document.querySelectorAll('#catFilterMenu .mmg-dropdown-item').forEach(b => b.classList.toggle('active', b.dataset.cat === activeCat));
+
+    const catLabel = activeCat === 'tumu' ? '' : (' · ' + catInfo(activeCat).label);
+    document.getElementById('addPaymentTitle').textContent = 'Yeni Gider Ekle' + catLabel;
+    document.getElementById('listTitle').textContent = (activeCat === 'tumu' ? 'Tüm Giderler' : catInfo(activeCat).label) + ' (' + sorted.length + ')';
+
+    // Özet kartları
+    let pendingTotal = 0;
+    let nextDue = null;
+    sorted.forEach(p => {
+      if(p.dueDate >= tKey || p.lastTransferredDate !== p.dueDate){
+        pendingTotal += p.amount;
+        if(p.dueDate >= tKey && (!nextDue || p.dueDate < nextDue.dueDate)) nextDue = p;
+      }
+    });
+    document.getElementById('sumPending').textContent = fmtMoney(pendingTotal);
+    document.getElementById('sumPendingSub').textContent = activeCat === 'tumu' ? 'Tüm kategoriler' : catInfo(activeCat).label;
+    document.getElementById('sumNextDue').textContent = nextDue ? fmtDateLabel(nextDue.dueDate) : '—';
+    document.getElementById('sumNextDueSub').textContent = nextDue ? escapeHtml(nextDue.desc) : 'Yaklaşan vade yok';
+    document.getElementById('sumCount').textContent = sorted.length;
+    document.getElementById('sumCountSub').textContent = activeCat === 'tumu' ? 'kayıtlı gider' : catInfo(activeCat).label + ' kategorisinde';
+
+    renderAnalysis(all);
+
+    // Liste
+    const listEl = document.getElementById('paymentList');
+    if(!sorted.length){
+      listEl.innerHTML = '<div class="list-empty">Bu kategoride henüz kayıtlı bir gider yok. Yukarıdaki formdan ekleyebilirsiniz.</div>';
+      return;
+    }
+    listEl.innerHTML = sorted.map(p => buildPaymentRowHtml(p, tKey)).join('');
+  }
+
+  // ================== Gider Analizi: ay-ay kategori karşılaştırması ==================
+  function mmgMonthKeyFromDate(dateStr){ return dateStr.slice(0,7); }
+  function mmgPrevMonthKey(monthKey){
+    const [y,m] = monthKey.split('-').map(Number);
+    const d = new Date(y, m-2, 1); // m-1 = bu ay (0-index), -1 daha = önceki ay
+    return d.getFullYear() + '-' + pad2(d.getMonth()+1);
+  }
+
+  function renderAnalysis(all){
+    const thisMonthKey = todayKey().slice(0,7);
+    const prevMonthKey = mmgPrevMonthKey(thisMonthKey);
+
+    const curByCat = {};
+    const prevByCat = {};
+    all.forEach(item => {
+      const mk = mmgMonthKeyFromDate(item.dueDate);
+      const label = catInfo(item.category).label;
+      if(mk === thisMonthKey) curByCat[label] = (curByCat[label] || 0) + item.amount;
+      else if(mk === prevMonthKey) prevByCat[label] = (prevByCat[label] || 0) + item.amount;
+    });
+
+    const cats = new Set([...Object.keys(curByCat), ...Object.keys(prevByCat)]);
+    const insights = [];
+    cats.forEach(cat => {
+      const cur = curByCat[cat] || 0;
+      const prev = prevByCat[cat] || 0;
+      if(cur === 0 && prev === 0) return;
+      if(prev === 0 && cur > 0){
+        insights.push({ type:'new', pct:100, icon:'🆕',
+          html: '<span class="analysis-cat">' + escapeHtml(cat) + '</span> kaleminde bu ay ' + fmtMoney(cur) + ' tutarında yeni bir gider oluştu (önceki ay bu kategoride hiç kayıt yoktu).' });
+        return;
+      }
+      if(cur === 0 && prev > 0){
+        insights.push({ type:'down', pct:100, icon:'✅',
+          html: '<span class="analysis-cat">' + escapeHtml(cat) + '</span> kaleminde bu ay hiç gider oluşmadı (önceki ay ' + fmtMoney(prev) + ' idi).' });
+        return;
+      }
+      const pctChange = ((cur - prev) / prev) * 100;
+      if(Math.abs(pctChange) >= 15){
+        const dir = pctChange > 0 ? 'artış' : 'azalış';
+        const type = pctChange > 0 ? 'up' : 'down';
+        const icon = pctChange > 0 ? '⚠️' : '✅';
+        insights.push({ type, pct: Math.abs(pctChange), icon,
+          html: '<span class="analysis-cat">' + escapeHtml(cat) + '</span> harcamalarında geçen aya göre <b>%' + Math.abs(Math.round(pctChange)) + ' ' + dir + '</b> var (' + fmtMoney(prev) + ' → ' + fmtMoney(cur) + ').' });
+      }
+    });
+
+    insights.sort((a,b) => b.pct - a.pct);
+    const listEl = document.getElementById('analysisList');
+    if(!insights.length){
+      listEl.innerHTML = '<div class="analysis-empty">Bu ay ile önceki ay arasında kategori bazlı belirgin bir fark tespit edilmedi (veya karşılaştırma için yeterli veri yok).</div>';
+      return;
+    }
+    listEl.innerHTML = insights.slice(0, 6).map(i =>
+      '<div class="analysis-item ' + i.type + '"><span class="analysis-icon">' + i.icon + '</span><span>' + i.html + '</span></div>'
+    ).join('');
+  }
+
+  document.getElementById('paymentList').addEventListener('click', async (e) => {
+    const delBtn = e.target.closest('[data-action="delete-payment"]');
+    if(delBtn){
+      if(!confirm('Bu gider kaydını silmek istediğinize emin misiniz?')) return;
+      const id = delBtn.dataset.id;
+      const list = window.mmgLocalPaymentsAPI.load().filter(p => p.id !== id);
+      window.mmgLocalPaymentsAPI.save(list);
+      if(isMember() && window.mmgDeletePaymentCloud){
+        await window.mmgDeletePaymentCloud(id);
+      }
+      renderAll();
+    }
+  });
+
+  // ================== Başlangıç ==================
+  activeCat = 'tumu';
+  runLocalSyncAndReport();
+  renderAll();
+
+  document.addEventListener('mmg-auth-ready', async (e) => {
+    isMemberFlag = !!e.detail.user;
+    if(isMemberFlag && window.mmgMergeCloudPaymentsAndSync){
+      showSyncStatus('Bulut verileriniz kontrol ediliyor…');
+      await window.mmgMergeCloudPaymentsAndSync();
+      runLocalSyncAndReport();
+      renderAll();
+    }
+  });
+</script>
+
+<button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır">↓</button>
+<style>
+  #mmgScrollDownBtn{
+    position:fixed; right:20px; bottom:20px; z-index:500;
+    width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
+    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B);
+    font-size:20px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(0,0,0,0.35); transition:opacity .2s ease, transform .2s ease;
+    opacity:0; pointer-events:none;
+  }
+  #mmgScrollDownBtn.show{ opacity:1; pointer-events:auto; }
+  #mmgScrollDownBtn:hover{ transform:translateY(2px); }
+</style>
+<script>
+(function(){
+  var btn = document.getElementById('mmgScrollDownBtn');
+  function nearBottom(){
+    return (window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 40);
+  }
+  function updateVisibility(){
+    if(document.body.scrollHeight <= window.innerHeight + 60 || nearBottom()){
+      btn.classList.remove('show');
+    } else {
+      btn.classList.add('show');
+    }
+  }
+  btn.addEventListener('click', function(){
+    window.scrollBy({ top: window.innerHeight * 0.85, behavior: 'smooth' });
+  });
+  window.addEventListener('scroll', updateVisibility);
+  window.addEventListener('resize', updateVisibility);
+  updateVisibility();
+})();
+</script>
+
+<!-- ================== mmgcreativity: Hesap Makinesi Widget (tüm sayfalarda ortak) ================== -->
+<button id="mmgCalcBtn" title="Hesap Makinesi" aria-label="Hesap Makinesi">🧮</button>
+<div id="mmgCalcPanel" hidden>
+  <div class="mmg-calc-head">
+    <span>Hesap Makinesi</span>
+    <button type="button" id="mmgCalcCloseBtn" aria-label="Kapat">✕</button>
+  </div>
+  <input id="mmgCalcDisplay" readonly value="0">
+  <div class="mmg-calc-grid">
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-act="clear">C</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-act="back">⌫</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-act="percent">%</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-op="/">÷</button>
+
+    <button type="button" class="mmg-calc-btn" data-num="7">7</button>
+    <button type="button" class="mmg-calc-btn" data-num="8">8</button>
+    <button type="button" class="mmg-calc-btn" data-num="9">9</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-op="*">×</button>
+
+    <button type="button" class="mmg-calc-btn" data-num="4">4</button>
+    <button type="button" class="mmg-calc-btn" data-num="5">5</button>
+    <button type="button" class="mmg-calc-btn" data-num="6">6</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-op="-">−</button>
+
+    <button type="button" class="mmg-calc-btn" data-num="1">1</button>
+    <button type="button" class="mmg-calc-btn" data-num="2">2</button>
+    <button type="button" class="mmg-calc-btn" data-num="3">3</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-op="+">+</button>
+
+    <button type="button" class="mmg-calc-btn" data-num="0" style="grid-column:span 2;">0</button>
+    <button type="button" class="mmg-calc-btn" data-act="dot">,</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-eq" data-act="equals">=</button>
+  </div>
+</div>
+<style>
+  #mmgCalcBtn{
+    position:fixed; top:16px; right:16px; z-index:800;
+    width:42px; height:42px; border-radius:11px; border:1px solid var(--hairline,#2A3448);
+    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B); font-size:19px;
+    cursor:pointer; box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, transform .15s ease;
+  }
+  #mmgCalcBtn:hover{ border-color:var(--brass-dim,#8A7440); transform:translateY(-1px); }
+  #mmgCalcPanel{
+    position:fixed; top:64px; right:16px; z-index:801; width:236px;
+    background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448); border-radius:14px;
+    padding:14px; box-shadow:0 24px 60px rgba(0,0,0,0.5); font-family:'IBM Plex Mono',monospace;
+  }
+  #mmgCalcPanel[hidden]{ display:none; }
+  .mmg-calc-head{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+    font-size:11.5px; color:var(--muted,#8D96AC); text-transform:uppercase; letter-spacing:.06em;
+  }
+  #mmgCalcCloseBtn{
+    background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:13px; padding:2px 4px;
+  }
+  #mmgCalcCloseBtn:hover{ color:var(--text,#EAEDF3); }
+  #mmgCalcDisplay{
+    width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448);
+    border-radius:8px; padding:12px 10px; color:var(--text,#EAEDF3); font-size:22px; text-align:right;
+    margin-bottom:10px; font-family:'IBM Plex Mono',monospace;
+  }
+  .mmg-calc-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+  .mmg-calc-btn{
+    background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px;
+    color:var(--text,#EAEDF3); font-family:'IBM Plex Mono',monospace; font-size:15px; font-weight:600;
+    padding:10px 0; cursor:pointer; transition:border-color .15s ease, background .15s ease;
+  }
+  .mmg-calc-btn:hover{ border-color:var(--brass-dim,#8A7440); background:var(--surface,#141C2B); }
+  .mmg-calc-op{ color:var(--brass,#C6A15B); }
+  .mmg-calc-eq{ background:var(--brass,#C6A15B); border-color:var(--brass,#C6A15B); color:#1a1a1a; }
+  .mmg-calc-eq:hover{ opacity:0.9; }
+  @media (max-width:480px){
+    #mmgCalcPanel{ right:8px; left:8px; width:auto; }
+    #mmgCalcBtn{ right:8px; }
+  }
+</style>
+<script>
+(function(){
+  const btn = document.getElementById('mmgCalcBtn');
+  const panel = document.getElementById('mmgCalcPanel');
+  const closeBtn = document.getElementById('mmgCalcCloseBtn');
+  const display = document.getElementById('mmgCalcDisplay');
+
+  let current = '0';
+  let previous = null;
+  let operator = null;
+  let justEvaluated = false;
+
+  function render(){
+    display.value = current.replace('.', ',');
+  }
+
+  function inputNum(n){
+    if(justEvaluated){ current = '0'; justEvaluated = false; }
+    if(current === '0' && n !== ','){ current = String(n); }
+    else { current += String(n); }
+    render();
+  }
+
+  function inputDot(){
+    if(justEvaluated){ current = '0'; justEvaluated = false; }
+    if(!current.includes('.')) current += '.';
+    render();
+  }
+
+  function clearAll(){
+    current = '0'; previous = null; operator = null; justEvaluated = false;
+    render();
+  }
+
+  function backspace(){
+    if(justEvaluated){ clearAll(); return; }
+    current = current.length > 1 ? current.slice(0, -1) : '0';
+    render();
+  }
+
+  function percent(){
+    current = String(parseFloat(current) / 100);
+    render();
+  }
+
+  function chooseOperator(op){
+    if(operator !== null && !justEvaluated) compute();
+    previous = current;
+    operator = op;
+    justEvaluated = false;
+    current = '0';
+  }
+
+  function compute(){
+    if(operator === null || previous === null) return;
+    const a = parseFloat(previous), b = parseFloat(current);
+    let result = 0;
+    switch(operator){
+      case '+': result = a + b; break;
+      case '-': result = a - b; break;
+      case '*': result = a * b; break;
+      case '/': result = b !== 0 ? a / b : 0; break;
+    }
+    current = String(Math.round(result * 1e10) / 1e10);
+    operator = null;
+    previous = null;
+    justEvaluated = true;
+    render();
+  }
+
+  document.querySelectorAll('.mmg-calc-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      const num = b.dataset.num;
+      const op = b.dataset.op;
+      const act = b.dataset.act;
+      if(num !== undefined) inputNum(num);
+      else if(op !== undefined) chooseOperator(op);
+      else if(act === 'clear') clearAll();
+      else if(act === 'back') backspace();
+      else if(act === 'percent') percent();
+      else if(act === 'dot') inputDot();
+      else if(act === 'equals') compute();
+    });
+  });
+
+  btn.addEventListener('click', () => {
+    panel.hidden = !panel.hidden;
+  });
+  closeBtn.addEventListener('click', () => { panel.hidden = true; });
+  document.addEventListener('click', (e) => {
+    if(!panel.hidden && !panel.contains(e.target) && e.target !== btn){
+      panel.hidden = true;
+    }
+  });
+})();
+</script>
+<!-- ================== /Hesap Makinesi Widget ================== -->
+
+<!-- ================== mmgcreativity: Beğen / Geri Bildirim Widget'ı (tüm sayfalarda ortak) ================== -->
+<button id="mmgRateBtn" title="Sitemizi Değerlendirin" aria-label="Sitemizi Değerlendirin" style="font-size:20px;">👍</button>
+<div id="mmgRateOverlay" hidden>
+  <div id="mmgRatePanel">
+    <button type="button" id="mmgRateCloseBtn" aria-label="Kapat">✕</button>
+
+    <div id="mmgRateStepScore">
+      <div class="mmg-rate-title">Sitemizi beğendiniz mi?</div>
+      <div class="mmg-rate-thumbs">
+        <button type="button" class="mmg-rate-thumb" id="mmgThumbUp" data-liked="1">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 22V11M2 13v7a2 2 0 0 0 2 2h12.6a2 2 0 0 0 2-1.7l1.3-8A2 2 0 0 0 18 10h-5.6l.9-4.4a1.7 1.7 0 0 0-3-1.4L7 11"/></svg>
+          <span>Evet</span>
+        </button>
+        <button type="button" class="mmg-rate-thumb" id="mmgThumbDown" data-liked="0">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 2v11M22 11V4a2 2 0 0 0-2-2H7.4a2 2 0 0 0-2 1.7l-1.3 8A2 2 0 0 0 6 14h5.6l-.9 4.4a1.7 1.7 0 0 0 3 1.4L17 13"/></svg>
+          <span>Hayır</span>
+        </button>
+      </div>
+      <textarea id="mmgRateComment" class="mmg-rate-comment" placeholder="Yorumunuz (opsiyonel)" rows="3"></textarea>
+      <button type="button" class="mmg-rate-btn-primary" id="mmgRateSubmitBtn">Gönder</button>
+    </div>
+
+    <div id="mmgRateStepStore" hidden>
+      <div class="mmg-rate-title">Teşekkürler! 🎉</div>
+      <div class="mmg-rate-sub">Bu memnuniyetinizi Play Store'da da bizimle paylaşır mısınız? Yorumunuz bizim için çok değerli.</div>
+      <div class="mmg-rate-actions">
+        <a href="https://play.google.com/store/apps/details?id=com.mmgcreativity.dijitalfinans" target="_blank" rel="noopener" class="mmg-rate-btn-primary" id="mmgRatePlayStoreBtn">Play Store'a Git</a>
+        <button type="button" class="mmg-rate-btn-secondary" id="mmgRateSkipBtn">Belki Sonra</button>
+      </div>
+    </div>
+
+    <div id="mmgRateStepThanks" hidden>
+      <div class="mmg-rate-title">Teşekkürler!</div>
+      <div class="mmg-rate-sub">Geri bildiriminiz bize ulaştı, uygulamayı geliştirmemize yardımcı oluyor.</div>
+    </div>
+  </div>
+</div>
+<style>
+  #mmgRateBtn{
+    position:fixed; bottom:18px; left:22px; z-index:800;
+    width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
+    background:var(--surface-2,#1B2536); color:var(--teal,#3FB68A); font-size:19px;
+    cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,0.35);
+    display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, transform .15s ease;
+  }
+  #mmgRateBtn:hover{ border-color:var(--teal,#3FB68A); transform:translateY(-1px); }
+  #mmgRateOverlay{
+    position:fixed; inset:0; z-index:900; background:rgba(5,8,14,0.65);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  #mmgRateOverlay[hidden]{ display:none; }
+  #mmgRatePanel{
+    position:relative; width:100%; max-width:360px; background:var(--surface,#141C2B);
+    border:1px solid var(--hairline,#2A3448); border-radius:18px; padding:28px 24px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.5); font-family:'Inter',sans-serif;
+  }
+  #mmgRateCloseBtn{
+    position:absolute; top:14px; right:14px; background:none; border:none;
+    color:var(--muted,#8D96AC); cursor:pointer; font-size:14px; padding:4px;
+  }
+  #mmgRateCloseBtn:hover{ color:var(--text,#EAEDF3); }
+  .mmg-rate-title{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:var(--text,#EAEDF3);
+    margin-bottom:16px; text-align:center;
+  }
+  .mmg-rate-sub{
+    font-size:13px; color:var(--muted,#8D96AC); text-align:center; margin-bottom:20px; line-height:1.5;
+  }
+  .mmg-rate-thumbs{ display:flex; gap:12px; margin-bottom:16px; }
+  .mmg-rate-thumb{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;
+    background:var(--surface-2,#1B2536); border:1.5px solid var(--hairline,#2A3448); border-radius:12px;
+    color:var(--muted,#8D96AC); padding:16px 0; cursor:pointer; transition:all .15s ease;
+    font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
+  }
+  .mmg-rate-thumb:hover{ border-color:var(--brass-dim,#8A7440); color:var(--text,#EAEDF3); }
+  .mmg-rate-thumb.active#mmgThumbUp{ border-color:var(--teal,#3FB68A); color:var(--teal,#3FB68A); background:rgba(63,182,138,0.1); }
+  .mmg-rate-thumb.active#mmgThumbDown{ border-color:var(--red,#E2544B); color:var(--red,#E2544B); background:rgba(226,84,75,0.1); }
+  .mmg-rate-comment{
+    width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448);
+    border-radius:8px; padding:10px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13px;
+    resize:vertical; outline:none; margin-bottom:14px;
+  }
+  .mmg-rate-comment:focus{ border-color:var(--brass-dim,#8A7440); }
+  .mmg-rate-comment::placeholder{ color:var(--muted,#8D96AC); }
+  .mmg-rate-actions{ display:flex; flex-direction:column; gap:10px; }
+  .mmg-rate-btn-primary{
+    display:block; width:100%; box-sizing:border-box; text-align:center; background:var(--brass,#C6A15B); color:#1a1a1a; border:none;
+    border-radius:8px; padding:12px 0; font-family:'Inter',sans-serif; font-weight:700; font-size:14px;
+    cursor:pointer; text-decoration:none; transition:opacity .15s ease;
+  }
+  .mmg-rate-btn-primary:hover{ opacity:0.9; }
+  .mmg-rate-btn-secondary{
+    background:none; border:none; color:var(--muted,#8D96AC); font-family:'Inter',sans-serif; font-size:12.5px;
+    cursor:pointer; text-decoration:underline; padding:4px;
+  }
+  .mmg-rate-btn-secondary:hover{ color:var(--text,#EAEDF3); }
+</style>
+<script>
+(function(){
+  const btn = document.getElementById('mmgRateBtn');
+  const overlay = document.getElementById('mmgRateOverlay');
+  const closeBtn = document.getElementById('mmgRateCloseBtn');
+  const stepScore = document.getElementById('mmgRateStepScore');
+  const stepStore = document.getElementById('mmgRateStepStore');
+  const stepThanks = document.getElementById('mmgRateStepThanks');
+  const skipBtn = document.getElementById('mmgRateSkipBtn');
+  const thumbUp = document.getElementById('mmgThumbUp');
+  const thumbDown = document.getElementById('mmgThumbDown');
+  const commentBox = document.getElementById('mmgRateComment');
+  const submitBtn = document.getElementById('mmgRateSubmitBtn');
+
+  let likedValue = null; // 1 = beğendi, 0 = beğenmedi, null = henüz seçilmedi
+
+  function selectThumb(val){
+    likedValue = val;
+    thumbUp.classList.toggle('active', val === 1);
+    thumbDown.classList.toggle('active', val === 0);
+  }
+  thumbUp.addEventListener('click', () => selectThumb(1));
+  thumbDown.addEventListener('click', () => selectThumb(0));
+
+  function openOverlay(){
+    stepScore.hidden = false;
+    stepStore.hidden = true;
+    stepThanks.hidden = true;
+    selectThumb(null);
+    commentBox.value = '';
+    overlay.hidden = false;
+  }
+  function closeOverlay(){ overlay.hidden = true; }
+
+  async function submitFeedback(){
+    if(likedValue === null){
+      thumbUp.style.borderColor = 'var(--red,#E2544B)';
+      thumbDown.style.borderColor = 'var(--red,#E2544B)';
+      setTimeout(() => { thumbUp.style.borderColor=''; thumbDown.style.borderColor=''; }, 900);
+      return;
+    }
+    const comment = commentBox.value.trim();
+    try{ localStorage.setItem('mmg_feedback_liked', String(likedValue)); }catch(e){}
+    try{ localStorage.setItem('mmg_feedback_comment', comment); }catch(e){}
+    try{ localStorage.setItem('mmg_feedback_date', new Date().toISOString()); }catch(e){}
+
+    try{
+      if(window.mmgCloud && window.mmgCloud.currentUser && window.mmgCloud.setDoc && window.mmgCloud.doc){
+        const cloud = window.mmgCloud;
+        await cloud.setDoc(cloud.doc(cloud.db, 'feedback', cloud.currentUser.uid + '_' + Date.now()), {
+          liked: !!likedValue,
+          comment: comment || null,
+          page: location.pathname.split('/').pop(),
+          ratedAt: new Date().toISOString()
+        }, { merge: true });
+      }
+    }catch(e){ /* sessizce geç */ }
+
+    stepScore.hidden = true;
+    if(likedValue === 1){
+      stepStore.hidden = false;
+    } else {
+      stepThanks.hidden = false;
+    }
+  }
+
+  submitBtn.addEventListener('click', submitFeedback);
+  btn.addEventListener('click', openOverlay);
+  closeBtn.addEventListener('click', closeOverlay);
+  skipBtn.addEventListener('click', closeOverlay);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });
+})();
+</script>
+<!-- ================== /Beğen Widget'ı ================== -->
+
+</body>
+</html>
