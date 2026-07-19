@@ -104,9 +104,10 @@
   tbody tr.clickable-row:hover{ background:rgba(198,161,91,0.06); }
 
   .user-modal-overlay{
-    position:fixed; inset:0; background:rgba(5,8,14,0.7); display:flex; align-items:center; justify-content:center;
+    display:none; position:fixed; inset:0; background:rgba(5,8,14,0.7); align-items:center; justify-content:center;
     z-index:100; padding:20px;
   }
+  .user-modal-overlay:not([hidden]){ display:flex; }
   .user-modal{
     background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:28px;
     max-width:420px; width:100%; position:relative; max-height:85vh; overflow-y:auto;
@@ -126,8 +127,13 @@
 </head>
 <body>
 <main>
-  <h1>İstatistikler</h1>
-  <p class="sub">Kullanıcı, referans kodu ve beğenme geri bildirimi istatistikleri burada listelenir.</p>
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+    <div>
+      <h1>İstatistikler</h1>
+      <p class="sub">Kullanıcı, referans kodu ve beğenme geri bildirimi istatistikleri burada listelenir.</p>
+    </div>
+    <button class="btn" id="refreshAllBtn">↻ Yenile</button>
+  </div>
 
   <div id="stateArea"></div>
 
@@ -346,23 +352,24 @@
         '<td class="user-list-cell">' + usersHtml + '</td>' +
       '</tr>';
     }).join('');
-
-    tblReferralBody.querySelectorAll('.toggle-users-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const detail = document.getElementById('codeUsers' + btn.dataset.idx);
-        const isOpen = detail.classList.toggle('open');
-        btn.textContent = isOpen
-          ? 'Gizle'
-          : (detail.querySelectorAll('.code-user-row').length + ' kullanıcıyı göster');
-      });
-    });
-    tblReferralBody.querySelectorAll('.code-user-row.clickable-row').forEach(row => {
-      row.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openUserModal(row.dataset.userId);
-      });
-    });
   }
+
+  // Referans tablosu tıklamalarını tek seferlik event delegation ile dinle
+  tblReferralBody.addEventListener('click', (e) => {
+    const toggleBtn = e.target.closest('.toggle-users-btn');
+    if(toggleBtn){
+      const detail = document.getElementById('codeUsers' + toggleBtn.dataset.idx);
+      const isOpen = detail.classList.toggle('open');
+      toggleBtn.textContent = isOpen
+        ? 'Gizle'
+        : (detail.querySelectorAll('.code-user-row').length + ' kullanıcıyı göster');
+      return;
+    }
+    const userRow = e.target.closest('.code-user-row.clickable-row');
+    if(userRow){
+      openUserModal(userRow.dataset.userId);
+    }
+  });
 
   // ---------------- Beğenme Geri Bildirimleri ----------------
   function render(){
@@ -434,11 +441,14 @@
         '<td>' + statusHtml + '</td><td>' + refHtml + '</td><td class="date-cell">' + fmtDate(u.createdAt) + '</td></tr>';
     }).join('') : '<tr><td colspan="5" style="text-align:center; color:var(--muted); padding:24px;">Bu kategoride kullanıcı yok.</td></tr>';
     userDetailWrap.hidden = false;
-
-    tblUserDetailBody.querySelectorAll('tr.clickable-row').forEach(row => {
-      row.addEventListener('click', () => openUserModal(row.dataset.userId));
-    });
   }
+
+  // Satır tıklamalarını tek seferlik "event delegation" ile dinle (her render'da yeniden eklemeye gerek yok)
+  tblUserDetailBody.addEventListener('click', (e) => {
+    const row = e.target.closest('tr.clickable-row');
+    if(!row) return;
+    openUserModal(row.dataset.userId);
+  });
 
   // ---------------- Kullanıcı detay modalı ----------------
   const userModalOverlay = document.getElementById('userModalOverlay');
@@ -542,6 +552,20 @@
   }
 
   refreshBtn.addEventListener('click', loadAll);
+  document.getElementById('refreshAllBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('refreshAllBtn');
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Yükleniyor…';
+    try{
+      await loadAll();
+      const activeCard = document.querySelector('.summary-card.clickable.active');
+      if(activeCard) renderUserDetail(activeCard.dataset.userFilter);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  });
 
   onAuthStateChanged(auth, async (user) => {
     if(!user){
