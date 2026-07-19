@@ -756,8 +756,8 @@
       <span>Referans Kodu Yönetimi</span>
     </button>
     <button type="button" class="account-dropdown-item" id="begenIstatistikleriBtn" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-6.7-4.3-9.3-8.2C1 10 1.6 6.5 4.4 5c2.2-1.2 4.7-.5 6 1.2l1.6 2 1.6-2c1.3-1.7 3.8-2.4 6-1.2 2.8 1.5 3.4 5 1.7 7.8C18.7 16.7 12 21 12 21z"/></svg>
-      <span>Beğenme İstatistikleri</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/><path d="M2 20h20"/></svg>
+      <span>İstatistikler</span>
     </button>
     <button type="button" class="account-dropdown-item account-dropdown-item-danger" id="dropdownLogoutBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
@@ -1205,7 +1205,7 @@
   });
   document.getElementById('begenIstatistikleriBtn').addEventListener('click', () => {
     document.getElementById('accountDropdown').hidden = true;
-    openTarget('Begen_Istatistikleri.html', 'Beğenme İstatistikleri');
+    openTarget('Istatistikler.html', 'İstatistikler');
   });
   document.getElementById('mmgAdminClose').addEventListener('click', () => {
     document.getElementById('mmgAdminOverlay').hidden = true;

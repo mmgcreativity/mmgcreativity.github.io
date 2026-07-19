@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — İstatistikler</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --teal:#3FB68A; --azure:#3E8FE0;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+  main{ max-width:1040px; margin:0 auto; padding:36px 24px 60px; }
+  .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; color:var(--brass); text-transform:uppercase; margin-bottom:10px; }
+  h1{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,32px); margin-bottom:8px; }
+  .sub{ color:var(--muted); font-size:13.5px; margin-bottom:28px; }
+  h2.section-title{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:18px; margin:36px 0 14px; display:flex; align-items:center; gap:8px; }
+  h2.section-title:first-of-type{ margin-top:0; }
+
+  .summary-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:10px; }
+  .summary-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:18px 20px; }
+  .summary-label{ font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; font-family:'IBM Plex Mono',monospace; margin-bottom:8px; }
+  .summary-value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:26px; }
+  .summary-value.good{ color:var(--teal); }
+  .summary-value.bad{ color:var(--red); }
+  .summary-value.azure{ color:var(--azure); }
+  .summary-value.brass{ color:var(--brass); }
+
+  .toolbar{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+  .btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; color:var(--text);
+    font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; padding:9px 14px; cursor:pointer;
+    transition:border-color .15s ease;
+  }
+  .btn:hover{ border-color:var(--brass-dim); }
+
+  .filter-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .filter-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:999px; color:var(--muted);
+    font-size:12px; font-family:'Inter',sans-serif; padding:6px 14px; cursor:pointer; transition:all .15s ease;
+  }
+  .filter-btn.active{ border-color:var(--brass); color:var(--brass); background:rgba(198,161,91,0.08); }
+
+  table{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; margin-bottom:10px; }
+  thead th{
+    text-align:left; padding:12px 14px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hairline); background:var(--surface-2);
+  }
+  tbody td{ padding:12px 14px; border-bottom:1px solid rgba(42,52,72,0.5); font-size:13px; vertical-align:top; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:rgba(198,161,91,0.03); }
+  .like-badge{ display:inline-flex; align-items:center; gap:4px; font-weight:600; font-size:12.5px; }
+  .like-badge.good{ color:var(--teal); }
+  .like-badge.bad{ color:var(--red); }
+  .comment-text{ color:var(--text); }
+  .comment-empty{ color:var(--muted); font-style:italic; }
+  .page-tag{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); background:var(--surface-2);
+    border:1px solid var(--hairline); border-radius:6px; padding:2px 6px; white-space:nowrap;
+  }
+  .date-cell{ color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:12px; white-space:nowrap; }
+
+  .code-tag{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--brass); background:rgba(198,161,91,0.08);
+    border:1px solid rgba(198,161,91,0.25); border-radius:6px; padding:3px 8px; white-space:nowrap; font-weight:600;
+  }
+  .badge-pill{
+    display:inline-flex; align-items:center; gap:4px; font-size:11px; font-family:'IBM Plex Mono',monospace;
+    padding:2px 8px; border-radius:999px; white-space:nowrap;
+  }
+  .badge-pill.premium{ color:var(--brass); background:rgba(198,161,91,0.12); border:1px solid rgba(198,161,91,0.3); }
+  .badge-pill.member{ color:var(--muted); background:var(--surface-2); border:1px solid var(--hairline); }
+  .badge-pill.admin{ color:var(--azure); background:rgba(62,143,224,0.12); border:1px solid rgba(62,143,224,0.3); }
+
+  .user-list-cell{ display:flex; flex-direction:column; gap:4px; }
+  .user-list-empty{ color:var(--muted); font-style:italic; font-size:12.5px; }
+  .toggle-users-btn{
+    background:none; border:none; color:var(--brass); font-size:12px; font-family:'Inter',sans-serif;
+    cursor:pointer; text-align:left; padding:0; text-decoration:underline;
+  }
+  .code-users-detail{ display:none; margin-top:8px; padding:10px 12px; background:var(--surface-2); border-radius:8px; }
+  .code-users-detail.open{ display:block; }
+  .code-user-row{ font-size:12.5px; padding:4px 0; border-bottom:1px solid rgba(42,52,72,0.5); }
+  .code-user-row:last-child{ border-bottom:none; }
+
+  .state-box{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:40px 24px;
+    text-align:center; color:var(--muted); font-size:13.5px; line-height:1.6;
+  }
+  .state-box .big{ font-size:28px; margin-bottom:10px; }
+  .state-box a{ color:var(--brass); }
+  .empty-note{ text-align:center; color:var(--muted); padding:24px; font-size:13px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Yönetim</div>
+  <h1>İstatistikler</h1>
+  <p class="sub">Kullanıcı, referans kodu ve beğenme geri bildirimi istatistikleri burada listelenir.</p>
+
+  <div id="stateArea"></div>
+
+  <div id="content" hidden>
+
+    <h2 class="section-title">👥 Kullanıcı Özeti</h2>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">Toplam Kullanıcı</div>
+        <div class="summary-value azure" id="statUserTotal">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Standart Üye</div>
+        <div class="summary-value" id="statUserMember">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Premium Üye</div>
+        <div class="summary-value brass" id="statUserPremium">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Referansla Katılan</div>
+        <div class="summary-value" id="statUserReferred">—</div>
+      </div>
+    </div>
+
+    <h2 class="section-title">🎟️ Referans Kodu Kullanımı</h2>
+    <table>
+      <thead>
+        <tr><th>Kod</th><th>Fayda</th><th>Kullanım</th><th>Kullanan Kullanıcılar</th></tr>
+      </thead>
+      <tbody id="tblReferralBody"></tbody>
+    </table>
+
+    <h2 class="section-title">💬 Beğenme Geri Bildirimleri</h2>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">Toplam Geri Bildirim</div>
+        <div class="summary-value" id="statTotal">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">👍 Beğendi</div>
+        <div class="summary-value good" id="statLiked">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">👎 Beğenmedi</div>
+        <div class="summary-value bad" id="statDisliked">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Memnuniyet Oranı</div>
+        <div class="summary-value" id="statRate">—</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="filter-row">
+        <button class="filter-btn active" data-filter="all">Tümü</button>
+        <button class="filter-btn" data-filter="liked">👍 Beğendi</button>
+        <button class="filter-btn" data-filter="disliked">👎 Beğenmedi</button>
+        <button class="filter-btn" data-filter="comment">Sadece yorumlu</button>
+      </div>
+      <button class="btn" id="refreshBtn">↻ Yenile</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Tarih</th><th>Sayfa</th><th>Beğeni</th><th>Yorum</th></tr>
+      </thead>
+      <tbody id="tblBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  const auth = getAuth(fbApp);
+  const db = getFirestore(fbApp);
+
+  const stateArea = document.getElementById('stateArea');
+  const content = document.getElementById('content');
+  const tblBody = document.getElementById('tblBody');
+  const tblReferralBody = document.getElementById('tblReferralBody');
+  const refreshBtn = document.getElementById('refreshBtn');
+
+  let allEntries = [];
+  let currentFilter = 'all';
+
+  function showState(html){
+    content.hidden = true;
+    stateArea.innerHTML = '<div class="state-box">' + html + '</div>';
+  }
+
+  function fmtDate(iso){
+    try{
+      const d = (iso && iso.toDate) ? iso.toDate() : new Date(iso);
+      if(isNaN(d.getTime())) return '—';
+      return d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+    }catch(e){ return '—'; }
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------------- Kullanıcı Özeti + Referans Kodu Kullanımı ----------------
+  async function loadUsersAndReferrals(){
+    // 1) Tüm kullanıcıları çek → toplam / üye / premium / referansla katılan sayıları
+    const usersSnap = await getDocs(collection(db, 'users'));
+    let total = 0, premium = 0, referred = 0;
+    usersSnap.forEach(d => {
+      const u = d.data();
+      total++;
+      if(u.isPremium === true) premium++;
+      if(u.referredBy) referred++;
+    });
+    document.getElementById('statUserTotal').textContent = total;
+    document.getElementById('statUserPremium').textContent = premium;
+    document.getElementById('statUserMember').textContent = total - premium;
+    document.getElementById('statUserReferred').textContent = referred;
+
+    // 2) Tanımlı referans kodlarını çek
+    const codesSnap = await getDocs(collection(db, 'referralCodes'));
+    const codes = [];
+    codesSnap.forEach(d => codes.push({ id: d.id, ...d.data() }));
+
+    if(!codes.length){
+      tblReferralBody.innerHTML = '<tr><td colspan="4" class="empty-note">Henüz tanımlı bir referans kodu yok.</td></tr>';
+      return;
+    }
+
+    // 3) Her kod için kullanım sayısı + kullanan kullanıcı listesini çek
+    const rows = await Promise.all(codes.map(async (c) => {
+      let count = 0;
+      let usedByUsers = [];
+      try{
+        const usageDoc = await getDoc(doc(db, 'referrals', c.id));
+        count = usageDoc.exists() ? (usageDoc.data().count || 0) : 0;
+      }catch(e){ count = 0; }
+      try{
+        const usersOfCode = await getDocs(collection(db, 'referrals', c.id, 'users'));
+        usersOfCode.forEach(ud => usedByUsers.push(ud.data()));
+      }catch(e){ usedByUsers = []; }
+
+      const benefitLabel = c.benefitType === 'free'
+        ? 'Ücretsiz premium'
+        : c.benefitType === 'discount'
+          ? ('%' + (c.discountPercent || 0) + ' indirim')
+          : '—';
+
+      return { code: c.id, benefitLabel, count, usedByUsers, active: c.active !== false };
+    }));
+
+    tblReferralBody.innerHTML = rows.map((r, i) => {
+      const usersHtml = r.usedByUsers.length
+        ? '<button class="toggle-users-btn" data-idx="' + i + '">' + r.usedByUsers.length + ' kullanıcıyı göster</button>' +
+          '<div class="code-users-detail" id="codeUsers' + i + '">' +
+            r.usedByUsers.map(u =>
+              '<div class="code-user-row">' + escapeHtml(u.username || u.email || '(isimsiz)') +
+              ' <span style="color:var(--muted);">— ' + fmtDate(u.joinedAt) + '</span></div>'
+            ).join('') +
+          '</div>'
+        : '<span class="user-list-empty">Henüz kimse kullanmadı</span>';
+
+      return '<tr>' +
+        '<td><span class="code-tag">' + escapeHtml(r.code) + '</span>' + (r.active ? '' : ' <span style="color:var(--muted); font-size:11px;">(pasif)</span>') + '</td>' +
+        '<td>' + escapeHtml(r.benefitLabel) + '</td>' +
+        '<td><b>' + r.count + '</b> kayıt</td>' +
+        '<td class="user-list-cell">' + usersHtml + '</td>' +
+      '</tr>';
+    }).join('');
+
+    tblReferralBody.querySelectorAll('.toggle-users-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const detail = document.getElementById('codeUsers' + btn.dataset.idx);
+        const isOpen = detail.classList.toggle('open');
+        btn.textContent = isOpen
+          ? 'Gizle'
+          : (detail.querySelectorAll('.code-user-row').length + ' kullanıcıyı göster');
+      });
+    });
+  }
+
+  // ---------------- Beğenme Geri Bildirimleri ----------------
+  function render(){
+    const filtered = allEntries.filter(e => {
+      if(currentFilter === 'liked') return e.liked === true;
+      if(currentFilter === 'disliked') return e.liked === false;
+      if(currentFilter === 'comment') return !!(e.comment && e.comment.trim());
+      return true;
+    });
+
+    tblBody.innerHTML = filtered.length ? filtered.map(e => {
+      const likeHtml = e.liked === true
+        ? '<span class="like-badge good">👍 Beğendi</span>'
+        : e.liked === false
+          ? '<span class="like-badge bad">👎 Beğenmedi</span>'
+          : '<span class="comment-empty">—</span>';
+      const commentHtml = e.comment && e.comment.trim()
+        ? '<span class="comment-text">' + escapeHtml(e.comment) + '</span>'
+        : '<span class="comment-empty">Yorum yok</span>';
+      const pageHtml = e.page ? '<span class="page-tag">' + escapeHtml(e.page) + '</span>' : '<span class="comment-empty">—</span>';
+      return '<tr><td class="date-cell">' + fmtDate(e.ratedAt) + '</td><td>' + pageHtml + '</td><td>' + likeHtml + '</td><td>' + commentHtml + '</td></tr>';
+    }).join('') : '<tr><td colspan="4" style="text-align:center; color:var(--muted); padding:30px;">Bu filtreye uyan kayıt yok.</td></tr>';
+
+    const total = allEntries.length;
+    const liked = allEntries.filter(e => e.liked === true).length;
+    const disliked = allEntries.filter(e => e.liked === false).length;
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statLiked').textContent = liked;
+    document.getElementById('statDisliked').textContent = disliked;
+    document.getElementById('statRate').textContent = total ? Math.round((liked/total)*100) + '%' : '—';
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      render();
+    });
+  });
+
+  async function loadFeedback(){
+    const snap = await getDocs(collection(db, 'feedback'));
+    allEntries = [];
+    snap.forEach(docSnap => {
+      const d = docSnap.data();
+      allEntries.push({
+        liked: typeof d.liked === 'boolean' ? d.liked : null,
+        comment: d.comment || '',
+        page: d.page || '',
+        ratedAt: d.ratedAt || ''
+      });
+    });
+    allEntries.sort((a,b) => new Date(b.ratedAt) - new Date(a.ratedAt));
+    render();
+  }
+
+  async function loadAll(){
+    showState('<div class="big">⏳</div>Yükleniyor…');
+    try{
+      await Promise.all([loadUsersAndReferrals(), loadFeedback()]);
+      stateArea.innerHTML = '';
+      content.hidden = false;
+    } catch(e){
+      showState(
+        '<div class="big">🔒</div>' +
+        'Veriler okunamadı.<br><br>' +
+        'Bu, Firestore güvenlik kurallarının ilgili koleksiyonları okumaya izin vermemesinden kaynaklanıyor olabilir, ' +
+        'veya bu hesabın yetkisi olmayabilir.<br><br>' +
+        '<span style="font-size:11.5px; opacity:0.7;">' + escapeHtml(e.message || String(e)) + '</span>'
+      );
+    }
+  }
+
+  refreshBtn.addEventListener('click', loadAll);
+
+  onAuthStateChanged(auth, async (user) => {
+    if(!user){
+      showState(
+        '<div class="big">🔑</div>' +
+        'Bu sayfayı görüntülemek için giriş yapmış olmanız gerekir.<br><br>' +
+        'Herhangi bir modülden (örn. <a href="index.html">Ana Sayfa</a>) hesabınıza giriş yaptıktan sonra bu sayfayı yeniden açın.'
+      );
+      return;
+    }
+    showState('<div class="big">⏳</div>Yetki kontrol ediliyor…');
+    let isAdmin = false;
+    try{
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      isAdmin = !!(snap.exists() && snap.data().isAdmin === true);
+    }catch(e){ isAdmin = false; }
+
+    if(!isAdmin){
+      showState(
+        '<div class="big">⛔</div>' +
+        'Bu sayfayı görüntüleme yetkiniz yok.<br><br>' +
+        'Bu sayfa yalnızca yönetici (admin) olarak işaretlenmiş hesaplara açıktır.<br><br>' +
+        '<span style="font-size:11.5px; opacity:0.7;">Hesabınızı admin yapmak için Firebase Console → Firestore Database → <b>users</b> koleksiyonu → sizin UID\'niz olan belge → <b>isAdmin</b> alanını <b>true</b> (boolean) olarak ekleyin.</span>'
+      );
+      return;
+    }
+    loadAll();
+  });
+</script>
+</body>
+</html>
