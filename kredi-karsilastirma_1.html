@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kredi Tekliflerini Karşılaştır</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e1a;
+    --card:#121729;
+    --card-2:#161d33;
+    --border:#232b45;
+    --border-soft:#1a2138;
+    --gold:#e8b356;
+    --gold-soft:rgba(232,179,86,.14);
+    --purple-a:#a855f7;
+    --purple-b:#ec4899;
+    --text:#f4f5f9;
+    --text-dim:#8b93ac;
+    --text-faint:#5a6280;
+    --green:#3ddc97;
+    --green-soft:rgba(61,220,151,.12);
+    --red:#f2748c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(168,85,247,.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(232,179,86,.07), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    padding:32px 20px 60px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  .eyebrow{
+    display:flex;align-items:center;gap:8px;
+    color:var(--gold);font-size:12.5px;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;
+  }
+  .eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--text-faint);}
+  .eyebrow .star{font-size:13px;}
+
+  h1{
+    font-family:'Sora',sans-serif;
+    font-weight:800;
+    font-size:clamp(28px,4vw,40px);
+    margin:0 0 10px;
+    letter-spacing:-.01em;
+    background:linear-gradient(135deg,#ffffff 30%, #c9cee0 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .sub{color:var(--text-dim);font-size:15px;max-width:640px;line-height:1.55;margin-bottom:28px;}
+
+  .grid-top{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+  @media (max-width:860px){.grid-top{grid-template-columns:repeat(2,1fr);}}
+  .stat{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:16px 18px;position:relative;overflow:hidden;
+  }
+  .stat::before{
+    content:"";position:absolute;top:0;left:0;width:3px;height:100%;
+    background:linear-gradient(180deg,var(--gold),transparent);
+  }
+  .stat .label{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:8px;}
+  .stat .value{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--text);}
+  .stat .value.gold{color:var(--gold);}
+  .stat .value.small{font-size:16px;}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:22px 22px 24px;margin-bottom:22px;
+  }
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .card-head h2{font-family:'Sora',sans-serif;font-size:17px;font-weight:700;margin:0;display:flex;align-items:center;gap:8px;}
+  .card-head h2 .star{color:var(--gold);font-size:15px;}
+  .card-head .hint{font-size:12.5px;color:var(--text-faint);}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  thead th{
+    text-align:left;color:var(--text-dim);font-weight:600;font-size:11px;
+    text-transform:uppercase;letter-spacing:.04em;padding:0 10px 10px;
+    border-bottom:1px solid var(--border);white-space:nowrap;
+  }
+  tbody td{padding:8px 10px;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr.best-row{background:var(--green-soft);}
+  tbody tr.best-row td:first-child{box-shadow:inset 3px 0 0 var(--green);}
+
+  input[type=text], input[type=number]{
+    width:100%;background:var(--card-2);border:1px solid var(--border);color:var(--text);
+    border-radius:8px;padding:8px 10px;font-family:'Inter',sans-serif;font-size:13.5px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input[type=number]{font-family:'JetBrains Mono',monospace;}
+  input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);}
+  input::placeholder{color:var(--text-faint);}
+
+  .col-name{min-width:130px;}
+  .col-num{min-width:90px;}
+
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .rank-badge{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:6px;font-weight:700;font-size:12px;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .rank-1{background:var(--gold);color:#241a05;}
+  .rank-2{background:#c9cfe0;color:#20242f;}
+  .rank-3{background:#c98a55;color:#241a05;}
+  .rank-n{background:var(--card-2);color:var(--text-dim);border:1px solid var(--border);}
+
+  .total-cell{font-weight:700;color:var(--text);}
+  .best-row .total-cell{color:var(--green);}
+
+  .row-actions button{
+    background:none;border:1px solid var(--border);color:var(--text-faint);
+    border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:14px;
+    transition:all .15s;
+  }
+  .row-actions button:hover{border-color:var(--red);color:var(--red);background:rgba(242,116,140,.08);}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--card-2);border:1px solid var(--border);color:var(--text);
+    padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:600;
+    cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;
+  }
+  .btn:hover{border-color:var(--gold);color:var(--gold);}
+  .btn-gold{background:linear-gradient(135deg,var(--gold),#f0c98a);color:#241a05;border:none;}
+  .btn-gold:hover{filter:brightness(1.07);color:#241a05;}
+
+  .assump{
+    font-size:12.5px;color:var(--text-faint);line-height:1.7;
+    border-top:1px solid var(--border-soft);margin-top:18px;padding-top:14px;
+  }
+  .assump b{color:var(--text-dim);}
+  .assump code{background:var(--card-2);padding:1px 6px;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold);}
+
+  .empty{
+    text-align:center;padding:30px 10px;color:var(--text-faint);font-size:13.5px;
+  }
+
+  ::-webkit-scrollbar{height:8px;width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+  .table-scroll{overflow-x:auto;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Kredi Tekliflerini Karşılaştır</h1>
+  <p class="sub">Bankaların ihtiyaç kredisi tekliflerini gir; taksit tutarı, faiz, BSMV ve toplam geri ödeme otomatik hesaplansın, en uygun teklif otomatik öne çıksın.</p>
+
+  <div class="grid-top">
+    <div class="stat">
+      <div class="label">En uygun teklif</div>
+      <div class="value gold" id="statBestBank">—</div>
+    </div>
+    <div class="stat">
+      <div class="label">En uygun toplam geri ödeme</div>
+      <div class="value" id="statBestTotal">—</div>
+    </div>
+    <div class="stat">
+      <div class="label">Ortalama aylık taksit</div>
+      <div class="value small" id="statAvgInstallment">—</div>
+    </div>
+    <div class="stat">
+      <div class="label">Teklif sayısı</div>
+      <div class="value" id="statCount">0</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2><span class="star">&#9733;</span> Teklif Girişi</h2>
+      <span class="hint">Kredi tutarı, yıllık oran, taksit sayısı ve komisyon oranını gir</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Banka</th>
+            <th>Kredi Tutarı</th>
+            <th>Yıllık Oran %</th>
+            <th>Taksit Sayısı</th>
+            <th>Komisyon %</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="inputBody"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:14px;">
+      <button class="btn" id="addRowBtn">+ Teklif Ekle</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2><span class="star">&#9733;</span> Sıralama</h2>
+      <span class="hint">En ucuzdan en pahalıya otomatik sıralanır</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Banka</th>
+            <th>Aylık Taksit</th>
+            <th>Toplam Faiz</th>
+            <th>BSMV</th>
+            <th>Komisyon</th>
+            <th>Toplam Geri Ödeme</th>
+            <th>En Uyguna Göre Fark</th>
+          </tr>
+        </thead>
+        <tbody id="resultBody"></tbody>
+      </table>
+      <div class="empty" id="emptyState">Henüz teklif eklenmedi. Yukarıdan bir teklif ekleyerek başla.</div>
+    </div>
+
+    <div class="assump">
+      <b>Yöntem:</b> Aylık Taksit eşit taksitli (anüite) formülüyle hesaplanır:
+      <code>Taksit = Tutar × [i(1+i)&#8319;] / [(1+i)&#8319;−1]</code>, i = Yıllık Oran/12, n = Taksit Sayısı.
+      Komisyon Tutarı = Tutar × Komisyon Oranı. BSMV, 09.07.2025 tarihli 2025/66 sayılı Cumhurbaşkanı Kararı uyarınca
+      tüketici/ihtiyaç kredilerinde toplam faizin <b>%15</b>'i olarak uygulanır. Toplam Geri Ödeme = Taksitlerin toplamı + Komisyon + BSMV.
+      Bu araç bilgilendirme amaçlıdır, bağlayıcı bir kredi teklifi değildir.
+    </div>
+  </div>
+
+</div>
+
+<script>
+let offers = [
+  {bank:"VAKIF KATILIM", amount:100000, rate:51.96, months:12, feeRate:1.12},
+  {bank:"KUVEYT TÜRK", amount:100000, rate:49.80, months:24, feeRate:1.13},
+  {bank:"AKBANK", amount:100000, rate:55.00, months:36, feeRate:1.17},
+  {bank:"TÜRKİYE FİNANS", amount:100000, rate:49.00, months:48, feeRate:1.82},
+];
+
+const BSMV_RATE = 0.15;
+
+function fmt(n){
+  if(n===null||n===undefined||isNaN(n)) return "—";
+  return n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + " TL";
+}
+function fmtPct(n){
+  if(n===null||n===undefined||isNaN(n)) return "—";
+  return n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + "%";
+}
+
+function calc(offer){
+  const {amount, rate, months, feeRate} = offer;
+  if(!amount || !rate || !months) return null;
+  const i = (rate/100)/12;
+  const n = months;
+  const installment = amount * (i*Math.pow(1+i,n)) / (Math.pow(1+i,n)-1);
+  const feeAmount = amount * (feeRate/100 || 0);
+  const totalInterest = installment*n - amount;
+  const bsmv = totalInterest * BSMV_RATE;
+  const loanRepay = installment*n;
+  const total = loanRepay + feeAmount + bsmv;
+  return {installment, feeAmount, totalInterest, bsmv, loanRepay, total};
+}
+
+function renderInputs(){
+  const body = document.getElementById('inputBody');
+  body.innerHTML = '';
+  offers.forEach((o, idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="col-name"><input type="text" value="${o.bank}" data-idx="${idx}" data-field="bank" placeholder="Banka adı"></td>
+      <td class="col-num"><input type="number" value="${o.amount}" data-idx="${idx}" data-field="amount" placeholder="100000"></td>
+      <td class="col-num"><input type="number" step="0.01" value="${o.rate}" data-idx="${idx}" data-field="rate" placeholder="45.00"></td>
+      <td class="col-num"><input type="number" value="${o.months}" data-idx="${idx}" data-field="months" placeholder="12"></td>
+      <td class="col-num"><input type="number" step="0.01" value="${o.feeRate}" data-idx="${idx}" data-field="feeRate" placeholder="1.12"></td>
+      <td class="row-actions"><button data-idx="${idx}" title="Kaldır">&times;</button></td>
+    `;
+    body.appendChild(tr);
+  });
+
+  body.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const idx = +e.target.dataset.idx;
+      const field = e.target.dataset.field;
+      let val = e.target.value;
+      if(field !== 'bank') val = parseFloat(val.replace(',', '.'));
+      offers[idx][field] = val;
+      renderResults();
+      renderStats();
+    });
+  });
+  body.querySelectorAll('button[data-idx]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const idx = +e.currentTarget.dataset.idx;
+      offers.splice(idx,1);
+      renderInputs();
+      renderResults();
+      renderStats();
+    });
+  });
+}
+
+function renderResults(){
+  const body = document.getElementById('resultBody');
+  const empty = document.getElementById('emptyState');
+  body.innerHTML = '';
+
+  const computed = offers.map(o=>({offer:o, r:calc(o)})).filter(x=>x.r);
+  if(computed.length === 0){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  computed.sort((a,b)=>a.r.total-b.r.total);
+  const bestTotal = computed[0].r.total;
+
+  computed.forEach((x,rank)=>{
+    const {offer,r} = x;
+    const tr = document.createElement('tr');
+    if(rank===0) tr.className='best-row';
+    const rankClass = rank===0?'rank-1':rank===1?'rank-2':rank===2?'rank-3':'rank-n';
+    const diff = r.total - bestTotal;
+    tr.innerHTML = `
+      <td><span class="rank-badge ${rankClass}">${rank+1}</span></td>
+      <td>${offer.bank || '—'}</td>
+      <td class="mono">${fmt(r.installment)}</td>
+      <td class="mono">${fmt(r.totalInterest)}</td>
+      <td class="mono">${fmt(r.bsmv)}</td>
+      <td class="mono">${fmt(r.feeAmount)}</td>
+      <td class="mono total-cell">${fmt(r.total)}</td>
+      <td class="mono" style="color:${diff===0?'var(--green)':'var(--text-dim)'}">${diff===0?'En uygun':'+'+fmt(diff)}</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function renderStats(){
+  const computed = offers.map(o=>calc(o)).filter(Boolean);
+  document.getElementById('statCount').textContent = computed.length;
+
+  if(computed.length===0){
+    document.getElementById('statBestBank').textContent = '—';
+    document.getElementById('statBestTotal').textContent = '—';
+    document.getElementById('statAvgInstallment').textContent = '—';
+    return;
+  }
+  const withBank = offers.map(o=>({o,r:calc(o)})).filter(x=>x.r);
+  withBank.sort((a,b)=>a.r.total-b.r.total);
+  document.getElementById('statBestBank').textContent = withBank[0].o.bank || '—';
+  document.getElementById('statBestTotal').textContent = fmt(withBank[0].r.total);
+
+  const avgInstallment = computed.reduce((s,r)=>s+r.installment,0)/computed.length;
+  document.getElementById('statAvgInstallment').textContent = fmt(avgInstallment);
+}
+
+document.getElementById('addRowBtn').addEventListener('click', ()=>{
+  offers.push({bank:"", amount:100000, rate:45, months:12, feeRate:1.0});
+  renderInputs();
+  renderResults();
+  renderStats();
+});
+
+renderInputs();
+renderResults();
+renderStats();
+</script>
+</body>
+</html>
