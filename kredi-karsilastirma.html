@@ -82,7 +82,7 @@
   .card-head h2 .star{color:var(--gold);font-size:15px;}
   .card-head .hint{font-size:12.5px;color:var(--text-faint);}
 
-  table{width:100%;border-collapse:collapse;font-size:13.5px;table-layout:fixed;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
   thead th{
     text-align:left;color:var(--text-dim);font-weight:600;font-size:11px;
     text-transform:uppercase;letter-spacing:.04em;padding:0 10px 10px;
@@ -102,9 +102,8 @@
   input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);}
   input::placeholder{color:var(--text-faint);}
 
-  .col-name{min-width:0;}
-  .col-num{min-width:0;}
-  .col-del{width:44px;}
+  .col-name{min-width:130px;}
+  .col-num{min-width:90px;}
 
   .mono{font-family:'JetBrains Mono',monospace;}
   .rank-badge{
@@ -151,55 +150,6 @@
   ::-webkit-scrollbar{height:8px;width:8px;}
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
   .table-scroll{overflow-x:auto;}
-
-  /* ---- Split layout: left = data entry, right = live results ---- */
-  .split-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
-  @media (max-width:920px){.split-grid{grid-template-columns:1fr;}}
-
-  .offer-card{
-    background:var(--card-2);border:1px solid var(--border);border-radius:12px;
-    padding:14px 14px 12px;margin-bottom:12px;position:relative;
-  }
-  .offer-card:last-child{margin-bottom:0;}
-  .offer-card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-  .offer-card-head input[type=text]{font-weight:600;font-size:14px;}
-  .offer-card-head .rm-btn{
-    flex-shrink:0;background:none;border:1px solid var(--border);color:var(--text-faint);
-    border-radius:7px;width:30px;height:30px;cursor:pointer;font-size:15px;transition:all .15s;
-  }
-  .offer-card-head .rm-btn:hover{border-color:var(--red);color:var(--red);background:rgba(242,116,140,.08);}
-
-  .field-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-  .field{display:flex;flex-direction:column;gap:4px;}
-  .field label{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
-  .field-manual{margin-top:2px;}
-  .field-manual label{color:var(--gold);}
-  .field-manual input::placeholder{font-style:italic;}
-
-  .result-card{
-    background:var(--card-2);border:1px solid var(--border);border-radius:12px;
-    padding:14px 16px;margin-bottom:12px;transition:border-color .15s, background .15s;
-  }
-  .result-card:last-child{margin-bottom:0;}
-  .result-card.best{background:var(--green-soft);border-color:rgba(61,220,151,.35);}
-  .result-card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-  .result-card-head .name{font-weight:700;font-size:14px;flex:1;}
-  .result-card.best .name{color:var(--green);}
-  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:8px;}
-  .result-item .k{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;font-weight:600;margin-bottom:2px;}
-  .result-item .v{font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:600;}
-  .result-total{
-    border-top:1px solid var(--border);margin-top:8px;padding-top:8px;
-    display:flex;align-items:baseline;justify-content:space-between;
-  }
-  .result-total .k{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
-  .result-total .v{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;}
-  .result-card.best .result-total .v{color:var(--green);}
-  .result-diff{font-size:11px;color:var(--text-faint);margin-top:3px;text-align:right;font-family:'JetBrains Mono',monospace;}
-  .manual-tag{
-    font-size:9.5px;font-weight:700;color:var(--gold);background:var(--gold-soft);
-    padding:1px 6px;border-radius:5px;margin-left:6px;text-transform:uppercase;letter-spacing:.03em;
-  }
 </style>
 </head>
 <body>
@@ -227,34 +177,61 @@
     </div>
   </div>
 
-  <div class="split-grid">
-    <div class="card">
-      <div class="card-head">
-        <h2><span class="star">&#9733;</span> Teklif Girişi</h2>
-        <span class="hint">Sol taraf: veri girişi</span>
-      </div>
-      <div id="inputBody"></div>
-      <div style="margin-top:6px;">
-        <button class="btn" id="addRowBtn">+ Teklif Ekle</button>
-      </div>
+  <div class="card">
+    <div class="card-head">
+      <h2><span class="star">&#9733;</span> Teklif Girişi</h2>
+      <span class="hint">Kredi tutarı, yıllık oran, taksit sayısı ve komisyon oranını gir</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Banka</th>
+            <th>Kredi Tutarı</th>
+            <th>Yıllık Oran %</th>
+            <th>Taksit Sayısı</th>
+            <th>Komisyon %</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="inputBody"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:14px;">
+      <button class="btn" id="addRowBtn">+ Teklif Ekle</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2><span class="star">&#9733;</span> Sıralama</h2>
+      <span class="hint">En ucuzdan en pahalıya otomatik sıralanır</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Banka</th>
+            <th>Aylık Taksit</th>
+            <th>Toplam Faiz</th>
+            <th>BSMV</th>
+            <th>Komisyon</th>
+            <th>Toplam Geri Ödeme</th>
+            <th>En Uyguna Göre Fark</th>
+          </tr>
+        </thead>
+        <tbody id="resultBody"></tbody>
+      </table>
+      <div class="empty" id="emptyState">Henüz teklif eklenmedi. Yukarıdan bir teklif ekleyerek başla.</div>
     </div>
 
-    <div class="card">
-      <div class="card-head">
-        <h2><span class="star">&#9733;</span> Sonuçlar</h2>
-        <span class="hint">Sağ taraf: anında güncellenir</span>
-      </div>
-      <div id="resultBody"></div>
-      <div class="empty" id="emptyState">Henüz teklif eklenmedi. Soldan bir teklif ekleyerek başla.</div>
-
-      <div class="assump">
-        <b>Yöntem:</b> Aylık Taksit, girilmezse eşit taksitli (anüite) formülüyle otomatik hesaplanır:
-        <code>Taksit = Tutar × [i(1+i)&#8319;] / [(1+i)&#8319;−1]</code>, i = Yıllık Oran/12, n = Taksit Sayısı.
-        Bankanızın verdiği taksit tutarı farklıysa "Taksit Tutarı (manuel)" alanına yazabilirsiniz; girilirse bu değer esas alınır.
-        Komisyon Tutarı = Tutar × Komisyon Oranı. BSMV, 09.07.2025 tarihli 2025/66 sayılı Cumhurbaşkanı Kararı uyarınca
-        tüketici/ihtiyaç kredilerinde toplam faizin <b>%15</b>'i olarak uygulanır. Toplam Geri Ödeme = Taksitlerin toplamı + Komisyon + BSMV.
-        Bu araç bilgilendirme amaçlıdır, bağlayıcı bir kredi teklifi değildir.
-      </div>
+    <div class="assump">
+      <b>Yöntem:</b> Aylık Taksit eşit taksitli (anüite) formülüyle hesaplanır:
+      <code>Taksit = Tutar × [i(1+i)&#8319;] / [(1+i)&#8319;−1]</code>, i = Yıllık Oran/12, n = Taksit Sayısı.
+      Komisyon Tutarı = Tutar × Komisyon Oranı. BSMV, 09.07.2025 tarihli 2025/66 sayılı Cumhurbaşkanı Kararı uyarınca
+      tüketici/ihtiyaç kredilerinde toplam faizin <b>%15</b>'i olarak uygulanır. Toplam Geri Ödeme = Taksitlerin toplamı + Komisyon + BSMV.
+      Bu araç bilgilendirme amaçlıdır, bağlayıcı bir kredi teklifi değildir.
     </div>
   </div>
 
@@ -262,10 +239,10 @@
 
 <script>
 let offers = [
-  {bank:"VAKIF KATILIM", amount:100000, rate:51.96, months:12, feeRate:1.12, manualInstallment:null},
-  {bank:"KUVEYT TÜRK", amount:100000, rate:49.80, months:24, feeRate:1.13, manualInstallment:null},
-  {bank:"AKBANK", amount:100000, rate:55.00, months:36, feeRate:1.17, manualInstallment:null},
-  {bank:"TÜRKİYE FİNANS", amount:100000, rate:49.00, months:48, feeRate:1.82, manualInstallment:null},
+  {bank:"VAKIF KATILIM", amount:100000, rate:51.96, months:12, feeRate:1.12},
+  {bank:"KUVEYT TÜRK", amount:100000, rate:49.80, months:24, feeRate:1.13},
+  {bank:"AKBANK", amount:100000, rate:55.00, months:36, feeRate:1.17},
+  {bank:"TÜRKİYE FİNANS", amount:100000, rate:49.00, months:48, feeRate:1.82},
 ];
 
 const BSMV_RATE = 0.15;
@@ -279,103 +256,48 @@ function fmtPct(n){
   return n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + "%";
 }
 
-// Tutar alanları için canlı "1.000.000" biçimli binlik ayraç formatlama
-function formatTRThousands(rawStr){
-  let digits = (rawStr||'').replace(/\D/g,'');
-  digits = digits.replace(/^0+(?=\d)/,'');
-  if(digits === '') return '';
-  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-}
-function parseTRAmount(str){
-  if(!str) return NaN;
-  const digits = String(str).replace(/\./g,'');
-  return parseFloat(digits);
-}
-function attachTRAmountInput(inputEl){
-  inputEl.addEventListener('input', ()=>{
-    const cursorFromEnd = inputEl.value.length - inputEl.selectionStart;
-    const formatted = formatTRThousands(inputEl.value);
-    inputEl.value = formatted;
-    const newPos = Math.max(0, formatted.length - cursorFromEnd);
-    inputEl.setSelectionRange(newPos, newPos);
-  });
-}
-
 function calc(offer){
-  const {amount, rate, months, feeRate, manualInstallment} = offer;
-  if(!amount || !months) return null;
-
-  let installment, isManual = false;
-  if(manualInstallment && manualInstallment > 0){
-    installment = manualInstallment;
-    isManual = true;
-  } else {
-    if(!rate) return null;
-    const i = (rate/100)/12;
-    installment = amount * (i*Math.pow(1+i,months)) / (Math.pow(1+i,months)-1);
-  }
-
+  const {amount, rate, months, feeRate} = offer;
+  if(!amount || !rate || !months) return null;
+  const i = (rate/100)/12;
+  const n = months;
+  const installment = amount * (i*Math.pow(1+i,n)) / (Math.pow(1+i,n)-1);
   const feeAmount = amount * (feeRate/100 || 0);
-  const totalInterest = installment*months - amount;
+  const totalInterest = installment*n - amount;
   const bsmv = totalInterest * BSMV_RATE;
-  const loanRepay = installment*months;
+  const loanRepay = installment*n;
   const total = loanRepay + feeAmount + bsmv;
-  return {installment, feeAmount, totalInterest, bsmv, loanRepay, total, isManual};
+  return {installment, feeAmount, totalInterest, bsmv, loanRepay, total};
 }
 
 function renderInputs(){
   const body = document.getElementById('inputBody');
   body.innerHTML = '';
   offers.forEach((o, idx)=>{
-    const card = document.createElement('div');
-    card.className = 'offer-card';
-    card.innerHTML = `
-      <div class="offer-card-head">
-        <input type="text" value="${o.bank}" data-idx="${idx}" data-field="bank" placeholder="Banka adı">
-        <button class="rm-btn" data-idx="${idx}" title="Kaldır">&times;</button>
-      </div>
-      <div class="field-row2">
-        <div class="field">
-          <label>Kredi Tutarı</label>
-          <input type="text" inputmode="numeric" value="${formatTRThousands(String(o.amount))}" data-idx="${idx}" data-field="amount" placeholder="100.000">
-        </div>
-        <div class="field">
-          <label>Yıllık Oran %</label>
-          <input type="number" step="0.01" value="${o.rate}" data-idx="${idx}" data-field="rate" placeholder="45.00">
-        </div>
-      </div>
-      <div class="field-row2">
-        <div class="field">
-          <label>Taksit Sayısı</label>
-          <input type="number" value="${o.months}" data-idx="${idx}" data-field="months" placeholder="12">
-        </div>
-        <div class="field">
-          <label>Komisyon %</label>
-          <input type="number" step="0.01" value="${o.feeRate}" data-idx="${idx}" data-field="feeRate" placeholder="1.12">
-        </div>
-      </div>
-      <div class="field field-manual">
-        <label>Taksit Tutarı (manuel, opsiyonel)</label>
-        <input type="text" inputmode="numeric" value="${o.manualInstallment ? formatTRThousands(String(o.manualInstallment)) : ''}" data-idx="${idx}" data-field="manualInstallment" placeholder="Otomatik hesaplanan taksiti kullan">
-      </div>
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="col-name"><input type="text" value="${o.bank}" data-idx="${idx}" data-field="bank" placeholder="Banka adı"></td>
+      <td class="col-num"><input type="number" value="${o.amount}" data-idx="${idx}" data-field="amount" placeholder="100000"></td>
+      <td class="col-num"><input type="number" step="0.01" value="${o.rate}" data-idx="${idx}" data-field="rate" placeholder="45.00"></td>
+      <td class="col-num"><input type="number" value="${o.months}" data-idx="${idx}" data-field="months" placeholder="12"></td>
+      <td class="col-num"><input type="number" step="0.01" value="${o.feeRate}" data-idx="${idx}" data-field="feeRate" placeholder="1.12"></td>
+      <td class="row-actions"><button data-idx="${idx}" title="Kaldır">&times;</button></td>
     `;
-    body.appendChild(card);
+    body.appendChild(tr);
   });
 
   body.querySelectorAll('input').forEach(inp=>{
-    if(inp.dataset.field === 'amount' || inp.dataset.field === 'manualInstallment') attachTRAmountInput(inp);
     inp.addEventListener('input', e=>{
       const idx = +e.target.dataset.idx;
       const field = e.target.dataset.field;
       let val = e.target.value;
-      if(field === 'amount' || field === 'manualInstallment') val = parseTRAmount(val);
-      else if(field !== 'bank') val = parseFloat(val.replace(',', '.'));
+      if(field !== 'bank') val = parseFloat(val.replace(',', '.'));
       offers[idx][field] = val;
       renderResults();
       renderStats();
     });
   });
-  body.querySelectorAll('.rm-btn').forEach(btn=>{
+  body.querySelectorAll('button[data-idx]').forEach(btn=>{
     btn.addEventListener('click', e=>{
       const idx = +e.currentTarget.dataset.idx;
       offers.splice(idx,1);
@@ -391,49 +313,33 @@ function renderResults(){
   const empty = document.getElementById('emptyState');
   body.innerHTML = '';
 
-  const computed = offers.map(o=>({offer:o, r:calc(o)}));
-  const valid = computed.filter(x=>x.r);
-  if(valid.length === 0){
+  const computed = offers.map(o=>({offer:o, r:calc(o)})).filter(x=>x.r);
+  if(computed.length === 0){
     empty.style.display = 'block';
     return;
   }
   empty.style.display = 'none';
 
-  const bestTotal = Math.min(...valid.map(x=>x.r.total));
-  const sortedTotals = [...valid.map(x=>x.r.total)].sort((a,b)=>a-b);
+  computed.sort((a,b)=>a.r.total-b.r.total);
+  const bestTotal = computed[0].r.total;
 
-  // Girilen sırayı bozmadan (soldaki kartlarla hizalı kalsın diye) her teklife rütbe ata
-  computed.forEach(({offer,r})=>{
-    const card = document.createElement('div');
-    if(!r){
-      card.className = 'result-card';
-      card.innerHTML = `<div class="result-card-head"><span class="name" style="color:var(--text-faint);">${offer.bank || 'Yeni teklif'}</span></div><div style="font-size:12.5px;color:var(--text-faint);">Tutar, taksit sayısı ve (oran ya da manuel taksit) girilince hesaplanır.</div>`;
-      body.appendChild(card);
-      return;
-    }
-    const rank = sortedTotals.indexOf(r.total) + 1;
-    const isBest = r.total === bestTotal;
-    card.className = 'result-card' + (isBest ? ' best' : '');
+  computed.forEach((x,rank)=>{
+    const {offer,r} = x;
+    const tr = document.createElement('tr');
+    if(rank===0) tr.className='best-row';
+    const rankClass = rank===0?'rank-1':rank===1?'rank-2':rank===2?'rank-3':'rank-n';
     const diff = r.total - bestTotal;
-    card.innerHTML = `
-      <div class="result-card-head">
-        <span class="rank-badge ${rank===1?'rank-1':rank===2?'rank-2':rank===3?'rank-3':'rank-n'}">${rank}</span>
-        <span class="name">${offer.bank || '—'}</span>
-      </div>
-      <div class="result-grid">
-        <div class="result-item"><div class="k">Aylık Taksit${r.isManual?'<span class="manual-tag">Manuel</span>':''}</div><div class="v">${fmt(r.installment)}</div></div>
-        <div class="result-item"><div class="k">Toplam Faiz</div><div class="v">${fmt(r.totalInterest)}</div></div>
-        <div class="result-item"><div class="k">Komisyon</div><div class="v">${fmt(r.feeAmount)}</div></div>
-        <div class="result-item"><div class="k">BSMV</div><div class="v">${fmt(r.bsmv)}</div></div>
-        <div class="result-item"><div class="k">Kredi Geri Ödeme</div><div class="v">${fmt(r.loanRepay)}</div></div>
-      </div>
-      <div class="result-total">
-        <span class="k">Toplam Geri Ödeme</span>
-        <span class="v">${fmt(r.total)}</span>
-      </div>
-      <div class="result-diff">${isBest ? 'En uygun teklif' : '+' + fmt(diff) + ' fazla'}</div>
+    tr.innerHTML = `
+      <td><span class="rank-badge ${rankClass}">${rank+1}</span></td>
+      <td>${offer.bank || '—'}</td>
+      <td class="mono">${fmt(r.installment)}</td>
+      <td class="mono">${fmt(r.totalInterest)}</td>
+      <td class="mono">${fmt(r.bsmv)}</td>
+      <td class="mono">${fmt(r.feeAmount)}</td>
+      <td class="mono total-cell">${fmt(r.total)}</td>
+      <td class="mono" style="color:${diff===0?'var(--green)':'var(--text-dim)'}">${diff===0?'En uygun':'+'+fmt(diff)}</td>
     `;
-    body.appendChild(card);
+    body.appendChild(tr);
   });
 }
 
@@ -457,7 +363,7 @@ function renderStats(){
 }
 
 document.getElementById('addRowBtn').addEventListener('click', ()=>{
-  offers.push({bank:"", amount:100000, rate:45, months:12, feeRate:1.0, manualInstallment:null});
+  offers.push({bank:"", amount:100000, rate:45, months:12, feeRate:1.0});
   renderInputs();
   renderResults();
   renderStats();

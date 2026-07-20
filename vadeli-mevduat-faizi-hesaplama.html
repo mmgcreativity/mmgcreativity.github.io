@@ -82,7 +82,7 @@
   .card-head h2 .star{color:var(--gold);font-size:15px;}
   .card-head .hint{font-size:12.5px;color:var(--text-faint);}
 
-  table{width:100%;border-collapse:collapse;font-size:13.5px;table-layout:fixed;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
   thead th{
     text-align:left;color:var(--text-dim);font-weight:600;font-size:11px;
     text-transform:uppercase;letter-spacing:.04em;padding:0 10px 10px;
@@ -102,9 +102,8 @@
   input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);}
   input::placeholder{color:var(--text-faint);}
 
-  .col-name{min-width:0;}
-  .col-num{min-width:0;}
-  .col-del{width:44px;}
+  .col-name{min-width:130px;}
+  .col-num{min-width:90px;}
 
   .mono{font-family:'JetBrains Mono',monospace;}
   .rank-badge{
@@ -191,13 +190,6 @@
     </div>
     <div class="table-scroll">
       <table>
-        <colgroup>
-          <col style="width:30%">
-          <col style="width:26%">
-          <col style="width:22%">
-          <col style="width:22%">
-          <col style="width:44px">
-        </colgroup>
         <thead>
           <tr>
             <th>Banka</th>
@@ -267,28 +259,6 @@ function fmtPct(n){
   return n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + "%";
 }
 
-// Anapara alanı için canlı "1.000.000" biçimli binlik ayraç formatlama
-function formatTRThousands(rawStr){
-  let digits = (rawStr||'').replace(/\D/g,'');
-  digits = digits.replace(/^0+(?=\d)/,'');
-  if(digits === '') return '';
-  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-}
-function parseTRAmount(str){
-  if(!str) return NaN;
-  const digits = String(str).replace(/\./g,'');
-  return parseFloat(digits);
-}
-function attachTRAmountInput(inputEl){
-  inputEl.addEventListener('input', ()=>{
-    const cursorFromEnd = inputEl.value.length - inputEl.selectionStart;
-    const formatted = formatTRThousands(inputEl.value);
-    inputEl.value = formatted;
-    const newPos = Math.max(0, formatted.length - cursorFromEnd);
-    inputEl.setSelectionRange(newPos, newPos);
-  });
-}
-
 function stopajRate(days){
   if(days<=183) return 0.175;
   if(days<=366) return 0.15;
@@ -318,22 +288,20 @@ function renderInputs(){
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="col-name"><input type="text" value="${o.bank}" data-idx="${idx}" data-field="bank" placeholder="Banka adı"></td>
-      <td class="col-num"><input type="text" inputmode="numeric" value="${formatTRThousands(String(o.amount))}" data-idx="${idx}" data-field="amount" placeholder="100.000"></td>
+      <td class="col-num"><input type="number" value="${o.amount}" data-idx="${idx}" data-field="amount" placeholder="100000"></td>
       <td class="col-num"><input type="number" step="0.01" value="${o.rate}" data-idx="${idx}" data-field="rate" placeholder="46.00"></td>
       <td class="col-num"><input type="number" value="${o.days}" data-idx="${idx}" data-field="days" placeholder="32"></td>
-      <td class="row-actions col-del"><button data-idx="${idx}" title="Kaldır">&times;</button></td>
+      <td class="row-actions"><button data-idx="${idx}" title="Kaldır">&times;</button></td>
     `;
     body.appendChild(tr);
   });
 
   body.querySelectorAll('input').forEach(inp=>{
-    if(inp.dataset.field === 'amount') attachTRAmountInput(inp);
     inp.addEventListener('input', e=>{
       const idx = +e.target.dataset.idx;
       const field = e.target.dataset.field;
       let val = e.target.value;
-      if(field === 'amount') val = parseTRAmount(val);
-      else if(field !== 'bank') val = parseFloat(val.replace(',', '.'));
+      if(field !== 'bank') val = parseFloat(val.replace(',', '.'));
       offers[idx][field] = val;
       renderResults();
       renderStats();
