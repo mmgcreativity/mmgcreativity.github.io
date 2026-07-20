@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hesabım — Dijital Finans Asistanı</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+
+  .page-wrap{ max-width:640px; margin:0 auto; padding:40px 24px 80px; }
+
+  .back-btn{
+    display:inline-flex; align-items:center; gap:8px; text-decoration:none;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px;
+    padding:10px 18px; color:var(--text); font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px;
+    cursor:pointer; transition:border-color .15s ease, transform .15s ease; margin-bottom:26px;
+  }
+  .back-btn:hover{ border-color:var(--brass-dim); transform:translateX(-2px); }
+
+  .page-title{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:32px; letter-spacing:-0.01em;
+    margin-bottom:10px;
+  }
+  .page-sub{ color:var(--muted); font-size:14.5px; line-height:1.6; margin-bottom:8px; max-width:480px; }
+  .status-pill{
+    display:inline-flex; align-items:center; gap:7px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+    color:var(--muted); padding:6px 12px; border:1px solid var(--hairline); border-radius:6px;
+    background:var(--surface-2); margin:16px 0 30px;
+  }
+  .status-dot{ width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 6px var(--teal); flex-shrink:0; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:16px;
+    padding:28px; box-shadow:0 10px 30px rgba(0,0,0,0.25); margin-bottom:24px;
+  }
+  .card h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; margin-bottom:18px; }
+
+  .auth-field{ margin-bottom:16px; }
+  .auth-field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; }
+  .auth-field input, .auth-field select, .auth-field textarea{
+    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
+    transition:border-color .15s ease; resize:vertical;
+  }
+  .auth-field input:focus, .auth-field select:focus, .auth-field textarea:focus{ border-color:var(--brass-dim); }
+  .auth-error{ color:var(--coral); font-size:12.5px; margin-bottom:14px; display:none; }
+  .auth-error.show{ display:block; }
+  .auth-submit{
+    width:100%; padding:13px; border-radius:9px; border:none; cursor:pointer;
+    background:var(--grad); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px;
+    margin-top:4px; transition:opacity .15s ease;
+  }
+  .auth-submit:hover{ opacity:0.9; }
+  .auth-submit:disabled{ opacity:0.6; cursor:default; }
+  .saved-msg{
+    display:none; text-align:center; color:var(--teal); font-family:'IBM Plex Mono',monospace;
+    font-size:12px; margin-top:10px;
+  }
+  .saved-msg.show{ display:block; }
+  .referral-note{ color:var(--muted); font-size:13px; margin-bottom:18px; line-height:1.6; }
+  .referral-locked-btn{
+    display:inline-flex; align-items:center; gap:8px; text-decoration:none;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:9px;
+    padding:12px 16px; color:var(--text); font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px;
+  }
+  .auth-field input:disabled{ opacity:0.55; cursor:not-allowed; }
+
+  .danger-card{ border-color:rgba(226,84,75,0.30); }
+  .danger-card h2{ color:var(--red); }
+  .danger-card p{ color:var(--muted); font-size:13px; margin-bottom:18px; line-height:1.6; }
+  .danger-btn{
+    width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+    background:transparent; border:1px solid rgba(226,84,75,0.35); border-radius:9px; padding:12px;
+    color:var(--red); font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer;
+    transition:background .15s ease;
+  }
+  .danger-btn:hover{ background:rgba(226,84,75,0.10); }
+
+  .mini-overlay{
+    position:fixed; inset:0; z-index:900; background:rgba(5,8,14,0.7);
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .mini-overlay[hidden]{ display:none; }
+  .mini-modal{
+    width:100%; max-width:420px; max-height:88vh; overflow-y:auto;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:16px;
+    padding:28px; box-shadow:0 24px 60px rgba(0,0,0,0.5);
+  }
+  .mini-modal-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .mini-modal-header h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; }
+  .mini-modal-close{
+    background:transparent; border:1px solid var(--hairline); border-radius:7px; color:var(--muted);
+    width:30px; height:30px; cursor:pointer; font-size:14px; transition:color .15s ease, border-color .15s ease;
+  }
+  .mini-modal-close:hover{ color:var(--coral); border-color:var(--coral); }
+  .mini-modal p{ color:var(--muted); font-size:13px; margin-bottom:18px; line-height:1.6; }
+
+  @media (max-width:520px){
+    .page-title{ font-size:26px; }
+    .card{ padding:20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <a href="index.html" target="_top" class="back-btn">← Ana Sayfa</a>
+
+  <h1 class="page-title">Hesabım</h1>
+  <p class="page-sub">Firma ya da kişisel bilgilerinizi girin. Bu bilgiler yalnızca sizin hesabınızda saklanır.</p>
+  <div class="status-pill" id="statusPill">
+    <span class="status-dot"></span>
+    <span id="statusPillText">Yükleniyor...</span>
+  </div>
+
+  <div class="card">
+    <h2>Profil Bilgileri</h2>
+    <form id="accountInfoForm">
+      <div class="auth-field">
+        <label>Hesap Türü</label>
+        <select id="profileType">
+          <option value="bireysel">Bireysel</option>
+          <option value="firma">Firma</option>
+        </select>
+      </div>
+      <div class="auth-field">
+        <label id="profileNameLabel">Ad Soyad</label>
+        <input type="text" id="profileName" placeholder="Ad Soyad">
+      </div>
+      <div class="auth-field">
+        <label>Telefon</label>
+        <input type="tel" id="profilePhone" placeholder="05xx xxx xx xx">
+      </div>
+      <div class="auth-field">
+        <label>E-posta</label>
+        <input type="email" id="profileEmail" placeholder="ornek@eposta.com">
+      </div>
+      <div class="auth-field">
+        <label>Adres</label>
+        <textarea id="profileAddress" rows="3" placeholder="Adres bilgisi"></textarea>
+      </div>
+      <button type="submit" class="auth-submit" id="profileSaveBtn">Kaydet</button>
+      <div class="saved-msg" id="profileSavedMsg">Kaydedildi ✓</div>
+    </form>
+  </div>
+
+  <div class="card" id="referralCard">
+    <h2>Referans Kodu</h2>
+    <p class="referral-note" id="referralNote">Bir referans kodunuz mu var? Girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.</p>
+    <form id="referralForm">
+      <div class="auth-field">
+        <label>Referans Kodu</label>
+        <input type="text" id="referralInput" placeholder="ör. AHMET10" style="text-transform:uppercase;">
+      </div>
+      <div class="auth-error" id="referralError"></div>
+      <button type="submit" class="auth-submit" id="referralSubmitBtn">Uygula</button>
+      <div class="saved-msg" id="referralSavedMsg">Kod uygulandı ✓</div>
+    </form>
+  </div>
+
+  <div class="card danger-card" id="dangerCard" style="display:none;">
+    <h2>Tehlikeli Bölge</h2>
+    <p>Hesabınızı kalıcı olarak silmek, kayıtlı oranlarınızı ve profil bilgilerinizi de kalıcı olarak kaldırır. Bu işlem geri alınamaz.</p>
+    <button type="button" id="deleteAccountBtn" class="danger-btn">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      <span>Hesabımı Kalıcı Olarak Sil</span>
+    </button>
+  </div>
+</div>
+
+<div class="mini-overlay" id="deleteAccountOverlay" hidden>
+  <div class="mini-modal">
+    <div class="mini-modal-header">
+      <h2>Hesabı Sil</h2>
+      <button type="button" class="mini-modal-close" id="deleteAccountClose" title="Kapat">✕</button>
+    </div>
+    <p>Bu işlem geri alınamaz. Hesabınız, kayıtlı oranlarınız ve profil bilgileriniz kalıcı olarak silinecek.</p>
+    <div class="auth-field" id="deleteReauthWrap" style="display:none;">
+      <label>Devam etmek için şifrenizi girin</label>
+      <input type="password" id="deleteReauthPassword" placeholder="••••••••">
+    </div>
+    <div class="auth-error" id="deleteAccountError"></div>
+    <button type="button" class="auth-submit" id="deleteAccountConfirmBtn" style="background:var(--red);">Evet, Hesabımı Sil</button>
+  </div>
+</div>
+
+<script>
+  // Sayfa geneli görünüm modu (dark/light), ana uygulamayla tutarlı
+  (function(){
+    var mode = localStorage.getItem('mmg_theme') || 'dark';
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+  })();
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import {
+    getAuth, onAuthStateChanged, signOut, deleteUser,
+    EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, GoogleAuthProvider
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, increment, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  const auth = getAuth(fbApp);
+  const db = getFirestore(fbApp);
+  const googleProvider = new GoogleAuthProvider();
+
+  const statusPillText = document.getElementById('statusPillText');
+  const dangerCard = document.getElementById('dangerCard');
+
+  const referralCard = document.getElementById('referralCard');
+  const referralNote = document.getElementById('referralNote');
+  const referralForm = document.getElementById('referralForm');
+  const referralInput = document.getElementById('referralInput');
+  const referralError = document.getElementById('referralError');
+  const referralSubmitBtn = document.getElementById('referralSubmitBtn');
+  const referralSavedMsg = document.getElementById('referralSavedMsg');
+  let currentUserData = null;
+
+  const profileType = document.getElementById('profileType');
+  const profileName = document.getElementById('profileName');
+  const profileNameLabel = document.getElementById('profileNameLabel');
+  const profilePhone = document.getElementById('profilePhone');
+  const profileEmail = document.getElementById('profileEmail');
+  const profileAddress = document.getElementById('profileAddress');
+  const profileSaveBtn = document.getElementById('profileSaveBtn');
+  const profileSavedMsg = document.getElementById('profileSavedMsg');
+  const accountInfoForm = document.getElementById('accountInfoForm');
+
+  function getCachedProfile(){
+    try{ return JSON.parse(localStorage.getItem('mmg_profile') || '{}'); } catch(e){ return {}; }
+  }
+  function updateProfileNameLabel(){
+    profileNameLabel.textContent = profileType.value === 'firma' ? 'Firma Adı' : 'Ad Soyad';
+    profileName.placeholder = profileType.value === 'firma' ? 'Firma Adı' : 'Ad Soyad';
+  }
+  profileType.addEventListener('change', updateProfileNameLabel);
+
+  function loadProfileIntoForm(profile){
+    const p = profile || getCachedProfile();
+    profileType.value = p.type || 'bireysel';
+    profileName.value = p.name || '';
+    profilePhone.value = p.phone || '';
+    const state = localStorage.getItem('mmg_auth_state');
+    const defaultEmail = (state && state.startsWith('user:')) ? state.slice(5) : '';
+    profileEmail.value = p.email || defaultEmail;
+    profileAddress.value = p.address || '';
+    updateProfileNameLabel();
+  }
+
+  async function saveProfileToCloud(profile){
+    const user = auth.currentUser;
+    if(!user) return; // misafir bulutta saklanmaz
+    try{ await setDoc(doc(db, 'users', user.uid), { profile: profile }, { merge: true }); }
+    catch(err){ /* bulut kaydı başarısız olsa da yerelde zaten kayıtlı */ }
+  }
+
+  loadProfileIntoForm();
+
+  accountInfoForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const profile = {
+      type: profileType.value,
+      name: profileName.value.trim(),
+      phone: profilePhone.value.trim(),
+      email: profileEmail.value.trim(),
+      address: profileAddress.value.trim()
+    };
+    localStorage.setItem('mmg_profile', JSON.stringify(profile));
+    profileSaveBtn.disabled = true;
+    await saveProfileToCloud(profile);
+    profileSaveBtn.disabled = false;
+    profileSavedMsg.classList.add('show');
+    setTimeout(() => profileSavedMsg.classList.remove('show'), 2000);
+  });
+
+  function lockReferralCard(message){
+    referralNote.textContent = message;
+    referralForm.style.display = 'none';
+  }
+  function unlockReferralCard(noteText){
+    referralNote.textContent = noteText;
+    referralForm.style.display = 'block';
+    referralInput.disabled = false;
+    referralSubmitBtn.disabled = false;
+  }
+  lockReferralCard('Yükleniyor...');
+
+  onAuthStateChanged(auth, async (user) => {
+    if(!user){
+      statusPillText.textContent = 'Misafir modundasınız';
+      dangerCard.style.display = 'none';
+      lockReferralCard('Referans kodu girmek için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz.');
+      currentUserData = null;
+      return;
+    }
+    dangerCard.style.display = 'block';
+    try{
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      const data = snap.exists() ? snap.data() : {};
+      currentUserData = data;
+      statusPillText.textContent = data.username ? data.username : (user.email || 'Üye');
+      if(data.profile) loadProfileIntoForm(data.profile);
+      if(data.referredBy){
+        lockReferralCard('"' + data.referredBy + '" referans kodunu zaten kullandınız.');
+      } else {
+        unlockReferralCard('Bir referans kodunuz mu var? Girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.');
+      }
+    } catch(e){
+      statusPillText.textContent = user.email || 'Üye';
+    }
+  });
+
+  function showReferralError(msg){
+    referralError.textContent = msg;
+    referralError.classList.add('show');
+  }
+  function hideReferralError(){
+    referralError.classList.remove('show');
+    referralError.textContent = '';
+  }
+
+  referralForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideReferralError();
+    const user = auth.currentUser;
+    if(!user){
+      showReferralError('Referans kodu girmek için önce giriş yapmalısınız.');
+      return;
+    }
+    const code = referralInput.value.trim().toUpperCase();
+    if(!code){
+      showReferralError('Lütfen bir referans kodu girin.');
+      return;
+    }
+    referralSubmitBtn.disabled = true;
+    const originalLabel = referralSubmitBtn.textContent;
+    referralSubmitBtn.textContent = 'Kontrol ediliyor...';
+    try{
+      const codeSnap = await getDoc(doc(db, 'referralCodes', code));
+      if(!codeSnap.exists() || codeSnap.data().active === false){
+        showReferralError('Bu referans kodu geçerli değil.');
+        return;
+      }
+      const cd = codeSnap.data();
+      if(cd.maxUses){
+        let usedCount = 0;
+        try{
+          const usageSnap = await getDoc(doc(db, 'referrals', code));
+          usedCount = usageSnap.exists() ? (usageSnap.data().count || 0) : 0;
+        }catch(usageErr){ usedCount = 0; }
+        if(usedCount >= cd.maxUses){
+          showReferralError('Bu referans kodu kullanım limitine ulaştı.');
+          return;
+        }
+      }
+      const premiumBenefit = {
+        type: cd.benefitType || 'discount',
+        discountPercent: cd.discountPercent || 0,
+        code: code
+      };
+      const updatePayload = { referredBy: code, premiumBenefit: premiumBenefit };
+      if(premiumBenefit.type === 'free') updatePayload.isPremium = true;
+      await setDoc(doc(db, 'users', user.uid), updatePayload, { merge: true });
+      await setDoc(doc(db, 'referrals', code), {
+        code: code, count: increment(1), lastUsedAt: serverTimestamp()
+      }, { merge: true });
+      await setDoc(doc(db, 'referrals', code, 'users', user.uid), {
+        email: user.email || '',
+        username: (currentUserData && currentUserData.username) || '',
+        customerNumber: (currentUserData && currentUserData.customerNumber) || null,
+        joinedAt: serverTimestamp()
+      });
+      referralSavedMsg.classList.add('show');
+      setTimeout(() => referralSavedMsg.classList.remove('show'), 2500);
+      if(premiumBenefit.type === 'free'){
+        alert('🎉 "' + code + '" kodunu kullandınız!\nHesabınıza ücretsiz premium tanımlandı.');
+      } else {
+        alert('🎉 "' + code + '" kodunu kullandınız!\nHesabınıza %' + premiumBenefit.discountPercent + ' indirimli premium tanımlandı.');
+      }
+      lockReferralCard('"' + code + '" referans kodunu zaten kullandınız.');
+    } catch(err){
+      showReferralError('Bir hata oluştu, lütfen tekrar deneyin.');
+    } finally {
+      referralSubmitBtn.disabled = false;
+      referralSubmitBtn.textContent = originalLabel;
+    }
+  });
+
+  // ---- Hesabı Sil ----
+  const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+  const deleteAccountOverlay = document.getElementById('deleteAccountOverlay');
+  const deleteAccountClose = document.getElementById('deleteAccountClose');
+  const deleteAccountConfirmBtn = document.getElementById('deleteAccountConfirmBtn');
+  const deleteReauthWrap = document.getElementById('deleteReauthWrap');
+  const deleteReauthPassword = document.getElementById('deleteReauthPassword');
+  const deleteAccountError = document.getElementById('deleteAccountError');
+
+  function showDeleteAccountError(msg){
+    deleteAccountError.textContent = msg;
+    deleteAccountError.classList.add('show');
+  }
+  function hideDeleteAccountError(){
+    deleteAccountError.classList.remove('show');
+    deleteAccountError.textContent = '';
+  }
+
+  deleteAccountBtn.addEventListener('click', () => {
+    hideDeleteAccountError();
+    deleteReauthWrap.style.display = 'none';
+    deleteReauthPassword.value = '';
+    deleteAccountOverlay.hidden = false;
+  });
+  deleteAccountClose.addEventListener('click', () => { deleteAccountOverlay.hidden = true; });
+  deleteAccountOverlay.addEventListener('click', (e) => {
+    if(e.target === deleteAccountOverlay) deleteAccountOverlay.hidden = true;
+  });
+
+  async function deleteAllUserData(uid){
+    try{
+      const ratesSnap = await getDocs(collection(db, 'users', uid, 'rates'));
+      for(const d of ratesSnap.docs){
+        try{ await deleteDoc(d.ref); } catch(e){ /* tek kayıt silinemezse devam et */ }
+      }
+    } catch(e){ /* alt koleksiyon okunamazsa sessizce geç */ }
+    try{ await deleteDoc(doc(db, 'users', uid)); } catch(e){ /* sessizce geç */ }
+  }
+
+  function finishAccountDeletion(){
+    localStorage.removeItem('mmg_auth_state');
+    localStorage.removeItem('mmg_remember');
+    localStorage.removeItem('mmg_customer_no');
+    localStorage.removeItem('mmg_username');
+    localStorage.removeItem('mmg_avatar');
+    localStorage.removeItem('mmg_profile');
+    alert('Hesabınız kalıcı olarak silindi.');
+    window.top.location.href = 'index.html';
+  }
+
+  function mapFirebaseError(code){
+    const map = {
+      'auth/wrong-password': 'Şifre hatalı.',
+      'auth/invalid-credential': 'E-posta veya şifre hatalı.',
+      'auth/too-many-requests': 'Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.',
+      'auth/network-request-failed': 'Bağlantı hatası. İnternetinizi kontrol edin.',
+      'auth/popup-blocked': 'Tarayıcınız açılır pencereyi (popup) engelledi. Popup engelleyiciyi kapatıp tekrar deneyin.'
+    };
+    return map[code] || ('Bir hata oluştu (' + (code || 'bilinmiyor') + '), lütfen tekrar deneyin.');
+  }
+
+  deleteAccountConfirmBtn.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if(!user){ deleteAccountOverlay.hidden = true; return; }
+    hideDeleteAccountError();
+    deleteAccountConfirmBtn.disabled = true;
+    const originalLabel = deleteAccountConfirmBtn.textContent;
+    deleteAccountConfirmBtn.textContent = 'Siliniyor...';
+    const uid = user.uid;
+    try{
+      await deleteAllUserData(uid);
+      await deleteUser(user);
+      finishAccountDeletion();
+    } catch(err){
+      if(err.code === 'auth/requires-recent-login'){
+        const isGoogleUser = user.providerData.some(p => p.providerId === 'google.com');
+        if(isGoogleUser){
+          try{
+            await reauthenticateWithPopup(user, googleProvider);
+            await deleteAllUserData(uid);
+            await deleteUser(user);
+            finishAccountDeletion();
+          } catch(reauthErr){
+            showDeleteAccountError('Kimlik doğrulama başarısız oldu. Lütfen tekrar deneyin.');
+          }
+        } else {
+          deleteReauthWrap.style.display = 'block';
+          if(!deleteReauthPassword.value){
+            showDeleteAccountError('Devam etmek için lütfen şifrenizi girin, ardından tekrar "Evet, Hesabımı Sil" butonuna basın.');
+          } else {
+            try{
+              const cred = EmailAuthProvider.credential(user.email, deleteReauthPassword.value);
+              await reauthenticateWithCredential(user, cred);
+              await deleteAllUserData(uid);
+              await deleteUser(user);
+              finishAccountDeletion();
+            } catch(reauthErr){
+              showDeleteAccountError(mapFirebaseError(reauthErr.code));
+            }
+          }
+        }
+      } else {
+        showDeleteAccountError(mapFirebaseError(err.code));
+      }
+    } finally {
+      deleteAccountConfirmBtn.disabled = false;
+      deleteAccountConfirmBtn.textContent = originalLabel;
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -74,8 +74,8 @@
     display:flex; flex-direction:column; overflow-y:auto;
   }
   .brand{
-    padding:36px 24px 36px; border-bottom:1px solid var(--hairline); position:relative; overflow:hidden;
-    min-height:96px; display:flex; align-items:center; justify-content:center;
+    padding:18px 20px 18px; border-bottom:1px solid var(--hairline); position:relative; overflow:hidden;
+    min-height:0; display:flex; align-items:center; justify-content:center;
   }
   .brand::before{
     content:''; position:absolute; top:-40px; left:-20px; width:160px; height:160px;
@@ -85,11 +85,11 @@
   .brand-row{
     display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:0; position:relative; width:100%;
   }
-  .brand-row-logo{ height:140px; width:140px; border-radius:26px; object-fit:cover; display:inline-block; filter:drop-shadow(0 4px 14px rgba(0,0,0,0.35)); }
+  .brand-row-logo{ height:161px; width:161px; border-radius:30px; object-fit:cover; display:inline-block; filter:drop-shadow(0 4px 14px rgba(0,0,0,0.35)); }
   .brand-row-fallback{
-    display:none; width:140px; height:140px; border-radius:26px; margin:0;
+    display:none; width:161px; height:161px; border-radius:30px; margin:0;
     background:var(--grad); align-items:center; justify-content:center;
-    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:50px; color:#fff;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:58px; color:#fff;
     box-shadow:0 4px 14px rgba(0,0,0,0.35);
   }
   .brand-title{
@@ -139,11 +139,14 @@
   .nav-drawer-chevron{ margin-left:auto; font-size:11px; color:var(--muted); transition:transform .18s ease; flex-shrink:0; }
   .nav-item[aria-expanded="true"] .nav-drawer-chevron{ transform:rotate(180deg); color:var(--brass); }
   .nav-drawer{
-    display:flex; flex-direction:column; gap:2px; margin:2px 0 8px 20px; padding-left:10px;
+    display:flex; flex-direction:column; gap:2px; margin:2px 0 8px 14px; padding-left:8px;
     border-left:2px solid var(--hairline);
+    opacity:0; transform:translateX(-10px);
+    transition:opacity .22s ease, transform .22s ease;
   }
   .nav-drawer[hidden]{ display:none; }
-  .nav-subitem{ padding:9px 14px; margin-bottom:0; }
+  .nav-drawer.open{ opacity:1; transform:translateX(0); }
+  .nav-subitem{ padding:9px 10px; margin-bottom:0; }
   .nav-subitem .nav-title{ font-size:12.5px; font-weight:600; }
 
   /* ---------- Favori yıldızı ---------- */
@@ -279,25 +282,23 @@
   }
   .account-info-close:hover{ color:var(--coral); border-color:var(--coral); }
   .account-info-sub{ color:var(--muted); font-size:13px; margin-bottom:22px; }
-  #accountInfoForm select, #accountInfoForm textarea{
+  #mmgAdminForm select, #mmgAdminForm input{
     width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
     padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
     transition:border-color .15s ease; resize:vertical;
   }
-  #accountInfoForm select:focus, #accountInfoForm textarea:focus{ border-color:var(--brass-dim); }
+  #mmgAdminForm select:focus, #mmgAdminForm input:focus{ border-color:var(--brass-dim); }
   .account-info-saved{
     display:none; text-align:center; color:var(--teal); font-family:'IBM Plex Mono',monospace;
     font-size:12px; margin-top:10px;
   }
   .account-info-saved.show{ display:block; }
-  #deleteAccountBtn:hover{ background:rgba(226,84,75,0.10); }
 
   .frame-wrap{ flex:1; position:relative; background:var(--bg); }
   iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
 
   /* ---------- Home screen ---------- */
-  .home{ flex:1; overflow-y:auto; display:flex; flex-direction:column; }
-  .home > footer{ margin-top:auto; }
+  .home{ flex:1; overflow-y:auto; }
 
   .hero{
     position:relative; overflow:hidden; padding:32px 48px 28px;
@@ -353,7 +354,7 @@
     font-size:10.5px; letter-spacing:.16em; color:var(--muted); text-transform:uppercase; margin-bottom:16px;
   }
 
-  .card-grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; max-width:1300px; position:relative; }
+  .card-grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:18px; max-width:980px; position:relative; }
   .app-card{
     background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
     padding:24px; cursor:pointer; text-align:left; color:var(--text);
@@ -392,51 +393,37 @@
   ::-webkit-scrollbar-track{ background:transparent; }
   ::-webkit-scrollbar-thumb{ background:var(--hairline); border-radius:4px; }
 
-  footer{ padding:0 48px 20px; }
-  .footer-bottom-row{
-    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px;
-  }
-  @media (max-width:720px){
-    .footer-bottom-row{ flex-direction:column; align-items:flex-start; }
-  }
+  footer{ padding:0 48px 32px; }
   .footer-top{
-    padding:8px 0 4px;
+    display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:36px 0 28px;
+    border-bottom:1px solid var(--hairline); margin-bottom:20px;
   }
-  .footer-download-row{
-    display:flex; justify-content:flex-end; margin:2px 0 10px;
-  }
-  .footer-download-col{ max-width:300px; text-align:right; }
-  .footer-download-col .app-badge-row{ justify-content:flex-end; }
-  .footer-download-col .app-badge{ text-align:left; }
-  @media (max-width:720px){
-    .footer-download-row{ justify-content:flex-start; }
-    .footer-download-col{ max-width:none; text-align:left; }
-    .footer-download-col .app-badge-row{ justify-content:flex-start; }
-  }
+  @media (max-width:720px){ .footer-top{ grid-template-columns:1fr; gap:28px; } }
   .footer-col-title{
-    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11px; letter-spacing:.08em;
-    text-transform:uppercase; color:var(--text); margin-bottom:10px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--text); margin-bottom:16px;
   }
-  .social-icon-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .social-icon-row{ display:flex; flex-wrap:wrap; gap:10px; }
   .social-icon{
-    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     color:#fff; transition:transform .15s ease, opacity .15s ease; flex-shrink:0;
   }
   .social-icon:hover{ transform:translateY(-2px); opacity:.9; }
-  .social-icon svg{ width:14px; height:14px; }
-  .app-badge-row{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:0; }
+  .social-icon svg{ width:18px; height:18px; }
+  .app-badge-row{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
   .app-badge{
-    display:flex; align-items:center; gap:6px; border:1px solid var(--hairline); border-radius:8px;
-    padding:5px 10px; text-decoration:none; color:var(--text); transition:border-color .15s ease;
+    display:flex; align-items:center; gap:8px; border:1px solid var(--hairline); border-radius:9px;
+    padding:8px 14px; text-decoration:none; color:var(--text); transition:border-color .15s ease;
   }
   .app-badge:hover{ border-color:var(--brass-dim); }
-  .app-badge svg{ width:15px; height:15px; flex-shrink:0; }
-  .app-badge-text{ display:flex; flex-direction:column; line-height:1.15; }
-  .app-badge-text span{ font-size:8px; color:var(--muted); }
-  .app-badge-text b{ font-family:'Space Grotesk',sans-serif; font-size:11px; }
+  .app-badge svg{ width:20px; height:20px; flex-shrink:0; }
+  .app-badge-text{ display:flex; flex-direction:column; line-height:1.2; }
+  .app-badge-text span{ font-size:9.5px; color:var(--muted); }
+  .app-badge-text b{ font-family:'Space Grotesk',sans-serif; font-size:13px; }
+  .footer-desc{ font-size:12.5px; color:var(--muted); max-width:420px; line-height:1.6; }
   .legal-links{
-    display:flex; flex-wrap:wrap; gap:14px; justify-content:flex-end;
-    font-family:'IBM Plex Mono',monospace; font-size:10px; margin-bottom:8px;
+    display:flex; flex-wrap:wrap; gap:18px; justify-content:flex-end;
+    font-family:'IBM Plex Mono',monospace; font-size:11px; margin-bottom:10px;
   }
   .legal-links a{ color:var(--muted); text-decoration:none; }
   .legal-links a:hover{ color:var(--coral); }
@@ -488,10 +475,6 @@
     .app-card{ padding:16px; }
     .app-card p{ display:none; }
     .app-card h3{ margin-bottom:0; }
-
-    .top-right-badge{ bottom:14px; left:14px; }
-    .top-right-badge #userBadge{ display:none !important; }
-    .top-right-badge .theme-toggle-standalone{ display:none !important; }
   }
 
   #authOverlay{
@@ -533,22 +516,21 @@
   .auth-di-5{ width:30px; height:30px; top:48%; right:8%; color:var(--coral); --r:14deg; animation-delay:-4.5s; animation-duration:9s; }
   .auth-di-6{ width:34px; height:34px; top:65%; left:22%; color:var(--azure); --r:-10deg; animation-delay:-1s; animation-duration:7.5s; }
 
-  .auth-brand-logo{ position:relative; height:136px; width:136px; border-radius:32px; object-fit:cover; margin-bottom:22px; box-shadow:0 20px 50px rgba(0,0,0,0.4); }
+  .auth-brand-logo{ position:relative; height:190px; width:190px; border-radius:38px; object-fit:cover; margin-bottom:26px; box-shadow:0 20px 50px rgba(0,0,0,0.4); }
   .auth-brand-fallback{
-    display:none; position:relative; height:136px; width:136px; border-radius:32px; align-items:center; justify-content:center;
-    background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; color:#fff; font-size:56px;
-    margin-bottom:22px; box-shadow:0 20px 50px rgba(0,0,0,0.4);
+    display:none; position:relative; height:190px; width:190px; border-radius:38px; align-items:center; justify-content:center;
+    background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; color:#fff; font-size:76px;
+    margin-bottom:26px; box-shadow:0 20px 50px rgba(0,0,0,0.4);
   }
   .auth-brand-title{
-    position:relative; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:30px;
-    text-align:center; max-width:420px; margin-bottom:10px;
+    position:relative; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:40px;
+    text-align:center; max-width:460px; margin-bottom:14px;
   }
   .auth-brand-tagline{
-    position:relative; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:12px; letter-spacing:.14em;
+    position:relative; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:16px; letter-spacing:.14em;
     text-transform:uppercase; text-align:center; margin-bottom:14px;
     background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  .auth-brand-desc{ position:relative; color:var(--muted); text-align:center; max-width:360px; font-size:14px; line-height:1.6; }
 
   .auth-form-panel{
     flex:1; display:flex; align-items:center; justify-content:center; padding:40px 24px; overflow-y:auto;
@@ -604,9 +586,9 @@
   @media (max-width:820px){
     #authOverlay{ flex-direction:column; overflow-y:auto; }
     .auth-brand-panel{ flex:none; padding:32px 20px; border-right:0; border-bottom:1px solid var(--hairline); }
-    .auth-brand-logo, .auth-brand-fallback{ height:64px; width:64px; margin-bottom:14px; }
-    .auth-brand-title{ font-size:22px; }
-    .auth-brand-desc{ display:none; }
+    .auth-brand-logo, .auth-brand-fallback{ height:92px; width:92px; margin-bottom:16px; }
+    .auth-brand-title{ font-size:28px; }
+    .auth-brand-tagline{ font-size:13px; }
     .auth-form-panel{ flex:none; padding:32px 20px; }
   }
 </style>
@@ -629,7 +611,6 @@
     <div class="auth-brand-fallback">M</div>
     <div class="auth-brand-title">Dijital Finans Asistanı</div>
     <div class="auth-brand-tagline">Finansal kararlarınızın dijital iş ortağı</div>
-    <div class="auth-brand-desc">Hesabınıza giriş yapın, kendi banka oranlarınızı kaydedin ve her ziyaretinizde kaldığınız yerden devam edin.</div>
   </div>
 
   <div class="auth-form-panel">
@@ -709,6 +690,7 @@
     </button>
 
     <button class="nav-item" id="hesaplamaAraclariToggle" data-drawer-toggle="true" data-title="Hesaplama Araçları" aria-expanded="false">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title">Hesaplama</span>
         <span class="nav-desc">Araçları</span>
@@ -727,14 +709,6 @@
       <button class="nav-item nav-subitem" data-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-title="Kredi Kartı Vade Farkı Hesaplama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-fav-title="Kredi Kartı Vade Farkı" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title">Kredi Kartı Vade Farkı</span></span>
-      </button>
-      <button class="nav-item nav-subitem" data-target="Mevduat_Faizi_Hesaplama.html" data-title="Mevduat Faizi Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Mevduat_Faizi_Hesaplama.html" data-fav-title="Mevduat Faizi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title">Mevduat Faizi Hesaplama</span></span>
-      </button>
-      <button class="nav-item nav-subitem" data-target="Vade_Sapma_Hesaplama.html" data-title="Vade Sapma Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Vade_Sapma_Hesaplama.html" data-fav-title="Vade Sapma Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title">Vade Sapma Hesaplama</span></span>
       </button>
     </div>
 
@@ -796,10 +770,6 @@
     </span>
   </button>
 
-  <button type="button" class="theme-toggle-standalone" id="themeToggle" title="Görünüm modu">
-    <span id="themeToggleIcon">☾</span><span id="themeToggleLabel">Koyu Mod</span>
-  </button>
-
   <div class="account-dropdown" id="accountDropdown" hidden>
     <div class="account-dropdown-header">
       <span class="avatar-wrap avatar-wrap-lg">
@@ -812,17 +782,13 @@
       </div>
     </div>
     <div class="account-dropdown-divider"></div>
-    <button type="button" class="account-dropdown-item" id="dropdownThemeToggle">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3a9 9 0 1 0 9 9c0-.5 0-1-.1-1.5A7 7 0 0 1 12 3z"/></svg>
-      <span id="dropdownThemeLabel">Koyu Mod</span>
-    </button>
     <button type="button" class="account-dropdown-item" id="accountInfoBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M6 16c0-1.8 1.5-3 3-3s3 1.2 3 3"/><path d="M14 9h4"/><path d="M14 13h4"/></svg>
       <span>Hesabım</span>
     </button>
     <button type="button" class="account-dropdown-item" id="changePhotoBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>
-      <span>Fotoğrafı / Logoyu Değiştir</span>
+      <span>Resmi Değiştir</span>
     </button>
     <button type="button" class="account-dropdown-item" id="adminPanelBtn" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z"/></svg>
@@ -831,6 +797,11 @@
     <button type="button" class="account-dropdown-item" id="begenIstatistikleriBtn" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/><path d="M2 20h20"/></svg>
       <span>İstatistikler</span>
+    </button>
+    <div class="account-dropdown-divider"></div>
+    <button type="button" class="account-dropdown-item" id="themeToggle" title="Görünüm modu">
+      <span id="themeToggleIcon" style="font-size:16px;">☾</span>
+      <span id="themeToggleLabel">Koyu Mod</span>
     </button>
     <button type="button" class="account-dropdown-item account-dropdown-item-danger" id="dropdownLogoutBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
@@ -841,95 +812,49 @@
   <input type="file" id="avatarInput" accept="image/*" style="display:none;">
 </div>
 
-<div class="account-info-overlay" id="deleteAccountOverlay" hidden>
-  <div class="account-info-modal" style="max-width:420px;">
+<div class="account-info-overlay" id="mmgAdminOverlay" hidden>
+  <div class="account-info-modal" style="max-width:520px;">
     <div class="account-info-modal-header">
-      <h2>Hesabı Sil</h2>
-      <button type="button" class="account-info-close" id="deleteAccountClose" title="Kapat">✕</button>
+      <h2>Referans Kodu Yönetimi</h2>
+      <button type="button" class="account-info-close" id="mmgAdminClose" title="Kapat">✕</button>
     </div>
-    <p class="account-info-sub">Bu işlem geri alınamaz. Hesabınız, kayıtlı oranlarınız ve profil bilgileriniz kalıcı olarak silinecek.</p>
-    <div class="auth-field" id="deleteReauthWrap" style="display:none;">
-      <label>Devam etmek için şifrenizi girin</label>
-      <input type="password" id="deleteReauthPassword" placeholder="••••••••">
-    </div>
-    <div class="auth-error" id="deleteAccountError"></div>
-    <button type="button" class="auth-submit" id="deleteAccountConfirmBtn" style="background:var(--red,#E2544B);">Evet, Hesabımı Sil</button>
+    <p class="account-info-sub">Yeni bir referans kodu tanımlayın: bu kodla kayıt olan üyelere ücretsiz ya da indirimli premium tanınır.</p>
+
+    <form id="mmgAdminForm" style="display:grid; gap:12px; margin-bottom:20px;">
+      <div class="auth-field">
+        <label>Kod</label>
+        <input type="text" id="mmgAdminCode" placeholder="ör. AHMET10" style="text-transform:uppercase;">
+      </div>
+      <div class="auth-field">
+        <label>Fayda Türü</label>
+        <select id="mmgAdminBenefitType">
+          <option value="free">Ücretsiz Premium</option>
+          <option value="discount">İndirimli Premium</option>
+        </select>
+      </div>
+      <div class="auth-field" id="mmgAdminDiscountWrap" style="display:none;">
+        <label>İndirim Yüzdesi</label>
+        <input type="number" id="mmgAdminDiscountPercent" min="1" max="100" placeholder="ör. 20" value="20">
+      </div>
+      <div class="auth-field">
+        <label>Kullanım Limiti <span style="color:var(--muted); font-weight:400;">(boş = sınırsız, örn. 1 = tek kişi)</span></label>
+        <input type="number" id="mmgAdminMaxUses" min="1" placeholder="Sınırsız için boş bırakın">
+      </div>
+      <button type="submit" class="auth-submit" style="margin-top:4px;">Kodu Kaydet</button>
+    </form>
+
+
+    <div id="mmgAdminMsg" style="font-size:12.5px; margin-bottom:14px;"></div>
+
+    <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; margin-bottom:10px;">Tanımlı Kodlar</div>
+    <div id="mmgAdminCodeList" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto;"></div>
   </div>
 </div>
+
 
 <main>
   <div class="frame-wrap" id="frame-wrap" style="display:none;">
     <iframe id="app-frame" src=""></iframe>
-  </div>
-
-  <div class="home" id="account-screen" style="display:none;">
-    <section class="hero">
-      <div class="hero-top-row">
-        <div class="hero-top-text">
-          <h1 class="hero-title">Hesabım</h1>
-          <p class="hero-tagline">Firma ya da kişisel bilgilerinizi girin. Bu bilgiler yalnızca sizin hesabınızda saklanır.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="tools-section">
-      <div style="max-width:520px; position:relative;">
-        <form id="accountInfoForm">
-          <div class="auth-field">
-            <label>Hesap Türü</label>
-            <select id="profileType">
-              <option value="bireysel">Bireysel</option>
-              <option value="firma">Firma</option>
-            </select>
-          </div>
-          <div class="auth-field">
-            <label id="profileNameLabel">Ad Soyad</label>
-            <input type="text" id="profileName" placeholder="Ad Soyad">
-          </div>
-          <div class="auth-field">
-            <label>Telefon</label>
-            <input type="tel" id="profilePhone" placeholder="05xx xxx xx xx">
-          </div>
-          <div class="auth-field">
-            <label>E-posta</label>
-            <input type="email" id="profileEmail" placeholder="ornek@eposta.com">
-          </div>
-          <div class="auth-field">
-            <label>Adres</label>
-            <textarea id="profileAddress" rows="3" placeholder="Adres bilgisi"></textarea>
-          </div>
-          <button type="submit" class="auth-submit" id="profileSaveBtn">Kaydet</button>
-          <div class="account-info-saved" id="profileSavedMsg">Kaydedildi ✓</div>
-        </form>
-
-        <div style="border-top:1px solid var(--hairline); margin-top:22px; padding-top:18px;">
-          <label style="display:block; font-size:12.5px; color:var(--muted); margin-bottom:8px;">İndirim / Referans Kodu</label>
-
-          <div id="referralGuestNotice" style="display:none; font-size:12.5px; color:var(--muted); background:var(--surface-2); border:1px solid var(--hairline); border-radius:9px; padding:12px;">
-            Bir indirim/referans kodunuz varsa kullanabilmeniz için önce ücretsiz bir hesap oluşturmanız gerekiyor.
-          </div>
-
-          <div id="referralAppliedInfo" style="display:none; font-size:12.5px; color:var(--muted); background:var(--surface-2); border:1px solid var(--hairline); border-radius:9px; padding:12px;">
-            <span id="referralAppliedText"></span>
-          </div>
-
-          <div id="referralInputWrap" style="display:none; gap:8px;">
-            <div class="auth-field" style="flex:1; margin-bottom:0;">
-              <input type="text" id="accountReferralCode" placeholder="ör. AHMET10">
-            </div>
-            <button type="button" id="applyReferralBtn" class="auth-submit" style="width:auto; white-space:nowrap; padding:0 16px;">Kodu Uygula</button>
-          </div>
-          <div class="auth-error" id="referralApplyError" style="margin-top:8px;"></div>
-        </div>
-
-        <div style="border-top:1px solid var(--hairline); margin-top:22px; padding-top:18px;">
-          <button type="button" id="deleteAccountBtn" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; background:transparent; border:1px solid rgba(226,84,75,0.35); border-radius:9px; padding:12px; color:var(--red,#E2544B); font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer; transition:background .15s ease;">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-            <span>Hesabımı Kalıcı Olarak Sil</span>
-          </button>
-        </div>
-      </div>
-    </section>
   </div>
 
   <div class="home" id="home-screen">
@@ -1001,7 +926,6 @@
     </section>
 
     <footer>
-      <div class="footer-bottom-row">
       <div class="footer-top">
         <div>
           <div class="footer-col-title">Bizi Takip Edin</div>
@@ -1029,37 +953,34 @@
             </a>
           </div>
         </div>
-      </div>
-      <div>
-        <div class="footer-download-row">
-          <div class="footer-download-col">
-            <div class="app-badge-row">
-              <a href="#" class="app-badge">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 1.4c.1 1.1-.3 2.2-1 3-.7.8-1.8 1.5-2.9 1.4-.1-1.1.4-2.2 1-3 .8-.8 2-1.4 2.9-1.4zM20.6 17c-.5 1.2-.8 1.7-1.5 2.8-1 1.5-2.4 3.4-4.1 3.4-1.5 0-1.9-1-4-1-2 0-2.5 1-4 1-1.7 0-3-1.7-4-3.2C.6 16.9-.6 12.1 1 8.9c.8-1.6 2.2-2.6 3.7-2.6 1.6 0 2.6 1 3.9 1 1.3 0 2.1-1 3.9-1 1.4 0 2.8.8 3.7 2-3.3 1.8-2.8 6.4.4 7.7z"/></svg>
-                <span class="app-badge-text"><span>Hemen İndirin</span><b>App Store</b></span>
-              </a>
-              <a href="#" class="app-badge">
-                <svg viewBox="0 0 24 24"><path d="M3.6 2.6a1 1 0 0 0-.6.9v17a1 1 0 0 0 .6.9l9.7-9.4-9.7-9.4z" fill="#00d2ff"/><path d="M13.3 12l3-2.9 3.9 2.2c.9.5.9 1.4 0 1.9l-3.9 2.2-3-2.4z" fill="#ffd200"/><path d="M13.3 12L3.6 2.6c.2 0 .5 0 .7.1l11 6.3-2 2.9z" fill="#00e676"/><path d="M13.3 12l2 2.9-11 6.3c-.2.1-.5.1-.7.1L13.3 12z" fill="#ff3d57"/></svg>
-                <span class="app-badge-text"><span>Hemen İndirin</span><b>Google Play</b></span>
-              </a>
-            </div>
+        <div>
+          <div class="footer-col-title">Uygulamamızı İndirin</div>
+          <div class="app-badge-row">
+            <a href="#" class="app-badge">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 1.4c.1 1.1-.3 2.2-1 3-.7.8-1.8 1.5-2.9 1.4-.1-1.1.4-2.2 1-3 .8-.8 2-1.4 2.9-1.4zM20.6 17c-.5 1.2-.8 1.7-1.5 2.8-1 1.5-2.4 3.4-4.1 3.4-1.5 0-1.9-1-4-1-2 0-2.5 1-4 1-1.7 0-3-1.7-4-3.2C.6 16.9-.6 12.1 1 8.9c.8-1.6 2.2-2.6 3.7-2.6 1.6 0 2.6 1 3.9 1 1.3 0 2.1-1 3.9-1 1.4 0 2.8.8 3.7 2-3.3 1.8-2.8 6.4.4 7.7z"/></svg>
+              <span class="app-badge-text"><span>Hemen İndirin</span><b>App Store</b></span>
+            </a>
+            <a href="#" class="app-badge">
+              <svg viewBox="0 0 24 24"><path d="M3.6 2.6a1 1 0 0 0-.6.9v17a1 1 0 0 0 .6.9l9.7-9.4-9.7-9.4z" fill="#00d2ff"/><path d="M13.3 12l3-2.9 3.9 2.2c.9.5.9 1.4 0 1.9l-3.9 2.2-3-2.4z" fill="#ffd200"/><path d="M13.3 12L3.6 2.6c.2 0 .5 0 .7.1l11 6.3-2 2.9z" fill="#00e676"/><path d="M13.3 12l2 2.9-11 6.3c-.2.1-.5.1-.7.1L13.3 12z" fill="#ff3d57"/></svg>
+              <span class="app-badge-text"><span>Hemen İndirin</span><b>Google Play</b></span>
+            </a>
           </div>
-        </div>
-        <div class="legal-links">
-          <a href="hakkinda.html" target="_blank">Hakkında</a>
-          <a href="iletisim.html" target="_blank">İletişim</a>
-          <a href="gizlilik-politikasi.html" target="_blank">Gizlilik Politikası</a>
-          <a href="kullanim-sartlari.html" target="_blank">Kullanım Şartları</a>
-        </div>
-        <div class="credit" style="justify-content:flex-end; margin-top:6px;">
-          <span>Powered by</span>
-          <span class="signature-pill">
-            <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
-            <span id="credit-fallback" class="credit-fallback">M</span>
-            <b>mmgcreativity</b>
-          </span>
+          <div class="footer-desc">Dijital Finans Asistanı: firmanızın ve bireysel finans işlerinizin dijital ortağı. Hesaplama araçları, nakit akış takibi ve talimat hazırlama tek platformda.</div>
         </div>
       </div>
+      <div class="legal-links">
+        <a href="hakkinda.html" target="_blank">Hakkında</a>
+        <a href="iletisim.html" target="_blank">İletişim</a>
+        <a href="gizlilik-politikasi.html" target="_blank">Gizlilik Politikası</a>
+        <a href="kullanim-sartlari.html" target="_blank">Kullanım Şartları</a>
+      </div>
+      <div class="credit">
+        <span>Powered by</span>
+        <span class="signature-pill">
+          <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+          <span id="credit-fallback" class="credit-fallback">M</span>
+          <b>mmgcreativity</b>
+        </span>
       </div>
     </footer>
   </div>
@@ -1096,7 +1017,7 @@
   function openTarget(target, title){
     closeMobileNav();
     if(target === 'home'){
-      homeScreen.style.display = 'flex';
+      homeScreen.style.display = 'block';
       frameWrap.style.display = 'none';
       setActive('home');
       return;
@@ -1123,7 +1044,15 @@
   hesaplamaToggle.addEventListener('click', ()=>{
     const isOpen = hesaplamaToggle.getAttribute('aria-expanded') === 'true';
     hesaplamaToggle.setAttribute('aria-expanded', String(!isOpen));
-    hesaplamaDrawer.hidden = isOpen;
+    if(isOpen){
+      hesaplamaDrawer.classList.remove('open');
+      hesaplamaDrawer.hidden = true;
+    } else {
+      hesaplamaDrawer.hidden = false;
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=> hesaplamaDrawer.classList.add('open'));
+      });
+    }
   });
 
   openTarget('home', 'Ana Sayfa');
@@ -1255,8 +1184,7 @@
   import {
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
     signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup,
-    deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup,
-    signInAnonymously
+    deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment
@@ -1302,11 +1230,86 @@
 
   document.getElementById('adminPanelBtn').addEventListener('click', () => {
     document.getElementById('accountDropdown').hidden = true;
-    openTarget('Referans_Kodu_Yonetimi.html', 'Referans Kodu Yönetimi');
+    document.getElementById('mmgAdminOverlay').hidden = false;
+    mmgLoadAdminCodes();
   });
   document.getElementById('begenIstatistikleriBtn').addEventListener('click', () => {
     document.getElementById('accountDropdown').hidden = true;
     openTarget('Istatistikler.html', 'İstatistikler');
+  });
+  document.getElementById('mmgAdminClose').addEventListener('click', () => {
+    document.getElementById('mmgAdminOverlay').hidden = true;
+  });
+  document.getElementById('mmgAdminOverlay').addEventListener('click', (e) => {
+    if(e.target.id === 'mmgAdminOverlay') document.getElementById('mmgAdminOverlay').hidden = true;
+  });
+  document.getElementById('mmgAdminBenefitType').addEventListener('change', (e) => {
+    document.getElementById('mmgAdminDiscountWrap').style.display = e.target.value === 'discount' ? 'block' : 'none';
+  });
+
+  async function mmgLoadAdminCodes(){
+    const listEl = document.getElementById('mmgAdminCodeList');
+    listEl.innerHTML = '<div style="font-size:12px; color:var(--muted);">Yükleniyor…</div>';
+    try{
+      const snap = await getDocs(collection(db, 'referralCodes'));
+      const codes = [];
+      snap.forEach(d => codes.push({ id: d.id, ...d.data() }));
+      if(!codes.length){
+        listEl.innerHTML = '<div style="font-size:12px; color:var(--muted);">Henüz tanımlı bir referans kodu yok.</div>';
+        return;
+      }
+      const usageCounts = {};
+      try{
+        const refSnap = await getDocs(collection(db, 'referrals'));
+        refSnap.forEach(d => { usageCounts[d.id] = (d.data().count || 0); });
+      }catch(e){ /* istatistik okunamazsa 0 say */ }
+      listEl.innerHTML = codes.map(c => {
+        const benefitLabel = c.benefitType === 'free' ? 'Ücretsiz Premium' : ('%' + (c.discountPercent||0) + ' İndirim');
+        const used = usageCounts[c.id] || 0;
+        const limitLabel = c.maxUses ? (used + ' / ' + c.maxUses + ' kullanıldı') : (used + ' kullanıldı · Sınırsız');
+        return '<div style="display:flex; align-items:center; justify-content:space-between; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px;">' +
+          '<div><b style="font-family:\'IBM Plex Mono\',monospace;">' + c.id + '</b><div style="font-size:11.5px; color:var(--muted);">' + benefitLabel + ' · ' + limitLabel + '</div></div>' +
+          '<button type="button" class="mmg-admin-del" data-code="' + c.id + '" style="background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:12px;">Sil</button>' +
+          '</div>';
+      }).join('');
+      listEl.querySelectorAll('.mmg-admin-del').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if(!confirm('"' + btn.dataset.code + '" kodunu silmek istediğinize emin misiniz?')) return;
+          await deleteDoc(doc(db, 'referralCodes', btn.dataset.code));
+          mmgLoadAdminCodes();
+        });
+      });
+    } catch(e){
+      listEl.innerHTML = '<div style="font-size:12px; color:var(--red,#e2544b);">Kodlar yüklenemedi.</div>';
+    }
+  }
+
+  document.getElementById('mmgAdminForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msgEl = document.getElementById('mmgAdminMsg');
+    const code = document.getElementById('mmgAdminCode').value.trim().toUpperCase();
+    const benefitType = document.getElementById('mmgAdminBenefitType').value;
+    const discountPercent = parseInt(document.getElementById('mmgAdminDiscountPercent').value, 10) || 0;
+    const maxUsesRaw = document.getElementById('mmgAdminMaxUses').value.trim();
+    const maxUses = maxUsesRaw ? parseInt(maxUsesRaw, 10) : null;
+    if(!code){ msgEl.textContent = 'Lütfen bir kod girin.'; msgEl.style.color = 'var(--red,#e2544b)'; return; }
+    try{
+      await setDoc(doc(db, 'referralCodes', code), {
+        benefitType: benefitType,
+        discountPercent: benefitType === 'discount' ? discountPercent : 0,
+        maxUses: maxUses,
+        active: true,
+        createdAt: serverTimestamp()
+      });
+      msgEl.textContent = '"' + code + '" kodu kaydedildi. ✓';
+      msgEl.style.color = 'var(--teal,#3FB68A)';
+      document.getElementById('mmgAdminCode').value = '';
+      document.getElementById('mmgAdminMaxUses').value = '';
+      mmgLoadAdminCodes();
+    } catch(err){
+      msgEl.textContent = 'Kod kaydedilemedi, tekrar deneyin.';
+      msgEl.style.color = 'var(--red,#e2544b)';
+    }
   });
 
   // ---- Karşılama / Üyelik Ekranı ----
@@ -1471,312 +1474,10 @@
     performLogout();
   });
 
-  // ---- Hesabım (profil bilgileri) ----
-  const accountInfoBtn = document.getElementById('accountInfoBtn');
-  const accountScreen = document.getElementById('account-screen');
-  const accountInfoForm = document.getElementById('accountInfoForm');
-
-  function openAccountPage(){
-    closeMobileNav();
-    homeScreen.style.display = 'none';
-    frameWrap.style.display = 'none';
-    accountScreen.style.display = 'flex';
-    setActive(null);
-  }
-  function closeAccountPage(){
-    openTarget('home', 'Ana Sayfa');
-  }
-  const profileType = document.getElementById('profileType');
-  const profileName = document.getElementById('profileName');
-  const profileNameLabel = document.getElementById('profileNameLabel');
-  const profilePhone = document.getElementById('profilePhone');
-  const profileEmail = document.getElementById('profileEmail');
-  const profileAddress = document.getElementById('profileAddress');
-  const profileSaveBtn = document.getElementById('profileSaveBtn');
-  const profileSavedMsg = document.getElementById('profileSavedMsg');
-
-  function getCachedProfile(){
-    try{ return JSON.parse(localStorage.getItem('mmg_profile') || '{}'); } catch(e){ return {}; }
-  }
-
-  function updateProfileNameLabel(){
-    profileNameLabel.textContent = profileType.value === 'firma' ? 'Firma Adı' : 'Ad Soyad';
-    profileName.placeholder = profileType.value === 'firma' ? 'Firma Adı' : 'Ad Soyad';
-  }
-  profileType.addEventListener('change', updateProfileNameLabel);
-
-  function loadProfileIntoForm(profile){
-    const p = profile || getCachedProfile();
-    profileType.value = p.type || 'bireysel';
-    profileName.value = p.name || '';
-    profilePhone.value = p.phone || '';
-    const state = localStorage.getItem('mmg_auth_state');
-    const defaultEmail = (state && state.startsWith('user:')) ? state.slice(5) : '';
-    profileEmail.value = p.email || defaultEmail;
-    profileAddress.value = p.address || '';
-    updateProfileNameLabel();
-  }
-
-  async function saveProfileToCloud(profile){
-    const state = localStorage.getItem('mmg_auth_state');
-    if(!state || state === 'guest') return; // misafir bulutta saklanmaz
-    const user = auth.currentUser;
-    if(!user) return;
-    try{
-      await setDoc(doc(db, 'users', user.uid), { profile: profile }, { merge: true });
-    } catch(err){ /* bulut kaydı başarısız olsa da yerelde zaten kayıtlı */ }
-  }
-
-  const referralGuestNotice = document.getElementById('referralGuestNotice');
-  const referralAppliedInfo = document.getElementById('referralAppliedInfo');
-  const referralAppliedText = document.getElementById('referralAppliedText');
-  const referralInputWrap = document.getElementById('referralInputWrap');
-  const accountReferralCode = document.getElementById('accountReferralCode');
-  const applyReferralBtn = document.getElementById('applyReferralBtn');
-  const referralApplyError = document.getElementById('referralApplyError');
-
-  function showReferralError(msg){
-    referralApplyError.textContent = msg;
-    referralApplyError.classList.add('show');
-  }
-  function hideReferralError(){
-    referralApplyError.classList.remove('show');
-    referralApplyError.textContent = '';
-  }
-
-  async function loadReferralSectionState(){
-    hideReferralError();
-    referralGuestNotice.style.display = 'none';
-    referralAppliedInfo.style.display = 'none';
-    referralInputWrap.style.display = 'none';
-
-    const state = localStorage.getItem('mmg_auth_state');
-    if(!state || state === 'guest'){
-      referralGuestNotice.style.display = 'block';
-      return;
-    }
-    const user = auth.currentUser;
-    if(!user) return;
-    try{
-      const snap = await getDoc(doc(db, 'users', user.uid));
-      const data = snap.exists() ? snap.data() : {};
-      if(data.referredBy){
-        const benefit = data.premiumBenefit;
-        let text = '"' + data.referredBy + '" kodu hesabınıza tanımlı.';
-        if(benefit && benefit.type === 'free') text += ' Ücretsiz premium hakkınız var. 🎉';
-        else if(benefit && benefit.discountPercent) text += ' %' + benefit.discountPercent + ' indirim hakkınız var. 🎉';
-        referralAppliedText.textContent = text;
-        referralAppliedInfo.style.display = 'block';
-      } else {
-        accountReferralCode.value = '';
-        referralInputWrap.style.display = 'flex';
-      }
-    } catch(e){ /* okunamazsa alanı gösterme, sessizce geç */ }
-  }
-
-  applyReferralBtn.addEventListener('click', async () => {
-    hideReferralError();
-    const user = auth.currentUser;
-    if(!user) return;
-    const referralCodeRaw = accountReferralCode.value.trim();
-    if(!referralCodeRaw){
-      showReferralError('Lütfen bir kod girin.');
-      return;
-    }
-    const referralCode = referralCodeRaw.toUpperCase();
-    applyReferralBtn.disabled = true;
-    const originalLabel = applyReferralBtn.textContent;
-    applyReferralBtn.textContent = 'Uygulanıyor...';
-    try{
-      const codeSnap = await getDoc(doc(db, 'referralCodes', referralCode));
-      if(!codeSnap.exists() || codeSnap.data().active === false){
-        showReferralError('"' + referralCode + '" geçerli bir kod değil.');
-        return;
-      }
-      const cd = codeSnap.data();
-      if(cd.maxUses){
-        let usedCount = 0;
-        try{
-          const usageSnap = await getDoc(doc(db, 'referrals', referralCode));
-          usedCount = usageSnap.exists() ? (usageSnap.data().count || 0) : 0;
-        } catch(usageErr){ usedCount = 0; }
-        if(usedCount >= cd.maxUses){
-          showReferralError('"' + referralCode + '" kodu kullanım limitine ulaştı.');
-          return;
-        }
-      }
-      const premiumBenefit = {
-        type: cd.benefitType || 'discount',
-        discountPercent: cd.discountPercent || 0,
-        code: referralCode
-      };
-      await setDoc(doc(db, 'users', user.uid), {
-        referredBy: referralCode,
-        isPremium: premiumBenefit.type === 'free' ? true : false,
-        premiumBenefit: premiumBenefit
-      }, { merge: true });
-      await setDoc(doc(db, 'referrals', referralCode), {
-        code: referralCode,
-        count: increment(1),
-        lastUsedAt: serverTimestamp()
-      }, { merge: true });
-      const uname = localStorage.getItem('mmg_username') || '';
-      await setDoc(doc(db, 'referrals', referralCode, 'users', user.uid), {
-        email: user.email || '',
-        username: uname,
-        customerNumber: localStorage.getItem('mmg_customer_no') || null,
-        joinedAt: serverTimestamp()
-      });
-      try{ gtag('event', 'referral_applied_after_signup', { referral_code: referralCode }); }catch(gtagErr){}
-      if(premiumBenefit.type === 'free'){
-        alert('🎉 "' + referralCode + '" kodunu kullandınız!\nHesabınıza ücretsiz premium tanımlandı.');
-      } else {
-        alert('🎉 "' + referralCode + '" kodunu kullandınız!\nHesabınıza %' + premiumBenefit.discountPercent + ' indirimli premium tanımlandı.');
-      }
-      await loadReferralSectionState();
-    } catch(err){
-      showReferralError('Kod uygulanırken bir hata oluştu, lütfen tekrar deneyin.');
-    } finally {
-      applyReferralBtn.disabled = false;
-      applyReferralBtn.textContent = originalLabel;
-    }
-  });
-
-  accountInfoBtn.addEventListener('click', () => {
+  // ---- Hesabım: diğer araç sayfaları gibi normal bir sayfa olarak açılır ----
+  document.getElementById('accountInfoBtn').addEventListener('click', () => {
     toggleAccountDropdown(false);
-    loadProfileIntoForm();
-    loadReferralSectionState();
-    openAccountPage();
-  });
-
-  accountInfoForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const profile = {
-      type: profileType.value,
-      name: profileName.value.trim(),
-      phone: profilePhone.value.trim(),
-      email: profileEmail.value.trim(),
-      address: profileAddress.value.trim()
-    };
-    localStorage.setItem('mmg_profile', JSON.stringify(profile));
-    profileSaveBtn.disabled = true;
-    await saveProfileToCloud(profile);
-    profileSaveBtn.disabled = false;
-    profileSavedMsg.classList.add('show');
-    setTimeout(() => profileSavedMsg.classList.remove('show'), 2000);
-  });
-
-  // ---- Hesabı Sil ----
-  const deleteAccountBtn = document.getElementById('deleteAccountBtn');
-  const deleteAccountOverlay = document.getElementById('deleteAccountOverlay');
-  const deleteAccountClose = document.getElementById('deleteAccountClose');
-  const deleteAccountConfirmBtn = document.getElementById('deleteAccountConfirmBtn');
-  const deleteReauthWrap = document.getElementById('deleteReauthWrap');
-  const deleteReauthPassword = document.getElementById('deleteReauthPassword');
-  const deleteAccountError = document.getElementById('deleteAccountError');
-
-  function showDeleteAccountError(msg){
-    deleteAccountError.textContent = msg;
-    deleteAccountError.classList.add('show');
-  }
-  function hideDeleteAccountError(){
-    deleteAccountError.classList.remove('show');
-    deleteAccountError.textContent = '';
-  }
-
-  deleteAccountBtn.addEventListener('click', () => {
-    const state = localStorage.getItem('mmg_auth_state');
-    if(!state || state === 'guest'){
-      alert('Misafir modunda silinecek bir hesap bulunmuyor.');
-      return;
-    }
-    hideDeleteAccountError();
-    deleteReauthWrap.style.display = 'none';
-    deleteReauthPassword.value = '';
-    deleteAccountOverlay.hidden = false;
-  });
-
-  deleteAccountClose.addEventListener('click', () => { deleteAccountOverlay.hidden = true; });
-  deleteAccountOverlay.addEventListener('click', (e) => {
-    if(e.target === deleteAccountOverlay) deleteAccountOverlay.hidden = true;
-  });
-
-  // Kullanıcıya ait tüm bulut verilerini (kayıtlı oranlar + profil belgesi) siler
-  async function deleteAllUserData(uid){
-    try{
-      const ratesSnap = await getDocs(collection(db, 'users', uid, 'rates'));
-      for(const d of ratesSnap.docs){
-        try{ await deleteDoc(d.ref); } catch(e){ /* tek bir kayıt silinemezse devam et */ }
-      }
-    } catch(e){ /* alt koleksiyon okunamazsa sessizce geç */ }
-    try{ await deleteDoc(doc(db, 'users', uid)); } catch(e){ /* sessizce geç */ }
-  }
-
-  async function finishAccountDeletion(){
-    accountScreen.style.display = 'none';
-    deleteAccountOverlay.hidden = true;
-    localStorage.removeItem('mmg_auth_state');
-    localStorage.removeItem('mmg_remember');
-    localStorage.removeItem('mmg_customer_no');
-    localStorage.removeItem('mmg_username');
-    localStorage.removeItem('mmg_avatar');
-    localStorage.removeItem('mmg_profile');
-    setAvatar(null);
-    updateUserBadge();
-    document.getElementById('authEmail').value = '';
-    document.getElementById('authPassword').value = '';
-    setAuthMode('login');
-    openAuthOverlay();
-    alert('Hesabınız kalıcı olarak silindi.');
-  }
-
-  deleteAccountConfirmBtn.addEventListener('click', async () => {
-    const user = auth.currentUser;
-    if(!user){ deleteAccountOverlay.hidden = true; return; }
-    hideDeleteAccountError();
-    deleteAccountConfirmBtn.disabled = true;
-    const originalLabel = deleteAccountConfirmBtn.textContent;
-    deleteAccountConfirmBtn.textContent = 'Siliniyor...';
-    const uid = user.uid;
-    try{
-      await deleteAllUserData(uid);
-      await deleteUser(user);
-      await finishAccountDeletion();
-    } catch(err){
-      if(err.code === 'auth/requires-recent-login'){
-        const isGoogleUser = user.providerData.some(p => p.providerId === 'google.com');
-        if(isGoogleUser){
-          try{
-            await reauthenticateWithPopup(user, googleProvider);
-            await deleteAllUserData(uid);
-            await deleteUser(user);
-            await finishAccountDeletion();
-          } catch(reauthErr){
-            showDeleteAccountError('Kimlik doğrulama başarısız oldu. Lütfen tekrar deneyin.');
-          }
-        } else {
-          deleteReauthWrap.style.display = 'block';
-          if(!deleteReauthPassword.value){
-            showDeleteAccountError('Devam etmek için lütfen şifrenizi girin, ardından tekrar "Evet, Hesabımı Sil" butonuna basın.');
-          } else {
-            try{
-              const cred = EmailAuthProvider.credential(user.email, deleteReauthPassword.value);
-              await reauthenticateWithCredential(user, cred);
-              await deleteAllUserData(uid);
-              await deleteUser(user);
-              await finishAccountDeletion();
-            } catch(reauthErr){
-              showDeleteAccountError(mapFirebaseError(reauthErr.code));
-            }
-          }
-        }
-      } else {
-        showDeleteAccountError(mapFirebaseError(err.code));
-      }
-    } finally {
-      deleteAccountConfirmBtn.disabled = false;
-      deleteAccountConfirmBtn.textContent = originalLabel;
-    }
+    openTarget('Hesabim.html', 'Hesabım');
   });
 
   // NOT: Aktif bir oturum (giriş yapılmış ya da misafir) varsa,
@@ -1825,7 +1526,6 @@
 
   guestBtn.addEventListener('click', async () => {
     try{ await signOut(auth); }catch(e){ /* zaten oturum yoksa sessizce geç */ }
-    try{ await signInAnonymously(auth); }catch(e){ /* anonim giriş başarısız olursa misafir modu yine de çalışsın */ }
     localStorage.setItem('mmg_auth_state', 'guest');
     localStorage.setItem('mmg_remember', document.getElementById('rememberMe').checked ? '1' : '0');
     updateUserBadge();
@@ -2020,7 +1720,6 @@
   });
 
   async function performLogout(){
-    const wasGuest = localStorage.getItem('mmg_auth_state') === 'guest';
     try { await signOut(auth); } catch(err){ /* önemli değil */ }
     localStorage.removeItem('mmg_auth_state');
     localStorage.removeItem('mmg_remember');
@@ -2033,9 +1732,7 @@
     document.getElementById('authEmail').value = '';
     document.getElementById('authPassword').value = '';
     document.getElementById('rememberMe').checked = false;
-    // Misafir moddan gelen kullanıcı zaten hesabı yok; onu doğrudan
-    // "Kayıt Ol" sekmesine götürerek referans kodu alanının görünmesini sağla.
-    setAuthMode(wasGuest ? 'signup' : 'login');
+    setAuthMode('login');
     openAuthOverlay();
   }
 
@@ -2046,24 +1743,16 @@
   const themeToggle = document.getElementById('themeToggle');
   const themeToggleIcon = document.getElementById('themeToggleIcon');
   const themeToggleLabel = document.getElementById('themeToggleLabel');
-  const dropdownThemeToggle = document.getElementById('dropdownThemeToggle');
-  const dropdownThemeLabel = document.getElementById('dropdownThemeLabel');
   function applyTheme(mode){
     document.documentElement.classList.toggle('theme-light', mode === 'light');
     themeToggleIcon.textContent = mode === 'light' ? '☀' : '☾';
     themeToggleLabel.textContent = mode === 'light' ? 'Açık Mod' : 'Koyu Mod';
-    dropdownThemeLabel.textContent = mode === 'light' ? 'Açık Mod' : 'Koyu Mod';
     localStorage.setItem('mmg_theme', mode);
   }
   applyTheme(localStorage.getItem('mmg_theme') || 'dark');
   themeToggle.addEventListener('click', () => {
     const isLight = document.documentElement.classList.contains('theme-light');
     applyTheme(isLight ? 'dark' : 'light');
-  });
-  dropdownThemeToggle.addEventListener('click', () => {
-    const isLight = document.documentElement.classList.contains('theme-light');
-    applyTheme(isLight ? 'dark' : 'light');
-    document.getElementById('accountDropdown').hidden = true;
   });
 </script>
 
@@ -2120,7 +1809,6 @@
 
 
 <!-- ================== mmgcreativity: Beğen / Geri Bildirim Widget'ı (tüm sayfalarda ortak) ================== -->
-<button id="mmgRateBtn" title="Sitemizi Değerlendirin" aria-label="Sitemizi Değerlendirin" style="font-size:20px;">👍</button>
 <div id="mmgRateOverlay" hidden>
   <div id="mmgRatePanel">
     <button type="button" id="mmgRateCloseBtn" aria-label="Kapat">✕</button>
@@ -2157,14 +1845,6 @@
   </div>
 </div>
 <style>
-  #mmgRateBtn{
-    position:fixed; bottom:84px; left:22px; z-index:800;
-    width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
-    background:var(--surface-2,#1B2536); color:var(--teal,#3FB68A); font-size:19px;
-    cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,0.35);
-    display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, transform .15s ease;
-  }
-  #mmgRateBtn:hover{ border-color:var(--teal,#3FB68A); transform:translateY(-1px); }
   #mmgRateOverlay{
     position:fixed; inset:0; z-index:900; background:rgba(5,8,14,0.65);
     display:flex; align-items:center; justify-content:center; padding:20px;
@@ -2219,7 +1899,6 @@
 </style>
 <script>
 (function(){
-  const btn = document.getElementById('mmgRateBtn');
   const overlay = document.getElementById('mmgRateOverlay');
   const closeBtn = document.getElementById('mmgRateCloseBtn');
   const stepScore = document.getElementById('mmgRateStepScore');
@@ -2231,13 +1910,11 @@
   const commentBox = document.getElementById('mmgRateComment');
   const submitBtn = document.getElementById('mmgRateSubmitBtn');
 
-  // Beğen butonu: günde bir kez gösterilir, tıklanınca (etkileşim alınca) o gün için kaybolur.
+  // Beğeni kutusu: günde bir kez otomatik gösterilir, o gün için tekrar gösterilmez.
   const MMG_RATE_TODAY = new Date().toISOString().slice(0,10);
-  try{
-    if(localStorage.getItem('mmg_rate_btn_interacted_date') === MMG_RATE_TODAY){
-      btn.style.display = 'none';
-    }
-  }catch(e){}
+  function markShownToday(){
+    try{ localStorage.setItem('mmg_rate_btn_interacted_date', MMG_RATE_TODAY); }catch(e){}
+  }
 
   let likedValue = null; // 1 = beğendi, 0 = beğenmedi, null = henüz seçilmedi
 
@@ -2246,8 +1923,8 @@
     thumbUp.classList.toggle('active', val === 1);
     thumbDown.classList.toggle('active', val === 0);
   }
-  thumbUp.addEventListener('click', () => selectThumb(1));
-  thumbDown.addEventListener('click', () => selectThumb(0));
+  thumbUp.addEventListener('click', () => { selectThumb(1); submitFeedback(); });
+  thumbDown.addEventListener('click', () => { selectThumb(0); submitFeedback(); });
 
   function openOverlay(){
     stepScore.hidden = false;
@@ -2256,6 +1933,7 @@
     selectThumb(null);
     commentBox.value = '';
     overlay.hidden = false;
+    markShownToday();
   }
   function closeOverlay(){ overlay.hidden = true; }
 
@@ -2279,8 +1957,6 @@
           liked: !!likedValue,
           comment: comment || null,
           page: location.pathname.split('/').pop(),
-          userEmail: cloud.currentUser.email || null,
-          userUid: cloud.currentUser.uid || null,
           ratedAt: new Date().toISOString()
         }, { merge: true });
       }
@@ -2295,14 +1971,18 @@
   }
 
   submitBtn.addEventListener('click', submitFeedback);
-  btn.addEventListener('click', () => {
-    openOverlay();
-    try{ localStorage.setItem('mmg_rate_btn_interacted_date', MMG_RATE_TODAY); }catch(e){}
-    btn.style.display = 'none';
-  });
   closeBtn.addEventListener('click', closeOverlay);
   skipBtn.addEventListener('click', closeOverlay);
   overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });
+
+  // Sayfa açıldığında, bugün henüz gösterilmediyse kutuyu otomatik aç.
+  try{
+    if(localStorage.getItem('mmg_rate_btn_interacted_date') !== MMG_RATE_TODAY){
+      setTimeout(openOverlay, 1500);
+    }
+  }catch(e){
+    setTimeout(openOverlay, 1500);
+  }
 })();
 </script>
 <!-- ================== /Beğen Widget'ı ================== -->
