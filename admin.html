@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Paneli — mmgcreativity</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,6 +20,8 @@
     --text:#EAEDF3; --muted:#8D96AC; --coral:#FF6B4A; --teal:#3FB68A;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  html,body{overscroll-behavior-y:none;}
   body{
     background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
     min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;

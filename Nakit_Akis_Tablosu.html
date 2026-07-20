@@ -9,6 +9,19 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-WVWJ4VZE0C');
+
+  (function(){
+    try{
+      var src = sessionStorage.getItem('mmg_app_source');
+      if(!src){
+        src = (document.referrer.indexOf('android-app://') === 0) ? 'twa_app'
+            : (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ? 'pwa_app'
+            : 'web';
+        sessionStorage.setItem('mmg_app_source', src);
+      }
+      gtag('set', 'user_properties', { app_source: src });
+    }catch(e){}
+  })();
 </script>
 <script src="mmg-odemeler-sync.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -32,26 +45,89 @@
   const auth = getAuth(fbApp);
   const db = getFirestore(fbApp);
 
-  window.mmgCloud = { auth, db, doc, getDoc, setDoc, deleteDoc, collection, getDocs, currentUser: null };
+  window.mmgCloud = { auth, db, doc, getDoc, setDoc, deleteDoc, collection, getDocs, currentUser: null, isPremium: false, isAdmin: false };
 
   onAuthStateChanged(auth, async (user) => {
     window.mmgCloud.currentUser = user;
     document.dispatchEvent(new CustomEvent('mmg-auth-ready', { detail: { user } }));
-    // Premium üye reklamsız deneyim
+    let isPremium = false, isAdmin = false, trialStartMs = null;
     if(user){
       try{
         const snap = await getDoc(doc(db, 'users', user.uid));
-        if(snap.exists() && snap.data().isPremium){
+        const data = snap.exists() ? snap.data() : {};
+        isPremium = data.isPremium === true;
+        isAdmin = data.isAdmin === true;
+        if(data.createdAt && typeof data.createdAt.toMillis === 'function'){
+          trialStartMs = data.createdAt.toMillis();
+        }
+        if(isPremium){
           document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
           window.adsbygoogle = { push: function(){} };
         }
       } catch(e){ /* sessizce geç */ }
+    } else {
+      // Misafir kullanıcı: ilk ziyaret tarihini bu tarayıcıda sakla
+      try{
+        const stored = localStorage.getItem('mmg_nat_trial_start_guest');
+        if(stored){
+          trialStartMs = parseInt(stored, 10);
+        } else {
+          trialStartMs = Date.now();
+          localStorage.setItem('mmg_nat_trial_start_guest', String(trialStartMs));
+        }
+      } catch(e){ trialStartMs = Date.now(); }
     }
+    window.mmgCloud.isPremium = isPremium;
+    window.mmgCloud.isAdmin = isAdmin;
+    try{ gtag('set', 'user_properties', { user_type: !user ? 'guest' : (isPremium ? 'premium' : 'member') }); }catch(e){}
+    try{ gtag('event', 'tool_used', { tool_name: 'nakit_akis_tablosu' }); }catch(e){}
+    applyTrialGate(isPremium, isAdmin, trialStartMs);
   });
+
+  // ---- 90 günlük ücretsiz deneme süresi (Nakit Akış Tablosu premium üyelere özeldir) ----
+  function applyTrialGate(isPremium, isAdmin, trialStartMs){
+    const banner = document.getElementById('trialBanner');
+    const bannerText = document.getElementById('trialBannerText');
+    const blockOverlay = document.getElementById('trialBlockOverlay');
+
+    // [[GEÇİCİ DONDURMA — BAŞLANGIÇ]] Premium özellikler herkese açıldı, deneme süresi kilidi devre dışı.
+    // Geri almak için bu üç satırı silin.
+    banner.hidden = true;
+    blockOverlay.hidden = true;
+    return;
+    // [[GEÇİCİ DONDURMA — BİTİŞ]]
+
+    if(isPremium || isAdmin || trialStartMs === null){
+      banner.hidden = true;
+      blockOverlay.hidden = true;
+      return;
+    }
+    const TRIAL_DAYS = 90;
+    const daysUsed = Math.floor((Date.now() - trialStartMs) / 86400000);
+    const daysLeft = TRIAL_DAYS - daysUsed;
+
+    if(daysLeft <= 0){
+      banner.hidden = true;
+      blockOverlay.hidden = false;
+      try{ gtag('event', 'premium_gate_hit', { feature: 'nakit_akis_trial_expired' }); }catch(e){}
+    } else if(daysLeft <= 5){
+      blockOverlay.hidden = true;
+      bannerText.textContent = 'Ücretsiz deneme sürenizin bitmesine ' + daysLeft + ' gün kaldı. Nakit Akış Tablosu premium üyelere aittir.';
+      banner.hidden = false;
+    } else {
+      banner.hidden = true;
+      blockOverlay.hidden = true;
+    }
+  }
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>mmgcreativity — Nakit Akış Tablosu</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -62,6 +138,8 @@
     --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
   }
   *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  html,body{overscroll-behavior-y:none;}
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.06), transparent 60%),
@@ -86,9 +164,34 @@
     padding:8px 14px; border-radius:8px; transition:border-color .15s ease, color .15s ease;
   }
   .guide-btn:hover{ color:var(--coral); border-color:var(--coral); }
-  .masthead-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-right:56px; }
+  .masthead-actions{ display:flex; gap:10px; flex-wrap:wrap; }
 
   main{ max-width:1180px; margin:0 auto; padding:20px 24px; }
+
+  .trial-banner{
+    max-width:1180px; margin:0 auto; margin-top:14px; padding:12px 24px; background:rgba(198,161,91,0.08);
+    border:1px solid rgba(198,161,91,0.3); border-radius:10px; color:var(--brass); font-size:13px; font-weight:600;
+  }
+  .trial-banner[hidden]{ display:none; }
+
+  .trial-block-overlay{
+    position:fixed; inset:0; z-index:950; background:rgba(5,8,14,0.85);
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .trial-block-overlay[hidden]{ display:none; }
+  .trial-block-card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:16px; padding:36px 32px;
+    max-width:440px; width:100%; text-align:center;
+  }
+  .trial-block-icon{ font-size:36px; margin-bottom:14px; }
+  .trial-block-card h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; margin-bottom:12px; }
+  .trial-block-card p{ color:var(--muted); font-size:13.5px; line-height:1.6; margin-bottom:22px; }
+  .trial-block-btn{
+    display:inline-block; background:var(--grad); color:#fff; font-weight:700; font-size:13.5px;
+    padding:12px 22px; border-radius:9px; text-decoration:none; margin-bottom:14px;
+  }
+  .trial-block-link{ display:block; color:var(--muted); font-size:12.5px; text-decoration:none; }
+  .trial-block-link:hover{ color:var(--text); }
   .section-title{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:20px; margin-bottom:20px;}
 
   /* ---- Ay/Yıl kontrolleri ---- */
@@ -430,6 +533,20 @@
     </div>
   </div>
 </header>
+
+<div class="trial-banner" id="trialBanner" hidden>
+  ⏳ <span id="trialBannerText"></span>
+</div>
+
+<div class="trial-block-overlay" id="trialBlockOverlay" hidden>
+  <div class="trial-block-card">
+    <div class="trial-block-icon">🔒</div>
+    <h2>Ücretsiz Deneme Süreniz Sona Erdi</h2>
+    <p>Nakit Akış Tablosu premium üyelere aittir. 90 günlük ücretsiz deneme sürenizi tamamladınız — kullanmaya devam etmek için premium üyeliğe geçmeniz gerekiyor.</p>
+    <a href="iletisim.html" class="trial-block-btn">Premium Üyelik Hakkında Bilgi Al</a>
+    <a href="index.html" class="trial-block-link">← Ana Sayfaya Dön</a>
+  </div>
+</div>
 
 <main>
   <section class="table-section">
@@ -2085,190 +2202,7 @@
 </script>
 <!-- ================== /Hesap Makinesi Widget ================== -->
 
-<!-- ================== mmgcreativity: Beğen / Geri Bildirim Widget'ı (tüm sayfalarda ortak) ================== -->
-<button id="mmgRateBtn" title="Sitemizi Değerlendirin" aria-label="Sitemizi Değerlendirin" style="font-size:20px;">👍</button>
-<div id="mmgRateOverlay" hidden>
-  <div id="mmgRatePanel">
-    <button type="button" id="mmgRateCloseBtn" aria-label="Kapat">✕</button>
 
-    <div id="mmgRateStepScore">
-      <div class="mmg-rate-title">Sitemizi beğendiniz mi?</div>
-      <div class="mmg-rate-thumbs">
-        <button type="button" class="mmg-rate-thumb" id="mmgThumbUp" data-liked="1">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 22V11M2 13v7a2 2 0 0 0 2 2h12.6a2 2 0 0 0 2-1.7l1.3-8A2 2 0 0 0 18 10h-5.6l.9-4.4a1.7 1.7 0 0 0-3-1.4L7 11"/></svg>
-          <span>Evet</span>
-        </button>
-        <button type="button" class="mmg-rate-thumb" id="mmgThumbDown" data-liked="0">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 2v11M22 11V4a2 2 0 0 0-2-2H7.4a2 2 0 0 0-2 1.7l-1.3 8A2 2 0 0 0 6 14h5.6l-.9 4.4a1.7 1.7 0 0 0 3 1.4L17 13"/></svg>
-          <span>Hayır</span>
-        </button>
-      </div>
-      <textarea id="mmgRateComment" class="mmg-rate-comment" placeholder="Yorumunuz (opsiyonel)" rows="3"></textarea>
-      <button type="button" class="mmg-rate-btn-primary" id="mmgRateSubmitBtn">Gönder</button>
-    </div>
-
-    <div id="mmgRateStepStore" hidden>
-      <div class="mmg-rate-title">Teşekkürler! 🎉</div>
-      <div class="mmg-rate-sub">Bu memnuniyetinizi Play Store'da da bizimle paylaşır mısınız? Yorumunuz bizim için çok değerli.</div>
-      <div class="mmg-rate-actions">
-        <a href="https://play.google.com/store/apps/details?id=com.mmgcreativity.dijitalfinans" target="_blank" rel="noopener" class="mmg-rate-btn-primary" id="mmgRatePlayStoreBtn">Play Store'a Git</a>
-        <button type="button" class="mmg-rate-btn-secondary" id="mmgRateSkipBtn">Belki Sonra</button>
-      </div>
-    </div>
-
-    <div id="mmgRateStepThanks" hidden>
-      <div class="mmg-rate-title">Teşekkürler!</div>
-      <div class="mmg-rate-sub">Geri bildiriminiz bize ulaştı, uygulamayı geliştirmemize yardımcı oluyor.</div>
-    </div>
-  </div>
-</div>
-<style>
-  #mmgRateBtn{
-    position:fixed; bottom:18px; left:22px; z-index:800;
-    width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
-    background:var(--surface-2,#1B2536); color:var(--teal,#3FB68A); font-size:19px;
-    cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,0.35);
-    display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, transform .15s ease;
-  }
-  #mmgRateBtn:hover{ border-color:var(--teal,#3FB68A); transform:translateY(-1px); }
-  #mmgRateOverlay{
-    position:fixed; inset:0; z-index:900; background:rgba(5,8,14,0.65);
-    display:flex; align-items:center; justify-content:center; padding:20px;
-  }
-  #mmgRateOverlay[hidden]{ display:none; }
-  #mmgRatePanel{
-    position:relative; width:100%; max-width:360px; background:var(--surface,#141C2B);
-    border:1px solid var(--hairline,#2A3448); border-radius:18px; padding:28px 24px;
-    box-shadow:0 24px 60px rgba(0,0,0,0.5); font-family:'Inter',sans-serif;
-  }
-  #mmgRateCloseBtn{
-    position:absolute; top:14px; right:14px; background:none; border:none;
-    color:var(--muted,#8D96AC); cursor:pointer; font-size:14px; padding:4px;
-  }
-  #mmgRateCloseBtn:hover{ color:var(--text,#EAEDF3); }
-  .mmg-rate-title{
-    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:var(--text,#EAEDF3);
-    margin-bottom:16px; text-align:center;
-  }
-  .mmg-rate-sub{
-    font-size:13px; color:var(--muted,#8D96AC); text-align:center; margin-bottom:20px; line-height:1.5;
-  }
-  .mmg-rate-thumbs{ display:flex; gap:12px; margin-bottom:16px; }
-  .mmg-rate-thumb{
-    flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;
-    background:var(--surface-2,#1B2536); border:1.5px solid var(--hairline,#2A3448); border-radius:12px;
-    color:var(--muted,#8D96AC); padding:16px 0; cursor:pointer; transition:all .15s ease;
-    font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
-  }
-  .mmg-rate-thumb:hover{ border-color:var(--brass-dim,#8A7440); color:var(--text,#EAEDF3); }
-  .mmg-rate-thumb.active#mmgThumbUp{ border-color:var(--teal,#3FB68A); color:var(--teal,#3FB68A); background:rgba(63,182,138,0.1); }
-  .mmg-rate-thumb.active#mmgThumbDown{ border-color:var(--red,#E2544B); color:var(--red,#E2544B); background:rgba(226,84,75,0.1); }
-  .mmg-rate-comment{
-    width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448);
-    border-radius:8px; padding:10px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13px;
-    resize:vertical; outline:none; margin-bottom:14px;
-  }
-  .mmg-rate-comment:focus{ border-color:var(--brass-dim,#8A7440); }
-  .mmg-rate-comment::placeholder{ color:var(--muted,#8D96AC); }
-  .mmg-rate-actions{ display:flex; flex-direction:column; gap:10px; }
-  .mmg-rate-btn-primary{
-    display:block; width:100%; box-sizing:border-box; text-align:center; background:var(--brass,#C6A15B); color:#1a1a1a; border:none;
-    border-radius:8px; padding:12px 0; font-family:'Inter',sans-serif; font-weight:700; font-size:14px;
-    cursor:pointer; text-decoration:none; transition:opacity .15s ease;
-  }
-  .mmg-rate-btn-primary:hover{ opacity:0.9; }
-  .mmg-rate-btn-secondary{
-    background:none; border:none; color:var(--muted,#8D96AC); font-family:'Inter',sans-serif; font-size:12.5px;
-    cursor:pointer; text-decoration:underline; padding:4px;
-  }
-  .mmg-rate-btn-secondary:hover{ color:var(--text,#EAEDF3); }
-</style>
-<script>
-(function(){
-  const btn = document.getElementById('mmgRateBtn');
-  const overlay = document.getElementById('mmgRateOverlay');
-  const closeBtn = document.getElementById('mmgRateCloseBtn');
-  const stepScore = document.getElementById('mmgRateStepScore');
-  const stepStore = document.getElementById('mmgRateStepStore');
-  const stepThanks = document.getElementById('mmgRateStepThanks');
-  const skipBtn = document.getElementById('mmgRateSkipBtn');
-  const thumbUp = document.getElementById('mmgThumbUp');
-  const thumbDown = document.getElementById('mmgThumbDown');
-  const commentBox = document.getElementById('mmgRateComment');
-  const submitBtn = document.getElementById('mmgRateSubmitBtn');
-
-  // Beğen butonu: günde bir kez gösterilir, tıklanınca (etkileşim alınca) o gün için kaybolur.
-  const MMG_RATE_TODAY = new Date().toISOString().slice(0,10);
-  try{
-    if(localStorage.getItem('mmg_rate_btn_interacted_date') === MMG_RATE_TODAY){
-      btn.style.display = 'none';
-    }
-  }catch(e){}
-
-  let likedValue = null; // 1 = beğendi, 0 = beğenmedi, null = henüz seçilmedi
-
-  function selectThumb(val){
-    likedValue = val;
-    thumbUp.classList.toggle('active', val === 1);
-    thumbDown.classList.toggle('active', val === 0);
-  }
-  thumbUp.addEventListener('click', () => selectThumb(1));
-  thumbDown.addEventListener('click', () => selectThumb(0));
-
-  function openOverlay(){
-    stepScore.hidden = false;
-    stepStore.hidden = true;
-    stepThanks.hidden = true;
-    selectThumb(null);
-    commentBox.value = '';
-    overlay.hidden = false;
-  }
-  function closeOverlay(){ overlay.hidden = true; }
-
-  async function submitFeedback(){
-    if(likedValue === null){
-      thumbUp.style.borderColor = 'var(--red,#E2544B)';
-      thumbDown.style.borderColor = 'var(--red,#E2544B)';
-      setTimeout(() => { thumbUp.style.borderColor=''; thumbDown.style.borderColor=''; }, 900);
-      return;
-    }
-    const comment = commentBox.value.trim();
-    try{ localStorage.setItem('mmg_feedback_liked', String(likedValue)); }catch(e){}
-    try{ localStorage.setItem('mmg_feedback_comment', comment); }catch(e){}
-    try{ localStorage.setItem('mmg_feedback_date', new Date().toISOString()); }catch(e){}
-
-    try{
-      if(window.mmgCloud && window.mmgCloud.currentUser && window.mmgCloud.setDoc && window.mmgCloud.doc){
-        const cloud = window.mmgCloud;
-        await cloud.setDoc(cloud.doc(cloud.db, 'feedback', cloud.currentUser.uid + '_' + Date.now()), {
-          liked: !!likedValue,
-          comment: comment || null,
-          page: location.pathname.split('/').pop(),
-          ratedAt: new Date().toISOString()
-        }, { merge: true });
-      }
-    }catch(e){ /* sessizce geç */ }
-
-    stepScore.hidden = true;
-    if(likedValue === 1){
-      stepStore.hidden = false;
-    } else {
-      stepThanks.hidden = false;
-    }
-  }
-
-  submitBtn.addEventListener('click', submitFeedback);
-  btn.addEventListener('click', () => {
-    openOverlay();
-    try{ localStorage.setItem('mmg_rate_btn_interacted_date', MMG_RATE_TODAY); }catch(e){}
-    btn.style.display = 'none';
-  });
-  closeBtn.addEventListener('click', closeOverlay);
-  skipBtn.addEventListener('click', closeOverlay);
-  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });
-})();
-</script>
-<!-- ================== /Beğen Widget'ı ================== -->
 
 </body>
 </html>

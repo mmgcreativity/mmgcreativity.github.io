@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>mmgcreativity — İstatistikler</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -12,6 +17,8 @@
     --red:#E2544B; --teal:#3FB68A; --azure:#3E8FE0;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  html,body{overscroll-behavior-y:none;}
   body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
   main{ max-width:1040px; margin:0 auto; padding:36px 24px 60px; }
   .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; color:var(--brass); text-transform:uppercase; margin-bottom:10px; }

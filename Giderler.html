@@ -9,6 +9,19 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-WVWJ4VZE0C');
+
+  (function(){
+    try{
+      var src = sessionStorage.getItem('mmg_app_source');
+      if(!src){
+        src = (document.referrer.indexOf('android-app://') === 0) ? 'twa_app'
+            : (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ? 'pwa_app'
+            : 'web';
+        sessionStorage.setItem('mmg_app_source', src);
+      }
+      gtag('set', 'user_properties', { app_source: src });
+    }catch(e){}
+  })();
 </script>
 <script src="mmg-odemeler-sync.js"></script>
 <script type="module">
@@ -38,17 +51,30 @@
     if(user){
       try{
         const snap = await getDoc(doc(db, 'users', user.uid));
-        if(snap.exists() && snap.data().isPremium){
+        const data = snap.exists() ? snap.data() : {};
+        try{ gtag('set', 'user_properties', { user_type: data.isPremium ? 'premium' : 'member' }); }catch(e){}
+        if(data.isPremium){
           document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
           window.adsbygoogle = { push: function(){} };
         }
       } catch(e){ /* sessizce geç */ }
+    } else {
+      try{ gtag('set', 'user_properties', { user_type: 'guest' }); }catch(e){}
     }
   });
+  try{ gtag('event', 'tool_used', { tool_name: 'giderler' }); }catch(e){}
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>mmgcreativity — Giderler</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <link rel="icon" type="image/png" href="logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -60,6 +86,8 @@
     --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
   }
   *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  html,body{overscroll-behavior-y:none;}
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.06), transparent 60%),
@@ -76,7 +104,7 @@
   }
   .masthead-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
-  .subtitle{color:var(--muted); font-size:14px; margin-top:6px; max-width:640px;}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px; max-width:920px;}
   .guide-btn{
     display:inline-flex; align-items:center; gap:8px; flex-shrink:0;
     font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:600; color:var(--text);
@@ -85,6 +113,18 @@
   }
   .guide-btn:hover{ color:var(--coral); border-color:var(--coral); }
   .masthead-actions{ display:flex; gap:10px; flex-wrap:wrap; flex-shrink:0; }
+
+  .io-toolbar{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .io-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    color:var(--text); font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;
+    padding:9px 14px; cursor:pointer; transition:border-color .15s ease, background .15s ease;
+    display:inline-flex; align-items:center;
+  }
+  .io-btn:hover{ border-color:var(--brass-dim); background:var(--surface); }
+  .io-msg{ font-size:12px; margin-top:6px; min-height:16px; }
+  .io-msg.ok{ color:var(--teal); }
+  .io-msg.err{ color:var(--coral); }
 
   main{ max-width:1180px; margin:0 auto; padding:36px 24px; }
   .section-title{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:20px; margin-bottom:20px;}
@@ -222,7 +262,7 @@
   <div class="masthead-row">
     <div>
       <h1 class="title">Giderler</h1>
-      <div class="subtitle">Faturalar, kredi kartları, komisyonlar, vergiler ve kiralar gibi düzenli giderlerinizi buradan takip edin.<br>Vadesi geldiğinde, girişte belirttiğiniz tercihe göre Nakit Akış Tablosu'na otomatik işlenir.</div>
+      <div class="subtitle">Faturalar, kredi kartları, teminat mektupları, komisyon ve kiralarınızı takip edin — vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlenir.</div>
     </div>
     <div class="masthead-actions">
       <a href="index.html" class="guide-btn">← Ana Sayfa</a>
@@ -253,6 +293,10 @@
                 <div class="mmg-dropdown-menu" id="typeChipMenu" hidden></div>
               </div>
             </div>
+            <div id="selectedTypeRow" class="selected-type-row" style="display:none;">
+              <span class="selected-type-badge" id="selectedTypeBadge"></span>
+              <button type="button" class="change-type-link" id="changeTypeBtn">değiştir</button>
+            </div>
           </div>
           <div style="flex:0 0 auto;">
             <div class="wizard-step-label">Gider Filtreleme</div>
@@ -264,10 +308,6 @@
         </div>
 
         <div id="wizardStep2" style="display:none;">
-          <div class="selected-type-row">
-            <span class="selected-type-badge" id="selectedTypeBadge"></span>
-            <button type="button" class="change-type-link" id="changeTypeBtn">değiştir</button>
-          </div>
           <div class="add-payment-grid">
             <div class="field">
               <label>Açıklama <span style="color:var(--muted); font-weight:400;">(opsiyonel)</span></label>
@@ -294,6 +334,15 @@
           </div>
         </div>
       </div>
+
+      <div class="io-toolbar">
+        <button type="button" class="io-btn" id="exportExcelBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
+        <button type="button" class="io-btn" id="exportPdfBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
+        <button type="button" class="io-btn" id="importExcelBtn">⬆ Excel'den Yükle</button>
+        <button type="button" class="io-btn" id="downloadTemplateBtn">⬇ Şablon İndir</button>
+        <input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none;">
+      </div>
+      <div class="io-msg" id="ioMsg"></div>
 
       <div class="section-title" id="listTitle">Giderler</div>
       <div class="payment-list" id="paymentList"></div>
@@ -556,6 +605,7 @@
     selectedTypeBadge.innerHTML = c.icon + ' ' + c.label;
     typeChipTrigger.innerHTML = c.icon + ' ' + c.label + ' <span class="chev">▾</span>';
     wizardStep1.style.display = 'none';
+    document.getElementById('selectedTypeRow').style.display = 'flex';
     wizardStep2.style.display = 'block';
   }
 
@@ -566,6 +616,7 @@
     } else {
       typeChipTrigger.innerHTML = 'Gider türü seçin <span class="chev">▾</span>';
       wizardStep1.style.display = 'block';
+      document.getElementById('selectedTypeRow').style.display = 'none';
       wizardStep2.style.display = 'none';
     }
   }
@@ -573,6 +624,7 @@
   document.getElementById('changeTypeBtn').addEventListener('click', () => {
     selectedPaymentType = null;
     wizardStep1.style.display = 'block';
+    document.getElementById('selectedTypeRow').style.display = 'none';
     wizardStep2.style.display = 'none';
   });
 
@@ -789,6 +841,157 @@
       renderAll();
     }
   });
+
+  // ================== Excel'e Aktar / PDF'e Aktar / Excel'den Yükle ==================
+  function showIoMsg(msg, isError){
+    const el = document.getElementById('ioMsg');
+    el.textContent = msg;
+    el.className = 'io-msg ' + (isError ? 'err' : 'ok');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.textContent = ''; el.className = 'io-msg'; }, 4000);
+  }
+
+  function buildGiderRowsForExport(){
+    const list = window.mmgLocalPaymentsAPI.load();
+    const header = ['Açıklama', 'Kategori', 'Tutar', 'Vade Tarihi', 'Tekrar'];
+    const rows = [header];
+    list.forEach(item => {
+      rows.push([
+        item.desc || '',
+        catInfo(item.category).label,
+        item.amount,
+        item.dueDate || '',
+        recurrenceLabel(item.recurrence)
+      ]);
+    });
+    return rows;
+  }
+
+  document.getElementById('exportExcelBtn').addEventListener('click', () => {
+    try{
+      const rows = buildGiderRowsForExport();
+      if(rows.length <= 1){ showIoMsg('Aktarılacak gider kaydı yok.', true); return; }
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{wch:28},{wch:20},{wch:14},{wch:14},{wch:14}];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Giderler');
+      XLSX.writeFile(wb, 'giderler.xlsx');
+      showIoMsg('Excel dosyası indirildi.');
+    } catch(e){ showIoMsg('Excel oluşturulurken hata oluştu.', true); }
+  });
+
+  document.getElementById('exportPdfBtn').addEventListener('click', () => {
+    try{
+      const rows = buildGiderRowsForExport();
+      if(rows.length <= 1){ showIoMsg('Aktarılacak gider kaydı yok.', true); return; }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape' });
+      doc.setFontSize(14);
+      doc.text('Giderler', 14, 16);
+      doc.autoTable({
+        startY: 24,
+        head: [rows[0]],
+        body: rows.slice(1).map(r => [r[0], r[1], Number(r[2]).toLocaleString('tr-TR',{minimumFractionDigits:2}) + ' TL', r[3], r[4]]),
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [198,161,91] }
+      });
+      doc.save('giderler.pdf');
+      showIoMsg('PDF dosyası indirildi.');
+    } catch(e){ showIoMsg('PDF oluşturulurken hata oluştu.', true); }
+  });
+
+  document.getElementById('importExcelBtn').addEventListener('click', () => {
+    document.getElementById('importExcelInput').click();
+  });
+
+  document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
+    try{
+      const header = ['Açıklama', 'Kategori', 'Tutar', 'Vade Tarihi', 'Tekrar'];
+      const example = ['örn. Ofis Elektrik Faturası', CATS[0].label, 1000, todayKey(), 'Tekrarlanmasın'];
+      const catNote = ['Geçerli Kategoriler:', CATS.map(c => c.label).join(' / ')];
+      const recNote = ['Geçerli Tekrar Değerleri:', 'Tekrarlanmasın / Her Hafta / Her Ay / Her Yıl'];
+      const rows = [header, example, [], catNote, recNote];
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{wch:28},{wch:20},{wch:14},{wch:14},{wch:18}];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Şablon');
+      XLSX.writeFile(wb, 'giderler-sablon.xlsx');
+      showIoMsg('Şablon dosyası indirildi.');
+    } catch(e){ showIoMsg('Şablon oluşturulurken hata oluştu.', true); }
+  });
+
+  document.getElementById('importExcelInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    try{
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data, { type: 'array', cellDates: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+      const list = window.mmgLocalPaymentsAPI.load();
+      let added = 0;
+
+      for(const row of json){
+        const descRaw = String(row['Açıklama'] ?? row['Aciklama'] ?? '').trim();
+        const catRaw = String(row['Kategori'] ?? '').trim().toLowerCase();
+        const amountRaw = row['Tutar'];
+        let dueDateRaw = row['Vade Tarihi'] ?? row['Vade'] ?? '';
+        const recRaw = String(row['Tekrar'] ?? '').trim().toLowerCase();
+
+        const amount = typeof amountRaw === 'number' ? amountRaw : parseTR(String(amountRaw || '0'));
+        if(!amount || amount <= 0) continue;
+
+        let matchedCat = CATS.find(c => c.label.toLowerCase() === catRaw);
+        const category = matchedCat ? matchedCat.id : CATS[0].id;
+
+        let dueDate;
+        if(dueDateRaw instanceof Date){
+          dueDate = dueDateRaw.getFullYear() + '-' + pad2(dueDateRaw.getMonth()+1) + '-' + pad2(dueDateRaw.getDate());
+        } else {
+          dueDate = String(dueDateRaw || '').trim() || todayKey();
+        }
+
+        const recurrence = recRaw.includes('hafta') ? 'haftalik' : recRaw.includes('yıl') || recRaw.includes('yil') ? 'yillik' : recRaw.includes('ay') ? 'aylik' : 'yok';
+
+        const item = {
+          id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+          category,
+          subCategory: '',
+          desc: descRaw || catInfo(category).label,
+          amount,
+          dueDate,
+          recurrence,
+          lastTransferredDate: null,
+          paused: false,
+          createdAt: new Date().toISOString()
+        };
+        list.push(item);
+        added++;
+
+        if(isMember()){
+          try{
+            const cloud = window.mmgCloud;
+            await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'odemeler', item.id), item);
+          }catch(err){ /* sessizce geç */ }
+        }
+      }
+
+      window.mmgLocalPaymentsAPI.save(list);
+      e.target.value = '';
+
+      if(added > 0){
+        showIoMsg(added + ' gider kaydı içeri aktarıldı.');
+        runLocalSyncAndReport();
+        renderAll();
+      } else {
+        showIoMsg('Dosyadan geçerli bir kayıt okunamadı. Sütun başlıklarının Açıklama/Kategori/Tutar/Vade Tarihi/Tekrar olduğundan emin olun.', true);
+      }
+    } catch(err){
+      showIoMsg('Excel dosyası okunamadı: ' + (err.message || 'bilinmeyen hata'), true);
+      e.target.value = '';
+    }
+  });
 </script>
 
 <button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır">↓</button>
@@ -1001,178 +1204,7 @@
 </script>
 <!-- ================== /Hesap Makinesi Widget ================== -->
 
-<!-- ================== mmgcreativity: Beğen / Geri Bildirim Widget'ı (tüm sayfalarda ortak) ================== -->
-<button id="mmgRateBtn" title="Sitemizi Değerlendirin" aria-label="Sitemizi Değerlendirin" style="font-size:20px;">👍</button>
-<div id="mmgRateOverlay" hidden>
-  <div id="mmgRatePanel">
-    <button type="button" id="mmgRateCloseBtn" aria-label="Kapat">✕</button>
 
-    <div id="mmgRateStepScore">
-      <div class="mmg-rate-title">Sitemizi beğendiniz mi?</div>
-      <div class="mmg-rate-thumbs">
-        <button type="button" class="mmg-rate-thumb" id="mmgThumbUp" data-liked="1">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 22V11M2 13v7a2 2 0 0 0 2 2h12.6a2 2 0 0 0 2-1.7l1.3-8A2 2 0 0 0 18 10h-5.6l.9-4.4a1.7 1.7 0 0 0-3-1.4L7 11"/></svg>
-          <span>Evet</span>
-        </button>
-        <button type="button" class="mmg-rate-thumb" id="mmgThumbDown" data-liked="0">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 2v11M22 11V4a2 2 0 0 0-2-2H7.4a2 2 0 0 0-2 1.7l-1.3 8A2 2 0 0 0 6 14h5.6l-.9 4.4a1.7 1.7 0 0 0 3 1.4L17 13"/></svg>
-          <span>Hayır</span>
-        </button>
-      </div>
-      <textarea id="mmgRateComment" class="mmg-rate-comment" placeholder="Yorumunuz (opsiyonel)" rows="3"></textarea>
-      <button type="button" class="mmg-rate-btn-primary" id="mmgRateSubmitBtn">Gönder</button>
-    </div>
-
-    <div id="mmgRateStepStore" hidden>
-      <div class="mmg-rate-title">Teşekkürler! 🎉</div>
-      <div class="mmg-rate-sub">Bu memnuniyetinizi Play Store'da da bizimle paylaşır mısınız? Yorumunuz bizim için çok değerli.</div>
-      <div class="mmg-rate-actions">
-        <a href="https://play.google.com/store/apps/details?id=com.mmgcreativity.dijitalfinans" target="_blank" rel="noopener" class="mmg-rate-btn-primary" id="mmgRatePlayStoreBtn">Play Store'a Git</a>
-        <button type="button" class="mmg-rate-btn-secondary" id="mmgRateSkipBtn">Belki Sonra</button>
-      </div>
-    </div>
-
-    <div id="mmgRateStepThanks" hidden>
-      <div class="mmg-rate-title">Teşekkürler!</div>
-      <div class="mmg-rate-sub">Geri bildiriminiz bize ulaştı, uygulamayı geliştirmemize yardımcı oluyor.</div>
-    </div>
-  </div>
-</div>
-<style>
-  #mmgRateBtn{
-    position:fixed; bottom:18px; left:22px; z-index:800;
-    width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
-    background:var(--surface-2,#1B2536); color:var(--teal,#3FB68A); font-size:19px;
-    cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,0.35);
-    display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, transform .15s ease;
-  }
-  #mmgRateBtn:hover{ border-color:var(--teal,#3FB68A); transform:translateY(-1px); }
-  #mmgRateOverlay{
-    position:fixed; inset:0; z-index:900; background:rgba(5,8,14,0.65);
-    display:flex; align-items:center; justify-content:center; padding:20px;
-  }
-  #mmgRateOverlay[hidden]{ display:none; }
-  #mmgRatePanel{
-    position:relative; width:100%; max-width:360px; background:var(--surface,#141C2B);
-    border:1px solid var(--hairline,#2A3448); border-radius:18px; padding:28px 24px;
-    box-shadow:0 24px 60px rgba(0,0,0,0.5); font-family:'Inter',sans-serif;
-  }
-  #mmgRateCloseBtn{
-    position:absolute; top:14px; right:14px; background:none; border:none;
-    color:var(--muted,#8D96AC); cursor:pointer; font-size:14px; padding:4px;
-  }
-  #mmgRateCloseBtn:hover{ color:var(--text,#EAEDF3); }
-  .mmg-rate-title{
-    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:var(--text,#EAEDF3);
-    margin-bottom:16px; text-align:center;
-  }
-  .mmg-rate-sub{
-    font-size:13px; color:var(--muted,#8D96AC); text-align:center; margin-bottom:20px; line-height:1.5;
-  }
-  .mmg-rate-thumbs{ display:flex; gap:12px; margin-bottom:16px; }
-  .mmg-rate-thumb{
-    flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;
-    background:var(--surface-2,#1B2536); border:1.5px solid var(--hairline,#2A3448); border-radius:12px;
-    color:var(--muted,#8D96AC); padding:16px 0; cursor:pointer; transition:all .15s ease;
-    font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
-  }
-  .mmg-rate-thumb:hover{ border-color:var(--brass-dim,#8A7440); color:var(--text,#EAEDF3); }
-  .mmg-rate-thumb.active#mmgThumbUp{ border-color:var(--teal,#3FB68A); color:var(--teal,#3FB68A); background:rgba(63,182,138,0.1); }
-  .mmg-rate-thumb.active#mmgThumbDown{ border-color:var(--red,#E2544B); color:var(--red,#E2544B); background:rgba(226,84,75,0.1); }
-  .mmg-rate-comment{
-    width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448);
-    border-radius:8px; padding:10px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13px;
-    resize:vertical; outline:none; margin-bottom:14px;
-  }
-  .mmg-rate-comment:focus{ border-color:var(--brass-dim,#8A7440); }
-  .mmg-rate-comment::placeholder{ color:var(--muted,#8D96AC); }
-  .mmg-rate-actions{ display:flex; flex-direction:column; gap:10px; }
-  .mmg-rate-btn-primary{
-    display:block; width:100%; box-sizing:border-box; text-align:center; background:var(--brass,#C6A15B); color:#1a1a1a; border:none;
-    border-radius:8px; padding:12px 0; font-family:'Inter',sans-serif; font-weight:700; font-size:14px;
-    cursor:pointer; text-decoration:none; transition:opacity .15s ease;
-  }
-  .mmg-rate-btn-primary:hover{ opacity:0.9; }
-  .mmg-rate-btn-secondary{
-    background:none; border:none; color:var(--muted,#8D96AC); font-family:'Inter',sans-serif; font-size:12.5px;
-    cursor:pointer; text-decoration:underline; padding:4px;
-  }
-  .mmg-rate-btn-secondary:hover{ color:var(--text,#EAEDF3); }
-</style>
-<script>
-(function(){
-  const btn = document.getElementById('mmgRateBtn');
-  const overlay = document.getElementById('mmgRateOverlay');
-  const closeBtn = document.getElementById('mmgRateCloseBtn');
-  const stepScore = document.getElementById('mmgRateStepScore');
-  const stepStore = document.getElementById('mmgRateStepStore');
-  const stepThanks = document.getElementById('mmgRateStepThanks');
-  const skipBtn = document.getElementById('mmgRateSkipBtn');
-  const thumbUp = document.getElementById('mmgThumbUp');
-  const thumbDown = document.getElementById('mmgThumbDown');
-  const commentBox = document.getElementById('mmgRateComment');
-  const submitBtn = document.getElementById('mmgRateSubmitBtn');
-
-  let likedValue = null; // 1 = beğendi, 0 = beğenmedi, null = henüz seçilmedi
-
-  function selectThumb(val){
-    likedValue = val;
-    thumbUp.classList.toggle('active', val === 1);
-    thumbDown.classList.toggle('active', val === 0);
-  }
-  thumbUp.addEventListener('click', () => selectThumb(1));
-  thumbDown.addEventListener('click', () => selectThumb(0));
-
-  function openOverlay(){
-    stepScore.hidden = false;
-    stepStore.hidden = true;
-    stepThanks.hidden = true;
-    selectThumb(null);
-    commentBox.value = '';
-    overlay.hidden = false;
-  }
-  function closeOverlay(){ overlay.hidden = true; }
-
-  async function submitFeedback(){
-    if(likedValue === null){
-      thumbUp.style.borderColor = 'var(--red,#E2544B)';
-      thumbDown.style.borderColor = 'var(--red,#E2544B)';
-      setTimeout(() => { thumbUp.style.borderColor=''; thumbDown.style.borderColor=''; }, 900);
-      return;
-    }
-    const comment = commentBox.value.trim();
-    try{ localStorage.setItem('mmg_feedback_liked', String(likedValue)); }catch(e){}
-    try{ localStorage.setItem('mmg_feedback_comment', comment); }catch(e){}
-    try{ localStorage.setItem('mmg_feedback_date', new Date().toISOString()); }catch(e){}
-
-    try{
-      if(window.mmgCloud && window.mmgCloud.currentUser && window.mmgCloud.setDoc && window.mmgCloud.doc){
-        const cloud = window.mmgCloud;
-        await cloud.setDoc(cloud.doc(cloud.db, 'feedback', cloud.currentUser.uid + '_' + Date.now()), {
-          liked: !!likedValue,
-          comment: comment || null,
-          page: location.pathname.split('/').pop(),
-          ratedAt: new Date().toISOString()
-        }, { merge: true });
-      }
-    }catch(e){ /* sessizce geç */ }
-
-    stepScore.hidden = true;
-    if(likedValue === 1){
-      stepStore.hidden = false;
-    } else {
-      stepThanks.hidden = false;
-    }
-  }
-
-  submitBtn.addEventListener('click', submitFeedback);
-  btn.addEventListener('click', openOverlay);
-  closeBtn.addEventListener('click', closeOverlay);
-  skipBtn.addEventListener('click', closeOverlay);
-  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });
-})();
-</script>
-<!-- ================== /Beğen Widget'ı ================== -->
 
 </body>
 </html>
