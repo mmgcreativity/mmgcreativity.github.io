@@ -630,6 +630,17 @@
           <label>Kullanıcı Adı</label>
           <input type="text" id="authUsername" placeholder="ör. mutlu.guler">
         </div>
+        <div class="auth-field" id="authAccountTypeWrap" style="display:none;">
+          <label>Hesap Türü</label>
+          <select id="authAccountType">
+            <option value="bireysel">Bireysel</option>
+            <option value="firma">Firma</option>
+          </select>
+        </div>
+        <div class="auth-field" id="authCompanyNameWrap" style="display:none;">
+          <label>Firma Adı</label>
+          <input type="text" id="authCompanyName" placeholder="ör. Güler Ticaret Ltd. Şti.">
+        </div>
         <div class="auth-field">
           <label>E-posta</label>
           <input type="email" id="authEmail" placeholder="ornek@eposta.com" required>
@@ -698,17 +709,29 @@
       <span class="nav-drawer-chevron" id="hesaplamaChevron">▾</span>
     </button>
     <div class="nav-drawer" id="hesaplamaDrawer" hidden>
-      <button class="nav-item nav-subitem" data-target="Ortalama_Vade_Hesaplama.html" data-title="Ortalama Vade Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Ortalama_Vade_Hesaplama.html" data-fav-title="Ortalama Vade Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title">Ortalama Vade Hesaplama</span></span>
-      </button>
       <button class="nav-item nav-subitem" data-target="Rotatif_Kredi_Hesaplama.html" data-title="Rotatif Kredi Hesaplama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Rotatif_Kredi_Hesaplama.html" data-fav-title="Rotatif Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title">Rotatif Kredi Hesaplama</span></span>
       </button>
+      <button class="nav-item nav-subitem" data-target="Ortalama_Vade_Hesaplama.html" data-title="Ortalama Vade Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Ortalama_Vade_Hesaplama.html" data-fav-title="Ortalama Vade Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title">Ortalama Vade Hesaplama</span></span>
+      </button>
       <button class="nav-item nav-subitem" data-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-title="Kredi Kartı Vade Farkı Hesaplama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-fav-title="Kredi Kartı Vade Farkı" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title">Kredi Kartı Vade Farkı</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Vade_Sapmasi_Hesaplama.html" data-title="Vade Sapması Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Vade_Sapmasi_Hesaplama.html" data-fav-title="Vade Sapması Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title">Vade Sapması Hesaplama</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Vadeli_Mevduat_Faizi_Hesaplama.html" data-title="Vadeli Mevduat Faizi Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Vadeli_Mevduat_Faizi_Hesaplama.html" data-fav-title="Vadeli Mevduat Faizi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title">Vadeli Mevduat Faizi Hesaplama</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Kredi_Tekliflerini_Karsilastir.html" data-title="Kredi Tekliflerini Karşılaştır">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Kredi_Tekliflerini_Karsilastir.html" data-fav-title="Kredi Tekliflerini Karşılaştır" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title">Kredi Tekliflerini Karşılaştır</span></span>
       </button>
     </div>
 
@@ -1187,7 +1210,8 @@
     deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment
+    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment,
+    query, where
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -1224,6 +1248,16 @@
       if(data.isPremium){
         document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
         window.adsbygoogle = { push: function(){} }; // olası hataları sessizce yut
+      }
+      // Firma / Ekip: mevcut firma bilgisini yerel önbelleğe yaz
+      if(data.companyId){
+        localStorage.setItem('mmg_company_id', data.companyId);
+        localStorage.setItem('mmg_company_role', data.companyRole || 'member');
+        localStorage.setItem('mmg_company_name', data.companyName || '');
+      } else {
+        localStorage.removeItem('mmg_company_id');
+        localStorage.removeItem('mmg_company_role');
+        localStorage.removeItem('mmg_company_name');
       }
     } catch(e){ /* sessizce geç */ }
   });
@@ -1324,9 +1358,17 @@
   const passwordConfirmWrap = document.getElementById('authPasswordConfirmWrap');
   const usernameWrap = document.getElementById('authUsernameWrap');
   const referralWrap = document.getElementById('authReferralWrap');
+  const accountTypeWrap = document.getElementById('authAccountTypeWrap');
+  const companyNameWrap = document.getElementById('authCompanyNameWrap');
+  const authAccountType = document.getElementById('authAccountType');
   const guestBtn = document.getElementById('guestBtn');
 
   let authMode = 'login';
+
+  function updateCompanyNameVisibility(){
+    companyNameWrap.style.display = (authMode === 'signup' && authAccountType.value === 'firma') ? 'block' : 'none';
+  }
+  authAccountType.addEventListener('change', updateCompanyNameVisibility);
 
   function setAuthMode(mode){
     authMode = mode;
@@ -1335,6 +1377,8 @@
     passwordConfirmWrap.style.display = mode === 'signup' ? 'block' : 'none';
     usernameWrap.style.display = mode === 'signup' ? 'block' : 'none';
     referralWrap.style.display = mode === 'signup' ? 'block' : 'none';
+    accountTypeWrap.style.display = mode === 'signup' ? 'block' : 'none';
+    updateCompanyNameVisibility();
     authTitle.textContent = mode === 'login' ? 'Tekrar hoş geldiniz' : 'Hesap oluşturun';
     authSub.textContent = mode === 'login' ? 'Kaldığınız yerden devam etmek için giriş yapın' : 'Oranlarınızı ve tercihlerinizi kaydetmek için ücretsiz hesap açın';
     authSubmitBtn.textContent = mode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur';
@@ -1487,6 +1531,11 @@
   if(localStorage.getItem('mmg_auth_state')){
     closeAuthOverlay();
   }
+  // "Misafir modundasınız" rozetine tıklanınca yönlendirilen ?auth=1 ile
+  // giriş/kayıt ekranını zorla açar (misafir modunda bile olsa)
+  if(new URLSearchParams(window.location.search).get('auth') === '1'){
+    openAuthOverlay();
+  }
   // Güvenlik önlemi: Kayıtlı durum "misafir" olduğu halde Firebase'de hâlâ
   // gerçek bir oturum (örn. eski admin girişi) açıksa, tutarsızlığı önlemek
   // için o oturumu kapat.
@@ -1522,6 +1571,70 @@
       return next;
     });
     return newNumber;
+  }
+
+  // ---- Firma / Ekip: yeni bir firma hesabı kurar, kuran kişi 'owner' (sahibi) olur ----
+  async function createCompanyForUser(user, companyName, username){
+    const companyRef = doc(collection(db, 'companies'));
+    const companyId = companyRef.id;
+    await setDoc(companyRef, {
+      name: companyName,
+      ownerUid: user.uid,
+      groupId: null,
+      createdAt: serverTimestamp()
+    });
+    await setDoc(doc(db, 'companies', companyId, 'members', user.uid), {
+      email: user.email || '',
+      username: username || '',
+      role: 'owner',
+      joinedAt: serverTimestamp()
+    });
+    await setDoc(doc(db, 'users', user.uid), {
+      companyId: companyId, companyRole: 'owner', companyName: companyName
+    }, { merge: true });
+    localStorage.setItem('mmg_company_id', companyId);
+    localStorage.setItem('mmg_company_role', 'owner');
+    localStorage.setItem('mmg_company_name', companyName);
+    return companyId;
+  }
+
+  // ---- Firma / Ekip: bekleyen bir davet varsa kullanıcıyı ilgili firmaya üye olarak ekler ----
+  async function applyPendingInviteIfAny(user, username){
+    if(!user || !user.email) return;
+    try{
+      const inviteRef = doc(db, 'invites', user.email.toLowerCase());
+      const inviteSnap = await getDoc(inviteRef);
+      if(!inviteSnap.exists()) return;
+      const invite = inviteSnap.data();
+      await setDoc(doc(db, 'companies', invite.companyId, 'members', user.uid), {
+        email: user.email || '', username: username || '', role: 'member', joinedAt: serverTimestamp()
+      });
+      await setDoc(doc(db, 'users', user.uid), {
+        companyId: invite.companyId, companyRole: 'member', companyName: invite.companyName || ''
+      }, { merge: true });
+      await deleteDoc(inviteRef);
+      localStorage.setItem('mmg_company_id', invite.companyId);
+      localStorage.setItem('mmg_company_role', 'member');
+      localStorage.setItem('mmg_company_name', invite.companyName || '');
+      try{ alert('🎉 "' + (invite.companyName || 'Firma') + '" hesabına üye olarak eklendiniz.'); }catch(e){}
+    } catch(e){ /* davet kontrol edilemezse sessizce geç */ }
+  }
+
+  // ---- Firma / Ekip: giriş sonrası kullanıcının firma bilgisini yerel önbelleğe yükler ----
+  async function syncCompanyCache(uid){
+    try{
+      const snap = await getDoc(doc(db, 'users', uid));
+      const data = snap.exists() ? snap.data() : {};
+      if(data.companyId){
+        localStorage.setItem('mmg_company_id', data.companyId);
+        localStorage.setItem('mmg_company_role', data.companyRole || 'member');
+        localStorage.setItem('mmg_company_name', data.companyName || '');
+      } else {
+        localStorage.removeItem('mmg_company_id');
+        localStorage.removeItem('mmg_company_role');
+        localStorage.removeItem('mmg_company_name');
+      }
+    } catch(e){ /* sessizce geç */ }
   }
 
   guestBtn.addEventListener('click', async () => {
@@ -1574,6 +1687,8 @@
       setAvatar(avatar);
       localStorage.setItem('mmg_remember', remember ? '1' : '0');
       updateUserBadge(customerNumber, username);
+      await applyPendingInviteIfAny(user, username);
+      await syncCompanyCache(user.uid);
       closeAuthOverlay();
     } catch(err){
       if(err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request'){
@@ -1686,6 +1801,19 @@
         } else if(referralLimitReached){
           alert('"' + referralCode + '" kodu kullanım limitine ulaştığı için geçerli değil.');
         }
+
+        // ---- Firma / Ekip: Hesap Türü'ne göre firma kur ya da bekleyen daveti uygula ----
+        const accountType = document.getElementById('authAccountType').value;
+        if(accountType === 'firma'){
+          const companyNameInput = document.getElementById('authCompanyName').value.trim();
+          if(companyNameInput){
+            try{ await createCompanyForUser(cred.user, companyNameInput, username); }
+            catch(companyErr){ /* firma kurulamazsa sessizce geç, kullanıcı sonradan Hesabım'dan tekrar deneyebilir */ }
+          }
+        } else {
+          await applyPendingInviteIfAny(cred.user, username);
+        }
+
         closeAuthOverlay();
       } else {
         const cred = await signInWithEmailAndPassword(auth, email, password);
@@ -1709,6 +1837,8 @@
         if(profile) localStorage.setItem('mmg_profile', JSON.stringify(profile));
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
+        await applyPendingInviteIfAny(cred.user, username);
+        await syncCompanyCache(cred.user.uid);
         closeAuthOverlay();
       }
     } catch(err){
@@ -1727,6 +1857,10 @@
     localStorage.removeItem('mmg_username');
     localStorage.removeItem('mmg_avatar');
     localStorage.removeItem('mmg_profile');
+    localStorage.removeItem('mmg_company_id');
+    localStorage.removeItem('mmg_company_role');
+    localStorage.removeItem('mmg_company_name');
+    localStorage.removeItem('mmg_active_company_id');
     setAvatar(null);
     updateUserBadge();
     document.getElementById('authEmail').value = '';
