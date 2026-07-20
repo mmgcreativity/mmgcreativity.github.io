@@ -96,16 +96,20 @@ function mmgApplyTurkishFont(doc){
   const auth = getAuth(fbApp);
   const db = getFirestore(fbApp);
 
-  window.mmgCloud = { auth, db, doc, getDoc, setDoc, currentUser: null };
+  window.mmgCloud = { auth, db, doc, getDoc, setDoc, currentUser: null, scopeId: null, scopeCollection: 'users' };
 
   onAuthStateChanged(auth, async (user) => {
     window.mmgCloud.currentUser = user;
+    window.mmgCloud.scopeId = user ? user.uid : null;
+    window.mmgCloud.scopeCollection = 'users';
     document.dispatchEvent(new CustomEvent('mmg-auth-ready', { detail: { user } }));
     // Premium üye reklamsız deneyim
     if(user){
       try{
         const snap = await getDoc(doc(db, 'users', user.uid));
         const data = snap.exists() ? snap.data() : {};
+        // Firma/Ekip: kullanıcı bir firmaya bağlıysa veriler kişi yerine firma altında paylaşılır
+        if(data.companyId){ window.mmgCloud.scopeId = data.companyId; window.mmgCloud.scopeCollection = 'companies'; }
         try{ gtag('set', 'user_properties', { user_type: data.isPremium ? 'premium' : 'member' }); }catch(e){}
         if(data.isPremium){
           document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
@@ -115,6 +119,7 @@ function mmgApplyTurkishFont(doc){
     } else {
       try{ gtag('set', 'user_properties', { user_type: 'guest' }); }catch(e){}
     }
+    document.dispatchEvent(new CustomEvent('mmg-scope-ready', { detail: { scopeId: window.mmgCloud.scopeId } }));
   });
   try{ gtag('event', 'tool_used', { tool_name: 'talimat_hazirlama' }); }catch(e){}
 </script>
@@ -972,7 +977,7 @@ function mmgApplyTurkishFont(doc){
   async function loadSavedData(uid){
     try{
       const cloud = window.mmgCloud;
-      const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', uid, 'talimat', 'kayitliMuhataplar'));
+      const snap = await cloud.getDoc(cloud.doc(cloud.db, cloud.scopeCollection, uid, 'talimat', 'kayitliMuhataplar'));
       if(snap.exists()){
         const d = snap.data();
         savedGonderenFirms = d.gonderenFirms || [];
@@ -992,7 +997,7 @@ function mmgApplyTurkishFont(doc){
     const user = window.mmgCloud.currentUser;
     if(!user) return; // önizleme modunda bulut kaydı atlanır, sadece bellekte tutulur
     const cloud = window.mmgCloud;
-    await cloud.setDoc(cloud.doc(cloud.db, 'users', user.uid, 'talimat', 'kayitliMuhataplar'), {
+    await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'talimat', 'kayitliMuhataplar'), {
       gonderenFirms: savedGonderenFirms,
       aliciFirms: savedAliciFirms,
       ibans: savedIbans,
@@ -1217,13 +1222,13 @@ function mmgApplyTurkishFont(doc){
   document.getElementById('addAliciRowBtn').addEventListener('click', addAliciRow);
   addAliciRow(); // Başlangıçta bir satır otomatik eklenir
 
-  document.addEventListener('mmg-auth-ready', (e) => {
-    const user = e.detail.user;
-    if(user){
-      loadSavedData(user.uid);
-      loadCompanyLogo(user.uid);
-      loadStamp(user.uid);
-      loadHistory(user.uid);
+  document.addEventListener('mmg-scope-ready', (e) => {
+    if(window.mmgCloud && window.mmgCloud.currentUser){
+      const scopeId = e.detail.scopeId;
+      loadSavedData(scopeId);
+      loadCompanyLogo(scopeId);
+      loadStamp(scopeId);
+      loadHistory(scopeId);
     }
   });
 
@@ -1262,7 +1267,7 @@ function mmgApplyTurkishFont(doc){
   async function loadStamp(uid){
     try{
       const cloud = window.mmgCloud;
-      const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', uid, 'talimat', 'firmaProfili'));
+      const snap = await cloud.getDoc(cloud.doc(cloud.db, cloud.scopeCollection, uid, 'talimat', 'firmaProfili'));
       if(snap.exists() && snap.data().stampBase64){
         const d = snap.data();
         applyStamp(d.stampBase64, (d.stampW && d.stampH) ? { w: d.stampW, h: d.stampH } : null);
@@ -1279,7 +1284,7 @@ function mmgApplyTurkishFont(doc){
     if(!user) return;
     try{
       const cloud = window.mmgCloud;
-      await cloud.setDoc(cloud.doc(cloud.db, 'users', user.uid, 'talimat', 'firmaProfili'), {
+      await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'talimat', 'firmaProfili'), {
         stampBase64: dataUrl,
         stampW: dims ? dims.w : null,
         stampH: dims ? dims.h : null
@@ -1369,7 +1374,7 @@ function mmgApplyTurkishFont(doc){
   async function loadCompanyLogo(uid){
     try{
       const cloud = window.mmgCloud;
-      const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', uid, 'talimat', 'firmaProfili'));
+      const snap = await cloud.getDoc(cloud.doc(cloud.db, cloud.scopeCollection, uid, 'talimat', 'firmaProfili'));
       if(snap.exists() && snap.data().logoBase64){
         const d = snap.data();
         applyCompanyLogo(d.logoBase64, (d.logoW && d.logoH) ? { w: d.logoW, h: d.logoH } : null);
@@ -1386,7 +1391,7 @@ function mmgApplyTurkishFont(doc){
     if(!user) return;
     try{
       const cloud = window.mmgCloud;
-      await cloud.setDoc(cloud.doc(cloud.db, 'users', user.uid, 'talimat', 'firmaProfili'), {
+      await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'talimat', 'firmaProfili'), {
         logoBase64: dataUrl,
         logoW: dims ? dims.w : null,
         logoH: dims ? dims.h : null
@@ -1558,7 +1563,7 @@ function mmgApplyTurkishFont(doc){
   async function loadHistory(uid){
     try{
       const cloud = window.mmgCloud;
-      const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', uid, 'talimat', 'gecmis'));
+      const snap = await cloud.getDoc(cloud.doc(cloud.db, cloud.scopeCollection, uid, 'talimat', 'gecmis'));
       if(snap.exists()){
         talimatHistory = snap.data().entries || [];
       }
@@ -1573,7 +1578,7 @@ function mmgApplyTurkishFont(doc){
     if(!user) return;
     try{
       const cloud = window.mmgCloud;
-      await cloud.setDoc(cloud.doc(cloud.db, 'users', user.uid, 'talimat', 'gecmis'), { entries: talimatHistory });
+      await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'talimat', 'gecmis'), { entries: talimatHistory });
     } catch(err){
       // Sessizce geç
     }
@@ -2366,7 +2371,7 @@ function mmgApplyTurkishFont(doc){
     }
     try{
       const cloud = window.mmgCloud;
-      await cloud.setDoc(cloud.doc(cloud.db, 'users', user.uid, 'talimat', 'kayitliMuhataplar'), { muhataplar: savedMuhataplar }, { merge: true });
+      await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'talimat', 'kayitliMuhataplar'), { muhataplar: savedMuhataplar }, { merge: true });
       flashButton(btnId, true, 'Muhatap kaydedildi.');
     } catch(err){
       flashButton(btnId, false, 'Kaydedilirken bir hata oluştu.');

@@ -63,15 +63,19 @@ function mmgApplyTurkishFont(doc){
   const fbApp = initializeApp(firebaseConfig);
   const auth = getAuth(fbApp);
   const db = getFirestore(fbApp);
-  window.mmgCloud = { auth, db, doc, getDoc, currentUser: null, isPremium: false, isAdmin: false };
+  window.mmgCloud = { auth, db, doc, getDoc, currentUser: null, isPremium: false, isAdmin: false, scopeId: null, scopeCollection: 'users' };
   onAuthStateChanged(auth, async (user) => {
     window.mmgCloud.currentUser = user;
+    window.mmgCloud.scopeId = user ? user.uid : null;
+    window.mmgCloud.scopeCollection = 'users';
     if(user){
       try{
         const snap = await getDoc(doc(db, 'users', user.uid));
         const data = snap.exists() ? snap.data() : {};
         window.mmgCloud.isPremium = data.isPremium === true;
         window.mmgCloud.isAdmin = data.isAdmin === true;
+        // Firma/Ekip: kullanıcı bir firmaya bağlıysa veriler kişi yerine firma altında paylaşılır
+        if(data.companyId){ window.mmgCloud.scopeId = data.companyId; window.mmgCloud.scopeCollection = 'companies'; }
         try{ gtag('set', 'user_properties', { user_type: data.isPremium ? 'premium' : 'member' }); }catch(e){}
         if(data.isPremium){
           document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
@@ -83,6 +87,7 @@ function mmgApplyTurkishFont(doc){
       window.mmgCloud.isAdmin = false;
       try{ gtag('set', 'user_properties', { user_type: 'guest' }); }catch(e){}
     }
+    document.dispatchEvent(new CustomEvent('mmg-scope-ready', { detail: { scopeId: window.mmgCloud.scopeId } }));
     if(typeof updatePremiumGateUI === 'function') updatePremiumGateUI();
   });
   try{ gtag('event', 'tool_used', { tool_name: 'rotatif_kredi_hesaplama' }); }catch(e){}
@@ -92,7 +97,7 @@ function mmgApplyTurkishFont(doc){
     try{
       const user = window.mmgCloud.currentUser;
       if(!user) return result;
-      const snap = await getDoc(doc(db, 'users', user.uid, 'talimat', 'firmaProfili'));
+      const snap = await getDoc(doc(db, window.mmgCloud.scopeCollection, window.mmgCloud.scopeId, 'talimat', 'firmaProfili'));
       if(snap.exists()){
         const d = snap.data();
         result.logo = d.logoBase64 || null; result.logoW = d.logoW || null; result.logoH = d.logoH || null;

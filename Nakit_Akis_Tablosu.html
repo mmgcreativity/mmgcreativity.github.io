@@ -45,10 +45,12 @@
   const auth = getAuth(fbApp);
   const db = getFirestore(fbApp);
 
-  window.mmgCloud = { auth, db, doc, getDoc, setDoc, deleteDoc, collection, getDocs, currentUser: null, isPremium: false, isAdmin: false };
+  window.mmgCloud = { auth, db, doc, getDoc, setDoc, deleteDoc, collection, getDocs, currentUser: null, isPremium: false, isAdmin: false, scopeId: null, scopeCollection: 'users' };
 
   onAuthStateChanged(auth, async (user) => {
     window.mmgCloud.currentUser = user;
+    window.mmgCloud.scopeId = user ? user.uid : null;
+    window.mmgCloud.scopeCollection = 'users';
     document.dispatchEvent(new CustomEvent('mmg-auth-ready', { detail: { user } }));
     let isPremium = false, isAdmin = false, trialStartMs = null;
     if(user){
@@ -57,6 +59,8 @@
         const data = snap.exists() ? snap.data() : {};
         isPremium = data.isPremium === true;
         isAdmin = data.isAdmin === true;
+        // Firma/Ekip: kullanıcı bir firmaya bağlıysa veriler kişi yerine firma altında paylaşılır
+        if(data.companyId){ window.mmgCloud.scopeId = data.companyId; window.mmgCloud.scopeCollection = 'companies'; }
         if(data.createdAt && typeof data.createdAt.toMillis === 'function'){
           trialStartMs = data.createdAt.toMillis();
         }
@@ -81,6 +85,7 @@
     window.mmgCloud.isAdmin = isAdmin;
     try{ gtag('set', 'user_properties', { user_type: !user ? 'guest' : (isPremium ? 'premium' : 'member') }); }catch(e){}
     try{ gtag('event', 'tool_used', { tool_name: 'nakit_akis_tablosu' }); }catch(e){}
+    document.dispatchEvent(new CustomEvent('mmg-scope-ready', { detail: { scopeId: window.mmgCloud.scopeId } }));
     applyTrialGate(isPremium, isAdmin, trialStartMs);
   });
 
@@ -773,7 +778,7 @@
     if(!isMember()) return;
     try{
       const cloud = window.mmgCloud;
-      await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk), {
+      await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'cashflow', mk), {
         data: monthData, updatedAt: new Date().toISOString()
       });
       showCloudMsg('Kaydedildi ✓');
@@ -784,7 +789,7 @@
     if(!isMember()) return null;
     try{
       const cloud = window.mmgCloud;
-      const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk));
+      const snap = await cloud.getDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'cashflow', mk));
       if(snap.exists()) return snap.data().data || null;
     }catch(err){ /* sessizce geç */ }
     return null;
@@ -865,7 +870,7 @@
       try{ localData = JSON.parse(localStorage.getItem(key)); }catch(e){ continue; }
       if(!localData || Object.keys(localData).length === 0) continue;
       try{
-        const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk));
+        const snap = await cloud.getDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'cashflow', mk));
         if(snap.exists() && snap.data().data){
           const cloudData = snap.data().data;
           const merged = Object.assign({}, cloudData);
@@ -882,11 +887,11 @@
             merged[dk] = cloudDay;
           });
           if(changed){
-            await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk), { data: merged, updatedAt: new Date().toISOString() });
+            await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'cashflow', mk), { data: merged, updatedAt: new Date().toISOString() });
             migratedAny = true;
           }
         } else {
-          await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk), { data: localData, updatedAt: new Date().toISOString() });
+          await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'cashflow', mk), { data: localData, updatedAt: new Date().toISOString() });
           migratedAny = true;
         }
       }catch(err){ /* sessizce geç, bir sonraki aya devam et */ }
@@ -894,8 +899,10 @@
     return migratedAny;
   }
 
-  document.addEventListener('mmg-auth-ready', async () => {
+  document.addEventListener('mmg-auth-ready', () => {
     updateMemberGate();
+  });
+  document.addEventListener('mmg-scope-ready', async () => {
     if(isMember() && window.mmgMergeCloudPaymentsAndSync){
       await window.mmgMergeCloudPaymentsAndSync(); // bulut ödemelerini kontrol et, vadesi gelenleri işle
     }
@@ -1295,7 +1302,7 @@
     if(isMember()){
       try{
         const cloud = window.mmgCloud;
-        const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk));
+        const snap = await cloud.getDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'cashflow', mk));
         if(snap.exists() && snap.data().data) data = snap.data().data;
       }catch(err){ /* sessizce geç */ }
     }
@@ -1480,7 +1487,7 @@
     if(isMember()){
       try{
         const cloud = window.mmgCloud;
-        await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'archive', entry.id), entry);
+        await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'archive', entry.id), entry);
       }catch(err){ /* sessizce geç, yerelde zaten kayıtlı */ }
     }
   }
@@ -1491,7 +1498,7 @@
     if(isMember()){
       try{
         const cloud = window.mmgCloud;
-        await cloud.deleteDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'archive', id));
+        await cloud.deleteDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'archive', id));
       }catch(err){ /* sessizce geç */ }
     }
   }
@@ -1502,7 +1509,7 @@
     if(isMember()){
       try{
         const cloud = window.mmgCloud;
-        const snaps = await cloud.getDocs(cloud.collection(cloud.db, 'users', cloud.currentUser.uid, 'archive'));
+        const snaps = await cloud.getDocs(cloud.collection(cloud.db, cloud.scopeCollection, cloud.scopeId, 'archive'));
         snaps.forEach(d => cloudList.push(d.data()));
       }catch(err){ /* sessizce geç */ }
     }

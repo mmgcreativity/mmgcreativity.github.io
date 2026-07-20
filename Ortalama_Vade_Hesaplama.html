@@ -44,11 +44,22 @@
   const auth = getAuth(fbApp);
   const db = getFirestore(fbApp);
 
-  window.mmgCloud = { auth, db, doc, getDoc, setDoc, currentUser: null };
+  window.mmgCloud = { auth, db, doc, getDoc, setDoc, currentUser: null, scopeId: null, scopeCollection: 'users' };
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     window.mmgCloud.currentUser = user;
+    window.mmgCloud.scopeId = user ? user.uid : null;
+    window.mmgCloud.scopeCollection = 'users';
     document.dispatchEvent(new CustomEvent('mmg-auth-ready', { detail: { user } }));
+    if(user){
+      try{
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        const data = snap.exists() ? snap.data() : {};
+        // Firma/Ekip: kullanıcı bir firmaya bağlıysa veriler kişi yerine firma altında paylaşılır
+        if(data.companyId){ window.mmgCloud.scopeId = data.companyId; window.mmgCloud.scopeCollection = 'companies'; }
+      } catch(e){ /* sessizce geç */ }
+    }
+    document.dispatchEvent(new CustomEvent('mmg-scope-ready', { detail: { scopeId: window.mmgCloud.scopeId } }));
   });
 </script>
 <meta charset="UTF-8">
@@ -402,7 +413,7 @@
   async function loadCloudRates(uid){
     try{
       const cloud = window.mmgCloud;
-      const snap = await cloud.getDoc(cloud.doc(cloud.db, 'users', uid, 'rates', 'kkVadeFarki'));
+      const snap = await cloud.getDoc(cloud.doc(cloud.db, cloud.scopeCollection, uid, 'rates', 'kkVadeFarki'));
       if(snap.exists()){
         const data = snap.data();
         if(data.taksitVades){ for(const k in data.taksitVades){ taksitVades[k] = data.taksitVades[k]; } }
@@ -417,11 +428,12 @@
   }
 
   document.addEventListener('mmg-auth-ready', (e) => {
-    const user = e.detail.user;
-    if(user){
-      loadCloudRates(user.uid);
-    }
     updateMemberGate();
+  });
+  document.addEventListener('mmg-scope-ready', (e) => {
+    if(window.mmgCloud && window.mmgCloud.currentUser){
+      loadCloudRates(e.detail.scopeId);
+    }
   });
 
   // ---- Excel/PDF/Şablon araçlarını yalnızca üyelere açık tutan kontrol ----

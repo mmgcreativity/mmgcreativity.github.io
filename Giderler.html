@@ -42,16 +42,20 @@
   const auth = getAuth(fbApp);
   const db = getFirestore(fbApp);
 
-  window.mmgCloud = { auth, db, doc, getDoc, setDoc, deleteDoc, collection, getDocs, currentUser: null };
+  window.mmgCloud = { auth, db, doc, getDoc, setDoc, deleteDoc, collection, getDocs, currentUser: null, scopeId: null, scopeCollection: 'users' };
 
   onAuthStateChanged(auth, async (user) => {
     window.mmgCloud.currentUser = user;
+    // Firma/Ekip: kullanıcı bir firmaya bağlıysa veriler kişi yerine firma altında paylaşılır
+    window.mmgCloud.scopeId = user ? user.uid : null;
+    window.mmgCloud.scopeCollection = 'users';
     document.dispatchEvent(new CustomEvent('mmg-auth-ready', { detail: { user } }));
     // Premium üye reklamsız deneyim
     if(user){
       try{
         const snap = await getDoc(doc(db, 'users', user.uid));
         const data = snap.exists() ? snap.data() : {};
+        if(data.companyId){ window.mmgCloud.scopeId = data.companyId; window.mmgCloud.scopeCollection = 'companies'; }
         try{ gtag('set', 'user_properties', { user_type: data.isPremium ? 'premium' : 'member' }); }catch(e){}
         if(data.isPremium){
           document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
@@ -61,6 +65,7 @@
     } else {
       try{ gtag('set', 'user_properties', { user_type: 'guest' }); }catch(e){}
     }
+    document.dispatchEvent(new CustomEvent('mmg-scope-ready', { detail: { scopeId: window.mmgCloud.scopeId } }));
   });
   try{ gtag('event', 'tool_used', { tool_name: 'giderler' }); }catch(e){}
 </script>
@@ -669,7 +674,7 @@
     if(isMember()){
       try{
         const cloud = window.mmgCloud;
-        await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'odemeler', item.id), item);
+        await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'odemeler', item.id), item);
       }catch(e){ /* sessizce geç */ }
     }
 
@@ -832,8 +837,10 @@
   runLocalSyncAndReport();
   renderAll();
 
-  document.addEventListener('mmg-auth-ready', async (e) => {
+  document.addEventListener('mmg-auth-ready', (e) => {
     isMemberFlag = !!e.detail.user;
+  });
+  document.addEventListener('mmg-scope-ready', async (e) => {
     if(isMemberFlag && window.mmgMergeCloudPaymentsAndSync){
       showSyncStatus('Bulut verileriniz kontrol ediliyor…');
       await window.mmgMergeCloudPaymentsAndSync();
@@ -972,7 +979,7 @@
         if(isMember()){
           try{
             const cloud = window.mmgCloud;
-            await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'odemeler', item.id), item);
+            await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'odemeler', item.id), item);
           }catch(err){ /* sessizce geç */ }
         }
       }

@@ -20,9 +20,9 @@
     --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html,body{height:100%;}
   html{background:var(--bg);}
   html,body{overscroll-behavior-y:none;}
+  html,body{height:100%;}
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
@@ -101,12 +101,27 @@
   }
   .saved-msg.show{ display:block; }
   .referral-note{ color:var(--muted); font-size:13px; margin-bottom:18px; line-height:1.6; }
+  #referralNote{ white-space:nowrap; }
+  @media (max-width:600px){
+    #referralNote{ white-space:normal; }
+  }
   .referral-locked-btn{
     display:inline-flex; align-items:center; gap:8px; text-decoration:none;
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:9px;
     padding:12px 16px; color:var(--text); font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px;
   }
   .auth-field input:disabled{ opacity:0.55; cursor:not-allowed; }
+  .preview-toggle-btn{
+    background:transparent; border:1px solid var(--hairline); border-radius:7px; color:var(--brass);
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; padding:6px 10px; cursor:pointer; flex-shrink:0;
+    transition:border-color .15s ease;
+  }
+  .preview-toggle-btn:hover{ border-color:var(--brass-dim); }
+  .preview-badge{
+    display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--amber);
+    border:1px solid rgba(227,162,60,0.35); background:rgba(227,162,60,0.08); border-radius:6px;
+    padding:3px 8px; margin-bottom:14px;
+  }
 
   .company-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
   .company-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px; }
@@ -197,7 +212,7 @@
         <label>Hesap Türü</label>
         <select id="profileType">
           <option value="bireysel">Bireysel</option>
-          <option value="firma">Firma</option>
+          <option value="firma">Kurumsal</option>
         </select>
       </div>
       <div class="auth-field">
@@ -225,7 +240,7 @@
   <div class="col-stack">
   <div class="card" id="referralCard">
     <h2>Referans Kodu</h2>
-    <p class="referral-note" id="referralNote">Bir referans kodunuz mu var? Girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.</p>
+    <p class="referral-note" id="referralNote">Referans kodu girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.</p>
     <form id="referralForm">
       <div class="auth-field" style="display:flex; gap:8px; margin-bottom:6px;">
         <input type="text" id="referralInput" placeholder="ör. AHMET10" style="flex:1; text-transform:uppercase;">
@@ -237,25 +252,21 @@
   </div>
 
   <div class="card" id="companyCard">
-    <h2>Firma / Ekip</h2>
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;">
+      <h2 style="margin-bottom:0;">Kullanıcı Grubu</h2>
+      <button type="button" id="companyPreviewToggle" class="preview-toggle-btn" style="display:none;">Dolu örnek görünüm</button>
+    </div>
 
     <div id="companyLocked" style="display:none;">
-      <p class="referral-note">Firma/ekip özellikleri için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz.</p>
+      <p class="referral-note">Kullanıcı grubu özellikleri için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz.</p>
     </div>
 
     <div id="companyNone" style="display:none;">
-      <p class="referral-note">Şu anda bireysel bir hesaptır. Bir firma hesabı kurarak diğer kullanıcıları (alt kullanıcı olarak) ekleyip aynı verileri birlikte görüp işleyebilirsiniz.</p>
-      <form id="companyCreateForm">
-        <div class="auth-field">
-          <label>Firma Adı</label>
-          <input type="text" id="companyCreateName" placeholder="ör. Güler Ticaret Ltd. Şti." required>
-        </div>
-        <div class="auth-error" id="companyCreateError"></div>
-        <button type="submit" class="auth-submit" id="companyCreateBtn">Firma Oluştur</button>
-      </form>
+      <p class="referral-note" id="companyNoneNote">Şu anda bireysel bir hesaptır. Soldaki Profil Bilgileri'nden Hesap Türü'nü "Kurumsal" seçip firma adınızı girerek kaydedin — burada otomatik olarak kullanıcı grubunuz açılır ve diğer kullanıcıları (alt kullanıcı olarak) ekleyip aynı verileri birlikte görüp işleyebilirsiniz.</p>
     </div>
 
     <div id="companyActive" style="display:none;">
+      <div class="preview-badge" id="companyPreviewBadge" style="display:none;">Bu bir örnek görünümdür — gerçek veri değildir</div>
       <div class="company-header">
         <div>
           <div class="company-name" id="companyNameText">—</div>
@@ -267,7 +278,7 @@
         <div class="mini-label">Şirket Kodu <span style="font-weight:400; color:var(--muted);">(gruplama için paylaşın)</span></div>
         <div class="code-box" id="companyIdBox">—</div>
 
-        <div class="mini-label" style="margin-top:22px;">Üye Davet Et</div>
+        <div class="mini-label" style="margin-top:22px;">Kullanıcı Ekle</div>
         <form id="inviteForm">
           <div class="auth-field" style="display:flex; gap:8px; margin-bottom:6px;">
             <input type="email" id="inviteEmail" placeholder="ornek@eposta.com" style="flex:1;" required>
@@ -279,11 +290,11 @@
         <div id="pendingInvitesList" class="member-list"></div>
       </div>
 
-      <div class="mini-label" style="margin-top:22px;">Üyeler</div>
+      <div class="mini-label" style="margin-top:22px;">Kullanıcılar</div>
       <div id="membersList" class="member-list"><p class="referral-note">Yükleniyor...</p></div>
 
       <div id="leaveCompanyWrap" style="display:none; margin-top:18px;">
-        <button type="button" id="leaveCompanyBtn" class="danger-btn">Firmadan Ayrıl</button>
+        <button type="button" id="leaveCompanyBtn" class="danger-btn">Gruptan Ayrıl</button>
       </div>
 
       <div id="companyGroupSection" style="display:none; margin-top:26px; border-top:1px solid var(--hairline); padding-top:22px;">
@@ -307,8 +318,6 @@
   </div>
 
   <div class="card danger-card" id="dangerCard" style="display:none;">
-    <h2>Tehlikeli Bölge</h2>
-    <p>Hesabınızı kalıcı olarak silmek, kayıtlı oranlarınızı ve profil bilgilerinizi de kalıcı olarak kaldırır. Bu işlem geri alınamaz.</p>
     <button type="button" id="deleteAccountBtn" class="danger-btn">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
       <span>Hesabımı Kalıcı Olarak Sil</span>
@@ -321,16 +330,16 @@
 <div class="mini-overlay" id="deleteAccountOverlay" hidden>
   <div class="mini-modal">
     <div class="mini-modal-header">
-      <h2>Hesabı Sil</h2>
+      <h2>Şifrenizi Girin</h2>
       <button type="button" class="mini-modal-close" id="deleteAccountClose" title="Kapat">✕</button>
     </div>
-    <p>Bu işlem geri alınamaz. Hesabınız, kayıtlı oranlarınız ve profil bilgileriniz kalıcı olarak silinecek.</p>
-    <div class="auth-field" id="deleteReauthWrap" style="display:none;">
-      <label>Devam etmek için şifrenizi girin</label>
+    <p>Hesabınızı silmek için güvenlik amacıyla şifrenizi tekrar girmeniz gerekiyor.</p>
+    <div class="auth-field" id="deleteReauthWrap">
+      <label>Şifre</label>
       <input type="password" id="deleteReauthPassword" placeholder="••••••••">
     </div>
     <div class="auth-error" id="deleteAccountError"></div>
-    <button type="button" class="auth-submit" id="deleteAccountConfirmBtn" style="background:var(--red);">Evet, Hesabımı Sil</button>
+    <button type="button" class="auth-submit" id="deleteAccountConfirmBtn" style="background:var(--red);">Onayla ve Sil</button>
   </div>
 </div>
 
@@ -389,10 +398,6 @@
   const companyLocked = document.getElementById('companyLocked');
   const companyNone = document.getElementById('companyNone');
   const companyActive = document.getElementById('companyActive');
-  const companyCreateForm = document.getElementById('companyCreateForm');
-  const companyCreateName = document.getElementById('companyCreateName');
-  const companyCreateError = document.getElementById('companyCreateError');
-  const companyCreateBtn = document.getElementById('companyCreateBtn');
   const companyNameText = document.getElementById('companyNameText');
   const companyRoleText = document.getElementById('companyRoleText');
   const companyOwnerOnly = document.getElementById('companyOwnerOnly');
@@ -413,6 +418,45 @@
   const linkCompanyError = document.getElementById('linkCompanyError');
   const switchCompanyWrap = document.getElementById('switchCompanyWrap');
   const switchCompanySelect = document.getElementById('switchCompanySelect');
+  const companyPreviewToggle = document.getElementById('companyPreviewToggle');
+  const companyPreviewBadge = document.getElementById('companyPreviewBadge');
+  const companyNoneNote = document.getElementById('companyNoneNote');
+  let previewOn = false;
+
+  function showCompanyPreview(){
+    previewOn = true;
+    companyPreviewToggle.textContent = 'Örnek görünümü kapat';
+    companyPreviewBadge.style.display = 'block';
+    companyNone.style.display = 'none';
+    companyActive.style.display = 'block';
+    companyNameText.textContent = 'Örnek Ticaret Ltd. Şti.';
+    companyRoleText.textContent = 'Yönetici (Admin)';
+    companyIdBox.textContent = 'ornek-sirket-kodu-123';
+    companyOwnerOnly.style.display = 'block';
+    leaveCompanyWrap.style.display = 'none';
+    pendingInvitesList.innerHTML = memberRowHtml('ayse@ornek.com', 'Davet bekliyor', 'Bekliyor', 'x1', false);
+    membersList.innerHTML =
+      memberRowHtml('Mehmet Güler', 'mehmet@ornek.com', 'Yönetici', 'x2', false) +
+      memberRowHtml('Ayşe Yıldız', 'ayse2@ornek.com', 'Kullanıcı', 'x3', true);
+    companyGroupSection.style.display = 'block';
+    linkCompanyForm.style.display = 'block';
+    groupCompaniesList.innerHTML =
+      memberRowHtml('Örnek Ticaret Ltd. Şti.', 'ornek-sirket-kodu-123', 'Bu firma', 'x4', false) +
+      memberRowHtml('Örnek Lojistik A.Ş.', 'ornek-sirket-kodu-456', 'Bağlı', 'x5', false);
+    switchCompanyWrap.style.display = 'block';
+    switchCompanySelect.innerHTML =
+      '<option>Örnek Ticaret Ltd. Şti.</option><option>Örnek Lojistik A.Ş.</option>';
+  }
+  function hideCompanyPreview(){
+    previewOn = false;
+    companyPreviewToggle.textContent = 'Dolu örnek görünüm';
+    companyPreviewBadge.style.display = 'none';
+    companyActive.style.display = 'none';
+    companyNone.style.display = 'block';
+  }
+  companyPreviewToggle.addEventListener('click', () => {
+    if(previewOn) hideCompanyPreview(); else showCompanyPreview();
+  });
 
 
   const profileType = document.getElementById('profileType');
@@ -467,6 +511,9 @@
     localStorage.setItem('mmg_profile', JSON.stringify(profile));
     profileSaveBtn.disabled = true;
     await saveProfileToCloud(profile);
+    if(auth.currentUser && profile.type === 'firma' && (!currentUserData || !currentUserData.companyId) && profile.name){
+      await createCompanyFromProfileSave(profile.name);
+    }
     profileSaveBtn.disabled = false;
     profileSavedMsg.classList.add('show');
     setTimeout(() => profileSavedMsg.classList.remove('show'), 2000);
@@ -474,7 +521,9 @@
 
   function lockReferralCard(message){
     referralNote.textContent = message;
-    referralForm.style.display = 'none';
+    referralForm.style.display = 'block';
+    referralInput.disabled = true;
+    referralSubmitBtn.disabled = true;
   }
   function unlockReferralCard(noteText){
     referralNote.textContent = noteText;
@@ -512,7 +561,7 @@
     } catch(e){ /* sessizce geç */ }
 
     companyNameText.textContent = companyDoc.name || data.companyName || '(isimsiz firma)';
-    companyRoleText.textContent = isOwner ? 'Firma Sahibi' : 'Üye';
+    companyRoleText.textContent = isOwner ? 'Yönetici (Admin)' : 'Kullanıcı';
     companyIdBox.textContent = data.companyId;
     companyOwnerOnly.style.display = isOwner ? 'block' : 'none';
     leaveCompanyWrap.style.display = isOwner ? 'none' : 'block';
@@ -525,7 +574,7 @@
       memSnap.forEach(m => {
         const md = m.data();
         const showRemove = isOwner && m.id !== user.uid;
-        rows.push(memberRowHtml(md.username || md.email, md.email || '', md.role === 'owner' ? 'Sahibi' : 'Üye', m.id, showRemove));
+        rows.push(memberRowHtml(md.username || md.email, md.email || '', md.role === 'owner' ? 'Yönetici' : 'Kullanıcı', m.id, showRemove));
       });
       membersList.innerHTML = rows.join('') || '<p class="referral-note">Henüz üye yok.</p>';
       membersList.querySelectorAll('[data-remove-uid]').forEach(btn => {
@@ -599,19 +648,10 @@
     }
   }
 
-  // ---- Firma oluştur ----
-  companyCreateForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    companyCreateError.classList.remove('show');
+  // ---- Kurumsal hesap seçilip kaydedildiğinde otomatik kullanıcı grubu (firma) oluşturur ----
+  async function createCompanyFromProfileSave(name){
     const user = auth.currentUser;
-    if(!user) return;
-    const name = companyCreateName.value.trim();
-    if(!name){
-      companyCreateError.textContent = 'Lütfen bir firma adı girin.';
-      companyCreateError.classList.add('show');
-      return;
-    }
-    companyCreateBtn.disabled = true;
+    if(!user || !name) return;
     try{
       const companyRef = doc(collection(db, 'companies'));
       const companyId = companyRef.id;
@@ -625,13 +665,8 @@
       localStorage.setItem('mmg_company_name', name);
       currentUserData = Object.assign({}, currentUserData, { companyId: companyId, companyRole: 'owner', companyName: name });
       await renderCompanySection(user, currentUserData);
-    } catch(err){
-      companyCreateError.textContent = 'Firma oluşturulamadı, lütfen tekrar deneyin.';
-      companyCreateError.classList.add('show');
-    } finally {
-      companyCreateBtn.disabled = false;
-    }
-  });
+    } catch(err){ /* sessizce geç; kullanıcı profilini tekrar kaydederek deneyebilir */ }
+  }
 
   // ---- Üye davet et ----
   inviteForm.addEventListener('submit', async (e) => {
@@ -775,15 +810,22 @@
     if(!user){
       statusPillText.textContent = 'Misafir modundasınız';
       statusPill.classList.add('clickable');
-      dangerCard.style.display = 'none';
+      dangerCard.style.display = 'block';
       lockReferralCard('Referans kodu girmek için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz.');
       currentUserData = null;
-      companyLocked.style.display = 'block';
-      companyNone.style.display = 'none';
-      companyActive.style.display = 'none';
+      companyLocked.style.display = 'none';
+      companyNoneNote.textContent = 'Kullanıcı grubu özellikleri için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz. Tasarımı incelemek için sağ üstteki "Dolu örnek görünüm" butonunu kullanabilirsiniz.';
+      companyPreviewToggle.style.display = 'inline-block';
+      if(!previewOn){
+        companyNone.style.display = 'block';
+        companyActive.style.display = 'none';
+      }
       return;
     }
     statusPill.classList.remove('clickable');
+    companyPreviewToggle.style.display = 'none';
+    if(previewOn) hideCompanyPreview();
+    companyNoneNote.textContent = 'Şu anda bireysel bir hesaptır. Soldaki Profil Bilgileri\'nden Hesap Türü\'nü "Kurumsal" seçip firma adınızı girerek kaydedin — burada otomatik olarak kullanıcı grubunuz açılır ve diğer kullanıcıları (alt kullanıcı olarak) ekleyip aynı verileri birlikte görüp işleyebilirsiniz.';
     dangerCard.style.display = 'block';
     companyLocked.style.display = 'none';
     try{
@@ -795,7 +837,7 @@
       if(data.referredBy){
         lockReferralCard('"' + data.referredBy + '" referans kodunu zaten kullandınız.');
       } else {
-        unlockReferralCard('Bir referans kodunuz mu var? Girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.');
+        unlockReferralCard('Referans kodu girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.');
       }
       renderCompanySection(user, data);
     } catch(e){
@@ -897,11 +939,13 @@
     deleteAccountError.textContent = '';
   }
 
-  deleteAccountBtn.addEventListener('click', () => {
-    hideDeleteAccountError();
-    deleteReauthWrap.style.display = 'none';
-    deleteReauthPassword.value = '';
-    deleteAccountOverlay.hidden = false;
+  deleteAccountBtn.addEventListener('click', async () => {
+    if(!auth.currentUser){
+      alert('Silinecek bir hesap yok — şu anda misafir modundasınız. Önce giriş yapmanız gerekir.');
+      return;
+    }
+    if(!confirm('Hesabınızı kalıcı olarak silmek istediğinizden emin misiniz?')) return;
+    await attemptAccountDeletion();
   });
   deleteAccountClose.addEventListener('click', () => { deleteAccountOverlay.hidden = true; });
   deleteAccountOverlay.addEventListener('click', (e) => {
@@ -940,13 +984,10 @@
     return map[code] || ('Bir hata oluştu (' + (code || 'bilinmiyor') + '), lütfen tekrar deneyin.');
   }
 
-  deleteAccountConfirmBtn.addEventListener('click', async () => {
+  async function attemptAccountDeletion(){
     const user = auth.currentUser;
-    if(!user){ deleteAccountOverlay.hidden = true; return; }
-    hideDeleteAccountError();
-    deleteAccountConfirmBtn.disabled = true;
-    const originalLabel = deleteAccountConfirmBtn.textContent;
-    deleteAccountConfirmBtn.textContent = 'Siliniyor...';
+    if(!user) return;
+    deleteAccountBtn.disabled = true;
     const uid = user.uid;
     try{
       await deleteAllUserData(uid);
@@ -962,27 +1003,50 @@
             await deleteUser(user);
             finishAccountDeletion();
           } catch(reauthErr){
-            showDeleteAccountError('Kimlik doğrulama başarısız oldu. Lütfen tekrar deneyin.');
+            alert('Kimlik doğrulama başarısız oldu. Lütfen tekrar deneyin.');
           }
         } else {
-          deleteReauthWrap.style.display = 'block';
-          if(!deleteReauthPassword.value){
-            showDeleteAccountError('Devam etmek için lütfen şifrenizi girin, ardından tekrar "Evet, Hesabımı Sil" butonuna basın.');
-          } else {
-            try{
-              const cred = EmailAuthProvider.credential(user.email, deleteReauthPassword.value);
-              await reauthenticateWithCredential(user, cred);
-              await deleteAllUserData(uid);
-              await deleteUser(user);
-              finishAccountDeletion();
-            } catch(reauthErr){
-              showDeleteAccountError(mapFirebaseError(reauthErr.code));
-            }
-          }
+          hideDeleteAccountError();
+          deleteReauthPassword.value = '';
+          deleteAccountOverlay.hidden = false;
         }
       } else {
-        showDeleteAccountError(mapFirebaseError(err.code));
+        alert(mapFirebaseError(err.code));
       }
+    } finally {
+      deleteAccountBtn.disabled = false;
+    }
+  }
+
+  function showDeleteAccountError(msg){
+    deleteAccountError.textContent = msg;
+    deleteAccountError.classList.add('show');
+  }
+  function hideDeleteAccountError(){
+    deleteAccountError.classList.remove('show');
+    deleteAccountError.textContent = '';
+  }
+
+  deleteAccountConfirmBtn.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if(!user){ deleteAccountOverlay.hidden = true; return; }
+    hideDeleteAccountError();
+    if(!deleteReauthPassword.value){
+      showDeleteAccountError('Lütfen şifrenizi girin.');
+      return;
+    }
+    deleteAccountConfirmBtn.disabled = true;
+    const originalLabel = deleteAccountConfirmBtn.textContent;
+    deleteAccountConfirmBtn.textContent = 'Siliniyor...';
+    try{
+      const cred = EmailAuthProvider.credential(user.email, deleteReauthPassword.value);
+      await reauthenticateWithCredential(user, cred);
+      await deleteAllUserData(user.uid);
+      await deleteUser(user);
+      deleteAccountOverlay.hidden = true;
+      finishAccountDeletion();
+    } catch(reauthErr){
+      showDeleteAccountError(mapFirebaseError(reauthErr.code));
     } finally {
       deleteAccountConfirmBtn.disabled = false;
       deleteAccountConfirmBtn.textContent = originalLabel;
