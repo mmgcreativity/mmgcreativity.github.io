@@ -150,11 +150,16 @@ function mmgApplyTurkishFont(doc){
     background:var(--surface-2); border:1px solid var(--hairline);
   }
   .back-link{
+    position:fixed; top:16px; right:68px; z-index:800;
     font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); text-decoration:none;
     border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
     transition:border-color .15s ease, color .15s ease;
   }
   .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  @media (max-width:480px){
+    .back-link{ top:64px; right:8px; }
+  }
   .brand-row-logo{height:38px; width:38px; border-radius:8px; object-fit:cover; flex-shrink:0;}
   .brand-row-fallback{
     display:none; width:38px; height:38px; border-radius:8px; flex-shrink:0;
@@ -277,11 +282,33 @@ function mmgApplyTurkishFont(doc){
   .io-msg{ font-size:12px; margin-top:10px; min-height:0; }
   .io-msg.ok{ color:var(--teal); }
   .io-msg.err{ color:var(--coral); }
-  .table-scroll{overflow-x:auto; scrollbar-width:thin; scrollbar-color:var(--hairline) transparent;}
+  .table-scroll{
+    overflow-x:auto; scrollbar-width:thin; scrollbar-color:var(--hairline) transparent;
+    -webkit-overflow-scrolling:touch; position:relative;
+  }
   .table-scroll::-webkit-scrollbar{height:6px;}
   .table-scroll::-webkit-scrollbar-track{background:transparent;}
   .table-scroll::-webkit-scrollbar-thumb{background:var(--hairline); border-radius:3px;}
   .table-scroll::-webkit-scrollbar-button{display:none; width:0; height:0;}
+  .table-scroll-wrap{position:relative;}
+  .table-scroll-wrap::after{
+    content:""; position:absolute; top:0; right:0; bottom:0; width:26px; pointer-events:none;
+    background:linear-gradient(90deg, transparent, var(--surface,#0d1220) 92%);
+    opacity:1; transition:opacity .15s ease;
+  }
+  .table-scroll-wrap.at-end::after{ opacity:0; }
+  .table-scroll-hint{
+    display:none; align-items:center; gap:6px; font-size:11px; color:var(--muted);
+    font-family:'IBM Plex Mono',monospace; margin-bottom:6px;
+  }
+  .table-scroll-hint svg{ animation:mmg-swipe 1.4s ease-in-out infinite; }
+  @keyframes mmg-swipe{ 0%,100%{ transform:translateX(0); opacity:.5; } 50%{ transform:translateX(5px); opacity:1; } }
+  @media (max-width:700px){
+    .table-scroll-hint{ display:flex; }
+    tbody td:first-child, thead th:first-child{
+      position:sticky; left:0; background:var(--bg,#0a0e17); z-index:2;
+    }
+  }
   table{border-collapse:collapse; font-size:12px; table-layout:fixed;}
   thead th{text-align:right; padding:9px 6px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hairline); white-space:nowrap; overflow:hidden;}
   thead th:first-child{text-align:left;}
@@ -327,8 +354,8 @@ function mmgApplyTurkishFont(doc){
     <h1 class="title">Rotatif Kredi Hesaplama</h1>
     <div class="subtitle">Tutar, oran ve vade girin — bankaların 3 ayda bir uyguladığı devre sonu faizini ve belirli bir tarih aralığında işleyen rotatif kredi geri ödemesini anında hesaplayın.</div>
   </div>
-  <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
 </header>
+<a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
 
 <main>
 
@@ -423,7 +450,12 @@ function mmgApplyTurkishFont(doc){
         <button class="btn small" id="addRow">+ Satır Ekle</button>
       </div>
     </div>
-    <div class="table-scroll">
+    <div class="table-scroll-hint">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h16m0 0l-5-5m5 5l-5 5"/></svg>
+      Diğer sütunlar için yatay kaydırın
+    </div>
+    <div class="table-scroll-wrap" id="trancheScrollWrap">
+    <div class="table-scroll" id="trancheScroll">
       <table>
         <colgroup>
           <col style="width:42px;">
@@ -448,6 +480,7 @@ function mmgApplyTurkishFont(doc){
         <tbody id="trancheBody"></tbody>
       </table>
     </div>
+    </div>
     <div class="io-toolbar">
       <button type="button" class="io-btn" id="exportExcelBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
       <button type="button" class="io-btn" id="exportPdfBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
@@ -467,6 +500,23 @@ function mmgApplyTurkishFont(doc){
     </span>
   </div>
 </footer>
+
+<script>
+(function(){
+  const scrollEl = document.getElementById('trancheScroll');
+  const wrapEl = document.getElementById('trancheScrollWrap');
+  if(!scrollEl || !wrapEl) return;
+  function checkEnd(){
+    const atEnd = scrollEl.scrollWidth - scrollEl.clientWidth - scrollEl.scrollLeft < 4;
+    wrapEl.classList.toggle('at-end', atEnd || scrollEl.scrollWidth <= scrollEl.clientWidth);
+  }
+  scrollEl.addEventListener('scroll', checkEnd);
+  window.addEventListener('resize', checkEnd);
+  const mo = new MutationObserver(checkEnd);
+  mo.observe(document.getElementById('trancheBody'), {childList:true, subtree:true});
+  setTimeout(checkEnd, 300);
+})();
+</script>
 
 <script>
 

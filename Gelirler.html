@@ -104,11 +104,11 @@
   .mono{font-family:'IBM Plex Mono',monospace;}
 
   header.masthead{
-    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
-    border-bottom:1px solid var(--hairline);
+    max-width:1180px; margin:0 auto; padding:20px 24px 16px; border-bottom:1px solid var(--hairline);
+    position:sticky; top:0; z-index:300; background:var(--bg);
   }
-  .masthead-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
+  .page-nav{ max-width:1180px; margin:0 auto; padding:14px 24px 0; display:flex; flex-wrap:wrap; gap:10px; }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em;}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px; max-width:920px;}
   .guide-btn{
     display:inline-flex; align-items:center; gap:8px; flex-shrink:0;
@@ -117,7 +117,6 @@
     padding:10px 16px; border-radius:8px; transition:border-color .15s ease, color .15s ease;
   }
   .guide-btn:hover{ color:var(--coral); border-color:var(--coral); }
-  .masthead-actions{ display:flex; gap:10px; flex-wrap:wrap; flex-shrink:0; }
 
   .io-toolbar{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
   .io-btn{
@@ -264,21 +263,17 @@
 <body>
 
 <header class="masthead">
-  <div class="masthead-row">
-    <div>
-      <h1 class="title">Gelirler</h1>
-      <div class="subtitle">Satışlar, hizmet, kira ve faiz gelirlerinizi takip edin — vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlenir.</div>
-    </div>
-    <div class="masthead-actions">
-      <a href="index.html" class="guide-btn">← Ana Sayfa</a>
-      <a href="rehber-gelirler.html" class="guide-btn">📖 Rehber</a>
-      <a href="Giderler.html" class="guide-btn">💳 Giderler</a>
-      <a href="Nakit_Akis_Tablosu.html" class="guide-btn">📊 Nakit Akış Tablosu</a>
-      <a href="Talimat_Hazirlama.html" class="guide-btn">📝 Talimat Hazırlama</a>
-      <button type="button" class="ghost-btn" id="syncNowBtn">🔄 Şimdi Senkronize Et</button>
-    </div>
-  </div>
+  <h1 class="title">Gelirler</h1>
+  <div class="subtitle">Satışlar, hizmet, kira ve faiz gelirlerinizi takip edin — vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlenir.</div>
 </header>
+<div class="page-nav">
+  <a href="index.html" class="guide-btn">← Ana Sayfa</a>
+  <a href="rehber-gelirler.html" class="guide-btn">📖 Rehber</a>
+  <a href="Giderler.html" class="guide-btn">💳 Giderler</a>
+  <a href="Nakit_Akis_Tablosu.html" class="guide-btn">📊 Nakit Akış Tablosu</a>
+  <a href="Talimat_Hazirlama.html" class="guide-btn">📝 Talimat Hazırlama</a>
+  <button type="button" class="ghost-btn" id="syncNowBtn">🔄 Şimdi Senkronize Et</button>
+</div>
 
 <main>
   <div class="controls-row" style="display:none;">

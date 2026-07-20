@@ -156,12 +156,12 @@
   .mono{font-family:'IBM Plex Mono',monospace;}
 
   header.masthead{
-    max-width:1180px; margin:0 auto; padding:22px 24px 16px;
-    border-bottom:1px solid var(--hairline);
+    max-width:1180px; margin:0 auto; padding:20px 24px 16px; border-bottom:1px solid var(--hairline);
+    position:sticky; top:0; z-index:300; background:var(--bg);
   }
-  .masthead-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(20px,3.2vw,30px); letter-spacing:-0.01em; color:var(--text);}
-  .subtitle{color:var(--muted); font-size:13.5px; margin-top:4px;}
+  .page-nav{ max-width:1180px; margin:0 auto; padding:14px 24px 0; display:flex; flex-wrap:wrap; gap:10px; }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em;}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
   .guide-btn{
     display:inline-flex; align-items:center; gap:8px; flex-shrink:0;
     font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:600; color:var(--text);
@@ -169,7 +169,6 @@
     padding:8px 14px; border-radius:8px; transition:border-color .15s ease, color .15s ease;
   }
   .guide-btn:hover{ color:var(--coral); border-color:var(--coral); }
-  .masthead-actions{ display:flex; gap:10px; flex-wrap:wrap; }
 
   main{ max-width:1180px; margin:0 auto; padding:20px 24px; }
 
@@ -525,19 +524,15 @@
 <body>
 
 <header class="masthead">
-  <div class="masthead-row">
-    <div>
-      <h1 class="title">Nakit Akış Tablosu</h1>
-      <div class="subtitle">Tarih seçin ve günlük, haftalık, aylık ve yıllık dönemlerde gelir gider analizinizi görün.</div>
-    </div>
-    <div class="masthead-actions">
-      <a href="index.html" class="guide-btn">← Ana Sayfa</a>
-      <a href="rehber-nakit-akis-tablosu.html" class="guide-btn">📖 Rehber</a>
-      <a href="Giderler.html" class="guide-btn">💳 Giderler</a>
-      <a href="Gelirler.html" class="guide-btn">💰 Gelirler</a>
-    </div>
-  </div>
+  <h1 class="title">Nakit Akış Tablosu</h1>
+  <div class="subtitle">Tarih seçin ve günlük, haftalık, aylık ve yıllık dönemlerde gelir gider analizinizi görün.</div>
 </header>
+<div class="page-nav">
+  <a href="index.html" class="guide-btn">← Ana Sayfa</a>
+  <a href="rehber-nakit-akis-tablosu.html" class="guide-btn">📖 Rehber</a>
+  <a href="Giderler.html" class="guide-btn">💳 Giderler</a>
+  <a href="Gelirler.html" class="guide-btn">💰 Gelirler</a>
+</div>
 
 <div class="trial-banner" id="trialBanner" hidden>
   ⏳ <span id="trialBannerText"></span>

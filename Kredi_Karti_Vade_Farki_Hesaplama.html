@@ -93,17 +93,17 @@
   .mono{font-family:'IBM Plex Mono',monospace;}
 
   header.masthead{
-    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
-    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;
-    border-bottom:1px solid var(--hairline);
+    max-width:1180px; margin:0 auto; padding:20px 24px 16px; border-bottom:1px solid var(--hairline);
+    position:sticky; top:0; z-index:300; background:var(--bg);
   }
+  .page-nav{ max-width:1180px; margin:0 auto; padding:14px 24px 0; display:flex; flex-wrap:wrap; gap:10px; }
   .back-link{
     font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); text-decoration:none;
     border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
     transition:border-color .15s ease, color .15s ease;
   }
   .back-link:hover{ color:var(--coral); border-color:var(--coral); }
-  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em;}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
 
   main{ max-width:1180px; margin:0 auto; padding:36px 24px; }
@@ -217,12 +217,12 @@
 <body>
 
 <header class="masthead">
-  <div>
-    <h1 class="title">Kredi Kartı Vade Farkı Hesaplama</h1>
-    <div class="subtitle">Komisyon veya müşteriye vade farkı yansıtma senaryoları için elinize geçmesini istediğiniz net tutardan yola çıkarak girmeniz/yansıtmanız gereken brüt tutarı hesaplayın</div>
-  </div>
-  <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
+  <h1 class="title">Kredi Kartı Vade Farkı Hesaplama</h1>
+  <div class="subtitle">Komisyon veya müşteriye vade farkı yansıtma senaryoları için elinize geçmesini istediğiniz net tutardan yola çıkarak girmeniz/yansıtmanız gereken brüt tutarı hesaplayın</div>
 </header>
+<div class="page-nav">
+  <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
+</div>
 
 <main>
   <section id="reverse">

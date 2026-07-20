@@ -327,9 +327,15 @@ function mmgApplyTurkishFont(doc){
       0 20px 50px rgba(0,0,0,0.35);
     aspect-ratio:210/297;
     min-height:480px;
+    max-height:min(80vh, 1000px);
+    overflow-y:auto;
     box-sizing:border-box;
     margin:0 12px 12px 12px;
   }
+  /* Belge içeriği kutunun sınırını aşarsa (uzun alıcı listesi vb.) kutu büyümek yerine
+     kendi içinde kaydırılır; alttaki "Firma Logonuz / Kaşe-İmza" kartlarına asla taşmaz. */
+  .doc-preview::-webkit-scrollbar{ width:8px; }
+  .doc-preview::-webkit-scrollbar-thumb{ background:#e2d5b8; border-radius:8px; }
   .doc-preview .doc-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; }
   .doc-preview .doc-logo{ height:44px; max-width:160px; object-fit:contain; }
   .doc-preview .doc-date{ font-size:12.5px; color:#555; margin-left:auto; font-weight:700; }
@@ -555,8 +561,8 @@ function mmgApplyTurkishFont(doc){
         </div>
         <div class="io-msg" id="ioMsg"></div>
 
-        <div class="io-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; margin-top:16px;">
-        <div class="form-card" style="margin-top:0; margin-bottom:0;">
+        <div class="io-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; margin-top:16px;">
+        <div class="form-card" style="margin-top:0; margin-bottom:0; display:flex; flex-direction:column; height:100%; box-sizing:border-box;">
           <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
             <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Firma Logonuz</span>
             <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
@@ -569,10 +575,10 @@ function mmgApplyTurkishFont(doc){
               <input type="file" id="companyLogoInput" accept="image/*" style="display:none;">
             </div>
           </div>
-          <p style="font-size:11.5px; color:var(--muted);">Yüklediğiniz logo, hesabınıza kaydedilir ve hazırladığınız tüm talimat belgelerinin üst kısmında otomatik olarak görünür.</p>
+          <p style="font-size:11.5px; color:var(--muted); margin-top:auto;">Yüklediğiniz logo, hesabınıza kaydedilir ve hazırladığınız tüm talimat belgelerinin üst kısmında otomatik olarak görünür.</p>
         </div>
 
-        <div class="form-card" style="margin-top:0; margin-bottom:0;">
+        <div class="form-card" style="margin-top:0; margin-bottom:0; display:flex; flex-direction:column; height:100%; box-sizing:border-box;">
           <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
             <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Kaşe / İmza</span>
             <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
@@ -585,7 +591,7 @@ function mmgApplyTurkishFont(doc){
               <input type="file" id="stampInput" accept="image/*" style="display:none;">
             </div>
           </div>
-          <p style="font-size:11.5px; color:var(--muted);">Yüklediğiniz kaşe/imza görseli hesabınıza kaydedilir ve hazırladığınız talimat belgelerinde "Kaşe / İmza" alanında otomatik olarak görünür.</p>
+          <p style="font-size:11.5px; color:var(--muted); margin-top:auto;">Yüklediğiniz kaşe/imza görseli hesabınıza kaydedilir ve hazırladığınız talimat belgelerinde "Kaşe / İmza" alanında otomatik olarak görünür.</p>
         </div>
         </div>
       </div>
@@ -2569,7 +2575,11 @@ function mmgApplyTurkishFont(doc){
       rightCol.style.marginTop = '0px';
       const currentTop = rightCol.getBoundingClientRect().top;
       const diff = currentTop - cascadeTop;
-      rightCol.style.marginTop = (-diff) + 'px';
+      // mmgcreativity: aşırı/yanlış ölçüm durumlarında (ör. içerik henüz yüklenmeden
+      // hesaplanan diff) kutunun üstteki veya alttaki komşu elemanlarla çakışmasını
+      // önlemek için negatif margin makul bir aralıkla sınırlandırılır.
+      const clamped = Math.max(-300, Math.min(0, -diff));
+      rightCol.style.marginTop = clamped + 'px';
     });
   }
   window.addEventListener('load', alignPreviewTop);

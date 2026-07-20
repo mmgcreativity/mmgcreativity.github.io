@@ -52,11 +52,11 @@
     -webkit-font-smoothing:antialiased; padding-bottom:60px;
   }
   header.masthead{
-    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
-    border-bottom:1px solid var(--hairline);
+    max-width:1180px; margin:0 auto; padding:20px 24px 16px; border-bottom:1px solid var(--hairline);
+    position:sticky; top:0; z-index:300; background:var(--bg);
   }
-  .masthead-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
+  .page-nav{ max-width:1180px; margin:0 auto; padding:14px 24px 0; display:flex; flex-wrap:wrap; gap:10px; }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em;}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px; max-width:640px;}
   .guide-btn{
     display:inline-flex; align-items:center; gap:8px; flex-shrink:0;
@@ -112,14 +112,12 @@
 <body>
 
 <header class="masthead">
-  <div class="masthead-row">
-    <div>
-      <h1 class="title">Hesaplama Araçları</h1>
-      <div class="subtitle">Rotatif kredi, kredi kartı vade farkı ve ortalama vade hesaplamalarınızı tek yerden yapın.</div>
-    </div>
-    <a href="index.html" class="guide-btn">← Ana Sayfa</a>
-  </div>
+  <h1 class="title">Hesaplama Araçları</h1>
+  <div class="subtitle">Rotatif kredi, kredi kartı vade farkı ve ortalama vade hesaplamalarınızı tek yerden yapın.</div>
 </header>
+<div class="page-nav">
+  <a href="index.html" class="guide-btn">← Ana Sayfa</a>
+</div>
 
 <main>
   <!-- Masaüstü: sekmeler + iframe -->
