@@ -70,17 +70,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     color:var(--text);
     font-family:'Inter',system-ui,sans-serif;
     min-height:100vh;
-    padding:32px 20px 60px;
+    padding-bottom:60px;
   }
-  .wrap{max-width:1180px;margin:0 auto;}
+  .wrap{max-width:1180px;margin:0 auto; padding:24px 24px 0;}
 
   header.masthead{
-    max-width:1180px; margin:0 auto 28px; padding:0 0 24px;
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
-  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
-  .subtitle{color:var(--muted); font-size:14px; margin-top:6px; max-width:640px; line-height:1.55;}
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5; min-height:42px; max-width:640px;}
   .back-link{
     position:fixed; top:16px; right:68px; z-index:800;
     font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
@@ -100,17 +100,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--text-faint);}
   .eyebrow .star{font-size:13px;}
-
-  h1{
-    font-family:'Sora',sans-serif;
-    font-weight:800;
-    font-size:clamp(28px,4vw,40px);
-    margin:0 0 10px;
-    letter-spacing:-.01em;
-    background:linear-gradient(135deg,#ffffff 30%, #c9cee0 100%);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-  }
-  .sub{color:var(--text-dim);font-size:15px;max-width:640px;line-height:1.55;margin-bottom:28px;}
 
   .grid-top{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
   @media (max-width:860px){.grid-top{grid-template-columns:repeat(2,1fr);}}
@@ -261,15 +250,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
+<header class="masthead">
+  <div>
+    <h1 class="title">Kredi Tekliflerini Karşılaştır</h1>
+    <div class="subtitle">Bankaların ihtiyaç kredisi tekliflerini gir; taksit tutarı, faiz, BSMV ve toplam geri ödeme otomatik hesaplansın, en uygun teklif otomatik öne çıksın.</div>
+  </div>
+</header>
+<a href="index.html" class="back-link">← Ana Sayfa</a>
 <div class="wrap">
-
-  <header class="masthead">
-    <div>
-      <h1 class="title">Kredi Tekliflerini Karşılaştır</h1>
-      <div class="subtitle">Bankaların ihtiyaç kredisi tekliflerini gir; taksit tutarı, faiz, BSMV ve toplam geri ödeme otomatik hesaplansın, en uygun teklif otomatik öne çıksın.</div>
-    </div>
-  </header>
-  <a href="index.html" class="back-link">← Ana Sayfa</a>
 
   <div class="grid-top">
     <div class="stat">
