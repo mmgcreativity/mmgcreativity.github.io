@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium — mmgcreativity Dijital Finans Asistanı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit; text-decoration:none;}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px clamp(20px,5vw,64px); border-bottom:1px solid var(--hairline);
+  }
+  .topbar-back{
+    display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted);
+    font-family:'IBM Plex Mono',monospace; cursor:pointer; transition:color .15s ease;
+  }
+  .topbar-back:hover{ color:var(--text); }
+  .topbar-brand{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px; letter-spacing:.02em; }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    max-width:720px; margin:0 auto; padding:64px 24px 40px; text-align:center;
+  }
+  .hero-eyebrow{
+    display:inline-flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px; letter-spacing:.16em; color:var(--brass); text-transform:uppercase;
+    border:1px solid var(--hairline); border-radius:99px; padding:6px 14px; margin-bottom:24px;
+  }
+  .hero-title{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(28px,5vw,42px);
+    letter-spacing:-0.01em; margin-bottom:16px;
+  }
+  .hero-title em{
+    font-style:normal;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero-sub{ color:var(--muted); font-size:15.5px; max-width:520px; margin:0 auto; }
+
+  /* ---------- Billing toggle ---------- */
+  .toggle-wrap{ display:flex; justify-content:center; margin:36px 0 8px; }
+  .toggle{
+    display:inline-flex; background:var(--surface); border:1px solid var(--hairline);
+    border-radius:99px; padding:4px; gap:4px;
+  }
+  .toggle button{
+    font-family:'Inter',sans-serif; font-size:13px; font-weight:600; color:var(--muted);
+    background:transparent; border:none; padding:9px 22px; border-radius:99px; cursor:pointer;
+    transition:all .18s ease; position:relative;
+  }
+  .toggle button.active{ background:var(--surface-2); color:var(--text); }
+  .toggle .save-badge{
+    position:absolute; top:-11px; right:-6px; background:var(--teal); color:#06231A;
+    font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.04em;
+    padding:2px 7px; border-radius:99px; white-space:nowrap;
+  }
+
+  /* ---------- Plans ---------- */
+  .plans{
+    max-width:920px; margin:32px auto 0; padding:0 24px;
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px;
+  }
+  .plan-card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:20px;
+    padding:32px 28px; position:relative; transition:border-color .2s ease, transform .2s ease;
+  }
+  .plan-card:hover{ transform:translateY(-3px); }
+  .plan-card.featured{
+    border-color:transparent; background:
+      linear-gradient(var(--surface),var(--surface)) padding-box,
+      var(--grad) border-box;
+    border-width:1.5px; border-style:solid;
+  }
+  .plan-badge{
+    position:absolute; top:-13px; left:28px; background:var(--grad); color:#fff;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11px;
+    padding:5px 14px; border-radius:99px;
+  }
+  .plan-name{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--brass); text-transform:uppercase; margin-bottom:14px; }
+  .plan-price{ display:flex; align-items:baseline; gap:6px; margin-bottom:6px; }
+  .plan-price .amount{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:38px; }
+  .plan-price .period{ color:var(--muted); font-size:13px; }
+  .plan-note{ color:var(--muted); font-size:12.5px; margin-bottom:24px; min-height:18px; }
+  .plan-cta{
+    display:block; width:100%; text-align:center; padding:13px; border-radius:12px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer;
+    border:1px solid var(--hairline); background:var(--surface-2); color:var(--text);
+    transition:all .18s ease;
+  }
+  .plan-card.featured .plan-cta{ background:var(--grad); border:none; color:#fff; }
+  .plan-cta:hover{ filter:brightness(1.08); }
+
+  /* ---------- Feature list ---------- */
+  .features{ max-width:640px; margin:56px auto 0; padding:0 24px; }
+  .features h2{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px;
+    color:var(--muted); text-align:center; margin-bottom:24px; letter-spacing:.02em;
+  }
+  .feature-row{
+    display:flex; align-items:flex-start; gap:14px; padding:14px 0;
+    border-bottom:1px solid var(--hairline);
+  }
+  .feature-row:last-child{ border-bottom:none; }
+  .feature-icon{
+    width:20px; height:20px; flex-shrink:0; color:var(--teal); margin-top:1px;
+  }
+  .feature-text b{ font-family:'Inter',sans-serif; font-weight:600; font-size:14px; display:block; margin-bottom:2px; }
+  .feature-text span{ color:var(--muted); font-size:12.5px; }
+
+  /* ---------- Trust / footer note ---------- */
+  .trust{
+    max-width:640px; margin:48px auto 0; padding:20px 24px; text-align:center;
+  }
+  .trust p{ color:var(--muted); font-size:11.5px; font-family:'IBM Plex Mono',monospace; letter-spacing:.02em; }
+  .trust a{ color:var(--brass); }
+
+  footer.legal{
+    text-align:center; padding:32px 24px 48px; color:var(--muted);
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+  }
+  footer.legal a{ color:var(--muted); text-decoration:underline; text-underline-offset:3px; }
+  footer.legal a:hover{ color:var(--text); }
+
+  @media (max-width:520px){
+    .plans{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-back" href="index.html">&larr; Panele dön</a>
+  <div class="topbar-brand mono">mmgcreativity</div>
+</div>
+
+<section class="hero">
+  <span class="hero-eyebrow">Premium</span>
+  <h1 class="hero-title">Finansını yönetmenin <em>tam sürümü</em></h1>
+  <p class="hero-sub">Reklamsız deneyim, sınırsız nakit akış tablosu ve gelişmiş hesaplama araçlarıyla paranızı daha net görün.</p>
+</section>
+
+<div class="toggle-wrap">
+  <div class="toggle" id="billingToggle">
+    <button class="active" data-plan="monthly" onclick="selectBilling('monthly')">Aylık</button>
+    <button data-plan="yearly" onclick="selectBilling('yearly')">
+      Yıllık
+      <span class="save-badge">%20 indirim</span>
+    </button>
+  </div>
+</div>
+
+<div class="plans">
+  <div class="plan-card featured">
+    <span class="plan-badge">En avantajlı</span>
+    <div class="plan-name">mmgcreativity premium</div>
+    <div class="plan-price">
+      <span class="amount" id="priceAmount">999₺</span>
+      <span class="period" id="priceUnit">/ ay</span>
+    </div>
+    <div class="plan-note" id="priceNote">İstediğiniz zaman iptal edin</div>
+    <button class="plan-cta" onclick="startSubscription()">Premium'a geç</button>
+  </div>
+</div>
+
+<section class="features">
+  <h2>Premium ile neler değişir</h2>
+
+  <div class="feature-row">
+    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+    <div class="feature-text">
+      <b>Reklamsız kullanım</b>
+      <span>Tüm ekranlarda reklam gösterilmez, kesintisiz kullanım sağlanır.</span>
+    </div>
+  </div>
+
+  <div class="feature-row">
+    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+    <div class="feature-text">
+      <b>Sınırsız nakit akış tablosu</b>
+      <span>Geçmiş dönemleri, gelir/gider kırılımlarını sınırsız görüntüleyin.</span>
+    </div>
+  </div>
+
+  <div class="feature-row">
+    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+    <div class="feature-text">
+      <b>Gelişmiş hesaplama araçları</b>
+      <span>Tüm finansal hesaplama modüllerine tam erişim.</span>
+    </div>
+  </div>
+
+  <div class="feature-row">
+    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+    <div class="feature-text">
+      <b>Öncelikli talimat hazırlama</b>
+      <span>Talimat şablonlarınızı daha hızlı oluşturun ve kaydedin.</span>
+    </div>
+  </div>
+</section>
+
+<div class="trust">
+  <p>Ödemeler PayTR güvenli altyapısıyla işlenir · İstediğiniz zaman iptal edebilirsiniz</p>
+</div>
+
+<footer class="legal">
+  <a href="mesafeli-satis-sozlesmesi.html">Mesafeli satış sözleşmesi</a> ·
+  <a href="iptal-iade.html">İptal &amp; iade</a> ·
+  <a href="kvkk.html">KVKK aydınlatma metni</a>
+</footer>
+
+<script>
+  const PLANS = {
+    monthly: { amount: '999₺', unit: '/ ay', note: "İstediğiniz zaman iptal edin" },
+    yearly:  { amount: '799₺', unit: '/ ay, yıllık faturalandırılır', note: "9.588₺ / yıl · %20 tasarruf" }
+  };
+  let currentPlan = 'monthly';
+
+  function selectBilling(plan){
+    currentPlan = plan;
+    document.querySelectorAll('#billingToggle button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.plan === plan);
+    });
+    const p = PLANS[plan];
+    document.getElementById('priceAmount').textContent = p.amount;
+    document.getElementById('priceUnit').textContent = p.unit;
+    document.getElementById('priceNote').textContent = p.note;
+  }
+
+  function startSubscription(){
+    // TODO: Cloudflare Worker uzerinden PayTR abonelik baslatma endpoint'ine yonlendirilecek.
+    // Ornek: window.location.href = `https://YOUR-WORKER.workers.dev/create-subscription?plan=${currentPlan}`;
+    alert('Odeme entegrasyonu henuz baglanmadi. Plan: ' + currentPlan);
+  }
+</script>
+
+</body>
+</html>
