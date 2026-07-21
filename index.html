@@ -2051,10 +2051,10 @@
   const commentBox = document.getElementById('mmgRateComment');
   const submitBtn = document.getElementById('mmgRateSubmitBtn');
 
-  // Beğeni kutusu: günde bir kez otomatik gösterilir, o gün için tekrar gösterilmez.
-  const MMG_RATE_TODAY = new Date().toISOString().slice(0,10);
+  // Beğeni kutusu: ayda bir kez otomatik gösterilir, o ay için tekrar gösterilmez.
+  const MMG_RATE_THIS_MONTH = new Date().toISOString().slice(0,7);
   function markShownToday(){
-    try{ localStorage.setItem('mmg_rate_btn_interacted_date', MMG_RATE_TODAY); }catch(e){}
+    try{ localStorage.setItem('mmg_rate_btn_interacted_date', MMG_RATE_THIS_MONTH); }catch(e){}
   }
 
   let likedValue = null; // 1 = beğendi, 0 = beğenmedi, null = henüz seçilmedi
@@ -2116,9 +2116,9 @@
   skipBtn.addEventListener('click', closeOverlay);
   overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });
 
-  // Sayfa açıldığında, bugün henüz gösterilmediyse kutuyu otomatik aç.
+  // Sayfa açıldığında, bu ay henüz gösterilmediyse kutuyu otomatik aç.
   try{
-    if(localStorage.getItem('mmg_rate_btn_interacted_date') !== MMG_RATE_TODAY){
+    if(localStorage.getItem('mmg_rate_btn_interacted_date') !== MMG_RATE_THIS_MONTH){
       setTimeout(openOverlay, 1500);
     }
   }catch(e){
