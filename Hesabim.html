@@ -360,6 +360,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var mode = localStorage.getItem('mmg_theme') || 'dark';
     document.documentElement.classList.toggle('theme-light', mode === 'light');
   })();
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.mmgTheme){
+      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
+      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
+    }
+  });
 </script>
 
 <script type="module">

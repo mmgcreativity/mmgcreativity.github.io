@@ -1077,6 +1077,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     homeScreen.style.display = 'none';
     frameWrap.style.display = 'block';
     iframe.src = target;
+    iframe.onload = function(){
+      try{
+        var mode = document.documentElement.classList.contains('theme-light') ? 'light' : 'dark';
+        iframe.contentWindow.postMessage({ mmgTheme: mode }, '*');
+      }catch(e){ /* sessizce geç */ }
+    };
     setActive(target);
   }
 
@@ -1907,6 +1913,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     themeToggleIcon.textContent = mode === 'light' ? '☀' : '☾';
     themeToggleLabel.textContent = mode === 'light' ? 'Açık Mod' : 'Koyu Mod';
     localStorage.setItem('mmg_theme', mode);
+    try{
+      if(iframe && iframe.contentWindow){
+        iframe.contentWindow.postMessage({ mmgTheme: mode }, '*');
+      }
+    }catch(e){ /* çapraz kaynak vb. durumlarda sessizce geç */ }
   }
   applyTheme(localStorage.getItem('mmg_theme') || 'dark');
   themeToggle.addEventListener('click', () => {

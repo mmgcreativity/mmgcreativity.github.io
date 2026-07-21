@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<script>
+(function(){
+  try{
+    var mode = localStorage.getItem('mmg_theme') || 'dark';
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+  }catch(e){}
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.mmgTheme){
+      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
+      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
+    }
+  });
+})();
+</script>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -21,12 +35,41 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   :root{
     --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
     --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
-    --red:#E2544B; --teal:#3FB68A; --azure:#3E8FE0;
+    --red:#E2544B; --teal:#3FB68A; --azure:#3E8FE0; --coral:#FF6B4A;
+  }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{background:var(--bg);}
   html,body{overscroll-behavior-y:none;}
-  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; min-height:100vh; padding-bottom:60px;
+  }
+  header.masthead{
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
+    display:flex; justify-content:space-between; align-items:flex-end;
+    border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
+  }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
+  .back-link{
+    position:fixed; top:16px; right:68px; z-index:800;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  @media (max-width:480px){
+    .back-link{ top:64px; right:8px; }
+  }
   main{ max-width:1040px; margin:0 auto; padding:36px 24px 60px; }
   .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; color:var(--brass); text-transform:uppercase; margin-bottom:10px; }
   h1{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,32px); margin-bottom:8px; }
@@ -144,14 +187,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-<main>
-  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-    <div>
-      <h1>İstatistikler</h1>
-      <p class="sub">Kullanıcı, referans kodu ve beğenme geri bildirimi istatistikleri burada listelenir.</p>
-    </div>
-    <button class="btn" id="refreshAllBtn">↻ Yenile</button>
+<header class="masthead">
+  <div>
+    <h1 class="title">İstatistikler</h1>
+    <div class="subtitle">Kullanıcı, referans kodu ve beğenme geri bildirimi istatistikleri burada listelenir.</div>
   </div>
+  <button class="btn" id="refreshAllBtn">↻ Yenile</button>
+</header>
+<a href="index.html" class="back-link">← Ana Sayfa</a>
+
+<main>
 
   <div id="stateArea"></div>
 

@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<script>
+(function(){
+  try{
+    var mode = localStorage.getItem('mmg_theme') || 'dark';
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+  }catch(e){}
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.mmgTheme){
+      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
+      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
+    }
+  });
+})();
+</script>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -155,13 +169,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
     --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
   }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
+  }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{background:var(--bg);}
   html,body{overscroll-behavior-y:none;}
   body{
     background:
-      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.06), transparent 60%),
-      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.05), transparent 60%),
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
       var(--bg);
     color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
     -webkit-font-smoothing:antialiased; padding-bottom:60px;
@@ -169,8 +187,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .mono{font-family:'IBM Plex Mono',monospace;}
 
   header.masthead{
-    max-width:1180px; margin:0 auto; padding:20px 24px 16px; border-bottom:1px solid var(--hairline);
-    position:sticky; top:0; z-index:300; background:var(--bg);
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
+    display:flex; justify-content:space-between; align-items:flex-end;
+    border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
   .page-nav{ max-width:1180px; margin:0 auto; padding:14px 24px 0; display:flex; flex-wrap:wrap; gap:10px; }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em;}
@@ -568,8 +587,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
 <header class="masthead">
-  <h1 class="title">Nakit Akış Tablosu</h1>
-  <div class="subtitle">Tarih seçin ve günlük, haftalık, aylık ve yıllık dönemlerde gelir gider analizinizi görün.</div>
+  <div>
+    <h1 class="title">Nakit Akış Tablosu</h1>
+    <div class="subtitle">Tarih seçin ve günlük, haftalık, aylık ve yıllık dönemlerde gelir gider analizinizi görün.</div>
+  </div>
 </header>
 <a href="index.html" class="back-link">← Ana Sayfa</a>
 <div class="page-nav">
