@@ -62,9 +62,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
     measurementId: "G-X8HEZRNWWS"
   };
-  const fbApp = initializeApp(firebaseConfig);
-  const auth = getAuth(fbApp);
-  const db = getFirestore(fbApp);
+  // Üst pencere (index.html) zaten giriş yapmış kullanıcının auth/db nesnesini tutuyor.
+  // Bu sayfa bir iframe içinde açıldıysa onu paylaşarak ayrı bir Firebase Auth
+  // örneğinin (ve olası IndexedDB yarış durumunun) önüne geçiyoruz.
+  let auth, db;
+  try{
+    if(window.parent && window.parent !== window && window.parent.mmgAuth && window.parent.mmgDb){
+      auth = window.parent.mmgAuth;
+      db = window.parent.mmgDb;
+    }
+  }catch(e){ /* farklı origin ihtimaline karşı sessizce geç */ }
+  if(!auth || !db){
+    const fbApp = initializeApp(firebaseConfig);
+    auth = getAuth(fbApp);
+    db = getFirestore(fbApp);
+  }
 
   window.mmgCloud = { auth, db, doc, getDoc, setDoc, deleteDoc, collection, getDocs, currentUser: null, isPremium: false, isAdmin: false, scopeId: null, scopeCollection: 'users' };
 

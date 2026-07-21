@@ -360,12 +360,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var mode = localStorage.getItem('mmg_theme') || 'dark';
     document.documentElement.classList.toggle('theme-light', mode === 'light');
   })();
-  window.addEventListener('message', function(ev){
-    if(ev && ev.data && ev.data.mmgTheme){
-      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
-      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
-    }
-  });
 </script>
 
 <script type="module">
@@ -388,9 +382,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
     measurementId: "G-X8HEZRNWWS"
   };
-  const fbApp = initializeApp(firebaseConfig);
-  const auth = getAuth(fbApp);
-  const db = getFirestore(fbApp);
+  // Üst pencere (index.html) zaten giriş yapmış kullanıcının auth/db nesnesini tutuyor.
+  // Bu sayfa bir iframe içinde açıldıysa onu paylaşarak ayrı bir Firebase Auth
+  // örneğinin (ve olası IndexedDB yarış durumunun) önüne geçiyoruz.
+  let auth, db;
+  try{
+    if(window.parent && window.parent !== window && window.parent.mmgAuth && window.parent.mmgDb){
+      auth = window.parent.mmgAuth;
+      db = window.parent.mmgDb;
+    }
+  }catch(e){ /* farklı origin ihtimaline karşı sessizce geç */ }
+  if(!auth || !db){
+    const fbApp = initializeApp(firebaseConfig);
+    auth = getAuth(fbApp);
+    db = getFirestore(fbApp);
+  }
   const googleProvider = new GoogleAuthProvider();
 
   const statusPillText = document.getElementById('statusPillText');

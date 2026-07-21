@@ -1,20 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<script>
-(function(){
-  try{
-    var mode = localStorage.getItem('mmg_theme') || 'dark';
-    document.documentElement.classList.toggle('theme-light', mode === 'light');
-  }catch(e){}
-  window.addEventListener('message', function(ev){
-    if(ev && ev.data && ev.data.mmgTheme){
-      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
-      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
-    }
-  });
-})();
-</script>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -81,9 +67,21 @@ function mmgApplyTurkishFont(doc){
     appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
     measurementId: "G-X8HEZRNWWS"
   };
-  const fbApp = initializeApp(firebaseConfig);
-  const auth = getAuth(fbApp);
-  const db = getFirestore(fbApp);
+  // Üst pencere (index.html) zaten giriş yapmış kullanıcının auth/db nesnesini tutuyor.
+  // Bu sayfa bir iframe içinde açıldıysa onu paylaşarak ayrı bir Firebase Auth
+  // örneğinin (ve olası IndexedDB yarış durumunun) önüne geçiyoruz.
+  let auth, db;
+  try{
+    if(window.parent && window.parent !== window && window.parent.mmgAuth && window.parent.mmgDb){
+      auth = window.parent.mmgAuth;
+      db = window.parent.mmgDb;
+    }
+  }catch(e){ /* farklı origin ihtimaline karşı sessizce geç */ }
+  if(!auth || !db){
+    const fbApp = initializeApp(firebaseConfig);
+    auth = getAuth(fbApp);
+    db = getFirestore(fbApp);
+  }
   window.mmgCloud = { auth, db, doc, getDoc, currentUser: null, isPremium: false, isAdmin: false, scopeId: null, scopeCollection: 'users' };
   onAuthStateChanged(auth, async (user) => {
     window.mmgCloud.currentUser = user;
@@ -153,10 +151,6 @@ function mmgApplyTurkishFont(doc){
     --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
     --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
   }
-  html.theme-light{
-    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
-    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
-  }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{background:var(--bg);}
   html,body{overscroll-behavior-y:none;}
@@ -201,8 +195,8 @@ function mmgApplyTurkishFont(doc){
     font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; letter-spacing:.01em;
     background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
-  .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5; min-height:42px;}
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text);}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
   .meta-block{text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); display:flex; flex-direction:column; align-items:flex-end; gap:2px;}
   .meta-block .status-dot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--teal); margin-right:6px; box-shadow:0 0 8px var(--teal);}
   .meta-block .credit-top{font-size:12.5px; letter-spacing:.04em; color:var(--muted); margin-bottom:10px;}
