@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<!-- End Google Tag Manager -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WVWJ4VZE0C"></script>
@@ -300,7 +307,8 @@
   iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
 
   /* ---------- Home screen ---------- */
-  .home{ flex:1; overflow-y:auto; }
+  .home{ flex:1; overflow-y:auto; display:flex; flex-direction:column; min-height:100%; }
+  .home footer{ margin-top:auto; }
 
   .hero{
     position:relative; overflow:hidden; padding:32px 48px 28px;
@@ -395,23 +403,35 @@
   ::-webkit-scrollbar-track{ background:transparent; }
   ::-webkit-scrollbar-thumb{ background:var(--hairline); border-radius:4px; }
 
-  footer{ padding:0 48px 32px; }
-  .footer-top{
-    display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:36px 0 28px;
-    border-bottom:1px solid var(--hairline); margin-bottom:20px;
+  footer{ padding:0 48px 18px; }
+  .footer-powered-row{ padding:28px 0 14px; display:flex; justify-content:flex-end; }
+  .footer-final-row{
+    position:fixed; left:calc(var(--sidebar-w) + 48px); right:48px; bottom:18px; z-index:390;
+    display:flex; flex-direction:column; gap:8px;
   }
-  @media (max-width:720px){ .footer-top{ grid-template-columns:1fr; gap:28px; } }
+  .footer-final-top-line, .footer-final-bottom-line{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px 24px;
+  }
+  .footer-social-col{ display:flex; flex-direction:column; justify-content:center; }
+  .footer-final-row-spacer{ height:96px; }
+  .footer-social-inline{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .app-badge-small{ padding:6px 11px; gap:6px; }
+  .app-badge-small svg{ width:16px; height:16px; }
+  .app-badge-small .app-badge-text span{ font-size:7.5px; }
+  .app-badge-small .app-badge-text b{ font-size:10.5px; }
+  .social-icon-row-nowrap{ flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; }
+  @media (max-width:720px){ .footer-final-top-line, .footer-final-bottom-line{ flex-direction:column; align-items:flex-start; } }
   .footer-col-title{
     font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; letter-spacing:.08em;
-    text-transform:uppercase; color:var(--text); margin-bottom:16px;
+    text-transform:uppercase; color:var(--text); margin-bottom:8px;
   }
-  .social-icon-row{ display:flex; flex-wrap:wrap; gap:10px; }
+  .social-icon-row{ display:flex; flex-wrap:wrap; gap:6px; }
   .social-icon{
-    width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     color:#fff; transition:transform .15s ease, opacity .15s ease; flex-shrink:0;
   }
   .social-icon:hover{ transform:translateY(-2px); opacity:.9; }
-  .social-icon svg{ width:18px; height:18px; }
+  .social-icon svg{ width:9px; height:9px; }
   .app-badge-row{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
   .app-badge{
     display:flex; align-items:center; gap:8px; border:1px solid var(--hairline); border-radius:9px;
@@ -422,14 +442,14 @@
   .app-badge-text{ display:flex; flex-direction:column; line-height:1.2; }
   .app-badge-text span{ font-size:9.5px; color:var(--muted); }
   .app-badge-text b{ font-family:'Space Grotesk',sans-serif; font-size:13px; }
-  .footer-desc{ font-size:12.5px; color:var(--muted); max-width:420px; line-height:1.6; }
+
   .legal-links{
-    display:flex; flex-wrap:wrap; gap:18px; justify-content:flex-end;
-    font-family:'IBM Plex Mono',monospace; font-size:11px; margin-bottom:10px;
+    display:flex; flex-wrap:wrap; gap:18px;
+    font-family:'IBM Plex Mono',monospace; font-size:11px;
   }
   .legal-links a{ color:var(--muted); text-decoration:none; }
   .legal-links a:hover{ color:var(--coral); }
-  footer .credit{width:100%; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); display:flex; align-items:center; justify-content:flex-end; gap:8px;}
+  footer .credit{ text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); display:flex; align-items:center; gap:8px; flex-shrink:0;}
   .signature-pill{
     display:inline-flex; align-items:center; gap:6px;
     padding:4px 12px 4px 5px; border-radius:999px;
@@ -467,6 +487,8 @@
     .nav-desc{ display:inline; }
 
     main{ height:auto; }
+    .footer-final-row{ position:static; left:auto; right:auto; bottom:auto; }
+    .footer-final-row-spacer{ display:none; }
     .frame-wrap{ height:85vh; }
     .hero{ padding:22px 20px 20px; }
     .hero-app-icon{ width:48px; height:48px; border-radius:12px; }
@@ -603,6 +625,10 @@
 </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <div id="authOverlay">
   <div class="auth-brand-panel">
@@ -624,7 +650,7 @@
 
   <div class="auth-form-panel">
     <div class="auth-form-inner">
-      <div class="auth-title" id="authTitle">Tekrar hoş geldiniz</div>
+      <div class="auth-title" id="authTitle">Hoş geldiniz</div>
       <div class="auth-sub" id="authSub">Kaldığınız yerden devam etmek için giriş yapın</div>
 
       <div class="auth-tabs">
@@ -954,10 +980,22 @@
     </section>
 
     <footer>
-      <div class="footer-top">
-        <div>
-          <div class="footer-col-title">Bizi Takip Edin</div>
-          <div class="social-icon-row">
+      <div class="footer-final-row">
+        <div class="footer-final-top-line">
+          <div class="footer-col-title" style="margin-bottom:0;">Bizi Takip Edin</div>
+          <div class="credit">
+            <span>Powered by</span>
+            <span class="signature-pill">
+              <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+              <span id="credit-fallback" class="credit-fallback">M</span>
+              <b>mmgcreativity</b>
+            </span>
+          </div>
+        </div>
+        <div class="footer-final-bottom-line">
+        <div class="footer-social-col">
+          <div class="footer-social-inline">
+          <div class="social-icon-row social-icon-row-nowrap">
             <a href="https://facebook.com/profile.php?id=61591997071236" target="_blank" rel="noopener" class="social-icon" style="background:#1877F2;" title="Facebook" aria-label="Facebook">
               <svg viewBox="0 0 24 24" fill="#fff"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>
             </a>
@@ -980,36 +1018,21 @@
               <svg viewBox="0 0 24 24" fill="#fff"><path d="M16.6 5.8c-.9-.9-1.4-2.1-1.4-3.4h-3.1v13.6c0 1.4-1.1 2.5-2.5 2.5s-2.5-1.1-2.5-2.5 1.1-2.5 2.5-2.5c.3 0 .5 0 .8.1V10.5c-.3 0-.5-.1-.8-.1-3.1 0-5.6 2.5-5.6 5.6S6.5 21.6 9.6 21.6s5.6-2.5 5.6-5.6V9.1c1.2.9 2.7 1.4 4.3 1.4V7.4c-1 0-1.9-.3-2.9-1.2z"/></svg>
             </a>
           </div>
-        </div>
-        <div>
-          <div class="footer-col-title">Uygulamamızı İndirin</div>
-          <div class="app-badge-row">
-            <a href="#" class="app-badge">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 1.4c.1 1.1-.3 2.2-1 3-.7.8-1.8 1.5-2.9 1.4-.1-1.1.4-2.2 1-3 .8-.8 2-1.4 2.9-1.4zM20.6 17c-.5 1.2-.8 1.7-1.5 2.8-1 1.5-2.4 3.4-4.1 3.4-1.5 0-1.9-1-4-1-2 0-2.5 1-4 1-1.7 0-3-1.7-4-3.2C.6 16.9-.6 12.1 1 8.9c.8-1.6 2.2-2.6 3.7-2.6 1.6 0 2.6 1 3.9 1 1.3 0 2.1-1 3.9-1 1.4 0 2.8.8 3.7 2-3.3 1.8-2.8 6.4.4 7.7z"/></svg>
-              <span class="app-badge-text"><span>Hemen İndirin</span><b>App Store</b></span>
-            </a>
-            <a href="#" class="app-badge">
-              <svg viewBox="0 0 24 24"><path d="M3.6 2.6a1 1 0 0 0-.6.9v17a1 1 0 0 0 .6.9l9.7-9.4-9.7-9.4z" fill="#00d2ff"/><path d="M13.3 12l3-2.9 3.9 2.2c.9.5.9 1.4 0 1.9l-3.9 2.2-3-2.4z" fill="#ffd200"/><path d="M13.3 12L3.6 2.6c.2 0 .5 0 .7.1l11 6.3-2 2.9z" fill="#00e676"/><path d="M13.3 12l2 2.9-11 6.3c-.2.1-.5.1-.7.1L13.3 12z" fill="#ff3d57"/></svg>
-              <span class="app-badge-text"><span>Hemen İndirin</span><b>Google Play</b></span>
-            </a>
+          <a href="#" class="app-badge app-badge-small">
+            <svg viewBox="0 0 24 24"><path d="M3.6 2.6a1 1 0 0 0-.6.9v17a1 1 0 0 0 .6.9l9.7-9.4-9.7-9.4z" fill="#00d2ff"/><path d="M13.3 12l3-2.9 3.9 2.2c.9.5.9 1.4 0 1.9l-3.9 2.2-3-2.4z" fill="#ffd200"/><path d="M13.3 12L3.6 2.6c.2 0 .5 0 .7.1l11 6.3-2 2.9z" fill="#00e676"/><path d="M13.3 12l2 2.9-11 6.3c-.2.1-.5.1-.7.1L13.3 12z" fill="#ff3d57"/></svg>
+            <span class="app-badge-text"><span>Hemen İndirin</span><b>Google Play</b></span>
+          </a>
           </div>
-          <div class="footer-desc">Dijital Finans Asistanı: firmanızın ve bireysel finans işlerinizin dijital ortağı. Hesaplama araçları, nakit akış takibi ve talimat hazırlama tek platformda.</div>
+        </div>
+        <div class="legal-links">
+          <a href="hakkinda.html" target="_blank">Hakkında</a>
+          <a href="iletisim.html" target="_blank">İletişim</a>
+          <a href="gizlilik-politikasi.html" target="_blank">Gizlilik Politikası</a>
+          <a href="kullanim-sartlari.html" target="_blank">Kullanım Şartları</a>
+        </div>
         </div>
       </div>
-      <div class="legal-links">
-        <a href="hakkinda.html" target="_blank">Hakkında</a>
-        <a href="iletisim.html" target="_blank">İletişim</a>
-        <a href="gizlilik-politikasi.html" target="_blank">Gizlilik Politikası</a>
-        <a href="kullanim-sartlari.html" target="_blank">Kullanım Şartları</a>
-      </div>
-      <div class="credit">
-        <span>Powered by</span>
-        <span class="signature-pill">
-          <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
-          <span id="credit-fallback" class="credit-fallback">M</span>
-          <b>mmgcreativity</b>
-        </span>
-      </div>
+      <div class="footer-final-row-spacer"></div>
     </footer>
   </div>
 </main>
@@ -1387,7 +1410,7 @@
     referralWrap.style.display = mode === 'signup' ? 'block' : 'none';
     accountTypeWrap.style.display = mode === 'signup' ? 'block' : 'none';
     if(mode === 'signup') updateUsernameLabelForType();
-    authTitle.textContent = mode === 'login' ? 'Tekrar hoş geldiniz' : 'Hesap oluşturun';
+    authTitle.textContent = mode === 'login' ? 'Hoş geldiniz' : 'Hesap oluşturun';
     authSub.textContent = mode === 'login' ? 'Kaldığınız yerden devam etmek için giriş yapın' : 'Oranlarınızı ve tercihlerinizi kaydetmek için ücretsiz hesap açın';
     authSubmitBtn.textContent = mode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur';
     hideAuthError();
@@ -2116,14 +2139,13 @@
   skipBtn.addEventListener('click', closeOverlay);
   overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });
 
-  // Sayfa açıldığında, bu ay henüz gösterilmediyse kutuyu otomatik aç.
+  // Sadece ayın 1'inde, o ay için henüz gösterilmediyse kutuyu otomatik aç.
   try{
-    if(localStorage.getItem('mmg_rate_btn_interacted_date') !== MMG_RATE_THIS_MONTH){
+    const isFirstOfMonth = new Date().getDate() === 1;
+    if(isFirstOfMonth && localStorage.getItem('mmg_rate_btn_interacted_date') !== MMG_RATE_THIS_MONTH){
       setTimeout(openOverlay, 1500);
     }
-  }catch(e){
-    setTimeout(openOverlay, 1500);
-  }
+  }catch(e){}
 })();
 </script>
 <!-- ================== /Beğen Widget'ı ================== -->

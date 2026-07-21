@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<!-- End Google Tag Manager -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WVWJ4VZE0C"></script>
@@ -519,16 +526,37 @@
   .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
   .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff; }
   footer .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .back-link{
+    position:fixed; top:16px; right:68px; z-index:800;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  @media (max-width:480px){
+    .back-link{ top:64px; right:8px; }
+  }
+  #exportExcelBtn, #exportPdfBtn{
+    font-size:12.5px !important; padding:9px 14px !important;
+  }
+  #exportExcelBtn svg, #exportPdfBtn svg{
+    margin-right:6px !important;
+  }
 </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <header class="masthead">
   <h1 class="title">Nakit Akış Tablosu</h1>
   <div class="subtitle">Tarih seçin ve günlük, haftalık, aylık ve yıllık dönemlerde gelir gider analizinizi görün.</div>
 </header>
+<a href="index.html" class="back-link">← Ana Sayfa</a>
 <div class="page-nav">
-  <a href="index.html" class="guide-btn">← Ana Sayfa</a>
   <a href="rehber-nakit-akis-tablosu.html" class="guide-btn">📖 Rehber</a>
   <a href="Giderler.html" class="guide-btn">💳 Giderler</a>
   <a href="Gelirler.html" class="guide-btn">💰 Gelirler</a>
@@ -544,7 +572,7 @@
     <h2>Ücretsiz Deneme Süreniz Sona Erdi</h2>
     <p>Nakit Akış Tablosu premium üyelere aittir. 90 günlük ücretsiz deneme sürenizi tamamladınız — kullanmaya devam etmek için premium üyeliğe geçmeniz gerekiyor.</p>
     <a href="iletisim.html" class="trial-block-btn">Premium Üyelik Hakkında Bilgi Al</a>
-    <a href="index.html" class="trial-block-link">← Ana Sayfaya Dön</a>
+    <a href="index.html" class="trial-block-link">← Ana Sayfa</a>
   </div>
 </div>
 
@@ -640,8 +668,8 @@
     </section>
 
     <div class="io-toolbar">
-      <button type="button" class="io-btn" id="exportExcelBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
-      <button type="button" class="io-btn" id="exportPdfBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
+      <button type="button" class="io-btn" id="exportExcelBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
+      <button type="button" class="io-btn" id="exportPdfBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
     </div>
     <div class="io-msg" id="memberNotice" style="color:var(--muted);">🔒 Excel/PDF dışa aktarma ve cihazlar arası bulut senkronizasyonu şimdilik yalnızca üye girişi yapan kullanıcılar için aktiftir. Misafir modunda verileriniz yalnızca bu tarayıcıda saklanır.</div>
     <div class="io-msg" id="ioMsg"></div>

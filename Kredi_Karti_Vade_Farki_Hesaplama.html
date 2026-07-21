@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<!-- End Google Tag Manager -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WVWJ4VZE0C"></script>
@@ -97,12 +104,17 @@
     position:sticky; top:0; z-index:300; background:var(--bg);
   }
   .page-nav{ max-width:1180px; margin:0 auto; padding:14px 24px 0; display:flex; flex-wrap:wrap; gap:10px; }
-  .back-link{
-    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); text-decoration:none;
+    .back-link{
+    position:fixed; top:16px; right:68px; z-index:800;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
     border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
     transition:border-color .15s ease, color .15s ease;
   }
   .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  @media (max-width:480px){
+    .back-link{ top:64px; right:8px; }
+  }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em;}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
 
@@ -212,17 +224,25 @@
   .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
   .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff; }
   footer .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  #exportExcelBtn, #exportPdfBtn, #importExcelBtn{
+    font-size:12.5px !important; padding:9px 14px !important;
+  }
+  #exportExcelBtn svg, #exportPdfBtn svg{
+    margin-right:6px !important;
+  }
 </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <header class="masthead">
   <h1 class="title">Kredi Kartı Vade Farkı Hesaplama</h1>
   <div class="subtitle">Komisyon veya müşteriye vade farkı yansıtma senaryoları için elinize geçmesini istediğiniz net tutardan yola çıkarak girmeniz/yansıtmanız gereken brüt tutarı hesaplayın</div>
 </header>
-<div class="page-nav">
-  <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
-</div>
+<a href="index.html" class="back-link">← Ana Sayfa</a>
 
 <main>
   <section id="reverse">
@@ -298,8 +318,8 @@
     </div>
     <a class="reset-link" id="resetRates">↺ Tüm oranları varsayılana sıfırla</a>
     <div class="io-toolbar" id="ioToolbar">
-      <button type="button" class="io-btn" id="exportExcelBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
-      <button type="button" class="io-btn" id="exportPdfBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
+      <button type="button" class="io-btn" id="exportExcelBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
+      <button type="button" class="io-btn" id="exportPdfBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
       <button type="button" class="io-btn" id="importExcelBtn">⬆ Excel'den Yükle</button>
       <button type="button" class="io-btn" id="downloadTemplateBtn">📄 Şablonu İndir</button>
       <input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none;">
@@ -732,6 +752,182 @@
   updateVisibility();
 })();
 </script>
+
+<!-- ================== mmgcreativity: Hesap Makinesi Widget (tüm sayfalarda ortak) ================== -->
+<button id="mmgCalcBtn" title="Hesap Makinesi" aria-label="Hesap Makinesi">🧮</button>
+<div id="mmgCalcPanel" hidden>
+  <div class="mmg-calc-head">
+    <span>Hesap Makinesi</span>
+    <button type="button" id="mmgCalcCloseBtn" aria-label="Kapat">✕</button>
+  </div>
+  <input id="mmgCalcDisplay" readonly value="0">
+  <div class="mmg-calc-grid">
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-act="clear">C</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-act="back">⌫</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-act="percent">%</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-op="/">÷</button>
+
+    <button type="button" class="mmg-calc-btn" data-num="7">7</button>
+    <button type="button" class="mmg-calc-btn" data-num="8">8</button>
+    <button type="button" class="mmg-calc-btn" data-num="9">9</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-op="*">×</button>
+
+    <button type="button" class="mmg-calc-btn" data-num="4">4</button>
+    <button type="button" class="mmg-calc-btn" data-num="5">5</button>
+    <button type="button" class="mmg-calc-btn" data-num="6">6</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-op="-">−</button>
+
+    <button type="button" class="mmg-calc-btn" data-num="1">1</button>
+    <button type="button" class="mmg-calc-btn" data-num="2">2</button>
+    <button type="button" class="mmg-calc-btn" data-num="3">3</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-op" data-op="+">+</button>
+
+    <button type="button" class="mmg-calc-btn" data-num="0" style="grid-column:span 2;">0</button>
+    <button type="button" class="mmg-calc-btn" data-act="dot">,</button>
+    <button type="button" class="mmg-calc-btn mmg-calc-eq" data-act="equals">=</button>
+  </div>
+</div>
+<style>
+  #mmgCalcBtn{
+    position:fixed; top:16px; right:16px; z-index:800;
+    width:42px; height:42px; border-radius:11px; border:1px solid var(--hairline,#2A3448);
+    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B); font-size:19px;
+    cursor:pointer; box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, transform .15s ease;
+  }
+  #mmgCalcBtn:hover{ border-color:var(--brass-dim,#8A7440); transform:translateY(-1px); }
+  #mmgCalcPanel{
+    position:fixed; top:64px; right:16px; z-index:801; width:236px;
+    background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448); border-radius:14px;
+    padding:14px; box-shadow:0 24px 60px rgba(0,0,0,0.5); font-family:'IBM Plex Mono',monospace;
+  }
+  #mmgCalcPanel[hidden]{ display:none; }
+  .mmg-calc-head{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+    font-size:11.5px; color:var(--muted,#8D96AC); text-transform:uppercase; letter-spacing:.06em;
+  }
+  #mmgCalcCloseBtn{
+    background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:13px; padding:2px 4px;
+  }
+  #mmgCalcCloseBtn:hover{ color:var(--text,#EAEDF3); }
+  #mmgCalcDisplay{
+    width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448);
+    border-radius:8px; padding:12px 10px; color:var(--text,#EAEDF3); font-size:22px; text-align:right;
+    margin-bottom:10px; font-family:'IBM Plex Mono',monospace;
+  }
+  .mmg-calc-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+  .mmg-calc-btn{
+    background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px;
+    color:var(--text,#EAEDF3); font-family:'IBM Plex Mono',monospace; font-size:15px; font-weight:600;
+    padding:10px 0; cursor:pointer; transition:border-color .15s ease, background .15s ease;
+  }
+  .mmg-calc-btn:hover{ border-color:var(--brass-dim,#8A7440); background:var(--surface,#141C2B); }
+  .mmg-calc-op{ color:var(--brass,#C6A15B); }
+  .mmg-calc-eq{ background:var(--brass,#C6A15B); border-color:var(--brass,#C6A15B); color:#1a1a1a; }
+  .mmg-calc-eq:hover{ opacity:0.9; }
+  @media (max-width:480px){
+    #mmgCalcPanel{ right:8px; left:8px; width:auto; }
+    #mmgCalcBtn{ right:8px; }
+  }
+</style>
+<script>
+(function(){
+  const btn = document.getElementById('mmgCalcBtn');
+  const panel = document.getElementById('mmgCalcPanel');
+  const closeBtn = document.getElementById('mmgCalcCloseBtn');
+  const display = document.getElementById('mmgCalcDisplay');
+
+  let current = '0';
+  let previous = null;
+  let operator = null;
+  let justEvaluated = false;
+
+  function render(){
+    display.value = current.replace('.', ',');
+  }
+
+  function inputNum(n){
+    if(justEvaluated){ current = '0'; justEvaluated = false; }
+    if(current === '0' && n !== ','){ current = String(n); }
+    else { current += String(n); }
+    render();
+  }
+
+  function inputDot(){
+    if(justEvaluated){ current = '0'; justEvaluated = false; }
+    if(!current.includes('.')) current += '.';
+    render();
+  }
+
+  function clearAll(){
+    current = '0'; previous = null; operator = null; justEvaluated = false;
+    render();
+  }
+
+  function backspace(){
+    if(justEvaluated){ clearAll(); return; }
+    current = current.length > 1 ? current.slice(0, -1) : '0';
+    render();
+  }
+
+  function percent(){
+    current = String(parseFloat(current) / 100);
+    render();
+  }
+
+  function chooseOperator(op){
+    if(operator !== null && !justEvaluated) compute();
+    previous = current;
+    operator = op;
+    justEvaluated = false;
+    current = '0';
+  }
+
+  function compute(){
+    if(operator === null || previous === null) return;
+    const a = parseFloat(previous), b = parseFloat(current);
+    let result = 0;
+    switch(operator){
+      case '+': result = a + b; break;
+      case '-': result = a - b; break;
+      case '*': result = a * b; break;
+      case '/': result = b !== 0 ? a / b : 0; break;
+    }
+    current = String(Math.round(result * 1e10) / 1e10);
+    operator = null;
+    previous = null;
+    justEvaluated = true;
+    render();
+  }
+
+  document.querySelectorAll('.mmg-calc-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      const num = b.dataset.num;
+      const op = b.dataset.op;
+      const act = b.dataset.act;
+      if(num !== undefined) inputNum(num);
+      else if(op !== undefined) chooseOperator(op);
+      else if(act === 'clear') clearAll();
+      else if(act === 'back') backspace();
+      else if(act === 'percent') percent();
+      else if(act === 'dot') inputDot();
+      else if(act === 'equals') compute();
+    });
+  });
+
+  btn.addEventListener('click', () => {
+    panel.hidden = !panel.hidden;
+  });
+  closeBtn.addEventListener('click', () => { panel.hidden = true; });
+  document.addEventListener('click', (e) => {
+    if(!panel.hidden && !panel.contains(e.target) && e.target !== btn){
+      panel.hidden = true;
+    }
+  });
+})();
+</script>
+<!-- ================== /Hesap Makinesi Widget ================== -->
+
 
 </body>
 </html>

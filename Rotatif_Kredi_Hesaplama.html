@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<!-- End Google Tag Manager -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WVWJ4VZE0C"></script>
@@ -151,7 +158,7 @@ function mmgApplyTurkishFont(doc){
   }
   .back-link{
     position:fixed; top:16px; right:68px; z-index:800;
-    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); text-decoration:none;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
     border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
     background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
     transition:border-color .15s ease, color .15s ease;
@@ -271,7 +278,7 @@ function mmgApplyTurkishFont(doc){
   .formula-item .fexpr{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--text);}
   .formula-item .fnote{font-size:11px; color:var(--muted); margin-top:6px;}
 
-  .tranche-toolbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;}
+  .tranche-toolbar{display:flex; flex-direction:column; align-items:flex-start; margin-bottom:16px; gap:10px;}
   .io-toolbar{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
   .io-btn{
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
@@ -345,9 +352,19 @@ function mmgApplyTurkishFont(doc){
     font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal;
     background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
   }
+  #exportExcelBtn, #exportPdfBtn{
+    font-size:12.5px !important; padding:9px 14px !important;
+  }
+  #exportExcelBtn svg, #exportPdfBtn svg{
+    margin-right:6px !important;
+  }
 </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <header class="masthead">
   <div>
@@ -355,7 +372,7 @@ function mmgApplyTurkishFont(doc){
     <div class="subtitle">Tutar, oran ve vade girin — bankaların 3 ayda bir uyguladığı devre sonu faizini ve belirli bir tarih aralığında işleyen rotatif kredi geri ödemesini anında hesaplayın.</div>
   </div>
 </header>
-<a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
+<a href="index.html" class="back-link">← Ana Sayfa</a>
 
 <main>
 
@@ -482,8 +499,8 @@ function mmgApplyTurkishFont(doc){
     </div>
     </div>
     <div class="io-toolbar">
-      <button type="button" class="io-btn" id="exportExcelBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
-      <button type="button" class="io-btn" id="exportPdfBtn"><svg width="28" height="28" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
+      <button type="button" class="io-btn" id="exportExcelBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
+      <button type="button" class="io-btn" id="exportPdfBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
     </div>
     <div class="io-msg" id="ioMsg"></div>
   </section>
