@@ -9,11 +9,29 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-BFZXS7R9BN');
+
+  (function(){
+    try{
+      var src = sessionStorage.getItem('mmg_app_source');
+      if(!src){
+        src = (document.referrer.indexOf('android-app://') === 0) ? 'twa_app'
+            : (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ? 'pwa_app'
+            : 'web';
+        sessionStorage.setItem('mmg_app_source', src);
+      }
+      gtag('set', 'user_properties', { app_source: src });
+    }catch(e){}
+  })();
 </script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gelir Takibi Neden Önemlidir, Nasıl Yapılır? — mmgcreativity</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
