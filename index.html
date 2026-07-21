@@ -1250,10 +1250,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const auth = getAuth(fbApp);
   const db = getFirestore(fbApp);
   const googleProvider = new GoogleAuthProvider();
-  // İçerideki (iframe) sayfaların kendi Firebase Auth örneğini oluşturmak yerine
-  // bu üst pencerenin zaten oturum durumunu bilen auth/db nesnesini kullanabilmesi için:
-  window.mmgAuth = auth;
-  window.mmgDb = db;
 
   // ---- Yönetici kontrolü, premium/reklamsız durumu ----
   onAuthStateChanged(auth, async (user) => {
@@ -1900,9 +1896,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   // ---- Açık / Koyu Görünüm Modu ----
-  // NOT: Bu anahtar şu an kabuk (sidebar, üst bar, hero) için çalışıyor.
-  // İçerideki hesaplayıcı sayfaları (iframe içinde ayrı dosyalar) için
-  // aynı anahtarın oraya da yansıması ayrı bir adımda yapılacak.
+  // Kabuk (sidebar, üst bar, hero) burada; iframe içindeki hesaplayıcı
+  // sayfalarına da postMessage ile anında bildiriliyor, böylece kullanıcı
+  // bir araç sayfasının içindeyken tema değiştirirse iframe da hemen güncellenir.
   const themeToggle = document.getElementById('themeToggle');
   const themeToggleIcon = document.getElementById('themeToggleIcon');
   const themeToggleLabel = document.getElementById('themeToggleLabel');
@@ -1911,6 +1907,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     themeToggleIcon.textContent = mode === 'light' ? '☀' : '☾';
     themeToggleLabel.textContent = mode === 'light' ? 'Açık Mod' : 'Koyu Mod';
     localStorage.setItem('mmg_theme', mode);
+    try{
+      const frameEl = document.getElementById('app-frame');
+      if(frameEl && frameEl.contentWindow){
+        frameEl.contentWindow.postMessage({ mmgTheme: mode }, '*');
+      }
+    }catch(e){}
   }
   applyTheme(localStorage.getItem('mmg_theme') || 'dark');
   themeToggle.addEventListener('click', () => {
