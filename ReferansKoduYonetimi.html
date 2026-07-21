@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script>
+(function(){
+  try{
+    var mode = localStorage.getItem('mmg_theme') || 'dark';
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+  }catch(e){}
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.mmgTheme){
+      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
+      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
+    }
+  });
+})();
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<!-- End Google Tag Manager -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Referans Kodu Yönetimi</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --teal:#3FB68A; --azure:#3E8FE0; --coral:#FF6B4A;
+  }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  html,body{overscroll-behavior-y:none;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; min-height:100vh; padding-bottom:60px;
+  }
+  header.masthead{
+    max-width:820px; margin:0 auto; padding:36px 24px 24px;
+    display:flex; justify-content:space-between; align-items:flex-end;
+    border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
+  }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5;}
+  .back-link{
+    position:fixed; top:16px; right:68px; z-index:800;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  @media (max-width:480px){
+    .back-link{ top:64px; right:8px; }
+  }
+  main{ max-width:820px; margin:0 auto; padding:36px 24px 60px; }
+
+  .state-box{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:40px 24px;
+    text-align:center; color:var(--muted); font-size:13.5px; line-height:1.6;
+  }
+  .state-box .big{ font-size:28px; margin-bottom:10px; }
+  .state-box a{ color:var(--brass); }
+
+  .panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:28px; }
+  .panel-sub{ color:var(--muted); font-size:13px; margin-bottom:22px; }
+  .auth-field{ margin-bottom:16px; }
+  .auth-field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; }
+  .auth-field select, .auth-field input{
+    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
+    transition:border-color .15s ease;
+  }
+  .auth-field select:focus, .auth-field input:focus{ border-color:var(--brass-dim); }
+  .auth-submit{
+    width:100%; padding:13px; border-radius:9px; border:none; cursor:pointer;
+    background:linear-gradient(120deg, var(--coral,#FF6B4A), var(--brass,#C6A15B) 75%); color:#fff;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px;
+    margin-top:4px; transition:opacity .15s ease;
+  }
+  .auth-submit:hover{ opacity:0.9; }
+  .codes-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; margin:24px 0 10px; }
+  #mmgAdminMsg{ font-size:12.5px; margin-bottom:14px; }
+  #mmgAdminCodeList{ display:flex; flex-direction:column; gap:8px; max-height:340px; overflow-y:auto; }
+</style>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header class="masthead">
+  <div>
+    <h1 class="title">Referans Kodu Yönetimi</h1>
+    <div class="subtitle">Yeni bir referans kodu tanımlayın: bu kodla kayıt olan üyelere ücretsiz ya da indirimli premium tanınır.</div>
+  </div>
+</header>
+<a href="index.html" class="back-link">← Ana Sayfa</a>
+
+<main>
+  <div id="stateArea"></div>
+
+  <div id="content" class="panel" hidden>
+    <form id="mmgAdminForm" style="display:grid; gap:0;">
+      <div class="auth-field">
+        <label>Kod</label>
+        <input type="text" id="mmgAdminCode" placeholder="ör. AHMET10" style="text-transform:uppercase;">
+      </div>
+      <div class="auth-field">
+        <label>Fayda Türü</label>
+        <select id="mmgAdminBenefitType">
+          <option value="free">Ücretsiz Premium</option>
+          <option value="discount">İndirimli Premium</option>
+        </select>
+      </div>
+      <div class="auth-field" id="mmgAdminDiscountWrap" style="display:none;">
+        <label>İndirim Yüzdesi</label>
+        <input type="number" id="mmgAdminDiscountPercent" min="1" max="100" placeholder="ör. 20" value="20">
+      </div>
+      <div class="auth-field">
+        <label>Kullanım Limiti <span style="color:var(--muted); font-weight:400;">(boş = sınırsız, örn. 1 = tek kişi)</span></label>
+        <input type="number" id="mmgAdminMaxUses" min="1" placeholder="Sınırsız için boş bırakın">
+      </div>
+      <button type="submit" class="auth-submit">Kodu Kaydet</button>
+    </form>
+
+    <div id="mmgAdminMsg"></div>
+
+    <div class="codes-title">Tanımlı Kodlar</div>
+    <div id="mmgAdminCodeList"></div>
+  </div>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  // Üst pencere (index.html) zaten giriş yapmış kullanıcının auth/db nesnesini tutuyor.
+  // Bu sayfa bir iframe içinde açıldıysa onu paylaşarak ayrı bir Firebase Auth
+  // örneğinin (ve olası IndexedDB yarış durumunun) önüne geçiyoruz.
+  let auth, db;
+  try{
+    if(window.parent && window.parent !== window && window.parent.mmgAuth && window.parent.mmgDb){
+      auth = window.parent.mmgAuth;
+      db = window.parent.mmgDb;
+    }
+  }catch(e){ /* farklı origin ihtimaline karşı sessizce geç */ }
+  if(!auth || !db){
+    auth = getAuth(fbApp);
+    db = getFirestore(fbApp);
+  }
+
+  const stateArea = document.getElementById('stateArea');
+  const content = document.getElementById('content');
+
+  function showState(html){
+    content.hidden = true;
+    stateArea.innerHTML = '<div class="state-box">' + html + '</div>';
+  }
+
+  document.getElementById('mmgAdminBenefitType').addEventListener('change', (e) => {
+    document.getElementById('mmgAdminDiscountWrap').style.display = e.target.value === 'discount' ? 'block' : 'none';
+  });
+
+  async function mmgLoadAdminCodes(){
+    const listEl = document.getElementById('mmgAdminCodeList');
+    listEl.innerHTML = '<div style="font-size:12px; color:var(--muted);">Yükleniyor…</div>';
+    try{
+      const snap = await getDocs(collection(db, 'referralCodes'));
+      const codes = [];
+      snap.forEach(d => codes.push({ id: d.id, ...d.data() }));
+      if(!codes.length){
+        listEl.innerHTML = '<div style="font-size:12px; color:var(--muted);">Henüz tanımlı bir referans kodu yok.</div>';
+        return;
+      }
+      const usageCounts = {};
+      try{
+        const refSnap = await getDocs(collection(db, 'referrals'));
+        refSnap.forEach(d => { usageCounts[d.id] = (d.data().count || 0); });
+      }catch(e){ /* istatistik okunamazsa 0 say */ }
+      listEl.innerHTML = codes.map(c => {
+        const benefitLabel = c.benefitType === 'free' ? 'Ücretsiz Premium' : ('%' + (c.discountPercent||0) + ' İndirim');
+        const used = usageCounts[c.id] || 0;
+        const limitLabel = c.maxUses ? (used + ' / ' + c.maxUses + ' kullanıldı') : (used + ' kullanıldı · Sınırsız');
+        return '<div style="display:flex; align-items:center; justify-content:space-between; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px;">' +
+          '<div><b style="font-family:\'IBM Plex Mono\',monospace;">' + c.id + '</b><div style="font-size:11.5px; color:var(--muted);">' + benefitLabel + ' · ' + limitLabel + '</div></div>' +
+          '<button type="button" class="mmg-admin-del" data-code="' + c.id + '" style="background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:12px;">Sil</button>' +
+          '</div>';
+      }).join('');
+      listEl.querySelectorAll('.mmg-admin-del').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if(!confirm('"' + btn.dataset.code + '" kodunu silmek istediğinize emin misiniz?')) return;
+          await deleteDoc(doc(db, 'referralCodes', btn.dataset.code));
+          mmgLoadAdminCodes();
+        });
+      });
+    } catch(e){
+      listEl.innerHTML = '<div style="font-size:12px; color:var(--red,#e2544b);">Kodlar yüklenemedi.</div>';
+    }
+  }
+
+  document.getElementById('mmgAdminForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msgEl = document.getElementById('mmgAdminMsg');
+    const code = document.getElementById('mmgAdminCode').value.trim().toUpperCase();
+    const benefitType = document.getElementById('mmgAdminBenefitType').value;
+    const discountPercent = parseInt(document.getElementById('mmgAdminDiscountPercent').value, 10) || 0;
+    const maxUsesRaw = document.getElementById('mmgAdminMaxUses').value.trim();
+    const maxUses = maxUsesRaw ? parseInt(maxUsesRaw, 10) : null;
+    if(!code){ msgEl.textContent = 'Lütfen bir kod girin.'; msgEl.style.color = 'var(--red,#e2544b)'; return; }
+    try{
+      await setDoc(doc(db, 'referralCodes', code), {
+        benefitType: benefitType,
+        discountPercent: benefitType === 'discount' ? discountPercent : 0,
+        maxUses: maxUses,
+        active: true,
+        createdAt: serverTimestamp()
+      });
+      msgEl.textContent = '"' + code + '" kodu kaydedildi. ✓';
+      msgEl.style.color = 'var(--teal,#3FB68A)';
+      document.getElementById('mmgAdminCode').value = '';
+      document.getElementById('mmgAdminMaxUses').value = '';
+      mmgLoadAdminCodes();
+    } catch(err){
+      msgEl.textContent = 'Kod kaydedilemedi, tekrar deneyin.';
+      msgEl.style.color = 'var(--red,#e2544b)';
+    }
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    if(!user){
+      showState(
+        '<div class="big">🔑</div>' +
+        'Bu sayfayı görüntülemek için giriş yapmış olmanız gerekir.<br><br>' +
+        'Herhangi bir modülden (örn. <a href="index.html">Ana Sayfa</a>) hesabınıza giriş yaptıktan sonra bu sayfayı yeniden açın.'
+      );
+      return;
+    }
+    showState('<div class="big">⏳</div>Yetki kontrol ediliyor…');
+    let isAdmin = false;
+    try{
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      isAdmin = !!(snap.exists() && snap.data().isAdmin === true);
+    }catch(e){ isAdmin = false; }
+
+    if(!isAdmin){
+      showState(
+        '<div class="big">⛔</div>' +
+        'Bu sayfayı görüntüleme yetkiniz yok.<br><br>' +
+        'Bu sayfa yalnızca yönetici (admin) olarak işaretlenmiş hesaplara açıktır.<br><br>' +
+        '<span style="font-size:11.5px; opacity:0.7;">Hesabınızı admin yapmak için Firebase Console → Firestore Database → <b>users</b> koleksiyonu → sizin UID\'niz olan belge → <b>isAdmin</b> alanını <b>true</b> (boolean) olarak ekleyin.</span>'
+      );
+      return;
+    }
+    stateArea.innerHTML = '';
+    content.hidden = false;
+    mmgLoadAdminCodes();
+  });
+</script>
+</body>
+</html>
