@@ -537,7 +537,7 @@
   .auth-form-panel{
     flex:1; display:flex; align-items:center; justify-content:center; padding:40px 24px; overflow-y:auto;
   }
-  .auth-form-inner{ width:100%; max-width:360px; }
+  .auth-form-inner{ width:100%; max-width:420px; }
   .auth-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:22px; margin-bottom:6px; }
   .auth-sub{ color:var(--muted); font-size:13.5px; margin-bottom:26px; }
   .auth-tabs{ display:flex; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:4px; margin-bottom:22px; }
@@ -546,15 +546,18 @@
     color:var(--muted); cursor:pointer; transition:all .15s ease; background:transparent; border:none; font-family:'Inter',sans-serif;
   }
   .auth-tab.active{ background:var(--surface); color:var(--brass); box-shadow:0 2px 6px rgba(0,0,0,0.25); }
-  .auth-field{ margin-bottom:16px; }
-  .auth-field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; }
-  .auth-field input{
+  .auth-grid{ display:grid; grid-template-columns:1fr 1fr; column-gap:14px; align-items:start; }
+  .auth-full{ grid-column:1 / -1; }
+  .auth-half{ grid-column:span 1; }
+  .auth-field{ margin-bottom:16px; min-width:0; }
+  .auth-field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .auth-field input, .auth-field select{
     width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
     padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
     transition:border-color .15s ease;
   }
-  .auth-field input:focus{ border-color:var(--brass-dim); }
-  .auth-error{ color:var(--coral); font-size:12.5px; margin-bottom:14px; display:none; }
+  .auth-field input:focus, .auth-field select:focus{ border-color:var(--brass-dim); }
+  .auth-error{ color:var(--coral); font-size:12.5px; margin-bottom:14px; display:none; grid-column:1 / -1; }
   .auth-error.show{ display:block; }
   .auth-remember{
     display:flex; align-items:center; gap:8px; margin-bottom:16px; cursor:pointer;
@@ -593,6 +596,10 @@
     .auth-brand-tagline{ font-size:13px; }
     .auth-form-panel{ flex:none; padding:32px 20px; }
   }
+  @media (max-width:380px){
+    .auth-grid{ grid-template-columns:1fr; }
+    .auth-half{ grid-column:1 / -1; }
+  }
 </style>
 </head>
 <body>
@@ -627,43 +634,39 @@
 
       <div class="auth-error" id="authError"></div>
 
-      <form id="authForm">
-        <div class="auth-field" id="authUsernameWrap" style="display:none;">
-          <label>Kullanıcı Adı</label>
-          <input type="text" id="authUsername" placeholder="ör. mutlu.guler">
-        </div>
-        <div class="auth-field" id="authAccountTypeWrap" style="display:none;">
+      <form id="authForm" class="auth-grid">
+        <div class="auth-field auth-half" id="authAccountTypeWrap" style="display:none;">
           <label>Hesap Türü</label>
           <select id="authAccountType">
             <option value="bireysel">Bireysel</option>
             <option value="firma">Kurumsal</option>
           </select>
         </div>
-        <div class="auth-field" id="authCompanyNameWrap" style="display:none;">
-          <label>Firma Adı</label>
-          <input type="text" id="authCompanyName" placeholder="ör. Güler Ticaret Ltd. Şti.">
+        <div class="auth-field auth-half" id="authUsernameWrap" style="display:none;">
+          <label id="authUsernameLabel">Ad Soyad</label>
+          <input type="text" id="authUsername" placeholder="">
         </div>
-        <div class="auth-field">
+        <div class="auth-field auth-full">
           <label>E-posta</label>
           <input type="email" id="authEmail" placeholder="ornek@eposta.com" required>
         </div>
-        <div class="auth-field">
+        <div class="auth-field auth-half" id="authPasswordWrap">
           <label>Şifre</label>
           <input type="password" id="authPassword" placeholder="••••••••" required>
         </div>
-        <div class="auth-field" id="authPasswordConfirmWrap" style="display:none;">
+        <div class="auth-field auth-half" id="authPasswordConfirmWrap" style="display:none;">
           <label>Şifre (Tekrar)</label>
           <input type="password" id="authPasswordConfirm" placeholder="••••••••">
         </div>
-        <div class="auth-field" id="authReferralWrap" style="display:none;">
+        <div class="auth-field auth-full" id="authReferralWrap" style="display:none;">
           <label>Referans Kodu <span style="color:var(--muted); font-weight:400;">(varsa, opsiyonel)</span></label>
           <input type="text" id="authReferralCode" placeholder="ör. AHMET10">
         </div>
-        <label class="auth-remember">
+        <label class="auth-remember auth-full">
           <input type="checkbox" id="rememberMe">
           <span>Oturumu açık tut</span>
         </label>
-        <button type="submit" class="auth-submit" id="authSubmitBtn">Giriş Yap</button>
+        <button type="submit" class="auth-submit auth-full" id="authSubmitBtn">Giriş Yap</button>
       </form>
 
       <div class="auth-divider">veya</div>
@@ -1359,18 +1362,21 @@
   const tabSignup = document.getElementById('tabSignup');
   const passwordConfirmWrap = document.getElementById('authPasswordConfirmWrap');
   const usernameWrap = document.getElementById('authUsernameWrap');
+  const usernameLabel = document.getElementById('authUsernameLabel');
+  const authUsernameInput = document.getElementById('authUsername');
   const referralWrap = document.getElementById('authReferralWrap');
   const accountTypeWrap = document.getElementById('authAccountTypeWrap');
-  const companyNameWrap = document.getElementById('authCompanyNameWrap');
   const authAccountType = document.getElementById('authAccountType');
   const guestBtn = document.getElementById('guestBtn');
 
   let authMode = 'login';
 
-  function updateCompanyNameVisibility(){
-    companyNameWrap.style.display = (authMode === 'signup' && authAccountType.value === 'firma') ? 'block' : 'none';
+  function updateUsernameLabelForType(){
+    const isFirma = authAccountType.value === 'firma';
+    usernameLabel.textContent = isFirma ? 'Firma Ünvanı' : 'Ad Soyad';
+    authUsernameInput.placeholder = '';
   }
-  authAccountType.addEventListener('change', updateCompanyNameVisibility);
+  authAccountType.addEventListener('change', updateUsernameLabelForType);
 
   function setAuthMode(mode){
     authMode = mode;
@@ -1380,7 +1386,7 @@
     usernameWrap.style.display = mode === 'signup' ? 'block' : 'none';
     referralWrap.style.display = mode === 'signup' ? 'block' : 'none';
     accountTypeWrap.style.display = mode === 'signup' ? 'block' : 'none';
-    updateCompanyNameVisibility();
+    if(mode === 'signup') updateUsernameLabelForType();
     authTitle.textContent = mode === 'login' ? 'Tekrar hoş geldiniz' : 'Hesap oluşturun';
     authSub.textContent = mode === 'login' ? 'Kaldığınız yerden devam etmek için giriş yapın' : 'Oranlarınızı ve tercihlerinizi kaydetmek için ücretsiz hesap açın';
     authSubmitBtn.textContent = mode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur';
@@ -1807,9 +1813,8 @@
         // ---- Firma / Ekip: Hesap Türü'ne göre firma kur ya da bekleyen daveti uygula ----
         const accountType = document.getElementById('authAccountType').value;
         if(accountType === 'firma'){
-          const companyNameInput = document.getElementById('authCompanyName').value.trim();
-          if(companyNameInput){
-            try{ await createCompanyForUser(cred.user, companyNameInput, username); }
+          if(username){
+            try{ await createCompanyForUser(cred.user, username, username); }
             catch(companyErr){ /* firma kurulamazsa sessizce geç, kullanıcı sonradan Hesabım'dan tekrar deneyebilir */ }
           }
         } else {
