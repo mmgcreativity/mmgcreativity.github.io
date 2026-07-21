@@ -406,14 +406,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   footer{ padding:0 48px 18px; }
   .footer-powered-row{ padding:28px 0 14px; display:flex; justify-content:flex-end; }
   .footer-final-row{
-    position:fixed; left:calc(var(--sidebar-w) + 48px); right:48px; bottom:18px; z-index:390;
-    display:flex; flex-direction:column; gap:8px;
+    display:flex; flex-direction:column; gap:8px; margin-top:24px;
   }
   .footer-final-top-line, .footer-final-bottom-line{
     display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px 24px;
   }
   .footer-social-col{ display:flex; flex-direction:column; justify-content:center; }
-  .footer-final-row-spacer{ height:104px; }
   .footer-social-inline{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
   .app-badge-small{ padding:7px 13px; gap:7px; }
   .app-badge-small svg{ width:19px; height:19px; }
@@ -487,8 +485,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .nav-desc{ display:inline; }
 
     main{ height:auto; }
-    .footer-final-row{ position:static; left:auto; right:auto; bottom:auto; }
-    .footer-final-row-spacer{ display:none; }
     .frame-wrap{ height:85vh; }
     .hero{ padding:22px 20px 20px; }
     .hero-app-icon{ width:48px; height:48px; border-radius:12px; }
@@ -1032,7 +1028,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         </div>
       </div>
-      <div class="footer-final-row-spacer"></div>
     </footer>
   </div>
 </main>
