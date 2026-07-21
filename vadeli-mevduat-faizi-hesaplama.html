@@ -164,6 +164,48 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   ::-webkit-scrollbar{height:8px;width:8px;}
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
   .table-scroll{overflow-x:auto;}
+
+  /* ---- Split layout: sol = veri girişi, sağ = anlık sonuçlar ---- */
+  .split-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+  @media (max-width:920px){.split-grid{grid-template-columns:1fr;}}
+
+  .offer-card{
+    background:var(--card-2);border:1px solid var(--border);border-radius:12px;
+    padding:14px 14px 12px;margin-bottom:12px;position:relative;
+  }
+  .offer-card:last-child{margin-bottom:0;}
+  .offer-card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .offer-card-head input[type=text]{font-weight:600;font-size:14px;}
+  .offer-card-head .rm-btn{
+    flex-shrink:0;background:none;border:1px solid var(--border);color:var(--text-faint);
+    border-radius:7px;width:30px;height:30px;cursor:pointer;font-size:15px;transition:all .15s;
+  }
+  .offer-card-head .rm-btn:hover{border-color:var(--red);color:var(--red);background:rgba(242,116,140,.08);}
+
+  .field-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+  .field{display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
+
+  .result-card{
+    background:var(--card-2);border:1px solid var(--border);border-radius:12px;
+    padding:14px 16px;margin-bottom:12px;transition:border-color .15s, background .15s;
+  }
+  .result-card:last-child{margin-bottom:0;}
+  .result-card.best{background:var(--green-soft);border-color:rgba(61,220,151,.35);}
+  .result-card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .result-card-head .name{font-weight:700;font-size:14px;flex:1;}
+  .result-card.best .name{color:var(--green);}
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:8px;}
+  .result-item .k{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;font-weight:600;margin-bottom:2px;}
+  .result-item .v{font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:600;}
+  .result-total{
+    border-top:1px solid var(--border);margin-top:8px;padding-top:8px;
+    display:flex;align-items:baseline;justify-content:space-between;
+  }
+  .result-total .k{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+  .result-total .v{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;}
+  .result-card.best .result-total .v{color:var(--green);}
+  .result-diff{font-size:11px;color:var(--text-faint);margin-top:3px;text-align:right;font-family:'JetBrains Mono',monospace;}
 </style>
 </head>
 <body>
@@ -195,67 +237,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-head">
-      <h2><span class="star">&#9733;</span> Teklif Girişi</h2>
-      <span class="hint">Anapara, yıllık oran ve vade gününü gir</span>
-    </div>
-    <div class="table-scroll">
-      <table>
-        <colgroup>
-          <col style="width:30%">
-          <col style="width:26%">
-          <col style="width:22%">
-          <col style="width:22%">
-          <col style="width:44px">
-        </colgroup>
-        <thead>
-          <tr>
-            <th>Banka</th>
-            <th>Anapara</th>
-            <th>Yıllık Oran %</th>
-            <th>Vade (Gün)</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="inputBody"></tbody>
-      </table>
-    </div>
-    <div style="margin-top:14px;">
-      <button class="btn" id="addRowBtn">+ Teklif Ekle</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-head">
-      <h2><span class="star">&#9733;</span> Sıralama</h2>
-      <span class="hint">En yüksek getiriden en düşüğe otomatik sıralanır</span>
-    </div>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Banka</th>
-            <th>Vade</th>
-            <th>Brüt Faiz</th>
-            <th>Stopaj</th>
-            <th>Net Kazanç</th>
-            <th>Vade Sonu Bakiye</th>
-            <th>En İyiye Göre Fark</th>
-          </tr>
-        </thead>
-        <tbody id="resultBody"></tbody>
-      </table>
-      <div class="empty" id="emptyState">Henüz teklif eklenmedi. Yukarıdan bir teklif ekleyerek başla.</div>
+  <div class="split-grid">
+    <div class="card">
+      <div class="card-head">
+        <h2><span class="star">&#9733;</span> Teklif Girişi</h2>
+        <span class="hint">Sol taraf: veri girişi</span>
+      </div>
+      <div id="inputBody"></div>
+      <div style="margin-top:6px;">
+        <button class="btn" id="addRowBtn">+ Teklif Ekle</button>
+      </div>
     </div>
 
-    <div class="assump">
-      <b>Yöntem:</b> Brüt Faiz, TL vadeli mevduatta kullanılan basit faiz (Actual/365) yöntemiyle hesaplanır:
-      <code>Brüt Faiz = Anapara × Yıllık Oran × Vade(Gün) / 365</code>. Stopaj oranı, 09.07.2025 tarihli 2025/66 sayılı
-      Cumhurbaşkanı Kararı'na göre vade gününe göre otomatik uygulanır: 183 güne kadar <b>%17,5</b>, 366 güne kadar <b>%15</b>,
-      1 yıldan uzun vadelerde <b>%10</b>. Net Kazanç = Brüt Faiz − Stopaj; Vade Sonu Bakiye = Anapara + Net Kazanç.
-      Bu araç bilgilendirme amaçlıdır, bağlayıcı bir mevduat teklifi değildir.
+    <div class="card">
+      <div class="card-head">
+        <h2><span class="star">&#9733;</span> Sıralama</h2>
+        <span class="hint">Sağ taraf: anında güncellenir</span>
+      </div>
+      <div id="resultBody"></div>
+      <div class="empty" id="emptyState">Henüz teklif eklenmedi. Soldan bir teklif ekleyerek başla.</div>
+
+      <div class="assump">
+        <b>Yöntem:</b> Brüt Faiz, TL vadeli mevduatta kullanılan basit faiz (Actual/365) yöntemiyle hesaplanır:
+        <code>Brüt Faiz = Anapara × Yıllık Oran × Vade(Gün) / 365</code>. Stopaj oranı, 09.07.2025 tarihli 2025/66 sayılı
+        Cumhurbaşkanı Kararı'na göre vade gününe göre otomatik uygulanır: 183 güne kadar <b>%17,5</b>, 366 güne kadar <b>%15</b>,
+        1 yıldan uzun vadelerde <b>%10</b>. Net Kazanç = Brüt Faiz − Stopaj; Vade Sonu Bakiye = Anapara + Net Kazanç.
+        Bu araç bilgilendirme amaçlıdır, bağlayıcı bir mevduat teklifi değildir.
+      </div>
     </div>
   </div>
 
@@ -326,15 +334,29 @@ function renderInputs(){
   const body = document.getElementById('inputBody');
   body.innerHTML = '';
   offers.forEach((o, idx)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="col-name"><input type="text" value="${o.bank}" data-idx="${idx}" data-field="bank" placeholder="Banka adı"></td>
-      <td class="col-num"><input type="text" inputmode="numeric" value="${formatTRThousands(String(o.amount))}" data-idx="${idx}" data-field="amount" placeholder="100.000"></td>
-      <td class="col-num"><input type="number" step="0.01" value="${o.rate}" data-idx="${idx}" data-field="rate" placeholder="46.00"></td>
-      <td class="col-num"><input type="number" value="${o.days}" data-idx="${idx}" data-field="days" placeholder="32"></td>
-      <td class="row-actions col-del"><button data-idx="${idx}" title="Kaldır">&times;</button></td>
+    const card = document.createElement('div');
+    card.className = 'offer-card';
+    card.innerHTML = `
+      <div class="offer-card-head">
+        <input type="text" value="${o.bank}" data-idx="${idx}" data-field="bank" placeholder="Banka adı">
+        <button class="rm-btn" data-idx="${idx}" title="Kaldır">&times;</button>
+      </div>
+      <div class="field-row2">
+        <div class="field">
+          <label>Anapara</label>
+          <input type="text" inputmode="numeric" value="${formatTRThousands(String(o.amount))}" data-idx="${idx}" data-field="amount" placeholder="100.000">
+        </div>
+        <div class="field">
+          <label>Yıllık Oran %</label>
+          <input type="number" step="0.01" value="${o.rate}" data-idx="${idx}" data-field="rate" placeholder="46.00">
+        </div>
+      </div>
+      <div class="field">
+        <label>Vade (Gün)</label>
+        <input type="number" value="${o.days}" data-idx="${idx}" data-field="days" placeholder="32">
+      </div>
     `;
-    body.appendChild(tr);
+    body.appendChild(card);
   });
 
   body.querySelectorAll('input').forEach(inp=>{
@@ -350,7 +372,7 @@ function renderInputs(){
       renderStats();
     });
   });
-  body.querySelectorAll('button[data-idx]').forEach(btn=>{
+  body.querySelectorAll('.rm-btn').forEach(btn=>{
     btn.addEventListener('click', e=>{
       const idx = +e.currentTarget.dataset.idx;
       offers.splice(idx,1);
@@ -378,22 +400,30 @@ function renderResults(){
 
   computed.forEach((x,rank)=>{
     const {offer,r} = x;
-    const tr = document.createElement('tr');
-    if(rank===0) tr.className='best-row';
+    const card = document.createElement('div');
+    const isBest = rank === 0;
+    card.className = 'result-card' + (isBest ? ' best' : '');
     const rankClass = rank===0?'rank-1':rank===1?'rank-2':rank===2?'rank-3':'rank-n';
     const diff = r.total - bestTotal;
     const tag = stopajTag(offer.days);
-    tr.innerHTML = `
-      <td><span class="rank-badge ${rankClass}">${rank+1}</span></td>
-      <td>${offer.bank || '—'}</td>
-      <td class="mono">${offer.days} gün</td>
-      <td class="mono">${fmt(r.gross)}</td>
-      <td class="mono"><span class="tag ${tag.cls}">${tag.label}</span> ${fmt(r.stopaj)}</td>
-      <td class="mono">${fmt(r.net)}</td>
-      <td class="mono total-cell">${fmt(r.total)}</td>
-      <td class="mono" style="color:${diff===0?'var(--green)':'var(--text-dim)'}">${diff===0?'En iyi':fmt(diff)}</td>
+    card.innerHTML = `
+      <div class="result-card-head">
+        <span class="rank-badge ${rankClass}">${rank+1}</span>
+        <span class="name">${offer.bank || '—'}</span>
+      </div>
+      <div class="result-grid">
+        <div class="result-item"><div class="k">Vade</div><div class="v">${offer.days} gün</div></div>
+        <div class="result-item"><div class="k">Brüt Faiz</div><div class="v">${fmt(r.gross)}</div></div>
+        <div class="result-item"><div class="k">Stopaj <span class="tag ${tag.cls}">${tag.label}</span></div><div class="v">${fmt(r.stopaj)}</div></div>
+        <div class="result-item"><div class="k">Net Kazanç</div><div class="v">${fmt(r.net)}</div></div>
+      </div>
+      <div class="result-total">
+        <span class="k">Vade Sonu Bakiye</span>
+        <span class="v">${fmt(r.total)}</span>
+      </div>
+      <div class="result-diff">${isBest ? 'En iyi teklif' : '-' + fmt(Math.abs(diff)) + ' daha az'}</div>
     `;
-    body.appendChild(tr);
+    body.appendChild(card);
   });
 }
 

@@ -116,7 +116,13 @@ function mmgApplyTurkishFont(doc){
         const snap = await getDoc(doc(db, 'users', user.uid));
         const data = snap.exists() ? snap.data() : {};
         // Firma/Ekip: kullanıcı bir firmaya bağlıysa veriler kişi yerine firma altında paylaşılır
-        if(data.companyId){ window.mmgCloud.scopeId = data.companyId; window.mmgCloud.scopeCollection = 'companies'; }
+        if(data.companyId){
+          window.mmgCloud.scopeCollection = 'companies';
+          // Kullanıcı Hesabım'dan bir "Aktif Firma" seçtiyse (grup içinde firmalar arası geçiş),
+          // bu terminal de o firmanın verisini kullanır; seçim yoksa kendi firmasını kullanır.
+          const activeCompanyId = localStorage.getItem('mmg_active_company_id');
+          window.mmgCloud.scopeId = activeCompanyId || data.companyId;
+        }
         try{ gtag('set', 'user_properties', { user_type: data.isPremium ? 'premium' : 'member' }); }catch(e){}
         if(data.isPremium){
           document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
@@ -150,6 +156,7 @@ function mmgApplyTurkishFont(doc){
   *{box-sizing:border-box; margin:0; padding:0;}
   html{background:var(--bg);}
   html,body{overscroll-behavior-y:none;}
+  .io-two-col{ margin-right:60px; }
   @media (max-width: 700px){
     .io-two-col{ grid-template-columns:1fr !important; }
   }
@@ -228,7 +235,7 @@ function mmgApplyTurkishFont(doc){
 
   /* ---- Form + Önizleme ---- */
   .work-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:24px; align-items:start; }
-  .panel-right-col{ margin-top:0; }
+  .panel-right-col{ margin-top:-148px; }
   @media (max-width:900px){ .work-grid{ grid-template-columns:1fr; } .panel-right-col{ margin-top:0 !important; } }
 
   .form-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:26px; }
@@ -376,7 +383,7 @@ function mmgApplyTurkishFont(doc){
   .io-btn-icon{ display:inline-flex; align-items:center; justify-content:center; gap:0; padding:9px 12px; }
   .io-btn-icon svg{ margin-right:0 !important; }
   .io-btn-share{ display:inline-flex; align-items:center; gap:6px; padding:9px 14px; }
-  .io-msg{ font-size:12px; margin-top:10px; min-height:0; }
+  .io-msg{ font-size:12px; margin-top:10px; min-height:0; margin-right:60px; }
   .io-msg.ok{ color:var(--teal); }
   .io-msg.err{ color:var(--coral); }
 
@@ -454,6 +461,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     <div class="cascade-wrap">
       <div class="cascade-wrap-inner">
+      <div class="xcell-title" style="margin-top:0;">Talimat Bilgileri</div>
       <div class="type-date-row" style="display:flex; gap:6px; flex-wrap:nowrap; align-items:flex-start;">
         <div class="xrow" style="grid-template-columns:62px auto; display:none; flex:0 0 auto; border-top:none !important;" id="talimatTurWrap">
           <label title="Talimat Türünü Seçin">Talimat</label>
@@ -565,6 +573,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </button>
           <button type="button" class="io-btn io-btn-icon" id="shareWaBtn" title="WhatsApp ile Gönder">
             <svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#25D366"/><path fill="#fff" d="M12.04 5.5c-3.62 0-6.55 2.93-6.55 6.55 0 1.15.3 2.27.87 3.26l-.92 3.36 3.44-.9a6.53 6.53 0 003.16.8h.003c3.62 0 6.55-2.93 6.55-6.55 0-1.75-.68-3.39-1.92-4.63a6.5 6.5 0 00-4.63-1.92zm0 11.98h-.003a5.44 5.44 0 01-2.77-.76l-.2-.12-2.04.54.55-1.99-.13-.2a5.43 5.43 0 01-.84-2.9c0-3.01 2.45-5.46 5.46-5.46 1.46 0 2.83.57 3.86 1.6a5.43 5.43 0 011.6 3.87c0 3.01-2.45 5.45-5.46 5.45zm2.99-4.08c-.16-.08-.97-.48-1.12-.53-.15-.06-.26-.08-.37.08-.11.16-.42.53-.52.64-.1.11-.19.12-.35.04-.16-.08-.68-.25-1.29-.8-.48-.42-.8-.95-.89-1.11-.09-.16-.01-.25.07-.33.07-.07.16-.19.24-.28.08-.1.11-.16.16-.27.05-.11.03-.2-.01-.28-.04-.08-.37-.9-.51-1.23-.13-.32-.27-.28-.37-.28h-.32c-.11 0-.28.04-.43.2-.15.16-.56.55-.56 1.34s.58 1.56.66 1.67c.08.11 1.14 1.74 2.76 2.44.39.17.69.27.92.34.39.12.74.11 1.02.06.31-.05.97-.4 1.11-.78.14-.38.14-.71.1-.78-.04-.07-.15-.11-.31-.19z"/></svg>
+          </button>
           <button type="button" class="io-btn io-btn-icon mmg-design-btn" title="Belge Tasarımı">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="7.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="15.5" cy="10.5" r="1.2" fill="currentColor" stroke="none"/><path d="M9 15a3 3 0 0 0 6 0"/></svg>
           </button>
@@ -1324,22 +1333,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       return;
     }
     const reader = new FileReader();
+    reader.onerror = () => showIoMsg('Dosya okunamadı, lütfen tekrar deneyin.', true);
     reader.onload = (ev) => {
       const img = new Image();
+      img.onerror = () => showIoMsg('Görsel yüklenemedi, lütfen başka bir dosya deneyin.', true);
       img.onload = () => {
-        const maxW = 200, maxH = 120;
-        let w = img.width, h = img.height;
-        const scale = Math.min(maxW / w, maxH / h, 1);
-        w = Math.round(w * scale); h = Math.round(h * scale);
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL('image/png');
-        const dims = { w, h };
-        applyStamp(dataUrl, dims);
-        saveStamp(dataUrl, dims);
-        showIoMsg('Kaşe/imza yüklendi ve kaydedildi. ✓');
+        try{
+          const maxW = 200, maxH = 120;
+          let w = img.width, h = img.height;
+          const scale = Math.min(maxW / w, maxH / h, 1);
+          w = Math.round(w * scale); h = Math.round(h * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/png');
+          const dims = { w, h };
+          applyStamp(dataUrl, dims);
+          saveStamp(dataUrl, dims);
+          showIoMsg('Kaşe/imza yüklendi ve kaydedildi. ✓');
+        } catch(err){
+          showIoMsg('Kaşe/imza işlenirken bir hata oluştu, lütfen tekrar deneyin.', true);
+        }
       };
       img.src = ev.target.result;
     };
@@ -1431,23 +1446,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       return;
     }
     const reader = new FileReader();
+    reader.onerror = () => showIoMsg('Dosya okunamadı, lütfen tekrar deneyin.', true);
     reader.onload = (ev) => {
       const img = new Image();
+      img.onerror = () => showIoMsg('Görsel yüklenemedi, lütfen başka bir dosya deneyin.', true);
       img.onload = () => {
-        const maxW = 320, maxH = 140;
-        let w = img.width, h = img.height;
-        const scale = Math.min(maxW / w, maxH / h, 1);
-        w = Math.round(w * scale);
-        h = Math.round(h * scale);
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL('image/png');
-        const dims = { w, h };
-        applyCompanyLogo(dataUrl, dims);
-        saveCompanyLogo(dataUrl, dims);
-        showIoMsg('Logo yüklendi ve kaydedildi. ✓');
+        try{
+          const maxW = 320, maxH = 140;
+          let w = img.width, h = img.height;
+          const scale = Math.min(maxW / w, maxH / h, 1);
+          w = Math.round(w * scale);
+          h = Math.round(h * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/png');
+          const dims = { w, h };
+          applyCompanyLogo(dataUrl, dims);
+          saveCompanyLogo(dataUrl, dims);
+          showIoMsg('Logo yüklendi ve kaydedildi. ✓');
+        } catch(err){
+          showIoMsg('Logo işlenirken bir hata oluştu, lütfen tekrar deneyin.', true);
+        }
       };
       img.src = ev.target.result;
     };
@@ -2574,6 +2595,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 // yüksekliği ölçer, böylece panel türü değiştikçe (Havale/Çek/Serbest Metin gibi
 // farklı yükseklikte kartlar) veya ekran boyutu değiştikçe hizalama bozulmaz.
 (function(){
+  // Bazı tarayıcılarda/ekranlarda (yakınlaştırma, font render farkı) hesaplanan
+  // değer 1-2 piksel kayabiliyor. Hâlâ kayma görürsen bu sayıyı büyüt (ör. 12, 16).
+  const FINE_TUNE_OFFSET = 10; // pozitif = aşağı çeker, negatif = yukarı çeker
+
   function alignPreviewTop(){
     if(window.innerWidth <= 900) return; // mobilde tek sütun, hizalamaya gerek yok
     const cascadeWrap = document.querySelector('.cascade-wrap');
@@ -2589,7 +2614,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // mmgcreativity: aşırı/yanlış ölçüm durumlarında (ör. içerik henüz yüklenmeden
       // hesaplanan diff) kutunun üstteki veya alttaki komşu elemanlarla çakışmasını
       // önlemek için negatif margin makul bir aralıkla sınırlandırılır.
-      const clamped = Math.max(-300, Math.min(0, -diff));
+      const clamped = Math.max(-600, Math.min(600, -diff + FINE_TUNE_OFFSET));
       rightCol.style.marginTop = clamped + 'px';
     });
   }
@@ -2603,9 +2628,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
   const observer = new MutationObserver(() => alignPreviewTop());
   document.querySelectorAll('.work-grid').forEach(wg => observer.observe(wg, { attributes:true, attributeFilter:['style'] }));
+
+  // Gerçek boyut değişimini (ör. logo yüklenince, alıcı satırı eklenince, yazı tipi
+  // gecikmeli oturunca) doğrudan izler — sabit zamanlayıcılara güvenmek yerine
+  // her fiili yükseklik değişiminde otomatik yeniden hizalar.
+  if(window.ResizeObserver){
+    const ro = new ResizeObserver(() => alignPreviewTop());
+    document.querySelectorAll('.cascade-wrap, .panel-left-col, .doc-preview').forEach(el => ro.observe(el));
+  }
+
   setTimeout(alignPreviewTop, 200);
   setTimeout(alignPreviewTop, 600);
   setTimeout(alignPreviewTop, 1200);
+  setTimeout(alignPreviewTop, 2000);
   if(document.fonts && document.fonts.ready){
     document.fonts.ready.then(alignPreviewTop);
   }

@@ -259,12 +259,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="empty" id="emptyState">Henüz teklif eklenmedi. Soldan bir teklif ekleyerek başla.</div>
 
       <div class="assump">
-        <b>Yöntem:</b> Aylık Taksit, girilmezse eşit taksitli (anüite) formülüyle otomatik hesaplanır:
-        <code>Taksit = Tutar × [i(1+i)&#8319;] / [(1+i)&#8319;−1]</code>, i = Yıllık Oran/12, n = Taksit Sayısı.
-        Bankanızın verdiği taksit tutarı farklıysa "Taksit Tutarı (manuel)" alanına yazabilirsiniz; girilirse bu değer esas alınır.
-        Komisyon Tutarı = Tutar × Komisyon Oranı. BSMV, 09.07.2025 tarihli 2025/66 sayılı Cumhurbaşkanı Kararı uyarınca
-        tüketici/ihtiyaç kredilerinde toplam faizin <b>%15</b>'i olarak uygulanır. Toplam Geri Ödeme = Taksitlerin toplamı + Komisyon + BSMV.
-        Bu araç bilgilendirme amaçlıdır, bağlayıcı bir kredi teklifi değildir.
+        <b>Yöntem (KREDİ_HESAPLAMA.xlsx ile birebir doğrulanmıştır):</b> Bu, eşit taksitli değil, <b>vade sonu tek ödemeli</b> ticari kredi modelidir.
+        <code>Vade (Gün) = Vade (Ay) × 30</code>. <code>Vade Sonu Faiz = Tutar × Yıllık Oran × Vade(Gün) / 360</code>.
+        <code>Komisyon Tutarı = Tutar × Yıllık Komisyon Oranı × Vade(Gün) / 360</code>. <code>BSMV = Vade Sonu Faiz × %5</code>.
+        <code>Kredi Geri Ödeme = Tutar + Faiz + BSMV</code>. <code>Toplam Geri Ödeme = Tutar + Faiz + Komisyon + BSMV</code>.
+        <code>Taksit Tutarı = Toplam Geri Ödeme / Vade (Ay)</code> — vade sonu tek ödemeli olduğu için bu, karşılaştırma amaçlı <b>ortalama aylık maliyet</b>tir, gerçek bir taksit planı değildir.
+        Yıllık Oran, girdiğiniz Aylık Faiz Oranı × 12'dir (bankaların Excel'deki gibi basit yıllıklandırma yöntemi). Bu araç bilgilendirme amaçlıdır, bağlayıcı bir kredi teklifi değildir.
       </div>
     </div>
   </div>
@@ -273,13 +273,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
 let offers = [
-  {bank:"VAKIF KATILIM", amount:100000, rate:51.96, months:12, feeRate:1.12, manualInstallment:null},
-  {bank:"KUVEYT TÜRK", amount:100000, rate:49.80, months:24, feeRate:1.13, manualInstallment:null},
-  {bank:"AKBANK", amount:100000, rate:55.00, months:36, feeRate:1.17, manualInstallment:null},
-  {bank:"TÜRKİYE FİNANS", amount:100000, rate:49.00, months:48, feeRate:1.82, manualInstallment:null},
+  {bank:"VAKIF KATILIM", amount:190043, monthlyRate:4.33, months:2, annualFeeRate:1.12},
+  {bank:"KUVEYT TÜRK", amount:398478, monthlyRate:4.15, months:2, annualFeeRate:1.13},
+  {bank:"AKBANK", amount:3500000, monthlyRate:4.58, months:2, annualFeeRate:1.17},
+  {bank:"TÜRKİYE FİNANS", amount:856077, monthlyRate:4.08, months:2, annualFeeRate:1.82},
 ];
 
-const BSMV_RATE = 0.15;
+const BSMV_RATE = 0.05;
 
 function fmt(n){
   if(n===null||n===undefined||isNaN(n)) return "—";
@@ -312,26 +312,24 @@ function attachTRAmountInput(inputEl){
   });
 }
 
+// KREDİ_HESAPLAMA.xlsx ile birebir doğrulanmış formüller (vade sonu tek ödemeli ticari kredi)
 function calc(offer){
-  const {amount, rate, months, feeRate, manualInstallment} = offer;
+  const {amount, monthlyRate, months, annualFeeRate} = offer;
   if(!amount || !months) return null;
+  if(!monthlyRate && monthlyRate !== 0) return null;
 
-  let installment, isManual = false;
-  if(manualInstallment && manualInstallment > 0){
-    installment = manualInstallment;
-    isManual = true;
-  } else {
-    if(!rate) return null;
-    const i = (rate/100)/12;
-    installment = amount * (i*Math.pow(1+i,months)) / (Math.pow(1+i,months)-1);
-  }
+  const days = months * 30;                          // VADE (GÜN) = Ay × 30
+  const annualRate = (monthlyRate/100) * 12;          // ORAN = Aylık Oran × 12
+  const feeRateDec = (annualFeeRate||0)/100;          // KOM. ORAN (yıllık)
 
-  const feeAmount = amount * (feeRate/100 || 0);
-  const totalInterest = installment*months - amount;
-  const bsmv = totalInterest * BSMV_RATE;
-  const loanRepay = installment*months;
-  const total = loanRepay + feeAmount + bsmv;
-  return {installment, feeAmount, totalInterest, bsmv, loanRepay, total, isManual};
+  const interest = amount * annualRate * days / 360;  // VADE SONU FAİZ
+  const feeAmount = amount * feeRateDec * days / 360;  // KOMİSYON TUTAR
+  const bsmv = interest * BSMV_RATE;                   // BSMV = Faiz × %5
+  const loanRepay = amount + interest + bsmv;          // KREDİ GERİ ÖDEME
+  const total = amount + interest + feeAmount + bsmv;  // TOPLAM GERİ ÖDEME
+  const installment = total / months;                 // TAKSİT TUTARI (ortalama)
+
+  return { annualRate, days, interest, feeAmount, bsmv, loanRepay, total, installment };
 }
 
 function renderInputs(){
@@ -351,35 +349,41 @@ function renderInputs(){
           <input type="text" inputmode="numeric" value="${formatTRThousands(String(o.amount))}" data-idx="${idx}" data-field="amount" placeholder="100.000">
         </div>
         <div class="field">
-          <label>Yıllık Oran %</label>
-          <input type="number" step="0.01" value="${o.rate}" data-idx="${idx}" data-field="rate" placeholder="45.00">
+          <label>Vade (Ay)</label>
+          <select data-idx="${idx}" data-field="months">
+            ${[1,2,3,6,9,12,18,24,36,48].map(m => `<option value="${m}" ${o.months===m?'selected':''}>${m} Ay</option>`).join('')}
+          </select>
         </div>
       </div>
       <div class="field-row2">
         <div class="field">
-          <label>Taksit Sayısı</label>
-          <input type="number" value="${o.months}" data-idx="${idx}" data-field="months" placeholder="12">
+          <label>Aylık Faiz Oranı %</label>
+          <input type="number" step="0.01" value="${o.monthlyRate}" data-idx="${idx}" data-field="monthlyRate" placeholder="4.33">
         </div>
         <div class="field">
-          <label>Komisyon %</label>
-          <input type="number" step="0.01" value="${o.feeRate}" data-idx="${idx}" data-field="feeRate" placeholder="1.12">
+          <label>Yıllık Komisyon Oranı %</label>
+          <input type="number" step="0.01" value="${o.annualFeeRate}" data-idx="${idx}" data-field="annualFeeRate" placeholder="1.12">
         </div>
-      </div>
-      <div class="field field-manual">
-        <label>Taksit Tutarı (manuel, opsiyonel)</label>
-        <input type="text" inputmode="numeric" value="${o.manualInstallment ? formatTRThousands(String(o.manualInstallment)) : ''}" data-idx="${idx}" data-field="manualInstallment" placeholder="Otomatik hesaplanan taksiti kullan">
       </div>
     `;
     body.appendChild(card);
   });
 
+  body.querySelectorAll('select').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      const idx = +e.target.dataset.idx;
+      offers[idx].months = +e.target.value;
+      renderResults();
+      renderStats();
+    });
+  });
   body.querySelectorAll('input').forEach(inp=>{
-    if(inp.dataset.field === 'amount' || inp.dataset.field === 'manualInstallment') attachTRAmountInput(inp);
+    if(inp.dataset.field === 'amount') attachTRAmountInput(inp);
     inp.addEventListener('input', e=>{
       const idx = +e.target.dataset.idx;
       const field = e.target.dataset.field;
       let val = e.target.value;
-      if(field === 'amount' || field === 'manualInstallment') val = parseTRAmount(val);
+      if(field === 'amount') val = parseTRAmount(val);
       else if(field !== 'bank') val = parseFloat(val.replace(',', '.'));
       offers[idx][field] = val;
       renderResults();
@@ -418,7 +422,7 @@ function renderResults(){
     const card = document.createElement('div');
     if(!r){
       card.className = 'result-card';
-      card.innerHTML = `<div class="result-card-head"><span class="name" style="color:var(--text-faint);">${offer.bank || 'Yeni teklif'}</span></div><div style="font-size:12.5px;color:var(--text-faint);">Tutar, taksit sayısı ve (oran ya da manuel taksit) girilince hesaplanır.</div>`;
+      card.innerHTML = `<div class="result-card-head"><span class="name" style="color:var(--text-faint);">${offer.bank || 'Yeni teklif'}</span></div><div style="font-size:12.5px;color:var(--text-faint);">Tutar, vade ve aylık faiz oranı girilince hesaplanır.</div>`;
       body.appendChild(card);
       return;
     }
@@ -432,10 +436,10 @@ function renderResults(){
         <span class="name">${offer.bank || '—'}</span>
       </div>
       <div class="result-grid">
-        <div class="result-item"><div class="k">Aylık Taksit${r.isManual?'<span class="manual-tag">Manuel</span>':''}</div><div class="v">${fmt(r.installment)}</div></div>
-        <div class="result-item"><div class="k">Toplam Faiz</div><div class="v">${fmt(r.totalInterest)}</div></div>
-        <div class="result-item"><div class="k">Komisyon</div><div class="v">${fmt(r.feeAmount)}</div></div>
+        <div class="result-item"><div class="k">Oran (Yıllık)</div><div class="v">${fmtPct(r.annualRate*100)}</div></div>
+        <div class="result-item"><div class="k">Taksit Tutarı</div><div class="v">${fmt(r.installment)}</div></div>
         <div class="result-item"><div class="k">BSMV</div><div class="v">${fmt(r.bsmv)}</div></div>
+        <div class="result-item"><div class="k">Komisyon</div><div class="v">${fmt(r.feeAmount)}</div></div>
         <div class="result-item"><div class="k">Kredi Geri Ödeme</div><div class="v">${fmt(r.loanRepay)}</div></div>
       </div>
       <div class="result-total">
@@ -468,7 +472,7 @@ function renderStats(){
 }
 
 document.getElementById('addRowBtn').addEventListener('click', ()=>{
-  offers.push({bank:"", amount:100000, rate:45, months:12, feeRate:1.0, manualInstallment:null});
+  offers.push({bank:"", amount:100000, monthlyRate:4.5, months:2, annualFeeRate:1.0});
   renderInputs();
   renderResults();
   renderStats();

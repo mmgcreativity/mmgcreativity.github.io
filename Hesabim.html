@@ -1029,15 +1029,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   }
 
-  function showDeleteAccountError(msg){
-    deleteAccountError.textContent = msg;
-    deleteAccountError.classList.add('show');
-  }
-  function hideDeleteAccountError(){
-    deleteAccountError.classList.remove('show');
-    deleteAccountError.textContent = '';
-  }
-
   deleteAccountConfirmBtn.addEventListener('click', async () => {
     const user = auth.currentUser;
     if(!user){ deleteAccountOverlay.hidden = true; return; }

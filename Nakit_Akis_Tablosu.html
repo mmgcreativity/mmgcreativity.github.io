@@ -67,7 +67,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         isPremium = data.isPremium === true;
         isAdmin = data.isAdmin === true;
         // Firma/Ekip: kullanıcı bir firmaya bağlıysa veriler kişi yerine firma altında paylaşılır
-        if(data.companyId){ window.mmgCloud.scopeId = data.companyId; window.mmgCloud.scopeCollection = 'companies'; }
+        if(data.companyId){
+          window.mmgCloud.scopeCollection = 'companies';
+          // Kullanıcı Hesabım'dan bir "Aktif Firma" seçtiyse (grup içinde firmalar arası geçiş),
+          // bu terminal de o firmanın verisini kullanır; seçim yoksa kendi firmasını kullanır.
+          const activeCompanyId = localStorage.getItem('mmg_active_company_id');
+          window.mmgCloud.scopeId = activeCompanyId || data.companyId;
+        }
         if(data.createdAt && typeof data.createdAt.toMillis === 'function'){
           trialStartMs = data.createdAt.toMillis();
         }
@@ -452,13 +458,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .breakdown{ margin-top:22px; display:grid; grid-template-columns:1fr 1fr; gap:24px; }
 
   /* ---- Raporlar başlığı + Arşivle butonu ---- */
-  .reports-title-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .reports-title-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:20px; max-width:100%; }
+  .archive-btn-group{ display:flex; flex-direction:column; gap:14px; max-width:100%; margin-top:14px; }
   .archive-save-btn{
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; color:var(--brass);
     font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; padding:9px 16px;
-    cursor:pointer; transition:all .15s ease; white-space:nowrap;
+    cursor:pointer; transition:all .15s ease; white-space:nowrap; min-width:0; overflow:hidden; text-overflow:ellipsis;
+    width:100%; text-align:center;
   }
   .archive-save-btn:hover{ border-color:var(--brass); background:rgba(198,161,91,0.10); }
+  @media (max-width:900px){
+    .archive-btn-group{ flex-direction:row; flex-wrap:wrap; }
+    .archive-save-btn{ width:auto; flex:1; min-width:140px; }
+  }
+  @media (max-width:420px){
+    .archive-btn-group{ flex-direction:column; }
+    .archive-save-btn{ width:100%; text-align:center; white-space:normal; }
+  }
 
   /* ---- Arşiv sekmesi ---- */
   .archive-wrap{ margin-bottom:40px; }
@@ -642,16 +658,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="summary-sub" id="sumNetSub">&nbsp;</div>
           </div>
         </div>
+        <div class="archive-btn-group">
+          <button type="button" class="archive-save-btn" id="archiveSaveBtn">🗄 Bu Raporu Arşivle</button>
+          <button type="button" class="archive-save-btn" id="viewArchiveBtn">📁 Arşiv</button>
+        </div>
       </div>
     </div>
 
     <section class="reports-section" id="reportsSection">
       <div class="reports-title-row">
         <div class="section-title" style="margin-bottom:0;">Raporlar</div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button type="button" class="archive-save-btn" id="archiveSaveBtn">🗄 Bu Raporu Arşivle</button>
-          <button type="button" class="archive-save-btn" id="viewArchiveBtn">📁 Arşiv</button>
-        </div>
       </div>
 
       <div class="reports-list" id="reportsList"></div>
@@ -1116,7 +1132,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     html += '<div class="drawer-title">' + (type==='gider' ? 'Gider' : 'Gelir') + '</div>';
     html += '<div class="add-item-form" data-day="'+key+'" data-type="'+type+'">' +
       '<div class="field"><label>Açıklama <span style="color:var(--muted); font-weight:400;">(opsiyonel)</span></label>' +
-        '<input type="text" class="desc-in" placeholder="örn. Kira, Elektrik faturası..."></div>' +
+        '<input type="text" class="desc-in" placeholder="' + (type==='gider' ? 'örn. Kira, Elektrik faturası...' : 'örn. Kira Geliri, Nakit Tahsilat...') + '"></div>' +
       '<div class="field"><label>Kategori</label>' +
         '<select class="cat-in">' + cats.map(c=>'<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>').join('') + '</select></div>' +
       '<div class="field"><label>Tutar</label>' +
@@ -1284,7 +1300,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     renderSummaryAndReports();
+    alignSummaryCardsTop();
   }
+
+  // Sağdaki 3 özet kartının üst kenarını, üstteki araç çubuğunu atlayıp
+  // doğrudan gün/hafta kutusunun üst kenarına hizalar (masaüstünde).
+  function alignSummaryCardsTop(){
+    const controls = document.getElementById('secondaryControls');
+    const picker = document.getElementById('reportPicker');
+    const side = document.getElementById('contentSide');
+    if(!controls || !side) return;
+    if(window.innerWidth <= 900){ side.style.marginTop = '0px'; return; }
+    const controlsStyle = getComputedStyle(controls);
+    let offset = controls.offsetHeight + parseFloat(controlsStyle.marginBottom || 0);
+    if(picker && picker.offsetHeight > 0){
+      const pickerStyle = getComputedStyle(picker);
+      offset += picker.offsetHeight + parseFloat(pickerStyle.marginBottom || 0);
+    }
+    side.style.marginTop = offset + 'px';
+  }
+  window.addEventListener('resize', alignSummaryCardsTop);
 
   function renderTabsUI(){
     document.querySelectorAll('#reportTabs .report-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === reportTab));

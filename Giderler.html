@@ -62,7 +62,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       try{
         const snap = await getDoc(doc(db, 'users', user.uid));
         const data = snap.exists() ? snap.data() : {};
-        if(data.companyId){ window.mmgCloud.scopeId = data.companyId; window.mmgCloud.scopeCollection = 'companies'; }
+        if(data.companyId){
+          window.mmgCloud.scopeCollection = 'companies';
+          // Kullanıcı Hesabım'dan bir "Aktif Firma" seçtiyse (grup içinde firmalar arası geçiş),
+          // bu terminal de o firmanın verisini kullanır; seçim yoksa kendi firmasını kullanır.
+          const activeCompanyId = localStorage.getItem('mmg_active_company_id');
+          window.mmgCloud.scopeId = activeCompanyId || data.companyId;
+        }
         try{ gtag('set', 'user_properties', { user_type: data.isPremium ? 'premium' : 'member' }); }catch(e){}
         if(data.isPremium){
           document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
@@ -503,15 +509,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   const CATS = window.MMG_PAYMENT_CATEGORIES || [
+    { id:'nakit', icon:'💵', label:'Nakit' },
     { id:'fatura', icon:'🧾', label:'Fatura' },
-    { id:'kredi', icon:'🏦', label:'Kredi' },
     { id:'kredi-karti', icon:'💳', label:'Kredi Kartı' },
+    { id:'kredi', icon:'🏦', label:'Kredi' },
     { id:'kira', icon:'🏠', label:'Kira' },
     { id:'vergi-sgk', icon:'📋', label:'Vergi/SGK' },
-    { id:'maas', icon:'👤', label:'Maaş' },
-    { id:'tedarikci', icon:'📦', label:'Tedarikçi' },
+    { id:'maas', icon:'👤', label:'Personel Ücreti' },
+    { id:'tedarikci', icon:'📦', label:'Tedarikçi Ödemesi' },
     { id:'komisyon', icon:'🔗', label:'Komisyon' },
-    { id:'nakit', icon:'💵', label:'Nakit' },
     { id:'diger', icon:'✳️', label:'Diğer' }
   ];
   let activeCat = 'tumu';

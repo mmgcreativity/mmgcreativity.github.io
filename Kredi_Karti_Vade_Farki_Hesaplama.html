@@ -63,7 +63,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         const snap = await getDoc(doc(db, 'users', user.uid));
         const data = snap.exists() ? snap.data() : {};
         // Firma/Ekip: kullanıcı bir firmaya bağlıysa veriler kişi yerine firma altında paylaşılır
-        if(data.companyId){ window.mmgCloud.scopeId = data.companyId; window.mmgCloud.scopeCollection = 'companies'; }
+        if(data.companyId){
+          window.mmgCloud.scopeCollection = 'companies';
+          // Kullanıcı Hesabım'dan bir "Aktif Firma" seçtiyse (grup içinde firmalar arası geçiş),
+          // bu terminal de o firmanın verisini kullanır; seçim yoksa kendi firmasını kullanır.
+          const activeCompanyId = localStorage.getItem('mmg_active_company_id');
+          window.mmgCloud.scopeId = activeCompanyId || data.companyId;
+        }
       } catch(e){ /* sessizce geç */ }
     }
     document.dispatchEvent(new CustomEvent('mmg-scope-ready', { detail: { scopeId: window.mmgCloud.scopeId } }));
