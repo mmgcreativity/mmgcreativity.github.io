@@ -149,9 +149,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   header.masthead{
     max-width:1180px; margin:0 auto; padding:36px 24px 24px;
     display:flex; justify-content:space-between; align-items:flex-end;
-    border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
+    border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px 24px;
   }
-  .page-nav{ max-width:1180px; margin:0 auto; padding:14px 24px 0; display:flex; flex-wrap:wrap; gap:10px; }
+  header.masthead > div:first-child{ flex:1 1 280px; min-width:0; }
+  .page-nav{ display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; flex:0 1 620px; max-width:100%; }
+  @media (max-width:640px){ .page-nav{ justify-content:flex-start; flex-basis:100%; } }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5; min-height:42px; max-width:920px;}
   .guide-btn{
@@ -330,17 +332,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <header class="masthead">
   <div>
     <h1 class="title">Gelirler</h1>
-    <div class="subtitle">Satışlar, hizmet, kira ve faiz gelirlerinizi takip edin — vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlenir.</div>
+    <div class="subtitle">Tüm gelirlerinizi sisteme girerek, gelir takibinizi yapabilirsiniz.<br>Vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlenir.</div>
+  </div>
+  <div class="page-nav">
+    <button type="button" class="ghost-btn" id="syncNowBtn">🔄 Şimdi Senkronize Et</button>
   </div>
 </header>
 <a href="index.html" class="back-link">← Ana Sayfa</a>
-<div class="page-nav">
-  <a href="rehber-gelirler.html" class="guide-btn">📖 Rehber</a>
-  <a href="Giderler.html" class="guide-btn">💳 Giderler</a>
-  <a href="Nakit_Akis_Tablosu.html" class="guide-btn">📊 Nakit Akış Tablosu</a>
-  <a href="Talimat_Hazirlama.html" class="guide-btn">📝 Talimat Hazırlama</a>
-  <button type="button" class="ghost-btn" id="syncNowBtn">🔄 Şimdi Senkronize Et</button>
-</div>
 
 <main>
   <div class="controls-row" style="display:none;">

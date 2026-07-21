@@ -203,7 +203,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
-  .page-nav{ max-width:1180px; margin:0 auto; padding:14px 24px 0; display:flex; flex-wrap:wrap; gap:10px; }
+  .page-nav{ display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; }
+  @media (max-width:640px){ .page-nav{ justify-content:flex-start; } }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5; min-height:42px;}
   .guide-btn{
@@ -603,13 +604,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h1 class="title">Nakit Akış Tablosu</h1>
     <div class="subtitle">Tarih seçin ve günlük, haftalık, aylık ve yıllık dönemlerde gelir gider analizinizi görün.</div>
   </div>
+  <div class="page-nav">
+    <a href="rehber-nakit-akis-tablosu.html" class="guide-btn">📖 Rehber</a>
+    <a href="Giderler.html" class="guide-btn">💳 Giderler</a>
+    <a href="Gelirler.html" class="guide-btn">💰 Gelirler</a>
+  </div>
 </header>
 <a href="index.html" class="back-link">← Ana Sayfa</a>
-<div class="page-nav">
-  <a href="rehber-nakit-akis-tablosu.html" class="guide-btn">📖 Rehber</a>
-  <a href="Giderler.html" class="guide-btn">💳 Giderler</a>
-  <a href="Gelirler.html" class="guide-btn">💰 Gelirler</a>
-</div>
 
 <div class="trial-banner" id="trialBanner" hidden>
   ⏳ <span id="trialBannerText"></span>
