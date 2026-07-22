@@ -58,7 +58,12 @@ import {
   let myIsAdmin = false;
   let myBlockedUids = [];
   let unsubChats = null, unsubRequests = null, unsubMessages = null;
-  let openChatId = null, openChatInfo = null, openChatOtherUid = null;
+  let openChatId = null, openChatInfo = null, openChatOtherUid = null, openChatCollection = 'chats';
+  let groupsMap = {};        // groupId -> group data
+  let groupInvitesMap = {};  // inviteId -> invite data
+  let unsubGroups = null, unsubGroupInvites = null;
+  let friendsSubView = 'list'; // 'list' | 'newGroup'
+  let pendingGroupMembers = []; // [{uid, code}] grup oluşturma formunda eklenen kişiler
   let chatsMap = {};     // chatId -> chat data
   let requestsMap = {};  // reqId -> request data
   let activeTab = 'friends'; // friends | requests | add | admin
@@ -224,6 +229,9 @@ import {
       <button type="button" class="mmg-chat-iconbtn" id="mmgChatBlockBtn" hidden aria-label="Engelle" title="Bu kullanıcıyı engelle">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/></svg>
       </button>
+      <button type="button" class="mmg-chat-iconbtn" id="mmgChatLeaveGroupBtn" hidden aria-label="Gruptan ayrıl" title="Gruptan ayrıl">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
       <button type="button" class="mmg-chat-iconbtn" id="mmgChatCloseBtn" aria-label="Kapat">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
@@ -265,6 +273,7 @@ import {
     els.title = document.getElementById('mmgChatTitle');
     els.backBtn = document.getElementById('mmgChatBackBtn');
     els.blockBtn = document.getElementById('mmgChatBlockBtn');
+    els.leaveGroupBtn = document.getElementById('mmgChatLeaveGroupBtn');
     els.closeBtn = document.getElementById('mmgChatCloseBtn');
     els.codeBox = document.getElementById('mmgChatCodeBox');
     els.tabs = document.getElementById('mmgChatTabs');
@@ -285,10 +294,18 @@ import {
         blockUser(openChatOtherUid);
       }
     });
+    els.leaveGroupBtn.addEventListener('click', () => {
+      if(!openChatId || openChatCollection !== 'groups') return;
+      const label = (openChatInfo && openChatInfo.title) || 'Bu grup';
+      if(confirm(label + ' grubundan ayrılmak istediğinize emin misiniz?')){
+        leaveGroup(openChatId);
+      }
+    });
     els.tabs.addEventListener('click', (e) => {
       const tab = e.target.closest('.mmg-chat-tab');
       if(!tab) return;
       activeTab = tab.dataset.tab;
+      if(activeTab !== 'friends') friendsSubView = 'list';
       [...els.tabs.children].forEach(c => c.classList.toggle('active', c === tab));
       closeOpenChat(false);
       renderTab();
@@ -403,9 +420,10 @@ import {
 
   function closeOpenChat(rerender){
     if(unsubMessages){ unsubMessages(); unsubMessages = null; }
-    openChatId = null; openChatInfo = null; openChatOtherUid = null;
+    openChatId = null; openChatInfo = null; openChatOtherUid = null; openChatCollection = 'chats';
     els.backBtn.hidden = true;
     els.footer.hidden = true;
+    if(els.leaveGroupBtn) els.leaveGroupBtn.hidden = true;
     if(els.blockBtn) els.blockBtn.hidden = true;
     if(rerender !== false) renderTab();
   }
@@ -416,6 +434,25 @@ import {
     const usnap = await getDoc(uref);
     const udata = usnap.exists() ? usnap.data() : {};
     if(udata.chatCode) return udata.chatCode;
+
+    // Öncelik: sitede zaten kullanılan Müşteri No'yu (#1016 gibi) kullanıcı kodu olarak kullan
+    if(udata.customerNumber != null){
+      const code = String(udata.customerNumber);
+      const cref = doc(db, 'chatCodes', code);
+      try{
+        const csnap = await getDoc(cref);
+        if(!csnap.exists()){
+          await setDoc(cref, { uid, createdAt: serverTimestamp() });
+          await setDoc(uref, { chatCode: code }, { merge: true });
+          return code;
+        } else if(csnap.data().uid === uid){
+          await setDoc(uref, { chatCode: code }, { merge: true });
+          return code;
+        }
+      }catch(e){ /* aşağıdaki yedek koda düş */ }
+    }
+
+    // Yedek: Müşteri No yoksa/çakışıyorsa rastgele bir kod üret
     for(let i=0;i<6;i++){
       const code = genCode();
       const cref = doc(db, 'chatCodes', code);
@@ -436,7 +473,7 @@ import {
     unsubChats = onSnapshot(query(collection(db, 'chats'), where('participants', 'array-contains', uid)), (snap) => {
       chatsMap = {};
       snap.forEach(d => { chatsMap[d.id] = d.data(); });
-      if(activeTab === 'friends') renderTab();
+      if(activeTab === 'friends' && friendsSubView === 'list') renderTab();
       if(openChatId && chatsMap[openChatId]) updateOpenChatHeaderIfNeeded();
       updateBadge();
     }, (err) => console.error('mmg-chat-widget chats onSnapshot:', err));
@@ -447,14 +484,34 @@ import {
       if(activeTab === 'requests') renderTab();
       updateBadge();
     }, (err) => console.error('mmg-chat-widget requests onSnapshot:', err));
+
+    unsubGroups = onSnapshot(query(collection(db, 'groups'), where('members', 'array-contains', uid)), (snap) => {
+      groupsMap = {};
+      snap.forEach(d => { groupsMap[d.id] = d.data(); });
+      if(activeTab === 'friends' && friendsSubView === 'list') renderTab();
+      updateBadge();
+    }, (err) => console.error('mmg-chat-widget groups onSnapshot:', err));
+
+    unsubGroupInvites = onSnapshot(query(collection(db, 'groupInvites'), where('toUid', '==', uid), where('status', '==', 'pending')), (snap) => {
+      groupInvitesMap = {};
+      snap.forEach(d => { groupInvitesMap[d.id] = d.data(); });
+      if(activeTab === 'requests') renderTab();
+      updateBadge();
+    }, (err) => console.error('mmg-chat-widget groupInvites onSnapshot:', err));
   }
 
   function updateBadge(){
-    const reqCount = Object.keys(requestsMap).length;
+    const reqCount = Object.keys(requestsMap).length + Object.keys(groupInvitesMap).length;
     els.reqDot.hidden = reqCount === 0;
     let unread = 0;
     Object.keys(chatsMap).forEach(id => {
       const c = chatsMap[id];
+      const lastAt = c.lastMessageAt && c.lastMessageAt.toMillis ? c.lastMessageAt.toMillis() : 0;
+      const readAt = c['lastRead_' + currentUser.uid] && c['lastRead_' + currentUser.uid].toMillis ? c['lastRead_' + currentUser.uid].toMillis() : 0;
+      if(lastAt > readAt && c.lastSenderUid !== currentUser.uid) unread++;
+    });
+    Object.keys(groupsMap).forEach(id => {
+      const c = groupsMap[id];
       const lastAt = c.lastMessageAt && c.lastMessageAt.toMillis ? c.lastMessageAt.toMillis() : 0;
       const readAt = c['lastRead_' + currentUser.uid] && c['lastRead_' + currentUser.uid].toMillis ? c['lastRead_' + currentUser.uid].toMillis() : 0;
       if(lastAt > readAt && c.lastSenderUid !== currentUser.uid) unread++;
@@ -509,53 +566,201 @@ import {
 
   function renderFriendsTab(){
     els.title.textContent = 'Sohbet';
-    const ids = Object.keys(chatsMap).filter(id => {
+    if(friendsSubView === 'newGroup') return renderNewGroupForm();
+
+    const chatIds = Object.keys(chatsMap).filter(id => {
       const c = chatsMap[id];
       if(c.isAdminChat) return false;
       const otherUid = (c.participants || []).find(u => u !== currentUser.uid);
       return !myBlockedUids.includes(otherUid);
     });
-    if(!ids.length){
-      els.body.innerHTML = `<div class="mmg-chat-empty">Henüz bir sohbetiniz yok.<br>"Kod ile Ekle" sekmesinden bir arkadaşınızın sohbet kodunu girerek istek gönderebilirsiniz.</div>`;
-      return;
-    }
-    ids.sort((a,b) => {
-      const ta = chatsMap[a].lastMessageAt && chatsMap[a].lastMessageAt.toMillis ? chatsMap[a].lastMessageAt.toMillis() : 0;
-      const tb = chatsMap[b].lastMessageAt && chatsMap[b].lastMessageAt.toMillis ? chatsMap[b].lastMessageAt.toMillis() : 0;
-      return tb - ta;
-    });
-    els.body.innerHTML = ids.map(id => {
+    const groupIds = Object.keys(groupsMap);
+
+    const rows = [];
+    chatIds.forEach(id => {
       const c = chatsMap[id];
       const otherUid = (c.participants || []).find(u => u !== currentUser.uid);
       const info = (c.participantInfo && c.participantInfo[otherUid]) || {};
       const label = info.code ? ('Kod: ' + info.code) : 'Kullanıcı';
       const lastAt = c.lastMessageAt && c.lastMessageAt.toMillis ? c.lastMessageAt.toMillis() : 0;
       const readAt = c['lastRead_' + currentUser.uid] && c['lastRead_' + currentUser.uid].toMillis ? c['lastRead_' + currentUser.uid].toMillis() : 0;
-      const isUnread = lastAt > readAt && c.lastSenderUid !== currentUser.uid;
-      return `<div class="mmg-chat-list-item" data-chat-id="${esc(id)}" data-label="${esc(label)}" data-other-uid="${esc(otherUid)}">
-        <div class="mmg-chat-avatar">${esc((info.code||'?').slice(0,1))}</div>
-        <div class="mmg-chat-list-main">
-          <div class="mmg-chat-list-name">${esc(label)}${isUnread ? ' •' : ''}</div>
-          <div class="mmg-chat-list-sub">${esc(c.lastMessage || 'Henüz mesaj yok')}</div>
-        </div>
-        <div class="mmg-chat-list-time">${fmtTime(c.lastMessageAt)}</div>
-      </div>`;
-    }).join('');
-    els.body.querySelectorAll('.mmg-chat-list-item').forEach(row => {
-      row.addEventListener('click', () => openChat(row.dataset.chatId, { title: row.dataset.label, isAdminChat: false, otherUid: row.dataset.otherUid }));
+      rows.push({
+        id, kind: 'chat', label, sub: c.lastMessage || 'Henüz mesaj yok', lastAt,
+        unread: lastAt > readAt && c.lastSenderUid !== currentUser.uid,
+        avatarLetter: (info.code || '?').slice(0, 1), otherUid
+      });
     });
+    groupIds.forEach(id => {
+      const g = groupsMap[id];
+      const lastAt = g.lastMessageAt && g.lastMessageAt.toMillis ? g.lastMessageAt.toMillis() : 0;
+      const readAt = g['lastRead_' + currentUser.uid] && g['lastRead_' + currentUser.uid].toMillis ? g['lastRead_' + currentUser.uid].toMillis() : 0;
+      rows.push({
+        id, kind: 'group', label: (g.name || 'Grup') + ' (Grup)', sub: g.lastMessage || 'Henüz mesaj yok', lastAt,
+        unread: lastAt > readAt && g.lastSenderUid !== currentUser.uid,
+        avatarLetter: '👥'
+      });
+    });
+    rows.sort((a, b) => b.lastAt - a.lastAt);
+
+    const listHtml = rows.length ? rows.map(r => `
+      <div class="mmg-chat-list-item" data-kind="${r.kind}" data-chat-id="${esc(r.id)}" data-label="${esc(r.label)}" data-other-uid="${esc(r.otherUid || '')}">
+        <div class="mmg-chat-avatar">${esc(r.avatarLetter)}</div>
+        <div class="mmg-chat-list-main">
+          <div class="mmg-chat-list-name">${esc(r.label)}${r.unread ? ' •' : ''}</div>
+          <div class="mmg-chat-list-sub">${esc(r.sub)}</div>
+        </div>
+      </div>`).join('')
+      : `<div class="mmg-chat-empty">Henüz bir sohbetiniz yok.<br>"Kod ile Ekle" sekmesinden bir kullanıcı kodu girerek istek gönderebilir ya da bir grup oluşturabilirsiniz.</div>`;
+
+    els.body.innerHTML = `
+      <div class="mmg-chat-list-item" id="mmgNewGroupBtn" style="justify-content:center; font-weight:700; color:var(--brass,#C6A15B);">
+        + Grup Oluştur
+      </div>
+      ${listHtml}`;
+
+    document.getElementById('mmgNewGroupBtn').addEventListener('click', () => {
+      friendsSubView = 'newGroup';
+      pendingGroupMembers = [];
+      renderTab();
+    });
+    els.body.querySelectorAll('.mmg-chat-list-item[data-chat-id]').forEach(row => {
+      row.addEventListener('click', () => {
+        if(row.dataset.kind === 'group'){
+          const g = groupsMap[row.dataset.chatId] || {};
+          openChat(row.dataset.chatId, { title: (g.name || 'Grup'), isAdminChat: false, collection: 'groups' });
+        } else {
+          openChat(row.dataset.chatId, { title: row.dataset.label, isAdminChat: false, otherUid: row.dataset.otherUid, collection: 'chats' });
+        }
+      });
+    });
+  }
+
+  function renderNewGroupForm(){
+    els.title.textContent = 'Grup Oluştur';
+    els.body.innerHTML = `
+      <div class="mmg-chat-add-form">
+        <button type="button" class="mmg-chat-iconbtn" id="mmgGroupBackBtn" style="margin-bottom:8px;">← Sohbetler'e dön</button>
+        <input type="text" id="mmgGroupNameInput" placeholder="Grup adı" style="text-transform:none; letter-spacing:normal; font-family:'Inter',sans-serif;" maxlength="60">
+        <input type="text" id="mmgGroupMemberInput" placeholder="Üye kullanıcı kodu (ör. 1016)" maxlength="12">
+        <button type="button" class="mmg-chat-primary-btn" id="mmgGroupAddMemberBtn" style="margin-bottom:10px;">Üye Ekle</button>
+        <div id="mmgGroupMemberChips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;"></div>
+        <button type="button" class="mmg-chat-primary-btn" id="mmgGroupCreateBtn">Grubu Oluştur</button>
+        <div id="mmgGroupMsg" class="mmg-chat-msg-error"></div>
+      </div>`;
+
+    document.getElementById('mmgGroupBackBtn').addEventListener('click', () => {
+      friendsSubView = 'list'; renderTab();
+    });
+    document.getElementById('mmgGroupAddMemberBtn').addEventListener('click', addPendingGroupMember);
+    document.getElementById('mmgGroupMemberInput').addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); addPendingGroupMember(); } });
+    document.getElementById('mmgGroupCreateBtn').addEventListener('click', createGroup);
+    renderGroupMemberChips();
+  }
+
+  function renderGroupMemberChips(){
+    const wrap = document.getElementById('mmgGroupMemberChips');
+    if(!wrap) return;
+    if(!pendingGroupMembers.length){
+      wrap.innerHTML = `<span style="font-size:11.5px; color:var(--muted,#8D96AC);">Henüz üye eklenmedi.</span>`;
+      return;
+    }
+    wrap.innerHTML = pendingGroupMembers.map((m, idx) => `
+      <span style="display:inline-flex; align-items:center; gap:6px; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:999px; padding:5px 10px; font-size:11.5px; color:var(--text,#EAEDF3); font-family:'IBM Plex Mono',monospace;">
+        ${esc(m.code)}
+        <button type="button" data-idx="${idx}" style="background:none; border:none; color:var(--red,#E2544B); cursor:pointer; font-size:12px; padding:0; line-height:1;">✕</button>
+      </span>`).join('');
+    wrap.querySelectorAll('button[data-idx]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        pendingGroupMembers.splice(Number(btn.dataset.idx), 1);
+        renderGroupMemberChips();
+      });
+    });
+  }
+
+  async function addPendingGroupMember(){
+    const inputEl = document.getElementById('mmgGroupMemberInput');
+    const msgEl = document.getElementById('mmgGroupMsg');
+    const code = (inputEl.value || '').trim().toUpperCase();
+    msgEl.textContent = '';
+    if(!code) return;
+    if(code === myChatCode){ msgEl.textContent = 'Kendi kodunuzu ekleyemezsiniz.'; return; }
+    if(pendingGroupMembers.some(m => m.code === code)){ msgEl.textContent = 'Bu kullanıcı zaten eklendi.'; return; }
+    try{
+      const codeSnap = await getDoc(doc(db, 'chatCodes', code));
+      if(!codeSnap.exists()){ msgEl.textContent = 'Bu koda sahip bir kullanıcı bulunamadı.'; return; }
+      const targetUid = codeSnap.data().uid;
+      if(myBlockedUids.includes(targetUid)){ msgEl.textContent = 'Engellediğiniz bir kullanıcıyı ekleyemezsiniz.'; return; }
+      pendingGroupMembers.push({ uid: targetUid, code });
+      inputEl.value = '';
+      renderGroupMemberChips();
+    }catch(e){
+      console.error(e);
+      msgEl.textContent = (e && e.code === 'permission-denied') ? 'İzin hatası: Firestore güvenlik kuralları eksik olabilir.' : 'Bir hata oluştu, tekrar deneyin.';
+    }
+  }
+
+  async function createGroup(){
+    const nameInput = document.getElementById('mmgGroupNameInput');
+    const msgEl = document.getElementById('mmgGroupMsg');
+    const name = (nameInput.value || '').trim();
+    if(!name){ msgEl.textContent = 'Lütfen bir grup adı girin.'; return; }
+    if(!pendingGroupMembers.length){ msgEl.textContent = 'En az bir üye eklemelisiniz.'; return; }
+    try{
+      const uid = currentUser.uid;
+      const groupRef = doc(collection(db, 'groups'));
+      const memberInfo = {}; memberInfo[uid] = { code: myChatCode || null };
+      await setDoc(groupRef, {
+        name,
+        ownerUid: uid,
+        members: [uid],
+        memberInfo,
+        createdAt: serverTimestamp(),
+        lastMessage: null,
+        lastMessageAt: null,
+        lastSenderUid: null
+      });
+      for(const m of pendingGroupMembers){
+        await setDoc(doc(db, 'groupInvites', groupRef.id + '_' + m.uid), {
+          groupId: groupRef.id,
+          groupName: name,
+          fromUid: uid,
+          fromCode: myChatCode,
+          toUid: m.uid,
+          toCode: m.code,
+          status: 'pending',
+          createdAt: serverTimestamp()
+        });
+      }
+      friendsSubView = 'list';
+      pendingGroupMembers = [];
+      renderTab();
+    }catch(e){
+      console.error(e);
+      msgEl.textContent = (e && e.code === 'permission-denied') ? 'İzin hatası: Firestore güvenlik kuralları eksik olabilir.' : 'Grup oluşturulamadı, tekrar deneyin.';
+    }
+  }
+
+  async function leaveGroup(groupId){
+    try{
+      closeOpenChat(false);
+      const g = groupsMap[groupId];
+      const remaining = (g && g.members || []).filter(u => u !== currentUser.uid);
+      await updateDoc(doc(db, 'groups', groupId), { members: remaining });
+      renderTab();
+    }catch(e){ console.error(e); }
   }
 
   function renderRequestsTab(){
     els.title.textContent = 'Sohbet İstekleri';
-    const ids = Object.keys(requestsMap).filter(id => !myBlockedUids.includes(requestsMap[id].fromUid));
-    if(!ids.length){
-      els.body.innerHTML = `<div class="mmg-chat-empty">Bekleyen bir sohbet isteğiniz yok.</div>`;
+    const reqIds = Object.keys(requestsMap).filter(id => !myBlockedUids.includes(requestsMap[id].fromUid));
+    const invIds = Object.keys(groupInvitesMap).filter(id => !myBlockedUids.includes(groupInvitesMap[id].fromUid));
+    if(!reqIds.length && !invIds.length){
+      els.body.innerHTML = `<div class="mmg-chat-empty">Bekleyen bir isteğiniz yok.</div>`;
       return;
     }
-    els.body.innerHTML = ids.map(id => {
+    const reqHtml = reqIds.map(id => {
       const r = requestsMap[id];
-      return `<div class="mmg-chat-req-row" data-req-id="${esc(id)}" data-from-uid="${esc(r.fromUid)}" data-from-code="${esc(r.fromCode||'')}">
+      return `<div class="mmg-chat-req-row" data-kind="chat" data-req-id="${esc(id)}" data-from-uid="${esc(r.fromUid)}" data-from-code="${esc(r.fromCode||'')}">
         <div class="who"><b>${esc(r.fromCode || '???')}</b> kodlu kullanıcı sizinle sohbet etmek istiyor.</div>
         <div class="mmg-chat-req-actions">
           <button type="button" class="mmg-chat-btn accept">Kabul Et</button>
@@ -564,7 +769,20 @@ import {
         </div>
       </div>`;
     }).join('');
-    els.body.querySelectorAll('.mmg-chat-req-row').forEach(row => {
+    const invHtml = invIds.map(id => {
+      const inv = groupInvitesMap[id];
+      return `<div class="mmg-chat-req-row" data-kind="group" data-req-id="${esc(id)}" data-from-uid="${esc(inv.fromUid)}" data-from-code="${esc(inv.fromCode||'')}" data-group-id="${esc(inv.groupId)}">
+        <div class="who"><b>${esc(inv.fromCode || '???')}</b> kodlu kullanıcı sizi <b>${esc(inv.groupName || 'bir gruba')}</b> davet etti.</div>
+        <div class="mmg-chat-req-actions">
+          <button type="button" class="mmg-chat-btn accept">Kabul Et</button>
+          <button type="button" class="mmg-chat-btn decline">Reddet</button>
+          <button type="button" class="mmg-chat-btn block">Engelle</button>
+        </div>
+      </div>`;
+    }).join('');
+    els.body.innerHTML = reqHtml + invHtml;
+
+    els.body.querySelectorAll('.mmg-chat-req-row[data-kind="chat"]').forEach(row => {
       const reqId = row.dataset.reqId, fromUid = row.dataset.fromUid, fromCode = row.dataset.fromCode;
       row.querySelector('.accept').addEventListener('click', () => acceptRequest(reqId, fromUid, fromCode));
       row.querySelector('.decline').addEventListener('click', () => declineRequest(reqId));
@@ -575,16 +793,44 @@ import {
         }
       });
     });
+    els.body.querySelectorAll('.mmg-chat-req-row[data-kind="group"]').forEach(row => {
+      const reqId = row.dataset.reqId, fromUid = row.dataset.fromUid, fromCode = row.dataset.fromCode, groupId = row.dataset.groupId;
+      row.querySelector('.accept').addEventListener('click', () => acceptGroupInvite(reqId, groupId));
+      row.querySelector('.decline').addEventListener('click', () => declineGroupInvite(reqId));
+      row.querySelector('.block').addEventListener('click', () => {
+        if(confirm(fromCode + ' kodlu kullanıcıyı engellemek istediğinize emin misiniz?')){
+          declineGroupInvite(reqId);
+          blockUser(fromUid);
+        }
+      });
+    });
   }
+
+  async function acceptGroupInvite(inviteId, groupId){
+    try{
+      const uid = currentUser.uid;
+      await updateDoc(doc(db, 'groupInvites', inviteId), { status: 'accepted' });
+      await updateDoc(doc(db, 'groups', groupId), {
+        members: arrayUnion(uid),
+        ['memberInfo.' + uid]: { code: myChatCode || null }
+      });
+    }catch(e){ console.error(e); }
+  }
+
+  async function declineGroupInvite(inviteId){
+    try{ await updateDoc(doc(db, 'groupInvites', inviteId), { status: 'declined' }); }
+    catch(e){ console.error(e); }
+  }
+
 
   function renderAddTab(){
     els.title.textContent = 'Kod ile Sohbet Ekle';
     els.body.innerHTML = `
       <div class="mmg-chat-add-form">
         <p style="font-size:12px; color:var(--muted,#8D96AC); margin-bottom:10px; line-height:1.5;">
-          Arkadaşınızın Sohbet Kodu'nu girin. İsteğiniz, karşı taraf kabul ettiğinde bir sohbete dönüşür.
+          Arkadaşınızın Kullanıcı Kodunu (Müşteri No) girin. İsteğiniz, karşı taraf kabul ettiğinde bir sohbete dönüşür.
         </p>
-        <input type="text" id="mmgChatAddInput" placeholder="ör. AB12CD" maxlength="8">
+        <input type="text" id="mmgChatAddInput" placeholder="ör. 1016" maxlength="12">
         <button type="button" class="mmg-chat-primary-btn" id="mmgChatAddBtn">İstek Gönder</button>
         <div id="mmgChatAddMsg" class="mmg-chat-msg-error"></div>
       </div>`;
@@ -696,17 +942,19 @@ import {
     openChatId = chatId;
     openChatInfo = info || {};
     openChatOtherUid = (info && info.otherUid) || null;
+    openChatCollection = (info && info.collection) || 'chats';
     els.backBtn.hidden = false;
     els.footer.hidden = false;
-    els.blockBtn.hidden = !openChatOtherUid;
+    els.blockBtn.hidden = !openChatOtherUid; // gruplarda gösterilmez, sadece 1:1 sohbette
+    els.leaveGroupBtn.hidden = openChatCollection !== 'groups';
     els.title.textContent = info && info.title ? info.title : 'Sohbet';
     els.body.innerHTML = `<div class="mmg-chat-empty">Yükleniyor…</div>`;
 
     // okundu bilgisini güncelle
-    setDoc(doc(db, 'chats', chatId), { ['lastRead_' + currentUser.uid]: serverTimestamp() }, { merge: true }).catch(()=>{});
+    setDoc(doc(db, openChatCollection, chatId), { ['lastRead_' + currentUser.uid]: serverTimestamp() }, { merge: true }).catch(()=>{});
 
     if(unsubMessages) unsubMessages();
-    const msgsQuery = query(collection(db, 'chats', chatId, 'messages'), orderBy('createdAt', 'asc'), limit(200));
+    const msgsQuery = query(collection(db, openChatCollection, chatId, 'messages'), orderBy('createdAt', 'asc'), limit(200));
     unsubMessages = onSnapshot(msgsQuery, (snap) => {
       const msgs = [];
       snap.forEach(d => msgs.push(d.data()));
@@ -722,10 +970,18 @@ import {
       els.body.innerHTML = `<div class="mmg-chat-empty">Henüz mesaj yok. İlk mesajı siz gönderin!</div>`;
       return;
     }
+    const isGroup = openChatCollection === 'groups';
+    const groupInfo = isGroup ? (groupsMap[openChatId] || {}) : null;
     els.body.innerHTML = msgs.map(m => {
       const mine = m.senderUid === currentUser.uid;
+      let senderLabel = '';
+      if(isGroup && !mine){
+        const info = (groupInfo.memberInfo && groupInfo.memberInfo[m.senderUid]) || {};
+        senderLabel = `<div style="font-size:10.5px; color:var(--brass,#C6A15B); margin-bottom:2px; font-family:'IBM Plex Mono',monospace;">${esc(info.code || 'Üye')}</div>`;
+      }
       return `<div class="mmg-chat-msg ${mine ? 'me' : ''}">
         <div>
+          ${senderLabel}
           <div class="mmg-chat-bubble">${esc(m.text)}</div>
           <div class="mmg-chat-msg-time">${fmtTime(m.createdAt)}</div>
         </div>
@@ -740,13 +996,13 @@ import {
     els.input.value = '';
     const uid = currentUser.uid;
     try{
-      await addDoc(collection(db, 'chats', openChatId, 'messages'), {
+      await addDoc(collection(db, openChatCollection, openChatId, 'messages'), {
         senderUid: uid,
         senderIsAdmin: !!myIsAdmin,
         text: text.slice(0, 2000),
         createdAt: serverTimestamp()
       });
-      await setDoc(doc(db, 'chats', openChatId), {
+      await setDoc(doc(db, openChatCollection, openChatId), {
         lastMessage: text.slice(0, 140),
         lastMessageAt: serverTimestamp(),
         lastSenderUid: uid,
@@ -755,12 +1011,15 @@ import {
     }catch(e){ console.error(e); }
   }
 
+
   // ---- Başlangıç ----
   function stopAll(){
     if(unsubChats){ unsubChats(); unsubChats = null; }
     if(unsubRequests){ unsubRequests(); unsubRequests = null; }
     if(unsubMessages){ unsubMessages(); unsubMessages = null; }
-    chatsMap = {}; requestsMap = {}; openChatId = null;
+    if(unsubGroups){ unsubGroups(); unsubGroups = null; }
+    if(unsubGroupInvites){ unsubGroupInvites(); unsubGroupInvites = null; }
+    chatsMap = {}; requestsMap = {}; groupsMap = {}; groupInvitesMap = {}; openChatId = null;
   }
 
   onAuthStateChanged(auth, async (user) => {
@@ -780,7 +1039,7 @@ import {
       myIsAdmin = udata.isAdmin === true;
       myBlockedUids = Array.isArray(udata.blockedUids) ? udata.blockedUids : [];
       myChatCode = await ensureChatCode(user.uid);
-      els.codeBox.innerHTML = myChatCode ? `Sizin Sohbet Kodunuz: <b>${esc(myChatCode)}</b>` : '';
+      els.codeBox.innerHTML = myChatCode ? `Sizin Kullanıcı Kodunuz: <b>${esc(myChatCode)}</b>` : '';
     }catch(e){ console.error('mmg-chat-widget kullanıcı bilgisi alınamadı:', e); }
     startListeners(user.uid);
     renderTab();
