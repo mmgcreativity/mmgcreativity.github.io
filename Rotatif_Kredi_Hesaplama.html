@@ -130,7 +130,7 @@ function mmgApplyTurkishFont(doc){
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Great+Vibes&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
@@ -156,22 +156,32 @@ function mmgApplyTurkishFont(doc){
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
+  header.masthead > div:first-child{ flex:1 1 0%; min-width:0; }
+  .top-actions{ flex-shrink:0; }
   .brand-eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; color:var(--brass); text-transform:uppercase; margin-bottom:10px;}
   .brand-row{
     display:inline-flex; align-items:center; gap:10px; margin:0 0 18px 2px;
     padding:6px 18px 6px 8px; border-radius:999px;
     background:var(--surface-2); border:1px solid var(--hairline);
   }
+  .top-actions{ display:flex; gap:8px; flex-shrink:0; }
+  .top-actions .back-link{ position:static; }
   .back-link{
-    position:fixed; top:16px; right:68px; z-index:800;
     font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
     border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
     background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
     transition:border-color .15s ease, color .15s ease;
   }
   .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  .reset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); font-weight:600;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap; cursor:pointer;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .reset-btn:hover{ color:var(--red); border-color:var(--red); }
   @media (max-width:480px){
-    .back-link{ top:64px; right:8px; }
+    .top-actions{ width:100%; }
   }
   .brand-row-logo{height:38px; width:38px; border-radius:8px; object-fit:cover; flex-shrink:0;}
   .brand-row-fallback{
@@ -226,14 +236,14 @@ function mmgApplyTurkishFont(doc){
   .field .input-wrap{position:relative; display:flex; align-items:center;}
   .field input{
     width:100%; background:linear-gradient(180deg, var(--surface-2), #182031); border:1px solid var(--hairline); border-radius:8px;
-    padding:11px 44px 11px 14px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:15px; outline:none;
+    padding:11px 44px 11px 14px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:15px; outline:none;
     transition:border-color .15s ease, box-shadow .15s ease;
   }
   .field input::placeholder{color:var(--muted);}
   .field input:hover{border-color:#3A4666;}
   .field input:focus{border-color:var(--brass); box-shadow:0 0 0 3px rgba(198,161,91,0.14);}
   .field input[type=date]{color-scheme:dark;}
-  .field .unit{position:absolute; right:14px; color:var(--muted); font-size:12.5px; font-family:'IBM Plex Mono',monospace; pointer-events:none;}
+  .field .unit{position:absolute; right:14px; color:var(--muted); font-size:12.5px; font-family:'JetBrains Mono',monospace; pointer-events:none;}
   .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
   .field-row-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:18px;}
   @media (max-width:520px){.field-row-3{grid-template-columns:1fr 1fr;}}
@@ -330,7 +340,7 @@ function mmgApplyTurkishFont(doc){
   tbody td:last-child{padding:6px 4px; text-align:center;}
   tbody td input{
     width:100%; min-width:80px; background:linear-gradient(180deg, var(--surface-2), #182031); border:1px solid var(--hairline); border-radius:6px;
-    padding:6px 8px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; outline:none; text-align:right;
+    padding:6px 8px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12px; outline:none; text-align:right;
     transition:border-color .15s ease, box-shadow .15s ease; box-sizing:border-box;
   }
   tbody td input:hover{border-color:#3A4666;}
@@ -377,8 +387,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h1 class="title">Rotatif Kredi Hesaplama</h1>
     <div class="subtitle">Tutar, oran ve vade girin; bankaların rotatif kredi, KMH ve BCH kredilerinde, aylık veya üç aylık periyotlarla aldığı faizi anında hesaplayın.<br>Bu modül, gecelik işleyen faiz mantığındaki borçlarınızı hesaplamanızı kolaylaştırır.</div>
   </div>
+  <div class="top-actions">
+    <button type="button" class="reset-btn" id="resetPageBtn">↺ Sıfırla</button>
+    <a href="index.html" class="back-link">← Ana Sayfa</a>
+  </div>
 </header>
-<a href="index.html" class="back-link">← Ana Sayfa</a>
 
 <main>
 
@@ -1113,6 +1126,13 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
 
 
 
-<script src="mmg-feedback-widget.js"></script>
+
+<script>
+  document.getElementById('resetPageBtn').addEventListener('click', function(){
+    if(confirm('Girdiğiniz tüm veriler silinip sayfa varsayılan haline döndürülecek. Emin misiniz?')){
+      window.location.reload();
+    }
+  });
+</script>
 </body>
 </html>

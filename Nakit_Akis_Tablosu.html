@@ -172,7 +172,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
@@ -203,6 +203,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
+  header.masthead > div:first-child{ flex:1 1 0%; min-width:0; }
+  .top-actions{ flex-shrink:0; }
   .page-nav{ display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; }
   @media (max-width:640px){ .page-nav{ justify-content:flex-start; } }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
@@ -404,16 +406,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .add-item-form .field{ margin-bottom:0; min-width:0; }
   .add-item-form .field label{ display:block; font-size:11.5px; color:var(--muted); margin-bottom:6px; }
   .add-item-form input[type="text"], .add-item-form input.amount-in, .add-item-form select.cat-in{
-    width:100%; background:var(--surface); border:1px solid var(--hairline); border-radius:7px; color:var(--text);
-    font-family:'Inter',sans-serif; font-size:13px; padding:9px 11px; outline:none; transition:border-color .15s ease;
+    width:100%; height:38px; background:var(--surface); border:1px solid var(--hairline); border-radius:7px; color:var(--text);
+    font-family:'Inter',sans-serif; font-size:13px; padding:0 11px; outline:none; transition:border-color .15s ease;
     box-sizing:border-box;
   }
-  .add-item-form input.amount-in{ font-family:'IBM Plex Mono',monospace; }
+  .add-item-form input.amount-in{ font-family:'JetBrains Mono',monospace; }
   .add-item-form input:focus, .add-item-form select:focus{ border-color:var(--brass-dim); }
   .add-item-form select.cat-in{ cursor:pointer; font-size:12.5px; }
   .add-item-form .add-btn{
     background:var(--grad); border:none; color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700;
-    font-size:12.5px; padding:9px 16px; border-radius:7px; cursor:pointer; transition:opacity .15s ease; white-space:nowrap;
+    font-size:12.5px; height:38px; padding:0 16px; border-radius:7px; cursor:pointer; transition:opacity .15s ease; white-space:nowrap;
   }
   .add-item-form .add-btn:hover{ opacity:.9; }
 
@@ -574,16 +576,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
   .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff; }
   footer .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .top-actions{ display:flex; gap:8px; flex-shrink:0; }
+  .top-actions .back-link{ position:static; }
   .back-link{
-    position:fixed; top:16px; right:68px; z-index:800;
     font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
     border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
     background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
     transition:border-color .15s ease, color .15s ease;
   }
   .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  .reset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); font-weight:600;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap; cursor:pointer;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .reset-btn:hover{ color:var(--red); border-color:var(--red); }
   @media (max-width:480px){
-    .back-link{ top:64px; right:8px; }
+    .top-actions{ width:100%; }
   }
   #exportExcelBtn, #exportPdfBtn{
     font-size:12.5px !important; padding:9px 14px !important;
@@ -609,8 +619,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="Giderler.html" class="guide-btn">💳 Giderler</a>
     <a href="Gelirler.html" class="guide-btn">💰 Gelirler</a>
   </div>
+  <div class="top-actions">
+    <a href="index.html" class="back-link">← Ana Sayfa</a>
+  </div>
 </header>
-<a href="index.html" class="back-link">← Ana Sayfa</a>
 
 <div class="trial-banner" id="trialBanner" hidden>
   ⏳ <span id="trialBannerText"></span>
@@ -2303,6 +2315,5 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 
-<script src="mmg-feedback-widget.js"></script>
 </body>
 </html>

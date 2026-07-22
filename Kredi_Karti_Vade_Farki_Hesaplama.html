@@ -97,7 +97,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
@@ -128,17 +128,27 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
+  header.masthead > div:first-child{ flex:1 1 0%; min-width:0; }
+  .top-actions{ flex-shrink:0; }
   .page-nav{ max-width:1180px; margin:0 auto; padding:14px 24px 0; display:flex; flex-wrap:wrap; gap:10px; }
-    .back-link{
-    position:fixed; top:16px; right:68px; z-index:800;
+    .top-actions{ display:flex; gap:8px; flex-shrink:0; }
+  .top-actions .back-link{ position:static; }
+  .back-link{
     font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
     border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
     background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
     transition:border-color .15s ease, color .15s ease;
   }
   .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  .reset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); font-weight:600;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap; cursor:pointer;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .reset-btn:hover{ color:var(--red); border-color:var(--red); }
   @media (max-width:480px){
-    .back-link{ top:64px; right:8px; }
+    .top-actions{ width:100%; }
   }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5; min-height:42px;}
@@ -159,14 +169,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     border-radius:8px; padding:12px 14px;
   }
   .input-wrap input, .input-wrap select{
-    background:none; border:none; outline:none; color:var(--text); font-family:'IBM Plex Mono',monospace;
-    font-size:16px; font-weight:600; width:100%;
+    background:none; border:none; outline:none; color:var(--text); font-family:'JetBrains Mono',monospace;
+    font-size:16px; font-weight:600; flex:1 1 0; min-width:0;
   }
   .custom-select{ position:relative; }
   .select-trigger{
     width:100%; display:flex; align-items:center; justify-content:space-between;
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
-    padding:12px 14px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:600;
+    padding:12px 14px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:600;
     cursor:pointer; transition:border-color .15s ease;
   }
   .select-trigger:hover{ border-color:var(--brass-dim); }
@@ -179,12 +189,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .custom-select.open .select-options{ display:block; }
   .select-option{
-    padding:11px 14px; font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--text);
+    padding:11px 14px; font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--text);
     cursor:pointer; transition:background .12s ease;
   }
   .select-option:hover{ background:var(--surface); }
   .select-option.selected{ background:rgba(198,161,91,0.12); color:var(--brass); }
-  .input-wrap .unit{ color:var(--muted); font-size:12px; font-family:'IBM Plex Mono',monospace; }
+  .input-wrap .unit{ color:var(--muted); font-size:12px; font-family:'JetBrains Mono',monospace; }
   .ref-line{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); margin-top:8px; padding:0 2px; }
   .ref-line b{ color:var(--text); }
 
@@ -268,8 +278,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h1 class="title">Kredi Kartı Vade Farkı Hesaplama</h1>
     <div class="subtitle">Komisyon veya müşteriye vade farkı yansıtma senaryoları için elinize geçmesini istediğiniz net tutardan yola çıkarak girmeniz/yansıtmanız gereken brüt tutarı hesaplayın</div>
   </div>
+  <div class="top-actions">
+    <button type="button" class="reset-btn" id="resetPageBtn">↺ Sıfırla</button>
+    <a href="index.html" class="back-link">← Ana Sayfa</a>
+  </div>
 </header>
-<a href="index.html" class="back-link">← Ana Sayfa</a>
 
 <main>
   <section id="reverse">
@@ -955,7 +968,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </script>
 <!-- ================== /Hesap Makinesi Widget ================== -->
 
+<script>
+(function(){
+  // .input-wrap kutusunun herhangi bir yerine (birim etiketi ya da boş kenar dahil)
+  // tıklanınca içindeki input/select'e odaklanılmasını garanti eder.
+  document.addEventListener('mousedown', function(e){
+    var wrap = e.target.closest && e.target.closest('.input-wrap');
+    if(!wrap) return;
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    var el = wrap.querySelector('input, select');
+    if(el){ e.preventDefault(); el.focus(); }
+  });
+})();
+</script>
 
-<script src="mmg-feedback-widget.js"></script>
+
+<script>
+  document.getElementById('resetPageBtn').addEventListener('click', function(){
+    if(confirm('Girdiğiniz tüm veriler silinip sayfa varsayılan haline döndürülecek. Emin misiniz?')){
+      window.location.reload();
+    }
+  });
+</script>
 </body>
 </html>

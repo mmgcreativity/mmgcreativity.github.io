@@ -79,18 +79,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
+  header.masthead > div:first-child{ flex:1 1 0%; min-width:0; }
+  .top-actions{ flex-shrink:0; }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5; min-height:42px; max-width:640px;}
+  .top-actions{ display:flex; gap:8px; flex-shrink:0; }
+  .top-actions .back-link{ position:static; }
   .back-link{
-    position:fixed; top:16px; right:68px; z-index:800;
     font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
     border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
     background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
     transition:border-color .15s ease, color .15s ease;
   }
   .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  .reset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); font-weight:600;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap; cursor:pointer;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .reset-btn:hover{ color:var(--red); border-color:var(--red); }
   @media (max-width:480px){
-    .back-link{ top:64px; right:8px; }
+    .top-actions{ width:100%; }
   }
 
   .eyebrow{
@@ -214,34 +224,79 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .offer-card-head input[type=text]{font-weight:600;font-size:14px;}
   .offer-card-head .rm-btn{
     flex-shrink:0;background:none;border:1px solid var(--border);color:var(--text-faint);
-    border-radius:7px;width:30px;height:30px;cursor:pointer;font-size:15px;transition:all .15s;
+    border-radius:7px;width:34px;height:34px;cursor:pointer;font-size:15px;transition:all .15s;
   }
   .offer-card-head .rm-btn:hover{border-color:var(--red);color:var(--red);background:rgba(242,116,140,.08);}
+
+  .offer-table-wrap{ overflow-x:auto; }
+  table.offer-table{ width:100%; border-collapse:collapse; font-size:12.5px; table-layout:fixed; }
+  table.offer-table thead th{
+    text-align:left; padding:6px 4px; font-family:'JetBrains Mono',monospace; font-size:9px; line-height:1.35;
+    letter-spacing:.02em; text-transform:uppercase; color:var(--text-faint); border-bottom:1px solid var(--border);
+  }
+  table.offer-table thead th.num{ text-align:right; }
+  table.offer-table tbody td{ padding:5px 4px; border-bottom:1px solid var(--border-soft); vertical-align:middle; overflow:hidden; }
+  table.offer-table tbody tr:last-child td{ border-bottom:none; }
+  table.offer-table tbody td.idx-cell{ color:var(--text-faint); font-family:'JetBrains Mono',monospace; font-size:11px; text-align:center; }
+  table.offer-table tbody td input{
+    width:100%; height:32px; background:var(--card-2); border:1px solid var(--border); border-radius:6px;
+    padding:0 6px; color:var(--text); font-family:'Inter',sans-serif; font-size:12px; outline:none;
+    box-sizing:border-box; transition:border-color .15s;
+  }
+  table.offer-table tbody td input[data-field="amount"],
+  table.offer-table tbody td input[data-field="rate"],
+  table.offer-table tbody td input[data-field="days"]{
+    font-family:'JetBrains Mono',monospace; font-weight:600; text-align:right; padding:0 5px;
+  }
+  table.offer-table tbody td input:focus{ border-color:var(--gold); box-shadow:0 0 0 3px var(--gold-soft); }
+  table.offer-table td.del-cell{ width:26px; text-align:center; padding:5px 0; }
+  table.offer-table .rm-btn-table{
+    background:none; border:1px solid var(--border); color:var(--text-faint); border-radius:6px;
+    width:26px; height:32px; cursor:pointer; font-size:13px; transition:all .15s;
+  }
+  table.offer-table .rm-btn-table:hover{ border-color:var(--red); color:var(--red); background:rgba(242,116,140,.08); }
 
   .field-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
   .field{display:flex;flex-direction:column;gap:4px;}
   .field label{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
 
-  .result-card{
-    background:var(--card-2);border:1px solid var(--border);border-radius:12px;
-    padding:14px 16px;margin-bottom:12px;transition:border-color .15s, background .15s;
+  .result-table-wrap{ overflow-x:auto; }
+  table.result-table{ width:100%; border-collapse:collapse; font-size:11.5px; table-layout:fixed; }
+  table.result-table thead th{
+    text-align:left; padding:6px 4px; font-family:'JetBrains Mono',monospace; font-size:8.5px; line-height:1.3;
+    letter-spacing:.01em; text-transform:uppercase; color:var(--text-dim); border-bottom:1px solid var(--border);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .result-card:last-child{margin-bottom:0;}
-  .result-card.best{background:var(--green-soft);border-color:rgba(61,220,151,.35);}
-  .result-card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-  .result-card-head .name{font-weight:700;font-size:14px;flex:1;}
-  .result-card.best .name{color:var(--green);}
-  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:8px;}
-  .result-item .k{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;font-weight:600;margin-bottom:2px;}
-  .result-item .v{font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:600;}
-  .result-total{
-    border-top:1px solid var(--border);margin-top:8px;padding-top:8px;
-    display:flex;align-items:baseline;justify-content:space-between;
+  table.result-table thead th.num{ text-align:right; }
+  table.result-table tbody td{
+    padding:7px 4px; border-bottom:1px solid var(--border-soft); vertical-align:middle;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
-  .result-total .k{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
-  .result-total .v{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;}
-  .result-card.best .result-total .v{color:var(--green);}
-  .result-diff{font-size:11px;color:var(--text-faint);margin-top:3px;text-align:right;font-family:'JetBrains Mono',monospace;}
+  table.result-table tbody tr:last-child td{ border-bottom:none; }
+  table.result-table tbody tr.best td{ background:var(--green-soft); }
+  table.result-table tbody tr.best td:first-child{ border-radius:8px 0 0 8px; }
+  table.result-table tbody tr.summary-row.best:last-of-type td:last-child{ border-radius:0 8px 8px 0; }
+  table.result-table td.name-cell{ font-weight:700; font-size:11.5px; display:flex; align-items:center; gap:5px; }
+  table.result-table tr.best td.name-cell{ color:var(--green); }
+  table.result-table td.name-cell .name-txt{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  table.result-table td.num{ text-align:right; font-family:'JetBrains Mono',monospace; }
+  table.result-table td.total-cell{ font-weight:700; font-size:12px; }
+  table.result-table tr.best td.total-cell{ color:var(--green); }
+  table.result-table td .diff{ display:block; font-size:9px; font-weight:400; color:var(--text-faint); margin-top:1px; }
+  table.result-table td .tag{ display:inline-block; font-size:8.5px; margin-left:4px; }
+  table.result-table .rank-badge{ width:16px; height:16px; font-size:9px; border-radius:4px; flex-shrink:0; }
+
+  table.result-table tr.summary-row{ cursor:pointer; transition:background .12s ease; }
+  table.result-table tr.summary-row:hover td{ background:var(--card-2); }
+  table.result-table tr.summary-row.best:hover td{ background:var(--green-soft); }
+  table.result-table td.expand-cell{ text-align:center; padding:7px 0; }
+  table.result-table .expand-chevron{ display:inline-block; color:var(--text-faint); font-size:10px; transition:transform .15s ease; }
+  table.result-table tr.summary-row.open .expand-chevron{ transform:rotate(90deg); color:var(--gold); }
+  table.result-table tr.detail-row td{ padding:0 8px 10px 8px; border-bottom:1px solid var(--border-soft); background:var(--card-2); }
+  table.result-table tr.detail-row[hidden]{ display:none; }
+  .detail-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding-top:8px; }
+  .detail-item .k{ font-size:9px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px; white-space:nowrap; }
+  .detail-item .v{ font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; }
 </style>
 </head>
 <body>
@@ -254,8 +309,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h1 class="title">Vadeli Mevduat Faizi Hesaplama</h1>
     <div class="subtitle">Bankaların vadeli mevduat tekliflerini gir; brüt faiz, stopaj ve net vade sonu bakiye otomatik hesaplansın, en yüksek getirili teklif otomatik öne çıksın.</div>
   </div>
+  <div class="top-actions">
+    <button type="button" class="reset-btn" id="resetPageBtn">↺ Sıfırla</button>
+    <a href="index.html" class="back-link">← Ana Sayfa</a>
+  </div>
 </header>
-<a href="index.html" class="back-link">← Ana Sayfa</a>
 <div class="wrap">
 
   <div class="grid-top">
@@ -281,10 +339,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="card">
       <div class="card-head">
         <h2><span class="star">&#9733;</span> Teklif Girişi</h2>
-        <span class="hint">Sol taraf: veri girişi</span>
       </div>
-      <div id="inputBody"></div>
-      <div style="margin-top:6px;">
+      <div class="offer-table-wrap">
+        <table class="offer-table">
+          <thead>
+            <tr>
+              <th style="width:20px;">#</th>
+              <th style="width:110px;">Banka</th>
+              <th class="num" style="width:66px;">Anapara</th>
+              <th class="num" style="width:40px;">Vade<br>(Gün)</th>
+              <th class="num" style="width:46px;">Yıllık<br>Oran %</th>
+              <th style="width:26px;"></th>
+            </tr>
+          </thead>
+          <tbody id="inputBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;">
         <button class="btn" id="addRowBtn">+ Teklif Ekle</button>
       </div>
     </div>
@@ -292,9 +363,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="card">
       <div class="card-head">
         <h2><span class="star">&#9733;</span> Sıralama</h2>
-        <span class="hint">Sağ taraf: anında güncellenir</span>
       </div>
-      <div id="resultBody"></div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th style="width:18px;"></th>
+              <th>Banka</th>
+              <th class="num" style="width:52px;">Vade<br>(Gün)</th>
+              <th class="num" style="width:96px;">Vade Sonu<br>Bakiye</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody"></tbody>
+        </table>
+      </div>
       <div class="empty" id="emptyState">Henüz teklif eklenmedi. Soldan bir teklif ekleyerek başla.</div>
 
       <div class="assump">
@@ -374,29 +456,16 @@ function renderInputs(){
   const body = document.getElementById('inputBody');
   body.innerHTML = '';
   offers.forEach((o, idx)=>{
-    const card = document.createElement('div');
-    card.className = 'offer-card';
-    card.innerHTML = `
-      <div class="offer-card-head">
-        <input type="text" value="${o.bank}" data-idx="${idx}" data-field="bank" placeholder="Banka adı">
-        <button class="rm-btn" data-idx="${idx}" title="Kaldır">&times;</button>
-      </div>
-      <div class="field-row2">
-        <div class="field">
-          <label>Anapara</label>
-          <input type="text" inputmode="numeric" value="${formatTRThousands(String(o.amount))}" data-idx="${idx}" data-field="amount" placeholder="100.000">
-        </div>
-        <div class="field">
-          <label>Yıllık Oran %</label>
-          <input type="number" step="0.01" value="${o.rate}" data-idx="${idx}" data-field="rate" placeholder="46.00">
-        </div>
-      </div>
-      <div class="field">
-        <label>Vade (Gün)</label>
-        <input type="number" value="${o.days}" data-idx="${idx}" data-field="days" placeholder="32">
-      </div>
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx-cell">${idx+1}</td>
+      <td><input type="text" value="${o.bank}" data-idx="${idx}" data-field="bank" placeholder="Banka adı"></td>
+      <td><input type="text" inputmode="numeric" value="${formatTRThousands(String(o.amount))}" data-idx="${idx}" data-field="amount" placeholder="100.000"></td>
+      <td><input type="number" value="${o.days}" data-idx="${idx}" data-field="days" placeholder="32"></td>
+      <td><input type="number" step="0.01" value="${o.rate}" data-idx="${idx}" data-field="rate" placeholder="46.00"></td>
+      <td class="del-cell"><button class="rm-btn-table" data-idx="${idx}" title="Kaldır">&times;</button></td>
     `;
-    body.appendChild(card);
+    body.appendChild(tr);
   });
 
   body.querySelectorAll('input').forEach(inp=>{
@@ -412,7 +481,7 @@ function renderInputs(){
       renderStats();
     });
   });
-  body.querySelectorAll('.rm-btn').forEach(btn=>{
+  body.querySelectorAll('.rm-btn-table').forEach(btn=>{
     btn.addEventListener('click', e=>{
       const idx = +e.currentTarget.dataset.idx;
       offers.splice(idx,1);
@@ -440,30 +509,41 @@ function renderResults(){
 
   computed.forEach((x,rank)=>{
     const {offer,r} = x;
-    const card = document.createElement('div');
     const isBest = rank === 0;
-    card.className = 'result-card' + (isBest ? ' best' : '');
     const rankClass = rank===0?'rank-1':rank===1?'rank-2':rank===2?'rank-3':'rank-n';
     const diff = r.total - bestTotal;
     const tag = stopajTag(offer.days);
-    card.innerHTML = `
-      <div class="result-card-head">
-        <span class="rank-badge ${rankClass}">${rank+1}</span>
-        <span class="name">${offer.bank || '—'}</span>
-      </div>
-      <div class="result-grid">
-        <div class="result-item"><div class="k">Vade</div><div class="v">${offer.days} gün</div></div>
-        <div class="result-item"><div class="k">Brüt Faiz</div><div class="v">${fmt(r.gross)}</div></div>
-        <div class="result-item"><div class="k">Stopaj <span class="tag ${tag.cls}">${tag.label}</span></div><div class="v">${fmt(r.stopaj)}</div></div>
-        <div class="result-item"><div class="k">Net Kazanç</div><div class="v">${fmt(r.net)}</div></div>
-      </div>
-      <div class="result-total">
-        <span class="k">Vade Sonu Bakiye</span>
-        <span class="v">${fmt(r.total)}</span>
-      </div>
-      <div class="result-diff">${isBest ? 'En iyi teklif' : '-' + fmt(Math.abs(diff)) + ' daha az'}</div>
+
+    const summaryTr = document.createElement('tr');
+    summaryTr.className = 'summary-row' + (isBest ? ' best' : '');
+    summaryTr.innerHTML = `
+      <td class="expand-cell"><span class="expand-chevron">▸</span></td>
+      <td class="name-cell"><span class="rank-badge ${rankClass}">${rank+1}</span><span class="name-txt" title="${offer.bank || '—'}">${offer.bank || '—'}</span></td>
+      <td class="num">${offer.days}</td>
+      <td class="num total-cell">${fmt(r.total)}${isBest ? '' : '<span class="diff">-' + fmt(Math.abs(diff)) + '</span>'}</td>
     `;
-    body.appendChild(card);
+
+    const detailTr = document.createElement('tr');
+    detailTr.className = 'detail-row';
+    detailTr.hidden = true;
+    detailTr.innerHTML = `
+      <td colspan="4">
+        <div class="detail-grid">
+          <div class="detail-item"><div class="k">Brüt Faiz</div><div class="v">${fmt(r.gross)}</div></div>
+          <div class="detail-item"><div class="k">Stopaj <span class="tag ${tag.cls}">${tag.label}</span></div><div class="v">${fmt(r.stopaj)}</div></div>
+          <div class="detail-item"><div class="k">Net Kazanç</div><div class="v">${fmt(r.net)}</div></div>
+        </div>
+      </td>
+    `;
+
+    summaryTr.addEventListener('click', () => {
+      const willOpen = detailTr.hidden;
+      detailTr.hidden = !willOpen;
+      summaryTr.classList.toggle('open', willOpen);
+    });
+
+    body.appendChild(summaryTr);
+    body.appendChild(detailTr);
   });
 }
 
@@ -499,5 +579,13 @@ renderResults();
 renderStats();
 </script>
 <script src="mmg-feedback-widget.js"></script>
+
+<script>
+  document.getElementById('resetPageBtn').addEventListener('click', function(){
+    if(confirm('Girdiğiniz tüm veriler silinip sayfa varsayılan haline döndürülecek. Emin misiniz?')){
+      window.location.reload();
+    }
+  });
+</script>
 </body>
 </html>

@@ -291,12 +291,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .account-info-close:hover{ color:var(--coral); border-color:var(--coral); }
   .account-info-sub{ color:var(--muted); font-size:13px; margin-bottom:22px; }
-  #mmgAdminForm select, #mmgAdminForm input{
-    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
-    padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
-    transition:border-color .15s ease; resize:vertical;
-  }
-  #mmgAdminForm select:focus, #mmgAdminForm input:focus{ border-color:var(--brass-dim); }
   .account-info-saved{
     display:none; text-align:center; color:var(--teal); font-family:'IBM Plex Mono',monospace;
     font-size:12px; margin-top:10px;
@@ -364,7 +358,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     font-size:10.5px; letter-spacing:.16em; color:var(--muted); text-transform:uppercase; margin-bottom:16px;
   }
 
-  .card-grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:18px; max-width:980px; position:relative; }
+  .card-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:18px; max-width:1400px; position:relative; }
   .app-card{
     background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
     padding:24px; cursor:pointer; text-align:left; color:var(--text);
@@ -722,6 +716,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <button class="nav-item" data-target="home" data-title="Ana Sayfa">
+      <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V19a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title">Ana Sayfa</span>
       </span>
@@ -748,8 +743,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-fav-title="Kredi Kartı Vade Farkı" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title">Kredi Kartı Vade Farkı</span></span>
       </button>
-      <button class="nav-item nav-subitem" data-target="Vade_Sapma_Hesaplama.html" data-title="Vade Sapması Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Vade_Sapma_Hesaplama.html" data-fav-title="Vade Sapması Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <button class="nav-item nav-subitem" data-target="Vade_Sapmasi_Hesaplama.html" data-title="Vade Sapması Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Vade_Sapmasi_Hesaplama.html" data-fav-title="Vade Sapması Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title">Vade Sapması Hesaplama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="vadeli-mevduat-faizi-hesaplama.html" data-title="Vadeli Mevduat Faizi Hesaplama">
@@ -860,45 +855,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <input type="file" id="avatarInput" accept="image/*" style="display:none;">
-</div>
-
-<div class="account-info-overlay" id="mmgAdminOverlay" hidden>
-  <div class="account-info-modal" style="max-width:520px;">
-    <div class="account-info-modal-header">
-      <h2>Referans Kodu Yönetimi</h2>
-      <button type="button" class="account-info-close" id="mmgAdminClose" title="Kapat">✕</button>
-    </div>
-    <p class="account-info-sub">Yeni bir referans kodu tanımlayın: bu kodla kayıt olan üyelere ücretsiz ya da indirimli premium tanınır.</p>
-
-    <form id="mmgAdminForm" style="display:grid; gap:12px; margin-bottom:20px;">
-      <div class="auth-field">
-        <label>Kod</label>
-        <input type="text" id="mmgAdminCode" placeholder="ör. AHMET10" style="text-transform:uppercase;">
-      </div>
-      <div class="auth-field">
-        <label>Fayda Türü</label>
-        <select id="mmgAdminBenefitType">
-          <option value="free">Ücretsiz Premium</option>
-          <option value="discount">İndirimli Premium</option>
-        </select>
-      </div>
-      <div class="auth-field" id="mmgAdminDiscountWrap" style="display:none;">
-        <label>İndirim Yüzdesi</label>
-        <input type="number" id="mmgAdminDiscountPercent" min="1" max="100" placeholder="ör. 20" value="20">
-      </div>
-      <div class="auth-field">
-        <label>Kullanım Limiti <span style="color:var(--muted); font-weight:400;">(boş = sınırsız, örn. 1 = tek kişi)</span></label>
-        <input type="number" id="mmgAdminMaxUses" min="1" placeholder="Sınırsız için boş bırakın">
-      </div>
-      <button type="submit" class="auth-submit" style="margin-top:4px;">Kodu Kaydet</button>
-    </form>
-
-
-    <div id="mmgAdminMsg" style="font-size:12.5px; margin-bottom:14px;"></div>
-
-    <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; margin-bottom:10px;">Tanımlı Kodlar</div>
-    <div id="mmgAdminCodeList" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto;"></div>
-  </div>
 </div>
 
 
@@ -1287,86 +1243,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   document.getElementById('adminPanelBtn').addEventListener('click', () => {
     document.getElementById('accountDropdown').hidden = true;
-    document.getElementById('mmgAdminOverlay').hidden = false;
-    mmgLoadAdminCodes();
+    openTarget('ReferansKoduYonetimi.html', 'Referans Kodu Yönetimi');
   });
   document.getElementById('begenIstatistikleriBtn').addEventListener('click', () => {
     document.getElementById('accountDropdown').hidden = true;
     openTarget('Istatistikler.html', 'İstatistikler');
-  });
-  document.getElementById('mmgAdminClose').addEventListener('click', () => {
-    document.getElementById('mmgAdminOverlay').hidden = true;
-  });
-  document.getElementById('mmgAdminOverlay').addEventListener('click', (e) => {
-    if(e.target.id === 'mmgAdminOverlay') document.getElementById('mmgAdminOverlay').hidden = true;
-  });
-  document.getElementById('mmgAdminBenefitType').addEventListener('change', (e) => {
-    document.getElementById('mmgAdminDiscountWrap').style.display = e.target.value === 'discount' ? 'block' : 'none';
-  });
-
-  async function mmgLoadAdminCodes(){
-    const listEl = document.getElementById('mmgAdminCodeList');
-    listEl.innerHTML = '<div style="font-size:12px; color:var(--muted);">Yükleniyor…</div>';
-    try{
-      const snap = await getDocs(collection(db, 'referralCodes'));
-      const codes = [];
-      snap.forEach(d => codes.push({ id: d.id, ...d.data() }));
-      if(!codes.length){
-        listEl.innerHTML = '<div style="font-size:12px; color:var(--muted);">Henüz tanımlı bir referans kodu yok.</div>';
-        return;
-      }
-      const usageCounts = {};
-      try{
-        const refSnap = await getDocs(collection(db, 'referrals'));
-        refSnap.forEach(d => { usageCounts[d.id] = (d.data().count || 0); });
-      }catch(e){ /* istatistik okunamazsa 0 say */ }
-      listEl.innerHTML = codes.map(c => {
-        const benefitLabel = c.benefitType === 'free' ? 'Ücretsiz Premium' : ('%' + (c.discountPercent||0) + ' İndirim');
-        const used = usageCounts[c.id] || 0;
-        const limitLabel = c.maxUses ? (used + ' / ' + c.maxUses + ' kullanıldı') : (used + ' kullanıldı · Sınırsız');
-        return '<div style="display:flex; align-items:center; justify-content:space-between; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px;">' +
-          '<div><b style="font-family:\'IBM Plex Mono\',monospace;">' + c.id + '</b><div style="font-size:11.5px; color:var(--muted);">' + benefitLabel + ' · ' + limitLabel + '</div></div>' +
-          '<button type="button" class="mmg-admin-del" data-code="' + c.id + '" style="background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:12px;">Sil</button>' +
-          '</div>';
-      }).join('');
-      listEl.querySelectorAll('.mmg-admin-del').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          if(!confirm('"' + btn.dataset.code + '" kodunu silmek istediğinize emin misiniz?')) return;
-          await deleteDoc(doc(db, 'referralCodes', btn.dataset.code));
-          mmgLoadAdminCodes();
-        });
-      });
-    } catch(e){
-      listEl.innerHTML = '<div style="font-size:12px; color:var(--red,#e2544b);">Kodlar yüklenemedi.</div>';
-    }
-  }
-
-  document.getElementById('mmgAdminForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const msgEl = document.getElementById('mmgAdminMsg');
-    const code = document.getElementById('mmgAdminCode').value.trim().toUpperCase();
-    const benefitType = document.getElementById('mmgAdminBenefitType').value;
-    const discountPercent = parseInt(document.getElementById('mmgAdminDiscountPercent').value, 10) || 0;
-    const maxUsesRaw = document.getElementById('mmgAdminMaxUses').value.trim();
-    const maxUses = maxUsesRaw ? parseInt(maxUsesRaw, 10) : null;
-    if(!code){ msgEl.textContent = 'Lütfen bir kod girin.'; msgEl.style.color = 'var(--red,#e2544b)'; return; }
-    try{
-      await setDoc(doc(db, 'referralCodes', code), {
-        benefitType: benefitType,
-        discountPercent: benefitType === 'discount' ? discountPercent : 0,
-        maxUses: maxUses,
-        active: true,
-        createdAt: serverTimestamp()
-      });
-      msgEl.textContent = '"' + code + '" kodu kaydedildi. ✓';
-      msgEl.style.color = 'var(--teal,#3FB68A)';
-      document.getElementById('mmgAdminCode').value = '';
-      document.getElementById('mmgAdminMaxUses').value = '';
-      mmgLoadAdminCodes();
-    } catch(err){
-      msgEl.textContent = 'Kod kaydedilemedi, tekrar deneyin.';
-      msgEl.style.color = 'var(--red,#e2544b)';
-    }
   });
 
   // ---- Karşılama / Üyelik Ekranı ----

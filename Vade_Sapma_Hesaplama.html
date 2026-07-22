@@ -61,6 +61,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
+  header.masthead > div:first-child{ flex:1 1 0%; min-width:0; }
+  .top-actions{ flex-shrink:0; }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5;}
   .back-link{
@@ -71,8 +73,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition:border-color .15s ease, color .15s ease;
   }
   .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  .top-actions{ display:flex; gap:8px; flex-shrink:0; }
+  .top-actions .back-link{ position:static; }
+  .reset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); font-weight:600;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap; cursor:pointer;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .reset-btn:hover{ color:var(--red); border-color:var(--red); }
   @media (max-width:480px){
-    .back-link{ top:64px; right:8px; }
+    .top-actions{ width:100%; }
   }
 
   main{ max-width:1180px; margin:0 auto; padding:28px 24px 24px; }
@@ -213,8 +224,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h1 class="title">Vade Sapma Hesaplama</h1>
     <div class="subtitle">Fatura vadeleriniz ile tahsil ettiğiniz çeklerin vadelerini karşılaştırın; ortalama kaç gün sapma olduğunu ve karşılama oranını görün.</div>
   </div>
+  <div class="top-actions">
+    <button type="button" class="reset-btn" id="resetPageBtn">↺ Sıfırla</button>
+    <a href="index.html" class="back-link">← Ana Sayfa</a>
+  </div>
 </header>
-<a href="index.html" class="back-link">← Ana Sayfa</a>
 
 <main>
   <div class="cols">
@@ -608,6 +622,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   // ---------- başlangıç satırları ----------
+  function resetAll(){
+    Object.keys(faturaData).forEach(k => delete faturaData[k]);
+    Object.keys(cekData).forEach(k => delete cekData[k]);
+    faturaRowsEl.innerHTML = '';
+    cekRowsEl.innerHTML = '';
+    addFaturaRow();
+    addFaturaRow();
+    addCekRow();
+    addCekRow();
+    recalc();
+  }
+  document.getElementById('resetPageBtn').addEventListener('click', () => {
+    if(confirm('Girdiğiniz tüm fatura ve çek bilgileri silinecek. Emin misiniz?')){
+      resetAll();
+    }
+  });
+
   addFaturaRow();
   addFaturaRow();
   addCekRow();

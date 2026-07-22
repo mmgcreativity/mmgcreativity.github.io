@@ -205,18 +205,28 @@ function mmgApplyTurkishFont(doc){
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
+  header.masthead > div:first-child{ flex:1 1 0%; min-width:0; }
+  .top-actions{ flex-shrink:0; }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5; min-height:42px;}
+  .top-actions{ display:flex; gap:8px; flex-shrink:0; }
+  .top-actions .back-link{ position:static; }
   .back-link{
-    position:fixed; top:16px; right:68px; z-index:800;
     font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
     border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
     background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
     transition:border-color .15s ease, color .15s ease;
   }
   .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  .reset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); font-weight:600;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap; cursor:pointer;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .reset-btn:hover{ color:var(--red); border-color:var(--red); }
   @media (max-width:480px){
-    .back-link{ top:64px; right:8px; }
+    .top-actions{ width:100%; }
   }
 
   main{ max-width:1180px; margin:0 auto; padding:36px 24px; }
@@ -295,6 +305,7 @@ function mmgApplyTurkishFont(doc){
     padding:7px 10px; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; outline:none;
   }
   .xrow input:focus, .xrow select:focus{ border-color:var(--brass-dim); }
+  .xrow input[inputmode="decimal"]{ font-family:'JetBrains Mono',monospace; font-weight:600; }
   .xrow-group{ margin-bottom:10px; border:1px solid var(--hairline); border-radius:8px; overflow:hidden; background:var(--surface-2); }
   .xrow-group .xrow{ padding:6px 10px; }
   .xrow-group .xrow:last-child{ border-bottom:none; }
@@ -407,6 +418,7 @@ function mmgApplyTurkishFont(doc){
   .doc-signature-box{
     width:180px; text-align:center; border-top:1px solid #999; padding-top:8px; font-size:11.5px; color:#555;
   }
+  .doc-firma-label{ font-size:13.5px; font-weight:700; color:#222; margin-top:2px; }
   .doc-stamp-placeholder{
     width:110px; height:70px; border:1px dashed #ccc; border-radius:6px; display:flex; align-items:center;
     justify-content:center; font-size:9.5px; color:#aaa; margin:0 auto 10px; text-align:center; line-height:1.3;
@@ -479,8 +491,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h1 class="title">Talimat Hazırlama</h1>
     <div class="subtitle">Banka, müşteri, kurum ve şahıslara gönderilecek talimat yazılarınızı saniyeler içinde hazırlayın.</div>
   </div>
+  <div class="top-actions">
+    <button type="button" class="reset-btn" id="resetPageBtn">↺ Sıfırla</button>
+    <a href="index.html" class="back-link">← Ana Sayfa</a>
+  </div>
 </header>
-<a href="index.html" class="back-link">← Ana Sayfa</a>
 
 <main>
   <div id="memberGateWrap" style="display:none;">
@@ -559,8 +574,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="xcell">
             <span class="xcell-label">FİRMA</span>
             <input type="text" id="fGonderenFirma" placeholder="Örn. Örnek Ticaret A.Ş.">
-            <select class="xcell-mini" id="fGonderenFirmaSaved" title="Kayıtlı firmadan seç"><option value="">📋 Kayıtlı</option></select>
             <button type="button" class="xcell-savebtn" id="saveGonderenFirmaBtn" title="Firma bilgisini kaydet">💾</button>
+            <select class="xcell-mini" id="fGonderenFirmaSaved" title="Kayıtlı firmadan seç"><option value="">📋 Kayıtlı</option></select>
           </div>
           <div class="xcell xcell-full">
             <span class="xcell-label">BANKA</span>
@@ -569,8 +584,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="xcell">
             <span class="xcell-label">IBAN</span>
             <input type="text" id="fGonderenIban" placeholder="TR__ ____ ____ ____ ____ ____ __">
-            <select class="xcell-mini" id="fGonderenIbanSaved" title="Kayıtlı IBAN'dan seç"><option value="">📋 Kayıtlı</option></select>
             <button type="button" class="xcell-savebtn" id="saveGonderenIbanBtn" title="IBAN bilgisini kaydet">💾</button>
+            <select class="xcell-mini" id="fGonderenIbanSaved" title="Kayıtlı IBAN'dan seç"><option value="">📋 Kayıtlı</option></select>
           </div>
         </div>
       </div>
@@ -606,7 +621,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <img id="docStamp" style="max-width:100%; max-height:100%; display:none;" alt="">
                 <span id="docStampText"></span>
               </div>
-              <div id="docGonderenFirmaLabel">Firma Adı</div>
+              <div id="docGonderenFirmaLabel" class="doc-firma-label">Firma Adı</div>
             </div>
           </div>
         </div>
@@ -628,12 +643,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
             <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Firma Logonuz</span>
             <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
-              <div id="logoPreviewWrap" style="width:76px; height:38px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
-                <img id="companyLogoPreview" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
-                <span id="companyLogoPlaceholder" style="font-size:9.5px; color:var(--muted); text-align:center; padding:2px; line-height:1.15;">Görüntü Yok</span>
+              <div class="mmg-logo-preview-wrap" style="width:76px; height:38px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
+                <img class="mmg-logo-preview-img" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
+                <span class="mmg-logo-placeholder" style="font-size:9.5px; color:var(--muted); text-align:center; padding:2px; line-height:1.15;">Görüntü Yok</span>
               </div>
-              <button type="button" class="io-btn" id="uploadLogoBtn" style="flex-shrink:0; height:38px; box-sizing:border-box;">⬆ Yükle</button>
-              <button type="button" class="io-btn" id="removeLogoBtn" style="display:none; flex-shrink:0; height:38px; box-sizing:border-box; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
+              <button type="button" class="io-btn mmg-logo-upload-btn" style="flex-shrink:0; height:38px; box-sizing:border-box;">⬆ Yükle</button>
+              <button type="button" class="io-btn mmg-logo-remove-btn" style="display:none; flex-shrink:0; height:38px; box-sizing:border-box; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
               <input type="file" id="companyLogoInput" accept="image/*" style="display:none;">
             </div>
           </div>
@@ -666,6 +681,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div id="genericFieldsContainer"></div>
           <div class="io-msg" id="ioMsgGeneric"></div>
         </div>
+        <div class="form-card" style="margin-top:14px; margin-bottom:0;">
+          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
+            <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Firma Logonuz</span>
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
+              <div class="mmg-logo-preview-wrap" style="width:76px; height:38px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
+                <img class="mmg-logo-preview-img" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
+                <span class="mmg-logo-placeholder" style="font-size:9.5px; color:var(--muted); text-align:center; padding:2px; line-height:1.15;">Görüntü Yok</span>
+              </div>
+              <button type="button" class="io-btn mmg-logo-upload-btn" style="flex-shrink:0; height:38px; box-sizing:border-box;">⬆ Yükle</button>
+              <button type="button" class="io-btn mmg-logo-remove-btn" style="display:none; flex-shrink:0; height:38px; box-sizing:border-box; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
+            </div>
+          </div>
+          <p style="font-size:11.5px; color:var(--muted); margin:0;">Yüklediğiniz logo, hesabınıza kaydedilir ve hazırladığınız tüm talimat belgelerinin üst kısmında otomatik olarak görünür.</p>
+        </div>
       </div>
       <div class="panel-right-col">
         <div class="doc-preview-row">
@@ -687,7 +716,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <img id="docStampGeneric" style="max-width:100%; max-height:100%; display:none;" alt="">
                 <span id="docStampTextGeneric"></span>
               </div>
-              <div id="docGonderenFirmaLabelGeneric">Firma Adı</div>
+              <div id="docGonderenFirmaLabelGeneric" class="doc-firma-label">Firma Adı</div>
             </div>
           </div>
         </div>
@@ -706,7 +735,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <div class="work-grid" id="panel-serbest-metin" style="display:none;">
-      <div class="form-card panel-left-col">
+      <div class="panel-left-col">
+      <div class="form-card">
         <h3>Serbest Metin Talimatı</h3>
         <div class="xcell-title">Muhatap</div>
         <div class="xcell-group">
@@ -723,8 +753,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="xcell">
             <span class="xcell-label" id="fSmMuhatapAdiLabel">BANKA ADI</span>
             <input type="text" id="fSmMuhatapAdi" placeholder="Örn. Akbank">
-            <select class="xcell-mini" id="fSmMuhatapSaved" title="Kayıtlı muhataptan seç"><option value="">📋 Kayıtlı</option></select>
             <button type="button" class="xcell-savebtn" id="saveSmMuhatapBtn" title="Muhatabı kaydet">💾</button>
+            <select class="xcell-mini" id="fSmMuhatapSaved" title="Kayıtlı muhataptan seç"><option value="">📋 Kayıtlı</option></select>
           </div>
         </div>
         <div class="field">
@@ -736,6 +766,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <input type="text" id="fSmFirma" placeholder="Örn. Örnek Ticaret A.Ş.">
         </div>
 
+      </div>
+      <div class="form-card" style="margin-top:14px; margin-bottom:0;">
+        <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
+          <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Firma Logonuz</span>
+          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
+            <div class="mmg-logo-preview-wrap" style="width:76px; height:38px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
+              <img class="mmg-logo-preview-img" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
+              <span class="mmg-logo-placeholder" style="font-size:9.5px; color:var(--muted); text-align:center; padding:2px; line-height:1.15;">Görüntü Yok</span>
+            </div>
+            <button type="button" class="io-btn mmg-logo-upload-btn" style="flex-shrink:0; height:38px; box-sizing:border-box;">⬆ Yükle</button>
+            <button type="button" class="io-btn mmg-logo-remove-btn" style="display:none; flex-shrink:0; height:38px; box-sizing:border-box; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
+          </div>
+        </div>
+        <p style="font-size:11.5px; color:var(--muted); margin:0;">Yüklediğiniz logo, hesabınıza kaydedilir ve hazırladığınız tüm talimat belgelerinin üst kısmında otomatik olarak görünür.</p>
+      </div>
       </div>
 
       <div class="panel-right-col">
@@ -755,7 +800,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <img id="docStampSm" style="max-width:100%; max-height:100%; display:none;" alt="">
                 <span id="docStampTextSm"></span>
               </div>
-              <div id="docFirmaLabelSm">Firma Adı</div>
+              <div id="docFirmaLabelSm" class="doc-firma-label">Firma Adı</div>
             </div>
           </div>
         </div>
@@ -1197,8 +1242,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="xcell">
           <span class="xcell-label">ALICI</span>
           <input type="text" id="fAliciAdi_${idx}" placeholder="Örn. Alıcı Firma / Kişi">
-          <select class="xcell-mini alici-firma-saved" id="fAliciFirmaSaved_${idx}" title="Kayıtlı firmadan seç"><option value="">📋 Kayıtlı</option></select>
           <button type="button" class="xcell-savebtn" id="saveAliciFirmaBtn_${idx}" title="Firma bilgisini kaydet">💾</button>
+          <select class="xcell-mini alici-firma-saved" id="fAliciFirmaSaved_${idx}" title="Kayıtlı firmadan seç"><option value="">📋 Kayıtlı</option></select>
         </div>
         <div class="xcell xcell-full">
           <span class="xcell-label">BANKA</span>
@@ -1207,14 +1252,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="xcell">
           <span class="xcell-label">IBAN</span>
           <input type="text" id="fAliciIban_${idx}" placeholder="TR__ ____ ____ ____ ____ ____ __">
-          <select class="xcell-mini alici-iban-saved" id="fAliciIbanSaved_${idx}" title="Kayıtlı IBAN'dan seç"><option value="">📋 Kayıtlı</option></select>
           <button type="button" class="xcell-savebtn" id="saveAliciIbanBtn_${idx}" title="IBAN bilgisini kaydet">💾</button>
+          <select class="xcell-mini alici-iban-saved" id="fAliciIbanSaved_${idx}" title="Kayıtlı IBAN'dan seç"><option value="">📋 Kayıtlı</option></select>
         </div>
         <div class="xcell xcell-3col">
           <span class="xcell-label">TUTAR</span>
           <div style="position:relative; border-left:1px solid var(--hairline);">
-            <input type="text" inputmode="decimal" id="fAliciTutar_${idx}" value="0,00" style="padding-right:36px; width:100%; border-left:none;">
-            <span class="alici-para-birimi-label" id="fAliciParaBirimi_${idx}" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:10px;">${getParaBirimi()}</span>
+            <input type="text" inputmode="decimal" id="fAliciTutar_${idx}" value="0,00" style="padding-right:36px; width:100%; border-left:none; font-family:'JetBrains Mono',monospace; font-weight:600;">
+            <span class="alici-para-birimi-label" id="fAliciParaBirimi_${idx}" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:10px; pointer-events:none;">${getParaBirimi()}</span>
           </div>
           <button type="button" class="xcell-savebtn remove-alici-row" id="removeAliciRowBtn_${idx}" title="Satırı kaldır" style="color:var(--red);">✕</button>
         </div>
@@ -1411,26 +1456,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function applyCompanyLogo(dataUrl, dims){
     companyLogoDataUrl = dataUrl;
     companyLogoDims = dims || null;
-    const previewImg = document.getElementById('companyLogoPreview');
-    const placeholder = document.getElementById('companyLogoPlaceholder');
-    const removeBtn = document.getElementById('removeLogoBtn');
+    const previewImgs = document.querySelectorAll('.mmg-logo-preview-img');
+    const placeholders = document.querySelectorAll('.mmg-logo-placeholder');
+    const removeBtns = document.querySelectorAll('.mmg-logo-remove-btn');
     const docLogoEl = document.getElementById('docLogo');
     const docLogoSmEl = document.getElementById('docLogoSm');
     const docLogoGenericEl = document.getElementById('docLogoGeneric');
     if(dataUrl){
-      previewImg.src = dataUrl;
-      previewImg.style.display = 'block';
-      placeholder.style.display = 'none';
-      removeBtn.style.display = 'inline-block';
+      previewImgs.forEach(img => { img.src = dataUrl; img.style.display = 'block'; });
+      placeholders.forEach(ph => { ph.style.display = 'none'; });
+      removeBtns.forEach(btn => { btn.style.display = 'inline-block'; });
       docLogoEl.src = dataUrl;
       docLogoEl.style.display = 'block';
       docLogoSmEl.src = dataUrl;
       docLogoSmEl.style.display = 'block';
       if(docLogoGenericEl){ docLogoGenericEl.src = dataUrl; docLogoGenericEl.style.display = 'block'; }
     } else {
-      previewImg.style.display = 'none';
-      placeholder.style.display = 'block';
-      removeBtn.style.display = 'none';
+      previewImgs.forEach(img => { img.style.display = 'none'; });
+      placeholders.forEach(ph => { ph.style.display = 'block'; });
+      removeBtns.forEach(btn => { btn.style.display = 'none'; });
       docLogoEl.removeAttribute('src');
       docLogoEl.style.display = 'none';
       docLogoSmEl.removeAttribute('src');
@@ -1469,8 +1513,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   }
 
-  document.getElementById('uploadLogoBtn').addEventListener('click', () => {
-    document.getElementById('companyLogoInput').click();
+  document.querySelectorAll('.mmg-logo-upload-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('companyLogoInput').click();
+    });
   });
 
   document.getElementById('companyLogoInput').addEventListener('change', (e) => {
@@ -1512,10 +1558,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     e.target.value = '';
   });
 
-  document.getElementById('removeLogoBtn').addEventListener('click', () => {
-    applyCompanyLogo(null);
-    saveCompanyLogo(null, null);
-    showIoMsg('Logo kaldırıldı.');
+  document.querySelectorAll('.mmg-logo-remove-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyCompanyLogo(null);
+      saveCompanyLogo(null, null);
+      showIoMsg('Logo kaldırıldı.');
+    });
   });
 
   function parseTR(str){
@@ -1961,10 +2009,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         { id:'glBorclu', label:'Çekin Borçlusu', type:'text' },
         { id:'glCekNo', label:'Çek No', type:'text' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
-        { id:'glVade', label:'Çek Vade Tarihi', type:'date' }
+        { id:'glVade', label:'Çek Vade Tarihi', type:'date' },
+        { id:'glKisi', label:'Teslim Alacak Kişi', type:'multi-person' }
       ],
-      body: v => 'Firmamıza ait olup bankanızda takasa verilen ekli çekin iade edilerek tarafımıza teslim edilmesi rica olunur.',
-      infoRows: v => [['Borçlu', v.glBorclu||'—'], ['Çek No', v.glCekNo||'—'], ['Tutar', fmtTR(v.glTutar,2)+' TL'], ['Vade', v.glVadeDisp||'—']],
+      body: v => 'Firmamıza ait olup bankanızda takasa verilen ekli çekin iade edilerek aşağıda bilgileri verilen kişiye teslim edilmesi rica olunur.',
+      infoRows: v => [['Borçlu', v.glBorclu||'—'], ['Çek No', v.glCekNo||'—'], ['Tutar', fmtTR(v.glTutar,2)+' TL'], ['Vade', v.glVadeDisp||'—'], ['Teslim Alacak Kişi', v.glKisi||'—']],
       fileName: 'cek-iade-talimati.pdf',
       shareTitle: 'Çek İade Talimatı'
     },
@@ -2021,13 +2070,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glFirma', label:'Firma', type:'text' },
         { id:'glMuhatap', label:'Muhatap', type:'text' },
+        { id:'glMuhatapAdres', label:'Muhatap Adres', type:'text', placeholder:'Örn. Kızılay Mah. ... Ankara' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
+        { id:'glSure', label:'Süre', type:'duration' },
         { id:'glKonu', label:'Mektup Konusu', type:'text', placeholder:'Örn. Mal Alımı' },
-        { id:'glTur', label:'Mektup Türü', type:'select', options:['Kesin','Süresiz','Geçici'] },
-        { id:'glSube', label:'Teslim Alınacak Şube', type:'text' }
+        { id:'glTur', label:'Mektup Türü', type:'select-editable', options:['Kesin','Geçici','E-Mektup'], placeholder:'Seçin veya yazın' },
+        { id:'glSube', label:'Teslim Alınacak Şube', type:'text' },
+        { id:'glTeslimKisi', label:'Teslim Alacak Kişi (Ad Soyad, TC)', type:'multi-person-tc' }
       ],
       body: v => (v.glFirma || 'Firmamız') + ' adına aşağıdaki bilgilere istinaden teminat mektubu talep edilmektedir.',
-      infoRows: v => [['Firma', v.glFirma||'—'],['Muhatap', v.glMuhatap||'—'],['Tutar', fmtTR(v.glTutar,2)+' TL'],['Konu', v.glKonu||'—'],['Tür', v.glTur||'—'],['Teslim Alınacak Şube', v.glSube||'—']],
+      infoRows: v => [['Firma', v.glFirma||'—'],['Muhatap', v.glMuhatap||'—'],['Muhatap Adres', v.glMuhatapAdres||'—'],['Tutar', fmtTR(v.glTutar,2)+' TL'],['Süre', v.glSure||'—'],['Konu', v.glKonu||'—'],['Tür', v.glTur||'—'],['Teslim Alınacak Şube', v.glSube||'—'],['Teslim Alacak Kişi', v.glTeslimKisi||'—']],
       fileName: 'teminat-mektubu-talep-talimati.pdf',
       shareTitle: 'Teminat Mektubu Talep Talimatı'
     },
@@ -2113,13 +2165,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return '<div class="xrow"><label>' + f.label + '</label><select id="' + f.id + '">' +
           f.options.map(o => '<option value="' + o + '">' + o + '</option>').join('') + '</select></div>';
       }
+      if(f.type === 'select-editable'){
+        return '<div class="xrow"><label>' + f.label + '</label>' +
+          '<input type="text" id="' + f.id + '" list="' + f.id + 'List" placeholder="' + (f.placeholder||'Seçin veya yazın') + '">' +
+          '<datalist id="' + f.id + 'List">' + f.options.map(o => '<option value="' + o + '">').join('') + '</datalist>' +
+          '</div>';
+      }
+      if(f.type === 'duration'){
+        return '<div class="xrow"><label>' + f.label + '</label>' +
+          '<div style="display:flex; gap:6px; width:100%;">' +
+          '<input type="number" min="1" id="' + f.id + 'Num" placeholder="Örn. 90" style="flex:1 1 auto; min-width:0;">' +
+          '<select id="' + f.id + 'Unit" style="flex:0 0 80px;">' +
+          '<option value="Gün">Gün</option><option value="Ay">Ay</option><option value="Yıl">Yıl</option>' +
+          '</select></div></div>';
+      }
       if(f.type === 'date'){
         return '<div class="xrow"><label>' + f.label + '</label><input type="date" id="' + f.id + '"></div>';
       }
       if(f.type === 'tutar'){
         return '<div class="xrow"><label>' + f.label + '</label><input type="text" inputmode="decimal" id="' + f.id + '" placeholder="0,00"></div>';
       }
-      if(f.type === 'multi-person'){
+      if(f.type === 'multi-person' || f.type === 'multi-person-tc'){
         return '<div class="xcell-title" style="font-size:12px; margin-top:10px;">' + f.label + '</div>' +
           '<div id="' + f.id + 'Rows"></div>' +
           '<button type="button" class="io-btn" id="' + f.id + 'AddBtn" style="margin-bottom:10px;">+ Kişi Ekle</button>';
@@ -2129,7 +2195,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     cfg.fields.forEach(f => {
       if(f.type === 'multi-person'){
-        mmgInitPersonField(f.id);
+        mmgInitPersonField(f.id, false);
+        return;
+      }
+      if(f.type === 'multi-person-tc'){
+        mmgInitPersonField(f.id, true);
+        return;
+      }
+      if(f.type === 'duration'){
+        const numEl = document.getElementById(f.id + 'Num');
+        const unitEl = document.getElementById(f.id + 'Unit');
+        numEl.addEventListener('input', renderGenericPreview);
+        unitEl.addEventListener('change', renderGenericPreview);
         return;
       }
       const el = document.getElementById(f.id);
@@ -2170,7 +2247,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   }
 
-  function mmgInitPersonField(fieldId){
+  function mmgInitPersonField(fieldId, withTc){
     const rowsEl = document.getElementById(fieldId + 'Rows');
     const addBtn = document.getElementById(fieldId + 'AddBtn');
     if(!rowsEl || !addBtn) return;
@@ -2180,26 +2257,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         mmgLoadSavedKisiler().map(n => '<option value="' + n.replace(/"/g,'&quot;') + '">' + n + '</option>').join('');
     }
 
-    function addRow(value){
+    function addRow(value, tcValue){
       const rowId = fieldId + '_row_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
       const row = document.createElement('div');
       row.className = 'xcell xcell-full';
       row.style.marginBottom = '4px';
+      row.style.flexWrap = 'wrap';
       row.innerHTML =
         '<span class="xcell-label">KİŞİ</span>' +
         '<input type="text" class="mmg-person-input" placeholder="Ad Soyad" value="' + (value ? value.replace(/"/g,'&quot;') : '') + '">' +
-        '<select class="xcell-mini mmg-person-saved" title="Kayıtlı kişiden seç">' + savedOptionsHtml() + '</select>' +
+        (withTc ? '<input type="text" class="mmg-person-tc" inputmode="numeric" maxlength="11" placeholder="TC Kimlik No" style="flex:0 0 130px; width:130px;" value="' + (tcValue ? tcValue.replace(/"/g,'&quot;') : '') + '">' : '') +
         '<button type="button" class="xcell-savebtn mmg-person-save" title="Kişiyi kaydet">💾</button>' +
+        '<select class="xcell-mini mmg-person-saved" title="Kayıtlı kişiden seç">' + savedOptionsHtml() + '</select>' +
         '<button type="button" class="xcell-savebtn mmg-person-remove" title="Satırı kaldır" style="border-left:1px solid var(--hairline); color:var(--red);">✕</button>';
       rowsEl.appendChild(row);
 
       const input = row.querySelector('.mmg-person-input');
+      const tcInput = row.querySelector('.mmg-person-tc');
       const savedSelect = row.querySelector('.mmg-person-saved');
       const saveBtn = row.querySelector('.mmg-person-save');
       const removeBtn = row.querySelector('.mmg-person-remove');
 
       input.addEventListener('input', renderGenericPreview);
       input.addEventListener('change', renderGenericPreview);
+      if(tcInput){
+        tcInput.addEventListener('input', () => {
+          tcInput.value = tcInput.value.replace(/[^\d]/g, '').slice(0,11);
+          renderGenericPreview();
+        });
+      }
       savedSelect.addEventListener('change', () => {
         if(savedSelect.value){ input.value = savedSelect.value; renderGenericPreview(); }
         savedSelect.value = '';
@@ -2222,25 +2308,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     // Başlangıçta en az bir satır olsun
     rowsEl.innerHTML = '';
-    addRow('');
-    addBtn.onclick = () => addRow('');
+    addRow('', '');
+    addBtn.onclick = () => addRow('', '');
   }
 
   function mmgGetPersonFieldValue(fieldId){
     const rowsEl = document.getElementById(fieldId + 'Rows');
     if(!rowsEl) return '';
-    const names = Array.from(rowsEl.querySelectorAll('.mmg-person-input'))
-      .map(inp => inp.value.trim())
-      .filter(Boolean);
-    return names.join(', ');
+    const rows = Array.from(rowsEl.querySelectorAll('.xcell'));
+    const parts = rows.map(row => {
+      const name = row.querySelector('.mmg-person-input').value.trim();
+      const tcEl = row.querySelector('.mmg-person-tc');
+      const tc = tcEl ? tcEl.value.trim() : '';
+      if(!name) return '';
+      return tc ? (name + ' (TC: ' + tc + ')') : name;
+    }).filter(Boolean);
+    return parts.join(', ');
   }
 
   function getGenericValues(){
     const cfg = LETTER_TYPES[currentGenericType];
     const v = {};
     cfg.fields.forEach(f => {
-      if(f.type === 'multi-person'){
+      if(f.type === 'multi-person' || f.type === 'multi-person-tc'){
         v[f.id] = mmgGetPersonFieldValue(f.id);
+        return;
+      }
+      if(f.type === 'duration'){
+        const numEl = document.getElementById(f.id + 'Num');
+        const unitEl = document.getElementById(f.id + 'Unit');
+        const num = numEl ? numEl.value.trim() : '';
+        const unit = unitEl ? unitEl.value : '';
+        v[f.id] = num ? (num + ' ' + unit) : '';
         return;
       }
       const el = document.getElementById(f.id);
@@ -2970,6 +3069,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 
-<script src="mmg-feedback-widget.js"></script>
+
+<script>
+  document.getElementById('resetPageBtn').addEventListener('click', function(){
+    if(confirm('Girdiğiniz ama kaydetmediğiniz tüm veriler silinip sayfa yeniden yüklenecek. Kaydedilmiş kayıtlarınız etkilenmez. Emin misiniz?')){
+      window.location.reload();
+    }
+  });
+</script>
 </body>
 </html>

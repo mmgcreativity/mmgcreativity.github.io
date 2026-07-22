@@ -120,7 +120,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <link rel="icon" type="image/png" href="logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
@@ -151,8 +151,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px 24px;
   }
-  header.masthead > div:first-child{ flex:1 1 280px; min-width:0; }
+  header.masthead > div:first-child{ flex:1 1 0%; min-width:0; }
   .page-nav{ display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; flex:0 1 620px; max-width:100%; }
+  .header-actions-group{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:flex-end; flex:0 1 auto; }
   @media (max-width:640px){ .page-nav{ justify-content:flex-start; flex-basis:100%; } }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5; min-height:42px; max-width:920px;}
@@ -256,15 +257,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .field{ margin-bottom:0; }
   .field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:8px; }
   .field input, .field select{
-    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
-    padding:11px 13px; color:var(--text); font-family:'Inter',sans-serif; font-size:13.5px; outline:none;
+    width:100%; height:42px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    padding:0 13px; color:var(--text); font-family:'Inter',sans-serif; font-size:13.5px; outline:none;
     transition:border-color .15s ease; color-scheme:dark;
   }
   .field input:focus, .field select:focus{ border-color:var(--brass-dim); }
   .field select{ cursor:pointer; }
+  #newAmount{ font-family:'JetBrains Mono',monospace; font-weight:600; font-size:15px; }
   .add-payment-btn{
     background:var(--grad); border:none; color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700;
-    font-size:13.5px; padding:11px 20px; border-radius:8px; cursor:pointer; transition:opacity .15s ease; white-space:nowrap;
+    font-size:13.5px; height:42px; padding:0 20px; border-radius:8px; cursor:pointer; transition:opacity .15s ease; white-space:nowrap;
   }
   .add-payment-btn:hover{ opacity:.9; }
 
@@ -304,16 +306,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
   .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff; }
   footer .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .top-actions{ display:flex; gap:8px; flex-shrink:0; }
+  .top-actions .back-link{ position:static; }
   .back-link{
-    position:fixed; top:16px; right:68px; z-index:800;
     font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
     border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
     background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
     transition:border-color .15s ease, color .15s ease;
   }
   .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  .reset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); font-weight:600;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap; cursor:pointer;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .reset-btn:hover{ color:var(--red); border-color:var(--red); }
   @media (max-width:480px){
-    .back-link{ top:64px; right:8px; }
+    .top-actions{ width:100%; }
   }
   #exportExcelBtn, #exportPdfBtn, #importExcelBtn, #downloadTemplateBtn{
     font-size:12.5px !important; padding:9px 14px !important;
@@ -334,11 +344,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h1 class="title">Giderler</h1>
     <div class="subtitle">Tüm giderlerinizi sisteme girerek, kolaylıkla ödeme takibi yapabilirsiniz. Vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlenir.</div>
   </div>
-  <div class="page-nav">
-    <button type="button" class="ghost-btn" id="syncNowBtn">🔄 Şimdi Senkronize Et</button>
+  <div class="header-actions-group">
+    <div class="page-nav">
+      <button type="button" class="ghost-btn" id="syncNowBtn">🔄 Şimdi Senkronize Et</button>
+    </div>
+    <div class="top-actions">
+      <a href="index.html" class="back-link">← Ana Sayfa</a>
+    </div>
   </div>
 </header>
-<a href="index.html" class="back-link">← Ana Sayfa</a>
 
 <main>
   <div class="controls-row" style="display:none;">
@@ -1273,6 +1287,5 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 
-<script src="mmg-feedback-widget.js"></script>
 </body>
 </html>
