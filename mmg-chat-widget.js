@@ -27,7 +27,7 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, setDoc, updateDoc, addDoc,
+  getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, arrayUnion,
   collection, query, where, orderBy, limit, onSnapshot, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -56,11 +56,12 @@ import {
   let currentUser = null;
   let myChatCode = null;
   let myIsAdmin = false;
+  let myBlockedUids = [];
   let unsubChats = null, unsubRequests = null, unsubMessages = null;
-  let openChatId = null, openChatInfo = null;
+  let openChatId = null, openChatInfo = null, openChatOtherUid = null;
   let chatsMap = {};     // chatId -> chat data
   let requestsMap = {};  // reqId -> request data
-  let activeTab = 'admin'; // admin | friends | add | requests
+  let activeTab = 'friends'; // friends | requests | add | admin
 
   const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -88,12 +89,15 @@ import {
   const CSS = `
   #mmgChatBubble{
     position:fixed; right:20px; bottom:20px; z-index:850;
-    width:56px; height:56px; border-radius:50%; border:none; cursor:pointer;
+    width:56px; height:56px; border-radius:50%; border:none; cursor:grab;
     background:linear-gradient(135deg, var(--coral,#FF6B4A), var(--brass,#C6A15B) 85%);
     color:#fff; display:flex; align-items:center; justify-content:center;
     box-shadow:0 10px 26px rgba(0,0,0,0.4); transition:transform .15s ease;
+    touch-action:none; user-select:none; -webkit-user-select:none;
+    transform:scale(0.7); transform-origin:bottom right;
   }
-  #mmgChatBubble:hover{ transform:scale(1.06); }
+  #mmgChatBubble.dragging{ cursor:grabbing; transition:none; box-shadow:0 14px 34px rgba(0,0,0,0.55); }
+  #mmgChatBubble:hover{ transform:scale(0.742); }
   #mmgChatBubble[hidden]{ display:none; }
   #mmgChatBadge{
     position:absolute; top:-4px; right:-4px; background:var(--red,#E2544B); color:#fff;
@@ -107,6 +111,7 @@ import {
     height:520px; max-height:calc(100vh - 120px); background:var(--surface,#141C2B);
     border:1px solid var(--hairline,#2A3448); border-radius:16px; box-shadow:0 24px 60px rgba(0,0,0,0.5);
     display:flex; flex-direction:column; overflow:hidden; font-family:'Inter',sans-serif;
+    transform:scale(0.7); transform-origin:bottom right;
   }
   #mmgChatPanel[hidden]{ display:none; }
   .mmg-chat-head{
@@ -160,6 +165,8 @@ import {
   }
   .mmg-chat-btn.accept{ background:var(--teal,#3FB68A); color:#06231a; }
   .mmg-chat-btn.decline{ background:var(--surface,#141C2B); color:var(--red,#E2544B); border:1px solid var(--red,#E2544B); }
+  .mmg-chat-btn.block{ background:var(--surface,#141C2B); color:var(--muted,#8D96AC); border:1px solid var(--hairline,#2A3448); }
+  .mmg-chat-req-actions .mmg-chat-btn{ font-size:11px; padding:7px 2px; }
   .mmg-chat-add-form{ padding:6px 2px; }
   .mmg-chat-add-form input{
     width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448);
@@ -184,6 +191,7 @@ import {
   .mmg-chat-msg-time{ font-size:9.5px; color:var(--muted,#8D96AC); margin-top:3px; text-align:right; }
   .mmg-chat-msg.me .mmg-chat-msg-time{ color:rgba(255,255,255,0.75); }
   .mmg-chat-footer{ flex:0 0 auto; display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--hairline,#2A3448); }
+  .mmg-chat-footer[hidden]{ display:none !important; }
   .mmg-chat-footer textarea{
     flex:1; resize:none; height:38px; max-height:80px; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448);
     border-radius:8px; padding:9px 11px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13px; outline:none;
@@ -214,16 +222,19 @@ import {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
       <div class="mmg-chat-title" id="mmgChatTitle">Sohbet</div>
+      <button type="button" class="mmg-chat-iconbtn" id="mmgChatBlockBtn" hidden aria-label="Engelle" title="Bu kullanıcıyı engelle">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/></svg>
+      </button>
       <button type="button" class="mmg-chat-iconbtn" id="mmgChatCloseBtn" aria-label="Kapat">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
     <div id="mmgChatCodeBox" class="mmg-chat-code-box"></div>
     <div class="mmg-chat-tabs" id="mmgChatTabs">
-      <div class="mmg-chat-tab active" data-tab="admin">Admin</div>
-      <div class="mmg-chat-tab" data-tab="friends">Sohbetler</div>
+      <div class="mmg-chat-tab active" data-tab="friends">Sohbetler</div>
       <div class="mmg-chat-tab" data-tab="requests">İstekler<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
       <div class="mmg-chat-tab" data-tab="add">Kod ile Ekle</div>
+      <div class="mmg-chat-tab" data-tab="admin">Yöneticiniz</div>
     </div>
     <div class="mmg-chat-body" id="mmgChatBody"></div>
     <div class="mmg-chat-footer" id="mmgChatFooter" hidden>
@@ -254,6 +265,7 @@ import {
     els.panel = document.getElementById('mmgChatPanel');
     els.title = document.getElementById('mmgChatTitle');
     els.backBtn = document.getElementById('mmgChatBackBtn');
+    els.blockBtn = document.getElementById('mmgChatBlockBtn');
     els.closeBtn = document.getElementById('mmgChatCloseBtn');
     els.codeBox = document.getElementById('mmgChatCodeBox');
     els.tabs = document.getElementById('mmgChatTabs');
@@ -263,9 +275,17 @@ import {
     els.input = document.getElementById('mmgChatInput');
     els.sendBtn = document.getElementById('mmgChatSendBtn');
 
-    els.bubble.addEventListener('click', () => { els.panel.hidden = !els.panel.hidden; if(!els.panel.hidden) renderTab(); });
+    els.bubble.addEventListener('pointerdown', onBubblePointerDown);
     els.closeBtn.addEventListener('click', () => { els.panel.hidden = true; });
+    window.addEventListener('resize', () => { applyBubblePos(); if(!els.panel.hidden) positionPanelNearBubble(); });
     els.backBtn.addEventListener('click', closeOpenChat);
+    els.blockBtn.addEventListener('click', () => {
+      if(!openChatOtherUid) return;
+      const label = (openChatInfo && openChatInfo.title) || 'Bu kullanıcı';
+      if(confirm(label + ' engellensin mi? Bu kişi size bir daha mesaj gönderemez.')){
+        blockUser(openChatOtherUid);
+      }
+    });
     els.tabs.addEventListener('click', (e) => {
       const tab = e.target.closest('.mmg-chat-tab');
       if(!tab) return;
@@ -285,11 +305,109 @@ import {
     else { els.badge.hidden = true; }
   }
 
+  // ---- Taşınabilir baloncuk (sürükle-bırak) ----
+  const BUBBLE_POS_KEY = 'mmg_chat_bubble_pos';
+  let dragState = null;
+
+  function loadBubblePos(){
+    try{
+      const raw = localStorage.getItem(BUBBLE_POS_KEY);
+      if(!raw) return null;
+      const p = JSON.parse(raw);
+      if(typeof p.xr === 'number' && typeof p.yr === 'number') return p;
+    }catch(e){}
+    return null;
+  }
+  function saveBubblePos(xr, yr){
+    try{ localStorage.setItem(BUBBLE_POS_KEY, JSON.stringify({ xr, yr })); }catch(e){}
+  }
+  function applyBubblePos(){
+    const pos = loadBubblePos();
+    if(!pos) return; // kaydedilmiş konum yoksa CSS'teki varsayılan (sağ-alt) köşede kalsın
+    const size = els.bubble.offsetWidth || 56;
+    const maxX = window.innerWidth - size - 8;
+    const maxY = window.innerHeight - size - 8;
+    const x = Math.min(Math.max(pos.xr * window.innerWidth, 8), Math.max(8, maxX));
+    const y = Math.min(Math.max(pos.yr * window.innerHeight, 8), Math.max(8, maxY));
+    els.bubble.style.left = x + 'px';
+    els.bubble.style.top = y + 'px';
+    els.bubble.style.right = 'auto';
+    els.bubble.style.bottom = 'auto';
+  }
+
+  function onBubblePointerDown(e){
+    const rect = els.bubble.getBoundingClientRect();
+    dragState = {
+      startX: e.clientX, startY: e.clientY,
+      origLeft: rect.left, origTop: rect.top,
+      moved: false, pointerId: e.pointerId
+    };
+    try{ els.bubble.setPointerCapture(e.pointerId); }catch(err){}
+    els.bubble.addEventListener('pointermove', onBubblePointerMove);
+    els.bubble.addEventListener('pointerup', onBubblePointerUp);
+    els.bubble.addEventListener('pointercancel', onBubblePointerUp);
+  }
+  function onBubblePointerMove(e){
+    if(!dragState) return;
+    const dx = e.clientX - dragState.startX;
+    const dy = e.clientY - dragState.startY;
+    if(!dragState.moved && (Math.abs(dx) > 6 || Math.abs(dy) > 6)){
+      dragState.moved = true;
+      els.bubble.classList.add('dragging');
+    }
+    if(dragState.moved){
+      const size = els.bubble.offsetWidth || 56;
+      let newLeft = dragState.origLeft + dx;
+      let newTop = dragState.origTop + dy;
+      newLeft = Math.min(Math.max(newLeft, 8), window.innerWidth - size - 8);
+      newTop = Math.min(Math.max(newTop, 8), window.innerHeight - size - 8);
+      els.bubble.style.left = newLeft + 'px';
+      els.bubble.style.top = newTop + 'px';
+      els.bubble.style.right = 'auto';
+      els.bubble.style.bottom = 'auto';
+      if(!els.panel.hidden) positionPanelNearBubble();
+    }
+  }
+  function onBubblePointerUp(e){
+    if(!dragState) return;
+    els.bubble.classList.remove('dragging');
+    els.bubble.removeEventListener('pointermove', onBubblePointerMove);
+    els.bubble.removeEventListener('pointerup', onBubblePointerUp);
+    els.bubble.removeEventListener('pointercancel', onBubblePointerUp);
+    try{ els.bubble.releasePointerCapture(dragState.pointerId); }catch(err){}
+    if(dragState.moved){
+      const rect = els.bubble.getBoundingClientRect();
+      saveBubblePos(rect.left / window.innerWidth, rect.top / window.innerHeight);
+    } else {
+      // Sürükleme olmadıysa normal bir tıklama/dokunuş: paneli aç/kapat
+      els.panel.hidden = !els.panel.hidden;
+      if(!els.panel.hidden){ positionPanelNearBubble(); renderTab(); }
+    }
+    dragState = null;
+  }
+  function positionPanelNearBubble(){
+    const rect = els.bubble.getBoundingClientRect();
+    const panelRect = els.panel.getBoundingClientRect();
+    const panelW = panelRect.width || 350;
+    const panelH = panelRect.height || 520;
+    let top = rect.top - panelH - 12;
+    if(top < 8) top = Math.min(rect.bottom + 12, window.innerHeight - panelH - 8);
+    top = Math.max(8, top);
+    let right = window.innerWidth - rect.right;
+    if(right < 8) right = 8;
+    if(right + panelW > window.innerWidth - 8) right = Math.max(8, window.innerWidth - panelW - 8);
+    els.panel.style.top = top + 'px';
+    els.panel.style.bottom = 'auto';
+    els.panel.style.right = right + 'px';
+    els.panel.style.left = 'auto';
+  }
+
   function closeOpenChat(rerender){
     if(unsubMessages){ unsubMessages(); unsubMessages = null; }
-    openChatId = null; openChatInfo = null;
+    openChatId = null; openChatInfo = null; openChatOtherUid = null;
     els.backBtn.hidden = true;
     els.footer.hidden = true;
+    if(els.blockBtn) els.blockBtn.hidden = true;
     if(rerender !== false) renderTab();
   }
 
@@ -363,7 +481,7 @@ import {
       <div class="mmg-chat-list-item" id="mmgOpenAdminChatBtn">
         <div class="mmg-chat-avatar">A</div>
         <div class="mmg-chat-list-main">
-          <div class="mmg-chat-list-name">Yönetici ile Sohbet</div>
+          <div class="mmg-chat-list-name">Sistem Yöneticiniz ile Görüşün</div>
           <div class="mmg-chat-list-sub">Destek / geri bildirim</div>
         </div>
       </div>`;
@@ -387,12 +505,17 @@ import {
         lastSenderUid: null
       });
     }
-    openChat(chatId, { title: 'Yönetici ile Sohbet', isAdminChat: true });
+    openChat(chatId, { title: 'Sistem Yöneticiniz ile Görüşün', isAdminChat: true });
   }
 
   function renderFriendsTab(){
     els.title.textContent = 'Sohbet';
-    const ids = Object.keys(chatsMap).filter(id => !chatsMap[id].isAdminChat);
+    const ids = Object.keys(chatsMap).filter(id => {
+      const c = chatsMap[id];
+      if(c.isAdminChat) return false;
+      const otherUid = (c.participants || []).find(u => u !== currentUser.uid);
+      return !myBlockedUids.includes(otherUid);
+    });
     if(!ids.length){
       els.body.innerHTML = `<div class="mmg-chat-empty">Henüz bir sohbetiniz yok.<br>"Kod ile Ekle" sekmesinden bir arkadaşınızın sohbet kodunu girerek istek gönderebilirsiniz.</div>`;
       return;
@@ -410,7 +533,7 @@ import {
       const lastAt = c.lastMessageAt && c.lastMessageAt.toMillis ? c.lastMessageAt.toMillis() : 0;
       const readAt = c['lastRead_' + currentUser.uid] && c['lastRead_' + currentUser.uid].toMillis ? c['lastRead_' + currentUser.uid].toMillis() : 0;
       const isUnread = lastAt > readAt && c.lastSenderUid !== currentUser.uid;
-      return `<div class="mmg-chat-list-item" data-chat-id="${esc(id)}" data-label="${esc(label)}">
+      return `<div class="mmg-chat-list-item" data-chat-id="${esc(id)}" data-label="${esc(label)}" data-other-uid="${esc(otherUid)}">
         <div class="mmg-chat-avatar">${esc((info.code||'?').slice(0,1))}</div>
         <div class="mmg-chat-list-main">
           <div class="mmg-chat-list-name">${esc(label)}${isUnread ? ' •' : ''}</div>
@@ -420,13 +543,13 @@ import {
       </div>`;
     }).join('');
     els.body.querySelectorAll('.mmg-chat-list-item').forEach(row => {
-      row.addEventListener('click', () => openChat(row.dataset.chatId, { title: row.dataset.label, isAdminChat: false }));
+      row.addEventListener('click', () => openChat(row.dataset.chatId, { title: row.dataset.label, isAdminChat: false, otherUid: row.dataset.otherUid }));
     });
   }
 
   function renderRequestsTab(){
     els.title.textContent = 'Sohbet İstekleri';
-    const ids = Object.keys(requestsMap);
+    const ids = Object.keys(requestsMap).filter(id => !myBlockedUids.includes(requestsMap[id].fromUid));
     if(!ids.length){
       els.body.innerHTML = `<div class="mmg-chat-empty">Bekleyen bir sohbet isteğiniz yok.</div>`;
       return;
@@ -438,6 +561,7 @@ import {
         <div class="mmg-chat-req-actions">
           <button type="button" class="mmg-chat-btn accept">Kabul Et</button>
           <button type="button" class="mmg-chat-btn decline">Reddet</button>
+          <button type="button" class="mmg-chat-btn block">Engelle</button>
         </div>
       </div>`;
     }).join('');
@@ -445,6 +569,12 @@ import {
       const reqId = row.dataset.reqId, fromUid = row.dataset.fromUid, fromCode = row.dataset.fromCode;
       row.querySelector('.accept').addEventListener('click', () => acceptRequest(reqId, fromUid, fromCode));
       row.querySelector('.decline').addEventListener('click', () => declineRequest(reqId));
+      row.querySelector('.block').addEventListener('click', () => {
+        if(confirm(fromCode + ' kodlu kullanıcıyı engellemek istediğinize emin misiniz? Bu kullanıcı size bir daha istek gönderemez.')){
+          declineRequest(reqId);
+          blockUser(fromUid);
+        }
+      });
     });
   }
 
@@ -475,6 +605,10 @@ import {
       if(!codeSnap.exists()){ msgEl.textContent = 'Bu koda sahip bir kullanıcı bulunamadı.'; return; }
       const targetUid = codeSnap.data().uid;
       const uid = currentUser.uid;
+      if(myBlockedUids.includes(targetUid)){
+        msgEl.textContent = 'Bu kullanıcıyı engellediniz, istek gönderemezsiniz.';
+        return;
+      }
 
       const existingChatId = pairChatId(uid, targetUid);
       const existingChatSnap = await getDoc(doc(db, 'chats', existingChatId));
@@ -513,7 +647,11 @@ import {
       inputEl.value = '';
     }catch(e){
       console.error(e);
-      msgEl.textContent = 'Bir hata oluştu, tekrar deneyin.';
+      if(e && e.code === 'permission-denied'){
+        msgEl.textContent = 'İzin hatası: Firestore güvenlik kuralları henüz eklenmemiş olabilir.';
+      } else {
+        msgEl.textContent = 'Bir hata oluştu, tekrar deneyin.';
+      }
     }
   }
 
@@ -544,12 +682,24 @@ import {
     catch(e){ console.error(e); }
   }
 
+  async function blockUser(targetUid){
+    if(!targetUid || !currentUser) return;
+    try{
+      await updateDoc(doc(db, 'users', currentUser.uid), { blockedUids: arrayUnion(targetUid) });
+      if(!myBlockedUids.includes(targetUid)) myBlockedUids.push(targetUid);
+      if(openChatOtherUid === targetUid) closeOpenChat(false);
+      renderTab();
+    }catch(e){ console.error(e); }
+  }
+
   // ---- Açık sohbet ----
   function openChat(chatId, info){
     openChatId = chatId;
     openChatInfo = info || {};
+    openChatOtherUid = (info && info.otherUid) || null;
     els.backBtn.hidden = false;
     els.footer.hidden = false;
+    els.blockBtn.hidden = !openChatOtherUid;
     els.title.textContent = info && info.title ? info.title : 'Sohbet';
     els.body.innerHTML = `<div class="mmg-chat-empty">Yükleniyor…</div>`;
 
@@ -623,10 +773,13 @@ import {
       return;
     }
     els.bubble.hidden = false;
+    applyBubblePos();
     try{
       const uref = doc(db, 'users', user.uid);
       const usnap = await getDoc(uref);
-      myIsAdmin = usnap.exists() && usnap.data().isAdmin === true;
+      const udata = usnap.exists() ? usnap.data() : {};
+      myIsAdmin = udata.isAdmin === true;
+      myBlockedUids = Array.isArray(udata.blockedUids) ? udata.blockedUids : [];
       myChatCode = await ensureChatCode(user.uid);
       els.codeBox.innerHTML = myChatCode ? `Sizin Sohbet Kodunuz: <b>${esc(myChatCode)}</b>` : '';
     }catch(e){ console.error('mmg-chat-widget kullanıcı bilgisi alınamadı:', e); }
