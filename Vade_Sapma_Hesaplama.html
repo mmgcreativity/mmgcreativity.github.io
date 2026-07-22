@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script>
+(function(){
+  try{
+    var mode = localStorage.getItem('mmg_theme') || 'dark';
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+  }catch(e){}
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.mmgTheme){
+      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
+      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
+    }
+  });
+})();
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<!-- End Google Tag Manager -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Vade Sapma Hesaplama</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  html,body{overscroll-behavior-y:none;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; padding-bottom:60px;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  header.masthead{
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
+    display:flex; justify-content:space-between; align-items:flex-end;
+    border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
+  }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5;}
+  .back-link{
+    position:fixed; top:16px; right:68px; z-index:800;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  @media (max-width:480px){
+    .back-link{ top:64px; right:8px; }
+  }
+
+  main{ max-width:1180px; margin:0 auto; padding:28px 24px 24px; }
+
+  .cols{ display:grid; grid-template-columns:1.55fr 1fr; gap:24px; align-items:start; }
+  @media (max-width:940px){ .cols{ grid-template-columns:1fr; } }
+
+  .panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:22px; }
+  .panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .panel-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; }
+  .panel-title.fatura{ color:var(--azure); }
+  .panel-title.cek{ color:var(--brass); }
+  .panel-desc{ color:var(--muted); font-size:12.5px; margin-bottom:16px; line-height:1.5; }
+
+  .row-table{ display:flex; flex-direction:column; gap:8px; }
+  .entry-row{
+    display:flex; flex-wrap:nowrap; align-items:flex-end; gap:8px; background:var(--surface-2);
+    border:1px solid var(--hairline); border-radius:10px; padding:10px 10px;
+  }
+  @media (max-width:720px){
+    .entry-row{ flex-wrap:wrap; }
+  }
+  .f-field label{
+    display:block; font-size:9.5px; letter-spacing:.03em; text-transform:uppercase; color:var(--muted);
+    margin-bottom:4px; white-space:nowrap;
+  }
+  .f-field input, .f-field select{
+    background:var(--bg); border:1px solid var(--hairline); border-radius:7px;
+    padding:8px 8px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12.5px;
+    outline:none; transition:border-color .15s ease; width:100%;
+  }
+  .f-field input:focus, .f-field select:focus{ border-color:var(--brass-dim); }
+  .f-field select{ cursor:pointer; }
+
+  /* Alan genişlikleri: tarih kutuları sadece tarihi gösterecek kadar dar,
+     her satır tek satıra sığacak şekilde daraltıldı. */
+  .f-field.f-tarih-wrap{ flex:0 0 122px; }
+  .f-field.f-yontem-wrap{ flex:0 0 152px; }
+  .f-field.f-gun-wrap{ flex:0 0 56px; }
+  .f-field.f-tutar-wrap{ flex:1 1 100px; min-width:90px; }
+  .f-field.f-due-wrap{ flex:0 0 108px; }
+  .f-field.c-tarih-wrap{ flex:0 0 130px; }
+  .f-field.c-tutar-wrap{ flex:1 1 110px; min-width:90px; }
+
+  .f-field input[type="date"]{ padding-right:4px; }
+
+  .due-badge{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:var(--brass);
+    background:rgba(198,161,91,0.1); border:1px solid rgba(198,161,91,0.25); border-radius:7px;
+    padding:8px 6px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .row-del{
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:15px;
+    padding:8px 6px; line-height:1; border-radius:6px; transition:color .15s ease, background .15s ease;
+    flex:0 0 auto; align-self:center;
+  }
+  .row-del:hover{ color:var(--red); background:rgba(226,84,75,0.1); }
+
+
+  .add-btn{
+    margin-top:14px; width:100%; padding:11px; border-radius:9px; border:1px dashed var(--hairline);
+    background:none; color:var(--muted); font-family:'Inter',sans-serif; font-weight:600; font-size:13px;
+    cursor:pointer; transition:border-color .15s ease, color .15s ease;
+  }
+  .add-btn.fatura:hover{ border-color:var(--azure); color:var(--azure); }
+  .add-btn.cek:hover{ border-color:var(--brass); color:var(--brass); }
+
+  .subtotal-line{
+    display:flex; justify-content:space-between; margin-top:16px; padding-top:14px;
+    border-top:1px solid var(--hairline); font-size:13px; color:var(--muted);
+  }
+  .subtotal-line b{ color:var(--text); font-family:'IBM Plex Mono',monospace; }
+
+  /* Bilgi paneli */
+  .info-panel{
+    margin-top:24px; background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
+    padding:28px; text-align:center;
+  }
+  .info-panel .deviation-label{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; color:var(--muted); text-transform:uppercase;
+  }
+  .info-panel .deviation-value{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:44px; margin:10px 0 6px;
+  }
+  .info-panel .deviation-value.pos{ color:var(--teal); }
+  .info-panel .deviation-value.neg{ color:var(--red); }
+  .info-panel .deviation-value.neutral{ color:var(--muted); }
+  .info-panel .deviation-sub{ font-size:13px; color:var(--muted); margin-bottom:22px; }
+  .info-panel .deviation-sub.pos{ color:var(--teal); }
+  .info-panel .deviation-sub.neg{ color:var(--red); }
+
+  .stat-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px; text-align:left;
+    border-top:1px solid var(--hairline); padding-top:20px;
+  }
+  @media (max-width:800px){ .stat-grid{ grid-template-columns:1fr 1fr; } }
+  .stat-card{ background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:14px 16px; }
+  .stat-card .l{ font-size:11px; color:var(--muted); margin-bottom:6px; }
+  .stat-card .v{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:16px; }
+  .stat-card .v.brass{ color:var(--brass); }
+  .stat-card .v.pos{ color:var(--teal); }
+  .stat-card .v.neg{ color:var(--red); }
+
+  .flag{ color:var(--brass); font-size:11.5px; margin-top:18px; text-align:center; }
+
+  footer{max-width:1180px; margin:0 auto; padding:28px 24px 0; color:var(--muted); font-size:11.5px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  footer .credit{width:100%; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); margin-top:6px; display:flex; align-items:center; justify-content:flex-end; gap:8px;}
+  .signature-pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 12px 4px 5px; border-radius:999px; background:var(--surface-2); border:1px solid var(--hairline); }
+  .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
+  .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff; }
+  footer .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+</style>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<header class="masthead">
+  <div>
+    <h1 class="title">Vade Sapma Hesaplama</h1>
+    <div class="subtitle">Fatura vadeleriniz ile tahsil ettiğiniz çeklerin vadelerini karşılaştırın; ortalama kaç gün sapma olduğunu ve karşılama oranını görün.</div>
+  </div>
+</header>
+<a href="index.html" class="back-link">← Ana Sayfa</a>
+
+<main>
+  <div class="cols">
+
+    <!-- FATURA PANELİ -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title fatura">📄 Faturalar</div>
+      </div>
+      <div class="panel-desc">Fatura tarihi, çalışma koşulu ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.</div>
+      <div class="row-table" id="faturaRows"></div>
+      <button type="button" class="add-btn fatura" id="addFaturaBtn">+ Fatura Ekle</button>
+      <div class="subtotal-line"><span>Toplam Fatura Tutarı</span><b id="faturaToplam" class="mono">0,00</b></div>
+    </div>
+
+    <!-- ÇEK PANELİ -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title cek">🧾 Çekler</div>
+      </div>
+      <div class="panel-desc">Tahsil ettiğiniz / vadesi gelen çeklerin tarih ve tutarlarını girin.</div>
+      <div class="row-table" id="cekRows"></div>
+      <button type="button" class="add-btn cek" id="addCekBtn">+ Çek Ekle</button>
+      <div class="subtotal-line"><span>Toplam Çek Tutarı</span><b id="cekToplam" class="mono">0,00</b></div>
+    </div>
+
+  </div>
+
+  <!-- BİLGİ PANELİ -->
+  <div class="info-panel">
+    <div class="deviation-label">Vade Sapması</div>
+    <div class="deviation-value neutral" id="devValue">—</div>
+    <div class="deviation-sub" id="devSub">Hesaplamak için fatura ve çek bilgilerini girin</div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="l">Fatura Ort. Vadesi</div>
+        <div class="v brass" id="statFaturaVade">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="l">Çek Ort. Vadesi</div>
+        <div class="v brass" id="statCekVade">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="l">Karşılama Oranı</div>
+        <div class="v" id="statKarsilama">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="l">Karşılanmayan Tutar</div>
+        <div class="v" id="statFark">—</div>
+      </div>
+    </div>
+
+    <div class="flag">⚠ Vade sapması, fatura ve çek tutarlarına göre ağırlıklı ortalama tarihler üzerinden hesaplanır. Negatif (−) değer vadenin geçtiğini / gecikmeyi, sıfır veya pozitif (+) değer erken ya da tam vadesinde ödemeyi gösterir.</div>
+  </div>
+</main>
+
+<footer>
+  <div class="credit">
+    <span>Powered by</span>
+    <span class="signature-pill">
+      <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+      <span id="credit-fallback" class="credit-fallback">M</span>
+      <b>mmgcreativity</b>
+    </span>
+  </div>
+</footer>
+
+<script>
+  // ---------- yardımcı fonksiyonlar ----------
+  function parseTR(str){
+    if(!str) return 0;
+    const cleaned = String(str).replace(/\./g, '').replace(',', '.');
+    const v = parseFloat(cleaned);
+    return isFinite(v) ? v : 0;
+  }
+  function fmtTR(n, decimals){
+    decimals = decimals === undefined ? 2 : decimals;
+    return (n || 0).toLocaleString('tr-TR', {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+  }
+  function formatTRLive(raw){
+    raw = raw.replace(/[^\d,]/g, '');
+    const firstComma = raw.indexOf(',');
+    if(firstComma !== -1){
+      raw = raw.slice(0, firstComma+1) + raw.slice(firstComma+1).replace(/,/g, '');
+    }
+    let [intPart, decPart] = raw.split(',');
+    intPart = (intPart || '').replace(/^0+(?=\d)/, '');
+    intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    if(decPart !== undefined){
+      decPart = decPart.slice(0,2);
+      return intPart + ',' + decPart;
+    }
+    return intPart;
+  }
+  function attachTRFormatting(el){
+    el.addEventListener('input', ()=>{
+      const pos = el.selectionStart;
+      const before = el.value;
+      el.value = formatTRLive(el.value);
+      const diff = el.value.length - before.length;
+      const newPos = Math.max(0, (pos||0) + diff);
+      try { el.setSelectionRange(newPos, newPos); } catch(e){}
+      recalc();
+    });
+    el.addEventListener('blur', ()=>{
+      const v = parseTR(el.value);
+      el.value = v.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    });
+  }
+
+  function parseDateInput(str){
+    if(!str) return null;
+    const parts = str.split('-'); // yyyy-mm-dd (native date input)
+    if(parts.length !== 3) return null;
+    const d = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function fmtDateTR(d){
+    if(!d) return '—';
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yyyy = d.getFullYear();
+    return dd + '.' + mm + '.' + yyyy;
+  }
+  function endOfMonth(d){
+    return new Date(d.getFullYear(), d.getMonth()+1, 0);
+  }
+  function addDays(d, n){
+    const r = new Date(d.getTime());
+    r.setDate(r.getDate() + n);
+    return r;
+  }
+  function daySerial(d){
+    // gün bazlı seri numarası (saat farklarından etkilenmez)
+    return Math.round(d.getTime() / 86400000);
+  }
+
+  // ---------- fatura satırları ----------
+  let faturaIdSeq = 0;
+  let cekIdSeq = 0;
+  const faturaData = {}; // id -> {tarih, yontem, gun, tutar}
+  const cekData = {};    // id -> {tarih, tutar}
+
+  const faturaRowsEl = document.getElementById('faturaRows');
+  const cekRowsEl = document.getElementById('cekRows');
+
+  function addFaturaRow(prefill){
+    const id = ++faturaIdSeq;
+    faturaData[id] = Object.assign({tarih:'', yontem:'fatura', gun:90, tutar:0}, prefill||{});
+
+    const row = document.createElement('div');
+    row.className = 'entry-row fatura-row';
+    row.dataset.id = id;
+    row.innerHTML =
+      '<div class="f-field f-tarih-wrap"><label>Fatura Tarihi</label><input type="date" class="f-tarih"></div>' +
+      '<div class="f-field f-yontem-wrap"><label>Çalışma Şekli</label>' +
+        '<select class="f-yontem">' +
+          '<option value="fatura">Fatura Tarihine Ekle</option>' +
+          '<option value="aysonu">Ay Sonuna Ekle</option>' +
+        '</select>' +
+      '</div>' +
+      '<div class="f-field f-gun-wrap"><label>Vade (gün)</label><input type="text" inputmode="numeric" class="f-gun" value="' + faturaData[id].gun + '"></div>' +
+      '<div class="f-field f-tutar-wrap"><label>Fatura Tutarı</label><input type="text" inputmode="decimal" class="f-tutar" value="0,00"></div>' +
+      '<div class="f-field f-due-wrap"><label>Vade Tarihi</label><div class="due-badge f-due">—</div></div>' +
+      '<button type="button" class="row-del f-del" title="Satırı sil">✕</button>';
+    faturaRowsEl.appendChild(row);
+
+    const tarihEl = row.querySelector('.f-tarih');
+    const yontemEl = row.querySelector('.f-yontem');
+    const gunEl = row.querySelector('.f-gun');
+    const tutarEl = row.querySelector('.f-tutar');
+    const delBtn = row.querySelector('.f-del');
+
+    tarihEl.addEventListener('change', ()=>{ faturaData[id].tarih = tarihEl.value; recalc(); });
+    yontemEl.addEventListener('change', ()=>{ faturaData[id].yontem = yontemEl.value; recalc(); });
+    gunEl.addEventListener('input', ()=>{ gunEl.value = gunEl.value.replace(/[^\d]/g,''); faturaData[id].gun = parseInt(gunEl.value||'0',10); recalc(); });
+    attachTRFormatting(tutarEl);
+    tutarEl.addEventListener('input', ()=>{ faturaData[id].tutar = parseTR(tutarEl.value); });
+    tutarEl.addEventListener('blur', ()=>{ faturaData[id].tutar = parseTR(tutarEl.value); recalc(); });
+    delBtn.addEventListener('click', ()=>{ delete faturaData[id]; row.remove(); recalc(); });
+
+    recalc();
+  }
+
+  function addCekRow(prefill){
+    const id = ++cekIdSeq;
+    cekData[id] = Object.assign({tarih:'', tutar:0}, prefill||{});
+
+    const row = document.createElement('div');
+    row.className = 'entry-row cek-row';
+    row.dataset.id = id;
+    row.innerHTML =
+      '<div class="f-field c-tarih-wrap"><label>Çek Tarihi</label><input type="date" class="c-tarih"></div>' +
+      '<div class="f-field c-tutar-wrap"><label>Çek Tutarı</label><input type="text" inputmode="decimal" class="c-tutar" value="0,00"></div>' +
+      '<button type="button" class="row-del c-del" title="Satırı sil">✕</button>';
+    cekRowsEl.appendChild(row);
+
+    const tarihEl = row.querySelector('.c-tarih');
+    const tutarEl = row.querySelector('.c-tutar');
+    const delBtn = row.querySelector('.c-del');
+
+    tarihEl.addEventListener('change', ()=>{ cekData[id].tarih = tarihEl.value; recalc(); });
+    attachTRFormatting(tutarEl);
+    tutarEl.addEventListener('input', ()=>{ cekData[id].tutar = parseTR(tutarEl.value); });
+    tutarEl.addEventListener('blur', ()=>{ cekData[id].tutar = parseTR(tutarEl.value); recalc(); });
+    delBtn.addEventListener('click', ()=>{ delete cekData[id]; row.remove(); recalc(); });
+
+    recalc();
+  }
+
+  document.getElementById('addFaturaBtn').addEventListener('click', ()=>addFaturaRow());
+  document.getElementById('addCekBtn').addEventListener('click', ()=>addCekRow());
+
+  // ---------- hesaplama ----------
+  function computeDueDate(id){
+    const d = faturaData[id];
+    const tarihDate = parseDateInput(d.tarih);
+    if(!tarihDate) return null;
+    const gun = isFinite(d.gun) ? d.gun : 0;
+    if(d.yontem === 'aysonu'){
+      return addDays(endOfMonth(tarihDate), gun);
+    }
+    return addDays(tarihDate, gun);
+  }
+
+  function recalc(){
+    // fatura tarafı
+    let faturaToplam = 0;
+    let faturaAgirlikliTop = 0; // sum(tutar * gunSerial)
+    let faturaAgirlikToplam = 0; // sum(tutar) — sadece geçerli (tarihi girilmiş) satırlar için
+
+    document.querySelectorAll('#faturaRows .entry-row').forEach(row=>{
+      const id = row.dataset.id;
+      const data = faturaData[id];
+      if(!data) return;
+      faturaToplam += data.tutar || 0;
+      const due = computeDueDate(id);
+      const badge = row.querySelector('.f-due');
+      if(due){
+        badge.textContent = fmtDateTR(due);
+        if(data.tutar > 0){
+          faturaAgirlikliTop += data.tutar * daySerial(due);
+          faturaAgirlikToplam += data.tutar;
+        }
+      } else {
+        badge.textContent = '—';
+      }
+    });
+
+    // çek tarafı
+    let cekToplam = 0;
+    let cekAgirlikliTop = 0;
+    let cekAgirlikToplam = 0;
+    document.querySelectorAll('#cekRows .entry-row').forEach(row=>{
+      const id = row.dataset.id;
+      const data = cekData[id];
+      if(!data) return;
+      cekToplam += data.tutar || 0;
+      const tarihDate = parseDateInput(data.tarih);
+      if(tarihDate && data.tutar > 0){
+        cekAgirlikliTop += data.tutar * daySerial(tarihDate);
+        cekAgirlikToplam += data.tutar;
+      }
+    });
+
+    document.getElementById('faturaToplam').textContent = fmtTR(faturaToplam);
+    document.getElementById('cekToplam').textContent = fmtTR(cekToplam);
+
+    const devValueEl = document.getElementById('devValue');
+    const devSubEl = document.getElementById('devSub');
+    const statFaturaVadeEl = document.getElementById('statFaturaVade');
+    const statCekVadeEl = document.getElementById('statCekVade');
+    const statKarsilamaEl = document.getElementById('statKarsilama');
+    const statFarkEl = document.getElementById('statFark');
+
+    // karşılama oranı ve karşılanmayan tutar her zaman hesaplanabilir
+    if(faturaToplam > 0){
+      const oran = (cekToplam / faturaToplam) * 100;
+      statKarsilamaEl.textContent = '%' + fmtTR(oran, 1);
+      statKarsilamaEl.className = 'v ' + (oran >= 100 ? 'pos' : (oran <= 0 ? 'neg' : 'brass'));
+      const fark = faturaToplam - cekToplam;
+      statFarkEl.textContent = fmtTR(fark) + ' ₺';
+      statFarkEl.className = 'v ' + (fark <= 0 ? 'pos' : 'neg');
+    } else {
+      statKarsilamaEl.textContent = '—';
+      statKarsilamaEl.className = 'v';
+      statFarkEl.textContent = '—';
+      statFarkEl.className = 'v';
+    }
+
+    if(faturaAgirlikToplam <= 0 || cekAgirlikToplam <= 0){
+      devValueEl.textContent = '—';
+      devValueEl.className = 'deviation-value neutral';
+      devSubEl.textContent = 'Hesaplamak için en az bir fatura ve bir çek girin (tarih + tutar)';
+      devSubEl.className = 'deviation-sub';
+      statFaturaVadeEl.textContent = '—';
+      statCekVadeEl.textContent = '—';
+      return;
+    }
+
+    const faturaOrtSerial = faturaAgirlikliTop / faturaAgirlikToplam;
+    const cekOrtSerial = cekAgirlikliTop / cekAgirlikToplam;
+    const faturaOrtDate = new Date(Math.round(faturaOrtSerial) * 86400000);
+    const cekOrtDate = new Date(Math.round(cekOrtSerial) * 86400000);
+
+    statFaturaVadeEl.textContent = fmtDateTR(faturaOrtDate);
+    statCekVadeEl.textContent = fmtDateTR(cekOrtDate);
+
+    // Sapma = Fatura Ort. Vadesi - Çek Ort. Tarihi (gün)
+    // Negatif (−): çek, vadeden SONRA gelmiş -> vade geçmiş / gecikme -> KIRMIZI
+    // Sıfır veya Pozitif (+): çek, vadede ya da öncesinde gelmiş -> erken / tam vadesinde -> YEŞİL
+    const gunFarki = Math.round(faturaOrtSerial - cekOrtSerial);
+
+    devValueEl.textContent = (gunFarki > 0 ? '+' : '') + gunFarki + ' gün';
+    if(gunFarki < 0){
+      devValueEl.className = 'deviation-value neg';
+      devSubEl.textContent = 'Vade geçmiş — ortalama ' + Math.abs(gunFarki) + ' gün gecikmeli tahsilat';
+      devSubEl.className = 'deviation-sub neg';
+    } else if(gunFarki === 0){
+      devValueEl.className = 'deviation-value pos';
+      devSubEl.textContent = 'Tam vadesinde tahsilat';
+      devSubEl.className = 'deviation-sub pos';
+    } else {
+      devValueEl.className = 'deviation-value pos';
+      devSubEl.textContent = 'Vadesinden ortalama ' + gunFarki + ' gün erken tahsilat';
+      devSubEl.className = 'deviation-sub pos';
+    }
+  }
+
+  // ---------- başlangıç satırları ----------
+  addFaturaRow();
+  addFaturaRow();
+  addCekRow();
+  addCekRow();
+  recalc();
+</script>
+</body>
+</html>
