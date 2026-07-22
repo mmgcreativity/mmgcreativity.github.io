@@ -433,11 +433,12 @@ import {
     const uref = doc(db, 'users', uid);
     const usnap = await getDoc(uref);
     const udata = usnap.exists() ? usnap.data() : {};
-    if(udata.chatCode) return udata.chatCode;
 
-    // Öncelik: sitede zaten kullanılan Müşteri No'yu (#1016 gibi) kullanıcı kodu olarak kullan
+    // Öncelik: sitede zaten kullanılan Müşteri No'yu (#1016 gibi) kullanıcı kodu olarak kullan.
+    // Daha önce rastgele bir kod atanmış olsa bile, Müşteri No varsa ona geçiş yapılır.
     if(udata.customerNumber != null){
       const code = String(udata.customerNumber);
+      if(udata.chatCode === code) return code;
       const cref = doc(db, 'chatCodes', code);
       try{
         const csnap = await getDoc(cref);
@@ -449,8 +450,10 @@ import {
           await setDoc(uref, { chatCode: code }, { merge: true });
           return code;
         }
-      }catch(e){ /* aşağıdaki yedek koda düş */ }
+      }catch(e){ console.error('mmg-chat-widget: müşteri no kodu ayarlanamadı', e); }
     }
+
+    if(udata.chatCode) return udata.chatCode;
 
     // Yedek: Müşteri No yoksa/çakışıyorsa rastgele bir kod üret
     for(let i=0;i<6;i++){
@@ -547,21 +550,29 @@ import {
   async function openAdminChat(){
     const uid = currentUser.uid;
     const chatId = adminChatId(uid);
-    const cref = doc(db, 'chats', chatId);
-    const csnap = await getDoc(cref);
-    if(!csnap.exists()){
-      await setDoc(cref, {
-        participants: [uid],
-        isAdminChat: true,
-        userUid: uid,
-        userEmail: currentUser.email || null,
-        createdAt: serverTimestamp(),
-        lastMessage: null,
-        lastMessageAt: null,
-        lastSenderUid: null
-      });
+    try{
+      const cref = doc(db, 'chats', chatId);
+      const csnap = await getDoc(cref);
+      if(!csnap.exists()){
+        await setDoc(cref, {
+          participants: [uid],
+          isAdminChat: true,
+          userUid: uid,
+          userEmail: currentUser.email || null,
+          createdAt: serverTimestamp(),
+          lastMessage: null,
+          lastMessageAt: null,
+          lastSenderUid: null
+        });
+      }
+      openChat(chatId, { title: 'Sistem Yöneticiniz ile Görüşün', isAdminChat: true });
+    }catch(e){
+      console.error('mmg-chat-widget: yönetici sohbeti açılamadı', e);
+      const hint = (e && e.code === 'permission-denied')
+        ? 'İzin hatası: Firestore güvenlik kuralları henüz eklenmemiş/güncellenmemiş olabilir.'
+        : 'Sohbet açılamadı, lütfen tekrar deneyin.';
+      els.body.innerHTML = `<div class="mmg-chat-empty" style="color:var(--red,#E2544B);">${esc(hint)}</div>`;
     }
-    openChat(chatId, { title: 'Sistem Yöneticiniz ile Görüşün', isAdminChat: true });
   }
 
   function renderFriendsTab(){
