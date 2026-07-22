@@ -30,7 +30,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
@@ -101,33 +101,49 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .f-field input, .f-field select{
     background:var(--bg); border:1px solid var(--hairline); border-radius:7px;
-    padding:8px 8px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12.5px;
-    outline:none; transition:border-color .15s ease; width:100%;
+    padding:0 8px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12.5px;
+    outline:none; transition:border-color .15s ease; width:100%; height:34px;
   }
   .f-field input:focus, .f-field select:focus{ border-color:var(--brass-dim); }
   .f-field select{ cursor:pointer; }
 
   /* Alan genişlikleri: tarih kutuları sadece tarihi gösterecek kadar dar,
-     her satır tek satıra sığacak şekilde daraltıldı. */
-  .f-field.f-tarih-wrap{ flex:0 0 122px; }
+     tutar kutuları 99.999.999,00 gibi büyük tutarların kesilmeden sığması için genişletildi,
+     her satır tek satıra sığacak şekilde ayarlandı. */
+  .f-field.f-tarih-wrap{ flex:0 0 106px; }
   .f-field.f-yontem-wrap{ flex:0 0 152px; }
   .f-field.f-gun-wrap{ flex:0 0 56px; }
-  .f-field.f-tutar-wrap{ flex:1 1 100px; min-width:90px; }
-  .f-field.f-due-wrap{ flex:0 0 108px; }
-  .f-field.c-tarih-wrap{ flex:0 0 130px; }
-  .f-field.c-tutar-wrap{ flex:1 1 110px; min-width:90px; }
+  .f-field.f-tutar-wrap{ flex:1 1 132px; min-width:132px; }
+  .f-field.f-due-wrap{ flex:0 0 92px; }
+  .f-field.c-tarih-wrap{ flex:0 0 106px; }
+  .f-field.c-tutar-wrap{ flex:1 1 140px; min-width:140px; }
 
-  .f-field input[type="date"]{ padding-right:4px; }
-
+  /* ---- Özel kompakt tarih kutusu (native input[type=date]'in kaldırılamayan
+     iç boşluğu yerine: metin maskeli giriş + küçük takvim ikonu + gizli native picker) ---- */
+  .date-box{ position:relative; display:flex; align-items:center; }
+  .date-box input.date-text{
+    width:100%; padding-right:20px; letter-spacing:-0.02em;
+  }
+  .date-pick-btn{
+    position:absolute; right:5px; top:50%; transform:translateY(-50%);
+    width:15px; height:15px; padding:0; margin:0; background:none; border:none;
+    color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .date-pick-btn:hover{ color:var(--brass); }
+  .date-pick-btn svg{ width:13px; height:13px; }
+  .date-native-hidden{
+    position:absolute; opacity:0; width:1px; height:1px; pointer-events:none; left:0; top:0; border:0; padding:0;
+  }
   .due-badge{
-    font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:var(--brass);
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:600; color:var(--brass);
     background:rgba(198,161,91,0.1); border:1px solid rgba(198,161,91,0.25); border-radius:7px;
-    padding:8px 6px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    padding:0 4px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    height:34px; display:flex; align-items:center; justify-content:center;
   }
   .row-del{
     background:none; border:none; color:var(--muted); cursor:pointer; font-size:15px;
-    padding:8px 6px; line-height:1; border-radius:6px; transition:color .15s ease, background .15s ease;
-    flex:0 0 auto; align-self:center;
+    padding:0 6px; line-height:1; border-radius:6px; transition:color .15s ease, background .15s ease;
+    flex:0 0 auto; align-self:center; height:34px; display:flex; align-items:center; justify-content:center;
   }
   .row-del:hover{ color:var(--red); background:rgba(226,84,75,0.1); }
 
@@ -295,6 +311,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return intPart;
   }
   function attachTRFormatting(el){
+    el.addEventListener('focus', ()=>{ el.select(); });
     el.addEventListener('input', ()=>{
       const pos = el.selectionStart;
       const before = el.value;
@@ -311,11 +328,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   function parseDateInput(str){
+    // Artık "gg.aa.yyyy" formatındaki metni ayrıştırıyoruz (native input[type=date] yerine).
     if(!str) return null;
-    const parts = str.split('-'); // yyyy-mm-dd (native date input)
-    if(parts.length !== 3) return null;
-    const d = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
-    return isNaN(d.getTime()) ? null : d;
+    const m = String(str).match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    if(!m) return null;
+    const day = parseInt(m[1],10), month = parseInt(m[2],10), year = parseInt(m[3],10);
+    if(month < 1 || month > 12 || day < 1 || day > 31) return null;
+    const d = new Date(year, month-1, day);
+    if(d.getMonth() !== month-1) return null; // örn. 31.02 gibi geçersiz gün-ay kombinasyonu
+    return d;
   }
   function fmtDateTR(d){
     if(!d) return '—';
@@ -337,6 +358,64 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return Math.round(d.getTime() / 86400000);
   }
 
+  // ---------- kompakt tarih kutusu: metin maskesi + gizli native picker ----------
+  const CALENDAR_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+
+  function formatDateMaskLive(raw){
+    let digits = raw.replace(/[^\d]/g,'').slice(0,8);
+    if(digits.length > 4) return digits.slice(0,2) + '.' + digits.slice(2,4) + '.' + digits.slice(4);
+    if(digits.length > 2) return digits.slice(0,2) + '.' + digits.slice(2);
+    return digits;
+  }
+
+  // Bir satırın içine kompakt tarih kutusu enjekte eder ve olayları bağlar.
+  // onChange(dateTextOrEmpty) -> veri modeline yazıp recalc() çağırmak için.
+  function wireDateBox(wrapEl, initialValue, onChange){
+    wrapEl.innerHTML =
+      '<div class="date-box">' +
+        '<input type="text" class="date-text" inputmode="numeric" placeholder="gg.aa.yyyy" maxlength="10" autocomplete="off">' +
+        '<button type="button" class="date-pick-btn" tabindex="-1" aria-label="Takvimden seç">' + CALENDAR_ICON_SVG + '</button>' +
+        '<input type="date" class="date-native-hidden" tabindex="-1" aria-hidden="true">' +
+      '</div>';
+    const textEl = wrapEl.querySelector('.date-text');
+    const pickBtn = wrapEl.querySelector('.date-pick-btn');
+    const nativeEl = wrapEl.querySelector('.date-native-hidden');
+
+    if(initialValue) textEl.value = initialValue;
+
+    textEl.addEventListener('input', ()=>{
+      const pos = textEl.selectionStart;
+      const before = textEl.value;
+      textEl.value = formatDateMaskLive(textEl.value);
+      const diff = textEl.value.length - before.length;
+      const newPos = Math.max(0, (pos||0) + diff);
+      try{ textEl.setSelectionRange(newPos, newPos); }catch(e){}
+      onChange(textEl.value);
+    });
+    textEl.addEventListener('blur', ()=>{ onChange(textEl.value); });
+
+    pickBtn.addEventListener('click', ()=>{
+      const d = parseDateInput(textEl.value);
+      if(d){
+        nativeEl.value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      }
+      if(typeof nativeEl.showPicker === 'function'){
+        try{ nativeEl.showPicker(); return; }catch(e){ /* devam et, alttaki fallback'e düş */ }
+      }
+      nativeEl.focus();
+      nativeEl.click();
+    });
+    nativeEl.addEventListener('change', ()=>{
+      if(nativeEl.value){
+        const [y,mo,da] = nativeEl.value.split('-');
+        textEl.value = da + '.' + mo + '.' + y;
+        onChange(textEl.value);
+      }
+    });
+
+    return textEl;
+  }
+
   // ---------- fatura satırları ----------
   let faturaIdSeq = 0;
   let cekIdSeq = 0;
@@ -354,7 +433,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     row.className = 'entry-row fatura-row';
     row.dataset.id = id;
     row.innerHTML =
-      '<div class="f-field f-tarih-wrap"><label>Fatura Tarihi</label><input type="date" class="f-tarih"></div>' +
+      '<div class="f-field f-tarih-wrap"><label>Fatura Tarihi</label><div class="f-tarih-box"></div></div>' +
       '<div class="f-field f-yontem-wrap"><label>Çalışma Şekli</label>' +
         '<select class="f-yontem">' +
           '<option value="fatura">Fatura Tarihine Ekle</option>' +
@@ -367,13 +446,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       '<button type="button" class="row-del f-del" title="Satırı sil">✕</button>';
     faturaRowsEl.appendChild(row);
 
-    const tarihEl = row.querySelector('.f-tarih');
+    wireDateBox(row.querySelector('.f-tarih-box'), faturaData[id].tarih, (val)=>{ faturaData[id].tarih = val; recalc(); });
     const yontemEl = row.querySelector('.f-yontem');
     const gunEl = row.querySelector('.f-gun');
     const tutarEl = row.querySelector('.f-tutar');
     const delBtn = row.querySelector('.f-del');
 
-    tarihEl.addEventListener('change', ()=>{ faturaData[id].tarih = tarihEl.value; recalc(); });
     yontemEl.addEventListener('change', ()=>{ faturaData[id].yontem = yontemEl.value; recalc(); });
     gunEl.addEventListener('input', ()=>{ gunEl.value = gunEl.value.replace(/[^\d]/g,''); faturaData[id].gun = parseInt(gunEl.value||'0',10); recalc(); });
     attachTRFormatting(tutarEl);
@@ -392,16 +470,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     row.className = 'entry-row cek-row';
     row.dataset.id = id;
     row.innerHTML =
-      '<div class="f-field c-tarih-wrap"><label>Çek Tarihi</label><input type="date" class="c-tarih"></div>' +
+      '<div class="f-field c-tarih-wrap"><label>Çek Tarihi</label><div class="c-tarih-box"></div></div>' +
       '<div class="f-field c-tutar-wrap"><label>Çek Tutarı</label><input type="text" inputmode="decimal" class="c-tutar" value="0,00"></div>' +
       '<button type="button" class="row-del c-del" title="Satırı sil">✕</button>';
     cekRowsEl.appendChild(row);
 
-    const tarihEl = row.querySelector('.c-tarih');
+    wireDateBox(row.querySelector('.c-tarih-box'), cekData[id].tarih, (val)=>{ cekData[id].tarih = val; recalc(); });
     const tutarEl = row.querySelector('.c-tutar');
     const delBtn = row.querySelector('.c-del');
 
-    tarihEl.addEventListener('change', ()=>{ cekData[id].tarih = tarihEl.value; recalc(); });
     attachTRFormatting(tutarEl);
     tutarEl.addEventListener('input', ()=>{ cekData[id].tutar = parseTR(tutarEl.value); });
     tutarEl.addEventListener('blur', ()=>{ cekData[id].tutar = parseTR(tutarEl.value); recalc(); });
@@ -412,6 +489,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   document.getElementById('addFaturaBtn').addEventListener('click', ()=>addFaturaRow());
   document.getElementById('addCekBtn').addEventListener('click', ()=>addCekRow());
+
 
   // ---------- hesaplama ----------
   function computeDueDate(id){
