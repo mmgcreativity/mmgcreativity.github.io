@@ -111,7 +111,7 @@ import {
     height:520px; max-height:calc(100vh - 120px); background:var(--surface,#141C2B);
     border:1px solid var(--hairline,#2A3448); border-radius:16px; box-shadow:0 24px 60px rgba(0,0,0,0.5);
     display:flex; flex-direction:column; overflow:hidden; font-family:'Inter',sans-serif;
-    transform:scale(0.7); transform-origin:bottom right;
+    transform:scale(0.84); transform-origin:bottom right;
   }
   #mmgChatPanel[hidden]{ display:none; }
   .mmg-chat-head{
