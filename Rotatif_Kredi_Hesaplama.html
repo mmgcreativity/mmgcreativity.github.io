@@ -389,7 +389,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
   <div class="top-actions">
     <button type="button" class="reset-btn" id="resetPageBtn">↺ Sıfırla</button>
-    <a href="index.html" class="back-link">← Ana Sayfa</a>
+    <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
   </div>
 </header>
 
@@ -880,8 +880,8 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
       try{ doc.addImage(logoDataUrl, 'PNG', 14, 8, 14, 14); } catch(imgErr){ /* logo eklenemezse sessizce geç */ }
     }
     doc.setFontSize(14);
-    doc.text('Rotatif Kredi Çekim Tablosu', titleX, 16);
     const pageWidthHdr = doc.internal.pageSize.getWidth();
+    doc.text('Rotatif Kredi Çekim Tablosu', pageWidthHdr / 2, 16, { align: 'center' });
     try{ doc.addImage(MMG_APP_ICON_B64, 'PNG', pageWidthHdr - 14 - 12, 8, 12, 12); } catch(iconErr){ /* ikon eklenemezse sessizce geç */ }
     const rows = buildTrancheRows();
     doc.autoTable({
