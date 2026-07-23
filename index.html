@@ -63,7 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{background:var(--bg);}
-  html,body{overscroll-behavior-y:none;}
+
   html,body{height:100%;}
   body{
     background:
@@ -267,6 +267,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .account-dropdown-item svg{ width:17px; height:17px; color:var(--brass); flex-shrink:0; }
   .account-dropdown-item-danger:hover{ background:rgba(226,84,75,0.10); }
   .account-dropdown-item-danger svg{ color:var(--red); }
+  .account-dropdown-section-label{
+    font-family:'Inter',sans-serif; font-size:10.5px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--muted); padding:8px 8px 4px;
+  }
+  .mmg-account-row{
+    display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+    background:transparent; border:none; border-radius:9px; padding:9px 8px; cursor:pointer;
+    font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; color:var(--text);
+  }
+  .mmg-account-row:hover{ background:var(--surface-2); }
+  .mmg-account-row.mmg-account-row-static{ cursor:default; color:var(--muted); font-weight:400; }
+  .mmg-account-row.mmg-account-row-static:hover{ background:transparent; }
+  .mmg-account-row-dot{ width:7px; height:7px; border-radius:50%; background:var(--teal,#3FB68A); flex:0 0 auto; }
+  .mmg-account-row-main{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mmg-account-row-x{
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; flex:0 0 auto; padding:2px 4px;
+  }
+  .mmg-account-row-x:hover{ color:var(--red,#E2544B); }
   .account-dropdown-item-danger span{ color:var(--red); }
 
   .account-info-overlay{
@@ -730,14 +748,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button class="nav-item" data-target="home" data-title="Ana Sayfa">
       <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V19a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title">Ana Sayfa</span>
+        <span class="nav-title" data-i18n="nav_home">Ana Sayfa</span>
       </span>
     </button>
 
     <button class="nav-item" id="hesaplamaAraclariToggle" data-drawer-toggle="true" data-title="Hesaplama Araçları" aria-expanded="false">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title">Hesaplama</span>
+        <span class="nav-title" data-i18n="nav_calc">Hesaplama</span>
         <span class="nav-desc">Araçları</span>
       </span>
       <span class="nav-drawer-chevron" id="hesaplamaChevron">▾</span>
@@ -745,34 +763,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="nav-drawer" id="hesaplamaDrawer" hidden>
       <button class="nav-item nav-subitem" data-target="Rotatif_Kredi_Hesaplama.html" data-title="Rotatif Kredi Hesaplama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Rotatif_Kredi_Hesaplama.html" data-fav-title="Rotatif Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title">Rotatif Kredi Hesaplama</span></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_rotatif">Rotatif Kredi Hesaplama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="Ortalama_Vade_Hesaplama.html" data-title="Ortalama Vade Hesaplama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Ortalama_Vade_Hesaplama.html" data-fav-title="Ortalama Vade Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title">Ortalama Vade Hesaplama</span></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_ortalama">Ortalama Vade Hesaplama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-title="Kredi Kartı Vade Farkı Hesaplama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-fav-title="Kredi Kartı Vade Farkı" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title">Kredi Kartı Vade Farkı</span></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_kkvf">Kredi Kartı Vade Farkı</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="Vade_Sapma_Hesaplama.html" data-title="Vade Sapması Hesaplama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Vade_Sapma_Hesaplama.html" data-fav-title="Vade Sapması Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title">Vade Sapması Hesaplama</span></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_vadesapmasi">Vade Sapması Hesaplama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="vadeli-mevduat-faizi-hesaplama.html" data-title="Vadeli Mevduat Faizi Hesaplama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="vadeli-mevduat-faizi-hesaplama.html" data-fav-title="Vadeli Mevduat Faizi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title">Vadeli Mevduat Faizi Hesaplama</span></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_vadelimevduat">Vadeli Mevduat Faizi Hesaplama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="kredi-karsilastirma.html" data-title="Kredi Tekliflerini Karşılaştır">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="kredi-karsilastirma.html" data-fav-title="Kredi Tekliflerini Karşılaştır" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title">Kredi Tekliflerini Karşılaştır</span></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_krediteklif">Kredi Tekliflerini Karşılaştır</span></span>
       </button>
     </div>
 
     <button class="nav-item" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title">Nakit Akış</span>
+        <span class="nav-title" data-i18n="nav_nakitakis">Nakit Akış</span>
         <span class="nav-desc">Tablosu</span>
       </span>
     </button>
@@ -780,21 +798,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button class="nav-item" data-target="Giderler.html" data-title="Giderler">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title">Giderler</span>
+        <span class="nav-title" data-i18n="nav_giderler">Giderler</span>
       </span>
     </button>
 
     <button class="nav-item" data-target="Gelirler.html" data-title="Gelirler">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title">Gelirler</span>
+        <span class="nav-title" data-i18n="nav_gelirler">Gelirler</span>
       </span>
     </button>
 
     <button class="nav-item" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title">Talimat</span>
+        <span class="nav-title" data-i18n="nav_talimat">Talimat</span>
         <span class="nav-desc">Hazırlama</span>
       </span>
     </button>
@@ -802,14 +820,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button class="nav-item" data-target="rehber.html" data-title="Rehber">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title">Rehber</span>
+        <span class="nav-title" data-i18n="nav_rehber">Rehber</span>
       </span>
     </button>
 
     <button class="nav-item" data-target="iletisim.html" data-title="İletişim">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="iletisim.html" data-fav-title="İletişim" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title">İletişim</span>
+        <span class="nav-title" data-i18n="nav_iletisim">İletişim</span>
       </span>
     </button>
   </nav>
@@ -839,6 +857,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
     <div class="account-dropdown-divider"></div>
+    <div id="mmgCompanySwitchWrap" style="display:none;">
+      <div class="account-dropdown-section-label">Bağlı Firmalar</div>
+      <div id="mmgCompanySwitchList"></div>
+      <div class="account-dropdown-divider"></div>
+    </div>
+    <div class="account-dropdown-section-label">Hesaplarım</div>
+    <div id="mmgKnownAccountsList"></div>
+    <button type="button" class="account-dropdown-item" id="mmgAddAccountBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+      <span>Başka Hesap Ekle</span>
+    </button>
+    <div class="account-dropdown-divider"></div>
     <button type="button" class="account-dropdown-item" id="accountInfoBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M6 16c0-1.8 1.5-3 3-3s3 1.2 3 3"/><path d="M14 9h4"/><path d="M14 13h4"/></svg>
       <span>Hesabım</span>
@@ -854,6 +884,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button type="button" class="account-dropdown-item" id="begenIstatistikleriBtn" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/><path d="M2 20h20"/></svg>
       <span>İstatistikler</span>
+    </button>
+    <div class="account-dropdown-divider"></div>
+    <button type="button" class="account-dropdown-item" id="mmgSettingsBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Ayarlar</span>
     </button>
     <div class="account-dropdown-divider"></div>
     <button type="button" class="account-dropdown-item" id="themeToggle" title="Görünüm modu">
@@ -890,7 +925,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="hero-top-row">
         <img src="DFA_icon.png" alt="Dijital Finans Asistanı" class="hero-app-icon">
         <div class="hero-top-text">
-          <h1 class="hero-title">Dijital Finans Asistanı</h1>
+          <h1 class="hero-title" data-i18n="hero_title">Dijital Finans Asistanı</h1>
           <p class="hero-tagline">Finansal kararlarınızın dijital iş ortağı</p>
         </div>
       </div>
@@ -1459,6 +1494,121 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function toggleAccountDropdown(forceState){
     const shouldShow = typeof forceState === 'boolean' ? forceState : accountDropdown.hidden;
     accountDropdown.hidden = !shouldShow;
+    if(shouldShow){
+      renderKnownAccountsList();
+      renderCompanySwitchList();
+    }
+  }
+
+  // ================== Hesap Değiştirme ==================
+  // A) Bağımsız Hesaplar: e-posta bazlı, tamamen ayrı kullanıcı hesapları arasında hızlı geçiş.
+  //    Şifreler ASLA saklanmaz; sadece e-posta/ad hatırlanır, geçişte şifre tekrar girilir
+  //    (Google ile eklenen hesaplarda tarayıcı/Google popup'ı genelde şifresiz hızlı geçiş sağlar).
+  function getKnownAccounts(){
+    try{ return JSON.parse(localStorage.getItem('mmg_known_accounts') || '[]'); }catch(e){ return []; }
+  }
+  function saveKnownAccounts(list){
+    try{ localStorage.setItem('mmg_known_accounts', JSON.stringify(list)); }catch(e){}
+  }
+  function rememberAccount(email, username){
+    if(!email) return;
+    const list = getKnownAccounts().filter(a => a.email.toLowerCase() !== email.toLowerCase());
+    list.unshift({ email: email, username: username || '' });
+    saveKnownAccounts(list.slice(0, 6));
+  }
+  function forgetAccount(email){
+    saveKnownAccounts(getKnownAccounts().filter(a => a.email.toLowerCase() !== email.toLowerCase()));
+    renderKnownAccountsList();
+  }
+  function renderKnownAccountsList(){
+    const wrap = document.getElementById('mmgKnownAccountsList');
+    if(!wrap) return;
+    const currentEmail = ((auth.currentUser && auth.currentUser.email) || '').toLowerCase();
+    const list = getKnownAccounts().filter(a => a.email.toLowerCase() !== currentEmail);
+    if(!list.length){
+      wrap.innerHTML = '<div class="mmg-account-row mmg-account-row-static">Başka kayıtlı hesap yok.</div>';
+      return;
+    }
+    wrap.innerHTML = list.map(a =>
+      '<div class="mmg-account-row" data-email="' + a.email.replace(/"/g,'&quot;') + '">' +
+        '<span class="mmg-account-row-main">' + (a.username || a.email) + '</span>' +
+        '<button type="button" class="mmg-account-row-x" data-forget="' + a.email.replace(/"/g,'&quot;') + '" title="Listeden kaldır">✕</button>' +
+      '</div>'
+    ).join('');
+    wrap.querySelectorAll('.mmg-account-row[data-email]').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if(e.target.closest('[data-forget]')) return;
+        switchToAccount(row.dataset.email);
+      });
+    });
+    wrap.querySelectorAll('[data-forget]').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); forgetAccount(btn.dataset.forget); });
+    });
+  }
+  async function switchToAccount(email){
+    toggleAccountDropdown(false);
+    try{ await signOut(auth); }catch(e){ /* sessizce geç */ }
+    localStorage.setItem('mmg_auth_state', 'guest');
+    setAuthMode('login');
+    openAuthOverlay();
+    const emailInput = document.getElementById('authEmail');
+    const passwordInput = document.getElementById('authPassword');
+    if(emailInput) emailInput.value = email;
+    if(passwordInput){ passwordInput.value = ''; passwordInput.focus(); }
+  }
+  document.getElementById('mmgAddAccountBtn').addEventListener('click', () => {
+    toggleAccountDropdown(false);
+    setAuthMode('login');
+    const emailInput = document.getElementById('authEmail');
+    const passwordInput = document.getElementById('authPassword');
+    if(emailInput) emailInput.value = '';
+    if(passwordInput) passwordInput.value = '';
+    openAuthOverlay();
+  });
+
+  // B) Bağlı Firmalar: Şirket Kodu ile birbirine bağlanmış firmalar arasında geçiş
+  //    (Hesabım sayfasındaki "Firmaları Bağla" özelliğiyle aynı veriyi kullanır).
+  let mmgCompanySwitchOptions = [];
+  async function renderCompanySwitchList(){
+    const wrap = document.getElementById('mmgCompanySwitchWrap');
+    const listEl = document.getElementById('mmgCompanySwitchList');
+    if(!wrap || !listEl) return;
+    const user = auth.currentUser;
+    const companyId = user ? localStorage.getItem('mmg_company_id') : null;
+    if(!user || !companyId){ wrap.style.display = 'none'; return; }
+    try{
+      const cSnap = await getDoc(doc(db, 'companies', companyId));
+      const groupId = cSnap.exists() ? cSnap.data().groupId : null;
+      let companyIds = [companyId];
+      if(groupId){
+        const gSnap = await getDoc(doc(db, 'groups', groupId));
+        if(gSnap.exists() && Array.isArray(gSnap.data().companyIds)) companyIds = gSnap.data().companyIds;
+      }
+      if(companyIds.length < 2){ wrap.style.display = 'none'; return; }
+      const activeId = localStorage.getItem('mmg_active_company_id') || companyId;
+      mmgCompanySwitchOptions = [];
+      const rows = [];
+      for(const cid of companyIds){
+        const snap = await getDoc(doc(db, 'companies', cid));
+        const name = snap.exists() ? (snap.data().name || cid) : cid;
+        mmgCompanySwitchOptions.push({ id: cid, name: name });
+        rows.push(
+          '<div class="mmg-account-row" data-company-id="' + cid + '">' +
+            (cid === activeId ? '<span class="mmg-account-row-dot"></span>' : '<span style="width:7px;"></span>') +
+            '<span class="mmg-account-row-main">' + name + '</span>' +
+          '</div>'
+        );
+      }
+      listEl.innerHTML = rows.join('');
+      listEl.querySelectorAll('[data-company-id]').forEach(row => {
+        row.addEventListener('click', () => {
+          localStorage.setItem('mmg_active_company_id', row.dataset.companyId);
+          toggleAccountDropdown(false);
+          location.reload();
+        });
+      });
+      wrap.style.display = 'block';
+    } catch(e){ wrap.style.display = 'none'; }
   }
 
   accountTrigger.addEventListener('click', (e) => {
@@ -1539,10 +1689,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   // ---- Firma / Ekip: yeni bir firma hesabı kurar, kuran kişi 'owner' (sahibi) olur ----
   async function createCompanyForUser(user, companyName, username){
+    const trimmedName = (companyName || '').trim();
+    const dupCheck = await getDocs(query(collection(db, 'companies'), where('name', '==', trimmedName)));
+    if(!dupCheck.empty){
+      const err = new Error('DUPLICATE_COMPANY_NAME');
+      err.code = 'DUPLICATE_COMPANY_NAME';
+      throw err;
+    }
     const companyRef = doc(collection(db, 'companies'));
     const companyId = companyRef.id;
     await setDoc(companyRef, {
-      name: companyName,
+      name: trimmedName,
       ownerUid: user.uid,
       groupId: null,
       createdAt: serverTimestamp()
@@ -1554,11 +1711,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       joinedAt: serverTimestamp()
     });
     await setDoc(doc(db, 'users', user.uid), {
-      companyId: companyId, companyRole: 'owner', companyName: companyName
+      companyId: companyId, companyRole: 'owner', companyName: trimmedName
     }, { merge: true });
     localStorage.setItem('mmg_company_id', companyId);
     localStorage.setItem('mmg_company_role', 'owner');
-    localStorage.setItem('mmg_company_name', companyName);
+    localStorage.setItem('mmg_company_name', trimmedName);
     return companyId;
   }
 
@@ -1644,6 +1801,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(!avatar && user.photoURL) avatar = user.photoURL;
 
       localStorage.setItem('mmg_auth_state', 'user:' + email);
+      rememberAccount(email, username);
       if(customerNumber) localStorage.setItem('mmg_customer_no', String(customerNumber));
       if(username) localStorage.setItem('mmg_username', username);
       if(avatar) localStorage.setItem('mmg_avatar', avatar); else localStorage.removeItem('mmg_avatar');
@@ -1752,6 +1910,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           }
         }
         localStorage.setItem('mmg_auth_state', 'user:' + email);
+        rememberAccount(email, username);
         localStorage.setItem('mmg_customer_no', String(customerNumber));
         localStorage.setItem('mmg_username', username);
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
@@ -1771,7 +1930,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(accountType === 'firma'){
           if(username){
             try{ await createCompanyForUser(cred.user, username, username); }
-            catch(companyErr){ /* firma kurulamazsa sessizce geç, kullanıcı sonradan Hesabım'dan tekrar deneyebilir */ }
+            catch(companyErr){
+              if(companyErr && companyErr.code === 'DUPLICATE_COMPANY_NAME'){
+                alert('"' + username + '" adında bir firma zaten kayıtlı. Firma hesabınızı Hesabım sayfasından farklı bir isimle tekrar oluşturabilirsiniz.');
+              }
+              /* diğer hatalarda sessizce geç, kullanıcı sonradan Hesabım\'dan tekrar deneyebilir */
+            }
           }
         } else {
           await applyPendingInviteIfAny(cred.user, username);
@@ -1794,6 +1958,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           }
         } catch(err){ /* profil okunamadıysa sessizce geç */ }
         localStorage.setItem('mmg_auth_state', 'user:' + email);
+        rememberAccount(email, username);
         if(customerNumber) localStorage.setItem('mmg_customer_no', String(customerNumber));
         if(username) localStorage.setItem('mmg_username', username);
         if(avatar) { localStorage.setItem('mmg_avatar', avatar); setAvatar(avatar); }
@@ -1911,8 +2076,104 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </script>
 
 
-<script src="mmg-feedback-widget.js"></script>
-<script type="module" src="mmg-chat-widget.js"></script>
+<style>
+  #mmgSettingsOverlay{
+    position:fixed; inset:0; z-index:920; background:rgba(5,8,14,0.7);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  #mmgSettingsOverlay[hidden]{ display:none; }
+  #mmgSettingsPanel{
+    width:100%; max-width:380px; background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448);
+    border-radius:16px; box-shadow:0 24px 60px rgba(0,0,0,0.5); padding:22px;
+  }
+  #mmgSettingsPanel h3{ font-family:'Space Grotesk',sans-serif; font-size:17px; color:var(--text,#EAEDF3); margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; }
+  #mmgSettingsCloseBtn{ background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:16px; }
+  #mmgSettingsCloseBtn:hover{ color:var(--text,#EAEDF3); }
+  .mmg-settings-label{ font-size:12px; color:var(--muted,#8D96AC); margin-bottom:8px; font-weight:600; }
+  .mmg-lang-row{ display:flex; gap:8px; margin-bottom:6px; }
+  .mmg-lang-btn{
+    flex:1; padding:11px 0; border-radius:9px; border:1px solid var(--hairline,#2A3448); background:var(--surface-2,#1B2536);
+    color:var(--text,#EAEDF3); cursor:pointer; font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600;
+  }
+  .mmg-lang-btn.active{ border-color:var(--brass,#C6A15B); background:rgba(198,161,91,0.12); color:var(--brass,#C6A15B); }
+  .mmg-settings-note{ font-size:11.5px; color:var(--muted,#8D96AC); margin-top:14px; line-height:1.5; }
+</style>
+<div id="mmgSettingsOverlay" hidden>
+  <div id="mmgSettingsPanel">
+    <h3><span data-i18n="settings_title">Ayarlar</span><button type="button" id="mmgSettingsCloseBtn" aria-label="Kapat">✕</button></h3>
+    <div class="mmg-settings-label" data-i18n="settings_lang_label">Dil / Language</div>
+    <div class="mmg-lang-row">
+      <button type="button" class="mmg-lang-btn" data-lang="tr">Türkçe</button>
+      <button type="button" class="mmg-lang-btn" data-lang="en">English</button>
+    </div>
+    <p class="mmg-settings-note" data-i18n="settings_note">Şu an ana sayfa menüsü İngilizce'ye çevrilebiliyor. Diğer araç sayfalarının tamamının çevirisi ayrı bir adımda eklenecek.</p>
+  </div>
+</div>
+<script>
+(function(){
+  // ---- Basit i18n altyapısı (şimdilik ana sayfa kabuğu için) ----
+  const MMG_I18N = {
+    tr: {
+      nav_home:'Ana Sayfa', nav_calc:'Hesaplama', nav_rotatif:'Rotatif Kredi Hesaplama', nav_ortalama:'Ortalama Vade Hesaplama',
+      nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması Hesaplama', nav_vadelimevduat:'Vadeli Mevduat Faizi Hesaplama',
+      nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
+      nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim',
+      hero_title:'Dijital Finans Asistanı',
+      settings_title:'Ayarlar', settings_lang_label:'Dil / Language',
+      settings_note:'Şu an ana sayfa menüsü İngilizce\'ye çevrilebiliyor. Diğer araç sayfalarının tamamının çevirisi ayrı bir adımda eklenecek.'
+    },
+    en: {
+      nav_home:'Home', nav_calc:'Calculators', nav_rotatif:'Revolving Loan Calculator', nav_ortalama:'Average Maturity Calculator',
+      nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
+      nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
+      nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact',
+      hero_title:'Digital Finance Assistant',
+      settings_title:'Settings', settings_lang_label:'Dil / Language',
+      settings_note:'Right now only the home page menu can be translated to English. Translating every tool page is a separate, larger task.'
+    }
+  };
+  function applyLang(lang){
+    const dict = MMG_I18N[lang] || MMG_I18N.tr;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.textContent = dict[key];
+    });
+    document.querySelectorAll('.mmg-lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+    document.documentElement.setAttribute('lang', lang);
+  }
+  function getSavedLang(){
+    try{ return localStorage.getItem('mmg_lang') || 'tr'; }catch(e){ return 'tr'; }
+  }
+  function saveLang(lang){
+    try{ localStorage.setItem('mmg_lang', lang); }catch(e){}
+  }
 
+  const settingsBtn = document.getElementById('mmgSettingsBtn');
+  const overlay = document.getElementById('mmgSettingsOverlay');
+  const closeBtn = document.getElementById('mmgSettingsCloseBtn');
+  if(settingsBtn){
+    settingsBtn.addEventListener('click', () => {
+      document.getElementById('accountDropdown').hidden = true;
+      overlay.hidden = false;
+    });
+  }
+  if(closeBtn) closeBtn.addEventListener('click', () => { overlay.hidden = true; });
+  if(overlay) overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.hidden = true; });
+  document.querySelectorAll('.mmg-lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      saveLang(btn.dataset.lang);
+      applyLang(btn.dataset.lang);
+    });
+  });
+
+  applyLang(getSavedLang());
+})();
+</script>
+
+<script src="mmg-feedback-widget.js"></script>
+
+<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

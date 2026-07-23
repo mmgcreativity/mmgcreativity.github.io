@@ -28,7 +28,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{background:var(--bg);}
-  html,body{overscroll-behavior-y:none;}
+
   html,body{height:100%;}
   body{
     background:
@@ -489,15 +489,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   profileType.addEventListener('change', updateProfileNameLabel);
 
-  function loadProfileIntoForm(profile){
-    const p = profile || getCachedProfile();
-    profileType.value = p.type || 'bireysel';
-    profileName.value = p.name || '';
-    profilePhone.value = p.phone || '';
+  function loadProfileIntoForm(data){
+    const p = (data && data.profile) || getCachedProfile();
+    profileType.value = p.type || ((data && data.companyId) ? 'firma' : 'bireysel');
+    profileName.value = p.name || (data && (data.companyName || data.username)) || '';
+    profilePhone.value = p.phone || (data && data.phone) || '';
     const state = localStorage.getItem('mmg_auth_state');
     const defaultEmail = (state && state.startsWith('user:')) ? state.slice(5) : '';
-    profileEmail.value = p.email || defaultEmail;
-    profileAddress.value = p.address || '';
+    profileEmail.value = p.email || (data && data.email) || defaultEmail;
+    profileAddress.value = p.address || (data && data.address) || '';
     updateProfileNameLabel();
   }
 
@@ -663,18 +663,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   async function createCompanyFromProfileSave(name){
     const user = auth.currentUser;
     if(!user || !name) return;
+    const trimmedName = name.trim();
     try{
+      const dupCheck = await getDocs(query(collection(db, 'companies'), where('name', '==', trimmedName)));
+      if(!dupCheck.empty){
+        alert('"' + trimmedName + '" adında bir firma zaten kayıtlı. Lütfen farklı bir firma adı girip tekrar kaydedin.');
+        return;
+      }
       const companyRef = doc(collection(db, 'companies'));
       const companyId = companyRef.id;
-      await setDoc(companyRef, { name: name, ownerUid: user.uid, groupId: null, createdAt: serverTimestamp() });
+      await setDoc(companyRef, { name: trimmedName, ownerUid: user.uid, groupId: null, createdAt: serverTimestamp() });
       await setDoc(doc(db, 'companies', companyId, 'members', user.uid), {
         email: user.email || '', username: (currentUserData && currentUserData.username) || '', role: 'owner', joinedAt: serverTimestamp()
       });
-      await setDoc(doc(db, 'users', user.uid), { companyId: companyId, companyRole: 'owner', companyName: name }, { merge: true });
+      await setDoc(doc(db, 'users', user.uid), { companyId: companyId, companyRole: 'owner', companyName: trimmedName }, { merge: true });
       localStorage.setItem('mmg_company_id', companyId);
       localStorage.setItem('mmg_company_role', 'owner');
-      localStorage.setItem('mmg_company_name', name);
-      currentUserData = Object.assign({}, currentUserData, { companyId: companyId, companyRole: 'owner', companyName: name });
+      localStorage.setItem('mmg_company_name', trimmedName);
+      currentUserData = Object.assign({}, currentUserData, { companyId: companyId, companyRole: 'owner', companyName: trimmedName });
       await renderCompanySection(user, currentUserData);
     } catch(err){ /* sessizce geç; kullanıcı profilini tekrar kaydederek deneyebilir */ }
   }
@@ -693,6 +699,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     inviteSubmitBtn.disabled = true;
     try{
+      const existingInvite = await getDoc(doc(db, 'invites', email));
+      if(existingInvite.exists()){
+        inviteError.textContent = 'Bu e-posta adresine zaten bir davet gönderilmiş (bu firmaya ya da başka bir firmaya).';
+        inviteError.classList.add('show');
+        inviteSubmitBtn.disabled = false;
+        return;
+      }
       await setDoc(doc(db, 'invites', email), {
         companyId: currentUserData.companyId,
         companyName: currentUserData.companyName || '',
@@ -844,7 +857,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const data = snap.exists() ? snap.data() : {};
       currentUserData = data;
       statusPillText.textContent = data.username ? data.username : (user.email || 'Üye');
-      if(data.profile) loadProfileIntoForm(data.profile);
+      loadProfileIntoForm(data);
       if(data.referredBy){
         lockReferralCard('"' + data.referredBy + '" referans kodunu zaten kullandınız.');
       } else {
@@ -1057,5 +1070,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </script>
 
 <script src="mmg-feedback-widget.js"></script>
+<script type="module" src="mmg-chat-widget.js"></script>
+<script>
+  if(location.hash === '#company'){
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const el = document.getElementById('companyCard');
+        if(el) el.scrollIntoView({ behavior: 'instant', block: 'start' });
+      }, 300);
+    });
+  }
+</script>
 </body>
 </html>
