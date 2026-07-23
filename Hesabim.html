@@ -244,6 +244,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <button type="submit" class="auth-submit" id="profileSaveBtn">Kaydet</button>
       <div class="saved-msg" id="profileSavedMsg">Kaydedildi ✓</div>
+      <div class="auth-error" id="profileCompanyError" style="display:none;"></div>
     </form>
   </div>
   </div>
@@ -661,13 +662,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   // ---- Kurumsal hesap seçilip kaydedildiğinde otomatik kullanıcı grubu (firma) oluşturur ----
   async function createCompanyFromProfileSave(name){
+    const errEl = document.getElementById('profileCompanyError');
+    if(errEl){ errEl.style.display = 'none'; errEl.textContent = ''; }
     const user = auth.currentUser;
     if(!user || !name) return;
     const trimmedName = name.trim();
     try{
       const dupCheck = await getDocs(query(collection(db, 'companies'), where('name', '==', trimmedName)));
-      if(!dupCheck.empty){
-        alert('"' + trimmedName + '" adında bir firma zaten kayıtlı. Lütfen farklı bir firma adı girip tekrar kaydedin.');
+      const isOwnExistingCompany = !dupCheck.empty && dupCheck.docs.some(d => d.data().ownerUid === user.uid);
+      if(!dupCheck.empty && !isOwnExistingCompany){
+        if(errEl){
+          errEl.textContent = '"' + trimmedName + '" adında bir firma zaten kayıtlı. Lütfen Firma Adı alanına biraz daha ayırt edici bir isim yazıp (örn. şehir/şube ekleyerek) tekrar kaydedin.';
+          errEl.style.display = 'block';
+        }
         return;
       }
       const companyRef = doc(collection(db, 'companies'));
@@ -682,7 +689,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       localStorage.setItem('mmg_company_name', trimmedName);
       currentUserData = Object.assign({}, currentUserData, { companyId: companyId, companyRole: 'owner', companyName: trimmedName });
       await renderCompanySection(user, currentUserData);
-    } catch(err){ /* sessizce geç; kullanıcı profilini tekrar kaydederek deneyebilir */ }
+    } catch(err){
+      console.error('mmg: firma oluşturulamadı ->', err);
+      if(errEl){
+        errEl.textContent = 'Firma oluşturulamadı: ' + (err && err.code ? err.code : (err && err.message) || 'bilinmeyen hata') + '. Lütfen F12 konsolunu kontrol edin.';
+        errEl.style.display = 'block';
+      }
+    }
   }
 
   // ---- Üye davet et ----
