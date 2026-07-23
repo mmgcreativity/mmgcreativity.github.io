@@ -140,8 +140,8 @@ function mmgApplyTurkishFont(doc){
     --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html{background:var(--bg);}
-
+  html{background:var(--bg); overflow-x:hidden;}
+  html,body{overscroll-behavior-y:none;}
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
@@ -1134,6 +1134,5 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
     }
   });
 </script>
-<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

@@ -21,7 +21,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --bg:#0D1420; --surface:#141C2B; --hairline:#2A3448;
@@ -29,7 +28,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{background:var(--bg);}
-
+  html,body{overscroll-behavior-y:none;}
   body{
     background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
     min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
@@ -49,27 +48,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .panel-card h3{ font-size:14px; margin-bottom:6px; }
   .panel-card p{ font-size:12.5px; margin-bottom:0; }
-
-  .chat-section{ margin-top:32px; text-align:left; }
-  .chat-section h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; margin-bottom:14px; }
-  .chat-wrap{ display:grid; grid-template-columns:220px 1fr; gap:14px; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; height:460px; }
-  @media (max-width:620px){ .chat-wrap{ grid-template-columns:1fr; height:auto; } }
-  .chat-list{ border-right:1px solid var(--hairline); overflow-y:auto; padding:8px; }
-  @media (max-width:620px){ .chat-list{ border-right:none; border-bottom:1px solid var(--hairline); max-height:200px; } }
-  .chat-list-item{ padding:10px; border-radius:8px; cursor:pointer; margin-bottom:4px; font-size:12.5px; }
-  .chat-list-item:hover, .chat-list-item.active{ background:rgba(198,161,91,0.12); }
-  .chat-list-item .nm{ font-weight:700; color:var(--text); font-family:'IBM Plex Mono',monospace; }
-  .chat-list-item .sub{ color:var(--muted); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .chat-main{ display:flex; flex-direction:column; min-height:0; }
-  .chat-msgs{ flex:1; overflow-y:auto; padding:14px; }
-  .chat-msg{ margin-bottom:10px; display:flex; }
-  .chat-msg.me{ justify-content:flex-end; }
-  .chat-bubble{ max-width:75%; padding:9px 12px; border-radius:12px; font-size:13px; background:var(--surface-2,#1B2536); border:1px solid var(--hairline); color:var(--text); }
-  .chat-msg.me .chat-bubble{ background:linear-gradient(120deg, var(--coral), var(--brass) 85%); color:#fff; border:none; }
-  .chat-input-row{ display:flex; gap:8px; padding:10px; border-top:1px solid var(--hairline); }
-  .chat-input-row textarea{ flex:1; resize:none; height:38px; background:var(--surface-2,#1B2536); border:1px solid var(--hairline); border-radius:8px; padding:9px; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; outline:none; }
-  .chat-input-row button{ border:none; border-radius:8px; padding:0 16px; background:linear-gradient(120deg, var(--coral), var(--brass) 85%); color:#fff; font-weight:700; cursor:pointer; }
-  .chat-empty{ color:var(--muted); font-size:12.5px; padding:20px; text-align:center; }
 </style>
 </head>
 <body>
@@ -128,110 +106,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <p>İçerik yönetimi (yakında)</p>
             </div>
           </div>
-          <div class="chat-section">
-            <h2>💬 Kullanıcı Sohbetleri</h2>
-            <div class="chat-wrap">
-              <div class="chat-list" id="chatList"><div class="chat-empty">Yükleniyor…</div></div>
-              <div class="chat-main">
-                <div class="chat-msgs" id="chatMsgs"><div class="chat-empty">Soldan bir sohbet seçin.</div></div>
-                <div class="chat-input-row" id="chatInputRow" style="display:none;">
-                  <textarea id="chatInput" placeholder="Yanıt yazın…" rows="1"></textarea>
-                  <button type="button" id="chatSendBtn">Gönder</button>
-                </div>
-              </div>
-            </div>
-          </div>
         `;
-        initAdminChatInbox();
       }catch(e){
         content.innerHTML = '<h1>❌ Hata</h1><p>' + e.message + '</p>';
       }
     });
-
-    // ---- Kullanıcı Sohbetleri (admin gelen kutusu) ----
-    // Not: firebase-firestore-compat.js aynı, zaten oturum açmış compat auth örneğini kullanır.
-    let chatDb = null, chatUnsubList = null, chatUnsubMsgs = null, activeChatId = null;
-    function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-    function fmtTime(ts){
-      try{
-        const d = ts && ts.toDate ? ts.toDate() : null;
-        if(!d) return '';
-        return d.toLocaleDateString('tr-TR', {day:'2-digit', month:'2-digit'}) + ' ' + d.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-      }catch(e){ return ''; }
-    }
-
-    function initAdminChatInbox(){
-      const sendBtn = document.getElementById('chatSendBtn');
-      const inputEl = document.getElementById('chatInput');
-      if(sendBtn) sendBtn.addEventListener('click', sendAdminReply);
-      if(inputEl) inputEl.addEventListener('keydown', (e) => { if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendAdminReply(); } });
-      if(chatDb) return; // dinleyici zaten kurulmuş, sadece DOM yeniden oluştu
-      chatDb = firebase.firestore();
-      const listEl = document.getElementById('chatList');
-      chatUnsubList = chatDb.collection('chats').where('isAdminChat', '==', true)
-        .onSnapshot((snap) => {
-          const chats = [];
-          snap.forEach(d => chats.push({ id: d.id, ...d.data() }));
-          chats.sort((a,b) => {
-            const ta = a.lastMessageAt && a.lastMessageAt.toMillis ? a.lastMessageAt.toMillis() : 0;
-            const tb = b.lastMessageAt && b.lastMessageAt.toMillis ? b.lastMessageAt.toMillis() : 0;
-            return tb - ta;
-          });
-          if(!chats.length){ listEl.innerHTML = '<div class="chat-empty">Henüz kullanıcı sohbeti yok.</div>'; return; }
-          listEl.innerHTML = chats.map(c => `
-            <div class="chat-list-item${c.id===activeChatId?' active':''}" data-id="${esc(c.id)}">
-              <div class="nm">${esc(c.userEmail || c.userUid || c.id)}</div>
-              <div class="sub">${esc(c.lastMessage || 'Mesaj yok')}</div>
-            </div>`).join('');
-          listEl.querySelectorAll('.chat-list-item').forEach(row => {
-            row.addEventListener('click', () => openAdminChat(row.dataset.id));
-          });
-        }, (err) => { listEl.innerHTML = '<div class="chat-empty">Sohbetler yüklenemedi.</div>'; console.error(err); });
-    }
-
-    function openAdminChat(chatId){
-      activeChatId = chatId;
-      document.querySelectorAll('.chat-list-item').forEach(r => r.classList.toggle('active', r.dataset.id === chatId));
-      const msgsEl = document.getElementById('chatMsgs');
-      const inputRow = document.getElementById('chatInputRow');
-      inputRow.style.display = 'flex';
-      msgsEl.innerHTML = '<div class="chat-empty">Yükleniyor…</div>';
-      if(chatUnsubMsgs) chatUnsubMsgs();
-      chatUnsubMsgs = chatDb.collection('chats').doc(chatId).collection('messages').orderBy('createdAt', 'asc').limit(300)
-        .onSnapshot((snap) => {
-          const msgs = [];
-          snap.forEach(d => msgs.push(d.data()));
-          if(!msgs.length){ msgsEl.innerHTML = '<div class="chat-empty">Henüz mesaj yok.</div>'; return; }
-          msgsEl.innerHTML = msgs.map(m => `
-            <div class="chat-msg${m.senderIsAdmin ? ' me' : ''}">
-              <div class="chat-bubble">${esc(m.text)}<div style="font-size:9.5px; opacity:.7; margin-top:4px; text-align:right;">${fmtTime(m.createdAt)}</div></div>
-            </div>`).join('');
-          msgsEl.scrollTop = msgsEl.scrollHeight;
-        }, (err) => console.error(err));
-      chatDb.collection('chats').doc(chatId).set({ ['lastRead_admin']: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(()=>{});
-    }
-
-    async function sendAdminReply(){
-      const inputEl = document.getElementById('chatInput');
-      const text = (inputEl.value || '').trim();
-      if(!text || !activeChatId) return;
-      inputEl.value = '';
-      const user = auth.currentUser;
-      try{
-        await chatDb.collection('chats').doc(activeChatId).collection('messages').add({
-          senderUid: user.uid,
-          senderIsAdmin: true,
-          text: text.slice(0, 2000),
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        await chatDb.collection('chats').doc(activeChatId).set({
-          lastMessage: text.slice(0, 140),
-          lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
-          lastSenderUid: user.uid,
-          lastRead_admin: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-      }catch(e){ console.error(e); }
-    }
   </script>
 </body>
 </html>

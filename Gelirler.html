@@ -153,8 +153,8 @@ function mmgApplyTurkishFont(doc){
     --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html{background:var(--bg);}
-
+  html{background:var(--bg); overflow-x:hidden;}
+  html,body{overscroll-behavior-y:none;}
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
@@ -1389,6 +1389,5 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 
-<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

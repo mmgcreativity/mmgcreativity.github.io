@@ -28,7 +28,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{background:var(--bg);}
-
+  html,body{overscroll-behavior-y:none;}
   html,body{height:100%;}
   body{
     background:
@@ -236,7 +236,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <div class="auth-field">
         <label>E-posta</label>
-        <input type="email" id="profileEmail" placeholder="ornek@eposta.com" required>
+        <input type="email" id="profileEmail" placeholder="ornek@eposta.com">
       </div>
       <div class="auth-field">
         <label>Adres</label>
@@ -512,17 +512,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   accountInfoForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const emailValue = profileEmail.value.trim();
-    if(!emailValue){
-      profileEmail.focus();
-      profileEmail.reportValidity();
-      return;
-    }
     const profile = {
       type: profileType.value,
       name: profileName.value.trim(),
       phone: profilePhone.value.trim(),
-      email: emailValue,
+      email: profileEmail.value.trim(),
       address: profileAddress.value.trim()
     };
     localStorage.setItem('mmg_profile', JSON.stringify(profile));
@@ -1063,6 +1057,5 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </script>
 
 <script src="mmg-feedback-widget.js"></script>
-<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>
