@@ -356,30 +356,30 @@ function mmgApplyTurkishFont(doc){
   .xrow-group .xrow:last-child{ border-bottom:none; }
   /* ---- Gerçek Excel hücresi hissi: etiket | değer | kayıtlı-mini | kaydet-ikonu, hepsi TEK satırda ---- */
   .xcell{
-    display:grid; grid-template-columns:70px 1fr 36px 92px; align-items:center; gap:5px;
+    display:grid; grid-template-columns:92px 1fr 36px 112px; align-items:center; gap:5px;
     border-bottom:none; background:var(--surface-2);
   }
-  .xcell.xcell-full{ grid-template-columns:70px 1fr; }
-  .xcell.xcell-3col{ grid-template-columns:70px 1fr auto; }
+  .xcell.xcell-full{ grid-template-columns:92px 1fr; }
+  .xcell.xcell-3col{ grid-template-columns:92px 1fr auto; }
   .xcell:first-child{ border-radius:6px 6px 0 0; }
   .xcell:last-child{ border-radius:0 0 6px 6px; }
   .xcell-label{
-    font-family:'Inter',sans-serif; font-size:12px; color:var(--muted); text-transform:none;
+    font-family:'Inter',sans-serif; font-size:13px; color:var(--muted); text-transform:none;
     letter-spacing:normal; padding:0 0 0 8px; background:transparent; align-self:stretch;
     display:flex; align-items:center; height:100%;
   }
   .xcell input, .xcell select{
     width:100%; background:var(--surface-2); border:none; border-left:1px solid var(--hairline);
-    padding:7px 10px; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; outline:none;
+    padding:7px 10px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
   }
   .xcell select option{ background:var(--surface-2); color:var(--text); }
   .xcell select.xcell-mini{
-    font-size:12px; font-family:'Inter',sans-serif; color:var(--muted); border-left:1px solid var(--hairline); padding:5px 4px;
+    font-size:15px; font-family:'Inter',sans-serif; color:var(--muted); border-left:1px solid var(--hairline); padding:5px 4px;
   }
   .xcell input:focus, .xcell select:focus{ background:rgba(198,161,91,0.06); }
   .xcell-savebtn{
     background:var(--surface-2); border:none; border-left:1px solid var(--hairline); color:var(--brass);
-    cursor:pointer; font-size:12px; height:100%; width:100%; transition:transform .15s ease;
+    cursor:pointer; font-size:18px; height:100%; width:100%; transition:transform .15s ease;
   }
   .xcell-savebtn:hover{ background:rgba(198,161,91,0.1); }
 
@@ -394,9 +394,16 @@ function mmgApplyTurkishFont(doc){
   .mmg-person-row .xcell-savebtn{ height:32px; padding:0; align-self:stretch; }
   .xcell-group{ border:1px solid var(--hairline); border-radius:6px; overflow:hidden; margin-bottom:8px; }
   .xcell-title{
-    font-family:'IBM Plex Mono',monospace; font-size:14px; color:#fff; text-transform:uppercase;
-    letter-spacing:.06em; margin:12px 0 6px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15.5px; color:var(--text);
+    text-transform:uppercase; letter-spacing:.045em; margin:12px 0 10px;
+    display:flex; align-items:center; gap:10px;
   }
+  .xcell-title::before{
+    content:''; flex:0 0 auto; width:4px; height:17px; border-radius:2px;
+    background:linear-gradient(180deg, var(--brass,#C6A15B), var(--coral,#FF6B4A));
+  }
+  .xcell-title.xcell-title-sm{ font-size:12px; gap:7px; }
+  .xcell-title.xcell-title-sm::before{ width:3px; height:13px; }
 
   .history-item{
     display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 4px;
@@ -441,17 +448,13 @@ function mmgApplyTurkishFont(doc){
   .doc-preview{
     background:#fff; color:#1a1a1a; border-radius:6px; padding:44px 40px;
     font-family:'Inter',sans-serif; font-size:13.5px; line-height:1.7;
-    box-shadow:
-      0 0 0 7px #fff,
-      0 0 0 8px #C6A15B,
-      0 0 0 11px #fff,
-      0 0 0 12px rgba(198,161,91,0.4),
-      0 20px 50px rgba(0,0,0,0.35);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    border:1px solid var(--hairline,#2A3448);
     aspect-ratio:210/297;
     min-height:480px;
     min-width:400px;
     box-sizing:border-box;
-    margin:0 12px 12px 12px;
+    margin:0;
   }
   /* Not: Belge içeriği kutunun doğal A4 yüksekliğini aşarsa kutu artık kaydırma yerine
      kendi yüksekliğini büyütür; A4 oranı sadece içerik bu boyuta sığdığında korunur. */
@@ -460,11 +463,13 @@ function mmgApplyTurkishFont(doc){
   .doc-preview .doc-date{ font-size:12.5px; color:#555; margin-left:auto; font-weight:700; }
   .doc-preview .doc-addressee{ font-weight:700; margin-bottom:22px; font-size:13.5px; text-align:center; }
   .doc-preview .doc-body{ margin-bottom:24px; color:#222; text-indent:32px; text-align:justify; line-height:1.5; }
-  .doc-preview table{ width:100%; table-layout:auto; border-collapse:collapse; margin-bottom:20px; border:1px solid #222; }
-  .doc-preview th{ background:transparent !important; text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:#222; font-weight:700; padding:9px 8px; border:1px solid #222; }
-  .doc-preview td{ padding:9px 8px; border:1px solid #222; font-size:12px; word-break:break-word; }
-  .doc-preview table tr th:nth-child(3), .doc-preview table tr td:nth-child(3),
-  .doc-preview table tr th:nth-child(4), .doc-preview table tr td:nth-child(4){ white-space:nowrap; width:1%; }
+  .doc-preview table{ width:100%; table-layout:fixed; border-collapse:collapse; margin-bottom:20px; border:1px solid #222; }
+  .doc-preview th{ background:transparent !important; text-align:left; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; color:#222; font-weight:700; padding:9px 8px; border:1px solid #222; }
+  .doc-preview td{ padding:9px 8px; border:1px solid #222; font-size:13px; word-break:break-word; }
+  .doc-preview table tr th:nth-child(1), .doc-preview table tr td:nth-child(1){ width:13.2%; }
+  .doc-preview table tr th:nth-child(2), .doc-preview table tr td:nth-child(2){ width:12.1%; }
+  .doc-preview table tr th:nth-child(3), .doc-preview table tr td:nth-child(3){ width:48.4%; white-space:nowrap; }
+  .doc-preview table tr th:nth-child(4), .doc-preview table tr td:nth-child(4){ width:26.4%; white-space:nowrap; }
   .doc-preview .doc-total{ text-align:right; font-weight:700; font-size:14px; margin-bottom:36px; }
   .doc-preview .doc-signature{
     display:flex; justify-content:flex-end; margin-top:40px;
@@ -479,8 +484,8 @@ function mmgApplyTurkishFont(doc){
   }
 
   .action-toolbar{ display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
-  .doc-preview-row{ display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap; }
-  .doc-preview-row .doc-preview{ flex:1 1 400px; }
+  .doc-preview-row{ display:flex; gap:6px; align-items:flex-start; flex-wrap:wrap; }
+  .doc-preview-row .doc-preview{ flex:1 1 400px; min-width:0; }
   .vtool-col{ display:flex; flex-direction:column; gap:10px; flex-shrink:0; padding-top:2px; }
   .io-btn{
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
@@ -576,45 +581,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="cascade-wrap">
       <div class="cascade-wrap-inner">
       <div class="xcell-title" style="margin-top:0; padding-left:32px;">Talimat Bilgileri</div>
-      <div class="type-date-row" style="display:flex; flex-direction:column; gap:10px; padding-left:20px;">
-        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; column-gap:16px; row-gap:10px;">
-          <div class="xrow" style="grid-template-columns:70px auto; display:none; border-top:none !important;" id="talimatTurWrap">
-            <label title="Talimat Türünü Seçin" style="text-align:right;">Talimat</label>
-            <select id="talimatTurSelect" style="width:150px;">
-              <option value="">— Seçiniz —</option>
-              <option value="havale">Havale/EFT</option>
-              <option value="cek">Çek</option>
-              <option value="senet">Senet</option>
-              <option value="doviz">Döviz Al/Sat</option>
-              <option value="teminat">Teminat Mektubu</option>
-              <option value="serbest">Serbest Metin</option>
-            </select>
-          </div>
-          <div class="xrow" style="grid-template-columns:70px auto; display:none; border-top:none !important;" id="tarihSlotHavale">
-            <label style="text-align:right;">Tarih</label>
-            <input type="date" id="fTarih" style="width:125px;">
-          </div>
-          <div class="xrow" style="grid-template-columns:70px auto; display:none; border-top:none !important;" id="tarihSlotSerbest">
-            <label style="text-align:right;">Tarih</label>
-            <input type="date" id="fSmTarih" style="width:125px;">
-          </div>
+      <div class="xcell-group">
+        <div class="xcell xcell-full" style="display:none;" id="talimatTurWrap">
+          <span class="xcell-label" title="Talimat Türünü Seçin">TALİMAT</span>
+          <select id="talimatTurSelect">
+            <option value="">— Seçiniz —</option>
+            <option value="havale">Havale/EFT</option>
+            <option value="cek">Çek</option>
+            <option value="senet">Senet</option>
+            <option value="doviz">Döviz Al/Sat</option>
+            <option value="teminat">Teminat Mektubu</option>
+            <option value="serbest">Serbest Metin</option>
+          </select>
         </div>
-        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; column-gap:16px; row-gap:10px;">
-          <div class="xrow" style="grid-template-columns:70px auto; display:none; border-top:none !important;" id="altKategoriWrap">
-            <label title="Alt Kategori Seçin" style="text-align:right;">Tür</label>
-            <select id="altKategoriSelect" style="width:180px;" disabled>
-              <option value="">— Talimat seçin —</option>
-            </select>
-          </div>
-          <div class="xrow" style="grid-template-columns:70px auto; display:none; border-top:none !important; margin-left:auto;" id="paraBirimiSlotHavale">
-            <label style="text-align:right;">Para Birimi</label>
-            <select id="paraBirimiSelect" style="width:91px;">
-              <option value="TL">TL</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-              <option value="GBP">GBP</option>
-            </select>
-          </div>
+        <div class="xcell xcell-full" style="display:none;" id="altKategoriWrap">
+          <span class="xcell-label" title="Alt Kategori Seçin">TÜR</span>
+          <select id="altKategoriSelect" disabled>
+            <option value="">— Talimat seçin —</option>
+          </select>
+        </div>
+        <div class="xcell xcell-full" style="display:none;" id="tarihSlotHavale">
+          <span class="xcell-label">TARİH</span>
+          <input type="date" id="fTarih">
+        </div>
+        <div class="xcell xcell-full" style="display:none;" id="tarihSlotSerbest">
+          <span class="xcell-label">TARİH</span>
+          <input type="date" id="fSmTarih">
+        </div>
+        <div class="xcell xcell-full" style="display:none;" id="paraBirimiSlotHavale">
+          <span class="xcell-label">PARA BİRİMİ</span>
+          <select id="paraBirimiSelect">
+            <option value="TL">TL</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
         </div>
       </div>
       <div class="io-msg" id="comingSoonNotice" style="margin-top:0;"></div>
@@ -647,7 +648,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="xcell-label">TUTAR</span>
             <div style="position:relative; display:flex; align-items:center; border-left:1px solid var(--hairline);">
               <input type="text" inputmode="decimal" id="fGonderenTutar" value="0,00" style="width:100%; border:none; padding-right:34px; font-weight:700;">
-              <span class="gonderen-para-birimi-label" id="fGonderenParaBirimi" style="position:absolute; right:10px; color:var(--muted); font-size:10px; pointer-events:none;">TL</span>
+              <span class="gonderen-para-birimi-label" id="fGonderenParaBirimi" style="position:absolute; right:10px; color:var(--muted); font-size:13px; pointer-events:none;">TL</span>
             </div>
           </div>
         </div>
@@ -662,7 +663,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <div class="panel-right-col">
         <div class="doc-preview-row">
-        <div class="doc-preview" id="docPreview">
+        <div class="doc-preview" id="docPreview" style="padding:0; overflow:hidden; position:relative;">
+          <button type="button" class="mmg-fullscreen-exit-btn" title="Tam Ekrandan Çık" style="display:none; position:absolute; top:12px; right:12px; z-index:50; background:rgba(20,28,43,0.85); color:#fff; border:1px solid rgba(255,255,255,0.25); border-radius:8px; padding:8px 14px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer; align-items:center; gap:6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            Tam Ekrandan Çık
+          </button>
+          <iframe id="docPreviewFrame" title="Talimat Önizleme" style="width:100%; height:100%; min-height:480px; border:none; display:block; background:#fff;"></iframe>
+          <div style="display:none;">
           <div class="doc-head">
             <div class="doc-logo-slot">
               <img id="docLogo" class="doc-logo" alt="" style="display:none;" onerror="this.style.display='none';">
@@ -687,6 +694,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <div id="docGonderenFirmaLabel" class="doc-firma-label">Firma Adı</div>
             </div>
           </div>
+          </div>
         </div>
         <div id="islemBilgisiHavale" class="vtool-col" style="display:none;">
           <button type="button" class="io-btn io-btn-icon" id="exportPdfBtn" title="PDF'e Aktar"><svg width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg></button>
@@ -696,6 +704,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </button>
           <button type="button" class="io-btn io-btn-icon mmg-design-btn" title="Belge Tasarımı">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="7.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="15.5" cy="10.5" r="1.2" fill="currentColor" stroke="none"/><path d="M9 15a3 3 0 0 0 6 0"/></svg>
+          </button>
+          <button type="button" class="io-btn io-btn-icon mmg-zoom-in-btn" title="Yakınlaştır" data-preview-id="docPreviewFrame">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <button type="button" class="io-btn io-btn-icon mmg-zoom-out-btn" title="Uzaklaştır" data-preview-id="docPreviewFrame">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <button type="button" class="io-btn io-btn-icon mmg-fullscreen-btn" title="Tam Ekran" data-preview-target="docPreview">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
           </button>
         </div>
         </div>
@@ -740,7 +757,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="work-grid" id="panel-generic-letter" style="display:none;">
       <div class="panel-left-col">
         <div class="form-card" style="margin-bottom:0;">
-          <div class="xcell-title" id="genericLetterTitle">Talimat Bilgileri</div>
+          <div class="xcell-title" id="genericLetterTitle" style="margin-top:0; padding-left:24px;">Talimat Bilgileri</div>
           <div id="genericFieldsContainer"></div>
           <div class="io-msg" id="ioMsgGeneric"></div>
         </div>
@@ -1349,6 +1366,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(typeof renderPreview === 'function') renderPreview();
   });
 
+  let livePdfPreviewTimer = null;
+  let livePdfPreviewBlobUrl = null;
   let aliciRowCounter = 0;
   const aliciRowsContainer = document.getElementById('aliciRowsContainer');
 
@@ -1373,23 +1392,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <button type="button" class="xcell-savebtn" id="saveAliciFirmaBtn_${idx}" title="Firma bilgisini kaydet">💾</button>
           <select class="xcell-mini alici-firma-saved" id="fAliciFirmaSaved_${idx}" title="Kayıtlı firmadan seç"><option value="">📋 Kayıtlı</option></select>
         </div>
-        <div class="xcell xcell-full">
+        <div class="xcell xcell-3col">
           <span class="xcell-label">BANKA</span>
           <select id="fAliciBanka_${idx}"></select>
+          <button type="button" class="xcell-savebtn remove-alici-row" id="removeAliciRowBtn_${idx}" title="Satırı kaldır" style="color:var(--red);">✕</button>
         </div>
         <div class="xcell">
           <span class="xcell-label">IBAN</span>
           <input type="text" id="fAliciIban_${idx}" placeholder="TR__ ____ ____ ____ ____ ____ __" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
           <button type="button" class="xcell-savebtn" id="saveAliciIbanBtn_${idx}" title="IBAN bilgisini kaydet">💾</button>
           <select class="xcell-mini alici-iban-saved" id="fAliciIbanSaved_${idx}" title="Kayıtlı IBAN'dan seç"><option value="">📋 Kayıtlı</option></select>
-        </div>
-        <div class="xcell xcell-3col">
-          <span class="xcell-label">TUTAR</span>
-          <div style="position:relative; display:flex; align-items:center; border-left:1px solid var(--hairline);">
-            <input type="text" inputmode="decimal" id="fAliciTutar_${idx}" value="0,00" style="width:100%; border:none; padding-right:34px; font-weight:700;">
-            <span class="alici-para-birimi-label" id="fAliciParaBirimi_${idx}" style="position:absolute; right:10px; color:var(--muted); font-size:10px; pointer-events:none;">${getParaBirimi()}</span>
-          </div>
-          <button type="button" class="xcell-savebtn remove-alici-row" id="removeAliciRowBtn_${idx}" title="Satırı kaldır" style="color:var(--red);">✕</button>
         </div>
       </div>
     `;
@@ -1426,17 +1438,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const ibanEl = document.getElementById(`fAliciIban_${idx}`);
     attachIbanFormatting(ibanEl);
     ibanEl.addEventListener('input', renderPreview);
-
-    const tutarEl = document.getElementById(`fAliciTutar_${idx}`);
-    tutarEl.addEventListener('input', () => {
-      tutarEl.value = formatTRLive(tutarEl.value);
-      tutarEl.setSelectionRange(tutarEl.value.length, tutarEl.value.length);
-      renderPreview();
-    });
-    tutarEl.addEventListener('blur', () => {
-      tutarEl.value = fmtTR(parseTR(tutarEl.value), 2);
-      renderPreview();
-    });
 
     document.getElementById(`fAliciAdi_${idx}`).addEventListener('input', renderPreview);
     document.getElementById(`fAliciBanka_${idx}`).addEventListener('change', renderPreview);
@@ -1759,18 +1760,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function getAliciRows(){
     const rows = [];
+    const gonderenTutar = parseTR(document.getElementById('fGonderenTutar').value);
     document.querySelectorAll('.alici-row-block').forEach(block => {
       const idx = block.dataset.idx;
       const adiEl = document.getElementById(`fAliciAdi_${idx}`);
       const bankaEl = document.getElementById(`fAliciBanka_${idx}`);
       const ibanEl = document.getElementById(`fAliciIban_${idx}`);
-      const tutarEl = document.getElementById(`fAliciTutar_${idx}`);
       if(!adiEl) return;
       rows.push({
         adi: adiEl.value.trim() || '—',
         banka: bankaEl.value || '—',
         iban: ibanEl.value.trim() || '—',
-        tutar: parseTR(tutarEl.value)
+        tutar: gonderenTutar
       });
     });
     return rows;
@@ -1795,8 +1796,78 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       : `<tr><td>—</td><td>—</td><td>—</td><td>0,00 ${pb}</td></tr>`;
     document.getElementById('docTotal').textContent = 'TOPLAM: ' + fmtTR(toplam,2) + ' ' + pb;
     document.getElementById('docGonderenFirmaLabel').textContent = gonderenFirma;
+    scheduleLivePdfPreview();
   }
   renderPreview();
+
+  // ---- Canlı PDF Önizleme: önizleme artık HTML/CSS taklidi değil, indirilecek PDF'in ta kendisi ----
+  function scheduleLivePdfPreview(){
+    clearTimeout(livePdfPreviewTimer);
+    livePdfPreviewTimer = setTimeout(updateLivePdfPreview, 450);
+  }
+  function updateLivePdfPreview(){
+    try{
+      const frame = document.getElementById('docPreviewFrame');
+      if(!frame) return;
+      const { doc } = buildHavalePdf();
+      const newBlobUrl = doc.output('bloburl');
+      const zoom = mmgPreviewZoomLevels['docPreviewFrame'];
+      // Kendi zoom tahminimiz tekrar tekrar yanlış çıktı; en güvenilirisi tarayıcının
+      // KENDİ varsayılan PDF görüntüleme davranışı (indirilen PDF'i açtığınızda çalışan
+      // davranışın aynısı). Kullanıcı +/- butonuna basmadıkça HİÇ parametre eklemiyoruz.
+      const params = zoom != null ? ('navpanes=0&zoom=' + zoom) : 'navpanes=0';
+      frame.src = newBlobUrl + '#' + params;
+      if(livePdfPreviewBlobUrl){
+        const oldUrl = livePdfPreviewBlobUrl;
+        setTimeout(() => { try{ URL.revokeObjectURL(oldUrl); }catch(e){} }, 2000);
+      }
+      livePdfPreviewBlobUrl = newBlobUrl;
+      frame.addEventListener('load', () => { document.dispatchEvent(new Event('mmg-align-preview')); }, { once: true });
+    } catch(e){ /* alanlar henüz boşken sessizce geç */ }
+  }
+
+  // ---- Önizleme yakınlaştırma/uzaklaştırma ----
+  const mmgPreviewZoomLevels = {};
+  document.querySelectorAll('.mmg-zoom-in-btn, .mmg-zoom-out-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const frameId = btn.dataset.previewId;
+      const frame = document.getElementById(frameId);
+      if(!frame) return;
+      const current = mmgPreviewZoomLevels[frameId] == null ? 100 : mmgPreviewZoomLevels[frameId];
+      const delta = btn.classList.contains('mmg-zoom-in-btn') ? 10 : -10;
+      const next = Math.max(30, Math.min(300, current + delta));
+      mmgPreviewZoomLevels[frameId] = next;
+      // Aynı blob adresine sadece # eklemek bazı tarayıcılarda yeniden yükleme
+      // tetiklemeyebiliyor; bu yüzden PDF'i her yakınlaştırmada baştan üretip
+      // her zaman TAZE bir blob adresiyle yüklüyoruz.
+      updateLivePdfPreview();
+    });
+  });
+
+  // ---- Önizlemeyi tam ekran yap: F11 yerine kendi butonumuzla, her zaman görünür bir çıkış butonuyla ----
+  document.querySelectorAll('.mmg-fullscreen-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.previewTarget);
+      if(!target) return;
+      if(target.requestFullscreen) target.requestFullscreen().catch(() => {});
+      else if(target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+    });
+  });
+  function mmgUpdateFullscreenExitBtn(){
+    const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+    document.querySelectorAll('.mmg-fullscreen-exit-btn').forEach(exitBtn => {
+      const wrap = exitBtn.closest('.doc-preview');
+      exitBtn.style.display = (wrap && wrap === fsEl) ? 'flex' : 'none';
+    });
+  }
+  document.addEventListener('fullscreenchange', mmgUpdateFullscreenExitBtn);
+  document.addEventListener('webkitfullscreenchange', mmgUpdateFullscreenExitBtn);
+  document.querySelectorAll('.mmg-fullscreen-exit-btn').forEach(exitBtn => {
+    exitBtn.addEventListener('click', () => {
+      if(document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+    });
+  });
 
   // ---- PDF'e Aktar ----
 
@@ -1915,9 +1986,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         document.getElementById(`fAliciAdi_${lastIdx}`).value = r.adi || '';
         document.getElementById(`fAliciBanka_${lastIdx}`).value = r.banka || '';
         document.getElementById(`fAliciIban_${lastIdx}`).value = r.iban || '';
-        document.getElementById(`fAliciTutar_${lastIdx}`).value = fmtTR(r.tutar || 0, 2);
       });
       if(!(h.veri.aliciRows || []).length) addAliciRow();
+      // Tutar artık paylaşılan (Gönderen) alanda tutuluyor; eski kayıtlarda satır bazlıydı, geriye dönük uyumluluk için ilk satırın tutarını kullan
+      const legacyTutar = h.veri.gonderenTutar != null ? h.veri.gonderenTutar : ((h.veri.aliciRows || [])[0] || {}).tutar;
+      document.getElementById('fGonderenTutar').value = fmtTR(legacyTutar || 0, 2);
       renderPreview();
     } else if(h.tur === 'serbest-metin'){
       const smTur = h.veri.muhatapTur || 'kisi';
@@ -1999,20 +2072,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       theme: 'grid',
       margin: { left: 14, right: 14 },
       tableWidth: 182,
-      styles: { fontSize: 9, font: mmgFontFamilyName(), lineColor: [0,0,0], lineWidth: 0.2, textColor: [20,20,20], cellPadding: 3.5, overflow: 'linebreak' },
-      headStyles: { fillColor: [255,255,255], textColor: [0,0,0], font: mmgFontFamilyName(), fontStyle: 'bold', lineColor: [0,0,0], lineWidth: 0.2, halign: 'center', fontSize: 9 },
+      styles: { fontSize: 9.5, font: mmgFontFamilyName(), lineColor: [0,0,0], lineWidth: 0.2, textColor: [20,20,20], cellPadding: 2.5, overflow: 'linebreak' },
+      headStyles: { fillColor: [255,255,255], textColor: [0,0,0], font: mmgFontFamilyName(), fontStyle: 'bold', lineColor: [0,0,0], lineWidth: 0.2, halign: 'center', fontSize: 11 },
       columnStyles: {
-        0: { cellWidth: 24 },
-        1: { cellWidth: 22 },
-        2: { cellWidth: 88 },
-        3: { cellWidth: 48 }
-      },
-      didParseCell: function(data){
-        // Güvence: IBAN (2) ve TUTAR (3) sütunlarının fontu, hangi jsPDF/autoTable sürümü
-        // olursa olsun her zaman küçük ve sabit kalsın, taşma/çakışma ihtimali kalmasın.
-        if(data.column.index === 2 || data.column.index === 3){
-          data.cell.styles.fontSize = 8;
-        }
+        0: { cellWidth: 38 },
+        1: { cellWidth: 38 },
+        2: { cellWidth: 64 },
+        3: { cellWidth: 42, halign: 'right' }
       }
     });
 
@@ -2050,7 +2116,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const ozet = 'Havale — ' + gonderenFirma + ' → ' + (aliciRows[0] ? aliciRows[0].adi : '—') +
       (aliciRows.length > 1 ? ' (+' + (aliciRows.length - 1) + ' diğer)' : '') + ' — ' + fmtTR(toplam,2) + ' ' + pb;
     const veri = {
-      gonderenFirma, gonderenBanka, gonderenIban,
+      gonderenFirma, gonderenBanka, gonderenIban, gonderenTutar: parseTR(document.getElementById('fGonderenTutar').value),
       aliciRows, tarihISO: tarihVal
     };
     return { doc, ozet, veri };
@@ -2328,41 +2394,54 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const cfg = LETTER_TYPES[tur];
     document.getElementById('genericLetterTitle').textContent = cfg.title;
     const container = document.getElementById('genericFieldsContainer');
-    container.innerHTML = cfg.fields.map(f => {
+
+    function simpleFieldHtml(f){
       if(f.type === 'bank'){
-        return '<div class="xrow"><label>' + f.label + '</label><select id="' + f.id + '"></select></div>';
+        return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span><select id="' + f.id + '"></select></div>';
       }
       if(f.type === 'select'){
-        return '<div class="xrow"><label>' + f.label + '</label><select id="' + f.id + '">' +
+        return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span><select id="' + f.id + '">' +
           f.options.map(o => '<option value="' + o + '">' + o + '</option>').join('') + '</select></div>';
       }
       if(f.type === 'select-editable'){
-        return '<div class="xrow"><label>' + f.label + '</label>' +
+        return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span>' +
           '<input type="text" id="' + f.id + '" list="' + f.id + 'List" placeholder="' + (f.placeholder||'Seçin veya yazın') + '">' +
           '<datalist id="' + f.id + 'List">' + f.options.map(o => '<option value="' + o + '">').join('') + '</datalist>' +
           '</div>';
       }
       if(f.type === 'duration'){
-        return '<div class="xrow"><label>' + f.label + '</label>' +
-          '<div style="display:flex; gap:6px; width:100%;">' +
-          '<input type="number" min="1" id="' + f.id + 'Num" placeholder="Örn. 90" style="flex:1 1 auto; min-width:0;">' +
-          '<select id="' + f.id + 'Unit" style="flex:0 0 80px;">' +
+        return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span>' +
+          '<div style="display:flex; align-items:center; width:100%; height:100%;">' +
+          '<input type="number" min="1" id="' + f.id + 'Num" placeholder="Örn. 90" style="flex:1 1 auto; min-width:0; border:none;">' +
+          '<select id="' + f.id + 'Unit" style="flex:0 0 80px; border-left:1px solid var(--hairline);">' +
           '<option value="Gün">Gün</option><option value="Ay">Ay</option><option value="Yıl">Yıl</option>' +
           '</select></div></div>';
       }
       if(f.type === 'date'){
-        return '<div class="xrow"><label>' + f.label + '</label><input type="date" id="' + f.id + '"></div>';
+        return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span><input type="date" id="' + f.id + '"></div>';
       }
       if(f.type === 'tutar'){
-        return '<div class="xrow"><label>' + f.label + '</label><input type="text" inputmode="decimal" id="' + f.id + '" placeholder="0,00"></div>';
+        return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span><input type="text" inputmode="decimal" id="' + f.id + '" placeholder="0,00"></div>';
       }
-      if(f.type === 'multi-person' || f.type === 'multi-person-tc'){
-        return '<div class="xcell-title" style="font-size:12px; margin-top:10px;">' + f.label + '</div>' +
+      return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span><input type="text" id="' + f.id + '" placeholder="' + (f.placeholder||'') + '"></div>';
+    }
+
+    let html = '';
+    let groupOpen = false;
+    cfg.fields.forEach(f => {
+      const isPerson = (f.type === 'multi-person' || f.type === 'multi-person-tc');
+      if(isPerson){
+        if(groupOpen){ html += '</div>'; groupOpen = false; }
+        html += '<div class="xcell-title xcell-title-sm" style="margin-top:10px;">' + f.label + '</div>' +
           '<div id="' + f.id + 'Rows"></div>' +
           '<button type="button" class="io-btn" id="' + f.id + 'AddBtn" style="margin-bottom:10px;">+ Kişi Ekle</button>';
+      } else {
+        if(!groupOpen){ html += '<div class="xcell-group">'; groupOpen = true; }
+        html += simpleFieldHtml(f);
       }
-      return '<div class="xrow"><label>' + f.label + '</label><input type="text" id="' + f.id + '" placeholder="' + (f.placeholder||'') + '"></div>';
-    }).join('');
+    });
+    if(groupOpen) html += '</div>';
+    container.innerHTML = html;
 
     cfg.fields.forEach(f => {
       if(f.type === 'multi-person'){
@@ -2934,7 +3013,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 (function(){
   // Bazı tarayıcılarda/ekranlarda (yakınlaştırma, font render farkı) hesaplanan
   // değer 1-2 piksel kayabiliyor. Hâlâ kayma görürsen bu sayıyı büyüt (ör. 12, 16).
-  const FINE_TUNE_OFFSET = 10; // pozitif = aşağı çeker, negatif = yukarı çeker
+  const FINE_TUNE_OFFSET = 0; // pozitif = aşağı çeker, negatif = yukarı çeker
 
   function alignPreviewTop(){
     if(window.innerWidth <= 900) return; // mobilde tek sütun, hizalamaya gerek yok
