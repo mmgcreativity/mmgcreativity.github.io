@@ -891,10 +891,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span>Ayarlar</span>
     </button>
     <div class="account-dropdown-divider"></div>
-    <button type="button" class="account-dropdown-item" id="themeToggle" title="Görünüm modu">
-      <span id="themeToggleIcon" style="font-size:16px;">☾</span>
-      <span id="themeToggleLabel">Koyu Mod</span>
-    </button>
     <button type="button" class="account-dropdown-item account-dropdown-item-danger" id="dropdownLogoutBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
       <span>Oturumu Kapat</span>
@@ -1234,7 +1230,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
     signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup,
     deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup,
-    sendPasswordResetEmail
+    sendPasswordResetEmail, updatePassword
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment,
@@ -2002,14 +1998,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // Kabuk (sidebar, üst bar, hero) burada; iframe içindeki hesaplayıcı
   // sayfalarına da postMessage ile anında bildiriliyor, böylece kullanıcı
   // bir araç sayfasının içindeyken tema değiştirirse iframe da hemen güncellenir.
-  const themeToggle = document.getElementById('themeToggle');
-  const themeToggleIcon = document.getElementById('themeToggleIcon');
-  const themeToggleLabel = document.getElementById('themeToggleLabel');
   function applyTheme(mode){
     document.documentElement.classList.toggle('theme-light', mode === 'light');
-    themeToggleIcon.textContent = mode === 'light' ? '☀' : '☾';
-    themeToggleLabel.textContent = mode === 'light' ? 'Açık Mod' : 'Koyu Mod';
     localStorage.setItem('mmg_theme', mode);
+    const darkBtn = document.getElementById('mmgThemeDarkBtn');
+    const lightBtn = document.getElementById('mmgThemeLightBtn');
+    if(darkBtn) darkBtn.classList.toggle('active', mode !== 'light');
+    if(lightBtn) lightBtn.classList.toggle('active', mode === 'light');
     try{
       const frameEl = document.getElementById('app-frame');
       if(frameEl && frameEl.contentWindow){
@@ -2017,11 +2012,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
     }catch(e){}
   }
+  window.mmgApplyTheme = applyTheme;
   applyTheme(localStorage.getItem('mmg_theme') || 'dark');
-  themeToggle.addEventListener('click', () => {
-    const isLight = document.documentElement.classList.contains('theme-light');
-    applyTheme(isLight ? 'dark' : 'light');
-  });
 </script>
 
 <button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır">↓</button>
@@ -2101,15 +2093,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="mmgSettingsOverlay" hidden>
   <div id="mmgSettingsPanel">
     <h3><span data-i18n="settings_title">Ayarlar</span><button type="button" id="mmgSettingsCloseBtn" aria-label="Kapat">✕</button></h3>
+
     <div class="mmg-settings-label" data-i18n="settings_lang_label">Dil / Language</div>
-    <div class="mmg-lang-row">
+    <div class="mmg-lang-row" style="margin-bottom:18px;">
       <button type="button" class="mmg-lang-btn" data-lang="tr">Türkçe</button>
       <button type="button" class="mmg-lang-btn" data-lang="en">English</button>
     </div>
-    <p class="mmg-settings-note" data-i18n="settings_note">Şu an ana sayfa menüsü İngilizce'ye çevrilebiliyor. Diğer araç sayfalarının tamamının çevirisi ayrı bir adımda eklenecek.</p>
+
+    <div class="mmg-settings-label">Görünüm Modu</div>
+    <div class="mmg-lang-row" style="margin-bottom:18px;">
+      <button type="button" class="mmg-lang-btn" id="mmgThemeDarkBtn">☾ Koyu Mod</button>
+      <button type="button" class="mmg-lang-btn" id="mmgThemeLightBtn">☀ Açık Mod</button>
+    </div>
+
+    <div class="mmg-settings-label">Tam Ekran Modu</div>
+    <div class="mmg-lang-row" style="margin-bottom:18px;">
+      <button type="button" class="mmg-lang-btn" id="mmgFullscreenOnBtn">⛶ Tam Ekran</button>
+      <button type="button" class="mmg-lang-btn" id="mmgFullscreenOffBtn">Pencere Modu</button>
+    </div>
+
+    <div class="mmg-settings-label">Bildirimler</div>
+    <div class="mmg-lang-row" style="margin-bottom:18px;">
+      <button type="button" class="mmg-lang-btn" id="mmgNotifOnBtn">Açık</button>
+      <button type="button" class="mmg-lang-btn" id="mmgNotifOffBtn">Kapalı</button>
+    </div>
+
+    <div class="mmg-settings-label">Şifre Değiştir</div>
+    <form id="mmgPasswordForm" style="margin-bottom:6px;">
+      <input type="password" id="mmgNewPassword" placeholder="Yeni şifre (en az 6 karakter)" autocomplete="new-password"
+        style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13.5px; margin-bottom:8px; outline:none;">
+      <input type="password" id="mmgNewPassword2" placeholder="Yeni şifre (tekrar)" autocomplete="new-password"
+        style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13.5px; margin-bottom:8px; outline:none;">
+      <button type="submit" class="mmg-lang-btn" id="mmgPasswordSubmitBtn" style="width:100%;">Şifreyi Güncelle</button>
+      <div id="mmgPasswordMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>
+    </form>
+
+
+
   </div>
 </div>
-<script>
+<script type="module">
+import { getApps, getApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+const auth = getApps().length ? getAuth(getApp()) : null;
 (function(){
   // ---- Basit i18n altyapısı (şimdilik ana sayfa kabuğu için) ----
   const MMG_I18N = {
@@ -2120,7 +2146,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim',
       hero_title:'Dijital Finans Asistanı',
       settings_title:'Ayarlar', settings_lang_label:'Dil / Language',
-      settings_note:'Şu an ana sayfa menüsü İngilizce\'ye çevrilebiliyor. Diğer araç sayfalarının tamamının çevirisi ayrı bir adımda eklenecek.'
+      settings_note:''
     },
     en: {
       nav_home:'Home', nav_calc:'Calculators', nav_rotatif:'Revolving Loan Calculator', nav_ortalama:'Average Maturity Calculator',
@@ -2129,7 +2155,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact',
       hero_title:'Digital Finance Assistant',
       settings_title:'Settings', settings_lang_label:'Dil / Language',
-      settings_note:'Right now only the home page menu can be translated to English. Translating every tool page is a separate, larger task.'
+      settings_note:''
     }
   };
   function applyLang(lang){
@@ -2157,11 +2183,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     settingsBtn.addEventListener('click', () => {
       document.getElementById('accountDropdown').hidden = true;
       overlay.hidden = false;
+      // Ayarlar açılırken görünüm/bildirim butonlarının aktif durumunu güncelle
+      if(window.mmgApplyTheme) window.mmgApplyTheme(localStorage.getItem('mmg_theme') || 'dark');
+      refreshNotifButtons();
+      if(typeof refreshFullscreenButtons === 'function') refreshFullscreenButtons();
     });
   }
   if(closeBtn) closeBtn.addEventListener('click', () => { overlay.hidden = true; });
   if(overlay) overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.hidden = true; });
-  document.querySelectorAll('.mmg-lang-btn').forEach(btn => {
+  document.querySelectorAll('.mmg-lang-btn[data-lang]').forEach(btn => {
     btn.addEventListener('click', () => {
       saveLang(btn.dataset.lang);
       applyLang(btn.dataset.lang);
@@ -2169,6 +2199,104 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
 
   applyLang(getSavedLang());
+
+  // ---- Görünüm Modu (Ayarlar paneli içinden) ----
+  const themeDarkBtn = document.getElementById('mmgThemeDarkBtn');
+  const themeLightBtn = document.getElementById('mmgThemeLightBtn');
+  if(themeDarkBtn) themeDarkBtn.addEventListener('click', () => { if(window.mmgApplyTheme) window.mmgApplyTheme('dark'); });
+  if(themeLightBtn) themeLightBtn.addEventListener('click', () => { if(window.mmgApplyTheme) window.mmgApplyTheme('light'); });
+
+  // ---- Tam Ekran Modu (F11 ile aynı tarayıcı API'si) ----
+  const fsOnBtn = document.getElementById('mmgFullscreenOnBtn');
+  const fsOffBtn = document.getElementById('mmgFullscreenOffBtn');
+  function refreshFullscreenButtons(){
+    const isFs = !!document.fullscreenElement;
+    if(fsOnBtn) fsOnBtn.classList.toggle('active', isFs);
+    if(fsOffBtn) fsOffBtn.classList.toggle('active', !isFs);
+  }
+  if(fsOnBtn){
+    fsOnBtn.addEventListener('click', async () => {
+      try{ await document.documentElement.requestFullscreen(); }
+      catch(e){ /* tarayici izin vermediyse sessizce gec */ }
+    });
+  }
+  if(fsOffBtn){
+    fsOffBtn.addEventListener('click', async () => {
+      try{ if(document.fullscreenElement) await document.exitFullscreen(); }
+      catch(e){ /* sessizce geç */ }
+    });
+  }
+  document.addEventListener('fullscreenchange', refreshFullscreenButtons);
+  refreshFullscreenButtons();
+
+  // ---- Bildirimler (uygulama içi uyarılar için tercih; tarayıcı push bildirimi değildir) ----
+  const notifOnBtn = document.getElementById('mmgNotifOnBtn');
+  const notifOffBtn = document.getElementById('mmgNotifOffBtn');
+  function refreshNotifButtons(){
+    const enabled = localStorage.getItem('mmg_notifications_enabled') !== '0';
+    if(notifOnBtn) notifOnBtn.classList.toggle('active', enabled);
+    if(notifOffBtn) notifOffBtn.classList.toggle('active', !enabled);
+  }
+  function setNotifEnabled(enabled){
+    localStorage.setItem('mmg_notifications_enabled', enabled ? '1' : '0');
+    refreshNotifButtons();
+  }
+  if(notifOnBtn) notifOnBtn.addEventListener('click', () => setNotifEnabled(true));
+  if(notifOffBtn) notifOffBtn.addEventListener('click', () => setNotifEnabled(false));
+  refreshNotifButtons();
+
+  // ---- Şifre Değiştir ----
+  const pwForm = document.getElementById('mmgPasswordForm');
+  const pwMsg = document.getElementById('mmgPasswordMsg');
+  if(pwForm){
+    pwForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      pwMsg.textContent = '';
+      const p1 = document.getElementById('mmgNewPassword').value;
+      const p2 = document.getElementById('mmgNewPassword2').value;
+      if(!auth.currentUser){
+        pwMsg.style.color = 'var(--red,#E2544B)';
+        pwMsg.textContent = 'Şifre değiştirmek için giriş yapmış olmanız gerekir.';
+        return;
+      }
+      if(p1.length < 6){
+        pwMsg.style.color = 'var(--red,#E2544B)';
+        pwMsg.textContent = 'Şifre en az 6 karakter olmalı.';
+        return;
+      }
+      if(p1 !== p2){
+        pwMsg.style.color = 'var(--red,#E2544B)';
+        pwMsg.textContent = 'Girdiğiniz iki şifre birbiriyle eşleşmiyor.';
+        return;
+      }
+      try{
+        await updatePassword(auth.currentUser, p1);
+        pwMsg.style.color = 'var(--teal,#3FB68A)';
+        pwMsg.textContent = 'Şifreniz güncellendi. ✓';
+        pwForm.reset();
+      }catch(err){
+        if(err && err.code === 'auth/requires-recent-login'){
+          const currentPw = prompt('Güvenlik nedeniyle önce mevcut şifrenizi girmeniz gerekiyor:');
+          if(currentPw){
+            try{
+              const cred = EmailAuthProvider.credential(auth.currentUser.email, currentPw);
+              await reauthenticateWithCredential(auth.currentUser, cred);
+              await updatePassword(auth.currentUser, p1);
+              pwMsg.style.color = 'var(--teal,#3FB68A)';
+              pwMsg.textContent = 'Şifreniz güncellendi. ✓';
+              pwForm.reset();
+            }catch(err2){
+              pwMsg.style.color = 'var(--red,#E2544B)';
+              pwMsg.textContent = 'Mevcut şifre yanlış ya da bir hata oluştu.';
+            }
+          }
+        } else {
+          pwMsg.style.color = 'var(--red,#E2544B)';
+          pwMsg.textContent = 'Şifre güncellenemedi, lütfen tekrar deneyin.';
+        }
+      }
+    });
+  }
 })();
 </script>
 
