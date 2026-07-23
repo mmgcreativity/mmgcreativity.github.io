@@ -756,7 +756,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="nav_calc">Hesaplama</span>
-        <span class="nav-desc">Araçları</span>
+        <span class="nav-desc" data-i18n="nav_calc_desc">Araçları</span>
       </span>
       <span class="nav-drawer-chevron" id="hesaplamaChevron">▾</span>
     </button>
@@ -791,7 +791,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="nav_nakitakis">Nakit Akış</span>
-        <span class="nav-desc">Tablosu</span>
+        <span class="nav-desc" data-i18n="nav_nakitakis_desc">Tablosu</span>
       </span>
     </button>
 
@@ -813,7 +813,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="nav_talimat">Talimat</span>
-        <span class="nav-desc">Hazırlama</span>
+        <span class="nav-desc" data-i18n="nav_talimat_desc">Hazırlama</span>
       </span>
     </button>
 
@@ -1225,12 +1225,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script type="module">
   // ---- Firebase ----
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { initializeApp, getApps, getApp, deleteApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import {
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
     signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup,
     deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup,
-    sendPasswordResetEmail, updatePassword
+    sendPasswordResetEmail, updatePassword, updateCurrentUser
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment,
@@ -1250,6 +1250,70 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const auth = getAuth(fbApp);
   const db = getFirestore(fbApp);
   const googleProvider = new GoogleAuthProvider();
+
+  // ================== Çoklu Hesap Oturum Motoru ==================
+  // Her bilinen hesap için ayrı, izole, kalıcı bir Firebase App+Auth nesnesi tutulur
+  // ("acct_<eposta>" isimli ikincil app). Bu sayede bir hesaba bir kez şifreyle
+  // giriş yaptıktan sonra, o hesabın oturumu tarayıcıda (IndexedDB) bağımsız olarak
+  // saklı kalır. Hesaplar arası geçiş, updateCurrentUser() ile bu saklı oturumu
+  // doğrudan ana (varsayılan) auth nesnesine "taşıyarak" yapılır — şifre tekrar
+  // sorulmaz. Diğer tüm sayfalar (Gelirler.html, Hesabim.html vb.) hep aynı
+  // varsayılan app'i kullandığı için, bu geçiş sayfa değişse bile korunur.
+  function accountAppName(email){
+    return 'acct_' + String(email).trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  }
+  function getAccountApp(email){
+    const name = accountAppName(email);
+    const existing = getApps().find(a => a.name === name);
+    if(existing) return existing;
+    return initializeApp(firebaseConfig, name);
+  }
+  function getAccountAuth(email){
+    return getAuth(getAccountApp(email));
+  }
+  // İkincil bir Auth nesnesinin, tarayıcıda daha önce saklanmış oturumu geri
+  // yüklemesini bekler (asenkron olur). Kayıtlı oturum yoksa null döner.
+  function waitForAuthRestore(authInst, timeoutMs){
+    return new Promise((resolve) => {
+      let settled = false;
+      const unsub = onAuthStateChanged(authInst, (u) => {
+        if(settled) return;
+        settled = true;
+        unsub();
+        resolve(u);
+      });
+      setTimeout(() => {
+        if(settled) return;
+        settled = true;
+        try{ unsub(); }catch(e){}
+        resolve(authInst.currentUser || null);
+      }, timeoutMs || 4000);
+    });
+  }
+  // Herhangi bir Auth akışından (e-posta/şifre, Google) gelen User nesnesini hem
+  // kendi hesabına özel ikincil app'e hem de varsayılan (aktif) app'e işler.
+  async function activateUser(user, email, username){
+    if(!user || !email) return;
+    try{
+      const acctAuth = getAccountAuth(email);
+      if(!acctAuth.currentUser || acctAuth.currentUser.uid !== user.uid){
+        await updateCurrentUser(acctAuth, user);
+      }
+    }catch(e){ /* ikincil kopyalama başarısız olsa da ana geçişi engellemesin */ }
+    await updateCurrentUser(auth, user);
+    rememberAccount(email, username || '');
+  }
+  // Bilinen bir hesaba, önceden saklanmış oturumu kullanarak şifresiz geçmeyi dener.
+  // Başarılı olursa true, oturum süresi dolmuş/yoksa false döner (şifre tekrar sorulmalı).
+  async function tryPasswordlessSwitch(email){
+    try{
+      const acctAuth = getAccountAuth(email);
+      const restoredUser = acctAuth.currentUser || await waitForAuthRestore(acctAuth);
+      if(!restoredUser) return false;
+      await updateCurrentUser(auth, restoredUser);
+      return true;
+    }catch(e){ return false; }
+  }
 
   // ---- Yönetici kontrolü, premium/reklamsız durumu ----
   onAuthStateChanged(auth, async (user) => {
@@ -1514,6 +1578,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   function forgetAccount(email){
     saveKnownAccounts(getKnownAccounts().filter(a => a.email.toLowerCase() !== email.toLowerCase()));
+    // Listeden kaldırılan hesabın arka plandaki oturumunu da temizle, aksi halde
+    // "unutulmuş" hesap yine şifresiz geçilebilir kalır.
+    try{
+      const acctApp = getApps().find(a => a.name === accountAppName(email));
+      if(acctApp){
+        const acctAuth = getAuth(acctApp);
+        signOut(acctAuth).finally(() => { try{ deleteApp(acctApp); }catch(e){} });
+      }
+    }catch(e){ /* sessizce geç */ }
     renderKnownAccountsList();
   }
   function renderKnownAccountsList(){
@@ -1534,15 +1607,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     wrap.querySelectorAll('.mmg-account-row[data-email]').forEach(row => {
       row.addEventListener('click', (e) => {
         if(e.target.closest('[data-forget]')) return;
-        switchToAccount(row.dataset.email);
+        const label = row.querySelector('.mmg-account-row-main');
+        const original = label ? label.textContent : '';
+        if(label) label.textContent = 'Geçiliyor…';
+        switchToAccount(row.dataset.email).finally(() => {
+          if(label) label.textContent = original;
+        });
       });
     });
     wrap.querySelectorAll('[data-forget]').forEach(btn => {
       btn.addEventListener('click', (e) => { e.stopPropagation(); forgetAccount(btn.dataset.forget); });
     });
   }
+  // Şifresiz geçiş başarılı olduğunda, bu hesabın profil bilgilerini (isim, müşteri no,
+  // avatar, firma önbelleği) tazeler — tıpkı normal girişte yapıldığı gibi.
+  async function refreshActiveUserLocalState(user, email){
+    let customerNumber = null, username = null, avatar = null, profile = null;
+    try{
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if(snap.exists()){
+        customerNumber = snap.data().customerNumber;
+        username = snap.data().username;
+        avatar = snap.data().avatarBase64 || null;
+        profile = snap.data().profile || null;
+      }
+    } catch(err){ /* profil okunamadıysa sessizce geç, önbellekteki değerler kullanılır */ }
+    if(customerNumber) localStorage.setItem('mmg_customer_no', String(customerNumber));
+    if(username) localStorage.setItem('mmg_username', username);
+    if(avatar){ localStorage.setItem('mmg_avatar', avatar); } else { localStorage.removeItem('mmg_avatar'); }
+    if(profile) localStorage.setItem('mmg_profile', JSON.stringify(profile));
+    setAvatar(avatar);
+    updateUserBadge(customerNumber, username);
+    rememberAccount(email, username || '');
+    try{ await syncCompanyCache(user.uid); }catch(e){}
+  }
   async function switchToAccount(email){
     toggleAccountDropdown(false);
+    const switched = await tryPasswordlessSwitch(email);
+    if(switched && auth.currentUser){
+      localStorage.setItem('mmg_auth_state', 'user:' + email);
+      localStorage.setItem('mmg_remember', '1');
+      await refreshActiveUserLocalState(auth.currentUser, email);
+      return;
+    }
+    // Bu hesabın kayıtlı oturumu bulunamadı ya da süresi dolmuş: şifreyi tekrar iste.
     try{ await signOut(auth); }catch(e){ /* sessizce geç */ }
     localStorage.setItem('mmg_auth_state', 'guest');
     setAuthMode('login');
@@ -1551,6 +1659,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const passwordInput = document.getElementById('authPassword');
     if(emailInput) emailInput.value = email;
     if(passwordInput){ passwordInput.value = ''; passwordInput.focus(); }
+    showAuthError('Bu hesabın oturum süresi dolmuş görünüyor, lütfen şifrenizi tekrar girin.');
   }
   document.getElementById('mmgAddAccountBtn').addEventListener('click', () => {
     toggleAccountDropdown(false);
@@ -1797,7 +1906,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(!avatar && user.photoURL) avatar = user.photoURL;
 
       localStorage.setItem('mmg_auth_state', 'user:' + email);
-      rememberAccount(email, username);
+      await activateUser(user, email, username);
       if(customerNumber) localStorage.setItem('mmg_customer_no', String(customerNumber));
       if(username) localStorage.setItem('mmg_username', username);
       if(avatar) localStorage.setItem('mmg_avatar', avatar); else localStorage.removeItem('mmg_avatar');
@@ -1844,7 +1953,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           showAuthError('Şifre en az 6 karakter olmalı.');
           return;
         }
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        const cred = await createUserWithEmailAndPassword(getAccountAuth(email), email, password);
+        await activateUser(cred.user, email, username);
         const customerNumber = await getNextCustomerNumber();
         const referralCodeRaw = document.getElementById('authReferralCode').value.trim();
         const referralCode = referralCodeRaw ? referralCodeRaw.toUpperCase() : null;
@@ -1939,7 +2049,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         closeAuthOverlay();
       } else {
-        const cred = await signInWithEmailAndPassword(auth, email, password);
+        const cred = await signInWithEmailAndPassword(getAccountAuth(email), email, password);
+        await activateUser(cred.user, email, '');
         let customerNumber = null;
         let username = null;
         let avatar = null;
@@ -2100,17 +2211,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <button type="button" class="mmg-lang-btn" data-lang="en">English</button>
     </div>
 
-    <div style="display:flex; gap:14px; margin-bottom:18px;">
-      <div style="flex:1;">
-        <div class="mmg-settings-label">Görünüm Modu</div>
-        <button type="button" class="mmg-lang-btn" id="mmgThemeDarkBtn" style="width:100%; margin-bottom:6px;">☾ Koyu Mod</button>
-        <button type="button" class="mmg-lang-btn" id="mmgThemeLightBtn" style="width:100%;">☀ Açık Mod</button>
-      </div>
-      <div style="flex:1;">
-        <div class="mmg-settings-label">Tam Ekran Modu</div>
-        <button type="button" class="mmg-lang-btn" id="mmgFullscreenOnBtn" style="width:100%; margin-bottom:6px;">⛶ Tam Ekran</button>
-        <button type="button" class="mmg-lang-btn" id="mmgFullscreenOffBtn" style="width:100%;">Pencere Modu</button>
-      </div>
+    <div class="mmg-settings-label">Görünüm Modu</div>
+    <div class="mmg-lang-row" style="margin-bottom:18px;">
+      <button type="button" class="mmg-lang-btn" id="mmgThemeDarkBtn">☾ Koyu Mod</button>
+      <button type="button" class="mmg-lang-btn" id="mmgThemeLightBtn">☀ Açık Mod</button>
+    </div>
+
+    <div class="mmg-settings-label">Tam Ekran Modu</div>
+    <div class="mmg-lang-row" style="margin-bottom:18px;">
+      <button type="button" class="mmg-lang-btn" id="mmgFullscreenOnBtn">⛶ Tam Ekran</button>
+      <button type="button" class="mmg-lang-btn" id="mmgFullscreenOffBtn">Pencere Modu</button>
     </div>
 
     <div class="mmg-settings-label">Bildirimler</div>
@@ -2119,8 +2229,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <button type="button" class="mmg-lang-btn" id="mmgNotifOffBtn">Kapalı</button>
     </div>
 
-    <div class="mmg-settings-label">Şifre Değiştir</div>
-    <form id="mmgPasswordForm" style="margin-bottom:6px;">
+    <button type="button" class="mmg-lang-btn" id="mmgForgotPasswordToggleBtn" style="width:100%; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:6px;">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="15" r="4"/><path d="M10.5 12.5L20 3M20 3v4M20 3h-4"/></svg>
+      <span>Şifremi Unuttum</span>
+    </button>
+    <form id="mmgPasswordForm" style="margin-bottom:6px; display:none;">
+      <input type="password" id="mmgOldPassword" placeholder="Eski şifre" autocomplete="current-password"
+        style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13.5px; margin-bottom:8px; outline:none;">
       <input type="password" id="mmgNewPassword" placeholder="Yeni şifre (en az 6 karakter)" autocomplete="new-password"
         style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13.5px; margin-bottom:8px; outline:none;">
       <input type="password" id="mmgNewPassword2" placeholder="Yeni şifre (tekrar)" autocomplete="new-password"
@@ -2154,6 +2269,7 @@ const auth = getApps().length ? getAuth(getApp()) : null;
       nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
       nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
       nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact',
+      nav_calc_desc:'Tools', nav_nakitakis_desc:'Table', nav_talimat_desc:'Preparation',
       hero_title:'Digital Finance Assistant',
       settings_title:'Settings', settings_lang_label:'Dil / Language',
       settings_note:''
@@ -2254,13 +2370,29 @@ const auth = getApps().length ? getAuth(getApp()) : null;
   if(notifOffBtn) notifOffBtn.addEventListener('click', () => setNotifEnabled(false));
   refreshNotifButtons();
 
-  // ---- Şifre Değiştir ----
+  // ---- Şifremi Unuttum / Şifre Değiştir ----
+  const pwToggleBtn = document.getElementById('mmgForgotPasswordToggleBtn');
   const pwForm = document.getElementById('mmgPasswordForm');
   const pwMsg = document.getElementById('mmgPasswordMsg');
+  if(pwToggleBtn && pwForm){
+    pwToggleBtn.addEventListener('click', () => {
+      const isHidden = pwForm.style.display === 'none';
+      pwForm.style.display = isHidden ? 'block' : 'none';
+      pwToggleBtn.querySelector('span').textContent = isHidden ? 'Vazgeç' : 'Şifremi Unuttum';
+      pwMsg.textContent = '';
+      if(isHidden){
+        const oldPwInput = document.getElementById('mmgOldPassword');
+        if(oldPwInput) oldPwInput.focus();
+      } else {
+        pwForm.reset();
+      }
+    });
+  }
   if(pwForm){
     pwForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       pwMsg.textContent = '';
+      const oldPw = document.getElementById('mmgOldPassword').value;
       const p1 = document.getElementById('mmgNewPassword').value;
       const p2 = document.getElementById('mmgNewPassword2').value;
       if(!auth.currentUser){
@@ -2268,39 +2400,43 @@ const auth = getApps().length ? getAuth(getApp()) : null;
         pwMsg.textContent = 'Şifre değiştirmek için giriş yapmış olmanız gerekir.';
         return;
       }
+      if(!oldPw){
+        pwMsg.style.color = 'var(--red,#E2544B)';
+        pwMsg.textContent = 'Lütfen eski şifrenizi girin.';
+        return;
+      }
       if(p1.length < 6){
         pwMsg.style.color = 'var(--red,#E2544B)';
-        pwMsg.textContent = 'Şifre en az 6 karakter olmalı.';
+        pwMsg.textContent = 'Yeni şifre en az 6 karakter olmalı.';
         return;
       }
       if(p1 !== p2){
         pwMsg.style.color = 'var(--red,#E2544B)';
-        pwMsg.textContent = 'Girdiğiniz iki şifre birbiriyle eşleşmiyor.';
+        pwMsg.textContent = 'Girdiğiniz iki yeni şifre birbiriyle eşleşmiyor.';
         return;
       }
+      pwMsg.style.color = 'var(--muted,#8D96AC)';
+      pwMsg.textContent = 'Güncelleniyor…';
       try{
+        // Güvenlik gereği önce eski şifreyle kimlik doğrulaması yapılır, ardından yeni şifre ayarlanır.
+        const cred = EmailAuthProvider.credential(auth.currentUser.email, oldPw);
+        await reauthenticateWithCredential(auth.currentUser, cred);
         await updatePassword(auth.currentUser, p1);
         pwMsg.style.color = 'var(--teal,#3FB68A)';
         pwMsg.textContent = 'Şifreniz güncellendi. ✓';
         pwForm.reset();
+        setTimeout(() => {
+          pwForm.style.display = 'none';
+          if(pwToggleBtn) pwToggleBtn.querySelector('span').textContent = 'Şifremi Unuttum';
+          pwMsg.textContent = '';
+        }, 1500);
       }catch(err){
-        if(err && err.code === 'auth/requires-recent-login'){
-          const currentPw = prompt('Güvenlik nedeniyle önce mevcut şifrenizi girmeniz gerekiyor:');
-          if(currentPw){
-            try{
-              const cred = EmailAuthProvider.credential(auth.currentUser.email, currentPw);
-              await reauthenticateWithCredential(auth.currentUser, cred);
-              await updatePassword(auth.currentUser, p1);
-              pwMsg.style.color = 'var(--teal,#3FB68A)';
-              pwMsg.textContent = 'Şifreniz güncellendi. ✓';
-              pwForm.reset();
-            }catch(err2){
-              pwMsg.style.color = 'var(--red,#E2544B)';
-              pwMsg.textContent = 'Mevcut şifre yanlış ya da bir hata oluştu.';
-            }
-          }
+        pwMsg.style.color = 'var(--red,#E2544B)';
+        if(err && (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential')){
+          pwMsg.textContent = 'Eski şifre yanlış.';
+        } else if(err && err.code === 'auth/too-many-requests'){
+          pwMsg.textContent = 'Çok fazla deneme yapıldı, lütfen biraz sonra tekrar deneyin.';
         } else {
-          pwMsg.style.color = 'var(--red,#E2544B)';
           pwMsg.textContent = 'Şifre güncellenemedi, lütfen tekrar deneyin.';
         }
       }
