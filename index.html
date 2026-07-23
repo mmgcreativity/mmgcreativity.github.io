@@ -2129,7 +2129,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="mmgPasswordMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>
     </form>
 
-
+    <button type="button" id="mmgSettingsOkBtn" style="width:100%; margin-top:14px; padding:12px 0; border-radius:9px; border:none; cursor:pointer; background:linear-gradient(120deg, var(--coral,#FF6B4A), var(--brass,#C6A15B) 75%); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;">✓ Tamam</button>
 
   </div>
 </div>
@@ -2197,6 +2197,8 @@ const auth = getApps().length ? getAuth(getApp()) : null;
     });
   }
   if(closeBtn) closeBtn.addEventListener('click', () => { overlay.hidden = true; });
+  const okBtn = document.getElementById('mmgSettingsOkBtn');
+  if(okBtn) okBtn.addEventListener('click', () => { overlay.hidden = true; });
   if(overlay) overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.hidden = true; });
   document.querySelectorAll('.mmg-lang-btn[data-lang]').forEach(btn => {
     btn.addEventListener('click', () => {
