@@ -94,49 +94,79 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const content = document.getElementById('content');
+    let mmgLang = 'tr';
+    try{ mmgLang = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
+    window.addEventListener('message', (ev) => {
+      if(ev && ev.data && ev.data.mmgLang){
+        mmgLang = ev.data.mmgLang;
+        try{ localStorage.setItem('mmg_lang', mmgLang); }catch(e){}
+        location.reload();
+      }
+    });
+    const T = mmgLang === 'en' ? {
+      needLogin:'🔒 Login required', needLoginDesc:'You need to sign in from the home page to view this page.',
+      noAccess:'⛔ No access', noAccessDesc:'Only users with admin permission can access this page.',
+      loggedInAs:'✓ LOGGED IN AS ADMIN', panelTitle:'🔐 Admin Panel', welcome:'Welcome,',
+      users:'👥 Users', usersDesc:'User list and management (coming soon)',
+      stats:'📊 Statistics', statsDesc:'Usage data (coming soon)',
+      settings:'⚙️ Settings', settingsDesc:'Site settings (coming soon)',
+      contentLbl:'📝 Content', contentDesc:'Content management (coming soon)',
+      chatSection:'💬 User Chats', loadingTxt:'Loading…', selectChat:'Select a chat on the left.',
+      reply:'Reply…', send:'Send', error:'❌ Error'
+    } : {
+      needLogin:'🔒 Giriş gerekli', needLoginDesc:'Bu sayfayı görüntülemek için ana sayfadan giriş yapmanız gerekiyor.',
+      noAccess:'⛔ Yetkiniz yok', noAccessDesc:'Bu sayfaya sadece admin yetkisi olan kullanıcılar erişebilir.',
+      loggedInAs:'✓ ADMİN OLARAK GİRİŞ YAPILDI', panelTitle:'🔐 Admin Paneli', welcome:'Hoş geldiniz,',
+      users:'👥 Kullanıcılar', usersDesc:'Kullanıcı listesi ve yönetimi (yakında)',
+      stats:'📊 İstatistikler', statsDesc:'Kullanım verileri (yakında)',
+      settings:'⚙️ Ayarlar', settingsDesc:'Site ayarları (yakında)',
+      contentLbl:'📝 İçerik', contentDesc:'İçerik yönetimi (yakında)',
+      chatSection:'💬 Kullanıcı Sohbetleri', loadingTxt:'Yükleniyor…', selectChat:'Soldan bir sohbet seçin.',
+      reply:'Yanıt yazın…', send:'Gönder', error:'❌ Hata'
+    };
 
     auth.onAuthStateChanged(async (user) => {
       if(!user){
-        content.innerHTML = '<h1>🔒 Giriş gerekli</h1><p>Bu sayfayı görüntülemek için ana sayfadan giriş yapmanız gerekiyor.</p>';
+        content.innerHTML = '<h1>' + T.needLogin + '</h1><p>' + T.needLoginDesc + '</p>';
         return;
       }
       try{
         const tokenResult = await user.getIdTokenResult(true);
         if(!tokenResult.claims.admin){
-          content.innerHTML = '<h1>⛔ Yetkiniz yok</h1><p>Bu sayfaya sadece admin yetkisi olan kullanıcılar erişebilir.</p>';
+          content.innerHTML = '<h1>' + T.noAccess + '</h1><p>' + T.noAccessDesc + '</p>';
           return;
         }
         content.innerHTML = `
-          <div class="badge">✓ ADMİN OLARAK GİRİŞ YAPILDI</div>
-          <h1>🔐 Admin Paneli</h1>
-          <p>Hoş geldiniz, ${user.email || user.displayName || 'Admin'}.</p>
+          <div class="badge">${T.loggedInAs}</div>
+          <h1>${T.panelTitle}</h1>
+          <p>${T.welcome} ${user.email || user.displayName || 'Admin'}.</p>
           <div class="panel-grid">
             <div class="panel-card">
-              <h3>👥 Kullanıcılar</h3>
-              <p>Kullanıcı listesi ve yönetimi (yakında)</p>
+              <h3>${T.users}</h3>
+              <p>${T.usersDesc}</p>
             </div>
             <div class="panel-card">
-              <h3>📊 İstatistikler</h3>
-              <p>Kullanım verileri (yakında)</p>
+              <h3>${T.stats}</h3>
+              <p>${T.statsDesc}</p>
             </div>
             <div class="panel-card">
-              <h3>⚙️ Ayarlar</h3>
-              <p>Site ayarları (yakında)</p>
+              <h3>${T.settings}</h3>
+              <p>${T.settingsDesc}</p>
             </div>
             <div class="panel-card">
-              <h3>📝 İçerik</h3>
-              <p>İçerik yönetimi (yakında)</p>
+              <h3>${T.contentLbl}</h3>
+              <p>${T.contentDesc}</p>
             </div>
           </div>
           <div class="chat-section">
-            <h2>💬 Kullanıcı Sohbetleri</h2>
+            <h2>${T.chatSection}</h2>
             <div class="chat-wrap">
-              <div class="chat-list" id="chatList"><div class="chat-empty">Yükleniyor…</div></div>
+              <div class="chat-list" id="chatList"><div class="chat-empty">${T.loadingTxt}</div></div>
               <div class="chat-main">
-                <div class="chat-msgs" id="chatMsgs"><div class="chat-empty">Soldan bir sohbet seçin.</div></div>
+                <div class="chat-msgs" id="chatMsgs"><div class="chat-empty">${T.selectChat}</div></div>
                 <div class="chat-input-row" id="chatInputRow" style="display:none;">
-                  <textarea id="chatInput" placeholder="Yanıt yazın…" rows="1"></textarea>
-                  <button type="button" id="chatSendBtn">Gönder</button>
+                  <textarea id="chatInput" placeholder="${T.reply}" rows="1"></textarea>
+                  <button type="button" id="chatSendBtn">${T.send}</button>
                 </div>
               </div>
             </div>
@@ -144,7 +174,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         `;
         initAdminChatInbox();
       }catch(e){
-        content.innerHTML = '<h1>❌ Hata</h1><p>' + e.message + '</p>';
+        content.innerHTML = '<h1>' + T.error + '</h1><p>' + e.message + '</p>';
       }
     });
 

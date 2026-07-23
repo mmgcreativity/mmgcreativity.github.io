@@ -112,7 +112,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .f-field input, .f-field select{
     background:var(--bg); border:1px solid var(--hairline); border-radius:7px;
-    padding:0 8px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:14px;
+    padding:0 8px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12.5px;
     outline:none; transition:border-color .15s ease; width:100%; height:34px;
   }
   .f-field input:focus, .f-field select:focus{ border-color:var(--brass-dim); }
@@ -221,12 +221,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <header class="masthead">
   <div>
-    <h1 class="title">Vade Sapma Hesaplama</h1>
-    <div class="subtitle">Fatura vadeleriniz ile tahsil ettiğiniz çeklerin vadelerini karşılaştırın; ortalama kaç gün sapma olduğunu ve karşılama oranını görün.</div>
+    <h1 class="title" data-i18n="page_title">Vade Sapma Hesaplama</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Fatura vadeleriniz ile tahsil ettiğiniz çeklerin vadelerini karşılaştırın; ortalama kaç gün sapma olduğunu ve karşılama oranını görün.</div>
   </div>
   <div class="top-actions">
-    <button type="button" class="reset-btn" id="resetPageBtn">↺ Sıfırla</button>
-    <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+    <button type="button" class="reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
+    <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </header>
 
@@ -236,53 +236,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- FATURA PANELİ -->
     <div class="panel">
       <div class="panel-head">
-        <div class="panel-title fatura">📄 Faturalar</div>
+        <div class="panel-title fatura" data-i18n="invoices_title">📄 Faturalar</div>
       </div>
-      <div class="panel-desc">Fatura tarihi, çalışma koşulu ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.</div>
+      <div class="panel-desc" data-i18n="invoices_desc">Fatura tarihi, çalışma koşulu ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.</div>
       <div class="row-table" id="faturaRows"></div>
-      <button type="button" class="add-btn fatura" id="addFaturaBtn">+ Fatura Ekle</button>
-      <div class="subtotal-line"><span>Toplam Fatura Tutarı</span><b id="faturaToplam" class="mono">0,00</b></div>
+      <button type="button" class="add-btn fatura" id="addFaturaBtn" data-i18n="add_invoice">+ Fatura Ekle</button>
+      <div class="subtotal-line"><span data-i18n="total_invoice_amount">Toplam Fatura Tutarı</span><b id="faturaToplam" class="mono">0,00</b></div>
     </div>
 
     <!-- ÇEK PANELİ -->
     <div class="panel">
       <div class="panel-head">
-        <div class="panel-title cek">🧾 Çekler</div>
+        <div class="panel-title cek" data-i18n="checks_title">🧾 Çekler</div>
       </div>
-      <div class="panel-desc">Tahsil ettiğiniz / vadesi gelen çeklerin tarih ve tutarlarını girin.</div>
+      <div class="panel-desc" data-i18n="checks_desc">Tahsil ettiğiniz / vadesi gelen çeklerin tarih ve tutarlarını girin.</div>
       <div class="row-table" id="cekRows"></div>
-      <button type="button" class="add-btn cek" id="addCekBtn">+ Çek Ekle</button>
-      <div class="subtotal-line"><span>Toplam Çek Tutarı</span><b id="cekToplam" class="mono">0,00</b></div>
+      <button type="button" class="add-btn cek" id="addCekBtn" data-i18n="add_check">+ Çek Ekle</button>
+      <div class="subtotal-line"><span data-i18n="total_check_amount">Toplam Çek Tutarı</span><b id="cekToplam" class="mono">0,00</b></div>
     </div>
 
   </div>
 
   <!-- BİLGİ PANELİ -->
   <div class="info-panel">
-    <div class="deviation-label">Vade Sapması</div>
+    <div class="deviation-label" data-i18n="deviation_label">Vade Sapması</div>
     <div class="deviation-value neutral" id="devValue">—</div>
-    <div class="deviation-sub" id="devSub">Hesaplamak için fatura ve çek bilgilerini girin</div>
+    <div class="deviation-sub" id="devSub" data-i18n="deviation_sub">Hesaplamak için fatura ve çek bilgilerini girin</div>
 
     <div class="stat-grid">
       <div class="stat-card">
-        <div class="l">Fatura Ort. Vadesi</div>
+        <div class="l" data-i18n="stat_invoice_avg">Fatura Ort. Vadesi</div>
         <div class="v brass" id="statFaturaVade">—</div>
       </div>
       <div class="stat-card">
-        <div class="l">Çek Ort. Vadesi</div>
+        <div class="l" data-i18n="stat_check_avg">Çek Ort. Vadesi</div>
         <div class="v brass" id="statCekVade">—</div>
       </div>
       <div class="stat-card">
-        <div class="l">Karşılama Oranı</div>
+        <div class="l" data-i18n="stat_coverage">Karşılama Oranı</div>
         <div class="v" id="statKarsilama">—</div>
       </div>
       <div class="stat-card">
-        <div class="l">Karşılanmayan Tutar</div>
+        <div class="l" data-i18n="stat_uncovered">Karşılanmayan Tutar</div>
         <div class="v" id="statFark">—</div>
       </div>
     </div>
 
-    <div class="flag">⚠ Vade sapması, fatura ve çek tutarlarına göre ağırlıklı ortalama tarihler üzerinden hesaplanır. Negatif (−) değer vadenin geçtiğini / gecikmeyi, sıfır veya pozitif (+) değer erken ya da tam vadesinde ödemeyi gösterir.</div>
+    <div class="flag" data-i18n="deviation_flag">⚠ Vade sapması, fatura ve çek tutarlarına göre ağırlıklı ortalama tarihler üzerinden hesaplanır. Negatif (−) değer vadenin geçtiğini / gecikmeyi, sıfır veya pozitif (+) değer erken ya da tam vadesinde ödemeyi gösterir.</div>
   </div>
 </main>
 
@@ -644,6 +644,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   addCekRow();
   addCekRow();
   recalc();
+</script>
+<script>
+(function(){
+  const MMG_I18N = {
+    en: {
+      page_title:'Maturity Deviation Calculator',
+      page_subtitle:'Compare your invoice due dates against the checks you collect; see the average deviation in days and the coverage ratio.',
+      reset_btn:'Reset', back_home:'← Home',
+      invoices_title:'📄 Invoices', invoices_desc:'Enter invoice date, terms, and number of due days — the due date is calculated automatically.',
+      add_invoice:'+ Add Invoice', total_invoice_amount:'Total Invoice Amount',
+      checks_title:'🧾 Checks', checks_desc:'Enter the date and amount of checks you collect / that are due.',
+      add_check:'+ Add Check', total_check_amount:'Total Check Amount',
+      deviation_label:'Maturity Deviation', deviation_sub:'Enter invoice and check data to calculate',
+      stat_invoice_avg:'Avg. Invoice Maturity', stat_check_avg:'Avg. Check Maturity', stat_coverage:'Coverage Ratio', stat_uncovered:'Uncovered Amount',
+      deviation_flag:'⚠ The maturity deviation is calculated using amount-weighted average dates for invoices and checks. A negative (−) value indicates the maturity has passed / a delay; zero or positive (+) indicates early or on-time payment.'
+    }
+  };
+  function applyMmgLang(lang){
+    if(lang === 'tr'){ location.reload(); return; }
+    const dict = MMG_I18N[lang];
+    if(!dict) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.innerHTML = dict[key];
+    });
+  }
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      applyMmgLang(ev.data.mmgLang);
+    }
+  });
+  try{
+    const savedLang = localStorage.getItem('mmg_lang');
+    if(savedLang === 'en') applyMmgLang('en');
+  }catch(e){}
+})();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>
 </body>

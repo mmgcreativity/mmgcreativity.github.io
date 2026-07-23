@@ -126,45 +126,45 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <header class="masthead">
   <div>
-    <h1 class="title">Referans Kodu Yönetimi</h1>
-    <div class="subtitle">Yeni bir referans kodu tanımlayın: bu kodla kayıt olan üyelere ücretsiz ya da indirimli premium tanınır.</div>
+    <h1 class="title" data-i18n="page_title">Referans Kodu Yönetimi</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Yeni bir referans kodu tanımlayın: bu kodla kayıt olan üyelere ücretsiz ya da indirimli premium tanınır.</div>
   </div>
 </header>
-<a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+<a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
 
 <main>
   <div id="stateArea"></div>
 
   <div id="content" class="split-grid" hidden>
     <div class="panel">
-      <div class="codes-title">Yeni Kod Tanımla</div>
+      <div class="codes-title" data-i18n="define_new_code">Yeni Kod Tanımla</div>
       <form id="mmgAdminForm" style="display:grid; gap:0;">
         <div class="auth-field">
-          <label>Kod</label>
+          <label data-i18n="code_label">Kod</label>
           <input type="text" id="mmgAdminCode" placeholder="ör. AHMET10" style="text-transform:uppercase;">
         </div>
         <div class="auth-field">
-          <label>Fayda Türü</label>
+          <label data-i18n="benefit_type">Fayda Türü</label>
           <select id="mmgAdminBenefitType">
-            <option value="free">Ücretsiz Premium</option>
-            <option value="discount">İndirimli Premium</option>
+            <option value="free" data-i18n="free_premium">Ücretsiz Premium</option>
+            <option value="discount" data-i18n="discounted_premium">İndirimli Premium</option>
           </select>
         </div>
         <div class="auth-field" id="mmgAdminDiscountWrap" style="display:none;">
-          <label>İndirim Yüzdesi</label>
+          <label data-i18n="discount_percent">İndirim Yüzdesi</label>
           <input type="number" id="mmgAdminDiscountPercent" min="1" max="100" placeholder="ör. 20" value="20">
         </div>
         <div class="auth-field">
-          <label>Kullanım Limiti <span style="color:var(--muted); font-weight:400;">(boş = sınırsız, örn. 1 = tek kişi)</span></label>
-          <input type="number" id="mmgAdminMaxUses" min="1" placeholder="Sınırsız için boş bırakın">
+          <label><span data-i18n="usage_limit">Kullanım Limiti</span> <span style="color:var(--muted); font-weight:400;" data-i18n="usage_limit_note">(boş = sınırsız, örn. 1 = tek kişi)</span></label>
+          <input type="number" id="mmgAdminMaxUses" min="1" placeholder="Sınırsız için boş bırakın" data-i18n-placeholder="unlimited_placeholder">
         </div>
-        <button type="submit" class="auth-submit">Kodu Kaydet</button>
+        <button type="submit" class="auth-submit" data-i18n="save_code">Kodu Kaydet</button>
       </form>
       <div id="mmgAdminMsg"></div>
     </div>
 
     <div class="panel">
-      <div class="codes-title">Tanımlı Kodlar</div>
+      <div class="codes-title" data-i18n="defined_codes">Tanımlı Kodlar</div>
       <div id="mmgAdminCodeList"></div>
     </div>
   </div>
@@ -308,6 +308,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     content.hidden = false;
     mmgLoadAdminCodes();
   });
+</script>
+<script>
+(function(){
+  const MMG_I18N = {
+    en: {
+      page_title:'Referral Code Management',
+      page_subtitle:'Define a new referral code: members who sign up with this code get free or discounted premium.',
+      back_home:'← Home',
+      define_new_code:'Define New Code', code_label:'Code', benefit_type:'Benefit Type',
+      free_premium:'Free Premium', discounted_premium:'Discounted Premium', discount_percent:'Discount Percentage',
+      usage_limit:'Usage Limit', usage_limit_note:'(blank = unlimited, e.g. 1 = single person)', unlimited_placeholder:'Leave blank for unlimited',
+      save_code:'Save Code', defined_codes:'Defined Codes'
+    }
+  };
+  function applyMmgLang(lang){
+    if(lang === 'tr'){ location.reload(); return; }
+    const dict = MMG_I18N[lang];
+    if(!dict) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.innerHTML = dict[key];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if(dict[key]) el.setAttribute('placeholder', dict[key]);
+    });
+  }
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      applyMmgLang(ev.data.mmgLang);
+    }
+  });
+  try{
+    const savedLang = localStorage.getItem('mmg_lang');
+    if(savedLang === 'en') applyMmgLang('en');
+  }catch(e){}
+})();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>
 </body>

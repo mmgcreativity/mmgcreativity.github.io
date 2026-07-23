@@ -202,14 +202,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="page-wrap">
   <div class="page-header">
     <div class="page-header-text">
-      <h1 class="page-title">Hesabım</h1>
-      <p class="page-sub">Firma ya da kişisel bilgilerinizi girin. Bu bilgiler yalnızca sizin hesabınızda saklanır.</p>
+      <h1 class="page-title" data-i18n="page_title">Hesabım</h1>
+      <p class="page-sub" data-i18n="page_subtitle">Firma ya da kişisel bilgilerinizi girin. Bu bilgiler yalnızca sizin hesabınızda saklanır.</p>
     </div>
     <div class="page-header-right">
-      <a href="index.html" target="_top" class="back-btn">← Ana Sayfa</a>
+      <a href="index.html" target="_top" class="back-btn" data-i18n="back_home">← Ana Sayfa</a>
       <div class="status-pill" id="statusPill">
         <span class="status-dot"></span>
-        <span id="statusPillText">Yükleniyor...</span>
+        <span id="statusPillText" data-i18n="loading">Yükleniyor...</span>
       </div>
     </div>
   </div>
@@ -217,33 +217,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="cards-grid">
   <div class="col-stack">
   <div class="card">
-    <h2>Profil Bilgileri</h2>
+    <h2 data-i18n="profile_info">Profil Bilgileri</h2>
     <form id="accountInfoForm">
       <div class="auth-field">
-        <label>Hesap Türü</label>
+        <label data-i18n="account_type">Hesap Türü</label>
         <select id="profileType">
-          <option value="bireysel">Bireysel</option>
-          <option value="firma">Kurumsal</option>
+          <option value="bireysel" data-i18n="individual">Bireysel</option>
+          <option value="firma" data-i18n="corporate">Kurumsal</option>
         </select>
       </div>
       <div class="auth-field">
-        <label id="profileNameLabel">Ad Soyad</label>
+        <label id="profileNameLabel" data-i18n="full_name">Ad Soyad</label>
         <input type="text" id="profileName" placeholder="Ad Soyad">
       </div>
       <div class="auth-field">
-        <label>Telefon</label>
+        <label data-i18n="phone">Telefon</label>
         <input type="tel" id="profilePhone" placeholder="05xx xxx xx xx">
       </div>
       <div class="auth-field">
-        <label>E-posta</label>
+        <label data-i18n="email">E-posta</label>
         <input type="email" id="profileEmail" placeholder="ornek@eposta.com">
       </div>
       <div class="auth-field">
-        <label>Adres</label>
+        <label data-i18n="address">Adres</label>
         <textarea id="profileAddress" rows="2" placeholder="Adres bilgisi"></textarea>
       </div>
-      <button type="submit" class="auth-submit" id="profileSaveBtn">Kaydet</button>
-      <div class="saved-msg" id="profileSavedMsg">Kaydedildi ✓</div>
+      <button type="submit" class="auth-submit" id="profileSaveBtn" data-i18n="save_btn">Kaydet</button>
+      <div class="saved-msg" id="profileSavedMsg" data-i18n="saved_ok">Kaydedildi ✓</div>
       <div class="auth-error" id="profileCompanyError" style="display:none;"></div>
     </form>
   </div>
@@ -251,34 +251,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div class="col-stack">
   <div class="card" id="referralCard">
-    <h2>Referans Kodu</h2>
-    <p class="referral-note" id="referralNote">Referans kodu girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.</p>
+    <h2 data-i18n="referral_code">Referans Kodu</h2>
+    <p class="referral-note" id="referralNote" data-i18n="referral_note">Referans kodu girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.</p>
     <form id="referralForm">
       <div class="auth-field" style="display:flex; gap:8px; margin-bottom:6px;">
         <input type="text" id="referralInput" placeholder="ör. AHMET10" style="flex:1; text-transform:uppercase;">
-        <button type="submit" class="auth-submit" id="referralSubmitBtn" style="width:auto; padding:12px 18px; margin-top:0;">Uygula</button>
+        <button type="submit" class="auth-submit" id="referralSubmitBtn" style="width:auto; padding:12px 18px; margin-top:0;" data-i18n="apply_btn">Uygula</button>
       </div>
       <div class="auth-error" id="referralError"></div>
-      <div class="saved-msg" id="referralSavedMsg">Kod uygulandı ✓</div>
+      <div class="saved-msg" id="referralSavedMsg" data-i18n="code_applied">Kod uygulandı ✓</div>
     </form>
   </div>
 
   <div class="card" id="companyCard">
     <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;">
-      <h2 style="margin-bottom:0;">Kullanıcı Grubu</h2>
-      <button type="button" id="companyPreviewToggle" class="preview-toggle-btn" style="display:none;">Dolu örnek görünüm</button>
+      <h2 style="margin-bottom:0;" data-i18n="user_group">Kullanıcı Grubu</h2>
+      <button type="button" id="companyPreviewToggle" class="preview-toggle-btn" style="display:none;" data-i18n="sample_view">Dolu örnek görünüm</button>
     </div>
 
     <div id="companyLocked" style="display:none;">
-      <p class="referral-note">Kullanıcı grubu özellikleri için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz.</p>
+      <p class="referral-note" data-i18n="company_locked">Kullanıcı grubu özellikleri için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz.</p>
     </div>
 
     <div id="companyNone" style="display:none;">
-      <p class="referral-note" id="companyNoneNote">Şu anda bireysel bir hesaptır. Soldaki Profil Bilgileri'nden Hesap Türü'nü "Kurumsal" seçip firma adınızı girerek kaydedin — burada otomatik olarak kullanıcı grubunuz açılır ve diğer kullanıcıları (alt kullanıcı olarak) ekleyip aynı verileri birlikte görüp işleyebilirsiniz.</p>
+      <p class="referral-note" id="companyNoneNote" data-i18n="company_none">Şu anda bireysel bir hesaptır. Soldaki Profil Bilgileri'nden Hesap Türü'nü "Kurumsal" seçip firma adınızı girerek kaydedin — burada otomatik olarak kullanıcı grubunuz açılır ve diğer kullanıcıları (alt kullanıcı olarak) ekleyip aynı verileri birlikte görüp işleyebilirsiniz.</p>
     </div>
 
     <div id="companyActive" style="display:none;">
-      <div class="preview-badge" id="companyPreviewBadge" style="display:none;">Bu bir örnek görünümdür — gerçek veri değildir</div>
+      <div class="preview-badge" id="companyPreviewBadge" style="display:none;" data-i18n="preview_badge">Bu bir örnek görünümdür — gerçek veri değildir</div>
       <div class="company-header">
         <div>
           <div class="company-name" id="companyNameText">—</div>
@@ -287,42 +287,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
       <div id="companyOwnerOnly" style="display:none;">
-        <div class="mini-label">Şirket Kodu <span style="font-weight:400; color:var(--muted);">(gruplama için paylaşın)</span></div>
+        <div class="mini-label"><span data-i18n="company_code">Şirket Kodu</span> <span style="font-weight:400; color:var(--muted);" data-i18n="company_code_note">(gruplama için paylaşın)</span></div>
         <div class="code-box" id="companyIdBox">—</div>
 
-        <div class="mini-label" style="margin-top:22px;">Kullanıcı Ekle</div>
+        <div class="mini-label" style="margin-top:22px;" data-i18n="add_user">Kullanıcı Ekle</div>
         <form id="inviteForm">
           <div class="auth-field" style="display:flex; gap:8px; margin-bottom:6px;">
             <input type="email" id="inviteEmail" placeholder="ornek@eposta.com" style="flex:1;" required>
-            <button type="submit" class="auth-submit" id="inviteSubmitBtn" style="width:auto; padding:12px 18px; margin-top:0;">Davet Et</button>
+            <button type="submit" class="auth-submit" id="inviteSubmitBtn" style="width:auto; padding:12px 18px; margin-top:0;" data-i18n="invite_btn">Davet Et</button>
           </div>
           <div class="auth-error" id="inviteError"></div>
-          <div class="saved-msg" id="inviteSavedMsg">Davet gönderildi ✓</div>
+          <div class="saved-msg" id="inviteSavedMsg" data-i18n="invite_sent">Davet gönderildi ✓</div>
         </form>
         <div id="pendingInvitesList" class="member-list"></div>
       </div>
 
-      <div class="mini-label" style="margin-top:22px;">Kullanıcılar</div>
-      <div id="membersList" class="member-list"><p class="referral-note">Yükleniyor...</p></div>
+      <div class="mini-label" style="margin-top:22px;" data-i18n="users_label">Kullanıcılar</div>
+      <div id="membersList" class="member-list"><p class="referral-note" data-i18n="loading">Yükleniyor...</p></div>
 
       <div id="leaveCompanyWrap" style="display:none; margin-top:18px;">
-        <button type="button" id="leaveCompanyBtn" class="danger-btn">Gruptan Ayrıl</button>
+        <button type="button" id="leaveCompanyBtn" class="danger-btn" data-i18n="leave_group">Gruptan Ayrıl</button>
       </div>
 
       <div id="companyGroupSection" style="display:none; margin-top:26px; border-top:1px solid var(--hairline); padding-top:22px;">
-        <div class="mini-label">Grup — Bağlı Firmalar</div>
-        <p class="referral-note">Birden fazla firmayı aynı gruba bağlayıp aralarında geçiş yapabilirsiniz.</p>
+        <div class="mini-label" data-i18n="group_linked_companies">Grup — Bağlı Firmalar</div>
+        <p class="referral-note" data-i18n="group_note">Birden fazla firmayı aynı gruba bağlayıp aralarında geçiş yapabilirsiniz.</p>
         <div id="groupCompaniesList" class="member-list"></div>
         <form id="linkCompanyForm" style="margin-top:14px;">
           <div class="auth-field" style="display:flex; gap:8px; margin-bottom:6px;">
             <input type="text" id="linkCompanyId" placeholder="Bağlanacak firmanın Şirket Kodu" style="flex:1;">
-            <button type="submit" class="auth-submit" id="linkCompanyBtn" style="width:auto; padding:12px 18px; margin-top:0;">Bağla</button>
+            <button type="submit" class="auth-submit" id="linkCompanyBtn" style="width:auto; padding:12px 18px; margin-top:0;" data-i18n="link_btn">Bağla</button>
           </div>
           <div class="auth-error" id="linkCompanyError"></div>
         </form>
 
         <div id="switchCompanyWrap" style="display:none; margin-top:18px;">
-          <div class="mini-label">Aktif Firma <span style="font-weight:400; color:var(--muted);">(işlem yapacağınız firma)</span></div>
+          <div class="mini-label"><span data-i18n="active_company">Aktif Firma</span> <span style="font-weight:400; color:var(--muted);" data-i18n="active_company_note">(işlem yapacağınız firma)</span></div>
           <select id="switchCompanySelect"></select>
         </div>
       </div>
@@ -332,7 +332,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="card danger-card" id="dangerCard" style="display:none;">
     <button type="button" id="deleteAccountBtn" class="danger-btn">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-      <span>Hesabımı Kalıcı Olarak Sil</span>
+      <span data-i18n="delete_account">Hesabımı Kalıcı Olarak Sil</span>
     </button>
   </div>
   </div>
@@ -342,16 +342,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="mini-overlay" id="deleteAccountOverlay" hidden>
   <div class="mini-modal">
     <div class="mini-modal-header">
-      <h2>Şifrenizi Girin</h2>
+      <h2 data-i18n="enter_password">Şifrenizi Girin</h2>
       <button type="button" class="mini-modal-close" id="deleteAccountClose" title="Kapat">✕</button>
     </div>
-    <p>Hesabınızı silmek için güvenlik amacıyla şifrenizi tekrar girmeniz gerekiyor.</p>
+    <p data-i18n="delete_confirm_desc">Hesabınızı silmek için güvenlik amacıyla şifrenizi tekrar girmeniz gerekiyor.</p>
     <div class="auth-field" id="deleteReauthWrap">
-      <label>Şifre</label>
+      <label data-i18n="password">Şifre</label>
       <input type="password" id="deleteReauthPassword" placeholder="••••••••">
     </div>
     <div class="auth-error" id="deleteAccountError"></div>
-    <button type="button" class="auth-submit" id="deleteAccountConfirmBtn" style="background:var(--red);">Onayla ve Sil</button>
+    <button type="button" class="auth-submit" id="deleteAccountConfirmBtn" style="background:var(--red);" data-i18n="confirm_delete">Onayla ve Sil</button>
   </div>
 </div>
 
@@ -1099,6 +1099,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }, 300);
     });
   }
+</script>
+<script>
+(function(){
+  const MMG_I18N = {
+    en: {
+      page_title:'My Account', page_subtitle:'Enter your company or personal details. This information is stored only in your account.',
+      back_home:'← Home', loading:'Loading...',
+      profile_info:'Profile Details', account_type:'Account Type', individual:'Individual', corporate:'Corporate',
+      full_name:'Full Name', phone:'Phone', email:'Email', address:'Address', save_btn:'Save', saved_ok:'Saved ✓',
+      referral_code:'Referral Code', referral_note:'Enter a referral code to use the benefit assigned to your membership.', apply_btn:'Apply', code_applied:'Code applied ✓',
+      user_group:'User Group', sample_view:'Sample filled view',
+      company_locked:'You need an account to use user-group features. This information cannot be stored in guest mode.',
+      company_none:'This is currently an individual account. From Profile Details on the left, set Account Type to "Corporate" and enter your company name to save — this automatically opens your user group, letting you add other users (as sub-users) who can view and work with the same data together.',
+      preview_badge:'This is a sample view — not real data.',
+      company_code:'Company Code', company_code_note:'(share for grouping)',
+      add_user:'Add User', invite_btn:'Invite', invite_sent:'Invitation sent ✓',
+      users_label:'Users', leave_group:'Leave Group',
+      group_linked_companies:'Group — Linked Companies', group_note:'Link multiple companies to the same group and switch between them.', link_btn:'Link',
+      active_company:'Active Company', active_company_note:'(the company you will work in)',
+      delete_account:'Permanently Delete My Account',
+      enter_password:'Enter Your Password', delete_confirm_desc:'For security, please re-enter your password to delete your account.',
+      password:'Password', confirm_delete:'Confirm and Delete'
+    }
+  };
+  function applyMmgLang(lang){
+    if(lang === 'tr'){ location.reload(); return; }
+    const dict = MMG_I18N[lang];
+    if(!dict) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.innerHTML = dict[key];
+    });
+  }
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      applyMmgLang(ev.data.mmgLang);
+    }
+  });
+  try{
+    const savedLang = localStorage.getItem('mmg_lang');
+    if(savedLang === 'en') applyMmgLang('en');
+  }catch(e){}
+})();
 </script>
 </body>
 </html>

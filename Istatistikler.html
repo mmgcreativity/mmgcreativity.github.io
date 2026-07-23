@@ -186,12 +186,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <header class="masthead">
   <div>
-    <h1 class="title">İstatistikler</h1>
-    <div class="subtitle">Kullanıcı, referans kodu ve beğenme geri bildirimi istatistikleri burada listelenir.</div>
+    <h1 class="title" data-i18n="page_title">İstatistikler</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Kullanıcı, referans kodu ve beğenme geri bildirimi istatistikleri burada listelenir.</div>
   </div>
-  <button class="btn" id="refreshAllBtn">↻ Yenile</button>
+  <button class="btn" id="refreshAllBtn">↻ <span data-i18n="refresh">Yenile</span></button>
 </header>
-<a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+<a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
 
 <main>
 
@@ -199,87 +199,87 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div id="content" hidden>
 
-    <h2 class="section-title">👥 Kullanıcı Özeti</h2>
+    <h2 class="section-title" data-i18n="user_summary">👥 Kullanıcı Özeti</h2>
     <div class="summary-grid">
       <div class="summary-card clickable" data-user-filter="all">
-        <div class="summary-label">Toplam Kullanıcı <span class="tap-hint">tıkla ▾</span></div>
+        <div class="summary-label"><span data-i18n="total_users">Toplam Kullanıcı</span> <span class="tap-hint" data-i18n="tap_hint">tıkla ▾</span></div>
         <div class="summary-value azure" id="statUserTotal">—</div>
       </div>
       <div class="summary-card clickable" data-user-filter="member">
-        <div class="summary-label">Standart Üye <span class="tap-hint">tıkla ▾</span></div>
+        <div class="summary-label"><span data-i18n="standard_member">Standart Üye</span> <span class="tap-hint" data-i18n="tap_hint">tıkla ▾</span></div>
         <div class="summary-value" id="statUserMember">—</div>
       </div>
       <div class="summary-card clickable" data-user-filter="premium">
-        <div class="summary-label">Premium Üye <span class="tap-hint">tıkla ▾</span></div>
+        <div class="summary-label"><span data-i18n="premium_member">Premium Üye</span> <span class="tap-hint" data-i18n="tap_hint">tıkla ▾</span></div>
         <div class="summary-value brass" id="statUserPremium">—</div>
       </div>
       <div class="summary-card clickable" data-user-filter="referred">
-        <div class="summary-label">Referansla Katılan <span class="tap-hint">tıkla ▾</span></div>
+        <div class="summary-label"><span data-i18n="joined_via_referral">Referansla Katılan</span> <span class="tap-hint" data-i18n="tap_hint">tıkla ▾</span></div>
         <div class="summary-value" id="statUserReferred">—</div>
       </div>
     </div>
 
     <div id="userDetailWrap" class="user-detail-wrap" hidden>
       <div class="toolbar">
-        <div class="user-detail-title" id="userDetailTitle">Kullanıcılar</div>
+        <div class="user-detail-title" id="userDetailTitle" data-i18n="users_label">Kullanıcılar</div>
         <div style="display:flex; gap:8px;">
-          <button class="btn" id="refreshUsersBtn">↻ Yenile</button>
-          <button class="btn" id="closeUserDetailBtn">✕ Kapat</button>
+          <button class="btn" id="refreshUsersBtn">↻ <span data-i18n="refresh">Yenile</span></button>
+          <button class="btn" id="closeUserDetailBtn">✕ <span data-i18n="close">Kapat</span></button>
         </div>
       </div>
       <table>
         <thead>
-          <tr><th>Kullanıcı</th><th>Müşteri No</th><th>Durum</th><th>Referans</th><th>Kayıt Tarihi</th></tr>
+          <tr><th data-i18n="th_user">Kullanıcı</th><th data-i18n="th_customer_no">Müşteri No</th><th data-i18n="th_status">Durum</th><th data-i18n="th_referral">Referans</th><th data-i18n="th_signup_date">Kayıt Tarihi</th></tr>
         </thead>
         <tbody id="tblUserDetailBody"></tbody>
       </table>
     </div>
 
-    <h2 class="section-title">🎟️ Referans Kodu Kullanımı</h2>
+    <h2 class="section-title" data-i18n="referral_usage">🎟️ Referans Kodu Kullanımı</h2>
     <table>
       <thead>
-        <tr><th>Kod</th><th>Fayda</th><th>Kullanım</th><th>Kullanan Kullanıcılar</th></tr>
+        <tr><th data-i18n="th_code">Kod</th><th data-i18n="th_benefit">Fayda</th><th data-i18n="th_usage">Kullanım</th><th data-i18n="th_users_using">Kullanan Kullanıcılar</th></tr>
       </thead>
       <tbody id="tblReferralBody"></tbody>
     </table>
 
-    <h2 class="section-title">💬 Beğenme Geri Bildirimleri</h2>
+    <h2 class="section-title" data-i18n="feedback_title">💬 Beğenme Geri Bildirimleri</h2>
     <div class="summary-grid">
       <div class="summary-card">
-        <div class="summary-label">Toplam Geri Bildirim</div>
+        <div class="summary-label" data-i18n="total_feedback">Toplam Geri Bildirim</div>
         <div class="summary-value" id="statTotal">—</div>
       </div>
       <div class="summary-card">
-        <div class="summary-label">👍 Beğendi</div>
+        <div class="summary-label" data-i18n="liked">👍 Beğendi</div>
         <div class="summary-value good" id="statLiked">—</div>
       </div>
       <div class="summary-card">
-        <div class="summary-label">👎 Beğenmedi</div>
+        <div class="summary-label" data-i18n="disliked">👎 Beğenmedi</div>
         <div class="summary-value bad" id="statDisliked">—</div>
       </div>
       <div class="summary-card">
-        <div class="summary-label">Memnuniyet Oranı</div>
+        <div class="summary-label" data-i18n="satisfaction_rate">Memnuniyet Oranı</div>
         <div class="summary-value" id="statRate">—</div>
       </div>
     </div>
 
     <div class="toolbar">
       <div class="filter-row">
-        <button class="filter-btn active" data-filter="all">Tümü</button>
-        <button class="filter-btn" data-filter="liked">👍 Beğendi</button>
-        <button class="filter-btn" data-filter="disliked">👎 Beğenmedi</button>
-        <button class="filter-btn" data-filter="comment">Sadece yorumlu</button>
+        <button class="filter-btn active" data-filter="all" data-i18n="filter_all">Tümü</button>
+        <button class="filter-btn" data-filter="liked" data-i18n="liked">👍 Beğendi</button>
+        <button class="filter-btn" data-filter="disliked" data-i18n="disliked">👎 Beğenmedi</button>
+        <button class="filter-btn" data-filter="comment" data-i18n="comments_only">Sadece yorumlu</button>
       </div>
-      <button class="btn" id="refreshBtn">↻ Yenile</button>
+      <button class="btn" id="refreshBtn">↻ <span data-i18n="refresh">Yenile</span></button>
     </div>
 
     <table>
       <thead>
-        <tr><th>Tarih</th><th>Kullanıcı</th><th>Sayfa</th><th>Beğeni</th><th>Yorum</th></tr>
+        <tr><th data-i18n="th_date">Tarih</th><th data-i18n="th_user">Kullanıcı</th><th data-i18n="th_page">Sayfa</th><th data-i18n="th_like">Beğeni</th><th data-i18n="th_comment">Yorum</th></tr>
       </thead>
       <tbody id="tblBody"></tbody>
     </table>
-    <div style="font-size:11.5px; color:var(--muted); margin-top:8px;">💡 Bir satıra tıklayarak geri bildirimi verenin hesap bilgilerini görebilirsiniz.</div>
+    <div style="font-size:11.5px; color:var(--muted); margin-top:8px;" data-i18n="row_click_hint">💡 Bir satıra tıklayarak geri bildirimi verenin hesap bilgilerini görebilirsiniz.</div>
   </div>
 </main>
 
@@ -684,6 +684,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     loadAll();
   });
+</script>
+<script>
+(function(){
+  const MMG_I18N = {
+    en: {
+      page_title:'Statistics', page_subtitle:'User, referral code, and feedback statistics are listed here.',
+      refresh:'Refresh', back_home:'← Home',
+      user_summary:'👥 User Summary', total_users:'Total Users', standard_member:'Standard Member', premium_member:'Premium Member',
+      joined_via_referral:'Joined via Referral', tap_hint:'tap ▾', users_label:'Users', close:'Close',
+      th_user:'User', th_customer_no:'Customer No', th_status:'Status', th_referral:'Referral', th_signup_date:'Signup Date',
+      referral_usage:'🎟️ Referral Code Usage', th_code:'Code', th_benefit:'Benefit', th_usage:'Usage', th_users_using:'Users Using',
+      feedback_title:'💬 Like Feedback', total_feedback:'Total Feedback', liked:'👍 Liked', disliked:'👎 Disliked', satisfaction_rate:'Satisfaction Rate',
+      filter_all:'All', comments_only:'Comments Only',
+      th_date:'Date', th_page:'Page', th_like:'Like', th_comment:'Comment',
+      row_click_hint:"💡 Click a row to see the account details of who gave the feedback."
+    }
+  };
+  function applyMmgLang(lang){
+    if(lang === 'tr'){ location.reload(); return; }
+    const dict = MMG_I18N[lang];
+    if(!dict) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.innerHTML = dict[key];
+    });
+  }
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      applyMmgLang(ev.data.mmgLang);
+    }
+  });
+  try{
+    const savedLang = localStorage.getItem('mmg_lang');
+    if(savedLang === 'en') applyMmgLang('en');
+  }catch(e){}
+})();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>
 </body>

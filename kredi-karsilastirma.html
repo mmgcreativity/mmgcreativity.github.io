@@ -62,7 +62,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
-  html{ overflow-x:hidden; }
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
@@ -112,18 +111,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--text-faint);}
   .eyebrow .star{font-size:13px;}
 
-  .grid-top{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+  .grid-top{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
   @media (max-width:860px){.grid-top{grid-template-columns:repeat(2,1fr);}}
   .stat{
-    background:var(--card);border:1px solid var(--border);border-radius:12px;
-    padding:11px 16px;position:relative;overflow:hidden;
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:16px 18px;position:relative;overflow:hidden;
   }
   .stat::before{
     content:"";position:absolute;top:0;left:0;width:3px;height:100%;
     background:linear-gradient(180deg,var(--gold),transparent);
   }
-  .stat .label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:4px;}
-  .stat .value{font-family:'JetBrains Mono',monospace;font-size:16.5px;font-weight:700;color:var(--text);}
+  .stat .label{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:8px;}
+  .stat .value{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--text);}
   .stat .value.gold{color:var(--gold);}
   .stat .value.small{font-size:16px;}
 
@@ -145,6 +144,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   tbody td{padding:8px 10px;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
   tbody tr:last-child td{border-bottom:none;}
   tbody tr.best-row{background:var(--green-soft);}
+  tbody tr.best-row td:first-child{box-shadow:inset 3px 0 0 var(--green);}
 
   input[type=text], input[type=number]{
     width:100%;background:var(--card-2);border:1px solid var(--border);color:var(--text);
@@ -260,13 +260,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   table.offer-table tbody td select{ cursor:pointer; padding:0 2px; }
   table.offer-table tbody td input.annual-rate-input{
     font-family:'JetBrains Mono',monospace; font-weight:600; text-align:right; color:var(--gold);
-    border-color:rgba(232,179,86,.35); background:var(--gold-soft); font-size:14px;
+    border-color:rgba(232,179,86,.35); background:var(--gold-soft);
   }
   table.offer-table tbody td input.annual-rate-input:focus{ border-color:var(--gold); }
   table.offer-table tbody td input[data-field="amount"],
   table.offer-table tbody td input[data-field="monthlyRate"],
   table.offer-table tbody td input[data-field="annualFeeRate"]{
-    font-family:'JetBrains Mono',monospace; font-weight:600; text-align:right; font-size:14px;
+    font-family:'JetBrains Mono',monospace; font-weight:600; text-align:right;
   }
   table.offer-table tbody td input:focus, table.offer-table tbody td select:focus{ border-color:var(--gold); box-shadow:0 0 0 3px var(--gold-soft); }
   table.offer-table td.del-cell{ width:26px; text-align:center; }
@@ -341,56 +341,56 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <header class="masthead">
   <div>
-    <h1 class="title">Kredi Tekliflerini Karşılaştır</h1>
-    <div class="subtitle">Bankaların ihtiyaç kredisi tekliflerini gir; taksit tutarı, faiz, BSMV ve toplam geri ödeme otomatik hesaplansın, en uygun teklif otomatik öne çıksın.</div>
+    <h1 class="title" data-i18n="page_title">Kredi Tekliflerini Karşılaştır</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Bankaların ihtiyaç kredisi tekliflerini gir; taksit tutarı, faiz, BSMV ve toplam geri ödeme otomatik hesaplansın, en uygun teklif otomatik öne çıksın.</div>
   </div>
   <div class="top-actions">
-    <button type="button" class="reset-btn" id="resetPageBtn">↺ Sıfırla</button>
-    <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+    <button type="button" class="reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
+    <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </header>
 <div class="wrap">
 
   <div class="grid-top">
     <div class="stat">
-      <div class="label">En uygun teklif</div>
+      <div class="label" data-i18n="stat_best_offer">En uygun teklif</div>
       <div class="value gold" id="statBestBank">—</div>
     </div>
     <div class="stat">
-      <div class="label">En uygun toplam geri ödeme</div>
+      <div class="label" data-i18n="stat_best_total">En uygun toplam geri ödeme</div>
       <div class="value" id="statBestTotal">—</div>
     </div>
     <div class="stat">
-      <div class="label">Ortalama aylık taksit</div>
+      <div class="label" data-i18n="stat_avg_installment">Ortalama aylık taksit</div>
       <div class="value small" id="statAvgInstallment">—</div>
     </div>
     <div class="stat">
-      <div class="label">Teklif sayısı</div>
+      <div class="label" data-i18n="stat_count">Teklif sayısı</div>
       <div class="value" id="statCount">0</div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-head">
-      <h2><span class="star">&#9733;</span> Teklif Karşılaştırma Tablosu</h2>
+      <h2><span class="star">&#9733;</span> <span data-i18n="compare_table_title">Teklif Karşılaştırma Tablosu</span></h2>
     </div>
     <div class="calc-mode-row">
       <div class="mode-group">
-        <span class="calc-mode-label">Hesaplama Yöntemi</span>
+        <span class="calc-mode-label" data-i18n="calc_method">Hesaplama Yöntemi</span>
         <div class="calc-mode-toggle">
-          <button type="button" class="calc-mode-btn active" data-mode="simple">Basit Faiz (Vade Sonu)</button>
-          <button type="button" class="calc-mode-btn" data-mode="compound">Bileşik Faiz (Periyodik Reeskont)</button>
+          <button type="button" class="calc-mode-btn active" data-mode="simple" data-i18n="mode_simple">Basit Faiz (Vade Sonu)</button>
+          <button type="button" class="calc-mode-btn" data-mode="compound" data-i18n="mode_compound">Bileşik Faiz (Periyodik Reeskont)</button>
         </div>
       </div>
       <div class="mode-group calc-mode-period" id="compoundPeriodRow" hidden>
-        <span class="calc-mode-label">Periyot</span>
+        <span class="calc-mode-label" data-i18n="period_label">Periyot</span>
         <div class="calc-mode-period-controls">
           <select id="compoundPeriodSelect">
-            <option value="1">Gecelik (1 gün)</option>
-            <option value="7">Haftalık (7 gün)</option>
-            <option value="30" selected>Aylık (30 gün)</option>
-            <option value="360">Yıllık (360 gün)</option>
-            <option value="custom">Özel (gün gir)</option>
+            <option value="1" data-i18n="period_nightly">Gecelik (1 gün)</option>
+            <option value="7" data-i18n="period_weekly">Haftalık (7 gün)</option>
+            <option value="30" selected data-i18n="period_monthly">Aylık (30 gün)</option>
+            <option value="360" data-i18n="period_yearly">Yıllık (360 gün)</option>
+            <option value="custom" data-i18n="period_custom">Özel (gün gir)</option>
           </select>
           <input type="number" id="compoundPeriodCustom" min="1" placeholder="gün" hidden>
         </div>
@@ -399,15 +399,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <div class="sort-filter-row">
       <div class="sort-group">
-        <span class="calc-mode-label">Sırala</span>
+        <span class="calc-mode-label" data-i18n="sort_label">Sırala</span>
         <div class="calc-mode-toggle">
-          <button type="button" class="sort-btn active" data-sort="total">Toplam Geri Ödemeye Göre<span class="sort-arrow"> ▲</span></button>
-          <button type="button" class="sort-btn" data-sort="rate">Yıllık Orana Göre<span class="sort-arrow"></span></button>
+          <button type="button" class="sort-btn active" data-sort="total"><span data-i18n="sort_total">Toplam Geri Ödemeye Göre</span><span class="sort-arrow"> ▲</span></button>
+          <button type="button" class="sort-btn" data-sort="rate"><span data-i18n="sort_rate">Yıllık Orana Göre</span><span class="sort-arrow"></span></button>
         </div>
       </div>
       <div class="filter-group">
-        <span class="calc-mode-label">Filtrele</span>
-        <input type="text" id="bankFilterInput" placeholder="Banka adına göre ara...">
+        <span class="calc-mode-label" data-i18n="filter_label">Filtrele</span>
+        <input type="text" id="bankFilterInput" placeholder="Banka adına göre ara..." data-i18n-placeholder="filter_placeholder">
       </div>
     </div>
 
@@ -415,27 +415,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <table class="offer-table">
         <thead>
           <tr>
-            <th style="width:32px;">#</th>
-            <th style="width:104px;">Banka</th>
-            <th class="num" style="width:84px;">Kredi Tutarı</th>
-            <th style="width:64px;">Vade</th>
-            <th class="num" style="width:58px;">Aylık<br>Faiz %</th>
-            <th class="num" style="width:58px;">Yıllık<br>Kom. %</th>
-            <th class="num col-divider" style="width:56px;">Oran<br>(Yıllık)</th>
-            <th class="num" style="width:78px;">Taksit<br>Tutarı</th>
-            <th class="num" style="width:65px;">BSMV</th>
-            <th class="num" style="width:65px;">Komisyon</th>
-            <th class="num" style="width:84px;">Kredi Geri<br>Ödeme</th>
-            <th class="num" style="width:92px;">Toplam Geri<br>Ödeme</th>
+            <th style="width:22px;">#</th>
+            <th style="width:104px;" data-i18n="th_bank">Banka</th>
+            <th class="num" style="width:84px;" data-i18n="th_amount">Kredi Tutarı</th>
+            <th style="width:64px;" data-i18n="th_term">Vade</th>
+            <th class="num" style="width:58px;" data-i18n="th_monthly_rate">Aylık<br>Faiz %</th>
+            <th class="num" style="width:58px;" data-i18n="th_annual_fee">Yıllık<br>Kom. %</th>
+            <th class="num col-divider" style="width:56px;" data-i18n="th_annual_rate">Oran<br>(Yıllık)</th>
+            <th class="num" style="width:78px;" data-i18n="th_installment">Taksit<br>Tutarı</th>
+            <th class="num" style="width:70px;">BSMV</th>
+            <th class="num" style="width:70px;" data-i18n="th_commission">Komisyon</th>
+            <th class="num" style="width:84px;" data-i18n="th_loan_repay">Kredi Geri<br>Ödeme</th>
+            <th class="num" style="width:92px;" data-i18n="th_total_repay">Toplam Geri<br>Ödeme</th>
             <th style="width:26px;"></th>
           </tr>
         </thead>
         <tbody id="inputBody"></tbody>
       </table>
     </div>
-    <div class="empty" id="emptyState" style="display:none;">Henüz teklif eklenmedi. Aşağıdan bir teklif ekleyerek başla.</div>
+    <div class="empty" id="emptyState" style="display:none;" data-i18n="empty_state">Henüz teklif eklenmedi. Aşağıdan bir teklif ekleyerek başla.</div>
     <div style="margin-top:10px;">
-      <button class="btn" id="addRowBtn">+ Teklif Ekle</button>
+      <button class="btn" id="addRowBtn" data-i18n="add_offer">+ Teklif Ekle</button>
     </div>
   </div>
 
@@ -443,10 +443,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
 let offers = [
-  {bank:"VAKIF KATILIM", amount:100000, monthlyRate:4.33, months:2, annualFeeRate:1.12},
-  {bank:"KUVEYT TÜRK", amount:100000, monthlyRate:4.15, months:2, annualFeeRate:1.13},
-  {bank:"AKBANK", amount:100000, monthlyRate:4.58, months:2, annualFeeRate:1.17},
-  {bank:"TÜRKİYE FİNANS", amount:100000, monthlyRate:4.08, months:2, annualFeeRate:1.82},
+  {bank:"VAKIF KATILIM", amount:190043, monthlyRate:4.33, months:2, annualFeeRate:1.12},
+  {bank:"KUVEYT TÜRK", amount:398478, monthlyRate:4.15, months:2, annualFeeRate:1.13},
+  {bank:"AKBANK", amount:3500000, monthlyRate:4.58, months:2, annualFeeRate:1.17},
+  {bank:"TÜRKİYE FİNANS", amount:856077, monthlyRate:4.08, months:2, annualFeeRate:1.82},
 ];
 
 const BSMV_RATE = 0.05;
@@ -735,6 +735,50 @@ renderStats();
       window.location.reload();
     }
   });
+</script>
+<script>
+(function(){
+  const MMG_I18N = {
+    en: {
+      page_title:'Compare Loan Offers',
+      page_subtitle:"Enter banks' personal loan offers; installment amount, interest, tax, and total repayment are calculated automatically, with the best offer highlighted.",
+      reset_btn:'Reset', back_home:'← Home',
+      stat_best_offer:'Best offer', stat_best_total:'Best total repayment', stat_avg_installment:'Average monthly installment', stat_count:'Number of offers',
+      compare_table_title:'Offer Comparison Table', calc_method:'Calculation Method',
+      mode_simple:'Simple Interest (At Maturity)', mode_compound:'Compound Interest (Periodic Rediscount)',
+      period_label:'Period', period_nightly:'Overnight (1 day)', period_weekly:'Weekly (7 days)', period_monthly:'Monthly (30 days)',
+      period_yearly:'Yearly (360 days)', period_custom:'Custom (enter days)',
+      sort_label:'Sort', sort_total:'By Total Repayment', sort_rate:'By Annual Rate',
+      filter_label:'Filter', filter_placeholder:'Search by bank name...',
+      th_bank:'Bank', th_amount:'Loan Amount', th_term:'Term', th_monthly_rate:'Monthly<br>Rate %', th_annual_fee:'Annual<br>Fee %',
+      th_annual_rate:'Rate<br>(Annual)', th_installment:'Installment<br>Amount', th_commission:'Commission', th_loan_repay:'Loan<br>Repayment', th_total_repay:'Total<br>Repayment',
+      empty_state:'No offer added yet. Start by adding one below.', add_offer:'+ Add Offer'
+    }
+  };
+  function applyMmgLang(lang){
+    if(lang === 'tr'){ location.reload(); return; }
+    const dict = MMG_I18N[lang];
+    if(!dict) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.innerHTML = dict[key];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if(dict[key]) el.setAttribute('placeholder', dict[key]);
+    });
+  }
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      applyMmgLang(ev.data.mmgLang);
+    }
+  });
+  try{
+    const savedLang = localStorage.getItem('mmg_lang');
+    if(savedLang === 'en') applyMmgLang('en');
+  }catch(e){}
+})();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>
 </body>
