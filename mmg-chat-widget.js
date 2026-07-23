@@ -35,6 +35,18 @@ import {
   if(window.__mmgChatWidgetLoaded) return;
   window.__mmgChatWidgetLoaded = true;
 
+  // Bu sayfa mmgcreativity uygulama kabuğunun (index.html) içine iframe olarak
+  // açılmışsa (Hesaplama Araçları, Hesabım, vb. sayfalar app-frame içinde açılır),
+  // üst pencerede zaten bir widget çalışıyor demektir. Aynı widget'ın hem üst
+  // pencerede hem iframe içinde ayrı ayrı enjekte edilip üst üste binmesini
+  // (iki baloncuk/panel görünmesini) önlemek için iframe içindeyken enjekte etmiyoruz.
+  // Not: Mobilde dar ekranlarda iframe yerine tam sayfa geçişi yapıldığından (index.html
+  // içinde belirtildiği gibi) o durumda sayfa zaten en üst pencere olur ve widget normal
+  // şekilde çalışmaya devam eder.
+  try{
+    if(window.self !== window.top) return;
+  }catch(e){ /* farklı origin ihtimaline karşı sessizce devam et (yine de enjekte et) */ }
+
   const firebaseConfig = {
     apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
     authDomain: "mmgcreativity-31263.firebaseapp.com",
@@ -213,6 +225,32 @@ import {
     #mmgChatPanel{ right:10px; bottom:78px; width:calc(100vw - 20px); height:min(560px, calc(100vh - 110px)); }
     #mmgChatBubble{ right:14px; bottom:14px; }
   }
+
+  #mmgChatToastContainer{
+    position:fixed; right:20px; bottom:88px; z-index:900;
+    display:flex; flex-direction:column-reverse; gap:10px;
+    width:320px; max-width:calc(100vw - 24px); pointer-events:none;
+  }
+  @media (max-width:480px){ #mmgChatToastContainer{ right:10px; bottom:14px; width:calc(100vw - 20px); } }
+  .mmg-chat-toast{
+    pointer-events:auto; cursor:pointer; display:flex; align-items:flex-start; gap:10px;
+    background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448); border-radius:12px;
+    padding:12px; box-shadow:0 16px 40px rgba(0,0,0,0.45); font-family:'Inter',sans-serif;
+    opacity:0; transform:translateY(12px) scale(0.98); transition:opacity .18s ease, transform .18s ease;
+  }
+  .mmg-chat-toast.mmg-chat-toast-in{ opacity:1; transform:translateY(0) scale(1); }
+  .mmg-chat-toast.mmg-chat-toast-out{ opacity:0; transform:translateY(6px) scale(0.98); }
+  .mmg-chat-toast-avatar{
+    width:34px; height:34px; border-radius:50%; background:var(--brass-dim,#8A7440); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex:0 0 auto;
+  }
+  .mmg-chat-toast-main{ flex:1; min-width:0; }
+  .mmg-chat-toast-title{ font-size:12.5px; font-weight:700; color:var(--text,#EAEDF3); margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mmg-chat-toast-msg{ font-size:12px; color:var(--muted,#8D96AC); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .mmg-chat-toast-close{
+    background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; padding:2px; flex:0 0 auto; font-size:12px; line-height:1;
+  }
+  .mmg-chat-toast-close:hover{ color:var(--text,#EAEDF3); }
   `;
 
   const HTML = `
@@ -252,6 +290,8 @@ import {
     </div>
   </div>`;
 
+  const TOAST_HTML = `<div id="mmgChatToastContainer" aria-live="polite"></div>`;
+
   function inject(){
     const styleTag = document.createElement('style');
     styleTag.id = 'mmgChatStyle';
@@ -260,6 +300,9 @@ import {
     const wrap = document.createElement('div');
     wrap.innerHTML = HTML;
     while(wrap.firstElementChild) document.body.appendChild(wrap.firstElementChild);
+    const toastWrap = document.createElement('div');
+    toastWrap.innerHTML = TOAST_HTML;
+    document.body.appendChild(toastWrap.firstElementChild);
     wireUp();
   }
 
@@ -282,6 +325,7 @@ import {
     els.footer = document.getElementById('mmgChatFooter');
     els.input = document.getElementById('mmgChatInput');
     els.sendBtn = document.getElementById('mmgChatSendBtn');
+    els.toastContainer = document.getElementById('mmgChatToastContainer');
 
     els.bubble.addEventListener('pointerdown', onBubblePointerDown);
     els.closeBtn.addEventListener('click', () => { els.panel.hidden = true; });
@@ -314,11 +358,51 @@ import {
     els.input.addEventListener('keydown', (e) => {
       if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendCurrentMessage(); }
     });
+
+    // Panel açıkken, panelin ve baloncuğun DIŞINDA bir yere tıklanırsa paneli kapat.
+    // Baloncuğa tıklamak zaten kendi aç/kapat mantığını yürütüyor (onBubblePointerUp),
+    // bu yüzden baloncuk tıklamaları burada hariç tutuluyor.
+    document.addEventListener('pointerdown', (e) => {
+      if(els.panel.hidden) return;
+      if(els.panel.contains(e.target) || els.bubble.contains(e.target)) return;
+      els.panel.hidden = true;
+    }, true);
   }
 
   function setBadge(n){
     if(n > 0){ els.badge.hidden = false; els.badge.textContent = n > 9 ? '9+' : String(n); }
     else { els.badge.hidden = true; }
+  }
+
+  // ---- Sağ altta beliren bildirim baloncuğu (toast) ----
+  function showChatToast(opts){
+    if(!els.toastContainer) return;
+    const toastEl = document.createElement('div');
+    toastEl.className = 'mmg-chat-toast';
+    toastEl.innerHTML = `
+      <div class="mmg-chat-toast-avatar">${esc(opts.avatarLetter || '💬')}</div>
+      <div class="mmg-chat-toast-main">
+        <div class="mmg-chat-toast-title">${esc(opts.title || 'Yeni mesaj')}</div>
+        <div class="mmg-chat-toast-msg">${esc(opts.message || '')}</div>
+      </div>
+      <button type="button" class="mmg-chat-toast-close" aria-label="Kapat">✕</button>
+    `;
+    let removed = false;
+    function removeToast(){
+      if(removed) return;
+      removed = true;
+      toastEl.classList.remove('mmg-chat-toast-in');
+      toastEl.classList.add('mmg-chat-toast-out');
+      setTimeout(() => toastEl.remove(), 200);
+    }
+    toastEl.addEventListener('click', (e) => {
+      if(e.target.closest('.mmg-chat-toast-close')){ e.stopPropagation(); removeToast(); return; }
+      removeToast();
+      if(typeof opts.onClick === 'function') opts.onClick();
+    });
+    els.toastContainer.appendChild(toastEl);
+    requestAnimationFrame(() => toastEl.classList.add('mmg-chat-toast-in'));
+    setTimeout(removeToast, 6000);
   }
 
   // ---- Taşınabilir baloncuk (sürükle-bırak) ----
@@ -472,10 +556,78 @@ import {
   }
 
   // ---- Dinleyiciler ----
+  let chatsFirstSnapshot = true, groupsFirstSnapshot = true;
+
+  function detectNewMessagesAndToast(newMap, oldMap, kind){
+    Object.keys(newMap).forEach(id => {
+      const c = newMap[id];
+      const prev = oldMap[id];
+      const newAt = c.lastMessageAt && c.lastMessageAt.toMillis ? c.lastMessageAt.toMillis() : 0;
+      const prevAt = prev && prev.lastMessageAt && prev.lastMessageAt.toMillis ? prev.lastMessageAt.toMillis() : 0;
+      if(!newAt || newAt <= prevAt) return;
+      if(!c.lastSenderUid || c.lastSenderUid === currentUser.uid) return;
+      if(openChatId === id) return; // zaten bu sohbet açıkken popup gösterilmesin
+      if(kind === 'chats' && !c.isAdminChat){
+        const otherUid = (c.participants || []).find(u => u !== currentUser.uid);
+        if(myBlockedUids.includes(otherUid)) return;
+      }
+      showToastForChat(id, c, kind);
+    });
+  }
+
+  function showToastForChat(id, c, kind){
+    if(kind === 'chats' && c.isAdminChat){
+      showChatToast({
+        title: 'Sistem Yöneticiniz',
+        message: c.lastMessage || 'Yeni mesaj',
+        avatarLetter: 'A',
+        onClick: () => {
+          els.panel.hidden = false;
+          positionPanelNearBubble();
+          activeTab = 'admin';
+          [...els.tabs.children].forEach(t => t.classList.toggle('active', t.dataset.tab === 'admin'));
+          openChat(id, { title: 'Sistem Yöneticiniz ile Görüşün', isAdminChat: true });
+        }
+      });
+      return;
+    }
+    if(kind === 'groups'){
+      const title = (c.name || 'Grup') + ' (Grup)';
+      showChatToast({
+        title, message: c.lastMessage || 'Yeni mesaj', avatarLetter: '👥',
+        onClick: () => {
+          els.panel.hidden = false;
+          positionPanelNearBubble();
+          activeTab = 'friends';
+          [...els.tabs.children].forEach(t => t.classList.toggle('active', t.dataset.tab === 'friends'));
+          openChat(id, { title: (c.name || 'Grup'), isAdminChat: false, collection: 'chatGroups' });
+        }
+      });
+      return;
+    }
+    // kind === 'chats', normal 1:1
+    const otherUid = (c.participants || []).find(u => u !== currentUser.uid);
+    const info = (c.participantInfo && c.participantInfo[otherUid]) || {};
+    const label = info.code ? ('Kod: ' + info.code) : 'Kullanıcı';
+    showChatToast({
+      title: label, message: c.lastMessage || 'Yeni mesaj', avatarLetter: (info.code || '?').slice(0, 1),
+      onClick: () => {
+        els.panel.hidden = false;
+        positionPanelNearBubble();
+        activeTab = 'friends';
+        [...els.tabs.children].forEach(t => t.classList.toggle('active', t.dataset.tab === 'friends'));
+        openChat(id, { title: label, isAdminChat: false, otherUid, collection: 'chats' });
+      }
+    });
+  }
+
   function startListeners(uid){
     unsubChats = onSnapshot(query(collection(db, 'chats'), where('participants', 'array-contains', uid)), (snap) => {
-      chatsMap = {};
-      snap.forEach(d => { chatsMap[d.id] = d.data(); });
+      const newChatsMap = {};
+      snap.forEach(d => { newChatsMap[d.id] = d.data(); });
+      if(!chatsFirstSnapshot) detectNewMessagesAndToast(newChatsMap, chatsMap, 'chats');
+      chatsMap = newChatsMap;
+      chatsFirstSnapshot = false;
       if(activeTab === 'friends' && friendsSubView === 'list') renderTab();
       if(openChatId && chatsMap[openChatId]) updateOpenChatHeaderIfNeeded();
       updateBadge();
@@ -489,8 +641,11 @@ import {
     }, (err) => console.error('mmg-chat-widget requests onSnapshot:', err));
 
     unsubGroups = onSnapshot(query(collection(db, 'chatGroups'), where('members', 'array-contains', uid)), (snap) => {
-      groupsMap = {};
-      snap.forEach(d => { groupsMap[d.id] = d.data(); });
+      const newGroupsMap = {};
+      snap.forEach(d => { newGroupsMap[d.id] = d.data(); });
+      if(!groupsFirstSnapshot) detectNewMessagesAndToast(newGroupsMap, groupsMap, 'groups');
+      groupsMap = newGroupsMap;
+      groupsFirstSnapshot = false;
       if(activeTab === 'friends' && friendsSubView === 'list') renderTab();
       updateBadge();
     }, (err) => console.error('mmg-chat-widget groups onSnapshot:', err));
@@ -1031,6 +1186,7 @@ import {
     if(unsubGroups){ unsubGroups(); unsubGroups = null; }
     if(unsubGroupInvites){ unsubGroupInvites(); unsubGroupInvites = null; }
     chatsMap = {}; requestsMap = {}; groupsMap = {}; groupInvitesMap = {}; openChatId = null;
+    chatsFirstSnapshot = true; groupsFirstSnapshot = true;
   }
 
   onAuthStateChanged(auth, async (user) => {

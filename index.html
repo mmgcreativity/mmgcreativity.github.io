@@ -571,8 +571,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .auth-field input:focus, .auth-field select:focus{ border-color:var(--brass-dim); }
   .auth-error{ color:var(--coral); font-size:12.5px; margin-bottom:14px; display:none; grid-column:1 / -1; }
   .auth-error.show{ display:block; }
+  .auth-success{ color:var(--teal); font-size:12.5px; margin-bottom:14px; display:none; grid-column:1 / -1; }
+  .auth-success.show{ display:block; }
+  .auth-remember-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; grid-column:1 / -1; }
+  .auth-forgot-link{
+    font-size:12.5px; color:var(--brass,#C6A15B); text-decoration:none; background:none; border:none;
+    cursor:pointer; padding:0; font-family:inherit;
+  }
+  .auth-forgot-link:hover{ text-decoration:underline; }
   .auth-remember{
-    display:flex; align-items:center; gap:8px; margin-bottom:16px; cursor:pointer;
+    display:flex; align-items:center; gap:8px; cursor:pointer;
     font-size:13px; color:var(--muted); user-select:none;
   }
   .auth-remember input[type="checkbox"]{ width:15px; height:15px; accent-color:var(--brass); cursor:pointer; }
@@ -649,6 +657,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
       <div class="auth-error" id="authError"></div>
+      <div class="auth-success" id="authSuccess"></div>
 
       <form id="authForm" class="auth-grid">
         <div class="auth-field auth-half" id="authAccountTypeWrap" style="display:none;">
@@ -678,10 +687,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <label>Referans Kodu <span style="color:var(--muted); font-weight:400;">(varsa, opsiyonel)</span></label>
           <input type="text" id="authReferralCode" placeholder="ör. AHMET10">
         </div>
-        <label class="auth-remember auth-full">
-          <input type="checkbox" id="rememberMe">
-          <span>Oturumu açık tut</span>
-        </label>
+        <div class="auth-remember-row" id="authRememberRow">
+          <label class="auth-remember">
+            <input type="checkbox" id="rememberMe">
+            <span>Oturumu açık tut</span>
+          </label>
+          <button type="button" class="auth-forgot-link" id="forgotPasswordBtn">Şifremi unuttum?</button>
+        </div>
         <button type="submit" class="auth-submit auth-full" id="authSubmitBtn">Giriş Yap</button>
       </form>
 
@@ -1186,7 +1198,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   import {
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
     signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup,
-    deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup
+    deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup,
+    sendPasswordResetEmail
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment,
@@ -1254,6 +1267,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const authOverlay = document.getElementById('authOverlay');
   const authForm = document.getElementById('authForm');
   const authError = document.getElementById('authError');
+  const authSuccess = document.getElementById('authSuccess');
+  const authRememberRow = document.getElementById('authRememberRow');
+  const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
   const authTitle = document.getElementById('authTitle');
   const authSub = document.getElementById('authSub');
   const authSubmitBtn = document.getElementById('authSubmitBtn');
@@ -1285,21 +1301,62 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     usernameWrap.style.display = mode === 'signup' ? 'block' : 'none';
     referralWrap.style.display = mode === 'signup' ? 'block' : 'none';
     accountTypeWrap.style.display = mode === 'signup' ? 'block' : 'none';
+    authRememberRow.style.display = mode === 'login' ? 'flex' : 'none';
     if(mode === 'signup') updateUsernameLabelForType();
     authTitle.textContent = mode === 'login' ? 'Hoş geldiniz' : 'Hesap oluşturun';
     authSub.textContent = mode === 'login' ? 'Kaldığınız yerden devam etmek için giriş yapın' : 'Oranlarınızı ve tercihlerinizi kaydetmek için ücretsiz hesap açın';
     authSubmitBtn.textContent = mode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur';
     hideAuthError();
+    hideAuthSuccess();
   }
 
   function showAuthError(msg){
     authError.textContent = msg;
     authError.classList.add('show');
+    hideAuthSuccess();
   }
   function hideAuthError(){
     authError.classList.remove('show');
     authError.textContent = '';
   }
+  function showAuthSuccess(msg){
+    authSuccess.textContent = msg;
+    authSuccess.classList.add('show');
+    hideAuthError();
+  }
+  function hideAuthSuccess(){
+    authSuccess.classList.remove('show');
+    authSuccess.textContent = '';
+  }
+
+  forgotPasswordBtn.addEventListener('click', async () => {
+    const emailInput = document.getElementById('authEmail');
+    const email = emailInput.value.trim();
+    if(!email){
+      showAuthError('Şifre sıfırlama bağlantısı gönderebilmemiz için önce e-posta adresinizi yazın.');
+      emailInput.focus();
+      return;
+    }
+    forgotPasswordBtn.disabled = true;
+    const originalText = forgotPasswordBtn.textContent;
+    forgotPasswordBtn.textContent = 'Gönderiliyor...';
+    try{
+      await sendPasswordResetEmail(auth, email);
+      showAuthSuccess('Şifre sıfırlama bağlantısı ' + email + ' adresine gönderildi. Gelen kutunuzu (ve spam klasörünü) kontrol edin.');
+    } catch(err){
+      if(err.code === 'auth/invalid-email'){
+        showAuthError('Geçerli bir e-posta adresi girin.');
+      } else if(err.code === 'auth/user-not-found'){
+        // Güvenlik amacıyla, bu e-postanın kayıtlı olup olmadığını ayırt etmiyoruz.
+        showAuthSuccess('Eğer bu e-posta adresi sistemde kayıtlıysa, şifre sıfırlama bağlantısı gönderildi.');
+      } else {
+        showAuthError('Şifre sıfırlama e-postası gönderilemedi. Lütfen daha sonra tekrar deneyin.');
+      }
+    } finally {
+      forgotPasswordBtn.disabled = false;
+      forgotPasswordBtn.textContent = originalText;
+    }
+  });
 
   tabLogin.addEventListener('click', () => setAuthMode('login'));
   tabSignup.addEventListener('click', () => setAuthMode('signup'));

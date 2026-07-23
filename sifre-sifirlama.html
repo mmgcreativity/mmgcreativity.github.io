@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Şifre Sıfırlama — mmgcreativity</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --teal:#3FB68A; --coral:#FF6B4A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html, body{background:var(--bg); min-height:100vh;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .card{
+    width:100%; max-width:400px; background:var(--surface); border:1px solid var(--hairline);
+    border-radius:16px; padding:36px 30px; box-shadow:0 24px 60px rgba(0,0,0,0.4);
+  }
+  .brand{ display:flex; flex-direction:column; align-items:center; margin-bottom:22px; }
+  .brand img{ width:44px; height:44px; border-radius:10px; margin-bottom:10px; }
+  .brand .fallback{
+    width:44px; height:44px; border-radius:10px; background:linear-gradient(135deg, var(--coral), var(--brass) 85%);
+    display:none; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700;
+    color:#fff; font-size:20px; margin-bottom:10px;
+  }
+  .brand .name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--muted); letter-spacing:.02em; }
+  h1{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:21px; text-align:center; margin-bottom:8px; }
+  .sub{ color:var(--muted); font-size:13.5px; text-align:center; margin-bottom:24px; line-height:1.6; }
+  .sub b{ color:var(--text); }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; }
+  .field input{
+    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
+    transition:border-color .15s ease;
+  }
+  .field input:focus{ border-color:var(--brass-dim); }
+  .submit-btn{
+    width:100%; padding:13px; border-radius:9px; border:none; cursor:pointer;
+    background:linear-gradient(120deg, var(--coral), var(--brass) 75%); color:#fff;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; margin-top:4px;
+    transition:opacity .15s ease;
+  }
+  .submit-btn:hover{ opacity:0.9; }
+  .submit-btn:disabled{ opacity:0.6; cursor:default; }
+  .msg{ font-size:13px; margin-top:14px; text-align:center; line-height:1.6; }
+  .msg.error{ color:var(--red); }
+  .msg.ok{ color:var(--teal); }
+  .state-box{ text-align:center; padding:10px 0; color:var(--muted); font-size:13.5px; line-height:1.7; }
+  .state-box .big{ font-size:30px; margin-bottom:12px; }
+  .home-link{
+    display:inline-block; margin-top:18px; color:var(--brass); font-size:13px; text-decoration:none; font-weight:600;
+  }
+  .home-link:hover{ text-decoration:underline; }
+  [hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <img src="logo.png" alt="mmgcreativity" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="fallback">M</div>
+      <div class="name">mmgcreativity</div>
+    </div>
+
+    <div id="loadingState" class="state-box">
+      <div class="big">⏳</div>
+      Bağlantı kontrol ediliyor…
+    </div>
+
+    <div id="formState" hidden>
+      <h1>Yeni Şifre Belirle</h1>
+      <div class="sub"><b id="targetEmail"></b> hesabı için yeni bir şifre oluşturun.</div>
+      <form id="resetForm">
+        <div class="field">
+          <label>Yeni Şifre</label>
+          <input type="password" id="newPassword" placeholder="••••••••" required minlength="6">
+        </div>
+        <div class="field">
+          <label>Yeni Şifre (Tekrar)</label>
+          <input type="password" id="newPasswordConfirm" placeholder="••••••••" required minlength="6">
+        </div>
+        <button type="submit" class="submit-btn" id="submitBtn">Şifreyi Güncelle</button>
+        <div id="formMsg" class="msg" style="min-height:16px;"></div>
+      </form>
+    </div>
+
+    <div id="successState" class="state-box" hidden>
+      <div class="big">✅</div>
+      Şifreniz başarıyla güncellendi.<br>
+      Artık yeni şifrenizle giriş yapabilirsiniz.
+      <div><a href="index.html" class="home-link">Ana Sayfaya Dön →</a></div>
+    </div>
+
+    <div id="errorState" class="state-box" hidden>
+      <div class="big">⛔</div>
+      <span id="errorText">Bu bağlantı geçersiz veya süresi dolmuş.</span>
+      <div><a href="index.html?auth=1" class="home-link">Yeni bir bağlantı iste →</a></div>
+    </div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, verifyPasswordResetCode, confirmPasswordReset } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  auth.languageCode = 'tr';
+
+  const loadingState = document.getElementById('loadingState');
+  const formState = document.getElementById('formState');
+  const successState = document.getElementById('successState');
+  const errorState = document.getElementById('errorState');
+  const errorText = document.getElementById('errorText');
+  const targetEmail = document.getElementById('targetEmail');
+
+  function showOnly(el){
+    [loadingState, formState, successState, errorState].forEach(s => s.hidden = (s !== el));
+  }
+
+  function mapError(code){
+    const map = {
+      'auth/expired-action-code': 'Bu bağlantının süresi dolmuş. Lütfen yeni bir şifre sıfırlama isteği gönderin.',
+      'auth/invalid-action-code': 'Bu bağlantı geçersiz veya daha önce kullanılmış.',
+      'auth/user-disabled': 'Bu hesap devre dışı bırakılmış.',
+      'auth/user-not-found': 'Bu bağlantıya ait bir hesap bulunamadı.',
+      'auth/weak-password': 'Şifre en az 6 karakter olmalı.'
+    };
+    return map[code] || 'Bir hata oluştu, lütfen tekrar deneyin.';
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get('mode');
+  const oobCode = params.get('oobCode');
+
+  async function init(){
+    if(mode !== 'resetPassword' || !oobCode){
+      errorText.textContent = 'Bu bağlantı geçersiz görünüyor.';
+      showOnly(errorState);
+      return;
+    }
+    try{
+      const email = await verifyPasswordResetCode(auth, oobCode);
+      targetEmail.textContent = email;
+      showOnly(formState);
+    }catch(err){
+      errorText.textContent = mapError(err.code);
+      showOnly(errorState);
+    }
+  }
+
+  document.getElementById('resetForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msgEl = document.getElementById('formMsg');
+    const submitBtn = document.getElementById('submitBtn');
+    const pw1 = document.getElementById('newPassword').value;
+    const pw2 = document.getElementById('newPasswordConfirm').value;
+    msgEl.textContent = '';
+    msgEl.className = 'msg';
+
+    if(pw1.length < 6){
+      msgEl.textContent = 'Şifre en az 6 karakter olmalı.';
+      msgEl.classList.add('error');
+      return;
+    }
+    if(pw1 !== pw2){
+      msgEl.textContent = 'Şifreler eşleşmiyor.';
+      msgEl.classList.add('error');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Güncelleniyor…';
+    try{
+      await confirmPasswordReset(auth, oobCode, pw1);
+      showOnly(successState);
+    }catch(err){
+      msgEl.textContent = mapError(err.code);
+      msgEl.classList.add('error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Şifreyi Güncelle';
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>
