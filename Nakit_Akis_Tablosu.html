@@ -205,8 +205,8 @@ function mmgApplyTurkishFont(doc){
     --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html{background:var(--bg); overflow-x:hidden;}
-  html,body{overscroll-behavior-y:none;}
+  html{background:var(--bg);}
+
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
@@ -630,16 +630,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <header class="masthead">
   <div>
-    <h1 class="title">Nakit Akış Tablosu</h1>
-    <div class="subtitle">Tarih seçin ve günlük, haftalık, aylık ve yıllık dönemlerde gelir gider analizinizi görün.</div>
+    <h1 class="title" data-i18n="page_title">Nakit Akış Tablosu</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Tarih seçin ve günlük, haftalık, aylık ve yıllık dönemlerde gelir gider analizinizi görün.</div>
   </div>
   <div class="page-nav">
-    <a href="rehber-nakit-akis-tablosu.html" class="guide-btn">📖 Rehber</a>
-    <a href="Giderler.html" class="guide-btn">💳 Giderler</a>
-    <a href="Gelirler.html" class="guide-btn">💰 Gelirler</a>
+    <a href="rehber-nakit-akis-tablosu.html" class="guide-btn">📖 <span data-i18n="nav_guide">Rehber</span></a>
+    <a href="Giderler.html" class="guide-btn">💳 <span data-i18n="nav_expenses">Giderler</span></a>
+    <a href="Gelirler.html" class="guide-btn">💰 <span data-i18n="nav_income">Gelirler</span></a>
   </div>
   <div class="top-actions">
-    <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+    <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </header>
 
@@ -665,10 +665,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="controls-row" id="secondaryControls">
           <div class="top-combined-row">
             <div class="report-tabs report-tabs-primary" id="reportTabs">
-              <button type="button" class="report-tab" data-tab="gunluk">Günlük</button>
-              <button type="button" class="report-tab" data-tab="haftalik">Haftalık</button>
-              <button type="button" class="report-tab" data-tab="aylik">Aylık</button>
-              <button type="button" class="report-tab" data-tab="yillik">Yıllık</button>
+              <button type="button" class="report-tab" data-tab="gunluk" data-i18n="tab_daily">Günlük</button>
+              <button type="button" class="report-tab" data-tab="haftalik" data-i18n="tab_weekly">Haftalık</button>
+              <button type="button" class="report-tab" data-tab="aylik" data-i18n="tab_monthly">Aylık</button>
+              <button type="button" class="report-tab" data-tab="yillik" data-i18n="tab_yearly">Yıllık</button>
             </div>
             <div class="date-controls-group" id="dateNavGroup">
               <div class="month-nav">
@@ -687,10 +687,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
                 <button type="button" class="nav-arrow-btn" id="nextMonthBtn" title="Sonraki">▶</button>
               </div>
-              <button type="button" class="ghost-btn" id="gotoTodayBtn">📍 Bugün</button>
-              <button type="button" class="ghost-btn" id="manualSaveBtn">💾 Kaydet</button>
-              <button type="button" class="ghost-btn" id="clearMonthBtn">🗑 Temizle</button>
-              <button type="button" class="ghost-btn" id="undoClearBtn" style="display:none;">↩ Geri Al</button>
+              <button type="button" class="ghost-btn" id="gotoTodayBtn">📍 <span data-i18n="goto_today">Bugün</span></button>
+              <button type="button" class="ghost-btn" id="manualSaveBtn">💾 <span data-i18n="save_btn">Kaydet</span></button>
+              <button type="button" class="ghost-btn" id="clearMonthBtn">🗑 <span data-i18n="clear_btn">Temizle</span></button>
+              <button type="button" class="ghost-btn" id="undoClearBtn" style="display:none;">↩ <span data-i18n="undo_btn">Geri Al</span></button>
             </div>
           </div>
         </div>
@@ -2335,5 +2335,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 
+<script>
+(function(){
+  const MMG_I18N = {
+    en: {
+      page_title:'Cash Flow Table', page_subtitle:'Pick a date and view your income/expense analysis by day, week, month, or year.',
+      nav_guide:'Guide', nav_expenses:'Expenses', nav_income:'Income', back_home:'← Home',
+      tab_daily:'Daily', tab_weekly:'Weekly', tab_monthly:'Monthly', tab_yearly:'Yearly',
+      goto_today:'Today', save_btn:'Save', clear_btn:'Clear', undo_btn:'Undo'
+    }
+  };
+  function applyMmgLang(lang){
+    if(lang === 'tr'){ location.reload(); return; }
+    const dict = MMG_I18N[lang];
+    if(!dict) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.innerHTML = dict[key];
+    });
+  }
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      applyMmgLang(ev.data.mmgLang);
+    }
+  });
+  try{
+    const savedLang = localStorage.getItem('mmg_lang');
+    if(savedLang === 'en') applyMmgLang('en');
+  }catch(e){}
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

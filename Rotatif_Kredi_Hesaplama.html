@@ -140,8 +140,8 @@ function mmgApplyTurkishFont(doc){
     --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html{background:var(--bg); overflow-x:hidden;}
-  html,body{overscroll-behavior-y:none;}
+  html{background:var(--bg);}
+
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
@@ -384,12 +384,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <header class="masthead">
   <div>
-    <h1 class="title">Rotatif Kredi Hesaplama</h1>
-    <div class="subtitle">Tutar, oran ve vade girin; bankaların rotatif kredi, KMH ve BCH kredilerinde, aylık veya üç aylık periyotlarla aldığı faizi anında hesaplayın.<br>Bu modül, gecelik işleyen faiz mantığındaki borçlarınızı hesaplamanızı kolaylaştırır.</div>
+    <h1 class="title" data-i18n="page_title">Rotatif Kredi Hesaplama</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Tutar, oran ve vade girin; bankaların rotatif kredi, KMH ve BCH kredilerinde, aylık veya üç aylık periyotlarla aldığı faizi anında hesaplayın.<br>Bu modül, gecelik işleyen faiz mantığındaki borçlarınızı hesaplamanızı kolaylaştırır.</div>
   </div>
   <div class="top-actions">
-    <button type="button" class="reset-btn" id="resetPageBtn">↺ Sıfırla</button>
-    <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+    <button type="button" class="reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
+    <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </header>
 
@@ -400,76 +400,76 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="calc-grid">
       <div class="input-card">
         <div class="field">
-          <label>Kredi Tutarı</label>
+          <label data-i18n="label_amount">Kredi Tutarı</label>
           <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num" id="qTutar" value="1.000.000" data-decimals="2"><span class="unit">TL</span></div>
         </div>
         <div class="field-row-3">
           <div class="field">
-            <label>Vade</label>
-            <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num small" id="qVade" value="365" data-decimals="0"><span class="unit">gün</span></div>
+            <label data-i18n="label_term">Vade</label>
+            <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num small" id="qVade" value="365" data-decimals="0"><span class="unit" data-i18n="unit_days">gün</span></div>
           </div>
           <div class="field">
-            <label>Yıllık Faiz Oranı</label>
+            <label data-i18n="label_annual_rate">Yıllık Faiz Oranı</label>
             <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num small" id="qOran" value="45" data-decimals="2"><span class="unit">%</span></div>
           </div>
           <div class="field">
-            <label>Komisyon Oranı</label>
+            <label data-i18n="label_commission_rate">Komisyon Oranı</label>
             <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num small" id="qKomOran" value="1" data-decimals="2"><span class="unit">%</span></div>
           </div>
         </div>
 
         <div class="adv-toggle" id="advToggle">
-          <span id="advIcon">▸</span> Gelişmiş ayarlar (BSMV oranı, gün bazı, tarihten vade hesapla)
+          <span id="advIcon">▸</span> <span data-i18n="adv_settings">Gelişmiş ayarlar (BSMV oranı, gün bazı, tarihten vade hesapla)</span>
         </div>
-        <div class="flag" style="margin-top:8px;">⚠ BSMV oranı ve gün bazları "Gelişmiş ayarlar"dan güncellenebilir; mevzuat değişirse buradan düzenleyin.</div>
+        <div class="flag" style="margin-top:8px;" data-i18n="adv_flag">⚠ BSMV oranı ve gün bazları "Gelişmiş ayarlar"dan güncellenebilir; mevzuat değişirse buradan düzenleyin.</div>
         <div class="adv-body" id="advBody">
           <div class="field">
-            <label>BSMV Oranı <span style="color:var(--muted)">(faiz ve komisyon üzerinden alınan vergi)</span></label>
+            <label><span data-i18n="label_bsmv">BSMV Oranı</span> <span style="color:var(--muted)" data-i18n="label_bsmv_note">(faiz ve komisyon üzerinden alınan vergi)</span></label>
             <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num" id="qBsmv" value="5" data-decimals="2"><span class="unit">%</span></div>
           </div>
           <div class="field-row">
             <div class="field">
-              <label>Faiz Gün Bazı</label>
-              <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num small" id="qGunBaziFaiz" value="365" data-decimals="0"><span class="unit">gün</span></div>
+              <label data-i18n="label_interest_daybase">Faiz Gün Bazı</label>
+              <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num small" id="qGunBaziFaiz" value="365" data-decimals="0"><span class="unit" data-i18n="unit_days">gün</span></div>
             </div>
             <div class="field">
-              <label>Komisyon Gün Bazı</label>
-              <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num small" id="qGunBaziKom" value="365" data-decimals="0"><span class="unit">gün</span></div>
+              <label data-i18n="label_commission_daybase">Komisyon Gün Bazı</label>
+              <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num small" id="qGunBaziKom" value="365" data-decimals="0"><span class="unit" data-i18n="unit_days">gün</span></div>
             </div>
           </div>
           <div class="io-msg" id="gunBaziIoMsg"></div>
           <div class="gun-tool">
-            <div style="font-size:12px; color:var(--brass); margin-bottom:10px; font-weight:600;">İki Tarih Arası Gün Hesaplama</div>
+            <div style="font-size:12px; color:var(--brass); margin-bottom:10px; font-weight:600;" data-i18n="days_between_title">İki Tarih Arası Gün Hesaplama</div>
             <div class="field-row">
               <div class="field">
-                <label>Kullanım Tarihi</label>
+                <label data-i18n="label_start_date">Kullanım Tarihi</label>
                 <div class="input-wrap"><input type="date" id="gunBaslangic"></div>
               </div>
               <div class="field">
-                <label>Vade Tarihi</label>
+                <label data-i18n="label_due_date">Vade Tarihi</label>
                 <div class="input-wrap"><input type="date" id="gunBitis"></div>
               </div>
             </div>
-            <div class="gun-result">Gün sayısı (başlangıç hariç, banka usulü): <b id="gunSonuc">—</b></div>
-            <button class="btn small ghost" id="gunUygula" style="margin-top:10px;">Vade alanına aktar</button>
+            <div class="gun-result"><span data-i18n="days_result_label">Gün sayısı (başlangıç hariç, banka usulü):</span> <b id="gunSonuc">—</b></div>
+            <button class="btn small ghost" id="gunUygula" style="margin-top:10px;" data-i18n="apply_to_term">Vade alanına aktar</button>
           </div>
         </div>
       </div>
 
       <div class="result-card">
         <div class="result-hero">
-          <div class="label">TOPLAM GERİ ÖDEME</div>
+          <div class="label" data-i18n="total_repayment">TOPLAM GERİ ÖDEME</div>
           <div class="value" id="rToplamGeri">—</div>
           <div class="sub" id="rToplamGeriSub">—</div>
         </div>
         <div class="result-rows">
-          <div class="result-row"><div class="rlabel">Vade Sonu Faiz</div><div class="rvalue" id="rFaiz">—</div></div>
-          <div class="result-row"><div class="rlabel">Faiz BSMV</div><div class="rvalue" id="rFaizBsmv">—</div></div>
-          <div class="result-row"><div class="rlabel">Komisyon Tutarı</div><div class="rvalue" id="rKomisyon">—</div></div>
-          <div class="result-row"><div class="rlabel">Komisyon BSMV</div><div class="rvalue" id="rKomisyonBsmv">—</div></div>
-          <div class="result-row total"><div class="rlabel">Kredi Geri Ödeme <span style="color:var(--muted); font-size:11px;">(anapara+faiz+faiz BSMV)</span></div><div class="rvalue" id="rKrediGeri">—</div></div>
-          <div class="result-row fark"><div class="rlabel">Toplam Fark <span style="color:var(--muted); font-size:11px;">(anapara hariç ek maliyet)</span></div><div class="rvalue" id="rFark">—</div></div>
-          <div class="result-row"><div class="rlabel">Efektif Yıllık Maliyet Oranı <span class="badge-formula">ek gösterge</span></div><div class="rvalue" id="rEfektif">—</div></div>
+          <div class="result-row"><div class="rlabel" data-i18n="interest_at_maturity">Vade Sonu Faiz</div><div class="rvalue" id="rFaiz">—</div></div>
+          <div class="result-row"><div class="rlabel" data-i18n="interest_bsmv">Faiz BSMV</div><div class="rvalue" id="rFaizBsmv">—</div></div>
+          <div class="result-row"><div class="rlabel" data-i18n="commission_amount">Komisyon Tutarı</div><div class="rvalue" id="rKomisyon">—</div></div>
+          <div class="result-row"><div class="rlabel" data-i18n="commission_bsmv">Komisyon BSMV</div><div class="rvalue" id="rKomisyonBsmv">—</div></div>
+          <div class="result-row total"><div class="rlabel"><span data-i18n="loan_repayment">Kredi Geri Ödeme</span> <span style="color:var(--muted); font-size:11px;" data-i18n="loan_repayment_note">(anapara+faiz+faiz BSMV)</span></div><div class="rvalue" id="rKrediGeri">—</div></div>
+          <div class="result-row fark"><div class="rlabel"><span data-i18n="total_difference">Toplam Fark</span> <span style="color:var(--muted); font-size:11px;" data-i18n="total_difference_note">(anapara hariç ek maliyet)</span></div><div class="rvalue" id="rFark">—</div></div>
+          <div class="result-row"><div class="rlabel"><span data-i18n="effective_annual_cost">Efektif Yıllık Maliyet Oranı</span> <span class="badge-formula" data-i18n="extra_indicator">ek gösterge</span></div><div class="rvalue" id="rEfektif">—</div></div>
         </div>
       </div>
     </div>
@@ -477,18 +477,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- MULTI-TRANCHE TABLE -->
   <section id="tranches">
-    <div class="section-label">Çoklu Çekim</div>
-    <div class="section-title">Rotatif Kredi Çekim Tablosu</div>
+    <div class="section-label" data-i18n="multi_draw">Çoklu Çekim</div>
+    <div class="section-title" data-i18n="tranche_table_title">Rotatif Kredi Çekim Tablosu</div>
     <div class="tranche-toolbar">
-      <div style="font-size:12px; color:var(--muted);">Rotatif kredide birden fazla eş zamanlı çekim olabilir — her satır ayrı bir çekimi temsil eder. <span style="color:var(--muted);">(Tutarlar TL cinsindendir.)</span></div>
+      <div style="font-size:12px; color:var(--muted);" data-i18n="tranche_note">Rotatif kredide birden fazla eş zamanlı çekim olabilir — her satır ayrı bir çekimi temsil eder. <span style="color:var(--muted);">(Tutarlar TL cinsindendir.)</span></div>
       <div style="display:flex; gap:8px;">
-        <button class="btn ghost small" id="addFromQuick">Hızlı hesaptan satır ekle</button>
-        <button class="btn small" id="addRow">+ Satır Ekle</button>
+        <button class="btn ghost small" id="addFromQuick" data-i18n="add_from_quick">Hızlı hesaptan satır ekle</button>
+        <button class="btn small" id="addRow" data-i18n="add_row">+ Satır Ekle</button>
       </div>
     </div>
     <div class="table-scroll-hint">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h16m0 0l-5-5m5 5l-5 5"/></svg>
-      Diğer sütunlar için yatay kaydırın
+      <span data-i18n="scroll_hint">Diğer sütunlar için yatay kaydırın</span>
     </div>
     <div class="table-scroll-wrap" id="trancheScrollWrap">
     <div class="table-scroll" id="trancheScroll">
@@ -509,8 +509,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </colgroup>
         <thead>
           <tr>
-            <th>#</th><th>Tutar</th><th>Vade</th><th>Oran %</th><th>Kom.Oran %</th>
-            <th>Faiz</th><th>Faiz BSMV</th><th>Komisyon</th><th>Kom. BSMV</th><th>Toplam Geri Ödeme</th><th>Toplam Fark</th><th></th>
+            <th>#</th><th data-i18n="th_amount">Tutar</th><th data-i18n="th_term">Vade</th><th data-i18n="th_rate">Oran %</th><th data-i18n="th_com_rate">Kom.Oran %</th>
+            <th data-i18n="th_interest">Faiz</th><th data-i18n="th_interest_bsmv">Faiz BSMV</th><th data-i18n="th_commission">Komisyon</th><th data-i18n="th_com_bsmv">Kom. BSMV</th><th data-i18n="th_total_repay">Toplam Geri Ödeme</th><th data-i18n="th_total_diff">Toplam Fark</th><th></th>
           </tr>
         </thead>
         <tbody id="trancheBody"></tbody>
@@ -518,8 +518,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     </div>
     <div class="io-toolbar">
-      <button type="button" class="io-btn" id="exportExcelBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
-      <button type="button" class="io-btn" id="exportPdfBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
+      <button type="button" class="io-btn" id="exportExcelBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg><span data-i18n="export_excel">Excel'e Aktar</span></button>
+      <button type="button" class="io-btn" id="exportPdfBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg><span data-i18n="export_pdf">PDF'e Aktar</span></button>
     </div>
     <div class="io-msg" id="ioMsg"></div>
   </section>
@@ -1134,5 +1134,53 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
     }
   });
 </script>
+<script>
+(function(){
+  const MMG_I18N = {
+    en: {
+      page_title:'Revolving Loan Calculator',
+      page_subtitle:"Enter amount, rate, and term; instantly calculate the interest banks charge on revolving loans, overdrafts, and business overdraft loans, whether monthly or quarterly.<br>This module makes it easy to calculate debts with overnight-accruing interest logic.",
+      reset_btn:'Reset', back_home:'← Home',
+      label_amount:'Loan Amount', label_term:'Term', unit_days:'days', label_annual_rate:'Annual Interest Rate', label_commission_rate:'Commission Rate',
+      adv_settings:'Advanced settings (tax rate, day base, calculate term from dates)',
+      adv_flag:'⚠ The tax rate and day bases can be updated from "Advanced settings"; adjust here if regulations change.',
+      label_bsmv:'Tax Rate (BSMV)', label_bsmv_note:'(tax charged on interest and commission)',
+      label_interest_daybase:'Interest Day Base', label_commission_daybase:'Commission Day Base',
+      days_between_title:'Days Between Two Dates', label_start_date:'Usage Date', label_due_date:'Due Date',
+      days_result_label:'Number of days (excluding start, bank convention):', apply_to_term:'Apply to term field',
+      total_repayment:'TOTAL REPAYMENT', interest_at_maturity:'Interest at Maturity', interest_bsmv:'Interest Tax',
+      commission_amount:'Commission Amount', commission_bsmv:'Commission Tax', loan_repayment:'Loan Repayment',
+      loan_repayment_note:'(principal+interest+interest tax)', total_difference:'Total Difference',
+      total_difference_note:'(extra cost excluding principal)', effective_annual_cost:'Effective Annual Cost Rate', extra_indicator:'extra indicator',
+      multi_draw:'Multiple Draws', tranche_table_title:'Revolving Loan Draw Table',
+      tranche_note:'A revolving loan can have several simultaneous draws — each row represents a separate draw. (Amounts are in TL.)',
+      add_from_quick:'Add row from quick calc', add_row:'+ Add Row', scroll_hint:'Scroll horizontally for more columns',
+      th_amount:'Amount', th_term:'Term', th_rate:'Rate %', th_com_rate:'Com. Rate %', th_interest:'Interest', th_interest_bsmv:'Interest Tax',
+      th_commission:'Commission', th_com_bsmv:'Com. Tax', th_total_repay:'Total Repayment', th_total_diff:'Total Difference',
+      export_excel:"Export to Excel", export_pdf:"Export to PDF"
+    }
+  };
+  function applyMmgLang(lang){
+    if(lang === 'tr'){ location.reload(); return; }
+    const dict = MMG_I18N[lang];
+    if(!dict) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.innerHTML = dict[key];
+    });
+  }
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      applyMmgLang(ev.data.mmgLang);
+    }
+  });
+  try{
+    const savedLang = localStorage.getItem('mmg_lang');
+    if(savedLang === 'en') applyMmgLang('en');
+  }catch(e){}
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

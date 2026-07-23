@@ -67,7 +67,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{background:var(--bg);}
-  html,body{overscroll-behavior-y:none;}
+
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
@@ -154,21 +154,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <header class="masthead">
   <div>
-    <h1 class="title">Hesaplama Araçları</h1>
-    <div class="subtitle">Rotatif kredi, kredi kartı vade farkı ve ortalama vade hesaplamalarınızı tek yerden yapın.</div>
+    <h1 class="title" data-i18n="page_title">Hesaplama Araçları</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Rotatif kredi, kredi kartı vade farkı ve ortalama vade hesaplamalarınızı tek yerden yapın.</div>
   </div>
 </header>
-<a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+<a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
 
 <main>
   <!-- Masaüstü: sekmeler + iframe -->
   <div class="desktop-only">
     <div class="cat-tabs" id="toolTabs">
-      <button type="button" class="cat-tab" data-file="Rotatif_Kredi_Hesaplama.html" data-hash="rotatif">Rotatif Kredi</button>
-      <button type="button" class="cat-tab" data-file="Kredi_Karti_Vade_Farki_Hesaplama.html" data-hash="vadefarki">Kredi Kartı Vade Farkı</button>
-      <button type="button" class="cat-tab" data-file="Ortalama_Vade_Hesaplama.html" data-hash="ortalamavade">Ortalama Vade</button>
-      <button type="button" class="cat-tab" data-file="vadeli-mevduat-faizi-hesaplama.html" data-hash="vadelimevduat">Vadeli Mevduat Faizi</button>
-      <button type="button" class="cat-tab" data-file="kredi-karsilastirma.html" data-hash="krediteklif">Kredi Tekliflerini Karşılaştır</button>
+      <button type="button" class="cat-tab" data-file="Rotatif_Kredi_Hesaplama.html" data-hash="rotatif" data-i18n="tab_rotatif">Rotatif Kredi</button>
+      <button type="button" class="cat-tab" data-file="Kredi_Karti_Vade_Farki_Hesaplama.html" data-hash="vadefarki" data-i18n="tab_vadefarki">Kredi Kartı Vade Farkı</button>
+      <button type="button" class="cat-tab" data-file="Ortalama_Vade_Hesaplama.html" data-hash="ortalamavade" data-i18n="tab_ortalamavade">Ortalama Vade</button>
+      <button type="button" class="cat-tab" data-file="vadeli-mevduat-faizi-hesaplama.html" data-hash="vadelimevduat" data-i18n="tab_vadelimevduat">Vadeli Mevduat Faizi</button>
+      <button type="button" class="cat-tab" data-file="kredi-karsilastirma.html" data-hash="krediteklif" data-i18n="tab_krediteklif">Kredi Tekliflerini Karşılaştır</button>
     </div>
     <div class="frame-wrap">
       <iframe id="toolFrame" src=""></iframe>
@@ -180,28 +180,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="tool-cards">
       <a class="tool-card" href="Rotatif_Kredi_Hesaplama.html">
         <span class="arrow">↗</span>
-        <h3>Rotatif Kredi Hesaplama</h3>
-        <p>Tutar, oran ve vade girin — faiz, komisyon, BSMV ve toplam geri ödeme anında hesaplansın.</p>
+        <h3 data-i18n="card1_title">Rotatif Kredi Hesaplama</h3>
+        <p data-i18n="card1_desc">Tutar, oran ve vade girin — faiz, komisyon, BSMV ve toplam geri ödeme anında hesaplansın.</p>
       </a>
       <a class="tool-card" href="Kredi_Karti_Vade_Farki_Hesaplama.html">
         <span class="arrow">↗</span>
-        <h3>Kredi Kartı Vade Farkı Hesaplama</h3>
-        <p>Net tutardan yola çıkarak girmeniz veya müşteriye yansıtmanız gereken brüt tutarı hesaplayın.</p>
+        <h3 data-i18n="card2_title">Kredi Kartı Vade Farkı Hesaplama</h3>
+        <p data-i18n="card2_desc">Net tutardan yola çıkarak girmeniz veya müşteriye yansıtmanız gereken brüt tutarı hesaplayın.</p>
       </a>
       <a class="tool-card" href="Ortalama_Vade_Hesaplama.html">
         <span class="arrow">↗</span>
-        <h3>Ortalama Vade Hesaplama</h3>
-        <p>Taksitlerin kaç günde bir yansıyacağını girin — her taksit sayısı için ortalama vadeyi görün.</p>
+        <h3 data-i18n="card3_title">Ortalama Vade Hesaplama</h3>
+        <p data-i18n="card3_desc">Taksitlerin kaç günde bir yansıyacağını girin — her taksit sayısı için ortalama vadeyi görün.</p>
       </a>
       <a class="tool-card" href="vadeli-mevduat-faizi-hesaplama.html">
         <span class="arrow">↗</span>
-        <h3>Vadeli Mevduat Faizi Hesaplama</h3>
-        <p>Bankaların vadeli mevduat tekliflerini girin; brüt faiz, stopaj ve net vade sonu bakiyeyi karşılaştırın.</p>
+        <h3 data-i18n="card4_title">Vadeli Mevduat Faizi Hesaplama</h3>
+        <p data-i18n="card4_desc">Bankaların vadeli mevduat tekliflerini girin; brüt faiz, stopaj ve net vade sonu bakiyeyi karşılaştırın.</p>
       </a>
       <a class="tool-card" href="kredi-karsilastirma.html">
         <span class="arrow">↗</span>
-        <h3>Kredi Tekliflerini Karşılaştır</h3>
-        <p>Bankaların ihtiyaç kredisi tekliflerini girin; taksit, BSMV ve toplam geri ödemeyi karşılaştırın.</p>
+        <h3 data-i18n="card5_title">Kredi Tekliflerini Karşılaştır</h3>
+        <p data-i18n="card5_desc">Bankaların ihtiyaç kredisi tekliflerini girin; taksit, BSMV ve toplam geri ödemeyi karşılaştırın.</p>
       </a>
     </div>
   </div>
@@ -424,5 +424,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <script src="mmg-feedback-widget.js"></script>
+<script>
+(function(){
+  const MMG_I18N = {
+    en: {
+      page_title:'Calculation Tools', page_subtitle:'Do your revolving loan, credit card late fee, and average maturity calculations in one place.',
+      back_home:'← Home',
+      tab_rotatif:'Revolving Loan', tab_vadefarki:'Credit Card Late Fee', tab_ortalamavade:'Average Maturity',
+      tab_vadelimevduat:'Time Deposit Interest', tab_krediteklif:'Compare Loan Offers',
+      card1_title:'Revolving Loan Calculator', card1_desc:'Enter amount, rate, and term — interest, fees, tax, and total repayment calculated instantly.',
+      card2_title:'Credit Card Late Fee Calculator', card2_desc:'Calculate the gross amount to charge starting from the net amount.',
+      card3_title:'Average Maturity Calculator', card3_desc:'Enter how often installments fall due — see the average maturity for any number of installments.',
+      card4_title:'Time Deposit Interest Calculator', card4_desc:"Enter banks' time deposit offers; compare gross interest, withholding tax, and net maturity balance.",
+      card5_title:'Compare Loan Offers', card5_desc:"Enter banks' personal loan offers; compare installments, tax, and total repayment."
+    }
+  };
+  function applyMmgLang(lang){
+    if(lang === 'tr'){ location.reload(); return; }
+    const dict = MMG_I18N[lang];
+    if(!dict) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.innerHTML = dict[key];
+    });
+  }
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      applyMmgLang(ev.data.mmgLang);
+    }
+  });
+  try{
+    const savedLang = localStorage.getItem('mmg_lang');
+    if(savedLang === 'en') applyMmgLang('en');
+  }catch(e){}
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

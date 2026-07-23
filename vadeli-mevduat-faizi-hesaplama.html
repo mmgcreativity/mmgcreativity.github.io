@@ -62,7 +62,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
-  html{ overflow-x:hidden; }
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
@@ -112,18 +111,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--text-faint);}
   .eyebrow .star{font-size:13px;}
 
-  .grid-top{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+  .grid-top{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
   @media (max-width:860px){.grid-top{grid-template-columns:repeat(2,1fr);}}
   .stat{
-    background:var(--card);border:1px solid var(--border);border-radius:12px;
-    padding:11px 16px;position:relative;overflow:hidden;
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:16px 18px;position:relative;overflow:hidden;
   }
   .stat::before{
     content:"";position:absolute;top:0;left:0;width:3px;height:100%;
     background:linear-gradient(180deg,var(--gold),transparent);
   }
-  .stat .label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:4px;}
-  .stat .value{font-family:'JetBrains Mono',monospace;font-size:16.5px;font-weight:700;color:var(--text);}
+  .stat .label{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:8px;}
+  .stat .value{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--text);}
   .stat .value.gold{color:var(--gold);}
   .stat .value.small{font-size:16px;}
 
@@ -145,6 +144,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   tbody td{padding:8px 10px;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
   tbody tr:last-child td{border-bottom:none;}
   tbody tr.best-row{background:var(--green-soft);}
+  tbody tr.best-row td:first-child{box-shadow:inset 3px 0 0 var(--green);}
 
   input[type=text], input[type=number]{
     width:100%;background:var(--card-2);border:1px solid var(--border);color:var(--text);
@@ -246,7 +246,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   table.offer-table tbody td input[data-field="amount"],
   table.offer-table tbody td input[data-field="rate"],
   table.offer-table tbody td input[data-field="days"]{
-    font-family:'JetBrains Mono',monospace; font-weight:600; text-align:right; padding:0 5px; font-size:14px;
+    font-family:'JetBrains Mono',monospace; font-weight:600; text-align:right; padding:0 5px;
   }
   table.offer-table tbody td input:focus{ border-color:var(--gold); box-shadow:0 0 0 3px var(--gold-soft); }
   table.offer-table td.del-cell{ width:26px; text-align:center; padding:5px 0; }
@@ -261,42 +261,42 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .field label{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
 
   .result-table-wrap{ overflow-x:auto; }
-  table.result-table{ width:100%; border-collapse:collapse; font-size:12.5px; table-layout:fixed; }
+  table.result-table{ width:100%; border-collapse:collapse; font-size:11.5px; table-layout:fixed; }
   table.result-table thead th{
-    text-align:left; padding:6px 4px; font-family:'JetBrains Mono',monospace; font-size:9px; line-height:1.35;
-    letter-spacing:.02em; text-transform:uppercase; color:var(--text-faint); border-bottom:1px solid var(--border);
+    text-align:left; padding:6px 4px; font-family:'JetBrains Mono',monospace; font-size:8.5px; line-height:1.3;
+    letter-spacing:.01em; text-transform:uppercase; color:var(--text-dim); border-bottom:1px solid var(--border);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   table.result-table thead th.num{ text-align:right; }
   table.result-table tbody td{
-    padding:13px 4px; border-bottom:1px solid var(--border-soft); vertical-align:middle;
+    padding:7px 4px; border-bottom:1px solid var(--border-soft); vertical-align:middle;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   table.result-table tbody tr:last-child td{ border-bottom:none; }
   table.result-table tbody tr.best td{ background:var(--green-soft); }
   table.result-table tbody tr.best td:first-child{ border-radius:8px 0 0 8px; }
   table.result-table tbody tr.summary-row.best:last-of-type td:last-child{ border-radius:0 8px 8px 0; }
-  table.result-table td.name-cell{ font-weight:700; font-size:12.5px; display:flex; align-items:center; gap:6px; }
+  table.result-table td.name-cell{ font-weight:700; font-size:11.5px; display:flex; align-items:center; gap:5px; }
   table.result-table tr.best td.name-cell{ color:var(--green); }
   table.result-table td.name-cell .name-txt{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   table.result-table td.num{ text-align:right; font-family:'JetBrains Mono',monospace; }
-  table.result-table td.total-cell{ font-weight:700; font-size:13px; }
+  table.result-table td.total-cell{ font-weight:700; font-size:12px; }
   table.result-table tr.best td.total-cell{ color:var(--green); }
-  table.result-table td .diff{ display:block; font-size:9.5px; font-weight:400; color:var(--text-faint); margin-top:1px; }
+  table.result-table td .diff{ display:block; font-size:9px; font-weight:400; color:var(--text-faint); margin-top:1px; }
   table.result-table td .tag{ display:inline-block; font-size:8.5px; margin-left:4px; }
-  table.result-table .rank-badge{ width:19px; height:19px; font-size:10.5px; border-radius:5px; flex-shrink:0; }
+  table.result-table .rank-badge{ width:16px; height:16px; font-size:9px; border-radius:4px; flex-shrink:0; }
 
   table.result-table tr.summary-row{ cursor:pointer; transition:background .12s ease; }
   table.result-table tr.summary-row:hover td{ background:var(--card-2); }
   table.result-table tr.summary-row.best:hover td{ background:var(--green-soft); }
-  table.result-table td.expand-cell{ text-align:center; padding:13px 0; }
-  table.result-table .expand-chevron{ display:inline-block; color:var(--text-faint); font-size:10.5px; transition:transform .15s ease; }
+  table.result-table td.expand-cell{ text-align:center; padding:7px 0; }
+  table.result-table .expand-chevron{ display:inline-block; color:var(--text-faint); font-size:10px; transition:transform .15s ease; }
   table.result-table tr.summary-row.open .expand-chevron{ transform:rotate(90deg); color:var(--gold); }
-  table.result-table tr.detail-row td{ padding:0 8px 12px 8px; border-bottom:1px solid var(--border-soft); background:var(--card-2); }
+  table.result-table tr.detail-row td{ padding:0 8px 10px 8px; border-bottom:1px solid var(--border-soft); background:var(--card-2); }
   table.result-table tr.detail-row[hidden]{ display:none; }
-  .detail-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding-top:9px; }
-  .detail-item .k{ font-size:9.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px; white-space:nowrap; }
-  .detail-item .v{ font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600; }
+  .detail-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding-top:8px; }
+  .detail-item .k{ font-size:9px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px; white-space:nowrap; }
+  .detail-item .v{ font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; }
 </style>
 </head>
 <body>
@@ -306,31 +306,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <header class="masthead">
   <div>
-    <h1 class="title">Vadeli Mevduat Faizi Hesaplama</h1>
-    <div class="subtitle">Bankaların vadeli mevduat tekliflerini gir; brüt faiz, stopaj ve net vade sonu bakiye otomatik hesaplansın, en yüksek getirili teklif otomatik öne çıksın.</div>
+    <h1 class="title" data-i18n="page_title">Vadeli Mevduat Faizi Hesaplama</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Bankaların vadeli mevduat tekliflerini gir; brüt faiz, stopaj ve net vade sonu bakiye otomatik hesaplansın, en yüksek getirili teklif otomatik öne çıksın.</div>
   </div>
   <div class="top-actions">
-    <button type="button" class="reset-btn" id="resetPageBtn">↺ Sıfırla</button>
-    <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+    <button type="button" class="reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
+    <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </header>
 <div class="wrap">
 
   <div class="grid-top">
     <div class="stat">
-      <div class="label">En iyi teklif</div>
+      <div class="label" data-i18n="stat_best_offer">En iyi teklif</div>
       <div class="value gold" id="statBestBank">—</div>
     </div>
     <div class="stat">
-      <div class="label">En iyi vade sonu bakiye</div>
+      <div class="label" data-i18n="stat_best_balance">En iyi vade sonu bakiye</div>
       <div class="value" id="statBestTotal">—</div>
     </div>
     <div class="stat">
-      <div class="label">Ortalama yıllık oran</div>
+      <div class="label" data-i18n="stat_avg_rate">Ortalama yıllık oran</div>
       <div class="value small" id="statAvgRate">—</div>
     </div>
     <div class="stat">
-      <div class="label">Teklif sayısı</div>
+      <div class="label" data-i18n="stat_count">Teklif sayısı</div>
       <div class="value" id="statCount">0</div>
     </div>
   </div>
@@ -338,48 +338,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="split-grid">
     <div class="card">
       <div class="card-head">
-        <h2><span class="star">&#9733;</span> Teklif Girişi</h2>
+        <h2><span class="star">&#9733;</span> <span data-i18n="offer_entry">Teklif Girişi</span></h2>
       </div>
       <div class="offer-table-wrap">
         <table class="offer-table">
           <thead>
             <tr>
-              <th style="width:22px;">#</th>
-              <th style="width:112px;">Banka</th>
-              <th class="num" style="width:135px;">Anapara</th>
-              <th class="num" style="width:80px;">Vade<br>(Gün)</th>
-              <th class="num" style="width:90px;">Yıllık<br>Oran %</th>
-              <th style="width:28px;"></th>
+              <th style="width:20px;">#</th>
+              <th style="width:110px;" data-i18n="th_bank">Banka</th>
+              <th class="num" style="width:66px;" data-i18n="th_principal">Anapara</th>
+              <th class="num" style="width:40px;" data-i18n="th_term_days">Vade<br>(Gün)</th>
+              <th class="num" style="width:46px;" data-i18n="th_annual_rate">Yıllık<br>Oran %</th>
+              <th style="width:26px;"></th>
             </tr>
           </thead>
           <tbody id="inputBody"></tbody>
         </table>
       </div>
       <div style="margin-top:10px;">
-        <button class="btn" id="addRowBtn">+ Teklif Ekle</button>
+        <button class="btn" id="addRowBtn" data-i18n="add_offer">+ Teklif Ekle</button>
       </div>
     </div>
 
     <div class="card">
       <div class="card-head">
-        <h2><span class="star">&#9733;</span> Sıralama</h2>
+        <h2><span class="star">&#9733;</span> <span data-i18n="ranking">Sıralama</span></h2>
       </div>
       <div class="result-table-wrap">
         <table class="result-table">
           <thead>
             <tr>
               <th style="width:18px;"></th>
-              <th>Banka</th>
-              <th class="num" style="width:52px;">Vade<br>(Gün)</th>
-              <th class="num" style="width:96px;">Vade Sonu<br>Bakiye</th>
+              <th data-i18n="th_bank">Banka</th>
+              <th class="num" style="width:52px;" data-i18n="th_term_days">Vade<br>(Gün)</th>
+              <th class="num" style="width:96px;" data-i18n="th_final_balance">Vade Sonu<br>Bakiye</th>
             </tr>
           </thead>
           <tbody id="resultBody"></tbody>
         </table>
       </div>
-      <div class="empty" id="emptyState">Henüz teklif eklenmedi. Soldan bir teklif ekleyerek başla.</div>
+      <div class="empty" id="emptyState" data-i18n="empty_state">Henüz teklif eklenmedi. Soldan bir teklif ekleyerek başla.</div>
 
-      <div class="assump">
+      <div class="assump" data-i18n="assumption_note">
         <b>Yöntem:</b> Brüt Faiz, TL vadeli mevduatta kullanılan basit faiz (Actual/365) yöntemiyle hesaplanır:
         <code>Brüt Faiz = Anapara × Yıllık Oran × Vade(Gün) / 365</code>. Stopaj oranı, 09.07.2025 tarihli 2025/66 sayılı
         Cumhurbaşkanı Kararı'na göre vade gününe göre otomatik uygulanır: 183 güne kadar <b>%17,5</b>, 366 güne kadar <b>%15</b>,
@@ -587,5 +587,41 @@ renderStats();
     }
   });
 </script>
+<script>
+(function(){
+  const MMG_I18N = {
+    en: {
+      page_title:'Time Deposit Interest Calculator',
+      page_subtitle:"Enter banks' time deposit offers; gross interest, withholding tax, and net maturity balance are calculated automatically, with the highest-yield offer highlighted.",
+      reset_btn:'Reset', back_home:'← Home',
+      stat_best_offer:'Best offer', stat_best_balance:'Best final balance', stat_avg_rate:'Average annual rate', stat_count:'Number of offers',
+      offer_entry:'Offer Entry', th_bank:'Bank', th_principal:'Principal', th_term_days:'Term<br>(Days)', th_annual_rate:'Annual<br>Rate %',
+      add_offer:'+ Add Offer', ranking:'Ranking', th_final_balance:'Final<br>Balance',
+      empty_state:'No offer added yet. Start by adding one on the left.',
+      assumption_note:'<b>Method:</b> Gross interest is calculated using the simple interest (Actual/365) method used for TL time deposits: <code>Gross Interest = Principal × Annual Rate × Term(Days) / 365</code>. The withholding tax rate is applied automatically based on the term per Presidential Decree 2025/66 dated 09.07.2025: <b>17.5%</b> up to 183 days, <b>15%</b> up to 366 days, and <b>10%</b> for terms over 1 year. Net Gain = Gross Interest − Withholding; Final Balance = Principal + Net Gain. This tool is for information only and is not a binding deposit offer.'
+    }
+  };
+  function applyMmgLang(lang){
+    if(lang === 'tr'){ location.reload(); return; }
+    const dict = MMG_I18N[lang];
+    if(!dict) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.innerHTML = dict[key];
+    });
+  }
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      applyMmgLang(ev.data.mmgLang);
+    }
+  });
+  try{
+    const savedLang = localStorage.getItem('mmg_lang');
+    if(savedLang === 'en') applyMmgLang('en');
+  }catch(e){}
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

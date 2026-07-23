@@ -153,8 +153,8 @@ function mmgApplyTurkishFont(doc){
     --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html{background:var(--bg); overflow-x:hidden;}
-  html,body{overscroll-behavior-y:none;}
+  html{background:var(--bg);}
+
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
@@ -360,15 +360,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <header class="masthead">
   <div>
-    <h1 class="title">Gelirler</h1>
-    <div class="subtitle">Tüm gelirlerinizi sisteme girerek, gelir takibinizi yapabilirsiniz.<br>Vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlenir.</div>
+    <h1 class="title" data-i18n="page_title">Gelirler</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Tüm gelirlerinizi sisteme girerek, gelir takibinizi yapabilirsiniz.<br>Vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlenir.</div>
   </div>
   <div class="header-actions-group">
     <div class="page-nav">
-      <button type="button" class="ghost-btn" id="syncNowBtn">🔄 Şimdi Senkronize Et</button>
+      <button type="button" class="ghost-btn" id="syncNowBtn">🔄 <span data-i18n="sync_now">Şimdi Senkronize Et</span></button>
     </div>
     <div class="top-actions">
-      <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+      <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
     </div>
   </div>
 </header>
@@ -384,22 +384,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="add-payment-card">
         <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:24px;">
           <div style="flex:1; min-width:220px;">
-            <h3 id="addPaymentTitle" style="margin-bottom:12px;">Yeni Gelir Ekle</h3>
+            <h3 id="addPaymentTitle" style="margin-bottom:12px;" data-i18n="add_income_title">Yeni Gelir Ekle</h3>
             <div id="wizardStep1">
               <div class="mmg-dropdown" id="typeChipDropdown">
-                <button type="button" class="mmg-dropdown-trigger" id="typeChipTrigger">Gelir türü seçin <span class="chev">▾</span></button>
+                <button type="button" class="mmg-dropdown-trigger" id="typeChipTrigger"><span data-i18n="select_income_type">Gelir türü seçin</span> <span class="chev">▾</span></button>
                 <div class="mmg-dropdown-menu" id="typeChipMenu" hidden></div>
               </div>
             </div>
             <div id="selectedTypeRow" class="selected-type-row" style="display:none;">
               <span class="selected-type-badge" id="selectedTypeBadge"></span>
-              <button type="button" class="change-type-link" id="changeTypeBtn">değiştir</button>
+              <button type="button" class="change-type-link" id="changeTypeBtn" data-i18n="change_link">değiştir</button>
             </div>
           </div>
           <div style="flex:0 0 auto;">
-            <div class="wizard-step-label">Gelir Filtreleme</div>
+            <div class="wizard-step-label" data-i18n="income_filter">Gelir Filtreleme</div>
             <div class="mmg-dropdown" id="catFilterDropdown">
-              <button type="button" class="mmg-dropdown-trigger" id="catFilterTrigger">📋 Tümü <span class="chev">▾</span></button>
+              <button type="button" class="mmg-dropdown-trigger" id="catFilterTrigger">📋 <span data-i18n="filter_all">Tümü</span> <span class="chev">▾</span></button>
               <div class="mmg-dropdown-menu" id="catFilterMenu" hidden></div>
             </div>
           </div>
@@ -408,36 +408,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div id="wizardStep2" style="display:none;">
           <div class="add-payment-grid">
             <div class="field">
-              <label>Açıklama <span style="color:var(--muted); font-weight:400;">(opsiyonel)</span></label>
-              <input type="text" id="newDesc" placeholder="örn. Mart Ayı Kira Geliri">
+              <label><span data-i18n="label_desc">Açıklama</span> <span style="color:var(--muted); font-weight:400;" data-i18n="optional_tag">(opsiyonel)</span></label>
+              <input type="text" id="newDesc" placeholder="örn. Mart Ayı Kira Geliri" data-i18n-placeholder="desc_placeholder">
             </div>
             <div class="field">
-              <label>Tutar</label>
+              <label data-i18n="label_amount">Tutar</label>
               <input type="text" id="newAmount" inputmode="decimal" placeholder="0,00">
             </div>
             <div class="field">
-              <label>Vade Tarihi</label>
+              <label data-i18n="label_due_date">Vade Tarihi</label>
               <input type="date" id="newDueDate">
             </div>
             <div class="field">
-              <label>Tekrarlansın mı?</label>
+              <label data-i18n="label_recurrence">Tekrarlansın mı?</label>
               <select id="newRecurrence">
-                <option value="yok">Tekrarlanmasın</option>
-                <option value="haftalik">Evet, her hafta</option>
-                <option value="aylik">Evet, her ay</option>
-                <option value="yillik">Evet, her yıl</option>
+                <option value="yok" data-i18n="rec_none">Tekrarlanmasın</option>
+                <option value="haftalik" data-i18n="rec_weekly">Evet, her hafta</option>
+                <option value="aylik" data-i18n="rec_monthly">Evet, her ay</option>
+                <option value="yillik" data-i18n="rec_yearly">Evet, her yıl</option>
               </select>
             </div>
-            <button type="button" class="add-payment-btn" id="addPaymentBtn">+ Ekle</button>
+            <button type="button" class="add-payment-btn" id="addPaymentBtn" data-i18n="add_btn">+ Ekle</button>
           </div>
         </div>
       </div>
 
       <div class="io-toolbar">
-        <button type="button" class="io-btn" id="exportExcelBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
-        <button type="button" class="io-btn" id="exportPdfBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
-        <button type="button" class="io-btn" id="importExcelBtn">⬆ Excel'den Yükle</button>
-        <button type="button" class="io-btn" id="downloadTemplateBtn">⬇ Şablon İndir</button>
+        <button type="button" class="io-btn" id="exportExcelBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg><span data-i18n="export_excel">Excel'e Aktar</span></button>
+        <button type="button" class="io-btn" id="exportPdfBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg><span data-i18n="export_pdf">PDF'e Aktar</span></button>
+        <button type="button" class="io-btn" id="importExcelBtn">⬆ <span data-i18n="import_excel">Excel'den Yükle</span></button>
+        <button type="button" class="io-btn" id="downloadTemplateBtn">⬇ <span data-i18n="download_template">Şablon İndir</span></button>
         <input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none;">
       </div>
       <div class="io-msg" id="ioMsg"></div>
@@ -1389,5 +1389,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 
+<script>
+(function(){
+  const MMG_I18N = {
+    tr: null, // Türkçe zaten HTML'in kendisinde; ayrıca sözlüğe gerek yok
+    en: {
+      page_title:'Income', page_subtitle:'Record all your income here to track it.<br>It is automatically posted to the Cash Flow Table when due.',
+      sync_now:'Sync Now', back_home:'← Home', add_income_title:'Add New Income', select_income_type:'Select income type',
+      change_link:'change', income_filter:'Filter Income', filter_all:'All', label_desc:'Description', optional_tag:'(optional)',
+      label_amount:'Amount', label_due_date:'Due Date', label_recurrence:'Repeat?', rec_none:'Do not repeat',
+      rec_weekly:'Yes, weekly', rec_monthly:'Yes, monthly', rec_yearly:'Yes, yearly', add_btn:'+ Add',
+      export_excel:'Export to Excel', export_pdf:'Export to PDF', import_excel:'Import from Excel', download_template:'Download Template'
+    }
+  };
+  function applyMmgLang(lang){
+    if(lang === 'tr'){
+      // Sayfa zaten Türkçe yazıldığı için TR'ye dönmek üzere ayrıca bir uygulama gerekmiyor,
+      // ancak dinamik olarak İngilizce'ye çevrilmiş elemanları geri Türkçe'ye almak için orijinal metinleri
+      // data öznitelikleri yerine sayfa yeniden yüklendiğinde doğal haliyle görürüz.
+      location.reload();
+      return;
+    }
+    const dict = MMG_I18N[lang];
+    if(!dict) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.innerHTML = dict[key];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if(dict[key]) el.setAttribute('placeholder', dict[key]);
+    });
+  }
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      applyMmgLang(ev.data.mmgLang);
+    }
+  });
+  try{
+    const savedLang = localStorage.getItem('mmg_lang');
+    if(savedLang === 'en') applyMmgLang('en');
+  }catch(e){}
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

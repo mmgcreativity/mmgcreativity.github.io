@@ -130,8 +130,8 @@ function mmgApplyTurkishFont(doc){
     --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html{background:var(--bg); overflow-x:hidden;}
-  html,body{overscroll-behavior-y:none;}
+  html{background:var(--bg);}
+
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
@@ -303,12 +303,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <header class="masthead">
   <div>
-    <h1 class="title">Ortalama Vade Hesaplama</h1>
-    <div class="subtitle">Taksitlerin kaç günde bir yansıyacağını girin — her taksit sayısı için vade ve ortalama vadeyi anında görün</div>
+    <h1 class="title" data-i18n="page_title">Ortalama Vade Hesaplama</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Taksitlerin kaç günde bir yansıyacağını girin — her taksit sayısı için vade ve ortalama vadeyi anında görün</div>
   </div>
   <div class="top-actions">
-    <button type="button" class="reset-btn" id="resetPageBtn">↺ Sıfırla</button>
-    <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+    <button type="button" class="reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
+    <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </header>
 
@@ -316,33 +316,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <section class="table-section">
     <div class="layout-row">
       <div class="info-col">
-        <p class="table-desc">Aşağıdaki gün değerleri örnektir. Gerçek vadeyi biliyorsanız tablodan güncelleyin, ortalama vade otomatik hesaplanır.</p>
+        <p class="table-desc" data-i18n="table_desc">Aşağıdaki gün değerleri örnektir. Gerçek vadeyi biliyorsanız tablodan güncelleyin, ortalama vade otomatik hesaplanır.</p>
         <div class="field">
-          <label>Taksitler kaç günde bir yansıyacak</label>
-          <div class="input-wrap"><input type="text" inputmode="numeric" class="tr-num" id="qInterval" value="30" data-decimals="0"><span class="unit">gün</span></div>
+          <label data-i18n="label_interval">Taksitler kaç günde bir yansıyacak</label>
+          <div class="input-wrap"><input type="text" inputmode="numeric" class="tr-num" id="qInterval" value="30" data-decimals="0"><span class="unit" data-i18n="unit_days">gün</span></div>
         </div>
       </div>
       <div>
         <table class="rates" id="ratesTable">
           <thead>
             <tr>
-              <th>Taksit</th>
-              <th>Taksit Vade (gün)</th>
-              <th>Toplam Vade (gün)</th>
-              <th>Ortalama Vade (gün)</th>
+              <th data-i18n="th_installment">Taksit</th>
+              <th data-i18n="th_installment_term">Taksit Vade (gün)</th>
+              <th data-i18n="th_total_term">Toplam Vade (gün)</th>
+              <th data-i18n="th_avg_term">Ortalama Vade (gün)</th>
             </tr>
           </thead>
           <tbody id="ratesBody"></tbody>
         </table>
-        <a class="reset-link" id="resetRates">↺ Varsayılan günlere sıfırla</a>
+        <a class="reset-link" id="resetRates" data-i18n="reset_rates">↺ Varsayılan günlere sıfırla</a>
         <div class="io-toolbar">
-          <button type="button" class="io-btn" id="exportExcelBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
-          <button type="button" class="io-btn" id="exportPdfBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
+          <button type="button" class="io-btn" id="exportExcelBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg><span data-i18n="export_excel">Excel'e Aktar</span></button>
+          <button type="button" class="io-btn" id="exportPdfBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg><span data-i18n="export_pdf">PDF'e Aktar</span></button>
         </div>
-        <div class="io-msg" id="memberNotice" style="color:var(--muted);">🔒 Excel/PDF aktarma özellikleri şimdilik yalnızca üye girişi yapan kullanıcılar için aktiftir.</div>
+        <div class="io-msg" id="memberNotice" style="color:var(--muted);" data-i18n="member_notice">🔒 Excel/PDF aktarma özellikleri şimdilik yalnızca üye girişi yapan kullanıcılar için aktiftir.</div>
         <div class="io-msg" id="ioMsg"></div>
         <div class="io-msg" id="cloudMsg" style="color:var(--muted);"></div>
-        <div class="flag">⚠ Vade günleri banka, kart programı ve kampanya dönemine göre değişir. Kesin bilgiler için bankanızın güncel verilerine başvurun.</div>
+        <div class="flag" data-i18n="rates_flag">⚠ Vade günleri banka, kart programı ve kampanya dönemine göre değişir. Kesin bilgiler için bankanızın güncel verilerine başvurun.</div>
       </div>
     </div>
   </section>
@@ -849,5 +849,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   });
 </script>
+<script>
+(function(){
+  const MMG_I18N = {
+    en: {
+      page_title:'Average Maturity Calculator',
+      page_subtitle:'Enter how often installments fall due — instantly see the term and average maturity for any number of installments',
+      reset_btn:'Reset', back_home:'← Home',
+      table_desc:'The day values below are examples. If you know the real maturity, update it in the table — the average maturity is calculated automatically.',
+      label_interval:'Installments recur every (days)', unit_days:'days',
+      th_installment:'Installment', th_installment_term:'Installment Term (days)', th_total_term:'Total Term (days)', th_avg_term:'Average Term (days)',
+      reset_rates:'↺ Reset to default days', export_excel:'Export to Excel', export_pdf:'Export to PDF',
+      member_notice:'🔒 Excel/PDF export features are currently only active for logged-in members.',
+      rates_flag:'⚠ Maturity days vary by bank, card program, and campaign period. Check your bank for exact figures.'
+    }
+  };
+  function applyMmgLang(lang){
+    if(lang === 'tr'){ location.reload(); return; }
+    const dict = MMG_I18N[lang];
+    if(!dict) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if(dict[key]) el.innerHTML = dict[key];
+    });
+  }
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      applyMmgLang(ev.data.mmgLang);
+    }
+  });
+  try{
+    const savedLang = localStorage.getItem('mmg_lang');
+    if(savedLang === 'en') applyMmgLang('en');
+  }catch(e){}
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

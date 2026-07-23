@@ -27,8 +27,8 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, arrayUnion,
-  collection, query, where, orderBy, limit, onSnapshot, serverTimestamp
+  getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, addDoc, arrayUnion,
+  collection, query, where, orderBy, limit, onSnapshot, serverTimestamp, deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 (function(){
@@ -170,6 +170,11 @@ import {
   .mmg-chat-list-name{ font-size:13px; font-weight:600; color:var(--text,#EAEDF3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .mmg-chat-list-sub{ font-size:11.5px; color:var(--muted,#8D96AC); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .mmg-chat-list-time{ font-size:10.5px; color:var(--muted,#8D96AC); flex:0 0 auto; }
+  .mmg-chat-list-delete{
+    background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:13px; padding:6px;
+    flex:0 0 auto; opacity:0.5; border-radius:6px; transition:opacity .12s ease, background .12s ease;
+  }
+  .mmg-chat-list-delete:hover{ opacity:1; color:var(--red,#E2544B); background:rgba(226,84,75,0.1); }
   .mmg-chat-req-row{
     background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:10px; padding:10px; margin-bottom:8px;
   }
@@ -197,8 +202,9 @@ import {
   }
   .mmg-chat-msg{ margin-bottom:10px; display:flex; }
   .mmg-chat-msg.me{ justify-content:flex-end; }
+  .mmg-chat-msg > div{ max-width:78%; min-width:0; }
   .mmg-chat-bubble{
-    max-width:78%; padding:9px 12px; border-radius:14px; font-size:13px; line-height:1.45; word-wrap:break-word;
+    width:fit-content; max-width:100%; padding:9px 12px; border-radius:14px; font-size:13px; line-height:1.45; word-wrap:break-word; overflow-wrap:break-word;
     background:var(--surface-2,#1B2536); color:var(--text,#EAEDF3); border:1px solid var(--hairline,#2A3448);
   }
   .mmg-chat-msg.me .mmg-chat-bubble{
@@ -206,8 +212,30 @@ import {
   }
   .mmg-chat-msg-time{ font-size:9.5px; color:var(--muted,#8D96AC); margin-top:3px; text-align:right; }
   .mmg-chat-msg.me .mmg-chat-msg-time{ color:rgba(255,255,255,0.75); }
-  .mmg-chat-footer{ flex:0 0 auto; display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--hairline,#2A3448); }
+  .mmg-chat-footer{ flex:0 0 auto; display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--hairline,#2A3448); align-items:flex-end; }
   .mmg-chat-footer[hidden]{ display:none !important; }
+  .mmg-chat-emoji-btn{
+    width:38px; height:38px; border-radius:8px; border:1px solid var(--hairline,#2A3448); cursor:pointer; flex:0 0 auto;
+    background:var(--surface-2,#1B2536); font-size:17px; display:flex; align-items:center; justify-content:center;
+  }
+  .mmg-chat-emoji-btn:hover{ border-color:var(--brass-dim,#8A7440); }
+  .mmg-chat-emoji-picker{
+    position:absolute; bottom:46px; left:0; z-index:5; width:220px; max-height:180px; overflow-y:auto;
+    background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448); border-radius:10px; padding:8px;
+    display:grid; grid-template-columns:repeat(7, 1fr); gap:2px; box-shadow:0 12px 30px rgba(0,0,0,0.4);
+  }
+  .mmg-chat-emoji-picker[hidden]{ display:none; }
+  .mmg-chat-emoji-picker span{
+    cursor:pointer; text-align:center; font-size:18px; padding:4px 0; border-radius:6px; line-height:1;
+  }
+  .mmg-chat-emoji-picker span:hover{ background:var(--surface-2,#1B2536); }
+  .mmg-chat-msg-delete{
+    background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:11px; padding:2px 4px;
+    opacity:0.45; transition:opacity .12s ease; flex:0 0 auto; align-self:flex-start;
+  }
+  .mmg-chat-msg-delete:hover{ opacity:1; color:var(--red,#E2544B); }
+  .mmg-chat-msg-row{ display:flex; align-items:flex-start; gap:4px; min-width:0; }
+  .mmg-chat-msg.me .mmg-chat-msg-row{ flex-direction:row-reverse; }
   .mmg-chat-footer textarea{
     flex:1; resize:none; height:38px; max-height:80px; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448);
     border-radius:8px; padding:9px 11px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13px; outline:none;
@@ -264,6 +292,9 @@ import {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
       <div class="mmg-chat-title" id="mmgChatTitle">Sohbet</div>
+      <button type="button" class="mmg-chat-iconbtn" id="mmgChatDeleteBtn" hidden aria-label="Sohbeti sil" title="Sohbeti sil">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      </button>
       <button type="button" class="mmg-chat-iconbtn" id="mmgChatBlockBtn" hidden aria-label="Engelle" title="Bu kullanıcıyı engelle">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/></svg>
       </button>
@@ -283,6 +314,10 @@ import {
     </div>
     <div class="mmg-chat-body" id="mmgChatBody"></div>
     <div class="mmg-chat-footer" id="mmgChatFooter" hidden>
+      <div style="position:relative;">
+        <button type="button" class="mmg-chat-emoji-btn" id="mmgChatEmojiBtn" aria-label="Emoji ekle">🙂</button>
+        <div class="mmg-chat-emoji-picker" id="mmgChatEmojiPicker" hidden></div>
+      </div>
       <textarea id="mmgChatInput" placeholder="Mesaj yazın…" rows="1"></textarea>
       <button type="button" class="mmg-chat-send-btn" id="mmgChatSendBtn" aria-label="Gönder">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
@@ -316,6 +351,7 @@ import {
     els.title = document.getElementById('mmgChatTitle');
     els.backBtn = document.getElementById('mmgChatBackBtn');
     els.blockBtn = document.getElementById('mmgChatBlockBtn');
+    els.deleteBtn = document.getElementById('mmgChatDeleteBtn');
     els.leaveGroupBtn = document.getElementById('mmgChatLeaveGroupBtn');
     els.closeBtn = document.getElementById('mmgChatCloseBtn');
     els.codeBox = document.getElementById('mmgChatCodeBox');
@@ -326,6 +362,8 @@ import {
     els.input = document.getElementById('mmgChatInput');
     els.sendBtn = document.getElementById('mmgChatSendBtn');
     els.toastContainer = document.getElementById('mmgChatToastContainer');
+    els.emojiBtn = document.getElementById('mmgChatEmojiBtn');
+    els.emojiPicker = document.getElementById('mmgChatEmojiPicker');
 
     els.bubble.addEventListener('pointerdown', onBubblePointerDown);
     els.closeBtn.addEventListener('click', () => { els.panel.hidden = true; });
@@ -336,6 +374,13 @@ import {
       const label = (openChatInfo && openChatInfo.title) || 'Bu kullanıcı';
       if(confirm(label + ' engellensin mi? Bu kişi size bir daha mesaj gönderemez.')){
         blockUser(openChatOtherUid);
+      }
+    });
+    els.deleteBtn.addEventListener('click', () => {
+      if(!openChatId || openChatCollection !== 'chats') return;
+      const label = (openChatInfo && openChatInfo.title) || 'Bu sohbet';
+      if(confirm(label + ' sohbeti tamamen silinsin mi? Bu işlem geri alınamaz ve tüm mesaj geçmişi kaybolur.')){
+        deleteChat(openChatId);
       }
     });
     els.leaveGroupBtn.addEventListener('click', () => {
@@ -357,6 +402,30 @@ import {
     els.sendBtn.addEventListener('click', sendCurrentMessage);
     els.input.addEventListener('keydown', (e) => {
       if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendCurrentMessage(); }
+    });
+
+    // ---- Emoji seçici ----
+    const EMOJI_LIST = ['😀','😁','😂','🤣','😊','😍','😘','😉','😎','🤔','😅','😢','😭','😡','😱','👍','👎','🙏','👏','💪','❤️','🔥','🎉','✅','❌','⏰','💰','📈','📉','💳','🏦','😴','🤝','😇','🙌','🥳'];
+    els.emojiPicker.innerHTML = EMOJI_LIST.map(e => `<span>${e}</span>`).join('');
+    els.emojiBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      els.emojiPicker.hidden = !els.emojiPicker.hidden;
+    });
+    els.emojiPicker.addEventListener('click', (e) => {
+      const span = e.target.closest('span');
+      if(!span) return;
+      const emoji = span.textContent;
+      const start = els.input.selectionStart ?? els.input.value.length;
+      const end = els.input.selectionEnd ?? els.input.value.length;
+      els.input.value = els.input.value.slice(0, start) + emoji + els.input.value.slice(end);
+      const newPos = start + emoji.length;
+      els.input.focus();
+      els.input.setSelectionRange(newPos, newPos);
+    });
+    document.addEventListener('click', (e) => {
+      if(els.emojiPicker.hidden) return;
+      if(els.emojiPicker.contains(e.target) || els.emojiBtn.contains(e.target)) return;
+      els.emojiPicker.hidden = true;
     });
 
     // Panel açıkken, panelin ve baloncuğun DIŞINDA bir yere tıklanırsa paneli kapat.
@@ -509,6 +578,7 @@ import {
     els.footer.hidden = true;
     if(els.leaveGroupBtn) els.leaveGroupBtn.hidden = true;
     if(els.blockBtn) els.blockBtn.hidden = true;
+    if(els.deleteBtn) els.deleteBtn.hidden = true;
     if(rerender !== false) renderTab();
   }
 
@@ -775,6 +845,7 @@ import {
           <div class="mmg-chat-list-name">${esc(r.label)}${r.unread ? ' •' : ''}</div>
           <div class="mmg-chat-list-sub">${esc(r.sub)}</div>
         </div>
+        ${r.kind === 'chat' ? `<button type="button" class="mmg-chat-list-delete" data-delete-chat-id="${esc(r.id)}" data-delete-label="${esc(r.label)}" title="Kişiyi sil" aria-label="Kişiyi sil">🗑</button>` : ''}
       </div>`).join('')
       : `<div class="mmg-chat-empty">Henüz bir sohbetiniz yok.<br>"Kod ile Ekle" sekmesinden bir kullanıcı kodu girerek istek gönderebilir ya da bir grup oluşturabilirsiniz.</div>`;
 
@@ -788,6 +859,15 @@ import {
       friendsSubView = 'newGroup';
       pendingGroupMembers = [];
       renderTab();
+    });
+    els.body.querySelectorAll('.mmg-chat-list-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const label = btn.dataset.deleteLabel || 'Bu kişi';
+        if(confirm(label + ' silinsin mi? Bu kişiyle olan tüm sohbet geçmişi kaybolacak.')){
+          deleteChat(btn.dataset.deleteChatId);
+        }
+      });
     });
     els.body.querySelectorAll('.mmg-chat-list-item[data-chat-id]').forEach(row => {
       row.addEventListener('click', () => {
@@ -1103,6 +1183,22 @@ import {
     }catch(e){ console.error(e); }
   }
 
+  // ---- Sohbeti (kişiyi) tamamen sil ----
+  async function deleteChat(chatId){
+    if(!chatId) return;
+    try{
+      const msgsSnap = await getDocs(collection(db, 'chats', chatId, 'messages'));
+      await Promise.all(msgsSnap.docs.map(d => deleteDoc(d.ref).catch(() => {})));
+      await deleteDoc(doc(db, 'chats', chatId));
+      delete chatsMap[chatId];
+      if(openChatId === chatId) closeOpenChat(false);
+      renderTab();
+    }catch(e){
+      console.error('mmg-chat-widget: sohbet silinemedi', e);
+      alert('Sohbet silinemedi, lütfen tekrar deneyin.');
+    }
+  }
+
   // ---- Açık sohbet ----
   function openChat(chatId, info){
     openChatId = chatId;
@@ -1113,6 +1209,7 @@ import {
     els.footer.hidden = false;
     els.blockBtn.hidden = !openChatOtherUid; // gruplarda gösterilmez, sadece 1:1 sohbette
     els.leaveGroupBtn.hidden = openChatCollection !== 'chatGroups';
+    els.deleteBtn.hidden = openChatCollection !== 'chats'; // gruplarda "gruptan ayrıl" kullanılır
     els.title.textContent = info && info.title ? info.title : 'Sohbet';
     els.body.innerHTML = `<div class="mmg-chat-empty">Yükleniyor…</div>`;
 
@@ -1123,7 +1220,7 @@ import {
     const msgsQuery = query(collection(db, openChatCollection, chatId, 'messages'), orderBy('createdAt', 'asc'), limit(200));
     unsubMessages = onSnapshot(msgsQuery, (snap) => {
       const msgs = [];
-      snap.forEach(d => msgs.push(d.data()));
+      snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
       renderMessages(msgs);
     }, (err) => {
       console.error('mmg-chat-widget messages onSnapshot:', err);
@@ -1148,12 +1245,31 @@ import {
       return `<div class="mmg-chat-msg ${mine ? 'me' : ''}">
         <div>
           ${senderLabel}
-          <div class="mmg-chat-bubble">${esc(m.text)}</div>
+          <div class="mmg-chat-msg-row">
+            <div class="mmg-chat-bubble">${esc(m.text)}</div>
+            ${mine ? `<button type="button" class="mmg-chat-msg-delete" data-msg-id="${esc(m.id)}" title="Mesajı sil">🗑</button>` : ''}
+          </div>
           <div class="mmg-chat-msg-time">${fmtTime(m.createdAt)}</div>
         </div>
       </div>`;
     }).join('');
+    els.body.querySelectorAll('.mmg-chat-msg-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const msgId = btn.dataset.msgId;
+        if(confirm('Bu mesajı silmek istediğinize emin misiniz?')) deleteMessage(msgId);
+      });
+    });
     els.body.scrollTop = els.body.scrollHeight;
+  }
+
+  async function deleteMessage(msgId){
+    if(!msgId || !openChatId) return;
+    try{
+      await deleteDoc(doc(db, openChatCollection, openChatId, 'messages', msgId));
+    }catch(e){
+      console.error('mmg-chat-widget: mesaj silinemedi', e);
+    }
   }
 
   async function sendCurrentMessage(){

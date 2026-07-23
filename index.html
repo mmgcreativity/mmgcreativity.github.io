@@ -2100,16 +2100,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <button type="button" class="mmg-lang-btn" data-lang="en">English</button>
     </div>
 
-    <div class="mmg-settings-label">Görünüm Modu</div>
-    <div class="mmg-lang-row" style="margin-bottom:18px;">
-      <button type="button" class="mmg-lang-btn" id="mmgThemeDarkBtn">☾ Koyu Mod</button>
-      <button type="button" class="mmg-lang-btn" id="mmgThemeLightBtn">☀ Açık Mod</button>
-    </div>
-
-    <div class="mmg-settings-label">Tam Ekran Modu</div>
-    <div class="mmg-lang-row" style="margin-bottom:18px;">
-      <button type="button" class="mmg-lang-btn" id="mmgFullscreenOnBtn">⛶ Tam Ekran</button>
-      <button type="button" class="mmg-lang-btn" id="mmgFullscreenOffBtn">Pencere Modu</button>
+    <div style="display:flex; gap:14px; margin-bottom:18px;">
+      <div style="flex:1;">
+        <div class="mmg-settings-label">Görünüm Modu</div>
+        <button type="button" class="mmg-lang-btn" id="mmgThemeDarkBtn" style="width:100%; margin-bottom:6px;">☾ Koyu Mod</button>
+        <button type="button" class="mmg-lang-btn" id="mmgThemeLightBtn" style="width:100%;">☀ Açık Mod</button>
+      </div>
+      <div style="flex:1;">
+        <div class="mmg-settings-label">Tam Ekran Modu</div>
+        <button type="button" class="mmg-lang-btn" id="mmgFullscreenOnBtn" style="width:100%; margin-bottom:6px;">⛶ Tam Ekran</button>
+        <button type="button" class="mmg-lang-btn" id="mmgFullscreenOffBtn" style="width:100%;">Pencere Modu</button>
+      </div>
     </div>
 
     <div class="mmg-settings-label">Bildirimler</div>
@@ -2164,10 +2165,16 @@ const auth = getApps().length ? getAuth(getApp()) : null;
       const key = el.getAttribute('data-i18n');
       if(dict[key]) el.textContent = dict[key];
     });
-    document.querySelectorAll('.mmg-lang-btn').forEach(btn => {
+    document.querySelectorAll('.mmg-lang-btn[data-lang]').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.lang === lang);
     });
     document.documentElement.setAttribute('lang', lang);
+    try{
+      const frameEl = document.getElementById('app-frame');
+      if(frameEl && frameEl.contentWindow){
+        frameEl.contentWindow.postMessage({ mmgLang: lang }, '*');
+      }
+    }catch(e){}
   }
   function getSavedLang(){
     try{ return localStorage.getItem('mmg_lang') || 'tr'; }catch(e){ return 'tr'; }

@@ -356,16 +356,16 @@ function mmgApplyTurkishFont(doc){
   .xrow-group .xrow:last-child{ border-bottom:none; }
   /* ---- Gerçek Excel hücresi hissi: etiket | değer | kayıtlı-mini | kaydet-ikonu, hepsi TEK satırda ---- */
   .xcell{
-    display:grid; grid-template-columns:148px 1fr 30px 78px; align-items:center; gap:5px;
+    display:grid; grid-template-columns:70px 1fr 36px 92px; align-items:center; gap:5px;
     border-bottom:none; background:var(--surface-2);
   }
-  .xcell.xcell-full{ grid-template-columns:148px 1fr; }
-  .xcell.xcell-3col{ grid-template-columns:148px 1fr auto; }
+  .xcell.xcell-full{ grid-template-columns:70px 1fr; }
+  .xcell.xcell-3col{ grid-template-columns:70px 1fr auto; }
   .xcell:first-child{ border-radius:6px 6px 0 0; }
   .xcell:last-child{ border-radius:0 0 6px 6px; }
   .xcell-label{
     font-family:'Inter',sans-serif; font-size:12px; color:var(--muted); text-transform:none;
-    letter-spacing:normal; padding:0 0 0 28px; background:transparent; align-self:stretch;
+    letter-spacing:normal; padding:0 0 0 8px; background:transparent; align-self:stretch;
     display:flex; align-items:center; height:100%;
   }
   .xcell input, .xcell select{
@@ -374,12 +374,12 @@ function mmgApplyTurkishFont(doc){
   }
   .xcell select option{ background:var(--surface-2); color:var(--text); }
   .xcell select.xcell-mini{
-    font-size:9.5px; color:var(--muted); border-left:1px solid var(--hairline); padding:5px 3px;
+    font-size:12px; font-family:'Inter',sans-serif; color:var(--muted); border-left:1px solid var(--hairline); padding:5px 4px;
   }
   .xcell input:focus, .xcell select:focus{ background:rgba(198,161,91,0.06); }
   .xcell-savebtn{
     background:var(--surface-2); border:none; border-left:1px solid var(--hairline); color:var(--brass);
-    cursor:pointer; font-size:14px; height:100%; width:100%; transition:transform .15s ease;
+    cursor:pointer; font-size:12px; height:100%; width:100%; transition:transform .15s ease;
   }
   .xcell-savebtn:hover{ background:rgba(198,161,91,0.1); }
 
@@ -575,11 +575,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     <div class="cascade-wrap">
       <div class="cascade-wrap-inner">
-      <div class="xcell-title" style="margin-top:0;">Talimat Bilgileri</div>
-      <div class="type-date-row" style="display:flex; flex-direction:column; gap:10px; padding-left:38px;">
+      <div class="xcell-title" style="margin-top:0; padding-left:32px;">Talimat Bilgileri</div>
+      <div class="type-date-row" style="display:flex; flex-direction:column; gap:10px; padding-left:20px;">
         <div style="display:flex; flex-wrap:wrap; justify-content:space-between; column-gap:16px; row-gap:10px;">
           <div class="xrow" style="grid-template-columns:70px auto; display:none; border-top:none !important;" id="talimatTurWrap">
-            <label title="Talimat Türünü Seçin">Talimat</label>
+            <label title="Talimat Türünü Seçin" style="text-align:right;">Talimat</label>
             <select id="talimatTurSelect" style="width:150px;">
               <option value="">— Seçiniz —</option>
               <option value="havale">Havale/EFT</option>
@@ -591,23 +591,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </select>
           </div>
           <div class="xrow" style="grid-template-columns:70px auto; display:none; border-top:none !important;" id="tarihSlotHavale">
-            <label>Tarih</label>
+            <label style="text-align:right;">Tarih</label>
             <input type="date" id="fTarih" style="width:125px;">
           </div>
           <div class="xrow" style="grid-template-columns:70px auto; display:none; border-top:none !important;" id="tarihSlotSerbest">
-            <label>Tarih</label>
+            <label style="text-align:right;">Tarih</label>
             <input type="date" id="fSmTarih" style="width:125px;">
           </div>
         </div>
         <div style="display:flex; flex-wrap:wrap; justify-content:space-between; column-gap:16px; row-gap:10px;">
           <div class="xrow" style="grid-template-columns:70px auto; display:none; border-top:none !important;" id="altKategoriWrap">
-            <label title="Alt Kategori Seçin">Tür</label>
+            <label title="Alt Kategori Seçin" style="text-align:right;">Tür</label>
             <select id="altKategoriSelect" style="width:180px;" disabled>
               <option value="">— Talimat seçin —</option>
             </select>
           </div>
-          <div class="xrow" style="grid-template-columns:70px auto; display:none; border-top:none !important;" id="paraBirimiSlotHavale">
-            <label>Para Birimi</label>
+          <div class="xrow" style="grid-template-columns:70px auto; display:none; border-top:none !important; margin-left:auto;" id="paraBirimiSlotHavale">
+            <label style="text-align:right;">Para Birimi</label>
             <select id="paraBirimiSelect" style="width:91px;">
               <option value="TL">TL</option>
               <option value="USD">USD</option>
@@ -625,7 +625,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="work-grid" id="panel-havale-tekli" style="display:none;">
       <div class="panel-left-col">
       <div class="form-card" style="margin-bottom:16px; padding-top:14px;">
-        <div class="xcell-title" style="margin-top:0;">Gönderen Bilgileri</div>
+        <div class="xcell-title" style="margin-top:0; padding-left:24px;">Gönderen Bilgileri</div>
         <div class="xcell-group">
           <div class="xcell">
             <span class="xcell-label">FİRMA</span>
@@ -654,7 +654,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
       <div class="form-card" style="margin-bottom:0;">
-        <div class="xcell-title" style="margin-top:0;">Alıcı Bilgileri</div>
+        <div class="xcell-title" style="margin-top:0; padding-left:24px;">Alıcı Bilgileri</div>
         <div id="aliciRowsContainer"></div>
         <button type="button" class="io-btn" id="addAliciRowBtn" style="margin-bottom:16px;">+ Alıcı Satırı Ekle</button>
       </div>

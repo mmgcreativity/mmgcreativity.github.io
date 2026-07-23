@@ -189,6 +189,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h1 class="title">İstatistikler</h1>
     <div class="subtitle">Kullanıcı, referans kodu ve beğenme geri bildirimi istatistikleri burada listelenir.</div>
   </div>
+  <button class="btn" id="refreshAllBtn">↻ Yenile</button>
 </header>
 <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
 
@@ -641,6 +642,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   refreshBtn.addEventListener('click', loadAll);
+  document.getElementById('refreshAllBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('refreshAllBtn');
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Yükleniyor…';
+    try{
+      await loadAll();
+      const activeCard = document.querySelector('.summary-card.clickable.active');
+      if(activeCard) renderUserDetail(activeCard.dataset.userFilter);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  });
 
   onAuthStateChanged(auth, async (user) => {
     if(!user){
