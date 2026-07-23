@@ -295,7 +295,7 @@ import {
       }
     });
     els.leaveGroupBtn.addEventListener('click', () => {
-      if(!openChatId || openChatCollection !== 'groups') return;
+      if(!openChatId || openChatCollection !== 'chatGroups') return;
       const label = (openChatInfo && openChatInfo.title) || 'Bu grup';
       if(confirm(label + ' grubundan ayrılmak istediğinize emin misiniz?')){
         leaveGroup(openChatId);
@@ -488,14 +488,14 @@ import {
       updateBadge();
     }, (err) => console.error('mmg-chat-widget requests onSnapshot:', err));
 
-    unsubGroups = onSnapshot(query(collection(db, 'groups'), where('members', 'array-contains', uid)), (snap) => {
+    unsubGroups = onSnapshot(query(collection(db, 'chatGroups'), where('members', 'array-contains', uid)), (snap) => {
       groupsMap = {};
       snap.forEach(d => { groupsMap[d.id] = d.data(); });
       if(activeTab === 'friends' && friendsSubView === 'list') renderTab();
       updateBadge();
     }, (err) => console.error('mmg-chat-widget groups onSnapshot:', err));
 
-    unsubGroupInvites = onSnapshot(query(collection(db, 'groupInvites'), where('toUid', '==', uid), where('status', '==', 'pending')), (snap) => {
+    unsubGroupInvites = onSnapshot(query(collection(db, 'chatGroupInvites'), where('toUid', '==', uid), where('status', '==', 'pending')), (snap) => {
       groupInvitesMap = {};
       snap.forEach(d => { groupInvitesMap[d.id] = d.data(); });
       if(activeTab === 'requests') renderTab();
@@ -638,7 +638,7 @@ import {
       row.addEventListener('click', () => {
         if(row.dataset.kind === 'group'){
           const g = groupsMap[row.dataset.chatId] || {};
-          openChat(row.dataset.chatId, { title: (g.name || 'Grup'), isAdminChat: false, collection: 'groups' });
+          openChat(row.dataset.chatId, { title: (g.name || 'Grup'), isAdminChat: false, collection: 'chatGroups' });
         } else {
           openChat(row.dataset.chatId, { title: row.dataset.label, isAdminChat: false, otherUid: row.dataset.otherUid, collection: 'chats' });
         }
@@ -718,7 +718,7 @@ import {
     if(!pendingGroupMembers.length){ msgEl.textContent = 'En az bir üye eklemelisiniz.'; return; }
     try{
       const uid = currentUser.uid;
-      const groupRef = doc(collection(db, 'groups'));
+      const groupRef = doc(collection(db, 'chatGroups'));
       const memberInfo = {}; memberInfo[uid] = { code: myChatCode || null };
       await setDoc(groupRef, {
         name,
@@ -731,7 +731,7 @@ import {
         lastSenderUid: null
       });
       for(const m of pendingGroupMembers){
-        await setDoc(doc(db, 'groupInvites', groupRef.id + '_' + m.uid), {
+        await setDoc(doc(db, 'chatGroupInvites', groupRef.id + '_' + m.uid), {
           groupId: groupRef.id,
           groupName: name,
           fromUid: uid,
@@ -756,7 +756,7 @@ import {
       closeOpenChat(false);
       const g = groupsMap[groupId];
       const remaining = (g && g.members || []).filter(u => u !== currentUser.uid);
-      await updateDoc(doc(db, 'groups', groupId), { members: remaining });
+      await updateDoc(doc(db, 'chatGroups', groupId), { members: remaining });
       renderTab();
     }catch(e){ console.error(e); }
   }
@@ -820,8 +820,8 @@ import {
   async function acceptGroupInvite(inviteId, groupId){
     try{
       const uid = currentUser.uid;
-      await updateDoc(doc(db, 'groupInvites', inviteId), { status: 'accepted' });
-      await updateDoc(doc(db, 'groups', groupId), {
+      await updateDoc(doc(db, 'chatGroupInvites', inviteId), { status: 'accepted' });
+      await updateDoc(doc(db, 'chatGroups', groupId), {
         members: arrayUnion(uid),
         ['memberInfo.' + uid]: { code: myChatCode || null }
       });
@@ -829,7 +829,7 @@ import {
   }
 
   async function declineGroupInvite(inviteId){
-    try{ await updateDoc(doc(db, 'groupInvites', inviteId), { status: 'declined' }); }
+    try{ await updateDoc(doc(db, 'chatGroupInvites', inviteId), { status: 'declined' }); }
     catch(e){ console.error(e); }
   }
 
@@ -957,7 +957,7 @@ import {
     els.backBtn.hidden = false;
     els.footer.hidden = false;
     els.blockBtn.hidden = !openChatOtherUid; // gruplarda gösterilmez, sadece 1:1 sohbette
-    els.leaveGroupBtn.hidden = openChatCollection !== 'groups';
+    els.leaveGroupBtn.hidden = openChatCollection !== 'chatGroups';
     els.title.textContent = info && info.title ? info.title : 'Sohbet';
     els.body.innerHTML = `<div class="mmg-chat-empty">Yükleniyor…</div>`;
 
@@ -981,7 +981,7 @@ import {
       els.body.innerHTML = `<div class="mmg-chat-empty">Henüz mesaj yok. İlk mesajı siz gönderin!</div>`;
       return;
     }
-    const isGroup = openChatCollection === 'groups';
+    const isGroup = openChatCollection === 'chatGroups';
     const groupInfo = isGroup ? (groupsMap[openChatId] || {}) : null;
     els.body.innerHTML = msgs.map(m => {
       const mine = m.senderUid === currentUser.uid;

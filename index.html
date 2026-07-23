@@ -269,6 +269,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .account-dropdown-item-danger svg{ color:var(--red); }
   .account-dropdown-item-danger span{ color:var(--red); }
 
+  .account-dropdown-section-label{
+    font-family:'Inter',sans-serif; font-size:10.5px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--muted); padding:8px 8px 4px;
+  }
+  .mmg-account-row{
+    display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+    background:transparent; border:none; border-radius:9px; padding:9px 8px; cursor:pointer;
+    font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; color:var(--text);
+  }
+  .mmg-account-row:hover{ background:var(--surface-2); }
+  .mmg-account-row.mmg-account-row-static{ cursor:default; color:var(--muted); font-weight:400; }
+  .mmg-account-row.mmg-account-row-static:hover{ background:transparent; }
+  .mmg-account-row-dot{ width:7px; height:7px; border-radius:50%; background:var(--teal,#3FB68A); flex:0 0 auto; }
+  .mmg-account-row-main{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mmg-account-row-x{
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; flex:0 0 auto; padding:2px 4px;
+  }
+  .mmg-account-row-x:hover{ color:var(--red,#E2544B); }
+
   .account-info-overlay{
     position:fixed; inset:0; z-index:900; background:rgba(5,8,14,0.7);
     display:flex; align-items:center; justify-content:center; padding:24px;
@@ -826,6 +845,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="account-dropdown-sub" id="accountDropdownSub"></div>
       </div>
     </div>
+    <div class="account-dropdown-divider"></div>
+    <div id="mmgCompanySwitchWrap" style="display:none;">
+      <div class="account-dropdown-section-label">Bağlı Firmalar</div>
+      <div id="mmgCompanySwitchList"></div>
+      <div class="account-dropdown-divider"></div>
+    </div>
+    <div class="account-dropdown-section-label">Hesaplarım</div>
+    <div id="mmgKnownAccountsList"></div>
+    <button type="button" class="account-dropdown-item" id="mmgAddAccountBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+      <span>Başka Hesap Ekle</span>
+    </button>
     <div class="account-dropdown-divider"></div>
     <button type="button" class="account-dropdown-item" id="accountInfoBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M6 16c0-1.8 1.5-3 3-3s3 1.2 3 3"/><path d="M14 9h4"/><path d="M14 13h4"/></svg>
@@ -1402,6 +1433,121 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function toggleAccountDropdown(forceState){
     const shouldShow = typeof forceState === 'boolean' ? forceState : accountDropdown.hidden;
     accountDropdown.hidden = !shouldShow;
+    if(shouldShow){
+      renderKnownAccountsList();
+      renderCompanySwitchList();
+    }
+  }
+
+  // ================== Hesap Değiştirme ==================
+  // A) Bağımsız Hesaplar: e-posta bazlı, tamamen ayrı kullanıcı hesapları arasında hızlı geçiş.
+  //    Şifreler ASLA saklanmaz; sadece e-posta/ad hatırlanır, geçişte şifre tekrar girilir
+  //    (Google ile eklenen hesaplarda tarayıcı/Google popup'ı genelde şifresiz hızlı geçiş sağlar).
+  function getKnownAccounts(){
+    try{ return JSON.parse(localStorage.getItem('mmg_known_accounts') || '[]'); }catch(e){ return []; }
+  }
+  function saveKnownAccounts(list){
+    try{ localStorage.setItem('mmg_known_accounts', JSON.stringify(list)); }catch(e){}
+  }
+  function rememberAccount(email, username){
+    if(!email) return;
+    const list = getKnownAccounts().filter(a => a.email.toLowerCase() !== email.toLowerCase());
+    list.unshift({ email: email, username: username || '' });
+    saveKnownAccounts(list.slice(0, 6));
+  }
+  function forgetAccount(email){
+    saveKnownAccounts(getKnownAccounts().filter(a => a.email.toLowerCase() !== email.toLowerCase()));
+    renderKnownAccountsList();
+  }
+  function renderKnownAccountsList(){
+    const wrap = document.getElementById('mmgKnownAccountsList');
+    if(!wrap) return;
+    const currentEmail = ((auth.currentUser && auth.currentUser.email) || '').toLowerCase();
+    const list = getKnownAccounts().filter(a => a.email.toLowerCase() !== currentEmail);
+    if(!list.length){
+      wrap.innerHTML = '<div class="mmg-account-row mmg-account-row-static">Başka kayıtlı hesap yok.</div>';
+      return;
+    }
+    wrap.innerHTML = list.map(a =>
+      '<div class="mmg-account-row" data-email="' + a.email.replace(/"/g,'&quot;') + '">' +
+        '<span class="mmg-account-row-main">' + (a.username || a.email) + '</span>' +
+        '<button type="button" class="mmg-account-row-x" data-forget="' + a.email.replace(/"/g,'&quot;') + '" title="Listeden kaldır">✕</button>' +
+      '</div>'
+    ).join('');
+    wrap.querySelectorAll('.mmg-account-row[data-email]').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if(e.target.closest('[data-forget]')) return;
+        switchToAccount(row.dataset.email);
+      });
+    });
+    wrap.querySelectorAll('[data-forget]').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); forgetAccount(btn.dataset.forget); });
+    });
+  }
+  async function switchToAccount(email){
+    toggleAccountDropdown(false);
+    try{ await signOut(auth); }catch(e){ /* sessizce geç */ }
+    localStorage.setItem('mmg_auth_state', 'guest');
+    setAuthMode('login');
+    openAuthOverlay();
+    const emailInput = document.getElementById('authEmail');
+    const passwordInput = document.getElementById('authPassword');
+    if(emailInput) emailInput.value = email;
+    if(passwordInput){ passwordInput.value = ''; passwordInput.focus(); }
+  }
+  document.getElementById('mmgAddAccountBtn').addEventListener('click', () => {
+    toggleAccountDropdown(false);
+    setAuthMode('login');
+    const emailInput = document.getElementById('authEmail');
+    const passwordInput = document.getElementById('authPassword');
+    if(emailInput) emailInput.value = '';
+    if(passwordInput) passwordInput.value = '';
+    openAuthOverlay();
+  });
+
+  // B) Bağlı Firmalar: Şirket Kodu ile birbirine bağlanmış firmalar arasında geçiş
+  //    (Hesabım sayfasındaki "Firmaları Bağla" özelliğiyle aynı veriyi kullanır).
+  let mmgCompanySwitchOptions = [];
+  async function renderCompanySwitchList(){
+    const wrap = document.getElementById('mmgCompanySwitchWrap');
+    const listEl = document.getElementById('mmgCompanySwitchList');
+    if(!wrap || !listEl) return;
+    const user = auth.currentUser;
+    const companyId = user ? localStorage.getItem('mmg_company_id') : null;
+    if(!user || !companyId){ wrap.style.display = 'none'; return; }
+    try{
+      const cSnap = await getDoc(doc(db, 'companies', companyId));
+      const groupId = cSnap.exists() ? cSnap.data().groupId : null;
+      let companyIds = [companyId];
+      if(groupId){
+        const gSnap = await getDoc(doc(db, 'groups', groupId));
+        if(gSnap.exists() && Array.isArray(gSnap.data().companyIds)) companyIds = gSnap.data().companyIds;
+      }
+      if(companyIds.length < 2){ wrap.style.display = 'none'; return; }
+      const activeId = localStorage.getItem('mmg_active_company_id') || companyId;
+      mmgCompanySwitchOptions = [];
+      const rows = [];
+      for(const cid of companyIds){
+        const snap = await getDoc(doc(db, 'companies', cid));
+        const name = snap.exists() ? (snap.data().name || cid) : cid;
+        mmgCompanySwitchOptions.push({ id: cid, name: name });
+        rows.push(
+          '<div class="mmg-account-row" data-company-id="' + cid + '">' +
+            (cid === activeId ? '<span class="mmg-account-row-dot"></span>' : '<span style="width:7px;"></span>') +
+            '<span class="mmg-account-row-main">' + name + '</span>' +
+          '</div>'
+        );
+      }
+      listEl.innerHTML = rows.join('');
+      listEl.querySelectorAll('[data-company-id]').forEach(row => {
+        row.addEventListener('click', () => {
+          localStorage.setItem('mmg_active_company_id', row.dataset.companyId);
+          toggleAccountDropdown(false);
+          location.reload();
+        });
+      });
+      wrap.style.display = 'block';
+    } catch(e){ wrap.style.display = 'none'; }
   }
 
   accountTrigger.addEventListener('click', (e) => {
@@ -1587,6 +1733,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(!avatar && user.photoURL) avatar = user.photoURL;
 
       localStorage.setItem('mmg_auth_state', 'user:' + email);
+      rememberAccount(email, username);
       if(customerNumber) localStorage.setItem('mmg_customer_no', String(customerNumber));
       if(username) localStorage.setItem('mmg_username', username);
       if(avatar) localStorage.setItem('mmg_avatar', avatar); else localStorage.removeItem('mmg_avatar');
@@ -1695,6 +1842,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           }
         }
         localStorage.setItem('mmg_auth_state', 'user:' + email);
+        rememberAccount(email, username);
         localStorage.setItem('mmg_customer_no', String(customerNumber));
         localStorage.setItem('mmg_username', username);
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
@@ -1737,6 +1885,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           }
         } catch(err){ /* profil okunamadıysa sessizce geç */ }
         localStorage.setItem('mmg_auth_state', 'user:' + email);
+        rememberAccount(email, username);
         if(customerNumber) localStorage.setItem('mmg_customer_no', String(customerNumber));
         if(username) localStorage.setItem('mmg_username', username);
         if(avatar) { localStorage.setItem('mmg_avatar', avatar); setAvatar(avatar); }
