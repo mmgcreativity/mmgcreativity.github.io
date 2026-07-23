@@ -44,8 +44,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html{background:var(--bg);}
-
+  html{background:var(--bg); overflow-x:hidden;}
+  html,body{overscroll-behavior-y:none;}
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
@@ -112,7 +112,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .f-field input, .f-field select{
     background:var(--bg); border:1px solid var(--hairline); border-radius:7px;
-    padding:0 8px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12.5px;
+    padding:0 8px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:14px;
     outline:none; transition:border-color .15s ease; width:100%; height:34px;
   }
   .f-field input:focus, .f-field select:focus{ border-color:var(--brass-dim); }
@@ -645,6 +645,5 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   addCekRow();
   recalc();
 </script>
-<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

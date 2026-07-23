@@ -184,8 +184,8 @@ function mmgApplyTurkishFont(doc){
     --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html{background:var(--bg);}
-
+  html{background:var(--bg); overflow-x:hidden;}
+  html,body{overscroll-behavior-y:none;}
   .io-two-col{ margin-right:60px; }
   @media (max-width: 700px){
     .io-two-col{ grid-template-columns:1fr !important; }
@@ -289,6 +289,10 @@ function mmgApplyTurkishFont(doc){
   .work-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:24px; align-items:start; }
   .panel-right-col{ margin-top:-148px; }
   @media (max-width:900px){ .work-grid{ grid-template-columns:1fr; } .panel-right-col{ margin-top:0 !important; } }
+  @media (max-width:900px){
+    .doc-preview-row{ flex-direction:column; }
+    .vtool-col{ flex-direction:row; flex-wrap:wrap; padding-top:0; margin-top:10px; }
+  }
 
   .form-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:26px; }
   .form-card h3{ font-family:'Space Grotesk',sans-serif; font-size:15px; margin-bottom:16px; color:var(--brass); }
@@ -1880,14 +1884,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           else { sh = maxHmm; sw = maxHmm * ratio; }
         }
         doc.addImage(stampDataUrl, 'PNG', pageWidth - 39 - sw, afterTableY + 8, sw, sh);
-        doc.setFontSize(mmgFS(10.5));
+        doc.setFont(mmgFontFamilyName(), 'bold');
+        doc.setFontSize(mmgFS(12));
         doc.setTextColor(20,20,20);
         doc.text(gonderenFirma, pageWidth - 39, afterTableY + 8 + sh + 5, { align: 'right' });
+        doc.setFont(mmgFontFamilyName(), 'normal');
       } catch(e){}
     } else {
-      doc.setFontSize(mmgFS(10.5));
+      doc.setFont(mmgFontFamilyName(), 'bold');
+      doc.setFontSize(mmgFS(12));
       doc.setTextColor(20,20,20);
       doc.text(gonderenFirma, pageWidth - 39, afterTableY + 30, { align: 'right' });
+      doc.setFont(mmgFontFamilyName(), 'normal');
     }
 
 
@@ -1917,20 +1925,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     };
     try{
       const blobUrl = doc.output('bloburl');
-      const iframe = document.createElement('iframe');
-      iframe.style.position = 'fixed';
-      iframe.style.right = '0';
-      iframe.style.bottom = '0';
-      iframe.style.width = '0';
-      iframe.style.height = '0';
-      iframe.style.border = 'none';
-      iframe.src = blobUrl;
-      document.body.appendChild(iframe);
-      iframe.onload = () => {
-        setTimeout(() => {
-          try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch(e){ fallback(); }
-        }, 200);
+      // Gizli bir iframe içinde yazdırmayı denemek yerine gerçek bir sekmede açıyoruz;
+      // tarayıcının kendi PDF görüntüleyicisi bu şekilde çok daha güvenilir çalışıyor.
+      const printWindow = window.open(blobUrl, '_blank');
+      if(!printWindow){
+        fallback();
+        return;
+      }
+      let printed = false;
+      const tryPrint = () => {
+        if(printed) return;
+        printed = true;
+        try{ printWindow.focus(); printWindow.print(); }
+        catch(e){ /* Kullanıcı sekmede PDF'i görüyor; gerekirse kendi Ctrl+P ile yazdırabilir. */ }
       };
+      printWindow.addEventListener('load', () => setTimeout(tryPrint, 300));
+      // Bazı tarayıcılarda PDF'ler için 'load' event'i tetiklenmeyebilir; güvenlik ağı olarak da deniyoruz.
+      setTimeout(tryPrint, 1200);
     } catch(err){
       fallback(); // beklenmedik bir hata olursa da referans PDF tasarımı dışına düşmeyelim
     }
@@ -2441,12 +2452,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         doc.addImage(stampDataUrl, 'PNG', pageWidth - 39 - sw, afterTableY, sw, sh);
         doc.setFontSize(mmgFS(10.5));
         doc.setTextColor(20,20,20);
+        doc.setFont(mmgFontFamilyName(), 'bold');
+        doc.setFontSize(mmgFS(12));
         doc.text(v.glFirma || '—', pageWidth - 39, afterTableY + sh + 5, { align: 'right' });
+        doc.setFont(mmgFontFamilyName(), 'normal');
       } catch(e){}
     } else {
       doc.setFontSize(mmgFS(10.5));
       doc.setTextColor(20,20,20);
+      doc.setFont(mmgFontFamilyName(), 'bold');
+      doc.setFontSize(mmgFS(12));
       doc.text(v.glFirma || '—', pageWidth - 39, afterTableY + 22, { align: 'right' });
+      doc.setFont(mmgFontFamilyName(), 'normal');
     }
 
 
@@ -2629,12 +2646,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         doc.addImage(stampDataUrl, 'PNG', pageWidth - 39 - sw, afterTextY, sw, sh);
         doc.setFontSize(mmgFS(10.5));
         doc.setTextColor(20,20,20);
+        doc.setFont(mmgFontFamilyName(), 'bold');
+        doc.setFontSize(mmgFS(12));
         doc.text(firma, pageWidth - 39, afterTextY + sh + 5, { align: 'right' });
+        doc.setFont(mmgFontFamilyName(), 'normal');
       } catch(e){}
     } else {
       doc.setFontSize(mmgFS(10.5));
       doc.setTextColor(20,20,20);
+      doc.setFont(mmgFontFamilyName(), 'bold');
+      doc.setFontSize(mmgFS(12));
       doc.text(firma, pageWidth - 39, afterTextY, { align: 'right' });
+      doc.setFont(mmgFontFamilyName(), 'normal');
     }
 
 
@@ -3077,6 +3100,5 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   });
 </script>
-<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>
