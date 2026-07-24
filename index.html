@@ -145,8 +145,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .nav-text-wrap{ display:flex; flex-direction:row; align-items:baseline; gap:5px; min-width:0; flex-wrap:nowrap; overflow:hidden; }
   .nav-title{ font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:0; }
   .nav-desc{ font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
-  .nav-drawer-chevron{ margin-left:auto; font-size:11px; color:var(--muted); transition:transform .18s ease; flex-shrink:0; }
-  .nav-item[aria-expanded="true"] .nav-drawer-chevron{ transform:rotate(180deg); color:var(--brass); }
+  .nav-drawer-chevron{ margin-left:auto; font-size:15px; color:var(--muted); transition:transform .18s ease; flex-shrink:0; }
+  .nav-item[aria-expanded="true"] .nav-drawer-chevron{ transform:rotate(90deg); color:var(--brass); }
   .nav-drawer-wrap{ position:relative; }
   .nav-drawer{
     position:fixed; z-index:500; min-width:230px;
@@ -658,6 +658,167 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </head>
 <body>
 <script src="i18n-core.js"></script>
+<script>
+  // ---- Sözlük burada, HERHANGİ bir modül script çalışmadan ÖNCE kayıtlı olsun diye
+  // erken kaydediliyor (aksi halde onAuthStateChanged gibi erken tetiklenen kodlar
+  // MMGI18N.t() çağırdığında sözlük henüz hazır olmuyor, ham anahtar adı görünüyordu). ----
+  MMGI18N.registerDict({
+    tr: {
+      nav_home:'Ana Sayfa', nav_calc:'Hesaplama', nav_rotatif:'Rotatif Kredi Hesaplama', nav_ortalama:'Ortalama Vade Hesaplama',
+      nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması Hesaplama', nav_vadelimevduat:'Vadeli Mevduat Faizi Hesaplama',
+      nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
+      nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları',
+      nav_calc_desc:'Araçları', nav_nakitakis_desc:'Tablosu', nav_talimat_desc:'Hazırlama', nav_talimat_full:'Talimat Hazırlama',
+      nav_budget:'Bütçeleme', nav_budget_desc:'Araçları',
+      hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
+      hero_desc:'Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.',
+      card_calc_desc:'Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.',
+      card_cashflow_title:'Nakit Akış Tablosu',
+      card_cashflow_desc:'Ay ay, gün gün gelir ve giderlerinizi girin; haftalık ve aylık durumunuzu, kategori dağılımınızı ve otomatik uyarılarınızı anında görün.',
+      card_expenses_desc:'Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlensin.',
+      card_income_desc:'Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlensin.',
+      card_instructions_desc:'Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.',
+      footer_follow_us:'Bizi Takip Edin', footer_powered_by:'Powered by', footer_download_now:'Hemen İndirin',
+      footer_about:'Hakkında', footer_privacy:'Gizlilik Politikası', footer_terms:'Kullanım Şartları',
+      close:'Kapat',
+      settings_title:'Ayarlar', settings_lang_label:'Dil / Language',
+      settings_view_mode:'Görünüm Modu', settings_dark_mode:'☾ Koyu Mod', settings_light_mode:'☀ Açık Mod',
+      settings_fullscreen_mode:'Tam Ekran Modu', settings_fullscreen_on:'⛶ Tam Ekran', settings_window_mode:'Pencere Modu',
+      settings_notifications:'Bildirimler', settings_on:'Açık', settings_off:'Kapalı',
+      settings_change_password:'Şifre Değiştir', settings_new_password:'Yeni şifre (en az 6 karakter)',
+      settings_new_password_repeat:'Yeni şifre (tekrar)', settings_update_password:'Şifreyi Güncelle', settings_ok:'✓ Tamam',
+      settings_forgot_password:'Şifremi Unuttum', settings_cancel:'Vazgeç', settings_old_password:'Eski şifre',
+      pw_err_need_old:'Lütfen eski şifrenizi girin.', pw_updating:'Güncelleniyor…',
+      guest:'Misafir', unknown:'bilinmiyor', please_wait:'Lütfen bekleyin...', sending:'Gönderiliyor...',
+      dropdown_linked_companies:'Bağlı Firmalar', dropdown_my_accounts:'Hesaplarım', dropdown_add_account:'Başka Hesap Ekle',
+      dropdown_my_account:'Hesabım', dropdown_change_photo:'Resmi Değiştir', dropdown_referral_admin:'Referans Kodu Yönetimi',
+      dropdown_stats:'İstatistikler', dropdown_logout:'Oturumu Kapat', dropdown_login:'Oturum Aç',
+      dropdown_user_management:'Kullanıcı Yönetim Paneli', firma_badge_default:'Firma', group_companies:'Grup Firmaları',
+      data_scope_label:'Veri Kaynağı', data_scope_personal:'👤 Kendi Verilerim',
+      verify_email_notice:'✉️ E-posta adresiniz henüz doğrulanmadı.',
+      verify_email_resend:'Doğrulama E-postasını Tekrar Gönder', verify_email_sent:'Gönderildi ✓',
+      nav_user_mgmt_1:'Kullanıcı', nav_user_mgmt_2:'Yönetim Paneli',
+      auth_title_login:'Hoş geldiniz', auth_title_signup:'Hesap oluşturun',
+      auth_sub_login:'Kaldığınız yerden devam etmek için giriş yapın',
+      auth_sub_signup:'Oranlarınızı ve tercihlerinizi kaydetmek için ücretsiz hesap açın',
+      auth_tab_login:'Giriş Yap', auth_tab_signup:'Kayıt Ol', auth_create_account:'Hesap Oluştur',
+      auth_account_type:'Hesap Türü', auth_account_individual:'Bireysel', auth_account_corporate:'Kurumsal',
+      auth_fullname:'Ad Soyad', auth_company_title:'Firma Ünvanı', auth_email:'E-posta',
+      auth_password:'Şifre', auth_password_repeat:'Şifre (Tekrar)',
+      auth_referral_label:'Referans Kodu', auth_referral_optional:'(varsa, opsiyonel)',
+      auth_remember_me:'Oturumu açık tut', auth_forgot_password:'Şifremi unuttum?', auth_or:'veya',
+      auth_google:'Google ile devam et', auth_guest:'Misafir olarak gir',
+      auth_not_logged_in:'Giriş yapmadınız', auth_guest_mode:'Misafir modundasınız', auth_user_code:'Kullanıcı Kodu: #',
+      no_user_code:'Kullanıcı Kodu atanmamış',
+      auth_err_need_email_reset:'Şifre sıfırlama bağlantısı gönderebilmemiz için önce e-posta adresinizi yazın.',
+      auth_reset_sent_prefix:'Şifre sıfırlama bağlantısı ', auth_reset_sent_suffix:' adresine gönderildi. Gelen kutunuzu (ve spam klasörünü) kontrol edin.',
+      auth_reset_maybe_sent:'Eğer bu e-posta adresi sistemde kayıtlıysa, şifre sıfırlama bağlantısı gönderildi.',
+      auth_err_reset_failed:'Şifre sıfırlama e-postası gönderilemedi. Lütfen daha sonra tekrar deneyin.',
+      auth_err_need_username:'Lütfen bir kullanıcı adı belirleyin.',
+      auth_err_passwords_mismatch:'Şifreler eşleşmiyor.',
+      auth_err_email_in_use:'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.',
+      auth_err_invalid_email:'Geçerli bir e-posta adresi girin.',
+      auth_err_weak_password:'Şifre en az 6 karakter olmalı.',
+      auth_err_user_not_found:'Bu e-posta ile kayıtlı bir hesap bulunamadı.',
+      auth_err_wrong_password:'Şifre hatalı.',
+      auth_err_invalid_credential:'E-posta veya şifre hatalı.',
+      auth_err_too_many_requests:'Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.',
+      auth_err_network:'Bağlantı hatası. İnternetinizi kontrol edin.',
+      auth_err_google_disabled:'Google ile giriş şu an aktif değil. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
+      auth_err_unauthorized_domain:'Bu site adresi Firebase\'de yetkili domainler listesinde değil. (Firebase Console → Authentication → Settings → Authorized domains)',
+      auth_err_popup_blocked:'Tarayıcınız açılır pencereyi (popup) engelledi. Popup engelleyiciyi kapatıp tekrar deneyin.',
+      auth_err_generic_prefix:'Bir hata oluştu (', auth_err_generic_suffix:'), lütfen tekrar deneyin.',
+      referral_used_free:'kodunu kullandınız!\nHesabınıza ücretsiz premium tanımlandı.',
+      referral_used_discount_prefix:'kodunu kullandınız!\nHesabınıza %', referral_used_discount_suffix:' indirimli premium tanımlandı.',
+      referral_limit_reached:'kodu kullanım limitine ulaştığı için geçerli değil.',
+      pw_err_need_login:'Şifre değiştirmek için giriş yapmış olmanız gerekir.',
+      pw_err_mismatch:'Girdiğiniz iki şifre birbiriyle eşleşmiyor.',
+      pw_updated:'Şifreniz güncellendi. ✓',
+      pw_reauth_prompt:'Güvenlik nedeniyle önce mevcut şifrenizi girmeniz gerekiyor:',
+      pw_err_wrong_current:'Mevcut şifre yanlış ya da bir hata oluştu.',
+      pw_err_update_failed:'Şifre güncellenemedi, lütfen tekrar deneyin.',
+      fav_toggle:'Favorilere ekle/çıkar', fav_remove:'Favorilerden çıkar', menu_toggle:'Menüyü aç/kapat',
+      scroll_down:'Aşağı kaydır', remove_from_list:'Listeden kaldır'
+    },
+    en: {
+      nav_home:'Home', nav_calc:'Calculators', nav_rotatif:'Revolving Loan Calculator', nav_ortalama:'Average Maturity Calculator',
+      nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
+      nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
+      nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools',
+      nav_calc_desc:'Tools', nav_nakitakis_desc:'Table', nav_talimat_desc:'Preparation', nav_talimat_full:'Instruction Preparation',
+      nav_budget:'Budgeting', nav_budget_desc:'Tools',
+      hero_title:'Digital Finance Assistant', hero_tagline:'Your digital partner for financial decisions',
+      hero_desc:'It helps your company with financial matters, and acts as a financial advisor for individual users. It performs the calculations you need in seconds and makes your budget planning easier.',
+      card_calc_desc:'Revolving Loan, Credit Card Late Fee, and Average Maturity calculators, all on one page, switching between tabs.',
+      card_cashflow_title:'Cash Flow Table',
+      card_cashflow_desc:'Enter your income and expenses month by month, day by day; instantly see your weekly and monthly status, category breakdown, and automatic alerts.',
+      card_expenses_desc:'Record recurring expenses such as bills, credit cards, letters of guarantee, commissions, and rent; they\'ll be automatically posted to the Cash Flow Table when due.',
+      card_income_desc:'Record your cash collections, check/note collections, POS collections, and interest income; they\'ll be automatically posted to the Cash Flow Table when due.',
+      card_instructions_desc:'Prepare transfer, check, letter of guarantee, and free-text instructions to banks, customers, institutions, and individuals in seconds.',
+      footer_follow_us:'Follow Us', footer_powered_by:'Powered by', footer_download_now:'Download Now',
+      footer_about:'About', footer_privacy:'Privacy Policy', footer_terms:'Terms of Use',
+      close:'Close',
+      settings_title:'Settings', settings_lang_label:'Dil / Language',
+      settings_view_mode:'Display Mode', settings_dark_mode:'☾ Dark Mode', settings_light_mode:'☀ Light Mode',
+      settings_fullscreen_mode:'Fullscreen Mode', settings_fullscreen_on:'⛶ Fullscreen', settings_window_mode:'Windowed Mode',
+      settings_notifications:'Notifications', settings_on:'On', settings_off:'Off',
+      settings_change_password:'Change Password', settings_new_password:'New password (at least 6 characters)',
+      settings_new_password_repeat:'New password (repeat)', settings_update_password:'Update Password', settings_ok:'✓ OK',
+      settings_forgot_password:'Forgot Password', settings_cancel:'Cancel', settings_old_password:'Current password',
+      pw_err_need_old:'Please enter your current password.', pw_updating:'Updating…',
+      guest:'Guest', unknown:'unknown', please_wait:'Please wait...', sending:'Sending...',
+      dropdown_linked_companies:'Linked Companies', dropdown_my_accounts:'My Accounts', dropdown_add_account:'Add Another Account',
+      dropdown_my_account:'My Account', dropdown_change_photo:'Change Photo', dropdown_referral_admin:'Referral Code Management',
+      dropdown_stats:'Statistics', dropdown_logout:'Sign Out', dropdown_login:'Sign In',
+      dropdown_user_management:'User Management Panel', firma_badge_default:'Company', group_companies:'Group Companies',
+      data_scope_label:'Data Source', data_scope_personal:'👤 My Own Data',
+      verify_email_notice:'✉️ Your email address is not verified yet.',
+      verify_email_resend:'Resend Verification Email', verify_email_sent:'Sent ✓',
+      nav_user_mgmt_1:'User', nav_user_mgmt_2:'Management Panel',
+      auth_title_login:'Welcome', auth_title_signup:'Create an account',
+      auth_sub_login:'Sign in to continue where you left off',
+      auth_sub_signup:'Open a free account to save your rates and preferences',
+      auth_tab_login:'Sign In', auth_tab_signup:'Sign Up', auth_create_account:'Create Account',
+      auth_account_type:'Account Type', auth_account_individual:'Individual', auth_account_corporate:'Corporate',
+      auth_fullname:'Full Name', auth_company_title:'Company Name', auth_email:'Email',
+      auth_password:'Password', auth_password_repeat:'Password (Repeat)',
+      auth_referral_label:'Referral Code', auth_referral_optional:'(optional, if any)',
+      auth_remember_me:'Keep me signed in', auth_forgot_password:'Forgot password?', auth_or:'or',
+      auth_google:'Continue with Google', auth_guest:'Continue as guest',
+      auth_not_logged_in:'You are not signed in', auth_guest_mode:'You are in guest mode', auth_user_code:'User Code: #',
+      no_user_code:'No user code assigned',
+      auth_err_need_email_reset:'Please enter your email address first so we can send a password reset link.',
+      auth_reset_sent_prefix:'A password reset link was sent to ', auth_reset_sent_suffix:'. Check your inbox (and spam folder).',
+      auth_reset_maybe_sent:'If this email address is registered in our system, a password reset link has been sent.',
+      auth_err_reset_failed:'The password reset email could not be sent. Please try again later.',
+      auth_err_need_username:'Please choose a username.',
+      auth_err_passwords_mismatch:'Passwords do not match.',
+      auth_err_email_in_use:'This email address is already registered. Try signing in instead.',
+      auth_err_invalid_email:'Enter a valid email address.',
+      auth_err_weak_password:'Password must be at least 6 characters.',
+      auth_err_user_not_found:'No account was found with this email.',
+      auth_err_wrong_password:'Incorrect password.',
+      auth_err_invalid_credential:'Incorrect email or password.',
+      auth_err_too_many_requests:'Too many attempts. Please try again shortly.',
+      auth_err_network:'Connection error. Please check your internet connection.',
+      auth_err_google_disabled:'Sign in with Google is not currently enabled. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
+      auth_err_unauthorized_domain:'This site\'s domain is not in Firebase\'s authorized domains list. (Firebase Console → Authentication → Settings → Authorized domains)',
+      auth_err_popup_blocked:'Your browser blocked the popup window. Please disable your popup blocker and try again.',
+      auth_err_generic_prefix:'An error occurred (', auth_err_generic_suffix:'), please try again.',
+      referral_used_free:'code was applied!\nFree premium has been activated on your account.',
+      referral_used_discount_prefix:'code was applied!\nA ', referral_used_discount_suffix:'% discounted premium has been activated on your account.',
+      referral_limit_reached:'code is no longer valid because it has reached its usage limit.',
+      pw_err_need_login:'You must be signed in to change your password.',
+      pw_err_mismatch:'The two passwords you entered do not match.',
+      pw_updated:'Your password has been updated. ✓',
+      pw_reauth_prompt:'For security reasons, please enter your current password first:',
+      pw_err_wrong_current:'The current password is incorrect, or an error occurred.',
+      pw_err_update_failed:'The password could not be updated, please try again.',
+      fav_toggle:'Add/remove favorite', fav_remove:'Remove from favorites', menu_toggle:'Open/close menu',
+      scroll_down:'Scroll down', remove_from_list:'Remove from list'
+    }
+  });
+</script>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -769,7 +930,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="nav-title" data-i18n="nav_calc">Hesaplama</span>
         <span class="nav-desc" data-i18n="nav_calc_desc">Araçları</span>
       </span>
-      <span class="nav-drawer-chevron" id="hesaplamaChevron">▾</span>
+      <span class="nav-drawer-chevron" id="hesaplamaChevron">›</span>
     </button>
     <div class="nav-drawer" id="hesaplamaDrawer" hidden>
       <button class="nav-item nav-subitem" data-target="Rotatif_Kredi_Hesaplama.html" data-title="Rotatif Kredi Hesaplama">
@@ -806,7 +967,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="nav-title" data-i18n="nav_budget">Bütçeleme</span>
         <span class="nav-desc" data-i18n="nav_budget_desc">Araçları</span>
       </span>
-      <span class="nav-drawer-chevron" id="butcelemeChevron">▾</span>
+      <span class="nav-drawer-chevron" id="butcelemeChevron">›</span>
     </button>
     <div class="nav-drawer" id="butcelemeDrawer" hidden>
       <button class="nav-item nav-subitem" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
@@ -870,6 +1031,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="account-dropdown-info">
         <div class="account-dropdown-name" id="accountDropdownName" data-i18n="guest">Misafir</div>
         <div class="account-dropdown-sub" id="accountDropdownSub"></div>
+        <div id="accountDropdownFirma" style="display:none; font-weight:700; font-size:13px; color:var(--brass); margin-top:3px;"></div>
       </div>
     </div>
     <div class="account-dropdown-divider"></div>
@@ -887,12 +1049,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="account-dropdown-divider"></div>
     </div>
     <div id="mmgDataScopeWrap" style="display:none;">
-      <button type="button" class="account-dropdown-item" id="mmgDataScopeToggleBtn" style="justify-content:space-between;">
-        <span style="display:flex; align-items:center; gap:10px; min-width:0;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>
-          <span data-i18n="data_scope_label">Veri Kaynağı</span>
-        </span>
-        <span id="mmgDataScopeCurrent" style="font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;"></span>
+      <button type="button" class="account-dropdown-item" id="mmgDataScopeToggleBtn" style="justify-content:flex-start; gap:10px;">
+        <span id="mmgDataScopeActiveDot" style="flex-shrink:0; width:8px; height:8px; border-radius:50%; background:var(--teal); box-shadow:0 0 6px var(--teal);"></span>
+        <span id="mmgDataScopeCurrent" style="font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
       </button>
       <div id="mmgDataScopeList" style="display:none; padding-left:6px; margin-top:2px;"></div>
       <div class="account-dropdown-divider"></div>
@@ -1122,9 +1281,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function wireDrawerToggle(toggleId, drawerId){
     const toggle = document.getElementById(toggleId);
     const drawer = document.getElementById(drawerId);
+    const wrap = toggle ? toggle.closest('.nav-drawer-wrap') : null;
     if(!toggle || !drawer) return;
-    toggle.addEventListener('click', (e) => {
-      const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+
+    function openDrawer(){
       // Diğer açık çekmeceleri kapat, tek seferde yalnızca biri açık kalsın.
       document.querySelectorAll('.nav-drawer.open').forEach(d => {
         if(d !== drawer){
@@ -1134,36 +1294,56 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           if(otherToggle) otherToggle.setAttribute('aria-expanded', 'false');
         }
       });
-      toggle.setAttribute('aria-expanded', String(!isOpen));
-      if(isOpen){
-        drawer.classList.remove('open');
-        drawer.hidden = true;
-      } else {
-        // Masaüstünde (>860px) sağa açılan flyout; mobilde (<=860px) menünün
-        // içinde aşağı doğru açılan klasik liste.
-        if(window.innerWidth > 860){
-          const rect = toggle.getBoundingClientRect();
-          drawer.style.left = (rect.right + 10) + 'px';
-          drawer.style.top = rect.top + 'px';
-          drawer.hidden = false;
-          const drawerWidth = drawer.offsetWidth;
-          const drawerHeight = drawer.offsetHeight;
-          const maxLeft = window.innerWidth - drawerWidth - 8;
-          if((rect.right + 10) > maxLeft){
-            drawer.style.left = Math.max(8, Math.min(rect.left - drawerWidth - 10, maxLeft)) + 'px';
-          }
-          const maxTop = window.innerHeight - drawerHeight - 12;
-          if(rect.top > maxTop) drawer.style.top = Math.max(12, maxTop) + 'px';
-        } else {
-          drawer.style.left = '';
-          drawer.style.top = '';
-          drawer.hidden = false;
+      toggle.setAttribute('aria-expanded', 'true');
+      // Masaüstünde (>860px) sağa açılan flyout; mobilde (<=860px) menünün
+      // içinde aşağı doğru açılan klasik liste.
+      if(window.innerWidth > 860){
+        const rect = toggle.getBoundingClientRect();
+        drawer.style.left = (rect.right + 10) + 'px';
+        drawer.style.top = rect.top + 'px';
+        drawer.hidden = false;
+        const drawerWidth = drawer.offsetWidth;
+        const drawerHeight = drawer.offsetHeight;
+        const maxLeft = window.innerWidth - drawerWidth - 8;
+        if((rect.right + 10) > maxLeft){
+          drawer.style.left = Math.max(8, Math.min(rect.left - drawerWidth - 10, maxLeft)) + 'px';
         }
-        requestAnimationFrame(()=>{
-          requestAnimationFrame(()=> drawer.classList.add('open'));
-        });
+        const maxTop = window.innerHeight - drawerHeight - 12;
+        if(rect.top > maxTop) drawer.style.top = Math.max(12, maxTop) + 'px';
+      } else {
+        drawer.style.left = '';
+        drawer.style.top = '';
+        drawer.hidden = false;
       }
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=> drawer.classList.add('open'));
+      });
+    }
+    function closeDrawer(){
+      drawer.classList.remove('open');
+      drawer.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    toggle.addEventListener('click', () => {
+      const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+      if(isOpen) closeDrawer(); else openDrawer();
     });
+
+    // Masaüstünde üzerine gelince de (hover) açılsın; dokunmatik ekranlarda
+    // hover tetiklenmediği için tıklama davranışı olduğu gibi çalışmaya devam eder.
+    if(wrap){
+      let hideTimer = null;
+      wrap.addEventListener('mouseenter', () => {
+        if(window.innerWidth <= 860) return;
+        clearTimeout(hideTimer);
+        if(toggle.getAttribute('aria-expanded') !== 'true') openDrawer();
+      });
+      wrap.addEventListener('mouseleave', () => {
+        if(window.innerWidth <= 860) return;
+        hideTimer = setTimeout(closeDrawer, 220);
+      });
+    }
   }
   wireDrawerToggle('hesaplamaAraclariToggle', 'hesaplamaDrawer');
   wireDrawerToggle('butcelemeAraclariToggle', 'butcelemeDrawer');
@@ -1866,30 +2046,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const wrap = document.getElementById('mmgDataScopeWrap');
     const listEl = document.getElementById('mmgDataScopeList');
     const currentEl = document.getElementById('mmgDataScopeCurrent');
+    const firmaHeaderEl = document.getElementById('accountDropdownFirma');
     if(!wrap) return;
     if(!mmgFirmaMemberships.length){
       wrap.style.display = 'none';
+      if(firmaHeaderEl) firmaHeaderEl.style.display = 'none';
       return;
     }
     wrap.style.display = 'block';
     const activeScope = getActiveDataScope();
     const activeFirma = activeScope !== 'personal' ? mmgFirmaMemberships.find(f => f.id === activeScope) : null;
-    if(currentEl) currentEl.textContent = activeFirma ? activeFirma.name : MMGI18N.t('data_scope_personal');
+    if(currentEl) currentEl.textContent = activeFirma ? ('🏢 ' + activeFirma.name) : MMGI18N.t('data_scope_personal');
+    if(firmaHeaderEl){
+      if(activeFirma){
+        firmaHeaderEl.textContent = '🏢 ' + activeFirma.name;
+        firmaHeaderEl.style.display = 'block';
+      } else {
+        firmaHeaderEl.style.display = 'none';
+      }
+    }
+    // Listede sadece ALTERNATİFLER görünür (o an aktif olan zaten üstte, canlı
+    // renkli gösteriliyor) — kalabalık olmasın diye herkes tekrar listelenmez.
     if(listEl){
-      const personalRow = '<div class="mmg-account-row" data-scope="personal">' +
-        (activeScope === 'personal' ? '<span class="mmg-account-row-dot"></span>' : '<span style="width:7px;"></span>') +
-        '<span class="mmg-account-row-main">' + MMGI18N.t('data_scope_personal') + '</span></div>';
-      const firmaRows = mmgFirmaMemberships.map(f =>
-        '<div class="mmg-account-row" data-scope="' + f.id + '">' +
-          (f.id === activeScope ? '<span class="mmg-account-row-dot"></span>' : '<span style="width:7px;"></span>') +
-          '<span class="mmg-account-row-main">🏢 ' + f.name + '</span>' +
-          '<span class="member-badge" style="margin-left:auto; font-size:10px;">' + f.role + '</span>' +
+      const others = [];
+      if(activeScope !== 'personal') others.push({ scope: 'personal', label: MMGI18N.t('data_scope_personal') });
+      mmgFirmaMemberships.forEach(f => {
+        if(f.id !== activeScope) others.push({ scope: f.id, label: '🏢 ' + f.name });
+      });
+      listEl.innerHTML = others.map(o =>
+        '<div class="mmg-account-row" data-scope="' + o.scope + '" style="opacity:0.68;">' +
+          '<span class="mmg-account-row-main">' + o.label + '</span>' +
         '</div>'
       ).join('');
-      listEl.innerHTML = personalRow + firmaRows;
       listEl.querySelectorAll('[data-scope]').forEach(row => {
         row.addEventListener('click', () => {
           setActiveDataScope(row.dataset.scope);
+          listEl.style.display = 'none';
           toggleAccountDropdown(false);
         });
       });
@@ -2316,162 +2508,6 @@ import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredentia
 const auth = getApps().length ? getAuth(getApp()) : null;
 (function(){
   // ---- Ana sayfa kabuğu için TR/EN sözlüğü (motor: i18n-core.js) ----
-  MMGI18N.registerDict({
-    tr: {
-      nav_home:'Ana Sayfa', nav_calc:'Hesaplama', nav_rotatif:'Rotatif Kredi Hesaplama', nav_ortalama:'Ortalama Vade Hesaplama',
-      nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması Hesaplama', nav_vadelimevduat:'Vadeli Mevduat Faizi Hesaplama',
-      nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
-      nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları',
-      nav_calc_desc:'Araçları', nav_nakitakis_desc:'Tablosu', nav_talimat_desc:'Hazırlama', nav_talimat_full:'Talimat Hazırlama',
-      nav_budget:'Bütçeleme', nav_budget_desc:'Araçları',
-      hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
-      hero_desc:'Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.',
-      card_calc_desc:'Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.',
-      card_cashflow_title:'Nakit Akış Tablosu',
-      card_cashflow_desc:'Ay ay, gün gün gelir ve giderlerinizi girin; haftalık ve aylık durumunuzu, kategori dağılımınızı ve otomatik uyarılarınızı anında görün.',
-      card_expenses_desc:'Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlensin.',
-      card_income_desc:'Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlensin.',
-      card_instructions_desc:'Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.',
-      footer_follow_us:'Bizi Takip Edin', footer_powered_by:'Powered by', footer_download_now:'Hemen İndirin',
-      footer_about:'Hakkında', footer_privacy:'Gizlilik Politikası', footer_terms:'Kullanım Şartları',
-      close:'Kapat',
-      settings_title:'Ayarlar', settings_lang_label:'Dil / Language',
-      settings_view_mode:'Görünüm Modu', settings_dark_mode:'☾ Koyu Mod', settings_light_mode:'☀ Açık Mod',
-      settings_fullscreen_mode:'Tam Ekran Modu', settings_fullscreen_on:'⛶ Tam Ekran', settings_window_mode:'Pencere Modu',
-      settings_notifications:'Bildirimler', settings_on:'Açık', settings_off:'Kapalı',
-      settings_change_password:'Şifre Değiştir', settings_new_password:'Yeni şifre (en az 6 karakter)',
-      settings_new_password_repeat:'Yeni şifre (tekrar)', settings_update_password:'Şifreyi Güncelle', settings_ok:'✓ Tamam',
-      settings_forgot_password:'Şifremi Unuttum', settings_cancel:'Vazgeç', settings_old_password:'Eski şifre',
-      pw_err_need_old:'Lütfen eski şifrenizi girin.', pw_updating:'Güncelleniyor…',
-      guest:'Misafir', unknown:'bilinmiyor', please_wait:'Lütfen bekleyin...', sending:'Gönderiliyor...',
-      dropdown_linked_companies:'Bağlı Firmalar', dropdown_my_accounts:'Hesaplarım', dropdown_add_account:'Başka Hesap Ekle',
-      dropdown_my_account:'Hesabım', dropdown_change_photo:'Resmi Değiştir', dropdown_referral_admin:'Referans Kodu Yönetimi',
-      dropdown_stats:'İstatistikler', dropdown_logout:'Oturumu Kapat', dropdown_login:'Oturum Aç',
-      dropdown_user_management:'Kullanıcı Yönetim Paneli', firma_badge_default:'Firma', group_companies:'Grup Firmaları',
-      data_scope_label:'Veri Kaynağı', data_scope_personal:'👤 Kendi Verilerim',
-      verify_email_notice:'✉️ E-posta adresiniz henüz doğrulanmadı.',
-      verify_email_resend:'Doğrulama E-postasını Tekrar Gönder', verify_email_sent:'Gönderildi ✓',
-      nav_user_mgmt_1:'Kullanıcı', nav_user_mgmt_2:'Yönetim Paneli',
-      auth_title_login:'Hoş geldiniz', auth_title_signup:'Hesap oluşturun',
-      auth_sub_login:'Kaldığınız yerden devam etmek için giriş yapın',
-      auth_sub_signup:'Oranlarınızı ve tercihlerinizi kaydetmek için ücretsiz hesap açın',
-      auth_tab_login:'Giriş Yap', auth_tab_signup:'Kayıt Ol', auth_create_account:'Hesap Oluştur',
-      auth_account_type:'Hesap Türü', auth_account_individual:'Bireysel', auth_account_corporate:'Kurumsal',
-      auth_fullname:'Ad Soyad', auth_company_title:'Firma Ünvanı', auth_email:'E-posta',
-      auth_password:'Şifre', auth_password_repeat:'Şifre (Tekrar)',
-      auth_referral_label:'Referans Kodu', auth_referral_optional:'(varsa, opsiyonel)',
-      auth_remember_me:'Oturumu açık tut', auth_forgot_password:'Şifremi unuttum?', auth_or:'veya',
-      auth_google:'Google ile devam et', auth_guest:'Misafir olarak gir',
-      auth_not_logged_in:'Giriş yapmadınız', auth_guest_mode:'Misafir modundasınız', auth_user_code:'Kullanıcı Kodu: #',
-      no_user_code:'Kullanıcı Kodu atanmamış',
-      auth_err_need_email_reset:'Şifre sıfırlama bağlantısı gönderebilmemiz için önce e-posta adresinizi yazın.',
-      auth_reset_sent_prefix:'Şifre sıfırlama bağlantısı ', auth_reset_sent_suffix:' adresine gönderildi. Gelen kutunuzu (ve spam klasörünü) kontrol edin.',
-      auth_reset_maybe_sent:'Eğer bu e-posta adresi sistemde kayıtlıysa, şifre sıfırlama bağlantısı gönderildi.',
-      auth_err_reset_failed:'Şifre sıfırlama e-postası gönderilemedi. Lütfen daha sonra tekrar deneyin.',
-      auth_err_need_username:'Lütfen bir kullanıcı adı belirleyin.',
-      auth_err_passwords_mismatch:'Şifreler eşleşmiyor.',
-      auth_err_email_in_use:'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.',
-      auth_err_invalid_email:'Geçerli bir e-posta adresi girin.',
-      auth_err_weak_password:'Şifre en az 6 karakter olmalı.',
-      auth_err_user_not_found:'Bu e-posta ile kayıtlı bir hesap bulunamadı.',
-      auth_err_wrong_password:'Şifre hatalı.',
-      auth_err_invalid_credential:'E-posta veya şifre hatalı.',
-      auth_err_too_many_requests:'Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.',
-      auth_err_network:'Bağlantı hatası. İnternetinizi kontrol edin.',
-      auth_err_google_disabled:'Google ile giriş şu an aktif değil. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
-      auth_err_unauthorized_domain:'Bu site adresi Firebase\'de yetkili domainler listesinde değil. (Firebase Console → Authentication → Settings → Authorized domains)',
-      auth_err_popup_blocked:'Tarayıcınız açılır pencereyi (popup) engelledi. Popup engelleyiciyi kapatıp tekrar deneyin.',
-      auth_err_generic_prefix:'Bir hata oluştu (', auth_err_generic_suffix:'), lütfen tekrar deneyin.',
-      referral_used_free:'kodunu kullandınız!\nHesabınıza ücretsiz premium tanımlandı.',
-      referral_used_discount_prefix:'kodunu kullandınız!\nHesabınıza %', referral_used_discount_suffix:' indirimli premium tanımlandı.',
-      referral_limit_reached:'kodu kullanım limitine ulaştığı için geçerli değil.',
-      pw_err_need_login:'Şifre değiştirmek için giriş yapmış olmanız gerekir.',
-      pw_err_mismatch:'Girdiğiniz iki şifre birbiriyle eşleşmiyor.',
-      pw_updated:'Şifreniz güncellendi. ✓',
-      pw_reauth_prompt:'Güvenlik nedeniyle önce mevcut şifrenizi girmeniz gerekiyor:',
-      pw_err_wrong_current:'Mevcut şifre yanlış ya da bir hata oluştu.',
-      pw_err_update_failed:'Şifre güncellenemedi, lütfen tekrar deneyin.',
-      fav_toggle:'Favorilere ekle/çıkar', fav_remove:'Favorilerden çıkar', menu_toggle:'Menüyü aç/kapat',
-      scroll_down:'Aşağı kaydır', remove_from_list:'Listeden kaldır'
-    },
-    en: {
-      nav_home:'Home', nav_calc:'Calculators', nav_rotatif:'Revolving Loan Calculator', nav_ortalama:'Average Maturity Calculator',
-      nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
-      nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
-      nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools',
-      nav_calc_desc:'Tools', nav_nakitakis_desc:'Table', nav_talimat_desc:'Preparation', nav_talimat_full:'Instruction Preparation',
-      nav_budget:'Budgeting', nav_budget_desc:'Tools',
-      hero_title:'Digital Finance Assistant', hero_tagline:'Your digital partner for financial decisions',
-      hero_desc:'It helps your company with financial matters, and acts as a financial advisor for individual users. It performs the calculations you need in seconds and makes your budget planning easier.',
-      card_calc_desc:'Revolving Loan, Credit Card Late Fee, and Average Maturity calculators, all on one page, switching between tabs.',
-      card_cashflow_title:'Cash Flow Table',
-      card_cashflow_desc:'Enter your income and expenses month by month, day by day; instantly see your weekly and monthly status, category breakdown, and automatic alerts.',
-      card_expenses_desc:'Record recurring expenses such as bills, credit cards, letters of guarantee, commissions, and rent; they\'ll be automatically posted to the Cash Flow Table when due.',
-      card_income_desc:'Record your cash collections, check/note collections, POS collections, and interest income; they\'ll be automatically posted to the Cash Flow Table when due.',
-      card_instructions_desc:'Prepare transfer, check, letter of guarantee, and free-text instructions to banks, customers, institutions, and individuals in seconds.',
-      footer_follow_us:'Follow Us', footer_powered_by:'Powered by', footer_download_now:'Download Now',
-      footer_about:'About', footer_privacy:'Privacy Policy', footer_terms:'Terms of Use',
-      close:'Close',
-      settings_title:'Settings', settings_lang_label:'Dil / Language',
-      settings_view_mode:'Display Mode', settings_dark_mode:'☾ Dark Mode', settings_light_mode:'☀ Light Mode',
-      settings_fullscreen_mode:'Fullscreen Mode', settings_fullscreen_on:'⛶ Fullscreen', settings_window_mode:'Windowed Mode',
-      settings_notifications:'Notifications', settings_on:'On', settings_off:'Off',
-      settings_change_password:'Change Password', settings_new_password:'New password (at least 6 characters)',
-      settings_new_password_repeat:'New password (repeat)', settings_update_password:'Update Password', settings_ok:'✓ OK',
-      settings_forgot_password:'Forgot Password', settings_cancel:'Cancel', settings_old_password:'Current password',
-      pw_err_need_old:'Please enter your current password.', pw_updating:'Updating…',
-      guest:'Guest', unknown:'unknown', please_wait:'Please wait...', sending:'Sending...',
-      dropdown_linked_companies:'Linked Companies', dropdown_my_accounts:'My Accounts', dropdown_add_account:'Add Another Account',
-      dropdown_my_account:'My Account', dropdown_change_photo:'Change Photo', dropdown_referral_admin:'Referral Code Management',
-      dropdown_stats:'Statistics', dropdown_logout:'Sign Out', dropdown_login:'Sign In',
-      dropdown_user_management:'User Management Panel', firma_badge_default:'Company', group_companies:'Group Companies',
-      data_scope_label:'Data Source', data_scope_personal:'👤 My Own Data',
-      verify_email_notice:'✉️ Your email address is not verified yet.',
-      verify_email_resend:'Resend Verification Email', verify_email_sent:'Sent ✓',
-      nav_user_mgmt_1:'User', nav_user_mgmt_2:'Management Panel',
-      auth_title_login:'Welcome', auth_title_signup:'Create an account',
-      auth_sub_login:'Sign in to continue where you left off',
-      auth_sub_signup:'Open a free account to save your rates and preferences',
-      auth_tab_login:'Sign In', auth_tab_signup:'Sign Up', auth_create_account:'Create Account',
-      auth_account_type:'Account Type', auth_account_individual:'Individual', auth_account_corporate:'Corporate',
-      auth_fullname:'Full Name', auth_company_title:'Company Name', auth_email:'Email',
-      auth_password:'Password', auth_password_repeat:'Password (Repeat)',
-      auth_referral_label:'Referral Code', auth_referral_optional:'(optional, if any)',
-      auth_remember_me:'Keep me signed in', auth_forgot_password:'Forgot password?', auth_or:'or',
-      auth_google:'Continue with Google', auth_guest:'Continue as guest',
-      auth_not_logged_in:'You are not signed in', auth_guest_mode:'You are in guest mode', auth_user_code:'User Code: #',
-      no_user_code:'No user code assigned',
-      auth_err_need_email_reset:'Please enter your email address first so we can send a password reset link.',
-      auth_reset_sent_prefix:'A password reset link was sent to ', auth_reset_sent_suffix:'. Check your inbox (and spam folder).',
-      auth_reset_maybe_sent:'If this email address is registered in our system, a password reset link has been sent.',
-      auth_err_reset_failed:'The password reset email could not be sent. Please try again later.',
-      auth_err_need_username:'Please choose a username.',
-      auth_err_passwords_mismatch:'Passwords do not match.',
-      auth_err_email_in_use:'This email address is already registered. Try signing in instead.',
-      auth_err_invalid_email:'Enter a valid email address.',
-      auth_err_weak_password:'Password must be at least 6 characters.',
-      auth_err_user_not_found:'No account was found with this email.',
-      auth_err_wrong_password:'Incorrect password.',
-      auth_err_invalid_credential:'Incorrect email or password.',
-      auth_err_too_many_requests:'Too many attempts. Please try again shortly.',
-      auth_err_network:'Connection error. Please check your internet connection.',
-      auth_err_google_disabled:'Sign in with Google is not currently enabled. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
-      auth_err_unauthorized_domain:'This site\'s domain is not in Firebase\'s authorized domains list. (Firebase Console → Authentication → Settings → Authorized domains)',
-      auth_err_popup_blocked:'Your browser blocked the popup window. Please disable your popup blocker and try again.',
-      auth_err_generic_prefix:'An error occurred (', auth_err_generic_suffix:'), please try again.',
-      referral_used_free:'code was applied!\nFree premium has been activated on your account.',
-      referral_used_discount_prefix:'code was applied!\nA ', referral_used_discount_suffix:'% discounted premium has been activated on your account.',
-      referral_limit_reached:'code is no longer valid because it has reached its usage limit.',
-      pw_err_need_login:'You must be signed in to change your password.',
-      pw_err_mismatch:'The two passwords you entered do not match.',
-      pw_updated:'Your password has been updated. ✓',
-      pw_reauth_prompt:'For security reasons, please enter your current password first:',
-      pw_err_wrong_current:'The current password is incorrect, or an error occurred.',
-      pw_err_update_failed:'The password could not be updated, please try again.',
-      fav_toggle:'Add/remove favorite', fav_remove:'Remove from favorites', menu_toggle:'Open/close menu',
-      scroll_down:'Scroll down', remove_from_list:'Remove from list'
-    }
-  });
   MMGI18N.onChange(function(lang){
     document.title = lang === 'en' ? 'mmgcreativity — Digital Finance Assistant' : 'mmgcreativity — Dijital Finans Asistanı';
   });
