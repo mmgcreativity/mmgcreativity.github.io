@@ -264,6 +264,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <strong>"🏢 Firma"</strong> sekmesinden yeni bir firma hesabı oluşturabilirsiniz. Bir firma sizi kullanıcı olarak
       eklediyse, üye olduğunuz firmalar arasında sol alt köşedeki rozetten tek tıkla geçiş yapabilirsiniz.
     </p>
+    <div id="legacyCompanyWrap" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--hairline);">
+      <p class="referral-note" style="margin-bottom:10px;">
+        Bu hesapta eski sistemden kalma bir firma kaydı bulundu: <strong id="legacyCompanyName">—</strong>.
+        Artık bir işlevi yok, isterseniz temizleyebilirsiniz.
+      </p>
+      <button type="button" id="clearLegacyCompanyBtn" class="danger-btn" style="width:auto; padding:10px 16px;">Eski Firma Kaydını Temizle</button>
+      <div class="saved-msg" id="legacyCompanyClearedMsg">Temizlendi ✓</div>
+    </div>
   </div>
 
   <div class="card danger-card" id="dangerCard" style="display:none;">
@@ -307,7 +315,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, GoogleAuthProvider
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, increment, serverTimestamp,
+    getFirestore, doc, getDoc, setDoc, deleteDoc, deleteField, collection, getDocs, increment, serverTimestamp,
     query, where, arrayUnion
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -405,6 +413,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   lockReferralCard('Yükleniyor...');
 
+  const legacyCompanyWrap = document.getElementById('legacyCompanyWrap');
+  const legacyCompanyName = document.getElementById('legacyCompanyName');
+  const clearLegacyCompanyBtn = document.getElementById('clearLegacyCompanyBtn');
+  const legacyCompanyClearedMsg = document.getElementById('legacyCompanyClearedMsg');
+  clearLegacyCompanyBtn.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if(!user) return;
+    clearLegacyCompanyBtn.disabled = true;
+    try{
+      await setDoc(doc(db, 'users', user.uid), {
+        companyId: deleteField(), companyRole: deleteField(), companyName: deleteField()
+      }, { merge: true });
+      localStorage.removeItem('mmg_company_id');
+      localStorage.removeItem('mmg_company_role');
+      localStorage.removeItem('mmg_company_name');
+      legacyCompanyWrap.style.display = 'none';
+      legacyCompanyClearedMsg.classList.add('show');
+      setTimeout(() => legacyCompanyClearedMsg.classList.remove('show'), 2000);
+    } catch(e){ /* sessizce geç */ }
+    clearLegacyCompanyBtn.disabled = false;
+  });
 
   onAuthStateChanged(auth, async (user) => {
     if(!user){
@@ -427,6 +456,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         lockReferralCard('"' + data.referredBy + '" referans kodunu zaten kullandınız.');
       } else {
         unlockReferralCard('Referans kodu girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.');
+      }
+      // Eski sistemden kalma companyId varsa, temizleme seçeneğini göster.
+      if(data.companyId){
+        legacyCompanyName.textContent = data.companyName || data.companyId;
+        legacyCompanyWrap.style.display = 'block';
+      } else {
+        legacyCompanyWrap.style.display = 'none';
       }
     } catch(e){
       statusPillText.textContent = user.email || 'Üye';
