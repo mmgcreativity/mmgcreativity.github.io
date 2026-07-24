@@ -1285,7 +1285,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     try{
       const snap = await getDoc(doc(db, 'users', user.uid));
-      const data = snap.exists() ? snap.data() : {};
+      let data = snap.exists() ? snap.data() : {};
+      // Eski/taşınmış hesaplarda müşteri kodu hiç atanmamış olabilir — bu durumda
+      // şimdi bir tane atayıp kaydediyoruz, böylece rozet e-posta yerine kod gösterebilsin.
+      if(!data.customerNumber){
+        try{
+          const newNo = await getNextCustomerNumber();
+          await setDoc(doc(db, 'users', user.uid), { customerNumber: newNo }, { merge: true });
+          data = Object.assign({}, data, { customerNumber: newNo });
+          localStorage.setItem('mmg_customer_no', String(newNo));
+          updateUserBadge(newNo, data.username);
+        } catch(backfillErr){ /* kod atanamazsa sessizce geç, rozet ada/e-postaya düşer */ }
+      }
       if(adminBtn) adminBtn.style.display = data.isAdmin ? 'flex' : 'none';
       if(begenBtn) begenBtn.style.display = data.isAdmin ? 'flex' : 'none';
       try{ gtag('set', 'user_properties', { user_type: data.isPremium ? 'premium' : 'member' }); }catch(e){}
@@ -1438,10 +1449,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     } else if(state.startsWith('user:')){
       const email = state.slice(5);
       const no = customerNumber || localStorage.getItem('mmg_customer_no');
-      const uname = username || localStorage.getItem('mmg_username');
-      nameEl.textContent = no ? ('#' + no) : (uname || email);
-      dropdownName.textContent = uname || email;
-      dropdownSub.textContent = no ? ('Kullanıcı Kodu: #' + no) : email;
+      let uname = username || localStorage.getItem('mmg_username');
+      if(!uname){
+        try{
+          const cachedProfile = JSON.parse(localStorage.getItem('mmg_profile') || '{}');
+          if(cachedProfile && cachedProfile.name) uname = cachedProfile.name;
+        }catch(e){ /* sessizce geç */ }
+      }
+      const displayName = uname || email;
+      nameEl.textContent = no ? ('#' + no) : displayName;
+      dropdownName.textContent = displayName;
+      dropdownSub.textContent = no ? ('Kullanıcı Kodu: #' + no) : (uname ? email : 'Kullanıcı Kodu atanmamış');
     }
   }
 

@@ -278,10 +278,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div class="card" id="companyCard">
     <h2 style="margin-bottom:10px;" data-i18n="user_group">Firma Yöneticiliği</h2>
-    <p class="referral-note" style="margin-bottom:14px;">
+    <p class="referral-note" style="margin-bottom:12px;">
       Firma, ayrı bir giriş değildir — kendi kullanıcı hesabınızla, bir ya da birden fazla firmanın
       <strong>yöneticisi</strong> olabilirsiniz. Bu, kendi verilerinizi girmenizi hiçbir şekilde etkilemez;
       sadece ek olarak o firma(lar)ın "Kullanıcı Yönetim Paneli"ne erişim kazandırır.
+    </p>
+    <p class="referral-note" style="margin-bottom:14px; padding:12px 14px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; color:var(--amber);">
+      ⚠️ <strong>Önemli:</strong> Birden fazla kişiyle ortak/paylaşımlı veri üzerinde çalışmak istiyorsanız önce
+      aşağıdan bir firma oluşturup o firmanın yöneticisi (admin) olmanız gerekir. Bir firma oluşturmadan,
+      başka kullanıcıları ortak bir veri havuzuna ekleyemezsiniz — bu işlem yalnızca bir firma yöneticisi
+      üzerinden yapılabilir.
     </p>
 
     <div id="myFirmasList" style="margin-bottom:16px;"></div>
@@ -289,7 +295,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div style="padding-top:14px; border-top:1px solid var(--hairline);">
       <div class="mini-label" style="margin-bottom:8px;">Yeni Firma Oluştur</div>
       <form id="createFirmaForm" style="display:flex; gap:8px; margin-bottom:6px;">
-        <input type="text" id="createFirmaName" placeholder="Firma adı" style="flex:1;" required>
+        <input type="text" id="createFirmaName" placeholder="Firma adı" required
+          style="flex:1; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;">
         <button type="submit" class="auth-submit" id="createFirmaBtn" style="width:auto; padding:12px 18px; margin-top:0;">Oluştur</button>
       </form>
       <div class="auth-error" id="createFirmaError"></div>
