@@ -762,14 +762,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </span>
     </button>
 
-    <button class="nav-item" id="navKullaniciYonetimBtn" data-target="KullaniciYonetimi.html" data-title="Kullanıcı Yönetim Paneli" style="display:none;">
-      <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-      <span class="nav-text-wrap">
-        <span class="nav-title" data-i18n="nav_user_mgmt_1">Kullanıcı</span>
-        <span class="nav-desc" data-i18n="nav_user_mgmt_2">Yönetim Paneli</span>
-      </span>
-    </button>
-
     <div class="nav-drawer-wrap">
     <button class="nav-item" id="hesaplamaAraclariToggle" data-drawer-toggle="true" data-title="Hesaplama Araçları" aria-expanded="false">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
@@ -895,8 +887,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="account-dropdown-divider"></div>
     </div>
     <div id="mmgDataScopeWrap" style="display:none;">
-      <div class="account-dropdown-section-label" data-i18n="data_scope_label">Veri Kaynağı</div>
-      <div id="mmgDataScopeList"></div>
+      <button type="button" class="account-dropdown-item" id="mmgDataScopeToggleBtn" style="justify-content:space-between;">
+        <span style="display:flex; align-items:center; gap:10px; min-width:0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>
+          <span data-i18n="data_scope_label">Veri Kaynağı</span>
+        </span>
+        <span id="mmgDataScopeCurrent" style="font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;"></span>
+      </button>
+      <div id="mmgDataScopeList" style="display:none; padding-left:6px; margin-top:2px;"></div>
       <div class="account-dropdown-divider"></div>
     </div>
     <button type="button" class="account-dropdown-item" id="kullaniciYonetimBtn" style="display:none;">
@@ -1141,14 +1139,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         drawer.classList.remove('open');
         drawer.hidden = true;
       } else {
-        // position:fixed kullanıldığı için konumu açılışta JS ile hesaplıyoruz
-        // (aside'ın overflow:auto'su nedeniyle position:absolute kırpılıyordu).
+        // Masaüstünde (>860px) sağa açılan flyout; mobilde (<=860px) menünün
+        // içinde aşağı doğru açılan klasik liste.
         if(window.innerWidth > 860){
           const rect = toggle.getBoundingClientRect();
           drawer.style.left = (rect.right + 10) + 'px';
           drawer.style.top = rect.top + 'px';
           drawer.hidden = false;
+          const drawerWidth = drawer.offsetWidth;
           const drawerHeight = drawer.offsetHeight;
+          const maxLeft = window.innerWidth - drawerWidth - 8;
+          if((rect.right + 10) > maxLeft){
+            drawer.style.left = Math.max(8, Math.min(rect.left - drawerWidth - 10, maxLeft)) + 'px';
+          }
           const maxTop = window.innerHeight - drawerHeight - 12;
           if(rect.top > maxTop) drawer.style.top = Math.max(12, maxTop) + 'px';
         } else {
@@ -1862,6 +1865,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function renderFirmaBadge(){
     const wrap = document.getElementById('mmgDataScopeWrap');
     const listEl = document.getElementById('mmgDataScopeList');
+    const currentEl = document.getElementById('mmgDataScopeCurrent');
     if(!wrap) return;
     if(!mmgFirmaMemberships.length){
       wrap.style.display = 'none';
@@ -1869,6 +1873,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     wrap.style.display = 'block';
     const activeScope = getActiveDataScope();
+    const activeFirma = activeScope !== 'personal' ? mmgFirmaMemberships.find(f => f.id === activeScope) : null;
+    if(currentEl) currentEl.textContent = activeFirma ? activeFirma.name : MMGI18N.t('data_scope_personal');
     if(listEl){
       const personalRow = '<div class="mmg-account-row" data-scope="personal">' +
         (activeScope === 'personal' ? '<span class="mmg-account-row-dot"></span>' : '<span style="width:7px;"></span>') +
@@ -1889,6 +1895,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
     }
   }
+  const mmgDataScopeToggleBtn = document.getElementById('mmgDataScopeToggleBtn');
+  if(mmgDataScopeToggleBtn){
+    mmgDataScopeToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const listEl = document.getElementById('mmgDataScopeList');
+      if(listEl) listEl.style.display = (listEl.style.display === 'none') ? 'block' : 'none';
+    });
+  }
 
   // ================== Firma Yöneticiliği (rol tabanlı, ayrı giriş YOK) ==================
   // Firma artık ayrı bir hesap türü değil — normal bir kullanıcı, bir ya da birden
@@ -1905,9 +1919,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
     } catch(e){ /* sessizce geç */ }
     const isAdmin = mmgAdminFirmaIds.length > 0;
-    const navBtn = document.getElementById('navKullaniciYonetimBtn');
     const dropdownBtn = document.getElementById('kullaniciYonetimBtn');
-    if(navBtn) navBtn.style.display = isAdmin ? 'flex' : 'none';
     if(dropdownBtn) dropdownBtn.style.display = isAdmin ? 'flex' : 'none';
   }
 
@@ -2144,9 +2156,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     mmgAdminFirmaIds = [];
     mmgFirmaMemberships = [];
     renderFirmaBadge();
-    const navBtn0 = document.getElementById('navKullaniciYonetimBtn');
     const dropdownBtn0 = document.getElementById('kullaniciYonetimBtn');
-    if(navBtn0) navBtn0.style.display = 'none';
     if(dropdownBtn0) dropdownBtn0.style.display = 'none';
     document.getElementById('authEmail').value = '';
     document.getElementById('authPassword').value = '';
