@@ -224,7 +224,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     position:relative;
     display:flex; align-items:center; gap:10px;
   }
-  #mmgFirmaBadgeWrap{ position:relative; display:flex; align-items:center; }
   .theme-toggle-standalone{
     display:flex; align-items:center; gap:7px;
     font-size:11px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px;
@@ -869,6 +868,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="mmgCompanySwitchList"></div>
       <div class="account-dropdown-divider"></div>
     </div>
+    <div id="mmgDataScopeWrap" style="display:none;">
+      <div class="account-dropdown-section-label">Veri Kaynağı</div>
+      <div id="mmgDataScopeList"></div>
+      <div class="account-dropdown-divider"></div>
+    </div>
     <button type="button" class="account-dropdown-item" id="kullaniciYonetimBtn" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span>Kullanıcı Yönetim Paneli</span>
@@ -903,22 +907,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <input type="file" id="avatarInput" accept="image/*" style="display:none;">
-</div>
-
-<div id="mmgFirmaBadgeWrap" style="display:none;">
-  <button type="button" class="account-trigger" id="mmgFirmaBadgeTrigger">
-    <span class="avatar-wrap" id="mmgFirmaAvatarWrap">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 10h.01M12 10h.01M15 10h.01M9 14h.01M15 14h.01"/></svg>
-    </span>
-    <span class="user-badge">
-      <span class="user-badge-dot"></span>
-      <span id="mmgFirmaBadgeName">Firma</span>
-    </span>
-  </button>
-  <div class="account-dropdown" id="mmgFirmaBadgeDropdown" hidden>
-    <div class="account-dropdown-section-label">Grup Firmaları</div>
-    <div id="mmgFirmaBadgeList"><div class="mmg-account-row mmg-account-row-static">Yükleniyor…</div></div>
-  </div>
 </div>
 
 </div>
@@ -1590,21 +1578,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   });
 
-  // ---- Sol-alt "Grup Firmaları" rozeti (kullanıcı hesapları, birden fazla firmaya üyeyse) ----
-  const mmgFirmaBadgeTrigger = document.getElementById('mmgFirmaBadgeTrigger');
-  const mmgFirmaBadgeDropdown = document.getElementById('mmgFirmaBadgeDropdown');
-  if(mmgFirmaBadgeTrigger && mmgFirmaBadgeDropdown){
-    mmgFirmaBadgeTrigger.addEventListener('click', (e) => {
-      e.stopPropagation();
-      mmgFirmaBadgeDropdown.hidden = !mmgFirmaBadgeDropdown.hidden;
-    });
-    document.addEventListener('click', (e) => {
-      if(!mmgFirmaBadgeDropdown.hidden && !mmgFirmaBadgeDropdown.contains(e.target) && !mmgFirmaBadgeTrigger.contains(e.target)){
-        mmgFirmaBadgeDropdown.hidden = true;
-      }
-    });
-  }
-
   changePhotoBtn.addEventListener('click', () => {
     toggleAccountDropdown(false);
     avatarInput.click();
@@ -1784,18 +1757,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }catch(e){ /* sessizce geç */ }
   }
   function renderFirmaBadge(){
-    const wrap = document.getElementById('mmgFirmaBadgeWrap');
-    const nameEl = document.getElementById('mmgFirmaBadgeName');
-    const listEl = document.getElementById('mmgFirmaBadgeList');
+    const wrap = document.getElementById('mmgDataScopeWrap');
+    const listEl = document.getElementById('mmgDataScopeList');
     if(!wrap) return;
     if(!mmgFirmaMemberships.length){
       wrap.style.display = 'none';
       return;
     }
-    wrap.style.display = 'flex';
+    wrap.style.display = 'block';
     const activeScope = getActiveDataScope();
-    const activeFirma = activeScope !== 'personal' ? mmgFirmaMemberships.find(f => f.id === activeScope) : null;
-    if(nameEl) nameEl.textContent = activeFirma ? ('🏢 ' + activeFirma.name) : '👤 Kendi Verilerim';
     if(listEl){
       const personalRow = '<div class="mmg-account-row" data-scope="personal">' +
         (activeScope === 'personal' ? '<span class="mmg-account-row-dot"></span>' : '<span style="width:7px;"></span>') +
@@ -1811,7 +1781,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       listEl.querySelectorAll('[data-scope]').forEach(row => {
         row.addEventListener('click', () => {
           setActiveDataScope(row.dataset.scope);
-          document.getElementById('mmgFirmaBadgeDropdown').hidden = true;
+          toggleAccountDropdown(false);
         });
       });
     }
