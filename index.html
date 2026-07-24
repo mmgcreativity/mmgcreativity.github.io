@@ -608,10 +608,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .auth-success{ color:var(--teal); font-size:12.5px; margin-bottom:14px; display:none; grid-column:1 / -1; }
   .auth-success.show{ display:block; }
   .auth-remember-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; grid-column:1 / -1; }
-  .auth-captcha-wrap{ grid-column:1 / -1; margin-bottom:16px; }
+  .auth-2x2-col{ display:flex; flex-direction:column; gap:16px; min-width:0; margin-bottom:16px; }
+  .auth-2x2-col .auth-field{ margin-bottom:0; }
+  .auth-captcha-graphic-wrap{ margin-bottom:0; }
+  .auth-captcha-input-wrap{ margin-bottom:0; }
   .auth-captcha-row{ display:flex; align-items:stretch; gap:8px; margin-bottom:8px; }
   #authCaptchaCanvas{
-    flex:1; min-width:0; height:56px; border-radius:8px; border:1px solid var(--hairline,#2A3448);
+    flex:1; min-width:0; max-width:190px; height:56px; border-radius:8px; border:1px solid var(--hairline,#2A3448);
     background:#f2f2f2; cursor:default;
   }
   .auth-captcha-actions{ display:flex; flex-direction:column; gap:6px; flex:0 0 auto; }
@@ -635,8 +638,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .mmg-invite-icon{ font-size:26px; flex:0 0 auto; line-height:1; }
   .mmg-invite-body{ flex:1; min-width:0; }
-  .mmg-invite-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; color:var(--text,#EAEDF3); margin-bottom:3px; }
-  .mmg-invite-sub{ font-size:12.5px; color:var(--muted,#8D96AC); margin-bottom:10px; line-height:1.4; }
+  .mmg-invite-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; color:var(--text,#EAEDF3); margin-bottom:3px; min-height:1.2em; }
+  .mmg-invite-sub{ font-size:12.5px; color:var(--muted,#8D96AC); margin-bottom:10px; line-height:1.4; min-height:2.2em; }
   .mmg-invite-actions{ display:flex; gap:8px; }
   .mmg-invite-accept, .mmg-invite-reject{
     flex:1; padding:8px 0; border-radius:8px; border:none; cursor:pointer; font-family:'Inter',sans-serif;
@@ -665,6 +668,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .auth-submit:hover{ opacity:0.9; }
   .auth-submit:disabled{ opacity:0.6; cursor:default; }
+  .auth-2x2-col .auth-submit{ margin-top:0; }
   .auth-divider{ display:flex; align-items:center; gap:10px; margin:22px 0; color:var(--muted); font-size:11.5px; }
   .auth-divider::before, .auth-divider::after{ content:''; flex:1; height:1px; background:var(--hairline); }
   .auth-guest{
@@ -910,11 +914,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <label data-i18n="auth_email">E-posta</label>
           <input type="email" id="authEmail" placeholder="ornek@eposta.com" required>
         </div>
-        <div class="auth-field auth-half" id="authPasswordWrap">
-          <label data-i18n="auth_password">Şifre</label>
-          <input type="password" id="authPassword" placeholder="••••••••" required>
+        <div class="auth-2x2-col auth-half" id="authLeftCol">
+          <div class="auth-field" id="authPasswordWrap">
+            <label data-i18n="auth_password">Şifre</label>
+            <input type="password" id="authPassword" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="auth-submit" id="authSubmitBtn" data-i18n="auth_tab_login">Giriş Yap</button>
         </div>
-        <div class="auth-field auth-half" id="authPasswordConfirmWrap" style="display:none;">
+        <div class="auth-2x2-col auth-half">
+          <div class="auth-captcha-graphic-wrap" id="authCaptchaGraphicWrap">
+            <div class="auth-captcha-label" data-i18n="captcha_label">Güvenlik Kodu</div>
+            <div class="auth-captcha-row">
+              <canvas id="authCaptchaCanvas" width="180" height="56" aria-hidden="true"></canvas>
+              <div class="auth-captcha-actions">
+                <button type="button" class="auth-captcha-iconbtn" id="authCaptchaRefreshBtn" title="Yeni kod" data-i18n-title="captcha_refresh" aria-label="Yeni kod">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                </button>
+                <button type="button" class="auth-captcha-iconbtn" id="authCaptchaAudioBtn" title="Sesli oku" data-i18n-title="captcha_listen" aria-label="Sesli oku">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="auth-captcha-input-wrap" id="authCaptchaInputWrap">
+            <input type="text" id="authCaptchaInput" placeholder="" data-i18n-placeholder="captcha_placeholder" autocomplete="off" style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:14px; outline:none;">
+            <div class="auth-captcha-error" id="authCaptchaError"></div>
+          </div>
+        </div>
+        <div class="auth-field auth-full" id="authPasswordConfirmWrap" style="display:none;">
           <label data-i18n="auth_password_repeat">Şifre (Tekrar)</label>
           <input type="password" id="authPasswordConfirm" placeholder="••••••••">
         </div>
@@ -929,23 +956,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </label>
           <button type="button" class="auth-forgot-link" id="forgotPasswordBtn" data-i18n="auth_forgot_password">Şifremi unuttum?</button>
         </div>
-        <div class="auth-captcha-wrap">
-          <div class="auth-captcha-label" data-i18n="captcha_label">Güvenlik Kodu</div>
-          <div class="auth-captcha-row">
-            <canvas id="authCaptchaCanvas" width="180" height="56" aria-hidden="true"></canvas>
-            <div class="auth-captcha-actions">
-              <button type="button" class="auth-captcha-iconbtn" id="authCaptchaRefreshBtn" title="Yeni kod" data-i18n-title="captcha_refresh" aria-label="Yeni kod">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-              </button>
-              <button type="button" class="auth-captcha-iconbtn" id="authCaptchaAudioBtn" title="Sesli oku" data-i18n-title="captcha_listen" aria-label="Sesli oku">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
-              </button>
-            </div>
-          </div>
-          <input type="text" id="authCaptchaInput" placeholder="" data-i18n-placeholder="captcha_placeholder" autocomplete="off" style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:14px; outline:none;">
-          <div class="auth-captcha-error" id="authCaptchaError"></div>
-        </div>
-        <button type="submit" class="auth-submit auth-full" id="authSubmitBtn" data-i18n="auth_tab_login">Giriş Yap</button>
       </form>
 
       <div class="auth-divider" data-i18n="auth_or">veya</div>
@@ -1693,6 +1703,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const authUsernameInput = document.getElementById('authUsername');
   const referralWrap = document.getElementById('authReferralWrap');
   const guestBtn = document.getElementById('guestBtn');
+  const authCaptchaInputWrap = document.getElementById('authCaptchaInputWrap');
+  const authLeftCol = document.getElementById('authLeftCol');
 
   let authMode = 'login';
 
@@ -1704,6 +1716,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     usernameWrap.style.display = mode === 'signup' ? 'block' : 'none';
     referralWrap.style.display = mode === 'signup' ? 'block' : 'none';
     authRememberRow.style.display = mode === 'login' ? 'flex' : 'none';
+    // Giriş ekranında buton, Şifre kutusunun hemen altında aynı sütun içinde kalır (2x2 blok);
+    // kayıt ekranında ek alanlar (kullanıcı adı, şifre tekrar, referans) araya girdiği için
+    // buton formun en altına, tam genişlikte taşınır.
+    if(mode === 'signup'){
+      authSubmitBtn.classList.add('auth-full');
+      authForm.appendChild(authSubmitBtn);
+    } else {
+      authSubmitBtn.classList.remove('auth-full');
+      if(authLeftCol) authLeftCol.appendChild(authSubmitBtn);
+    }
     authTitle.textContent = mode === 'login' ? MMGI18N.t('auth_title_login') : MMGI18N.t('auth_title_signup');
     authSub.textContent = mode === 'login' ? MMGI18N.t('auth_sub_login') : MMGI18N.t('auth_sub_signup');
     authSubmitBtn.textContent = mode === 'login' ? MMGI18N.t('auth_tab_login') : MMGI18N.t('auth_create_account');
@@ -2186,30 +2208,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const inviteRejectBtn = document.getElementById('mmgInviteRejectBtn');
   let pendingInviteQueue = [];
   let inviteBannerBusy = false;
+  let inviteFetchInProgress = false; // eşzamanlı checkPendingInvites çağrılarının kuyruğu birbirinin üstüne yazmasını (ve bildirimi boş göstermesini) önler
 
   async function checkPendingInvites(user, username){
-    if(!user || !user.email || inviteBannerBusy) return;
+    if(!user || !user.email || inviteBannerBusy || inviteFetchInProgress) return;
+    inviteFetchInProgress = true;
     const email = user.email.toLowerCase();
-    pendingInviteQueue = [];
+    const freshQueue = [];
     try{
       const memberSnap = await getDoc(doc(db, 'firmaInvites', email));
-      if(memberSnap.exists()) pendingInviteQueue.push({ kind: 'member', id: email, data: memberSnap.data() });
+      if(memberSnap.exists()) freshQueue.push({ kind: 'member', id: email, data: memberSnap.data() || {} });
     }catch(e){ /* sessizce geç */ }
     try{
       const adminSnap = await getDoc(doc(db, 'firmaAdminInvites', email));
-      if(adminSnap.exists()) pendingInviteQueue.push({ kind: 'admin', id: email, data: adminSnap.data() });
+      if(adminSnap.exists()) freshQueue.push({ kind: 'admin', id: email, data: adminSnap.data() || {} });
     }catch(e){ /* sessizce geç */ }
+    pendingInviteQueue = freshQueue;
+    inviteFetchInProgress = false;
     showNextPendingInvite(user, username);
   }
 
   function showNextPendingInvite(user, username){
     if(!inviteBanner || !pendingInviteQueue.length){ if(inviteBanner) inviteBanner.hidden = true; return; }
     const invite = pendingInviteQueue[0];
-    const firmaName = invite.data.firmaName || (MMGI18N.lang==='en' ? 'a company' : 'bir firma');
-    inviteTitleEl.textContent = '🏢 ' + firmaName;
-    inviteSubEl.textContent = invite.kind === 'admin'
+    const firmaName = (invite.data && invite.data.firmaName) || (MMGI18N.lang==='en' ? 'a company' : 'bir firma');
+    const title = '🏢 ' + firmaName;
+    const sub = invite.kind === 'admin'
       ? (MMGI18N.lang==='en' ? ('You have been invited to be an admin of "' + firmaName + '". Do you accept?') : ('"' + firmaName + '" firmasına yönetici olarak davet edildiniz. Kabul ediyor musunuz?'))
       : (MMGI18N.lang==='en' ? ('You have been invited to be a user of "' + firmaName + '". Do you accept?') : ('"' + firmaName + '" firmasına kullanıcı olarak davet edildiniz. Kabul ediyor musunuz?'));
+    // Güvenlik kontrolü: başlık/açıklama bir şekilde boş kalırsa bildirimi asla boş göstermeyiz,
+    // aksi halde kullanıcı ne için "Kabul Et" dediğini bilmeden onaylayabilir.
+    if(!title.trim() || !sub.trim()){
+      console.warn('mmgInviteBanner: başlık/açıklama boş geldi, bildirim gösterilmedi.', invite);
+      inviteBanner.hidden = true;
+      return;
+    }
+    inviteTitleEl.textContent = title;
+    inviteSubEl.textContent = sub;
     inviteMsgEl.textContent = '';
     inviteBanner.hidden = false;
 
