@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{
+    var mode = localStorage.getItem('mmg_theme') || 'dark';
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+  }catch(e){}
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.mmgTheme){
+      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
+      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
+    }
+  });
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hazır Metin Talimatlar — Dijital Finans Asistanı</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .page-wrap{ max-width:1080px; margin:0 auto; padding:28px 24px 48px; }
+  .page-header{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; }
+  .page-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:26px; letter-spacing:-0.01em; margin-bottom:6px; }
+  .page-sub{ color:var(--muted); font-size:13.5px; line-height:1.5; }
+  .back-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:9px; color:var(--text);
+    padding:10px 16px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer;
+    text-decoration:none; display:inline-flex; align-items:center; gap:6px; flex-shrink:0;
+  }
+  .back-btn:hover{ border-color:var(--brass-dim); }
+
+  .search-row{ margin-bottom:18px; display:flex; gap:10px; flex-wrap:wrap; }
+  .search-row input{
+    flex:1; min-width:220px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px;
+    padding:12px 16px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
+  }
+  .search-row input:focus{ border-color:var(--brass-dim); }
+  .cat-chip{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:20px; padding:9px 15px;
+    color:var(--muted); font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;
+  }
+  .cat-chip.active{ background:var(--grad); color:#fff; border-color:transparent; }
+
+  .cat-label{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; color:var(--brass);
+    text-transform:uppercase; letter-spacing:.04em; margin:24px 0 12px;
+  }
+  .cat-label:first-of-type{ margin-top:0; }
+
+  .tpl-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:12px; }
+  .tpl-card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:13px; padding:16px;
+    display:flex; flex-direction:column; gap:8px; box-shadow:0 8px 20px rgba(0,0,0,0.2); cursor:pointer;
+    transition:border-color .15s ease;
+  }
+  .tpl-card:hover{ border-color:var(--brass-dim); }
+  .tpl-card h3{ font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:700; }
+  .tpl-card p{ color:var(--muted); font-size:11.5px; line-height:1.5; }
+  .empty-note{ color:var(--muted); font-size:13px; padding:20px 4px; }
+
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:900; display:none;
+    align-items:flex-start; justify-content:center; padding:40px 16px; overflow-y:auto;
+  }
+  .modal-backdrop.open{ display:flex; }
+  .modal-box{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:16px; padding:26px;
+    max-width:560px; width:100%; box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  }
+  .modal-box h2{ font-family:'Space Grotesk',sans-serif; font-size:18px; margin-bottom:4px; }
+  .modal-box .modal-cat{ color:var(--brass); font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; margin-bottom:14px; }
+  .modal-field{ margin-bottom:12px; }
+  .modal-field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:5px; }
+  .modal-field input, .modal-field select{
+    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    padding:10px 13px; color:var(--text); font-family:'Inter',sans-serif; font-size:13.5px; outline:none;
+  }
+  .modal-field input:focus, .modal-field select:focus{ border-color:var(--brass-dim); }
+  .modal-preview{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:14px;
+    font-size:12.5px; color:var(--text); line-height:1.6; white-space:pre-wrap; margin:14px 0; min-height:60px;
+  }
+  .modal-btns{ display:flex; gap:10px; margin-top:16px; }
+  .modal-use-btn{
+    flex:1; background:var(--grad); border:none; border-radius:9px; color:#fff;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px; padding:12px; cursor:pointer;
+  }
+  .modal-use-btn:hover{ opacity:.9; }
+  .modal-close-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:9px; color:var(--muted);
+    font-family:'Inter',sans-serif; font-size:13px; padding:12px 18px; cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <div class="page-title">📄 Hazır Metin Talimatlar</div>
+      <div class="page-sub">Sık kullanılan banka/kurum talimatlarından birini seçin, firma/banka/isim/tutar gibi bilgileri girin — hazır metin otomatik oluşturulup Talimat Hazırlama'ya aktarılır; oradan PDF/Word olarak alabilirsiniz.</div>
+    </div>
+    <a href="Talimat_Hazirlama.html" class="back-btn">← Talimat Hazırlama</a>
+  </div>
+
+  <div class="search-row">
+    <input type="text" id="tplSearch" placeholder="Şablon ara... (örn. kredi kartı, yetki, çek, sgk)">
+  </div>
+  <div class="search-row" id="catChips"></div>
+
+  <div id="tplContainer"></div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-box">
+    <h2 id="modalTitle">—</h2>
+    <div class="modal-cat" id="modalCat">—</div>
+    <div id="modalFields"></div>
+    <div class="modal-preview" id="modalPreview"></div>
+    <div class="modal-btns">
+      <button type="button" class="modal-close-btn" id="modalCloseBtn">Vazgeç</button>
+      <button type="button" class="modal-use-btn" id="modalUseBtn">Talimat Hazırlama'ya Aktar →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const BANKS = ['Akbank','Ziraat Bankası','QNB','Halkbank','Vakıfbank','Garanti BBVA','Yapı Kredi','İş Bankası','TEB','Şekerbank','Kuveyt Türk','Vakıf Katılım','Diğer'];
+  function bankSelectField(key, label){
+    return { key: key, label: label || 'Banka', type: 'select', options: BANKS, placeholder: '' };
+  }
+  const F = {
+    banka: bankSelectField('banka'),
+    firma: { key:'firma', label:'Firma Adı', type:'text', placeholder:'Örn. Yaşar Cihan Hazır Beton San. ve Tic. A.Ş.', source:'mmg_saved_firmalar' },
+    vkn: { key:'vkn', label:'Vergi Kimlik No (VKN)', type:'text', placeholder:'Örn. 9390827810' },
+    isim: { key:'isim', label:'Ad Soyad', type:'text', placeholder:'Örn. Ahmet Yılmaz', source:'mmg_saved_kisiler' },
+    tckn: { key:'tckn', label:'TC Kimlik No', type:'text', placeholder:'11 haneli TCKN' },
+    tutar: { key:'tutar', label:'Tutar (TL)', type:'text', placeholder:'Örn. 1.000.000' },
+    kullaniciNo: { key:'kullaniciNo', label:'Kullanıcı No', type:'text', placeholder:'İnternet şubesi kullanıcı numarası' },
+    kartSon4: { key:'kartSon4', label:'Kartın Son 4 Hanesi', type:'text', placeholder:'Örn. 8177 (birden fazlaysa virgülle ayırın)' },
+    eskiGsm: { key:'eskiGsm', label:'Eski GSM No', type:'text', placeholder:'0532 000 00 00' },
+    yeniGsm: { key:'yeniGsm', label:'Yeni GSM No', type:'text', placeholder:'0532 000 00 00' },
+    mail: { key:'mail', label:'E-posta Adresi', type:'text', placeholder:'ornek@eposta.com' },
+    faturaNo: { key:'faturaNo', label:'Fatura / Sözleşme No', type:'text', placeholder:'Örn. 1234567' },
+    kurumAdi: { key:'kurumAdi', label:'Kurum/Şirket Adı', type:'text', placeholder:'Örn. Buski, TTNet, Turkcell' },
+    cekSenetNo: { key:'cekSenetNo', label:'Çek/Senet No', type:'text', placeholder:'Örn. 9179955' },
+    vade: { key:'vade', label:'Vade Tarihi', type:'text', placeholder:'GG.AA.YYYY' },
+    plaka: { key:'plaka', label:'Araç Plakası', type:'text', placeholder:'Örn. 16 AB 123' },
+    iban: { key:'iban', label:'Yeni IBAN', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' },
+    hesapNo: { key:'hesapNo', label:'Hesap No', type:'text', placeholder:'' },
+    oran: { key:'oran', label:'Faiz Oranı', type:'text', placeholder:'Örn. %42,5+1,1' }
+  };
+
+  const TEMPLATES = [
+    { cat:'Kredi Kartı', title:'Kredi Kartı Limit Tanımlama / Artırma',
+      fields:[F.banka, F.vkn, F.firma, F.tutar],
+      body:function(v){ return v.vkn + ' VKN ' + v.firma + ' Firmamıza ' + v.tutar + ' TL kredi kartı limiti aktarımı rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Kredi Kartı', title:'Kredi Kartı Şifre Tanımlama (Yetkili Belirleme)',
+      fields:[F.banka, F.vkn, F.firma, F.isim, F.tckn],
+      body:function(v){ return v.vkn + ' ' + v.firma + ' Firmamızın kredi kartı şifre tanımlaması için ekte bilgileri yer alan kişi firmamızca yetkilidir.\nAd Soyad: ' + v.isim + '\nTCKN: ' + v.tckn; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Kredi Kartı', title:'Kredi Kartı İptali',
+      fields:[F.banka, F.firma, F.kartSon4],
+      body:function(v){ return '** ' + v.kartSon4 + ' ile biten Firma kredi kartının iptali rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Kredi Kartı', title:'Kredi Kartı Teslim Yazısı',
+      fields:[F.banka, F.firma, F.isim, F.tckn],
+      body:function(v){ return v.firma + ' Firmamıza ait kredi kartının ekte bilgileri verilen kişiye teslim edilmesi rica olunur.\nTeslim alacak kişinin;\nAd Soyad: ' + v.isim + '\nTCKN: ' + v.tckn; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Kredi Kartı', title:'Kredi Kartı Tanımlı GSM No Değişikliği',
+      fields:[F.banka, F.firma, F.eskiGsm, F.yeniGsm],
+      body:function(v){ return v.firma + ' Firmamızın internet şubesi kullanıcısının tanımlı telefonunun;\nEski GSM = ' + v.eskiGsm + '\nYeni GSM = ' + v.yeniGsm + '\nolarak güncellenmesi rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Kredi Kartı', title:'Kredi Kartı Ekstresinin Mail ile Gönderimi',
+      fields:[F.banka, F.firma, F.mail],
+      body:function(v){ return v.firma + ' Firmamızın kredi kartı ekstresinin ' + v.mail + ' mail adresine aylık olarak gönderilmesi rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Kredi Kartı', title:'Basılı Ekstre Talebinin İptali (Elektronik Ekstre)',
+      fields:[F.banka, F.firma],
+      body:function(v){ return v.firma + ' Firmamızın basılı ekstre talebi yoktur. Tüm ekstrelerin elektronik ortamda iletilmesi rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Kredi Kartı', title:'HGS Ödemelerinin Kredi Kartına Tanımlanması',
+      fields:[F.banka, F.firma],
+      body:function(v){ return v.firma + " Firmamıza ait tüm aktif HGS'lerin ödemelerinin kredi kartına tanımlanması rica olunur."; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+
+    { cat:'Kredi', title:'Rotatif Kredi Kullandırım Talimatı',
+      fields:[F.banka, F.firma, F.oran, F.tutar],
+      body:function(v){ return v.firma + ' Firmamız için ' + v.oran + ' oranla ' + v.tutar + ' TL rotatif kredi kullandırım yapılması rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Kredi', title:'Kredi Kapanışı — İpotek/Teminat Kaldırma',
+      fields:[F.banka, F.firma, F.tutar],
+      body:function(v){ return v.firma + "'ye kullandırılan ve " + v.tutar + ' TL tutarındaki son taksidi ödenen kredinin teminatındaki ipoteğin/teminatın kaldırılması rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+
+    { cat:'İnternet Şubesi Yetki Tanımlama', title:'İnternet Şubesi Tam Yetki Tanımlama',
+      fields:[F.banka, F.vkn, F.firma, F.kullaniciNo, F.isim],
+      body:function(v){ return v.vkn + ' VKN ' + v.firma + ' Firmamıza ' + v.kullaniciNo + ' nolu ' + v.isim + ' kullanıcısının tam yetkili tanımlanması rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'İnternet Şubesi Yetki Tanımlama', title:'İnternet Şubesi Yetkisinin Süresiz Uzatılması',
+      fields:[F.banka, F.firma],
+      body:function(v){ return v.firma + ' Firmamızın internet şubesinde kullanıcılarının yetkilerinin "süresiz" uzatılması rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'İnternet Şubesi Yetki Tanımlama', title:'İnternet Şubesi İşlem Limiti Güncelleme',
+      fields:[F.banka, F.firma, F.isim, F.tutar],
+      body:function(v){ return v.firma + ' Firmamızda ' + v.isim + "'a ait internet kullanıcısının işlem yetkisinin " + v.tutar + ' TL olarak güncellenmesi rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'İnternet Şubesi Yetki Tanımlama', title:'İnternet Şubesi Kullanıcı İptali',
+      fields:[F.banka, F.firma, F.isim],
+      body:function(v){ return v.firma + ' Firmamıza ait "' + v.isim + '" isimli internet şubesi kullanıcısının iptal edilmesi rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'İnternet Şubesi Yetki Tanımlama', title:'İnternet Şubesi Kısıtının Kaldırılması (Grup)',
+      fields:[F.banka, F.firma],
+      body:function(v){ return 'Grubumuza ait ekli firmaların internet kısıtının kaldırılması rica olunur.\n' + v.firma; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'İnternet Şubesi Yetki Tanımlama', title:'Sadece İnternet Şubesi Kullanımı (Cihaz Aktivasyonu İptali)',
+      fields:[F.banka, F.firma],
+      body:function(v){ return v.firma + ' Firmamıza ait bankacılık işlemlerinde sadece İnternet şubesi kullanılacak olup, tanımlı cihazların aktivasyonunun iptali rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'İnternet Şubesi Yetki Tanımlama', title:'Günlük İşlem Limiti Artırma',
+      fields:[F.banka, F.firma, F.tutar],
+      body:function(v){ return v.firma + " Firmamıza ait internet şube kullanıcısının günlük işlem limitinin " + v.tutar + " TL'ye çıkarılması rica olunur."; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+
+    { cat:'Çek / Senet', title:'Çek Ödeme Talimatı',
+      fields:[F.banka, F.firma, F.cekSenetNo, F.vade, F.tutar],
+      body:function(v){ return 'Ekte bilgileri yer alan çekin ' + v.firma + ' hesabından ödenmesi uygundur.\nÇek Bilgileri:\nNo: ' + v.cekSenetNo + '\nVade: ' + v.vade + '\nTutar: ' + v.tutar + ' TL'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Çek / Senet', title:'Senet Ödeme Talimatı',
+      fields:[F.banka, F.firma, F.cekSenetNo, F.vade, F.tutar],
+      body:function(v){ return v.firma + ' Firmamızın borçlu olduğu, ekte bilgileri yer alan senedin hesaptan ödenmesi rica olunur.\nSenet No: ' + v.cekSenetNo + '\nVade: ' + v.vade + '\nTutar: ' + v.tutar + ' TL'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Çek / Senet', title:'Çek Karnesi İade Talebi',
+      fields:[F.banka, F.firma, F.cekSenetNo],
+      body:function(v){ return 'Grubumuza ait ödemelerde sıralı çek kullanılacağı için, aşağıda bilgileri verilen çek karnelerinin (' + v.cekSenetNo + ') iade alınması rica olunur.\n' + v.firma; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Çek / Senet', title:'Vadesi Geçmiş Çek Takas Talimatı',
+      fields:[F.banka, F.firma, F.cekSenetNo, F.tutar],
+      body:function(v){ return v.firma + ' Firmamıza ait vadesi geçmiş ' + v.cekSenetNo + ' nolu, ' + v.tutar + ' TL tutarındaki çekin takasa ibraz edilmesi rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Çek / Senet', title:'Senet İade Yazısı',
+      fields:[F.banka, F.firma, F.cekSenetNo, F.tutar],
+      body:function(v){ return v.tutar + ' TL bedelli, borcu tamamen ödenmiş ' + v.cekSenetNo + ' nolu senedimizin tarafımıza iade edilmesi rica olunur.\n' + v.firma; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+
+    { cat:'SGK / Vergi Ödemeleri', title:'SGK Ödeme Talimatı (Vadesiz Hesaptan)',
+      fields:[F.banka, F.firma],
+      body:function(v){ return 'Ekte bulunan SGK ödemelerinin firmamız ' + v.firma + ' vadesiz hesabından ödenmesi rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'SGK / Vergi Ödemeleri', title:'SGK Ödeme Talimatı (Kredi Kartından)',
+      fields:[F.banka, F.firma, F.kartSon4],
+      body:function(v){ return 'Ekte bulunan SGK ödemelerinin firmamız ' + v.firma + "'ye ait, son 4 hanesi " + v.kartSon4 + ' olan kredi kartına otomatik ödeme tanımlanması rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'SGK / Vergi Ödemeleri', title:'Vergi Ödeme Talimatı',
+      fields:[F.banka, F.vkn, F.firma],
+      body:function(v){ return v.vkn + ' Vergi Kimlik Numaralı ' + v.firma + ' Firmamıza ait ekli vergi ödemesinin vadesiz hesaptaki tutar ile ödenmesi rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+
+    { cat:'Otomatik Ödeme / Abonelik', title:'Fatura Otomatik Ödeme Tanımlama',
+      fields:[F.banka, F.firma, F.faturaNo],
+      body:function(v){ return 'Ekli faturalara (No: ' + v.faturaNo + ') ait otomatik ödeme tanımlanması rica olunur.\n' + v.firma; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Otomatik Ödeme / Abonelik', title:'Fatura Otomatik Ödemesinin İptali',
+      fields:[F.banka, F.firma, F.faturaNo],
+      body:function(v){ return 'Ekli faturalara (No: ' + v.faturaNo + ') ait otomatik ödemenin iptali rica olunur.\n' + v.firma; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Otomatik Ödeme / Abonelik', title:'Abonelik İptal Talebi (Su / İnternet / Telefon vb.)',
+      fields:[F.banka, F.firma, F.kurumAdi, F.faturaNo],
+      body:function(v){ return v.faturaNo + ' nolu ' + v.kurumAdi + ' faturasına ait otomatik ödemenin iptali rica olunur.\n' + v.firma; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+
+    { cat:'HGS', title:'HGS Tanımlama',
+      fields:[F.banka, F.firma, F.plaka],
+      body:function(v){ return 'Ekli plakaya (' + v.plaka + ') istinaden 3. Sınıf HGS tanımlanması rica olunur.\n' + v.firma; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'HGS', title:'HGS İptali',
+      fields:[F.banka, F.firma],
+      body:function(v){ return v.firma + " Firmamıza ait tüm aktif HGS'lerin iptali rica olunur."; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+
+    { cat:'POS İşlemleri', title:'POS İptal Talebi',
+      fields:[F.banka, F.firma],
+      body:function(v){ return v.firma + ' Firmamıza ait POS tanımının iptal edilmesi rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'POS İşlemleri', title:'POS Bozdurma (Blokeden Erken Çekim)',
+      fields:[F.banka, F.vkn, F.firma, F.tutar],
+      body:function(v){ return v.vkn + ' VKN ' + v.firma + " Firmamızın POS hesabında blokede bulunan tutardan " + v.tutar + " TL'nin erken çekilmesi rica olunur."; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+
+    { cat:'Diğer', title:'IBAN Değişikliği Bildirimi',
+      fields:[F.banka, F.firma, F.vkn, F.iban],
+      body:function(v){ return v.vkn + ' VKN ' + v.firma + " Firmamıza ait ödemelerin yapıldığı IBAN'ın aşağıdaki şekilde güncellenmesi rica olunur.\nYeni IBAN: " + v.iban; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Diğer', title:'Tanımlı Mail Adresi Değişikliği',
+      fields:[F.banka, F.vkn, F.firma, F.mail],
+      body:function(v){ return v.vkn + ' VKN ' + v.firma + ' hesabının tanımlı mail adresinin ' + v.mail + ' olarak güncellenmesi rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Diğer', title:'Hesap Kapama Talebi',
+      fields:[F.banka, F.firma, F.hesapNo],
+      body:function(v){ return v.hesapNo + ' nolu hesabımıza bağlı kullanılmayan hesabın/hesapların kapatılması rica olunur.\n' + v.firma; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Diğer', title:'DASK İptal Talebi',
+      fields:[F.banka, F.firma],
+      body:function(v){ return v.firma + ' adına tanımlı DASK poliçesinin iptal edilmesi rica olunur.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Diğer', title:'SMS Blokesi Kaldırma',
+      fields:[F.banka, F.isim, F.eskiGsm],
+      body:function(v){ return 'Operatör değişikliği kaynaklı ' + v.isim + ' adına tanımlı SMS blokesinin kaldırılmasını talep ediyorum.\nGSM No: ' + v.eskiGsm; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.isim; } },
+    { cat:'Diğer', title:'Şube Taşıma Talebi',
+      fields:[F.banka, F.firma],
+      body:function(v){ return v.firma + ' ve ilişkili firmalara ait hesapların, bankanızın uygun bir şubesine aktarılması hususunda gereğinin yapılmasını rica ederiz.'; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Diğer', title:'Sehven Yapılan Ödemenin İadesi / Virmanı',
+      fields:[F.banka, F.firma, F.tutar],
+      body:function(v){ return 'Firmamızca sehven gönderilen ' + v.tutar + ' TL tutarındaki ödemenin doğru hesaba virmanlanması / tarafımıza iade edilmesi rica olunur.\n' + v.firma; },
+      muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } }
+  ];
+
+  let activeCat = 'Tümü';
+  let activeTemplate = null;
+
+  function categories(){
+    var seen = {}; var out = ['Tümü'];
+    TEMPLATES.forEach(function(t){ if(!seen[t.cat]){ seen[t.cat]=true; out.push(t.cat); } });
+    return out;
+  }
+
+  function renderChips(){
+    const wrap = document.getElementById('catChips');
+    wrap.innerHTML = categories().map(function(c){
+      return '<span class="cat-chip' + (c === activeCat ? ' active' : '') + '" data-cat="' + c + '">' + c + '</span>';
+    }).join('');
+    wrap.querySelectorAll('.cat-chip').forEach(function(chip){
+      chip.addEventListener('click', function(){
+        activeCat = chip.dataset.cat;
+        renderChips();
+        applyFilter();
+      });
+    });
+  }
+
+  function renderList(list){
+    const container = document.getElementById('tplContainer');
+    if(!list.length){
+      container.innerHTML = '<div class="empty-note">Aramanızla eşleşen bir şablon bulunamadı.</div>';
+      return;
+    }
+    var seen = {}; var cats = [];
+    list.forEach(function(t){ if(!seen[t.cat]){ seen[t.cat]=true; cats.push(t.cat); } });
+    container.innerHTML = cats.map(function(cat){
+      const items = list.filter(function(t){ return t.cat === cat; });
+      return '<div class="cat-label">' + cat + '</div><div class="tpl-grid">' +
+        items.map(function(t){
+          const idx = TEMPLATES.indexOf(t);
+          return '<div class="tpl-card" data-idx="' + idx + '"><h3>' + t.title + '</h3><p>' + t.fields.length + ' alan doldurarak oluşturun</p></div>';
+        }).join('') + '</div>';
+    }).join('');
+    container.querySelectorAll('.tpl-card').forEach(function(card){
+      card.addEventListener('click', function(){ openModal(TEMPLATES[Number(card.dataset.idx)]); });
+    });
+  }
+
+  function applyFilter(){
+    const q = document.getElementById('tplSearch').value.trim().toLocaleLowerCase('tr-TR');
+    let list = TEMPLATES;
+    if(activeCat !== 'Tümü') list = list.filter(function(t){ return t.cat === activeCat; });
+    if(q) list = list.filter(function(t){ return t.title.toLocaleLowerCase('tr-TR').indexOf(q) !== -1 || t.cat.toLocaleLowerCase('tr-TR').indexOf(q) !== -1; });
+    renderList(list);
+  }
+
+  document.getElementById('tplSearch').addEventListener('input', applyFilter);
+
+  // ---- Talimat Hazırlama'da kayıtlı firma/kişi listelerini oku (aynı localStorage anahtarları) ----
+  function readSavedList(key){
+    try{
+      const raw = localStorage.getItem(key);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch(e){ return []; }
+  }
+
+  const backdrop = document.getElementById('modalBackdrop');
+  function openModal(tpl){
+    activeTemplate = tpl;
+    document.getElementById('modalTitle').textContent = tpl.title;
+    document.getElementById('modalCat').textContent = tpl.cat;
+    const fieldsEl = document.getElementById('modalFields');
+    fieldsEl.innerHTML = tpl.fields.map(function(f){
+      if(f.type === 'select'){
+        return '<div class="modal-field"><label>' + f.label + '</label><select data-key="' + f.key + '">' +
+          '<option value="">— Seçiniz —</option>' +
+          f.options.map(function(o){ return '<option value="' + o + '">' + o + '</option>'; }).join('') +
+          '</select></div>';
+      }
+      if(f.source){
+        const saved = readSavedList(f.source);
+        const dlId = 'dl_' + f.key;
+        const dl = saved.length ? '<datalist id="' + dlId + '">' + saved.map(function(s){ return '<option value="' + String(s).replace(/"/g,'&quot;') + '">'; }).join('') + '</datalist>' : '';
+        return '<div class="modal-field"><label>' + f.label + (saved.length ? ' <span style="color:var(--teal); font-weight:400;">· kayıtlılardan seçebilirsiniz</span>' : '') + '</label>' +
+          '<input type="text" data-key="' + f.key + '" placeholder="' + (f.placeholder||'') + '" list="' + dlId + '">' + dl + '</div>';
+      }
+      return '<div class="modal-field"><label>' + f.label + '</label><input type="text" data-key="' + f.key + '" placeholder="' + (f.placeholder||'') + '"></div>';
+    }).join('');
+    fieldsEl.querySelectorAll('input, select').forEach(function(el){ el.addEventListener('input', updatePreview); });
+    updatePreview();
+    backdrop.classList.add('open');
+  }
+  function closeModal(){
+    backdrop.classList.remove('open');
+    activeTemplate = null;
+  }
+  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+  backdrop.addEventListener('click', function(e){ if(e.target === backdrop) closeModal(); });
+
+  function readValues(){
+    const v = {};
+    document.querySelectorAll('#modalFields [data-key]').forEach(function(el){
+      v[el.dataset.key] = el.value.trim() || ('(' + (el.previousElementSibling ? el.previousElementSibling.textContent : el.dataset.key) + ')');
+    });
+    return v;
+  }
+  function updatePreview(){
+    if(!activeTemplate) return;
+    const v = readValues();
+    document.getElementById('modalPreview').textContent = activeTemplate.body(v);
+  }
+
+  document.getElementById('modalUseBtn').addEventListener('click', function(){
+    if(!activeTemplate) return;
+    const v = readValues();
+    const text = activeTemplate.body(v);
+    const firma = activeTemplate.firma ? activeTemplate.firma(v) : '';
+    const muhatapAdi = activeTemplate.muhatap ? activeTemplate.muhatap(v) : '';
+    // Yeni girilen firma/kişi isimlerini de Talimat Hazırlama'nın kayıtlı
+    // listelerine ekle, böylece bir dahaki sefere oradan/buradan seçilebilsin.
+    try{
+      activeTemplate.fields.forEach(function(f){
+        if(!f.source) return;
+        const val = v[f.key];
+        if(!val || val.indexOf('(') === 0) return; // boş bırakılmış placeholder değeri ekleme
+        const list = readSavedList(f.source);
+        if(list.indexOf(val) === -1){
+          list.push(val);
+          localStorage.setItem(f.source, JSON.stringify(list));
+        }
+      });
+    }catch(e){ /* sessizce geç */ }
+    try{
+      localStorage.setItem('mmg_pending_sm_text', text);
+      if(muhatapAdi) { localStorage.setItem('mmg_pending_sm_muhataptur', 'banka'); localStorage.setItem('mmg_pending_sm_muhatapadi', muhatapAdi); }
+      if(firma) localStorage.setItem('mmg_pending_sm_firma', firma);
+    }catch(e){}
+    window.location.href = 'Talimat_Hazirlama.html';
+  });
+
+  renderChips();
+  renderList(TEMPLATES);
+</script>
+
+</body>
+</html>

@@ -608,6 +608,46 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .auth-success{ color:var(--teal); font-size:12.5px; margin-bottom:14px; display:none; grid-column:1 / -1; }
   .auth-success.show{ display:block; }
   .auth-remember-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; grid-column:1 / -1; }
+  .auth-captcha-wrap{ grid-column:1 / -1; margin-bottom:16px; }
+  .auth-captcha-row{ display:flex; align-items:stretch; gap:8px; margin-bottom:8px; }
+  #authCaptchaCanvas{
+    flex:1; min-width:0; height:56px; border-radius:8px; border:1px solid var(--hairline,#2A3448);
+    background:#f2f2f2; cursor:default;
+  }
+  .auth-captcha-actions{ display:flex; flex-direction:column; gap:6px; flex:0 0 auto; }
+  .auth-captcha-iconbtn{
+    width:32px; height:25px; border-radius:6px; border:1px solid var(--hairline,#2A3448);
+    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:border-color .12s ease, color .12s ease;
+  }
+  .auth-captcha-iconbtn:hover{ border-color:var(--brass,#C6A15B); color:var(--text,#EAEDF3); }
+  .auth-captcha-label{ font-size:12.5px; font-weight:600; color:var(--brass,#C6A15B); margin-bottom:6px; }
+  .auth-captcha-error{ color:var(--coral); font-size:11.5px; margin-top:6px; min-height:14px; }
+  .mmg-invite-banner{
+    position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:960;
+    width:min(420px, calc(100vw - 24px)); background:var(--surface,#141C2B); border:1px solid var(--brass,#C6A15B);
+    border-radius:14px; padding:16px 18px; display:flex; gap:12px; box-shadow:0 18px 40px rgba(0,0,0,0.5);
+    animation:mmgInviteSlideIn .3s ease-out;
+  }
+  @keyframes mmgInviteSlideIn{
+    from{ opacity:0; transform:translate(-50%, -16px); }
+    to{ opacity:1; transform:translate(-50%, 0); }
+  }
+  .mmg-invite-icon{ font-size:26px; flex:0 0 auto; line-height:1; }
+  .mmg-invite-body{ flex:1; min-width:0; }
+  .mmg-invite-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; color:var(--text,#EAEDF3); margin-bottom:3px; }
+  .mmg-invite-sub{ font-size:12.5px; color:var(--muted,#8D96AC); margin-bottom:10px; line-height:1.4; }
+  .mmg-invite-actions{ display:flex; gap:8px; }
+  .mmg-invite-accept, .mmg-invite-reject{
+    flex:1; padding:8px 0; border-radius:8px; border:none; cursor:pointer; font-family:'Inter',sans-serif;
+    font-size:13px; font-weight:700; transition:opacity .12s ease;
+  }
+  .mmg-invite-accept{ background:linear-gradient(120deg, var(--teal,#3FB68A), #2E8C6A); color:#fff; }
+  .mmg-invite-reject{ background:var(--surface-2,#1B2536); color:var(--muted,#8D96AC); border:1px solid var(--hairline,#2A3448); }
+  .mmg-invite-accept:hover, .mmg-invite-reject:hover{ opacity:0.85; }
+  .mmg-invite-accept:disabled, .mmg-invite-reject:disabled{ opacity:0.5; cursor:default; }
+  .mmg-invite-msg{ font-size:11.5px; margin-top:8px; min-height:14px; color:var(--teal,#3FB68A); }
+  @media (max-width:480px){ .mmg-invite-banner{ top:10px; padding:13px 14px; } }
   .auth-forgot-link{
     font-size:12.5px; color:var(--brass,#C6A15B); text-decoration:none; background:none; border:none;
     cursor:pointer; padding:0; font-family:inherit;
@@ -706,6 +746,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       auth_fullname:'Ad Soyad', auth_company_title:'Firma Ünvanı', auth_email:'E-posta',
       auth_password:'Şifre', auth_password_repeat:'Şifre (Tekrar)',
       auth_referral_label:'Referans Kodu', auth_referral_optional:'(varsa, opsiyonel)',
+      captcha_label:'Güvenlik Kodu', captcha_refresh:'Yeni kod', captcha_listen:'Sesli oku',
+      captcha_placeholder:'Yukarıdaki kodu girin', captcha_wrong:'Güvenlik kodu hatalı, lütfen tekrar deneyin.',
+      invite_accept:'✓ Kabul Et', invite_reject:'✕ Reddet',
       auth_remember_me:'Oturumu açık tut', auth_forgot_password:'Şifremi unuttum?', auth_or:'veya',
       auth_google:'Google ile devam et', auth_guest:'Misafir olarak gir',
       auth_not_logged_in:'Giriş yapmadınız', auth_guest_mode:'Misafir modundasınız', auth_user_code:'Kullanıcı Kodu: #',
@@ -783,6 +826,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       auth_fullname:'Full Name', auth_company_title:'Company Name', auth_email:'Email',
       auth_password:'Password', auth_password_repeat:'Password (Repeat)',
       auth_referral_label:'Referral Code', auth_referral_optional:'(optional, if any)',
+      captcha_label:'Security Code', captcha_refresh:'New code', captcha_listen:'Listen',
+      captcha_placeholder:'Enter the code above', captcha_wrong:'Incorrect security code, please try again.',
+      invite_accept:'✓ Accept', invite_reject:'✕ Decline',
       auth_remember_me:'Keep me signed in', auth_forgot_password:'Forgot password?', auth_or:'or',
       auth_google:'Continue with Google', auth_guest:'Continue as guest',
       auth_not_logged_in:'You are not signed in', auth_guest_mode:'You are in guest mode', auth_user_code:'User Code: #',
@@ -883,6 +929,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </label>
           <button type="button" class="auth-forgot-link" id="forgotPasswordBtn" data-i18n="auth_forgot_password">Şifremi unuttum?</button>
         </div>
+        <div class="auth-captcha-wrap">
+          <div class="auth-captcha-label" data-i18n="captcha_label">Güvenlik Kodu</div>
+          <div class="auth-captcha-row">
+            <canvas id="authCaptchaCanvas" width="180" height="56" aria-hidden="true"></canvas>
+            <div class="auth-captcha-actions">
+              <button type="button" class="auth-captcha-iconbtn" id="authCaptchaRefreshBtn" title="Yeni kod" data-i18n-title="captcha_refresh" aria-label="Yeni kod">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              </button>
+              <button type="button" class="auth-captcha-iconbtn" id="authCaptchaAudioBtn" title="Sesli oku" data-i18n-title="captcha_listen" aria-label="Sesli oku">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+              </button>
+            </div>
+          </div>
+          <input type="text" id="authCaptchaInput" placeholder="" data-i18n-placeholder="captcha_placeholder" autocomplete="off" style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:14px; outline:none;">
+          <div class="auth-captcha-error" id="authCaptchaError"></div>
+        </div>
         <button type="submit" class="auth-submit auth-full" id="authSubmitBtn" data-i18n="auth_tab_login">Giriş Yap</button>
       </form>
 
@@ -893,6 +955,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </button>
       <button type="button" class="auth-guest" id="guestBtn" data-i18n="auth_guest">Misafir olarak gir</button>
     </div>
+  </div>
+</div>
+
+<div id="mmgInviteBanner" class="mmg-invite-banner" hidden>
+  <div class="mmg-invite-icon">🏢</div>
+  <div class="mmg-invite-body">
+    <div class="mmg-invite-title" id="mmgInviteTitle"></div>
+    <div class="mmg-invite-sub" id="mmgInviteSub"></div>
+    <div class="mmg-invite-actions">
+      <button type="button" class="mmg-invite-accept" id="mmgInviteAcceptBtn" data-i18n="invite_accept">✓ Kabul Et</button>
+      <button type="button" class="mmg-invite-reject" id="mmgInviteRejectBtn" data-i18n="invite_reject">✕ Reddet</button>
+    </div>
+    <div class="mmg-invite-msg" id="mmgInviteMsg"></div>
   </div>
 </div>
 
@@ -1041,7 +1116,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
         <span data-i18n="verify_email_resend">Doğrulama E-postasını Tekrar Gönder</span>
       </button>
-      <div class="saved-msg" id="mmgResendVerifySavedMsg" style="margin-top:6px;" data-i18n="verify_email_sent">Gönderildi ✓</div>
+      <div class="saved-msg" id="mmgResendVerifySavedMsg" style="margin-top:6px; display:none; color:var(--teal,#3FB68A); font-size:11.5px;" data-i18n="verify_email_sent">Gönderildi ✓</div>
     </div>
     <div id="mmgCompanySwitchWrap" style="display:none;">
       <div class="account-dropdown-section-label" data-i18n="dropdown_linked_companies">Bağlı Firmalar</div>
@@ -1524,6 +1599,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const googleProvider = new GoogleAuthProvider();
 
   // ---- Yönetici kontrolü, premium/reklamsız durumu ----
+  const mmgResendVerifyBtn = document.getElementById('mmgResendVerifyBtn');
+  if(mmgResendVerifyBtn){
+    mmgResendVerifyBtn.addEventListener('click', async () => {
+      if(!auth.currentUser) return;
+      mmgResendVerifyBtn.disabled = true;
+      const savedMsg = document.getElementById('mmgResendVerifySavedMsg');
+      try{
+        await sendEmailVerification(auth.currentUser);
+        if(savedMsg){
+          savedMsg.style.display = 'block';
+          setTimeout(() => { savedMsg.style.display = 'none'; }, 4000);
+        }
+      }catch(e){ /* gönderilemezse sessizce geç */ }
+      mmgResendVerifyBtn.disabled = false;
+    });
+  }
+
   onAuthStateChanged(auth, async (user) => {
     const adminBtn = document.getElementById('adminPanelBtn');
     const begenBtn = document.getElementById('begenIstatistikleriBtn');
@@ -1549,6 +1641,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
       if(adminBtn) adminBtn.style.display = data.isAdmin ? 'flex' : 'none';
       if(begenBtn) begenBtn.style.display = data.isAdmin ? 'flex' : 'none';
+      const verifyWrap = document.getElementById('mmgVerifyEmailWrap');
+      if(verifyWrap) verifyWrap.style.display = (user.email && !user.emailVerified) ? 'block' : 'none';
       try{ gtag('set', 'user_properties', { user_type: data.isPremium ? 'premium' : 'member' }); }catch(e){}
       // Premium üye reklamsız deneyim: adsbygoogle script'ini reklamsız kullanıcılar için hiç yüklemiyoruz
       if(data.isPremium){
@@ -1568,6 +1662,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // Firma Hesabı (üyelik rozeti + yöneticilik yetkisi): her ikisini de yükle
       await loadFirmaMemberships(user.uid);
       await loadAdminFirmas(user.uid);
+      // Zaten oturum açıkken gelen bekleyen davetleri de yakala (sadece giriş anında değil)
+      await checkPendingInvites(user, data.username);
     } catch(e){ /* sessizce geç */ }
   });
 
@@ -1671,7 +1767,115 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   function openAuthOverlay(){
     authOverlay.classList.remove('hidden');
+    refreshCaptcha();
   }
+
+  // ---- Güvenlik Kodu (CAPTCHA) ----
+  const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // karışabilecek 0/O, 1/I/L hariç
+  let currentCaptchaCode = '';
+  const captchaCanvas = document.getElementById('authCaptchaCanvas');
+  const captchaInput = document.getElementById('authCaptchaInput');
+  const captchaError = document.getElementById('authCaptchaError');
+  const captchaRefreshBtn = document.getElementById('authCaptchaRefreshBtn');
+  const captchaAudioBtn = document.getElementById('authCaptchaAudioBtn');
+
+  function generateCaptchaCode(len){
+    len = len || 5;
+    let code = '';
+    for(let i = 0; i < len; i++){
+      code += CAPTCHA_CHARS[Math.floor(Math.random() * CAPTCHA_CHARS.length)];
+    }
+    return code;
+  }
+
+  function drawCaptcha(code){
+    if(!captchaCanvas) return;
+    const ctx = captchaCanvas.getContext('2d');
+    const w = captchaCanvas.width, h = captchaCanvas.height;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#f2f2f2';
+    ctx.fillRect(0, 0, w, h);
+
+    // Arka plan gürültü çizgileri
+    for(let i = 0; i < 5; i++){
+      ctx.strokeStyle = `rgba(60,60,70,${0.12 + Math.random() * 0.12})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(Math.random() * w, Math.random() * h);
+      ctx.bezierCurveTo(Math.random()*w, Math.random()*h, Math.random()*w, Math.random()*h, Math.random()*w, Math.random()*h);
+      ctx.stroke();
+    }
+    // Arka plan noktaları
+    for(let i = 0; i < 40; i++){
+      ctx.fillStyle = `rgba(40,40,50,${0.10 + Math.random() * 0.15})`;
+      ctx.beginPath();
+      ctx.arc(Math.random() * w, Math.random() * h, Math.random() * 1.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Karakterleri tek tek, hafifçe döndürerek ve dalgalı bir taban çizgisinde çiz
+    const charW = w / code.length;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    for(let i = 0; i < code.length; i++){
+      const ch = code[i];
+      const x = charW * i + charW / 2 + (Math.random() * 6 - 3);
+      const y = h / 2 + Math.sin(i * 1.4) * 6 + (Math.random() * 6 - 3);
+      const angle = (Math.random() * 32 - 16) * Math.PI / 180;
+      const size = 24 + Math.random() * 8;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.font = `700 ${size}px 'Space Grotesk', sans-serif`;
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = `hsl(${Math.random()*360}, 55%, 30%)`;
+      ctx.strokeText(ch, 0, 0);
+      ctx.restore();
+    }
+    // Ortadan geçen ince bir dalga çizgisi
+    ctx.strokeStyle = 'rgba(30,30,40,0.4)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    for(let x = 0; x <= w; x += 4){
+      const y = h / 2 + Math.sin((x / w) * Math.PI * 3) * 5;
+      if(x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  function refreshCaptcha(){
+    currentCaptchaCode = generateCaptchaCode(5);
+    drawCaptcha(currentCaptchaCode);
+    if(captchaInput) captchaInput.value = '';
+    if(captchaError) captchaError.textContent = '';
+  }
+
+  function speakCaptcha(){
+    try{
+      if(!('speechSynthesis' in window) || !currentCaptchaCode) return;
+      window.speechSynthesis.cancel();
+      const spoken = currentCaptchaCode.split('').join(', ');
+      const utter = new SpeechSynthesisUtterance(spoken);
+      utter.lang = (typeof MMGI18N !== 'undefined' && MMGI18N.lang === 'en') ? 'en-US' : 'tr-TR';
+      utter.rate = 0.75;
+      window.speechSynthesis.speak(utter);
+    }catch(e){ /* sesli okunamazsa sessizce geç */ }
+  }
+
+  function verifyCaptchaOrShowError(){
+    const val = (captchaInput && captchaInput.value ? captchaInput.value : '').trim().toUpperCase();
+    if(!val || val !== currentCaptchaCode){
+      if(captchaError) captchaError.textContent = MMGI18N.t('captcha_wrong');
+      refreshCaptcha();
+      return false;
+    }
+    if(captchaError) captchaError.textContent = '';
+    return true;
+  }
+
+  if(captchaRefreshBtn) captchaRefreshBtn.addEventListener('click', refreshCaptcha);
+  if(captchaAudioBtn) captchaAudioBtn.addEventListener('click', speakCaptcha);
+  refreshCaptcha();
 
   function updateUserBadge(customerNumber, username){
     const state = localStorage.getItem('mmg_auth_state');
@@ -1951,7 +2155,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       localStorage.setItem('mmg_company_id', invite.companyId);
       localStorage.setItem('mmg_company_role', 'member');
       localStorage.setItem('mmg_company_name', invite.companyName || '');
-      try{ alert('🎉 "' + (invite.companyName || 'Firma') + '" hesabına üye olarak eklendiniz.'); }catch(e){}
+      try{ alert('🎉 ' + (MMGI18N.lang==='en' ? ('You have been added as a member of "' + (invite.companyName || 'Company') + '".') : ('"' + (invite.companyName || 'Firma') + '" hesabına üye olarak eklendiniz.'))); }catch(e){}
     } catch(e){ /* davet kontrol edilemezse sessizce geç */ }
   }
 
@@ -1972,23 +2176,87 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     } catch(e){ /* sessizce geç */ }
   }
 
-  // ---- Firma Hesabı (YENİ): bekleyen bir kullanıcı daveti varsa, kullanıcıyı ilgili firmaya üye olarak ekler ----
-  async function applyPendingFirmaInviteIfAny(user, username){
-    if(!user || !user.email) return;
+  // ---- Firma Hesabı (YENİ): bekleyen bir kullanıcı veya yöneticilik daveti varsa,
+  // otomatik eklemek yerine site içinde bir bildirim gösterir; kullanıcı kabul/red eder ----
+  const inviteBanner = document.getElementById('mmgInviteBanner');
+  const inviteTitleEl = document.getElementById('mmgInviteTitle');
+  const inviteSubEl = document.getElementById('mmgInviteSub');
+  const inviteMsgEl = document.getElementById('mmgInviteMsg');
+  const inviteAcceptBtn = document.getElementById('mmgInviteAcceptBtn');
+  const inviteRejectBtn = document.getElementById('mmgInviteRejectBtn');
+  let pendingInviteQueue = [];
+  let inviteBannerBusy = false;
+
+  async function checkPendingInvites(user, username){
+    if(!user || !user.email || inviteBannerBusy) return;
+    const email = user.email.toLowerCase();
+    pendingInviteQueue = [];
     try{
-      const inviteRef = doc(db, 'firmaInvites', user.email.toLowerCase());
-      const inviteSnap = await getDoc(inviteRef);
-      if(!inviteSnap.exists()) return;
-      const invite = inviteSnap.data();
-      await setDoc(doc(db, 'firmaAccounts', invite.firmaId, 'members', user.uid), {
-        email: user.email || '', username: username || '', permissions: invite.permissions || {}, addedAt: serverTimestamp()
-      });
-      await setDoc(doc(db, 'users', user.uid), {
-        firmaIds: arrayUnion(invite.firmaId)
-      }, { merge: true });
-      await deleteDoc(inviteRef);
-      try{ alert('🏢 ' + (MMGI18N.lang==='en' ? ('You have been added as a user to the "' + (invite.firmaName || 'Company') + '" account.') : ('"' + (invite.firmaName || 'Firma') + '" hesabına kullanıcı olarak eklendiniz.'))); }catch(e){}
-    } catch(e){ /* davet kontrol edilemezse sessizce geç */ }
+      const memberSnap = await getDoc(doc(db, 'firmaInvites', email));
+      if(memberSnap.exists()) pendingInviteQueue.push({ kind: 'member', id: email, data: memberSnap.data() });
+    }catch(e){ /* sessizce geç */ }
+    try{
+      const adminSnap = await getDoc(doc(db, 'firmaAdminInvites', email));
+      if(adminSnap.exists()) pendingInviteQueue.push({ kind: 'admin', id: email, data: adminSnap.data() });
+    }catch(e){ /* sessizce geç */ }
+    showNextPendingInvite(user, username);
+  }
+
+  function showNextPendingInvite(user, username){
+    if(!inviteBanner || !pendingInviteQueue.length){ if(inviteBanner) inviteBanner.hidden = true; return; }
+    const invite = pendingInviteQueue[0];
+    const firmaName = invite.data.firmaName || (MMGI18N.lang==='en' ? 'a company' : 'bir firma');
+    inviteTitleEl.textContent = '🏢 ' + firmaName;
+    inviteSubEl.textContent = invite.kind === 'admin'
+      ? (MMGI18N.lang==='en' ? ('You have been invited to be an admin of "' + firmaName + '". Do you accept?') : ('"' + firmaName + '" firmasına yönetici olarak davet edildiniz. Kabul ediyor musunuz?'))
+      : (MMGI18N.lang==='en' ? ('You have been invited to be a user of "' + firmaName + '". Do you accept?') : ('"' + firmaName + '" firmasına kullanıcı olarak davet edildiniz. Kabul ediyor musunuz?'));
+    inviteMsgEl.textContent = '';
+    inviteBanner.hidden = false;
+
+    inviteAcceptBtn.onclick = async () => {
+      inviteBannerBusy = true;
+      inviteAcceptBtn.disabled = true; inviteRejectBtn.disabled = true;
+      try{
+        if(invite.kind === 'admin'){
+          await setDoc(doc(db, 'firmaAccounts', invite.data.firmaId, 'admins', user.uid), {
+            email: user.email || '', addedAt: serverTimestamp()
+          });
+          await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayUnion(invite.data.firmaId) }, { merge: true });
+        } else {
+          await setDoc(doc(db, 'firmaAccounts', invite.data.firmaId, 'members', user.uid), {
+            email: user.email || '', username: username || '', permissions: invite.data.permissions || {}, addedAt: serverTimestamp()
+          });
+          await setDoc(doc(db, 'users', user.uid), { firmaIds: arrayUnion(invite.data.firmaId) }, { merge: true });
+        }
+        await deleteDoc(doc(db, invite.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', invite.id));
+        inviteMsgEl.textContent = MMGI18N.lang==='en' ? 'Accepted ✓' : 'Kabul edildi ✓';
+        try{ await loadFirmaMemberships(user.uid); await loadAdminFirmas(user.uid); }catch(e){}
+      } catch(e){
+        inviteMsgEl.style.color = 'var(--red,#E2544B)';
+        inviteMsgEl.textContent = MMGI18N.lang==='en' ? 'Something went wrong, please try again.' : 'Bir şeyler ters gitti, lütfen tekrar deneyin.';
+        inviteAcceptBtn.disabled = false; inviteRejectBtn.disabled = false;
+        inviteBannerBusy = false;
+        return;
+      }
+      setTimeout(() => {
+        pendingInviteQueue.shift();
+        inviteAcceptBtn.disabled = false; inviteRejectBtn.disabled = false;
+        inviteBannerBusy = false;
+        showNextPendingInvite(user, username);
+      }, 1100);
+    };
+
+    inviteRejectBtn.onclick = async () => {
+      inviteBannerBusy = true;
+      inviteAcceptBtn.disabled = true; inviteRejectBtn.disabled = true;
+      try{
+        await deleteDoc(doc(db, invite.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', invite.id));
+      } catch(e){ /* sessizce geç */ }
+      pendingInviteQueue.shift();
+      inviteAcceptBtn.disabled = false; inviteRejectBtn.disabled = false;
+      inviteBannerBusy = false;
+      showNextPendingInvite(user, username);
+    };
   }
 
   // ---- Firma Hesabı: hesap açılır menüsündeki gerçek "Veri Kaynağı" değiştiricisi ----
@@ -2166,7 +2434,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       localStorage.setItem('mmg_remember', remember ? '1' : '0');
       updateUserBadge(customerNumber, username);
       await applyPendingInviteIfAny(user, username);
-      await applyPendingFirmaInviteIfAny(user, username);
+      await checkPendingInvites(user, username);
       await syncCompanyCache(user.uid);
       await loadAdminFirmas(user.uid);
       closeAuthOverlay();
@@ -2182,6 +2450,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     hideAuthError();
+    if(!verifyCaptchaOrShowError()) return;
     const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value;
     const remember = document.getElementById('rememberMe').checked;
@@ -2285,9 +2554,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         // ---- Bekleyen bir eski-sistem (Hesabım'dan gönderilmiş) daveti varsa uygula ----
         await applyPendingInviteIfAny(cred.user, username);
-        await applyPendingFirmaInviteIfAny(cred.user, username);
+        await checkPendingInvites(cred.user, username);
         await loadAdminFirmas(cred.user.uid);
-        try{ alert('Hesabınız oluşturuldu. 📩 ' + email + ' adresine bir doğrulama e-postası gönderdik, lütfen gelen kutunuzu (ve gereksiz/spam klasörünü) kontrol edip e-postanızı onaylayın.'); }catch(alertErr){}
+        try{ alert(MMGI18N.lang==='en' ? ('Your account has been created. 📩 We sent a verification email to ' + email + ' — please check your inbox (and spam folder) and confirm your email.') : ('Hesabınız oluşturuldu. 📩 ' + email + ' adresine bir doğrulama e-postası gönderdik, lütfen gelen kutunuzu (ve gereksiz/spam klasörünü) kontrol edip e-postanızı onaylayın.')); }catch(alertErr){}
 
         closeAuthOverlay();
       } else {
@@ -2313,7 +2582,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
         await applyPendingInviteIfAny(cred.user, username);
-        await applyPendingFirmaInviteIfAny(cred.user, username);
+        await checkPendingInvites(cred.user, username);
         await syncCompanyCache(cred.user.uid);
         await loadAdminFirmas(cred.user.uid);
         closeAuthOverlay();

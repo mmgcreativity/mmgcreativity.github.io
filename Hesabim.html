@@ -861,22 +861,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   });
 
-  // Bekleyen bir firma-yöneticiliği daveti varsa kabul et.
-  async function applyPendingFirmaAdminInviteIfAny(user){
-    if(!user || !user.email) return;
-    try{
-      const inviteRef = doc(db, 'firmaAdminInvites', user.email.toLowerCase());
-      const inviteSnap = await getDoc(inviteRef);
-      if(!inviteSnap.exists()) return;
-      const invite = inviteSnap.data();
-      await setDoc(doc(db, 'firmaAccounts', invite.firmaId, 'admins', user.uid), {
-        email: user.email || '', addedAt: serverTimestamp()
-      });
-      await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayUnion(invite.firmaId) }, { merge: true });
-      await deleteDoc(inviteRef);
-      try{ alert('🏢 ' + (MMG_LANG==='en' ? ('You have been added as an admin of the "' + (invite.firmaName || 'Company') + '" company.') : ('"' + (invite.firmaName || 'Firma') + '" firmasına yönetici olarak eklendiniz.'))); }catch(e){}
-    } catch(e){ /* sessizce geç */ }
-  }
+  // Not: Firma yöneticiliği davetleri artık burada sessizce kabul edilmiyor;
+  // ana kabuk (index.html) bunu bir "Kabul Et / Reddet" bildirimiyle yönetiyor.
 
   onAuthStateChanged(auth, async (user) => {
     if(!user){
@@ -907,7 +893,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       } else {
         legacyCompanyWrap.style.display = 'none';
       }
-      await applyPendingFirmaAdminInviteIfAny(user);
       await loadMyFirmas(user.uid);
     } catch(e){
       statusPillText.textContent = user.email || LBL.member;

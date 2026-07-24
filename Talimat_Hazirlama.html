@@ -47,6 +47,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
 
 <script>
 // mmgcreativity: jsPDF varsayılan fontları Türkçe karakterleri (ş,ğ,ı,İ,ç,ö,ü vb.)
@@ -736,6 +737,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div id="islemBilgisiHavale" class="vtool-col" style="display:none;">
           <button type="button" class="io-btn io-btn-icon" id="exportPdfBtn" title="PDF'e Aktar"><svg width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg></button>
+          <button type="button" class="io-btn io-btn-icon" id="exportDocxBtn" title="Word'e Aktar"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M6 1.5h9.5L20 6v15.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-19a1 1 0 0 1 1-1z" fill="#fff" stroke="#c9ccd1" stroke-width="1"/><path d="M15.5 1.5V5a1 1 0 0 0 1 1H20" fill="none" stroke="#c9ccd1" stroke-width="1"/><rect x="7.5" y="9" width="9" height="1.1" fill="#c9ccd1"/><rect x="7.5" y="12" width="9" height="1.1" fill="#c9ccd1"/><rect x="7.5" y="15" width="6" height="1.1" fill="#c9ccd1"/><rect x="2" y="13.5" width="14" height="8.5" rx="0.6" fill="#2B579A"/><text x="9" y="19.8" font-family="Arial,sans-serif" font-size="7.4" font-weight="800" fill="#fff" text-anchor="middle">W</text></svg></button>
           <button type="button" class="io-btn io-btn-icon" id="printBtn" title="Yazdır"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V4h12v5"/><rect x="6" y="13" width="12" height="7" rx="1"/><path d="M6 13H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2"/></svg></button>
           <button type="button" class="io-btn io-btn-icon" id="shareBtn" title="Paylaş">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
@@ -836,6 +838,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="vtool-col">
           <button type="button" class="io-btn io-btn-icon" id="exportPdfGenericBtn" title="PDF'e Aktar"><svg width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg></button>
+          <button type="button" class="io-btn io-btn-icon" id="exportDocxGenericBtn" title="Word'e Aktar"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M6 1.5h9.5L20 6v15.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-19a1 1 0 0 1 1-1z" fill="#fff" stroke="#c9ccd1" stroke-width="1"/><path d="M15.5 1.5V5a1 1 0 0 0 1 1H20" fill="none" stroke="#c9ccd1" stroke-width="1"/><rect x="7.5" y="9" width="9" height="1.1" fill="#c9ccd1"/><rect x="7.5" y="12" width="9" height="1.1" fill="#c9ccd1"/><rect x="7.5" y="15" width="6" height="1.1" fill="#c9ccd1"/><rect x="2" y="13.5" width="14" height="8.5" rx="0.6" fill="#2B579A"/><text x="9" y="19.8" font-family="Arial,sans-serif" font-size="7.4" font-weight="800" fill="#fff" text-anchor="middle">W</text></svg></button>
           <button type="button" class="io-btn io-btn-icon" id="printGenericBtn" title="Yazdır"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V4h12v5"/><rect x="6" y="13" width="12" height="7" rx="1"/><path d="M6 13H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2"/></svg></button>
           <button type="button" class="io-btn io-btn-icon" id="shareGenericBtn" title="Paylaş">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
@@ -941,6 +944,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div id="islemBilgisiSerbest" class="vtool-col" style="display:none;">
           <button type="button" class="io-btn io-btn-icon" id="exportPdfSmBtn" title="PDF'e Aktar"><svg width="20" height="20" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg></button>
+          <button type="button" class="io-btn io-btn-icon" id="exportDocxSmBtn" title="Word'e Aktar"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M6 1.5h9.5L20 6v15.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-19a1 1 0 0 1 1-1z" fill="#fff" stroke="#c9ccd1" stroke-width="1"/><path d="M15.5 1.5V5a1 1 0 0 0 1 1H20" fill="none" stroke="#c9ccd1" stroke-width="1"/><rect x="7.5" y="9" width="9" height="1.1" fill="#c9ccd1"/><rect x="7.5" y="12" width="9" height="1.1" fill="#c9ccd1"/><rect x="7.5" y="15" width="6" height="1.1" fill="#c9ccd1"/><rect x="2" y="13.5" width="14" height="8.5" rx="0.6" fill="#2B579A"/><text x="9" y="19.8" font-family="Arial,sans-serif" font-size="7.4" font-weight="800" fill="#fff" text-anchor="middle">W</text></svg></button>
           <button type="button" class="io-btn io-btn-icon" id="printSmBtn" title="Yazdır"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V4h12v5"/><rect x="6" y="13" width="12" height="7" rx="1"/><path d="M6 13H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2"/></svg></button>
           <button type="button" class="io-btn io-btn-icon" id="shareSmBtn" title="Paylaş">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
@@ -1934,6 +1938,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(!frame) return;
       mmgPreviewUserZoom[frameId] = 1;
       mmgApplyPreviewScale(frame);
+      // Yakınlaştırılmışken kaydırılmış olabilecek konumu da başa al, yoksa
+      // sığdırılmış hale küçülen içerik, eski kaydırma konumunda "boş" görünür.
+      const container = frame.parentElement;
+      if(container){ container.scrollLeft = 0; container.scrollTop = 0; }
     });
   });
 
@@ -2222,6 +2230,78 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       showIoMsg('PDF dosyası indirildi.');
       addHistoryEntry('havale-tekli', ozet, veri);
     } catch(e){ showIoMsg('PDF oluşturulurken hata oluştu.', true); }
+  });
+
+  // ---- Word (.docx) olarak indir ----
+  function mmgDownloadDocx(doc, filename){
+    const { Packer } = window.docx;
+    Packer.toBlob(doc).then(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    });
+  }
+  function buildHavaleDocx(){
+    const { Document, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel } = window.docx;
+    const gonderenFirma = document.getElementById('fGonderenFirma').value.trim() || '—';
+    const gonderenBanka = document.getElementById('fGonderenBanka').value || '—';
+    const gonderenIban = document.getElementById('fGonderenIban').value.trim() || 'IBAN belirtilmedi';
+    const aliciRows = getAliciRows();
+    const toplam = aliciRows.reduce((sum, r) => sum + r.tutar, 0);
+    const tarihVal = document.getElementById('fTarih').value;
+    const tarih = tarihVal ? new Date(tarihVal + 'T00:00:00') : new Date();
+    const pb = getParaBirimi();
+
+    const headerRow = new TableRow({
+      tableHeader: true,
+      children: ['ALICI','BANKA','IBAN NO','TUTAR'].map(t => new TableCell({
+        children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: t, bold: true })] })]
+      }))
+    });
+    const bodyRows = (aliciRows.length ? aliciRows : [{ adi:'—', banka:'—', iban:'—', tutar:0 }]).map(r => new TableRow({
+      children: [
+        new TableCell({ children: [new Paragraph(r.adi || '—')] }),
+        new TableCell({ children: [new Paragraph(r.banka || '—')] }),
+        new TableCell({ children: [new Paragraph(r.iban || '—')] }),
+        new TableCell({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, text: fmtTR(r.tutar,2) + ' ' + pb })] })
+      ]
+    }));
+
+    const doc = new Document({
+      sections: [{
+        children: [
+          new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun(tarih.toLocaleDateString('tr-TR'))] }),
+          new Paragraph({ text: '' }),
+          new Paragraph({ heading: HeadingLevel.HEADING_2, alignment: AlignmentType.CENTER, children: [new TextRun((gonderenBanka + ' ŞUBE MÜDÜRLÜĞÜNE').toUpperCase())] }),
+          new Paragraph({ text: '' }),
+          new Paragraph({ text: '      ' + gonderenIban + ' IBAN nolu ' + gonderenFirma + ' hesabından aşağıda detayı verilen para transferi işleminin yapılmasını rica ederiz.' }),
+          new Paragraph({ text: '' }),
+          new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [headerRow, ...bodyRows] }),
+          new Paragraph({ text: '' }),
+          new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'TOPLAM: ' + fmtTR(toplam,2) + ' ' + pb, bold: true })] }),
+          new Paragraph({ text: '' }),
+          new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: gonderenFirma, bold: true })] })
+        ]
+      }]
+    });
+
+    const ozet = 'Havale — ' + gonderenFirma + ' → ' + (aliciRows[0] ? aliciRows[0].adi : '—') +
+      (aliciRows.length > 1 ? ' (+' + (aliciRows.length - 1) + ' diğer)' : '') + ' — ' + fmtTR(toplam,2) + ' ' + pb;
+    const veri = {
+      gonderenFirma, gonderenBanka, gonderenIban, gonderenTutar: parseTR(document.getElementById('fGonderenTutar').value),
+      aliciRows, tarihISO: tarihVal
+    };
+    return { doc, ozet, veri };
+  }
+  document.getElementById('exportDocxBtn').addEventListener('click', async () => {
+    try{
+      const { doc, ozet, veri } = buildHavaleDocx();
+      mmgDownloadDocx(doc, 'banka-havale-talimati.docx');
+      showIoMsg('Word dosyası indirildi.');
+      addHistoryEntry('havale-tekli', ozet, veri);
+    } catch(e){ showIoMsg('Word dosyası oluşturulurken hata oluştu.', true); }
   });
 
   // ---- PDF'i doğrudan yazdır (HTML sayfası değil, indirilen PDF ile birebir aynı çıktı) ----
@@ -2810,6 +2890,47 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     } catch(e){ showIoMsgGeneric('PDF oluşturulurken hata oluştu.', true); }
   });
 
+  function buildGenericDocx(){
+    const { Document, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel } = window.docx;
+    const cfg = LETTER_TYPES[currentGenericType];
+    const v = getGenericValues();
+    const banka = v.glBanka || '—';
+    const tarihVal = document.getElementById('fTarih').value;
+    const tarih = tarihVal ? new Date(tarihVal + 'T00:00:00') : new Date();
+    const infoRows = cfg.infoRows(v).map(r => new TableRow({
+      children: [
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: r[0], bold: true })] })] }),
+        new TableCell({ children: [new Paragraph(String(r[1]))] })
+      ]
+    }));
+    const doc = new Document({
+      sections: [{
+        children: [
+          new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun(tarih.toLocaleDateString('tr-TR'))] }),
+          new Paragraph({ text: '' }),
+          new Paragraph({ heading: HeadingLevel.HEADING_2, alignment: AlignmentType.CENTER, children: [new TextRun((banka + ' ŞUBE MÜDÜRLÜĞÜNE').toUpperCase())] }),
+          new Paragraph({ text: '' }),
+          new Paragraph({ text: '      ' + cfg.body(v) }),
+          new Paragraph({ text: '' }),
+          new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: infoRows }),
+          new Paragraph({ text: '' }),
+          new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: v.glFirma || '—', bold: true })] })
+        ]
+      }]
+    });
+    const ozet = cfg.shareTitle + ' — ' + (v.glFirma || '—') + (v.glMuhatap ? (' → ' + v.glMuhatap) : '');
+    const veri = Object.assign({}, v, { tarihISO: tarihVal, tur: currentGenericType });
+    return { doc, ozet, veri, cfg };
+  }
+  document.getElementById('exportDocxGenericBtn').addEventListener('click', () => {
+    try{
+      const { doc, ozet, veri, cfg } = buildGenericDocx();
+      mmgDownloadDocx(doc, cfg.fileName.replace(/\.pdf$/i, '.docx'));
+      showIoMsgGeneric('Word dosyası indirildi.');
+      addHistoryEntry(currentGenericType, ozet, veri);
+    } catch(e){ showIoMsgGeneric('Word dosyası oluşturulurken hata oluştu.', true); }
+  });
+
   document.getElementById('printGenericBtn').addEventListener('click', () => {
     const cfg = LETTER_TYPES[currentGenericType];
     const { doc } = buildGenericPdf();
@@ -3045,6 +3166,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       showIoMsgSm('PDF dosyası indirildi.');
       addHistoryEntry('serbest-metin', ozet, veri);
     } catch(e){ showIoMsgSm('PDF oluşturulurken hata oluştu.', true); }
+  });
+
+  function buildSmDocx(){
+    const { Document, Paragraph, TextRun, AlignmentType, HeadingLevel } = window.docx;
+    const smTur = document.getElementById('fSmMuhatapTur').value;
+    const smMuhatapAdi = document.getElementById('fSmMuhatapAdi').value.trim();
+    const muhatap = computeMuhatapDisplay(smTur, smMuhatapAdi);
+    const metin = document.getElementById('fSmMetin').value.trim() || '(Talimat metni girilmedi)';
+    const firma = document.getElementById('fSmFirma').value.trim() || '—';
+    const tarihVal = document.getElementById('fSmTarih').value;
+    const tarih = tarihVal ? new Date(tarihVal + 'T00:00:00') : new Date();
+
+    const doc = new Document({
+      sections: [{
+        children: [
+          new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun(tarih.toLocaleDateString('tr-TR'))] }),
+          new Paragraph({ text: '' }),
+          new Paragraph({ heading: HeadingLevel.HEADING_2, alignment: AlignmentType.CENTER, children: [new TextRun(muhatap)] }),
+          new Paragraph({ text: '' }),
+          new Paragraph({ text: '      ' + metin }),
+          new Paragraph({ text: '' }),
+          new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: firma, bold: true })] })
+        ]
+      }]
+    });
+    const ozet = 'Serbest Metin — ' + muhatap.slice(0, 40) + (muhatap.length > 40 ? '…' : '');
+    const veri = { muhatapTur: smTur, muhatapAdi: smMuhatapAdi, metin, firma, tarihISO: tarihVal };
+    return { doc, ozet, veri };
+  }
+  document.getElementById('exportDocxSmBtn').addEventListener('click', async () => {
+    try{
+      const { doc, ozet, veri } = buildSmDocx();
+      mmgDownloadDocx(doc, 'serbest-metin-talimati.docx');
+      showIoMsgSm('Word dosyası indirildi.');
+      addHistoryEntry('serbest-metin', ozet, veri);
+    } catch(e){ showIoMsgSm('Word dosyası oluşturulurken hata oluştu.', true); }
   });
 
   document.getElementById('printSmBtn').addEventListener('click', () => {
@@ -3499,6 +3656,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       window.location.reload();
     }
   });
+
+  // ---- "Hazır Metin Talimatlar" sayfasından bir şablon seçilip gelindiyse ----
+  // (bkz. HazirMetinTalimatlari.html) Serbest Metin paneline otomatik aktar.
+  (function(){
+    try{
+      const pendingText = localStorage.getItem('mmg_pending_sm_text');
+      if(!pendingText) return;
+      localStorage.removeItem('mmg_pending_sm_text');
+      const pendingMuhatapTur = localStorage.getItem('mmg_pending_sm_muhataptur') || '';
+      const pendingMuhatapAdi = localStorage.getItem('mmg_pending_sm_muhatapadi') || '';
+      const pendingFirma = localStorage.getItem('mmg_pending_sm_firma') || '';
+      localStorage.removeItem('mmg_pending_sm_muhataptur');
+      localStorage.removeItem('mmg_pending_sm_muhatapadi');
+      localStorage.removeItem('mmg_pending_sm_firma');
+      const apply = () => {
+        const sel = document.getElementById('talimatTurSelect');
+        const ta = document.getElementById('fSmMetin');
+        const turSel = document.getElementById('fSmMuhatapTur');
+        const adiInput = document.getElementById('fSmMuhatapAdi');
+        const firmaInput = document.getElementById('fSmFirma');
+        if(!sel || !ta){ setTimeout(apply, 60); return; }
+        sel.value = 'serbest';
+        sel.dispatchEvent(new Event('change'));
+        setTimeout(() => {
+          if(pendingMuhatapTur && turSel){
+            turSel.value = pendingMuhatapTur;
+            turSel.dispatchEvent(new Event('change'));
+          }
+          if(pendingMuhatapAdi && adiInput) adiInput.value = pendingMuhatapAdi;
+          if(pendingFirma && firmaInput) firmaInput.value = pendingFirma;
+          ta.value = pendingText;
+          ta.dispatchEvent(new Event('input'));
+          ta.focus();
+        }, 30);
+      };
+      apply();
+    }catch(e){ /* sessizce geç */ }
+  })();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>
 </body>
