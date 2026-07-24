@@ -1,0 +1,2967 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<!-- End Google Tag Manager -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WVWJ4VZE0C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WVWJ4VZE0C');
+
+  (function(){
+    try{
+      var src = sessionStorage.getItem('mmg_app_source');
+      if(!src){
+        src = (document.referrer.indexOf('android-app://') === 0) ? 'twa_app'
+            : (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ? 'pwa_app'
+            : 'web';
+        sessionStorage.setItem('mmg_app_source', src);
+      }
+      gtag('set', 'user_properties', { app_source: src });
+    }catch(e){}
+  })();
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Dijital Finans Asistanı</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+    --sidebar-w:280px;
+  }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
+  }
+  html.theme-light body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.05), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.04), transparent 60%),
+      var(--bg);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    display:flex; min-height:100vh; overflow:hidden;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  /* ---------- Sidebar ---------- */
+  aside{
+    width:var(--sidebar-w); flex-shrink:0; height:100vh;
+    background:var(--surface); border-right:1px solid var(--hairline);
+    display:flex; flex-direction:column; overflow-y:auto;
+  }
+  .brand{
+    padding:18px 20px 18px; border-bottom:1px solid var(--hairline); position:relative; overflow:hidden;
+    min-height:0; display:flex; align-items:center; justify-content:center;
+  }
+  .brand::before{
+    content:''; position:absolute; top:-40px; left:-20px; width:160px; height:160px;
+    background:radial-gradient(circle, rgba(255,107,74,0.16), rgba(124,77,217,0.10) 55%, transparent 75%);
+    pointer-events:none;
+  }
+  .brand-row{
+    display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:0; position:relative; width:100%;
+  }
+  .brand-row-logo{ height:161px; width:161px; border-radius:30px; object-fit:cover; display:inline-block; filter:drop-shadow(0 4px 14px rgba(0,0,0,0.35)); }
+  .brand-row-fallback{
+    display:none; width:161px; height:161px; border-radius:30px; margin:0;
+    background:var(--grad); align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:58px; color:#fff;
+    box-shadow:0 4px 14px rgba(0,0,0,0.35);
+  }
+  .brand-title{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; letter-spacing:-0.01em;
+    position:relative;
+  }
+  .brand-sub{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); margin-top:6px;
+    text-align:center; position:relative;
+  }
+
+  nav{ padding:18px 12px 84px; flex:1; }
+  .nav-label{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.16em;
+    color:var(--muted); text-transform:uppercase; padding:8px 12px 10px;
+  }
+  .nav-item{
+    display:flex; align-items:center; gap:13px; width:100%; text-align:left;
+    padding:11px 16px; border-radius:14px; border:1px solid transparent;
+    background:transparent; color:var(--text); cursor:pointer; margin-bottom:3px;
+    position:relative; transition:background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+  }
+  .nav-item:hover{ background:var(--surface-2); transform:translateX(2px); }
+  .nav-item.active{
+    background:linear-gradient(135deg, rgba(255,107,74,0.10), rgba(124,77,217,0.08));
+    border-color:rgba(255,107,74,0.25);
+    box-shadow:0 6px 18px rgba(0,0,0,0.28);
+  }
+  .nav-item.active::before{
+    content:''; position:absolute; left:-12px; top:10px; bottom:10px; width:3px;
+    background:var(--grad); border-radius:2px; box-shadow:0 0 10px rgba(214,64,122,0.5);
+  }
+  .nav-index{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--brass-dim);
+    width:20px; flex-shrink:0;
+  }
+  .nav-item.active .nav-index{ color:var(--brass); }
+  .nav-icon-badge{
+    width:20px; height:20px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .nav-icon{ width:19px; height:19px; color:var(--muted); transition:color .15s ease; }
+  .nav-item.active .nav-icon{ color:var(--coral); }
+  .nav-text-wrap{ display:flex; flex-direction:row; align-items:baseline; gap:5px; min-width:0; flex-wrap:nowrap; overflow:hidden; }
+  .nav-title{ font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:0; }
+  .nav-desc{ font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+  .nav-drawer-chevron{ margin-left:auto; font-size:15px; color:var(--muted); transition:transform .18s ease; flex-shrink:0; }
+  .nav-item[aria-expanded="true"] .nav-drawer-chevron{ transform:rotate(90deg); color:var(--brass); }
+  .nav-drawer-wrap{ position:relative; }
+  .nav-drawer{
+    position:fixed; z-index:500; min-width:230px;
+    display:flex; flex-direction:column; gap:2px;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px;
+    padding:8px; box-shadow:0 14px 34px rgba(0,0,0,0.45);
+    opacity:0; transform:translateX(-8px); pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease;
+  }
+  .nav-drawer[hidden]{ display:none; }
+  .nav-drawer.open{ opacity:1; transform:translateX(0); pointer-events:auto; }
+  .nav-subitem{ padding:9px 10px; margin-bottom:0; border-radius:8px; }
+  .nav-subitem:hover{ background:rgba(255,255,255,0.05); }
+  .nav-subitem .nav-title{ font-size:12.5px; font-weight:600; }
+  @media (max-width: 860px){
+    .nav-drawer{
+      position:static; margin:2px 0 8px 14px; padding:0 0 0 8px; min-width:0;
+      border:none; border-left:2px solid var(--hairline); border-radius:0; box-shadow:none;
+      background:transparent; transform:translateX(-10px);
+    }
+    .nav-drawer.open{ transform:translateX(0); }
+  }
+
+  /* ---------- Favori yıldızı ---------- */
+  .fav-star{
+    flex-shrink:0; width:18px; height:18px; display:flex; align-items:center; justify-content:center;
+    color:var(--muted); opacity:0.55; transition:color .15s ease, opacity .15s ease, transform .15s ease;
+    background:none; border:none; padding:0; cursor:pointer;
+  }
+  .fav-star:hover{ opacity:1; transform:scale(1.15); }
+  .fav-star svg{ width:15px; height:15px; }
+  .fav-star.is-fav{ color:var(--brass); opacity:1; }
+  .fav-star.is-fav svg{ fill:var(--brass); }
+
+  .nav-fav-pinned{ display:flex; flex-direction:column; gap:2px; margin-bottom:10px; }
+  .nav-fav-pinned[hidden]{ display:none; }
+  .nav-fav-pinned .nav-item{ background:rgba(198,161,91,0.06); border-color:rgba(198,161,91,0.18); }
+  .nav-fav-label{
+    font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.14em; color:var(--brass-dim);
+    text-transform:uppercase; padding:2px 16px 6px;
+  }
+  .nav-fav-divider{ height:1px; background:var(--hairline); margin:4px 12px 12px; }
+
+  .fav-star-card{
+    position:absolute; top:14px; left:14px; z-index:2; width:26px; height:26px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center; background:rgba(13,20,32,0.55);
+    color:var(--muted); opacity:0.6; transition:all .15s ease; border:none; cursor:pointer;
+  }
+  .fav-star-card:hover{ opacity:1; transform:scale(1.1); }
+  .fav-star-card svg{ width:15px; height:15px; }
+  .fav-star-card.is-fav{ color:var(--brass); opacity:1; background:rgba(198,161,91,0.14); }
+  .fav-star-card.is-fav svg{ fill:var(--brass); }
+
+  /* ---------- Main ---------- */
+  main{ flex:1; height:100vh; display:flex; flex-direction:column; min-width:0; }
+  .topbar{
+    height:56px; flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+    padding:0 26px; border-bottom:1px solid var(--hairline); background:rgba(20,28,43,0.5);
+  }
+  .topbar-title{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; }
+  .topbar-crumb{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); }
+  .topbar-actions a{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted);
+    text-decoration:none; border:1px solid var(--hairline); padding:6px 12px; border-radius:6px;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .topbar-actions a:hover{ color:var(--coral); border-color:var(--coral); }
+  .theme-toggle{
+    display:flex; align-items:center; gap:7px;
+    font-size:14px; background:transparent; border:1px solid var(--hairline); border-radius:6px;
+    color:var(--muted); padding:6px 10px; cursor:pointer; transition:border-color .15s ease, color .15s ease;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .theme-toggle:hover{ color:var(--brass); border-color:var(--brass-dim); }
+  .theme-toggle-label{ font-size:11px; }
+  .user-badge{
+    display:flex; align-items:center; gap:7px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+    color:var(--text); padding:6px 12px; border:1px solid var(--hairline); border-radius:6px; background:var(--surface-2);
+  }
+  .user-badge-dot{ width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 6px var(--teal); flex-shrink:0; }
+
+  .mmg-bottom-left-bar{
+    position:fixed; bottom:18px; left:22px; z-index:400;
+    display:flex; align-items:center; gap:10px;
+  }
+  .top-right-badge{
+    position:relative;
+    display:flex; align-items:center; gap:10px;
+  }
+  .theme-toggle-standalone{
+    display:flex; align-items:center; gap:7px;
+    font-size:11px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px;
+    color:var(--text); padding:6px 12px; cursor:pointer; transition:border-color .15s ease, color .15s ease;
+    font-family:'IBM Plex Mono',monospace; box-shadow:0 6px 16px rgba(0,0,0,0.3);
+  }
+  .theme-toggle-standalone #themeToggleIcon{ font-size:13px; }
+  .theme-toggle-standalone:hover{ color:var(--brass); border-color:var(--brass-dim); }
+  .account-trigger{
+    display:flex; align-items:center; gap:10px; background:transparent; border:none;
+    cursor:pointer; padding:0; font-family:inherit;
+  }
+  .top-right-badge .user-badge{
+    box-shadow:0 6px 16px rgba(0,0,0,0.3);
+  }
+  .avatar-wrap{
+    width:38px; height:38px; border-radius:50%; overflow:hidden;
+    border:1px solid var(--hairline); background:var(--surface-2); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 16px rgba(0,0,0,0.3); transition:border-color .15s ease;
+  }
+  .account-trigger:hover .avatar-wrap{ border-color:var(--brass-dim); }
+  .avatar-wrap img{ width:100%; height:100%; object-fit:cover; }
+  .avatar-wrap svg{ width:20px; height:20px; color:var(--muted); }
+  .avatar-wrap-lg{ width:52px; height:52px; }
+  .avatar-wrap-lg svg{ width:26px; height:26px; }
+
+  .account-dropdown{
+    position:absolute; bottom:calc(100% + 12px); top:auto; left:0; right:auto; width:250px;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
+    box-shadow:0 16px 40px rgba(0,0,0,0.45); padding:16px; z-index:401;
+  }
+  .account-dropdown[hidden]{ display:none; }
+  .account-dropdown-header{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .account-dropdown-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--text); }
+  .account-dropdown-sub{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); margin-top:3px; }
+  .account-dropdown-divider{ height:1px; background:var(--hairline); margin:0 -16px 8px; }
+  .account-dropdown-item{
+    display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+    background:transparent; border:none; border-radius:9px; padding:10px 8px; cursor:pointer;
+    font-family:'Inter',sans-serif; font-size:13px; font-weight:600; color:var(--text);
+    transition:background .15s ease;
+  }
+  .account-dropdown-item:hover{ background:var(--surface-2); }
+  .account-dropdown-item svg{ width:17px; height:17px; color:var(--brass); flex-shrink:0; }
+  .account-dropdown-item-danger:hover{ background:rgba(226,84,75,0.10); }
+  .account-dropdown-item-danger svg{ color:var(--red); }
+  .account-dropdown-section-label{
+    font-family:'Inter',sans-serif; font-size:10.5px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--muted); padding:8px 8px 4px;
+  }
+  .mmg-account-row{
+    display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+    background:transparent; border:none; border-radius:9px; padding:9px 8px; cursor:pointer;
+    font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; color:var(--text);
+  }
+  .mmg-account-row:hover{ background:var(--surface-2); }
+  .mmg-account-row.mmg-account-row-static{ cursor:default; color:var(--muted); font-weight:400; }
+  .mmg-account-row.mmg-account-row-static:hover{ background:transparent; }
+  .mmg-account-row-dot{ width:7px; height:7px; border-radius:50%; background:var(--teal,#3FB68A); flex:0 0 auto; }
+  .mmg-account-row-main{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mmg-account-row-x{
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; flex:0 0 auto; padding:2px 4px;
+  }
+  .mmg-account-row-x:hover{ color:var(--red,#E2544B); }
+  .account-dropdown-item-danger span{ color:var(--red); }
+
+  .account-info-overlay{
+    position:fixed; inset:0; z-index:900; background:rgba(5,8,14,0.7);
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .account-info-overlay[hidden]{ display:none; }
+  .account-info-modal{
+    width:100%; max-width:440px; max-height:88vh; overflow-y:auto;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:16px;
+    padding:28px; box-shadow:0 24px 60px rgba(0,0,0,0.5);
+  }
+  .account-info-modal-header{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;
+    position:sticky; top:-28px; background:var(--surface); padding:28px 0 10px; margin:-28px 0 0;
+    z-index:2;
+  }
+  .account-info-modal-header h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; }
+  .account-info-close{
+    background:transparent; border:1px solid var(--hairline); border-radius:7px; color:var(--muted);
+    width:30px; height:30px; cursor:pointer; font-size:14px; transition:color .15s ease, border-color .15s ease;
+  }
+  .account-info-close:hover{ color:var(--coral); border-color:var(--coral); }
+  .account-info-sub{ color:var(--muted); font-size:13px; margin-bottom:22px; }
+  .account-info-saved{
+    display:none; text-align:center; color:var(--teal); font-family:'IBM Plex Mono',monospace;
+    font-size:12px; margin-top:10px;
+  }
+  .account-info-saved.show{ display:block; }
+
+  .frame-wrap{ flex:1; position:relative; background:var(--bg); }
+  iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+
+  /* ---------- Home screen ---------- */
+  .home{ flex:1; overflow-y:auto; display:flex; flex-direction:column; min-height:100%; }
+  .home footer{ margin-top:auto; }
+
+  .hero{
+    position:relative; overflow:hidden; padding:32px 48px 28px;
+    background:
+      radial-gradient(900px 460px at 78% -20%, rgba(255,107,74,0.16), transparent 60%),
+      radial-gradient(700px 420px at 8% 110%, rgba(62,143,224,0.14), transparent 60%),
+      var(--surface);
+    border-bottom:1px solid var(--hairline);
+  }
+  .hero-deco{ position:absolute; inset:0; pointer-events:none; }
+  .deco{ position:absolute; opacity:0.28; }
+  .deco-1{ width:64px; height:64px; top:18px; right:14%; color:var(--coral); transform:rotate(-8deg); }
+  .deco-2{ width:52px; height:52px; top:120px; right:5%; color:var(--azure); transform:rotate(6deg); }
+  .deco-3{ width:58px; height:58px; bottom:16px; right:22%; color:var(--violet); transform:rotate(-4deg); }
+  .deco-4{ width:44px; height:44px; top:36px; right:32%; color:var(--magenta); transform:rotate(10deg); }
+  .deco-5{ width:48px; height:48px; top:8px; right:44%; color:var(--coral); transform:rotate(14deg); }
+  .deco-6{ width:40px; height:40px; bottom:30px; right:8%; color:var(--magenta); transform:rotate(-10deg); }
+  .deco-7{ width:56px; height:56px; top:150px; right:38%; color:var(--azure); transform:rotate(-6deg); }
+  .deco-8{ width:36px; height:36px; top:60px; right:2%; color:var(--violet); transform:rotate(8deg); }
+  .deco-9{ width:50px; height:50px; top:40px; left:6%; color:var(--coral); transform:rotate(-12deg); }
+  .deco-10{ width:38px; height:38px; bottom:60px; left:20%; color:var(--azure); transform:rotate(9deg); }
+  .deco-11{ width:44px; height:44px; top:180px; right:10%; color:var(--magenta); transform:rotate(-7deg); }
+  .deco-12{ width:34px; height:34px; bottom:20px; right:30%; color:var(--violet); transform:rotate(13deg); }
+  .deco-13{ width:46px; height:46px; bottom:120px; left:42%; color:var(--coral); transform:rotate(6deg); }
+  .hero-badge{
+    display:inline-block; font-size:11px; letter-spacing:.18em; color:var(--coral);
+    background:rgba(255,107,74,0.10); border:1px solid rgba(255,107,74,0.25);
+    padding:5px 12px; border-radius:999px; margin-bottom:20px; position:relative;
+  }
+  .hero-title{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:30px;
+    letter-spacing:-0.02em; margin-bottom:8px; position:relative; max-width:640px;
+  }
+  .hero-tagline{
+    font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:11px; letter-spacing:.12em;
+    text-transform:uppercase; margin-bottom:10px; position:relative;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero-sub{ color:var(--muted); max-width:520px; font-size:13px; position:relative; }
+  .hero-desc{ color:var(--muted); max-width:560px; font-size:13px; line-height:1.55; margin-top:10px; position:relative; }
+  .hero-top-row{ display:flex; align-items:center; gap:16px; position:relative; }
+  .hero-app-icon{
+    width:64px; height:64px; border-radius:16px; flex-shrink:0;
+    box-shadow:0 4px 16px rgba(0,0,0,0.35);
+  }
+  .hero-top-text{ min-width:0; }
+  .hero-top-text .hero-title{ margin-bottom:6px; }
+  .hero-top-text .hero-tagline{ margin-bottom:0; }
+
+  .tools-section{ padding:40px 48px 60px; position:relative; overflow:hidden; }
+  .tools-deco{ position:absolute; inset:0; pointer-events:none; }
+  .tools-label{
+    font-size:10.5px; letter-spacing:.16em; color:var(--muted); text-transform:uppercase; margin-bottom:16px;
+  }
+
+  .card-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:18px; max-width:1400px; position:relative; }
+  .app-card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
+    padding:24px; cursor:pointer; text-align:left; color:var(--text);
+    transition:border-color .15s ease, transform .15s ease; position:relative; overflow:hidden;
+  }
+  .app-card::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:var(--grad); opacity:0; transition:opacity .2s ease;
+  }
+  .app-card:hover{ border-color:transparent; transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,0.35); }
+  .app-card:hover::before{ opacity:1; }
+  .app-card .card-index{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--brass-dim); margin-bottom:16px; display:block;
+  }
+  .card-icon-badge{
+    width:26px; height:26px; margin-bottom:16px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .app-card .card-icon{ width:24px; height:24px; color:var(--brass); transition:color .2s ease; }
+  .app-card:hover .card-icon{ color:var(--coral); }
+  .app-card h3{ font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600; margin-bottom:8px; padding-left:30px; }
+  .app-card p{ font-size:12.5px; color:var(--muted); line-height:1.55; }
+  .card-arrow{ position:absolute; top:22px; right:20px; color:var(--muted); font-size:16px; transition:transform .15s ease, color .15s ease; }
+  .app-card:hover .card-arrow{ transform:translate(3px,-3px); color:var(--coral); }
+
+  .app-card.soon{ cursor:default; opacity:0.7; }
+  .app-card.soon:hover{ border-color:var(--hairline); transform:none; box-shadow:none; }
+  .app-card.soon:hover::before{ opacity:0; }
+  .soon-badge{
+    display:inline-block; font-size:10px; letter-spacing:.12em; color:var(--muted);
+    background:var(--surface-2); border:1px solid var(--hairline);
+    padding:3px 9px; border-radius:999px; margin-bottom:14px;
+  }
+
+  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+  ::-webkit-scrollbar-thumb{ background:var(--hairline); border-radius:4px; }
+
+  footer{ padding:0 48px 18px; }
+  .footer-powered-row{ padding:28px 0 14px; display:flex; justify-content:flex-end; }
+  .footer-final-row{
+    display:flex; flex-direction:column; gap:8px; margin-top:24px;
+  }
+  .footer-final-top-line, .footer-final-bottom-line{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px 24px;
+  }
+  .footer-social-col{ display:flex; flex-direction:column; justify-content:center; }
+  .footer-social-inline{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .app-badge-small{ padding:7px 13px; gap:7px; }
+  .app-badge-small svg{ width:19px; height:19px; }
+  .app-badge-small .app-badge-text span{ font-size:9px; }
+  .app-badge-small .app-badge-text b{ font-size:12.5px; }
+  .social-icon-row-nowrap{ flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; }
+  @media (max-width:720px){ .footer-final-top-line, .footer-final-bottom-line{ flex-direction:column; align-items:flex-start; } }
+  .footer-col-title{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--text); margin-bottom:8px;
+  }
+  .social-icon-row{ display:flex; flex-wrap:wrap; gap:7px; }
+  .social-icon{
+    width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    color:#fff; transition:transform .15s ease, opacity .15s ease; flex-shrink:0;
+  }
+  .social-icon:hover{ transform:translateY(-2px); opacity:.9; }
+  .social-icon svg{ width:11px; height:11px; }
+  .app-badge-row{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+  .app-badge{
+    display:flex; align-items:center; gap:8px; border:1px solid var(--hairline); border-radius:9px;
+    padding:8px 14px; text-decoration:none; color:var(--text); transition:border-color .15s ease;
+  }
+  .app-badge:hover{ border-color:var(--brass-dim); }
+  .app-badge svg{ width:20px; height:20px; flex-shrink:0; }
+  .app-badge-text{ display:flex; flex-direction:column; line-height:1.2; }
+  .app-badge-text span{ font-size:9.5px; color:var(--muted); }
+  .app-badge-text b{ font-family:'Space Grotesk',sans-serif; font-size:13px; }
+
+  .legal-links{
+    display:flex; flex-wrap:wrap; gap:18px;
+    font-family:'IBM Plex Mono',monospace; font-size:11px;
+  }
+  .legal-links a{ color:var(--muted); text-decoration:none; }
+  .legal-links a:hover{ color:var(--coral); }
+  footer .credit{ text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); display:flex; align-items:center; gap:8px; flex-shrink:0;}
+  .signature-pill{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 12px 4px 5px; border-radius:999px;
+    background:var(--surface-2); border:1px solid var(--hairline);
+  }
+  .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
+  .credit-fallback{
+    display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center;
+    background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff;
+  }
+  footer .credit b{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+
+  .mobile-nav-toggle{
+    display:none; align-items:center; justify-content:center; width:38px; height:38px;
+    border-radius:8px; border:1px solid var(--hairline); background:var(--surface-2); color:var(--text);
+    font-size:18px; cursor:pointer; position:fixed; top:14px; right:14px; z-index:2000;
+  }
+
+  @media (max-width:860px){
+    body{ flex-direction:column; overflow:auto; height:auto; }
+    aside{ width:100%; height:auto; max-height:none; border-right:0; border-bottom:1px solid var(--hairline); position:relative; }
+
+    .mobile-nav-toggle{ display:flex; }
+
+    nav{
+      display:none; flex-direction:column; gap:2px; overflow-x:visible; overflow-y:auto;
+      position:fixed; inset:0; z-index:1500; background:var(--bg); padding:84px 16px 24px;
+    }
+    aside.mobile-nav-open nav{ display:flex; }
+    .nav-item{ flex-direction:row; text-align:left; min-width:0; width:100%; gap:12px; }
+    .nav-item.active::before{ left:-12px; right:auto; top:10px; bottom:10px; width:3px; height:auto; }
+    .nav-desc{ display:inline; }
+
+    main{ height:auto; }
+    .frame-wrap{ height:85vh; }
+    .hero{ padding:22px 20px 20px; }
+    .hero-app-icon{ width:48px; height:48px; border-radius:12px; }
+    .hero-title{ font-size:22px; }
+    .tools-section{ padding:28px 20px 40px; }
+    .deco{ display:none; }
+    .card-grid{ grid-template-columns:1fr; gap:10px; }
+    .app-card{ padding:16px; }
+    .app-card p{ display:none; }
+    .app-card h3{ margin-bottom:0; }
+  }
+
+  #authOverlay{
+    position:fixed; inset:0; z-index:1000; display:flex;
+    background:var(--bg); overflow:hidden;
+  }
+  #authOverlay.hidden{ display:none; }
+
+  .auth-brand-panel{
+    position:relative; flex:1.1; overflow:hidden; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:40px;
+    background:
+      radial-gradient(1000px 600px at 20% 15%, rgba(255,107,74,0.16), transparent 60%),
+      radial-gradient(900px 600px at 85% 85%, rgba(62,143,224,0.14), transparent 60%),
+      var(--surface);
+    border-right:1px solid var(--hairline);
+  }
+  .auth-blob{
+    position:absolute; border-radius:50%; filter:blur(60px); opacity:0.35; pointer-events:none;
+    animation:blobFloat 14s ease-in-out infinite;
+  }
+  .auth-blob-1{ width:340px; height:340px; background:var(--coral); top:-80px; left:-60px; animation-duration:16s; }
+  .auth-blob-2{ width:280px; height:280px; background:var(--violet); bottom:-60px; right:-40px; animation-duration:19s; animation-delay:-4s; }
+  .auth-blob-3{ width:220px; height:220px; background:var(--azure); bottom:30%; left:30%; animation-duration:13s; animation-delay:-8s; }
+  @keyframes blobFloat{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%{ transform:translate(30px,-30px) scale(1.08); }
+  }
+
+  .auth-deco-icon{ position:absolute; opacity:0.3; animation:iconFloat 6s ease-in-out infinite; }
+  @keyframes iconFloat{
+    0%,100%{ transform:translateY(0) rotate(var(--r,0deg)); }
+    50%{ transform:translateY(-18px) rotate(var(--r,0deg)); }
+  }
+  .auth-di-1{ width:46px; height:46px; top:14%; left:16%; color:var(--coral); --r:-8deg; animation-delay:0s; }
+  .auth-di-2{ width:36px; height:36px; top:22%; right:14%; color:var(--azure); --r:6deg; animation-delay:-1.5s; animation-duration:7s; }
+  .auth-di-3{ width:40px; height:40px; bottom:20%; left:12%; color:var(--violet); --r:-4deg; animation-delay:-3s; animation-duration:8s; }
+  .auth-di-4{ width:32px; height:32px; bottom:16%; right:20%; color:var(--magenta); --r:10deg; animation-delay:-2s; animation-duration:6.5s; }
+  .auth-di-5{ width:30px; height:30px; top:48%; right:8%; color:var(--coral); --r:14deg; animation-delay:-4.5s; animation-duration:9s; }
+  .auth-di-6{ width:34px; height:34px; top:65%; left:22%; color:var(--azure); --r:-10deg; animation-delay:-1s; animation-duration:7.5s; }
+
+  .auth-brand-logo{ position:relative; height:190px; width:190px; border-radius:38px; object-fit:cover; margin-bottom:26px; box-shadow:0 20px 50px rgba(0,0,0,0.4); }
+  .auth-brand-fallback{
+    display:none; position:relative; height:190px; width:190px; border-radius:38px; align-items:center; justify-content:center;
+    background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; color:#fff; font-size:76px;
+    margin-bottom:26px; box-shadow:0 20px 50px rgba(0,0,0,0.4);
+  }
+  .auth-brand-title{
+    position:relative; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:40px;
+    text-align:center; max-width:460px; margin-bottom:14px;
+  }
+  .auth-brand-tagline{
+    position:relative; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:16px; letter-spacing:.14em;
+    text-transform:uppercase; text-align:center; margin-bottom:14px;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+
+  .auth-form-panel{
+    flex:1; display:flex; align-items:center; justify-content:center; padding:40px 24px; overflow-y:auto;
+  }
+  .auth-form-inner{ width:100%; max-width:420px; }
+  .auth-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:22px; margin-bottom:6px; }
+  .auth-sub{ color:var(--muted); font-size:13.5px; margin-bottom:26px; }
+  .auth-tabs{ display:flex; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:4px; margin-bottom:22px; }
+  .auth-tab{
+    flex:1; text-align:center; padding:9px; border-radius:7px; font-size:13px; font-weight:600;
+    color:var(--muted); cursor:pointer; transition:all .15s ease; background:transparent; border:none; font-family:'Inter',sans-serif;
+  }
+  .auth-tab.active{ background:var(--surface); color:var(--brass); box-shadow:0 2px 6px rgba(0,0,0,0.25); }
+  .auth-grid{ display:grid; grid-template-columns:1fr 1fr; column-gap:14px; align-items:start; }
+  .auth-full{ grid-column:1 / -1; }
+  .auth-half{ grid-column:span 1; }
+  .auth-field{ margin-bottom:16px; min-width:0; }
+  .auth-field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .auth-field input, .auth-field select{
+    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
+    transition:border-color .15s ease;
+  }
+  .auth-field input:focus, .auth-field select:focus{ border-color:var(--brass-dim); }
+  .auth-error{ color:var(--coral); font-size:12.5px; margin-bottom:14px; display:none; grid-column:1 / -1; }
+  .auth-error.show{ display:block; }
+  .auth-success{ color:var(--teal); font-size:12.5px; margin-bottom:14px; display:none; grid-column:1 / -1; }
+  .auth-success.show{ display:block; }
+  .auth-remember-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; grid-column:1 / -1; }
+  .auth-2x2-col{ display:flex; flex-direction:column; gap:16px; min-width:0; margin-bottom:16px; }
+  .auth-2x2-col .auth-field{ margin-bottom:0; }
+  .auth-captcha-graphic-wrap{ margin-bottom:0; }
+  .auth-captcha-input-wrap{ margin-bottom:0; }
+  .auth-captcha-row{ display:flex; align-items:stretch; gap:8px; margin-bottom:8px; }
+  #authCaptchaCanvas{
+    flex:1; min-width:0; max-width:190px; height:56px; border-radius:8px; border:1px solid var(--hairline,#2A3448);
+    background:#f2f2f2; cursor:default;
+  }
+  .auth-captcha-actions{ display:flex; flex-direction:column; gap:6px; flex:0 0 auto; }
+  .auth-captcha-iconbtn{
+    width:32px; height:25px; border-radius:6px; border:1px solid var(--hairline,#2A3448);
+    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:border-color .12s ease, color .12s ease;
+  }
+  .auth-captcha-iconbtn:hover{ border-color:var(--brass,#C6A15B); color:var(--text,#EAEDF3); }
+  .auth-captcha-label{ font-size:12.5px; font-weight:600; color:var(--brass,#C6A15B); margin-bottom:6px; }
+  .auth-captcha-error{ color:var(--coral); font-size:11.5px; margin-top:6px; min-height:14px; }
+  .mmg-invite-banner{
+    position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:960;
+    width:min(420px, calc(100vw - 24px)); background:var(--surface,#141C2B); border:1px solid var(--brass,#C6A15B);
+    border-radius:14px; padding:16px 18px; display:flex; gap:12px; box-shadow:0 18px 40px rgba(0,0,0,0.5);
+    animation:mmgInviteSlideIn .3s ease-out;
+  }
+  @keyframes mmgInviteSlideIn{
+    from{ opacity:0; transform:translate(-50%, -16px); }
+    to{ opacity:1; transform:translate(-50%, 0); }
+  }
+  .mmg-invite-icon{ font-size:26px; flex:0 0 auto; line-height:1; }
+  .mmg-invite-body{ flex:1; min-width:0; }
+  .mmg-invite-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; color:var(--text,#EAEDF3); margin-bottom:3px; min-height:1.2em; }
+  .mmg-invite-sub{ font-size:12.5px; color:var(--muted,#8D96AC); margin-bottom:10px; line-height:1.4; min-height:2.2em; }
+  .mmg-invite-actions{ display:flex; gap:8px; }
+  .mmg-invite-accept, .mmg-invite-reject{
+    flex:1; padding:8px 0; border-radius:8px; border:none; cursor:pointer; font-family:'Inter',sans-serif;
+    font-size:13px; font-weight:700; transition:opacity .12s ease;
+  }
+  .mmg-invite-accept{ background:linear-gradient(120deg, var(--teal,#3FB68A), #2E8C6A); color:#fff; }
+  .mmg-invite-reject{ background:var(--surface-2,#1B2536); color:var(--muted,#8D96AC); border:1px solid var(--hairline,#2A3448); }
+  .mmg-invite-accept:hover, .mmg-invite-reject:hover{ opacity:0.85; }
+  .mmg-invite-accept:disabled, .mmg-invite-reject:disabled{ opacity:0.5; cursor:default; }
+  .mmg-invite-msg{ font-size:11.5px; margin-top:8px; min-height:14px; color:var(--teal,#3FB68A); }
+  @media (max-width:480px){ .mmg-invite-banner{ top:10px; padding:13px 14px; } }
+  .auth-forgot-link{
+    font-size:12.5px; color:var(--brass,#C6A15B); text-decoration:none; background:none; border:none;
+    cursor:pointer; padding:0; font-family:inherit;
+  }
+  .auth-forgot-link:hover{ text-decoration:underline; }
+  .auth-remember{
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+    font-size:13px; color:var(--muted); user-select:none;
+  }
+  .auth-remember input[type="checkbox"]{ width:15px; height:15px; accent-color:var(--brass); cursor:pointer; }
+  .auth-submit{
+    width:100%; padding:13px; border-radius:9px; border:none; cursor:pointer;
+    background:var(--grad); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px;
+    margin-top:4px; transition:opacity .15s ease;
+  }
+  .auth-submit:hover{ opacity:0.9; }
+  .auth-submit:disabled{ opacity:0.6; cursor:default; }
+  .auth-2x2-col .auth-submit{ margin-top:0; }
+  .auth-divider{ display:flex; align-items:center; gap:10px; margin:22px 0; color:var(--muted); font-size:11.5px; }
+  .auth-divider::before, .auth-divider::after{ content:''; flex:1; height:1px; background:var(--hairline); }
+  .auth-guest{
+    width:100%; padding:12px; border-radius:9px; cursor:pointer; text-align:center;
+    background:transparent; border:1px solid var(--hairline); color:var(--text); font-family:'Inter',sans-serif;
+    font-size:13.5px; font-weight:600; transition:border-color .15s ease, background .15s ease;
+  }
+  .auth-guest:hover{ border-color:var(--brass-dim); background:var(--surface-2); }
+  .auth-google{
+    width:100%; padding:12px; border-radius:9px; cursor:pointer; text-align:center;
+    background:var(--surface-2); border:1px solid var(--hairline); color:var(--text); font-family:'Inter',sans-serif;
+    font-size:13.5px; font-weight:600; transition:border-color .15s ease, background .15s ease;
+    display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px;
+  }
+  .auth-google:hover{ border-color:var(--brass-dim); }
+  .auth-google:disabled{ opacity:0.6; cursor:default; }
+
+  @media (max-width:820px){
+    #authOverlay{ flex-direction:column; overflow-y:auto; }
+    .auth-brand-panel{ flex:none; padding:32px 20px; border-right:0; border-bottom:1px solid var(--hairline); }
+    .auth-brand-logo, .auth-brand-fallback{ height:92px; width:92px; margin-bottom:16px; }
+    .auth-brand-title{ font-size:28px; }
+    .auth-brand-tagline{ font-size:13px; }
+    .auth-form-panel{ flex:none; padding:32px 20px; }
+  }
+  @media (max-width:380px){
+    .auth-grid{ grid-template-columns:1fr; }
+    .auth-half{ grid-column:1 / -1; }
+  }
+</style>
+</head>
+<body>
+<script src="i18n-core.js"></script>
+<script>
+  // ---- Sözlük burada, HERHANGİ bir modül script çalışmadan ÖNCE kayıtlı olsun diye
+  // erken kaydediliyor (aksi halde onAuthStateChanged gibi erken tetiklenen kodlar
+  // MMGI18N.t() çağırdığında sözlük henüz hazır olmuyor, ham anahtar adı görünüyordu). ----
+  MMGI18N.registerDict({
+    tr: {
+      nav_home:'Ana Sayfa', nav_calc:'Hesaplama', nav_rotatif:'Rotatif Kredi Hesaplama', nav_ortalama:'Ortalama Vade Hesaplama',
+      nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması Hesaplama', nav_vadelimevduat:'Vadeli Mevduat Faizi Hesaplama',
+      nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
+      nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları',
+      nav_calc_desc:'Araçları', nav_nakitakis_desc:'Tablosu', nav_talimat_desc:'Hazırlama', nav_talimat_full:'Talimat Hazırlama',
+      nav_budget:'Bütçeleme', nav_budget_desc:'Araçları',
+      hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
+      hero_desc:'Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.',
+      card_calc_desc:'Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.',
+      card_cashflow_title:'Nakit Akış Tablosu',
+      card_cashflow_desc:'Ay ay, gün gün gelir ve giderlerinizi girin; haftalık ve aylık durumunuzu, kategori dağılımınızı ve otomatik uyarılarınızı anında görün.',
+      card_expenses_desc:'Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlensin.',
+      card_income_desc:'Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlensin.',
+      card_instructions_desc:'Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.',
+      footer_follow_us:'Bizi Takip Edin', footer_powered_by:'Powered by', footer_download_now:'Hemen İndirin',
+      footer_about:'Hakkında', footer_privacy:'Gizlilik Politikası', footer_terms:'Kullanım Şartları',
+      close:'Kapat',
+      settings_title:'Ayarlar', settings_lang_label:'Dil / Language',
+      settings_view_mode:'Görünüm Modu', settings_dark_mode:'☾ Koyu Mod', settings_light_mode:'☀ Açık Mod',
+      settings_fullscreen_mode:'Tam Ekran Modu', settings_fullscreen_on:'⛶ Tam Ekran', settings_window_mode:'Pencere Modu',
+      settings_notifications:'Bildirimler', settings_on:'Açık', settings_off:'Kapalı',
+      settings_change_password:'Şifre Değiştir', settings_new_password:'Yeni şifre (en az 6 karakter)',
+      settings_new_password_repeat:'Yeni şifre (tekrar)', settings_update_password:'Şifreyi Güncelle', settings_ok:'✓ Tamam',
+      settings_forgot_password:'Şifremi Unuttum', settings_cancel:'Vazgeç', settings_old_password:'Eski şifre',
+      pw_err_need_old:'Lütfen eski şifrenizi girin.', pw_updating:'Güncelleniyor…',
+      guest:'Misafir', unknown:'bilinmiyor', please_wait:'Lütfen bekleyin...', sending:'Gönderiliyor...',
+      dropdown_linked_companies:'Bağlı Firmalar', dropdown_my_accounts:'Hesaplarım', dropdown_add_account:'Başka Hesap Ekle',
+      dropdown_my_account:'Hesabım', dropdown_change_photo:'Resmi Değiştir', dropdown_referral_admin:'Referans Kodu Yönetimi',
+      dropdown_stats:'İstatistikler', dropdown_logout:'Oturumu Kapat', dropdown_login:'Oturum Aç',
+      dropdown_user_management:'Kullanıcı Yönetim Paneli', firma_badge_default:'Firma', group_companies:'Grup Firmaları',
+      data_scope_label:'Veri Kaynağı', data_scope_personal:'👤 Kendi Verilerim',
+      verify_email_notice:'✉️ E-posta adresiniz henüz doğrulanmadı.',
+      verify_email_resend:'Doğrulama E-postasını Tekrar Gönder', verify_email_sent:'Gönderildi ✓',
+      nav_user_mgmt_1:'Kullanıcı', nav_user_mgmt_2:'Yönetim Paneli',
+      auth_title_login:'Hoş geldiniz', auth_title_signup:'Hesap oluşturun',
+      auth_sub_login:'Kaldığınız yerden devam etmek için giriş yapın',
+      auth_sub_signup:'Oranlarınızı ve tercihlerinizi kaydetmek için ücretsiz hesap açın',
+      auth_tab_login:'Giriş Yap', auth_tab_signup:'Kayıt Ol', auth_create_account:'Hesap Oluştur',
+      auth_account_type:'Hesap Türü', auth_account_individual:'Bireysel', auth_account_corporate:'Kurumsal',
+      auth_fullname:'Ad Soyad', auth_company_title:'Firma Ünvanı', auth_email:'E-posta',
+      auth_password:'Şifre', auth_password_repeat:'Şifre (Tekrar)',
+      auth_referral_label:'Referans Kodu', auth_referral_optional:'(varsa, opsiyonel)',
+      captcha_label:'Güvenlik Kodu', captcha_refresh:'Yeni kod', captcha_listen:'Sesli oku',
+      captcha_placeholder:'Yukarıdaki kodu girin', captcha_wrong:'Güvenlik kodu hatalı, lütfen tekrar deneyin.',
+      invite_accept:'✓ Kabul Et', invite_reject:'✕ Reddet',
+      auth_remember_me:'Oturumu açık tut', auth_forgot_password:'Şifremi unuttum?', auth_or:'veya',
+      auth_google:'Google ile devam et', auth_guest:'Misafir olarak gir',
+      auth_not_logged_in:'Giriş yapmadınız', auth_guest_mode:'Misafir modundasınız', auth_user_code:'Kullanıcı Kodu: #',
+      no_user_code:'Kullanıcı Kodu atanmamış',
+      auth_err_need_email_reset:'Şifre sıfırlama bağlantısı gönderebilmemiz için önce e-posta adresinizi yazın.',
+      auth_reset_sent_prefix:'Şifre sıfırlama bağlantısı ', auth_reset_sent_suffix:' adresine gönderildi. Gelen kutunuzu (ve spam klasörünü) kontrol edin.',
+      auth_reset_maybe_sent:'Eğer bu e-posta adresi sistemde kayıtlıysa, şifre sıfırlama bağlantısı gönderildi.',
+      auth_err_reset_failed:'Şifre sıfırlama e-postası gönderilemedi. Lütfen daha sonra tekrar deneyin.',
+      auth_err_need_username:'Lütfen bir kullanıcı adı belirleyin.',
+      auth_err_passwords_mismatch:'Şifreler eşleşmiyor.',
+      auth_err_email_in_use:'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.',
+      auth_err_invalid_email:'Geçerli bir e-posta adresi girin.',
+      auth_err_weak_password:'Şifre en az 6 karakter olmalı.',
+      auth_err_user_not_found:'Bu e-posta ile kayıtlı bir hesap bulunamadı.',
+      auth_err_wrong_password:'Şifre hatalı.',
+      auth_err_invalid_credential:'E-posta veya şifre hatalı.',
+      auth_err_too_many_requests:'Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.',
+      auth_err_network:'Bağlantı hatası. İnternetinizi kontrol edin.',
+      auth_err_google_disabled:'Google ile giriş şu an aktif değil. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
+      auth_err_unauthorized_domain:'Bu site adresi Firebase\'de yetkili domainler listesinde değil. (Firebase Console → Authentication → Settings → Authorized domains)',
+      auth_err_popup_blocked:'Tarayıcınız açılır pencereyi (popup) engelledi. Popup engelleyiciyi kapatıp tekrar deneyin.',
+      auth_err_generic_prefix:'Bir hata oluştu (', auth_err_generic_suffix:'), lütfen tekrar deneyin.',
+      referral_used_free:'kodunu kullandınız!\nHesabınıza ücretsiz premium tanımlandı.',
+      referral_used_discount_prefix:'kodunu kullandınız!\nHesabınıza %', referral_used_discount_suffix:' indirimli premium tanımlandı.',
+      referral_limit_reached:'kodu kullanım limitine ulaştığı için geçerli değil.',
+      pw_err_need_login:'Şifre değiştirmek için giriş yapmış olmanız gerekir.',
+      pw_err_mismatch:'Girdiğiniz iki şifre birbiriyle eşleşmiyor.',
+      pw_updated:'Şifreniz güncellendi. ✓',
+      pw_reauth_prompt:'Güvenlik nedeniyle önce mevcut şifrenizi girmeniz gerekiyor:',
+      pw_err_wrong_current:'Mevcut şifre yanlış ya da bir hata oluştu.',
+      pw_err_update_failed:'Şifre güncellenemedi, lütfen tekrar deneyin.',
+      fav_toggle:'Favorilere ekle/çıkar', fav_remove:'Favorilerden çıkar', menu_toggle:'Menüyü aç/kapat',
+      scroll_down:'Aşağı kaydır', remove_from_list:'Listeden kaldır'
+    },
+    en: {
+      nav_home:'Home', nav_calc:'Calculators', nav_rotatif:'Revolving Loan Calculator', nav_ortalama:'Average Maturity Calculator',
+      nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
+      nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
+      nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools',
+      nav_calc_desc:'Tools', nav_nakitakis_desc:'Table', nav_talimat_desc:'Preparation', nav_talimat_full:'Instruction Preparation',
+      nav_budget:'Budgeting', nav_budget_desc:'Tools',
+      hero_title:'Digital Finance Assistant', hero_tagline:'Your digital partner for financial decisions',
+      hero_desc:'It helps your company with financial matters, and acts as a financial advisor for individual users. It performs the calculations you need in seconds and makes your budget planning easier.',
+      card_calc_desc:'Revolving Loan, Credit Card Late Fee, and Average Maturity calculators, all on one page, switching between tabs.',
+      card_cashflow_title:'Cash Flow Table',
+      card_cashflow_desc:'Enter your income and expenses month by month, day by day; instantly see your weekly and monthly status, category breakdown, and automatic alerts.',
+      card_expenses_desc:'Record recurring expenses such as bills, credit cards, letters of guarantee, commissions, and rent; they\'ll be automatically posted to the Cash Flow Table when due.',
+      card_income_desc:'Record your cash collections, check/note collections, POS collections, and interest income; they\'ll be automatically posted to the Cash Flow Table when due.',
+      card_instructions_desc:'Prepare transfer, check, letter of guarantee, and free-text instructions to banks, customers, institutions, and individuals in seconds.',
+      footer_follow_us:'Follow Us', footer_powered_by:'Powered by', footer_download_now:'Download Now',
+      footer_about:'About', footer_privacy:'Privacy Policy', footer_terms:'Terms of Use',
+      close:'Close',
+      settings_title:'Settings', settings_lang_label:'Dil / Language',
+      settings_view_mode:'Display Mode', settings_dark_mode:'☾ Dark Mode', settings_light_mode:'☀ Light Mode',
+      settings_fullscreen_mode:'Fullscreen Mode', settings_fullscreen_on:'⛶ Fullscreen', settings_window_mode:'Windowed Mode',
+      settings_notifications:'Notifications', settings_on:'On', settings_off:'Off',
+      settings_change_password:'Change Password', settings_new_password:'New password (at least 6 characters)',
+      settings_new_password_repeat:'New password (repeat)', settings_update_password:'Update Password', settings_ok:'✓ OK',
+      settings_forgot_password:'Forgot Password', settings_cancel:'Cancel', settings_old_password:'Current password',
+      pw_err_need_old:'Please enter your current password.', pw_updating:'Updating…',
+      guest:'Guest', unknown:'unknown', please_wait:'Please wait...', sending:'Sending...',
+      dropdown_linked_companies:'Linked Companies', dropdown_my_accounts:'My Accounts', dropdown_add_account:'Add Another Account',
+      dropdown_my_account:'My Account', dropdown_change_photo:'Change Photo', dropdown_referral_admin:'Referral Code Management',
+      dropdown_stats:'Statistics', dropdown_logout:'Sign Out', dropdown_login:'Sign In',
+      dropdown_user_management:'User Management Panel', firma_badge_default:'Company', group_companies:'Group Companies',
+      data_scope_label:'Data Source', data_scope_personal:'👤 My Own Data',
+      verify_email_notice:'✉️ Your email address is not verified yet.',
+      verify_email_resend:'Resend Verification Email', verify_email_sent:'Sent ✓',
+      nav_user_mgmt_1:'User', nav_user_mgmt_2:'Management Panel',
+      auth_title_login:'Welcome', auth_title_signup:'Create an account',
+      auth_sub_login:'Sign in to continue where you left off',
+      auth_sub_signup:'Open a free account to save your rates and preferences',
+      auth_tab_login:'Sign In', auth_tab_signup:'Sign Up', auth_create_account:'Create Account',
+      auth_account_type:'Account Type', auth_account_individual:'Individual', auth_account_corporate:'Corporate',
+      auth_fullname:'Full Name', auth_company_title:'Company Name', auth_email:'Email',
+      auth_password:'Password', auth_password_repeat:'Password (Repeat)',
+      auth_referral_label:'Referral Code', auth_referral_optional:'(optional, if any)',
+      captcha_label:'Security Code', captcha_refresh:'New code', captcha_listen:'Listen',
+      captcha_placeholder:'Enter the code above', captcha_wrong:'Incorrect security code, please try again.',
+      invite_accept:'✓ Accept', invite_reject:'✕ Decline',
+      auth_remember_me:'Keep me signed in', auth_forgot_password:'Forgot password?', auth_or:'or',
+      auth_google:'Continue with Google', auth_guest:'Continue as guest',
+      auth_not_logged_in:'You are not signed in', auth_guest_mode:'You are in guest mode', auth_user_code:'User Code: #',
+      no_user_code:'No user code assigned',
+      auth_err_need_email_reset:'Please enter your email address first so we can send a password reset link.',
+      auth_reset_sent_prefix:'A password reset link was sent to ', auth_reset_sent_suffix:'. Check your inbox (and spam folder).',
+      auth_reset_maybe_sent:'If this email address is registered in our system, a password reset link has been sent.',
+      auth_err_reset_failed:'The password reset email could not be sent. Please try again later.',
+      auth_err_need_username:'Please choose a username.',
+      auth_err_passwords_mismatch:'Passwords do not match.',
+      auth_err_email_in_use:'This email address is already registered. Try signing in instead.',
+      auth_err_invalid_email:'Enter a valid email address.',
+      auth_err_weak_password:'Password must be at least 6 characters.',
+      auth_err_user_not_found:'No account was found with this email.',
+      auth_err_wrong_password:'Incorrect password.',
+      auth_err_invalid_credential:'Incorrect email or password.',
+      auth_err_too_many_requests:'Too many attempts. Please try again shortly.',
+      auth_err_network:'Connection error. Please check your internet connection.',
+      auth_err_google_disabled:'Sign in with Google is not currently enabled. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
+      auth_err_unauthorized_domain:'This site\'s domain is not in Firebase\'s authorized domains list. (Firebase Console → Authentication → Settings → Authorized domains)',
+      auth_err_popup_blocked:'Your browser blocked the popup window. Please disable your popup blocker and try again.',
+      auth_err_generic_prefix:'An error occurred (', auth_err_generic_suffix:'), please try again.',
+      referral_used_free:'code was applied!\nFree premium has been activated on your account.',
+      referral_used_discount_prefix:'code was applied!\nA ', referral_used_discount_suffix:'% discounted premium has been activated on your account.',
+      referral_limit_reached:'code is no longer valid because it has reached its usage limit.',
+      pw_err_need_login:'You must be signed in to change your password.',
+      pw_err_mismatch:'The two passwords you entered do not match.',
+      pw_updated:'Your password has been updated. ✓',
+      pw_reauth_prompt:'For security reasons, please enter your current password first:',
+      pw_err_wrong_current:'The current password is incorrect, or an error occurred.',
+      pw_err_update_failed:'The password could not be updated, please try again.',
+      fav_toggle:'Add/remove favorite', fav_remove:'Remove from favorites', menu_toggle:'Open/close menu',
+      scroll_down:'Scroll down', remove_from_list:'Remove from list'
+    }
+  });
+</script>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<div id="authOverlay">
+  <div class="auth-brand-panel">
+    <div class="auth-blob auth-blob-1"></div>
+    <div class="auth-blob auth-blob-2"></div>
+    <div class="auth-blob auth-blob-3"></div>
+    <svg class="auth-deco-icon auth-di-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2l2.4 6.8L21 11l-6.6 2.2L12 20l-2.4-6.8L3 11l6.6-2.2z"/></svg>
+    <svg class="auth-deco-icon auth-di-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3.2"/><circle cx="7" cy="9" r=".6" fill="currentColor" stroke="none"/></svg>
+    <svg class="auth-deco-icon auth-di-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+    <svg class="auth-deco-icon auth-di-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z" fill="currentColor" stroke="none"/></svg>
+    <svg class="auth-deco-icon auth-di-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+    <svg class="auth-deco-icon auth-di-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+
+    <img class="auth-brand-logo" src="logo.png" alt="mmgcreativity" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="auth-brand-fallback">M</div>
+    <div class="auth-brand-title" data-i18n="hero_title">Dijital Finans Asistanı</div>
+    <div class="auth-brand-tagline" data-i18n="hero_tagline">Finansal kararlarınızın dijital iş ortağı</div>
+  </div>
+
+  <div class="auth-form-panel">
+    <div class="auth-form-inner">
+      <div class="auth-title" id="authTitle" data-i18n="auth_title_login" style="display:none;">Hoş geldiniz</div>
+      <div class="auth-sub" id="authSub" data-i18n="auth_sub_login" style="display:none;">Kaldığınız yerden devam etmek için giriş yapın</div>
+
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" id="tabLogin" data-i18n="auth_tab_login">Giriş Yap</button>
+        <button type="button" class="auth-tab" id="tabSignup" data-i18n="auth_tab_signup">Kayıt Ol</button>
+      </div>
+
+      <div class="auth-error" id="authError"></div>
+      <div class="auth-success" id="authSuccess"></div>
+
+      <form id="authForm" class="auth-grid">
+        <div class="auth-field auth-full" id="authUsernameWrap" style="display:none;">
+          <label id="authUsernameLabel" data-i18n="auth_fullname">Ad Soyad</label>
+          <input type="text" id="authUsername" placeholder="">
+        </div>
+        <div class="auth-field auth-full">
+          <label data-i18n="auth_email">E-posta</label>
+          <input type="email" id="authEmail" placeholder="ornek@eposta.com" required>
+        </div>
+        <div class="auth-2x2-col auth-half" id="authLeftCol">
+          <div class="auth-field" id="authPasswordWrap">
+            <label data-i18n="auth_password">Şifre</label>
+            <input type="password" id="authPassword" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="auth-submit" id="authSubmitBtn" data-i18n="auth_tab_login">Giriş Yap</button>
+        </div>
+        <div class="auth-2x2-col auth-half">
+          <div class="auth-captcha-graphic-wrap" id="authCaptchaGraphicWrap">
+            <div class="auth-captcha-label" data-i18n="captcha_label">Güvenlik Kodu</div>
+            <div class="auth-captcha-row">
+              <canvas id="authCaptchaCanvas" width="180" height="56" aria-hidden="true"></canvas>
+              <div class="auth-captcha-actions">
+                <button type="button" class="auth-captcha-iconbtn" id="authCaptchaRefreshBtn" title="Yeni kod" data-i18n-title="captcha_refresh" aria-label="Yeni kod">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                </button>
+                <button type="button" class="auth-captcha-iconbtn" id="authCaptchaAudioBtn" title="Sesli oku" data-i18n-title="captcha_listen" aria-label="Sesli oku">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="auth-captcha-input-wrap" id="authCaptchaInputWrap">
+            <input type="text" id="authCaptchaInput" placeholder="" data-i18n-placeholder="captcha_placeholder" autocomplete="off" style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:14px; outline:none;">
+            <div class="auth-captcha-error" id="authCaptchaError"></div>
+          </div>
+        </div>
+        <div class="auth-field auth-full" id="authPasswordConfirmWrap" style="display:none;">
+          <label data-i18n="auth_password_repeat">Şifre (Tekrar)</label>
+          <input type="password" id="authPasswordConfirm" placeholder="••••••••">
+        </div>
+        <div class="auth-field auth-full" id="authReferralWrap" style="display:none;">
+          <label data-i18n="auth_referral_label">Referans Kodu <span style="color:var(--muted); font-weight:400;" data-i18n="auth_referral_optional">(varsa, opsiyonel)</span></label>
+          <input type="text" id="authReferralCode" placeholder="ör. AHMET10">
+        </div>
+        <div class="auth-remember-row" id="authRememberRow">
+          <label class="auth-remember">
+            <input type="checkbox" id="rememberMe">
+            <span data-i18n="auth_remember_me">Oturumu açık tut</span>
+          </label>
+          <button type="button" class="auth-forgot-link" id="forgotPasswordBtn" data-i18n="auth_forgot_password">Şifremi unuttum?</button>
+        </div>
+      </form>
+
+      <div class="auth-divider" data-i18n="auth_or">veya</div>
+      <button type="button" class="auth-google" id="googleBtn">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6 29.6 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4C29.6 35.4 26.9 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.6 5.1C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.7l6.6 5.4C41.5 36.2 44 30.6 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        <span data-i18n="auth_google">Google ile devam et</span>
+      </button>
+      <button type="button" class="auth-guest" id="guestBtn" data-i18n="auth_guest">Misafir olarak gir</button>
+    </div>
+  </div>
+</div>
+
+<div id="mmgInviteBanner" class="mmg-invite-banner" hidden>
+  <div class="mmg-invite-icon">🏢</div>
+  <div class="mmg-invite-body">
+    <div class="mmg-invite-title" id="mmgInviteTitle"></div>
+    <div class="mmg-invite-sub" id="mmgInviteSub"></div>
+    <div class="mmg-invite-actions">
+      <button type="button" class="mmg-invite-accept" id="mmgInviteAcceptBtn" data-i18n="invite_accept">✓ Kabul Et</button>
+      <button type="button" class="mmg-invite-reject" id="mmgInviteRejectBtn" data-i18n="invite_reject">✕ Reddet</button>
+    </div>
+    <div class="mmg-invite-msg" id="mmgInviteMsg"></div>
+  </div>
+</div>
+
+<aside>
+  <div class="brand">
+    <div class="brand-row">
+      <img src="logo.png" alt="mmgcreativity" class="brand-row-logo" onerror="this.style.display='none'; document.getElementById('brand-row-fallback').style.display='flex';">
+      <span id="brand-row-fallback" class="brand-row-fallback">M</span>
+    </div>
+  </div>
+
+  <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Menüyü aç/kapat" data-i18n-aria="menu_toggle">
+    <span class="mobile-nav-toggle-icon" id="mobileNavToggleIcon">☰</span>
+  </button>
+
+  <nav>
+
+    <div class="nav-fav-pinned" id="navFavPinned" hidden>
+      <div class="nav-fav-label">★ Favoriler</div>
+      <div id="navFavList"></div>
+      <div class="nav-fav-divider"></div>
+    </div>
+
+    <button class="nav-item" data-target="home" data-title="Ana Sayfa">
+      <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V19a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg></span>
+      <span class="nav-text-wrap">
+        <span class="nav-title" data-i18n="nav_home">Ana Sayfa</span>
+      </span>
+    </button>
+
+    <div class="nav-drawer-wrap">
+    <button class="nav-item" id="hesaplamaAraclariToggle" data-drawer-toggle="true" data-title="Hesaplama Araçları" aria-expanded="false">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="nav-text-wrap">
+        <span class="nav-title" data-i18n="nav_calc">Hesaplama</span>
+        <span class="nav-desc" data-i18n="nav_calc_desc">Araçları</span>
+      </span>
+      <span class="nav-drawer-chevron" id="hesaplamaChevron">›</span>
+    </button>
+    <div class="nav-drawer" id="hesaplamaDrawer" hidden>
+      <button class="nav-item nav-subitem" data-target="Rotatif_Kredi_Hesaplama.html" data-title="Rotatif Kredi Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Rotatif_Kredi_Hesaplama.html" data-fav-title="Rotatif Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_rotatif">Rotatif Kredi Hesaplama</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Ortalama_Vade_Hesaplama.html" data-title="Ortalama Vade Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Ortalama_Vade_Hesaplama.html" data-fav-title="Ortalama Vade Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_ortalama">Ortalama Vade Hesaplama</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-title="Kredi Kartı Vade Farkı Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-fav-title="Kredi Kartı Vade Farkı" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_kkvf">Kredi Kartı Vade Farkı</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Vade_Sapma_Hesaplama.html" data-title="Vade Sapması Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Vade_Sapma_Hesaplama.html" data-fav-title="Vade Sapması Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_vadesapmasi">Vade Sapması Hesaplama</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="vadeli-mevduat-faizi-hesaplama.html" data-title="Vadeli Mevduat Faizi Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="vadeli-mevduat-faizi-hesaplama.html" data-fav-title="Vadeli Mevduat Faizi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_vadelimevduat">Vadeli Mevduat Faizi Hesaplama</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="kredi-karsilastirma.html" data-title="Kredi Tekliflerini Karşılaştır">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="kredi-karsilastirma.html" data-fav-title="Kredi Tekliflerini Karşılaştır" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_krediteklif">Kredi Tekliflerini Karşılaştır</span></span>
+      </button>
+    </div>
+    </div>
+
+    <div class="nav-drawer-wrap">
+    <button class="nav-item" id="butcelemeAraclariToggle" data-drawer-toggle="true" data-title="Bütçeleme Araçları" aria-expanded="false">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Bütçeleme Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="nav-text-wrap">
+        <span class="nav-title" data-i18n="nav_budget">Bütçeleme</span>
+        <span class="nav-desc" data-i18n="nav_budget_desc">Araçları</span>
+      </span>
+      <span class="nav-drawer-chevron" id="butcelemeChevron">›</span>
+    </button>
+    <div class="nav-drawer" id="butcelemeDrawer" hidden>
+      <button class="nav-item nav-subitem" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_nakitakis">Nakit Akış Tablosu</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Gelirler.html" data-title="Gelirler">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_gelirler">Gelirler</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Giderler.html" data-title="Giderler">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_giderler">Giderler</span></span>
+      </button>
+    </div>
+    </div>
+
+    <button class="nav-item" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="nav-text-wrap">
+        <span class="nav-title" data-i18n="nav_talimat">Talimat</span>
+        <span class="nav-desc" data-i18n="nav_talimat_desc">Hazırlama</span>
+      </span>
+    </button>
+
+    <button class="nav-item" data-target="rehber.html" data-title="Rehber">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="nav-text-wrap">
+        <span class="nav-title" data-i18n="nav_rehber">Rehber</span>
+      </span>
+    </button>
+
+    <button class="nav-item" data-target="iletisim.html" data-title="İletişim">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="iletisim.html" data-fav-title="İletişim" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="nav-text-wrap">
+        <span class="nav-title" data-i18n="nav_iletisim">İletişim</span>
+      </span>
+    </button>
+  </nav>
+</aside>
+
+<div class="mmg-bottom-left-bar" id="mmgBottomLeftBar">
+<div class="top-right-badge" id="topRightBadge">
+  <button type="button" class="account-trigger" id="accountTrigger">
+    <span class="avatar-wrap" id="avatarWrap">
+      <img id="avatarImg" alt="" style="display:none;">
+      <svg id="avatarDefaultIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg>
+    </span>
+    <span class="user-badge" id="userBadge" style="display:none;">
+      <span class="user-badge-dot"></span>
+      <span id="userBadgeName">Misafir</span>
+    </span>
+  </button>
+
+  <div class="account-dropdown" id="accountDropdown" hidden>
+    <div class="account-dropdown-header">
+      <span class="avatar-wrap avatar-wrap-lg">
+        <img id="avatarImgLg" alt="" style="display:none;">
+        <svg id="avatarDefaultIconLg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg>
+      </span>
+      <div class="account-dropdown-info">
+        <div class="account-dropdown-name" id="accountDropdownName" data-i18n="guest">Misafir</div>
+        <div class="account-dropdown-sub" id="accountDropdownSub"></div>
+        <div id="accountDropdownFirma" style="display:none; font-weight:700; font-size:13px; color:var(--brass); margin-top:3px;"></div>
+      </div>
+    </div>
+    <div class="account-dropdown-divider"></div>
+    <div id="mmgVerifyEmailWrap" style="display:none; padding:10px 4px;">
+      <div style="font-size:12px; color:var(--amber,#E3A23C); margin-bottom:8px;" data-i18n="verify_email_notice">✉️ E-posta adresiniz henüz doğrulanmadı.</div>
+      <button type="button" class="account-dropdown-item" id="mmgResendVerifyBtn" style="padding:8px 10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        <span data-i18n="verify_email_resend">Doğrulama E-postasını Tekrar Gönder</span>
+      </button>
+      <div class="saved-msg" id="mmgResendVerifySavedMsg" style="margin-top:6px; display:none; color:var(--teal,#3FB68A); font-size:11.5px;" data-i18n="verify_email_sent">Gönderildi ✓</div>
+    </div>
+    <div id="mmgCompanySwitchWrap" style="display:none;">
+      <div class="account-dropdown-section-label" data-i18n="dropdown_linked_companies">Bağlı Firmalar</div>
+      <div id="mmgCompanySwitchList"></div>
+      <div class="account-dropdown-divider"></div>
+    </div>
+    <div id="mmgDataScopeWrap" style="display:none;">
+      <button type="button" class="account-dropdown-item" id="mmgDataScopeToggleBtn" style="justify-content:flex-start; gap:10px;">
+        <span id="mmgDataScopeActiveDot" style="flex-shrink:0; width:8px; height:8px; border-radius:50%; background:var(--teal); box-shadow:0 0 6px var(--teal);"></span>
+        <span id="mmgDataScopeCurrent" style="font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+      </button>
+      <div id="mmgDataScopeList" style="display:none; padding-left:6px; margin-top:2px;"></div>
+      <div class="account-dropdown-divider"></div>
+    </div>
+    <button type="button" class="account-dropdown-item" id="kullaniciYonetimBtn" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span data-i18n="dropdown_user_management">Kullanıcı Yönetim Paneli</span>
+    </button>
+    <div class="account-dropdown-divider"></div>
+    <button type="button" class="account-dropdown-item" id="accountInfoBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M6 16c0-1.8 1.5-3 3-3s3 1.2 3 3"/><path d="M14 9h4"/><path d="M14 13h4"/></svg>
+      <span data-i18n="dropdown_my_account">Hesabım</span>
+    </button>
+    <button type="button" class="account-dropdown-item" id="changePhotoBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>
+      <span data-i18n="dropdown_change_photo">Resmi Değiştir</span>
+    </button>
+    <button type="button" class="account-dropdown-item" id="adminPanelBtn" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z"/></svg>
+      <span data-i18n="dropdown_referral_admin">Referans Kodu Yönetimi</span>
+    </button>
+    <button type="button" class="account-dropdown-item" id="begenIstatistikleriBtn" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/><path d="M2 20h20"/></svg>
+      <span data-i18n="dropdown_stats">İstatistikler</span>
+    </button>
+    <div class="account-dropdown-divider"></div>
+    <button type="button" class="account-dropdown-item" id="mmgSettingsBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span data-i18n="settings_title">Ayarlar</span>
+    </button>
+    <div class="account-dropdown-divider"></div>
+    <button type="button" class="account-dropdown-item account-dropdown-item-danger" id="dropdownLogoutBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      <span data-i18n="dropdown_logout">Oturumu Kapat</span>
+    </button>
+  </div>
+
+  <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+</div>
+
+</div>
+
+
+<main>
+  <div class="frame-wrap" id="frame-wrap" style="display:none;">
+    <iframe id="app-frame" src=""></iframe>
+  </div>
+
+  <div class="home" id="home-screen">
+    <section class="hero">
+      <div class="hero-deco" aria-hidden="true">
+        <svg class="deco deco-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+        <svg class="deco deco-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3.2"/><circle cx="7" cy="9" r=".6" fill="currentColor" stroke="none"/></svg>
+        <svg class="deco deco-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        <svg class="deco deco-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 19c-4-2-7-5.5-7-10a7 7 0 0 1 14 0c0 4.5-3 8-7 10z"/><circle cx="12" cy="9" r="2.4"/></svg>
+        <svg class="deco deco-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2l2.4 6.8L21 11l-6.6 2.2L12 20l-2.4-6.8L3 11l6.6-2.2z"/></svg>
+        <svg class="deco deco-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z" fill="currentColor" stroke="none"/></svg>
+        <svg class="deco deco-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <svg class="deco deco-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+      </div>
+      <div class="hero-top-row">
+        <img src="DFA_icon.png" alt="Dijital Finans Asistanı" class="hero-app-icon">
+        <div class="hero-top-text">
+          <h1 class="hero-title" data-i18n="hero_title">Dijital Finans Asistanı</h1>
+          <p class="hero-tagline" data-i18n="hero_tagline">Finansal kararlarınızın dijital iş ortağı</p>
+        </div>
+      </div>
+      <p class="hero-desc" data-i18n="hero_desc">Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.</p>
+    </section>
+
+    <section class="tools-section">
+      <div class="tools-deco" aria-hidden="true">
+        <svg class="deco deco-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <svg class="deco deco-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z" fill="currentColor" stroke="none"/></svg>
+        <svg class="deco deco-11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <svg class="deco deco-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2l2.4 6.8L21 11l-6.6 2.2L12 20l-2.4-6.8L3 11l6.6-2.2z"/></svg>
+        <svg class="deco deco-13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3.2"/><circle cx="7" cy="9" r=".6" fill="currentColor" stroke="none"/></svg>
+      </div>
+      <div class="card-grid" id="cardGrid">
+        <button class="app-card" data-target="Hesaplama_Araclari.html" data-title="Hesaplama Araçları">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="nav_hesaplamaaraclari">Hesaplama Araçları</h3>
+          <p data-i18n="card_calc_desc">Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.</p>
+        </button>
+
+        <button class="app-card" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="card_cashflow_title">Nakit Akış Tablosu</h3>
+          <p data-i18n="card_cashflow_desc">Ay ay, gün gün gelir ve giderlerinizi girin; haftalık ve aylık durumunuzu, kategori dağılımınızı ve otomatik uyarılarınızı anında görün.</p>
+        </button>
+
+        <button class="app-card" data-target="Giderler.html" data-title="Giderler">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="nav_giderler">Giderler</h3>
+          <p data-i18n="card_expenses_desc">Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
+        </button>
+
+        <button class="app-card" data-target="Gelirler.html" data-title="Gelirler">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="nav_gelirler">Gelirler</h3>
+          <p data-i18n="card_income_desc">Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
+        </button>
+
+        <button class="app-card" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="nav_talimat_full">Talimat Hazırlama</h3>
+          <p data-i18n="card_instructions_desc">Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.</p>
+        </button>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-final-row">
+        <div class="footer-final-top-line">
+          <div class="footer-col-title" style="margin-bottom:0;" data-i18n="footer_follow_us">Bizi Takip Edin</div>
+          <div class="credit">
+            <span data-i18n="footer_powered_by">Powered by</span>
+            <span class="signature-pill">
+              <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+              <span id="credit-fallback" class="credit-fallback">M</span>
+              <b>mmgcreativity</b>
+            </span>
+          </div>
+        </div>
+        <div class="footer-final-bottom-line">
+        <div class="footer-social-col">
+          <div class="footer-social-inline">
+          <div class="social-icon-row social-icon-row-nowrap">
+            <a href="https://facebook.com/profile.php?id=61591997071236" target="_blank" rel="noopener" class="social-icon" style="background:#1877F2;" title="Facebook" aria-label="Facebook">
+              <svg viewBox="0 0 24 24" fill="#fff"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>
+            </a>
+            <a href="https://x.com/mmgcreativity" target="_blank" rel="noopener" class="social-icon" style="background:#000;" title="X (Twitter)" aria-label="X">
+              <svg viewBox="0 0 24 24" fill="#fff"><path d="M18.9 3H21l-6.6 7.5L22 21h-6.1l-4.8-6.3L5.6 21H3.4l7-8-6.9-10h6.2l4.4 5.8L18.9 3zM17.8 19.3h1.7L7.9 4.6H6l11.8 14.7z"/></svg>
+            </a>
+            <a href="https://instagram.com/mmgcreativity" target="_blank" rel="noopener" class="social-icon" style="background:radial-gradient(circle at 30% 110%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);" title="Instagram" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="#fff"/></svg>
+            </a>
+            <a href="https://www.linkedin.com/in/mmg-creativity-undefined-41352a423/" target="_blank" rel="noopener" class="social-icon" style="background:#0A66C2;" title="LinkedIn" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24" fill="#fff"><path d="M6.9 8.6H3.6V20h3.3V8.6zM5.3 3.5A1.9 1.9 0 1 0 5.3 7.3 1.9 1.9 0 0 0 5.3 3.5zM20.4 20h-3.3v-5.9c0-1.4 0-3.2-2-3.2s-2.3 1.5-2.3 3.1V20H9.6V8.6h3.2v1.6h.1c.4-.8 1.5-1.7 3.1-1.7 3.3 0 3.9 2.2 3.9 5V20z"/></svg>
+            </a>
+            <a href="https://wa.me/90XXXXXXXXXX" target="_blank" rel="noopener" class="social-icon" style="background:#25D366;" title="WhatsApp" aria-label="WhatsApp">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.4"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.8L3.5 20.5l4.3-1.2A8.5 8.5 0 1 0 12 3.5z"/><path d="M8.7 8.5c-.2.4-.7 1.3-.2 2.4.6 1.3 2.1 2.9 3.6 3.6 1 .5 2 .2 2.3-.2l.3-.5c.1-.2 0-.4-.1-.5l-1.1-.8c-.2-.1-.4-.1-.6 0l-.4.4c-.1.1-.3.1-.5 0-.5-.3-1.3-1-1.7-1.7-.1-.2 0-.3 0-.5l.4-.4c.1-.2.1-.3 0-.5l-.6-1.2c-.1-.2-.3-.3-.5-.3h-.5c-.1 0-.3 0-.4.2z" fill="#fff"/></svg>
+            </a>
+            <a href="https://youtube.com/@mmgcreativity" target="_blank" rel="noopener" class="social-icon" style="background:#FF0000;" title="YouTube" aria-label="YouTube">
+              <svg viewBox="0 0 24 24" fill="#fff"><path d="M22 12s0-3.2-.4-4.7c-.2-.9-.9-1.6-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.5c-.9.2-1.6.9-1.8 1.8C2 8.8 2 12 2 12s0 3.2.4 4.7c.2.9.9 1.6 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.5c.9-.2 1.6-.9 1.8-1.8.4-1.5.4-4.7.4-4.7zM10 15.3V8.7l5.3 3.3-5.3 3.3z"/></svg>
+            </a>
+            <a href="https://tiktok.com/@mmgcreativity" target="_blank" rel="noopener" class="social-icon" style="background:#000;" title="TikTok" aria-label="TikTok">
+              <svg viewBox="0 0 24 24" fill="#fff"><path d="M16.6 5.8c-.9-.9-1.4-2.1-1.4-3.4h-3.1v13.6c0 1.4-1.1 2.5-2.5 2.5s-2.5-1.1-2.5-2.5 1.1-2.5 2.5-2.5c.3 0 .5 0 .8.1V10.5c-.3 0-.5-.1-.8-.1-3.1 0-5.6 2.5-5.6 5.6S6.5 21.6 9.6 21.6s5.6-2.5 5.6-5.6V9.1c1.2.9 2.7 1.4 4.3 1.4V7.4c-1 0-1.9-.3-2.9-1.2z"/></svg>
+            </a>
+          </div>
+          <a href="#" class="app-badge app-badge-small">
+            <svg viewBox="0 0 24 24"><path d="M3.6 2.6a1 1 0 0 0-.6.9v17a1 1 0 0 0 .6.9l9.7-9.4-9.7-9.4z" fill="#00d2ff"/><path d="M13.3 12l3-2.9 3.9 2.2c.9.5.9 1.4 0 1.9l-3.9 2.2-3-2.4z" fill="#ffd200"/><path d="M13.3 12L3.6 2.6c.2 0 .5 0 .7.1l11 6.3-2 2.9z" fill="#00e676"/><path d="M13.3 12l2 2.9-11 6.3c-.2.1-.5.1-.7.1L13.3 12z" fill="#ff3d57"/></svg>
+            <span class="app-badge-text"><span data-i18n="footer_download_now">Hemen İndirin</span><b>Google Play</b></span>
+          </a>
+          </div>
+        </div>
+        <div class="legal-links">
+          <a href="hakkinda.html" target="_blank" data-i18n="footer_about">Hakkında</a>
+          <a href="iletisim.html" target="_blank" data-i18n="nav_iletisim">İletişim</a>
+          <a href="gizlilik-politikasi.html" target="_blank" data-i18n="footer_privacy">Gizlilik Politikası</a>
+          <a href="kullanim-sartlari.html" target="_blank" data-i18n="footer_terms">Kullanım Şartları</a>
+        </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item:not([data-drawer-toggle]), .app-card');
+  const homeScreen = document.getElementById('home-screen');
+  const frameWrap = document.getElementById('frame-wrap');
+  const iframe = document.getElementById('app-frame');
+
+  // ---- Mobil hamburger menü ----
+  const asideEl = document.querySelector('aside');
+  const mobileNavToggle = document.getElementById('mobileNavToggle');
+  const mobileNavToggleIcon = document.getElementById('mobileNavToggleIcon');
+  function closeMobileNav(){
+    asideEl.classList.remove('mobile-nav-open');
+    mobileNavToggleIcon.textContent = '☰';
+    document.body.style.overflow = '';
+  }
+  mobileNavToggle.addEventListener('click', () => {
+    const willOpen = !asideEl.classList.contains('mobile-nav-open');
+    asideEl.classList.toggle('mobile-nav-open', willOpen);
+    mobileNavToggleIcon.textContent = willOpen ? '✕' : '☰';
+    document.body.style.overflow = willOpen ? 'hidden' : '';
+  });
+
+  function setActive(target){
+    document.querySelectorAll('.nav-item').forEach(el=>{
+      el.classList.toggle('active', el.dataset.target === target);
+    });
+  }
+
+  function openTarget(target, title){
+    closeMobileNav();
+    if(target === 'home'){
+      homeScreen.style.display = 'flex';
+      frameWrap.style.display = 'none';
+      setActive('home');
+      return;
+    }
+    // Mobilde iframe içi kaydırma (touch-scroll) güvenilir çalışmadığı için
+    // dar ekranlarda iframe yerine doğrudan tam sayfa geçişi yapılır.
+    if(window.innerWidth <= 860){
+      window.location.href = target;
+      return;
+    }
+    homeScreen.style.display = 'none';
+    frameWrap.style.display = 'block';
+    iframe.src = target;
+    setActive(target);
+  }
+
+  navItems.forEach(el=>{
+    el.addEventListener('click', ()=> openTarget(el.dataset.target, el.dataset.title));
+  });
+
+  // ---- Hesaplama Araçları / Bütçeleme Araçları çekmeceleri (sağa açılan flyout) ----
+  function wireDrawerToggle(toggleId, drawerId){
+    const toggle = document.getElementById(toggleId);
+    const drawer = document.getElementById(drawerId);
+    const wrap = toggle ? toggle.closest('.nav-drawer-wrap') : null;
+    if(!toggle || !drawer) return;
+
+    function openDrawer(){
+      // Diğer açık çekmeceleri kapat, tek seferde yalnızca biri açık kalsın.
+      document.querySelectorAll('.nav-drawer.open').forEach(d => {
+        if(d !== drawer){
+          d.classList.remove('open');
+          d.hidden = true;
+          const otherToggle = d.previousElementSibling;
+          if(otherToggle) otherToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+      toggle.setAttribute('aria-expanded', 'true');
+      // Masaüstünde (>860px) sağa açılan flyout; mobilde (<=860px) menünün
+      // içinde aşağı doğru açılan klasik liste.
+      if(window.innerWidth > 860){
+        const rect = toggle.getBoundingClientRect();
+        drawer.style.left = (rect.right + 10) + 'px';
+        drawer.style.top = rect.top + 'px';
+        drawer.hidden = false;
+        const drawerWidth = drawer.offsetWidth;
+        const drawerHeight = drawer.offsetHeight;
+        const maxLeft = window.innerWidth - drawerWidth - 8;
+        if((rect.right + 10) > maxLeft){
+          drawer.style.left = Math.max(8, Math.min(rect.left - drawerWidth - 10, maxLeft)) + 'px';
+        }
+        const maxTop = window.innerHeight - drawerHeight - 12;
+        if(rect.top > maxTop) drawer.style.top = Math.max(12, maxTop) + 'px';
+      } else {
+        drawer.style.left = '';
+        drawer.style.top = '';
+        drawer.hidden = false;
+      }
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=> drawer.classList.add('open'));
+      });
+    }
+    function closeDrawer(){
+      drawer.classList.remove('open');
+      drawer.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    toggle.addEventListener('click', () => {
+      const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+      if(isOpen) closeDrawer(); else openDrawer();
+    });
+
+    // Masaüstünde üzerine gelince de (hover) açılsın; dokunmatik ekranlarda
+    // hover tetiklenmediği için tıklama davranışı olduğu gibi çalışmaya devam eder.
+    if(wrap){
+      let hideTimer = null;
+      wrap.addEventListener('mouseenter', () => {
+        if(window.innerWidth <= 860) return;
+        clearTimeout(hideTimer);
+        if(toggle.getAttribute('aria-expanded') !== 'true') openDrawer();
+      });
+      wrap.addEventListener('mouseleave', () => {
+        if(window.innerWidth <= 860) return;
+        hideTimer = setTimeout(closeDrawer, 220);
+      });
+    }
+  }
+  wireDrawerToggle('hesaplamaAraclariToggle', 'hesaplamaDrawer');
+  wireDrawerToggle('butcelemeAraclariToggle', 'butcelemeDrawer');
+
+  // Flyout dışına tıklanınca ya da bir alt öge seçilince kapansın.
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.nav-drawer-wrap').forEach(wrap => {
+      if(!wrap.contains(e.target)){
+        const drawer = wrap.querySelector('.nav-drawer');
+        const toggle = wrap.querySelector('[data-drawer-toggle]');
+        if(drawer && drawer.classList.contains('open')){
+          drawer.classList.remove('open');
+          drawer.hidden = true;
+          if(toggle) toggle.setAttribute('aria-expanded', 'false');
+        }
+      }
+    });
+  });
+  document.querySelectorAll('.nav-subitem').forEach(item => {
+    item.addEventListener('click', () => {
+      const drawer = item.closest('.nav-drawer');
+      const wrap = item.closest('.nav-drawer-wrap');
+      const toggle = wrap ? wrap.querySelector('[data-drawer-toggle]') : null;
+      if(drawer){ drawer.classList.remove('open'); drawer.hidden = true; }
+      if(toggle) toggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  openTarget('home', 'Ana Sayfa');
+
+  // ---- PWA: Ana Ekrana Ekle desteği için service worker kaydı ----
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(()=>{ /* sessizce geç */ });
+    });
+  }
+
+  // ---- Favoriler ----
+  const FAV_KEY = 'mmg_nav_favorites';
+  const STAR_SVG = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg>';
+
+  function getFavorites(){
+    try{ return JSON.parse(localStorage.getItem(FAV_KEY)) || []; }catch(e){ return []; }
+  }
+  function setFavorites(arr){
+    try{ localStorage.setItem(FAV_KEY, JSON.stringify(arr)); }catch(e){}
+  }
+  function isFavorite(target){
+    return getFavorites().includes(target);
+  }
+  function toggleFavorite(target){
+    let favs = getFavorites();
+    if(favs.includes(target)){
+      favs = favs.filter(t => t !== target);
+    } else {
+      favs.unshift(target);
+    }
+    setFavorites(favs);
+    renderFavorites();
+  }
+
+  function renderFavStarStates(){
+    const favs = getFavorites();
+    document.querySelectorAll('.fav-star, .fav-star-card').forEach(star=>{
+      star.classList.toggle('is-fav', favs.includes(star.dataset.favTarget));
+    });
+    // Nav'daki orijinal öğeyi favorilendiyse gizle (üstteki pinned listede zaten gösteriliyor), değilse geri göster
+    document.querySelectorAll('.fav-star[data-fav-target]').forEach(star=>{
+      if(star.closest('#navFavPinned')) return; // pinned listedeki kopyaları hariç tut
+      const item = star.closest('.nav-item');
+      if(!item) return;
+      item.style.display = favs.includes(star.dataset.favTarget) ? 'none' : '';
+    });
+  }
+
+  function renderNavFavPinned(){
+    const favs = getFavorites();
+    const pinnedWrap = document.getElementById('navFavPinned');
+    const pinnedList = document.getElementById('navFavList');
+    // Sadece nav içinde gerçekten var olan hedefleri göster
+    const knownTargets = new Map();
+    document.querySelectorAll('.fav-star[data-fav-target]').forEach(s=>{
+      knownTargets.set(s.dataset.favTarget, s.dataset.favTitle || s.dataset.favTarget);
+    });
+    const favInNav = favs.filter(t => knownTargets.has(t));
+    if(favInNav.length === 0){
+      pinnedWrap.hidden = true;
+      pinnedList.innerHTML = '';
+      return;
+    }
+    pinnedWrap.hidden = false;
+    pinnedList.innerHTML = favInNav.map(t => {
+      const title = knownTargets.get(t);
+      return '<button class="nav-item" data-target="' + t + '" data-title="' + title + '">' +
+        '<span class="fav-star is-fav" role="button" tabindex="0" data-fav-target="' + t + '" data-fav-title="' + title + '" title="Favorilerden çıkar" aria-label="Favorilerden çıkar" data-i18n-title="fav_remove" data-i18n-aria="fav_remove">' + STAR_SVG + '</span>' +
+        '<span class="nav-text-wrap"><span class="nav-title">' + title + '</span></span>' +
+      '</button>';
+    }).join('');
+    // Yeni oluşturulan pinned butonlara olay dinleyicileri ekle
+    pinnedList.querySelectorAll('.nav-item').forEach(el=>{
+      el.addEventListener('click', ()=> openTarget(el.dataset.target, el.dataset.title));
+    });
+    pinnedList.querySelectorAll('.fav-star').forEach(star=>{
+      star.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        toggleFavorite(star.dataset.favTarget);
+      });
+    });
+  }
+
+  function sortCardGrid(){
+    const grid = document.getElementById('cardGrid');
+    if(!grid) return;
+    const favs = getFavorites();
+    const cards = Array.from(grid.querySelectorAll('.app-card'));
+    cards.forEach((c, i)=>{ if(c.dataset.origIndex === undefined) c.dataset.origIndex = i; });
+    cards.sort((a,b)=>{
+      const fa = favs.indexOf(a.dataset.target);
+      const fb = favs.indexOf(b.dataset.target);
+      if(fa === -1 && fb === -1) return (+a.dataset.origIndex) - (+b.dataset.origIndex);
+      if(fa === -1) return 1;
+      if(fb === -1) return -1;
+      return fa - fb;
+    });
+    cards.forEach(c => grid.appendChild(c));
+  }
+
+  function renderFavorites(){
+    renderFavStarStates();
+    renderNavFavPinned();
+    sortCardGrid();
+  }
+
+  // Mevcut (statik) yıldızlara olay dinleyicisi ekle
+  document.querySelectorAll('.fav-star[data-fav-target], .fav-star-card[data-fav-target]').forEach(star=>{
+    star.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      toggleFavorite(star.dataset.favTarget);
+    });
+    star.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        e.stopPropagation();
+        toggleFavorite(star.dataset.favTarget);
+      }
+    });
+  });
+
+  renderFavorites();
+</script>
+
+<script type="module">
+  // ---- Firebase ----
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup,
+    deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup,
+    sendPasswordResetEmail, updatePassword, sendEmailVerification
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment,
+    query, where, arrayUnion, arrayRemove
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  const auth = getAuth(fbApp);
+  const db = getFirestore(fbApp);
+  const googleProvider = new GoogleAuthProvider();
+
+  // ---- Yönetici kontrolü, premium/reklamsız durumu ----
+  const mmgResendVerifyBtn = document.getElementById('mmgResendVerifyBtn');
+  if(mmgResendVerifyBtn){
+    mmgResendVerifyBtn.addEventListener('click', async () => {
+      if(!auth.currentUser) return;
+      mmgResendVerifyBtn.disabled = true;
+      const savedMsg = document.getElementById('mmgResendVerifySavedMsg');
+      try{
+        await sendEmailVerification(auth.currentUser);
+        if(savedMsg){
+          savedMsg.style.display = 'block';
+          setTimeout(() => { savedMsg.style.display = 'none'; }, 4000);
+        }
+      }catch(e){ /* gönderilemezse sessizce geç */ }
+      mmgResendVerifyBtn.disabled = false;
+    });
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    const adminBtn = document.getElementById('adminPanelBtn');
+    const begenBtn = document.getElementById('begenIstatistikleriBtn');
+    if(!user){
+      if(adminBtn) adminBtn.style.display = 'none';
+      if(begenBtn) begenBtn.style.display = 'none';
+      try{ gtag('set', 'user_properties', { user_type: 'guest' }); }catch(e){}
+      return;
+    }
+    try{
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      let data = snap.exists() ? snap.data() : {};
+      // Eski/taşınmış hesaplarda müşteri kodu hiç atanmamış olabilir — bu durumda
+      // şimdi bir tane atayıp kaydediyoruz, böylece rozet e-posta yerine kod gösterebilsin.
+      if(!data.customerNumber){
+        try{
+          const newNo = await getNextCustomerNumber();
+          await setDoc(doc(db, 'users', user.uid), { customerNumber: newNo }, { merge: true });
+          data = Object.assign({}, data, { customerNumber: newNo });
+          localStorage.setItem('mmg_customer_no', String(newNo));
+          updateUserBadge(newNo, data.username);
+        } catch(backfillErr){ /* kod atanamazsa sessizce geç, rozet ada/e-postaya düşer */ }
+      }
+      if(adminBtn) adminBtn.style.display = data.isAdmin ? 'flex' : 'none';
+      if(begenBtn) begenBtn.style.display = data.isAdmin ? 'flex' : 'none';
+      const verifyWrap = document.getElementById('mmgVerifyEmailWrap');
+      if(verifyWrap) verifyWrap.style.display = (user.email && !user.emailVerified) ? 'block' : 'none';
+      try{ gtag('set', 'user_properties', { user_type: data.isPremium ? 'premium' : 'member' }); }catch(e){}
+      // Premium üye reklamsız deneyim: adsbygoogle script'ini reklamsız kullanıcılar için hiç yüklemiyoruz
+      if(data.isPremium){
+        document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
+        window.adsbygoogle = { push: function(){} }; // olası hataları sessizce yut
+      }
+      // Firma / Ekip: mevcut firma bilgisini yerel önbelleğe yaz
+      if(data.companyId){
+        localStorage.setItem('mmg_company_id', data.companyId);
+        localStorage.setItem('mmg_company_role', data.companyRole || 'member');
+        localStorage.setItem('mmg_company_name', data.companyName || '');
+      } else {
+        localStorage.removeItem('mmg_company_id');
+        localStorage.removeItem('mmg_company_role');
+        localStorage.removeItem('mmg_company_name');
+      }
+      // Firma Hesabı (üyelik rozeti + yöneticilik yetkisi): her ikisini de yükle
+      await loadFirmaMemberships(user.uid);
+      await loadAdminFirmas(user.uid);
+      // Zaten oturum açıkken gelen bekleyen davetleri de yakala (sadece giriş anında değil)
+      await checkPendingInvites(user, data.username);
+    } catch(e){ /* sessizce geç */ }
+  });
+
+  document.getElementById('adminPanelBtn').addEventListener('click', () => {
+    document.getElementById('accountDropdown').hidden = true;
+    openTarget('ReferansKoduYonetimi.html', 'Referans Kodu Yönetimi');
+  });
+  document.getElementById('begenIstatistikleriBtn').addEventListener('click', () => {
+    document.getElementById('accountDropdown').hidden = true;
+    openTarget('Istatistikler.html', 'İstatistikler');
+  });
+
+  // ---- Karşılama / Üyelik Ekranı ----
+  const authOverlay = document.getElementById('authOverlay');
+  const authForm = document.getElementById('authForm');
+  const authError = document.getElementById('authError');
+  const authSuccess = document.getElementById('authSuccess');
+  const authRememberRow = document.getElementById('authRememberRow');
+  const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+  const authTitle = document.getElementById('authTitle');
+  const authSub = document.getElementById('authSub');
+  const authSubmitBtn = document.getElementById('authSubmitBtn');
+  const tabLogin = document.getElementById('tabLogin');
+  const tabSignup = document.getElementById('tabSignup');
+  const passwordConfirmWrap = document.getElementById('authPasswordConfirmWrap');
+  const usernameWrap = document.getElementById('authUsernameWrap');
+  const authUsernameInput = document.getElementById('authUsername');
+  const referralWrap = document.getElementById('authReferralWrap');
+  const guestBtn = document.getElementById('guestBtn');
+  const authCaptchaInputWrap = document.getElementById('authCaptchaInputWrap');
+  const authLeftCol = document.getElementById('authLeftCol');
+
+  let authMode = 'login';
+
+  function setAuthMode(mode){
+    authMode = mode;
+    tabLogin.classList.toggle('active', mode === 'login');
+    tabSignup.classList.toggle('active', mode === 'signup');
+    passwordConfirmWrap.style.display = mode === 'signup' ? 'block' : 'none';
+    usernameWrap.style.display = mode === 'signup' ? 'block' : 'none';
+    referralWrap.style.display = mode === 'signup' ? 'block' : 'none';
+    authRememberRow.style.display = mode === 'login' ? 'flex' : 'none';
+    // Giriş ekranında buton, Şifre kutusunun hemen altında aynı sütun içinde kalır (2x2 blok);
+    // kayıt ekranında ek alanlar (kullanıcı adı, şifre tekrar, referans) araya girdiği için
+    // buton formun en altına, tam genişlikte taşınır.
+    if(mode === 'signup'){
+      authSubmitBtn.classList.add('auth-full');
+      authForm.appendChild(authSubmitBtn);
+    } else {
+      authSubmitBtn.classList.remove('auth-full');
+      if(authLeftCol) authLeftCol.appendChild(authSubmitBtn);
+    }
+    authTitle.textContent = mode === 'login' ? MMGI18N.t('auth_title_login') : MMGI18N.t('auth_title_signup');
+    authSub.textContent = mode === 'login' ? MMGI18N.t('auth_sub_login') : MMGI18N.t('auth_sub_signup');
+    authSubmitBtn.textContent = mode === 'login' ? MMGI18N.t('auth_tab_login') : MMGI18N.t('auth_create_account');
+    hideAuthError();
+    hideAuthSuccess();
+  }
+
+  function showAuthError(msg){
+    authError.textContent = msg;
+    authError.classList.add('show');
+    hideAuthSuccess();
+  }
+  function hideAuthError(){
+    authError.classList.remove('show');
+    authError.textContent = '';
+  }
+  function showAuthSuccess(msg){
+    authSuccess.textContent = msg;
+    authSuccess.classList.add('show');
+    hideAuthError();
+  }
+  function hideAuthSuccess(){
+    authSuccess.classList.remove('show');
+    authSuccess.textContent = '';
+  }
+
+  forgotPasswordBtn.addEventListener('click', async () => {
+    const emailInput = document.getElementById('authEmail');
+    const email = emailInput.value.trim();
+    if(!email){
+      showAuthError(MMGI18N.t('auth_err_need_email_reset'));
+      emailInput.focus();
+      return;
+    }
+    forgotPasswordBtn.disabled = true;
+    const originalText = forgotPasswordBtn.textContent;
+    forgotPasswordBtn.textContent = MMGI18N.t('sending');
+    try{
+      await sendPasswordResetEmail(auth, email);
+      showAuthSuccess(MMGI18N.t('auth_reset_sent_prefix') + email + MMGI18N.t('auth_reset_sent_suffix'));
+    } catch(err){
+      if(err.code === 'auth/invalid-email'){
+        showAuthError(MMGI18N.t('auth_err_invalid_email'));
+      } else if(err.code === 'auth/user-not-found'){
+        // Güvenlik amacıyla, bu e-postanın kayıtlı olup olmadığını ayırt etmiyoruz.
+        showAuthSuccess(MMGI18N.t('auth_reset_maybe_sent'));
+      } else {
+        showAuthError(MMGI18N.t('auth_err_reset_failed'));
+      }
+    } finally {
+      forgotPasswordBtn.disabled = false;
+      forgotPasswordBtn.textContent = originalText;
+    }
+  });
+
+  tabLogin.addEventListener('click', () => setAuthMode('login'));
+  tabSignup.addEventListener('click', () => setAuthMode('signup'));
+
+  function closeAuthOverlay(){
+    authOverlay.classList.add('hidden');
+  }
+  function openAuthOverlay(){
+    authOverlay.classList.remove('hidden');
+    refreshCaptcha();
+  }
+
+  // ---- Güvenlik Kodu (CAPTCHA) ----
+  const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // karışabilecek 0/O, 1/I/L hariç
+  let currentCaptchaCode = '';
+  const captchaCanvas = document.getElementById('authCaptchaCanvas');
+  const captchaInput = document.getElementById('authCaptchaInput');
+  const captchaError = document.getElementById('authCaptchaError');
+  const captchaRefreshBtn = document.getElementById('authCaptchaRefreshBtn');
+  const captchaAudioBtn = document.getElementById('authCaptchaAudioBtn');
+
+  function generateCaptchaCode(len){
+    len = len || 5;
+    let code = '';
+    for(let i = 0; i < len; i++){
+      code += CAPTCHA_CHARS[Math.floor(Math.random() * CAPTCHA_CHARS.length)];
+    }
+    return code;
+  }
+
+  function drawCaptcha(code){
+    if(!captchaCanvas) return;
+    const ctx = captchaCanvas.getContext('2d');
+    const w = captchaCanvas.width, h = captchaCanvas.height;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#f2f2f2';
+    ctx.fillRect(0, 0, w, h);
+
+    // Arka plan gürültü çizgileri
+    for(let i = 0; i < 5; i++){
+      ctx.strokeStyle = `rgba(60,60,70,${0.12 + Math.random() * 0.12})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(Math.random() * w, Math.random() * h);
+      ctx.bezierCurveTo(Math.random()*w, Math.random()*h, Math.random()*w, Math.random()*h, Math.random()*w, Math.random()*h);
+      ctx.stroke();
+    }
+    // Arka plan noktaları
+    for(let i = 0; i < 40; i++){
+      ctx.fillStyle = `rgba(40,40,50,${0.10 + Math.random() * 0.15})`;
+      ctx.beginPath();
+      ctx.arc(Math.random() * w, Math.random() * h, Math.random() * 1.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Karakterleri tek tek, hafifçe döndürerek ve dalgalı bir taban çizgisinde çiz
+    const charW = w / code.length;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    for(let i = 0; i < code.length; i++){
+      const ch = code[i];
+      const x = charW * i + charW / 2 + (Math.random() * 6 - 3);
+      const y = h / 2 + Math.sin(i * 1.4) * 6 + (Math.random() * 6 - 3);
+      const angle = (Math.random() * 32 - 16) * Math.PI / 180;
+      const size = 24 + Math.random() * 8;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.font = `700 ${size}px 'Space Grotesk', sans-serif`;
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = `hsl(${Math.random()*360}, 55%, 30%)`;
+      ctx.strokeText(ch, 0, 0);
+      ctx.restore();
+    }
+    // Ortadan geçen ince bir dalga çizgisi
+    ctx.strokeStyle = 'rgba(30,30,40,0.4)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    for(let x = 0; x <= w; x += 4){
+      const y = h / 2 + Math.sin((x / w) * Math.PI * 3) * 5;
+      if(x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  function refreshCaptcha(){
+    currentCaptchaCode = generateCaptchaCode(5);
+    drawCaptcha(currentCaptchaCode);
+    if(captchaInput) captchaInput.value = '';
+    if(captchaError) captchaError.textContent = '';
+  }
+
+  function speakCaptcha(){
+    try{
+      if(!('speechSynthesis' in window) || !currentCaptchaCode) return;
+      window.speechSynthesis.cancel();
+      const spoken = currentCaptchaCode.split('').join(', ');
+      const utter = new SpeechSynthesisUtterance(spoken);
+      utter.lang = (typeof MMGI18N !== 'undefined' && MMGI18N.lang === 'en') ? 'en-US' : 'tr-TR';
+      utter.rate = 0.75;
+      window.speechSynthesis.speak(utter);
+    }catch(e){ /* sesli okunamazsa sessizce geç */ }
+  }
+
+  function verifyCaptchaOrShowError(){
+    const val = (captchaInput && captchaInput.value ? captchaInput.value : '').trim().toUpperCase();
+    if(!val || val !== currentCaptchaCode){
+      if(captchaError) captchaError.textContent = MMGI18N.t('captcha_wrong');
+      refreshCaptcha();
+      return false;
+    }
+    if(captchaError) captchaError.textContent = '';
+    return true;
+  }
+
+  if(captchaRefreshBtn) captchaRefreshBtn.addEventListener('click', refreshCaptcha);
+  if(captchaAudioBtn) captchaAudioBtn.addEventListener('click', speakCaptcha);
+  refreshCaptcha();
+
+  function updateUserBadge(customerNumber, username){
+    const state = localStorage.getItem('mmg_auth_state');
+    const badge = document.getElementById('userBadge');
+    const nameEl = document.getElementById('userBadgeName');
+    const dropdownName = document.getElementById('accountDropdownName');
+    const dropdownSub = document.getElementById('accountDropdownSub');
+    const isRealUser = !!state && state.startsWith('user:');
+    dropdownLogoutBtn.querySelector('span').textContent = isRealUser ? MMGI18N.t('dropdown_logout') : MMGI18N.t('dropdown_login');
+    if(!state){
+      badge.style.display = 'none';
+      dropdownName.textContent = MMGI18N.t('guest');
+      dropdownSub.textContent = MMGI18N.t('auth_not_logged_in');
+      return;
+    }
+    badge.style.display = 'flex';
+    if(state === 'guest'){
+      nameEl.textContent = MMGI18N.t('guest');
+      dropdownName.textContent = MMGI18N.t('guest');
+      dropdownSub.textContent = MMGI18N.t('auth_guest_mode');
+    } else if(state.startsWith('user:')){
+      const email = state.slice(5);
+      const no = customerNumber || localStorage.getItem('mmg_customer_no');
+      let uname = username || localStorage.getItem('mmg_username');
+      if(!uname){
+        try{
+          const cachedProfile = JSON.parse(localStorage.getItem('mmg_profile') || '{}');
+          if(cachedProfile && cachedProfile.name) uname = cachedProfile.name;
+        }catch(e){ /* sessizce geç */ }
+      }
+      const displayName = uname || email;
+      nameEl.textContent = no ? ('#' + no) : displayName;
+      dropdownName.textContent = displayName;
+      dropdownSub.textContent = no ? (MMGI18N.t('auth_user_code') + no) : (uname ? email : MMGI18N.t('no_user_code'));
+    }
+  }
+
+  // ---- Profil fotoğrafı / firma logosu ----
+  const avatarImg = document.getElementById('avatarImg');
+  const avatarDefaultIcon = document.getElementById('avatarDefaultIcon');
+  const avatarImgLg = document.getElementById('avatarImgLg');
+  const avatarDefaultIconLg = document.getElementById('avatarDefaultIconLg');
+  const avatarInput = document.getElementById('avatarInput');
+
+  function setAvatar(dataUrl){
+    if(dataUrl){
+      avatarImg.src = dataUrl; avatarImg.style.display = 'block';
+      avatarDefaultIcon.style.display = 'none';
+      avatarImgLg.src = dataUrl; avatarImgLg.style.display = 'block';
+      avatarDefaultIconLg.style.display = 'none';
+    } else {
+      avatarImg.style.display = 'none'; avatarDefaultIcon.style.display = 'block';
+      avatarImgLg.style.display = 'none'; avatarDefaultIconLg.style.display = 'block';
+    }
+  }
+
+  async function saveAvatarToCloud(dataUrl){
+    const state = localStorage.getItem('mmg_auth_state');
+    if(!state || state === 'guest') return; // misafir oturumu bulutta saklanmaz
+    const user = auth.currentUser;
+    if(!user) return;
+    try{
+      await setDoc(doc(db, 'users', user.uid), { avatarBase64: dataUrl }, { merge: true });
+    } catch(err){ /* bulut kaydı başarısız olsa da sessizce geç, yerelde zaten kayıtlı */ }
+  }
+
+  avatarInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const size = 160;
+        const canvas = document.createElement('canvas');
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const scale = Math.max(size / img.width, size / img.height);
+        const w = img.width * scale, h = img.height * scale;
+        ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setAvatar(dataUrl);
+        localStorage.setItem('mmg_avatar', dataUrl);
+        saveAvatarToCloud(dataUrl);
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ---- Hesap açılır menüsü ----
+  const accountTrigger = document.getElementById('accountTrigger');
+  const accountDropdown = document.getElementById('accountDropdown');
+  const changePhotoBtn = document.getElementById('changePhotoBtn');
+  const dropdownLogoutBtn = document.getElementById('dropdownLogoutBtn');
+
+  function toggleAccountDropdown(forceState){
+    const shouldShow = typeof forceState === 'boolean' ? forceState : accountDropdown.hidden;
+    accountDropdown.hidden = !shouldShow;
+    if(shouldShow){
+      renderCompanySwitchList();
+    }
+  }
+
+  // Not: Kişisel hesaplar artık tek tek (kişi başı tek kullanıcı) — çoklu kişisel
+  // hesap arasında geçiş özelliği kaldırıldı. Hesap/firma geçişi artık aşağıdaki
+  // "Firma Üyeliklerim" (sol alt rozet) ve "Bağlı Firmalar" mekanizmalarıyla yapılır.
+
+  // B) Bağlı Firmalar: Şirket Kodu ile birbirine bağlanmış firmalar arasında geçiş
+  //    (Hesabım sayfasındaki "Firmaları Bağla" özelliğiyle aynı veriyi kullanır).
+  let mmgCompanySwitchOptions = [];
+  async function renderCompanySwitchList(){
+    const wrap = document.getElementById('mmgCompanySwitchWrap');
+    const listEl = document.getElementById('mmgCompanySwitchList');
+    if(!wrap || !listEl) return;
+    const user = auth.currentUser;
+    const companyId = user ? localStorage.getItem('mmg_company_id') : null;
+    if(!user || !companyId){ wrap.style.display = 'none'; return; }
+    try{
+      const cSnap = await getDoc(doc(db, 'companies', companyId));
+      const groupId = cSnap.exists() ? cSnap.data().groupId : null;
+      let companyIds = [companyId];
+      if(groupId){
+        const gSnap = await getDoc(doc(db, 'groups', groupId));
+        if(gSnap.exists() && Array.isArray(gSnap.data().companyIds)) companyIds = gSnap.data().companyIds;
+      }
+      if(companyIds.length < 2){ wrap.style.display = 'none'; return; }
+      const activeId = localStorage.getItem('mmg_active_company_id') || companyId;
+      mmgCompanySwitchOptions = [];
+      const rows = [];
+      for(const cid of companyIds){
+        const snap = await getDoc(doc(db, 'companies', cid));
+        const name = snap.exists() ? (snap.data().name || cid) : cid;
+        mmgCompanySwitchOptions.push({ id: cid, name: name });
+        rows.push(
+          '<div class="mmg-account-row" data-company-id="' + cid + '">' +
+            (cid === activeId ? '<span class="mmg-account-row-dot"></span>' : '<span style="width:7px;"></span>') +
+            '<span class="mmg-account-row-main">' + name + '</span>' +
+          '</div>'
+        );
+      }
+      listEl.innerHTML = rows.join('');
+      listEl.querySelectorAll('[data-company-id]').forEach(row => {
+        row.addEventListener('click', () => {
+          localStorage.setItem('mmg_active_company_id', row.dataset.companyId);
+          toggleAccountDropdown(false);
+          location.reload();
+        });
+      });
+      wrap.style.display = 'block';
+    } catch(e){ wrap.style.display = 'none'; }
+  }
+
+  accountTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleAccountDropdown();
+  });
+
+  document.addEventListener('click', (e) => {
+    if(!accountDropdown.hidden && !accountDropdown.contains(e.target) && !accountTrigger.contains(e.target)){
+      toggleAccountDropdown(false);
+    }
+  });
+
+  changePhotoBtn.addEventListener('click', () => {
+    toggleAccountDropdown(false);
+    avatarInput.click();
+  });
+
+  dropdownLogoutBtn.addEventListener('click', () => {
+    toggleAccountDropdown(false);
+    performLogout();
+  });
+
+  // ---- Hesabım: diğer araç sayfaları gibi normal bir sayfa olarak açılır ----
+  document.getElementById('accountInfoBtn').addEventListener('click', () => {
+    toggleAccountDropdown(false);
+    openTarget('Hesabim.html', 'Hesabım');
+  });
+
+  // NOT: Aktif bir oturum (giriş yapılmış ya da misafir) varsa,
+  // sayfa her yenilendiğinde tekrar giriş ekranı gösterilmez.
+  updateUserBadge();
+  setAvatar(localStorage.getItem('mmg_avatar'));
+  if(localStorage.getItem('mmg_auth_state')){
+    closeAuthOverlay();
+  }
+  // "Misafir modundasınız" rozetine tıklanınca yönlendirilen ?auth=1 ile
+  // giriş/kayıt ekranını zorla açar (misafir modunda bile olsa)
+  if(new URLSearchParams(window.location.search).get('auth') === '1'){
+    openAuthOverlay();
+  }
+  // Güvenlik önlemi: Kayıtlı durum "misafir" olduğu halde Firebase'de hâlâ
+  // gerçek bir oturum (örn. eski admin girişi) açıksa, tutarsızlığı önlemek
+  // için o oturumu kapat.
+  if(localStorage.getItem('mmg_auth_state') === 'guest' && auth.currentUser){
+    signOut(auth).catch(()=>{});
+  }
+
+  function mapFirebaseError(code){
+    const map = {
+      'auth/email-already-in-use': MMGI18N.t('auth_err_email_in_use'),
+      'auth/invalid-email': MMGI18N.t('auth_err_invalid_email'),
+      'auth/weak-password': MMGI18N.t('auth_err_weak_password'),
+      'auth/user-not-found': MMGI18N.t('auth_err_user_not_found'),
+      'auth/wrong-password': MMGI18N.t('auth_err_wrong_password'),
+      'auth/invalid-credential': MMGI18N.t('auth_err_invalid_credential'),
+      'auth/too-many-requests': MMGI18N.t('auth_err_too_many_requests'),
+      'auth/network-request-failed': MMGI18N.t('auth_err_network'),
+      'auth/operation-not-allowed': MMGI18N.t('auth_err_google_disabled'),
+      'auth/unauthorized-domain': MMGI18N.t('auth_err_unauthorized_domain'),
+      'auth/popup-blocked': MMGI18N.t('auth_err_popup_blocked')
+    };
+    return map[code] || (MMGI18N.t('auth_err_generic_prefix') + (code || MMGI18N.t('unknown')) + MMGI18N.t('auth_err_generic_suffix'));
+  }
+
+  // Sıradaki müşteri numarasını atomik olarak üretir (1001'den başlar)
+  async function getNextCustomerNumber(){
+    const counterRef = doc(db, 'meta', 'counters');
+    const newNumber = await runTransaction(db, async (tx) => {
+      const snap = await tx.get(counterRef);
+      const current = snap.exists() ? (snap.data().userCount || 1000) : 1000;
+      const next = current + 1;
+      tx.set(counterRef, { userCount: next }, { merge: true });
+      return next;
+    });
+    return newNumber;
+  }
+
+  // ---- Firma / Ekip: yeni bir firma hesabı kurar, kuran kişi 'owner' (sahibi) olur ----
+  async function createCompanyForUser(user, companyName, username){
+    const trimmedName = (companyName || '').trim();
+    const dupCheck = await getDocs(query(collection(db, 'companies'), where('name', '==', trimmedName)));
+    if(!dupCheck.empty){
+      const err = new Error('DUPLICATE_COMPANY_NAME');
+      err.code = 'DUPLICATE_COMPANY_NAME';
+      throw err;
+    }
+    const companyRef = doc(collection(db, 'companies'));
+    const companyId = companyRef.id;
+    await setDoc(companyRef, {
+      name: trimmedName,
+      ownerUid: user.uid,
+      groupId: null,
+      createdAt: serverTimestamp()
+    });
+    await setDoc(doc(db, 'companies', companyId, 'members', user.uid), {
+      email: user.email || '',
+      username: username || '',
+      role: 'owner',
+      joinedAt: serverTimestamp()
+    });
+    await setDoc(doc(db, 'users', user.uid), {
+      companyId: companyId, companyRole: 'owner', companyName: trimmedName
+    }, { merge: true });
+    localStorage.setItem('mmg_company_id', companyId);
+    localStorage.setItem('mmg_company_role', 'owner');
+    localStorage.setItem('mmg_company_name', trimmedName);
+    return companyId;
+  }
+
+  // ---- Firma / Ekip: bekleyen bir davet varsa kullanıcıyı ilgili firmaya üye olarak ekler ----
+  async function applyPendingInviteIfAny(user, username){
+    if(!user || !user.email) return;
+    try{
+      const inviteRef = doc(db, 'invites', user.email.toLowerCase());
+      const inviteSnap = await getDoc(inviteRef);
+      if(!inviteSnap.exists()) return;
+      const invite = inviteSnap.data();
+      await setDoc(doc(db, 'companies', invite.companyId, 'members', user.uid), {
+        email: user.email || '', username: username || '', role: 'member', joinedAt: serverTimestamp()
+      });
+      await setDoc(doc(db, 'users', user.uid), {
+        companyId: invite.companyId, companyRole: 'member', companyName: invite.companyName || ''
+      }, { merge: true });
+      await deleteDoc(inviteRef);
+      localStorage.setItem('mmg_company_id', invite.companyId);
+      localStorage.setItem('mmg_company_role', 'member');
+      localStorage.setItem('mmg_company_name', invite.companyName || '');
+      try{ alert('🎉 ' + (MMGI18N.lang==='en' ? ('You have been added as a member of "' + (invite.companyName || 'Company') + '".') : ('"' + (invite.companyName || 'Firma') + '" hesabına üye olarak eklendiniz.'))); }catch(e){}
+    } catch(e){ /* davet kontrol edilemezse sessizce geç */ }
+  }
+
+  // ---- Firma / Ekip: giriş sonrası kullanıcının firma bilgisini yerel önbelleğe yükler ----
+  async function syncCompanyCache(uid){
+    try{
+      const snap = await getDoc(doc(db, 'users', uid));
+      const data = snap.exists() ? snap.data() : {};
+      if(data.companyId){
+        localStorage.setItem('mmg_company_id', data.companyId);
+        localStorage.setItem('mmg_company_role', data.companyRole || 'member');
+        localStorage.setItem('mmg_company_name', data.companyName || '');
+      } else {
+        localStorage.removeItem('mmg_company_id');
+        localStorage.removeItem('mmg_company_role');
+        localStorage.removeItem('mmg_company_name');
+      }
+    } catch(e){ /* sessizce geç */ }
+  }
+
+  // ---- Firma Hesabı (YENİ): bekleyen bir kullanıcı veya yöneticilik daveti varsa,
+  // otomatik eklemek yerine site içinde bir bildirim gösterir; kullanıcı kabul/red eder ----
+  const inviteBanner = document.getElementById('mmgInviteBanner');
+  const inviteTitleEl = document.getElementById('mmgInviteTitle');
+  const inviteSubEl = document.getElementById('mmgInviteSub');
+  const inviteMsgEl = document.getElementById('mmgInviteMsg');
+  const inviteAcceptBtn = document.getElementById('mmgInviteAcceptBtn');
+  const inviteRejectBtn = document.getElementById('mmgInviteRejectBtn');
+  let pendingInviteQueue = [];
+  let inviteBannerBusy = false;
+  let inviteFetchInProgress = false; // eşzamanlı checkPendingInvites çağrılarının kuyruğu birbirinin üstüne yazmasını (ve bildirimi boş göstermesini) önler
+
+  async function checkPendingInvites(user, username){
+    if(!user || !user.email || inviteBannerBusy || inviteFetchInProgress) return;
+    inviteFetchInProgress = true;
+    const email = user.email.toLowerCase();
+    const freshQueue = [];
+    try{
+      const memberSnap = await getDoc(doc(db, 'firmaInvites', email));
+      if(memberSnap.exists()) freshQueue.push({ kind: 'member', id: email, data: memberSnap.data() || {} });
+    }catch(e){ /* sessizce geç */ }
+    try{
+      const adminSnap = await getDoc(doc(db, 'firmaAdminInvites', email));
+      if(adminSnap.exists()) freshQueue.push({ kind: 'admin', id: email, data: adminSnap.data() || {} });
+    }catch(e){ /* sessizce geç */ }
+    pendingInviteQueue = freshQueue;
+    inviteFetchInProgress = false;
+    showNextPendingInvite(user, username);
+  }
+
+  function showNextPendingInvite(user, username){
+    if(!inviteBanner || !pendingInviteQueue.length){ if(inviteBanner) inviteBanner.hidden = true; return; }
+    const invite = pendingInviteQueue[0];
+    const firmaName = (invite.data && invite.data.firmaName) || (MMGI18N.lang==='en' ? 'a company' : 'bir firma');
+    const title = '🏢 ' + firmaName;
+    const sub = invite.kind === 'admin'
+      ? (MMGI18N.lang==='en' ? ('You have been invited to be an admin of "' + firmaName + '". Do you accept?') : ('"' + firmaName + '" firmasına yönetici olarak davet edildiniz. Kabul ediyor musunuz?'))
+      : (MMGI18N.lang==='en' ? ('You have been invited to be a user of "' + firmaName + '". Do you accept?') : ('"' + firmaName + '" firmasına kullanıcı olarak davet edildiniz. Kabul ediyor musunuz?'));
+    // Güvenlik kontrolü: başlık/açıklama bir şekilde boş kalırsa bildirimi asla boş göstermeyiz,
+    // aksi halde kullanıcı ne için "Kabul Et" dediğini bilmeden onaylayabilir.
+    if(!title.trim() || !sub.trim()){
+      console.warn('mmgInviteBanner: başlık/açıklama boş geldi, bildirim gösterilmedi.', invite);
+      inviteBanner.hidden = true;
+      return;
+    }
+    inviteTitleEl.textContent = title;
+    inviteSubEl.textContent = sub;
+    inviteMsgEl.textContent = '';
+    inviteBanner.hidden = false;
+
+    inviteAcceptBtn.onclick = async () => {
+      inviteBannerBusy = true;
+      inviteAcceptBtn.disabled = true; inviteRejectBtn.disabled = true;
+      try{
+        if(invite.kind === 'admin'){
+          await setDoc(doc(db, 'firmaAccounts', invite.data.firmaId, 'admins', user.uid), {
+            email: user.email || '', addedAt: serverTimestamp()
+          });
+          await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayUnion(invite.data.firmaId) }, { merge: true });
+        } else {
+          await setDoc(doc(db, 'firmaAccounts', invite.data.firmaId, 'members', user.uid), {
+            email: user.email || '', username: username || '', permissions: invite.data.permissions || {}, addedAt: serverTimestamp()
+          });
+          await setDoc(doc(db, 'users', user.uid), { firmaIds: arrayUnion(invite.data.firmaId) }, { merge: true });
+        }
+        await deleteDoc(doc(db, invite.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', invite.id));
+        inviteMsgEl.textContent = MMGI18N.lang==='en' ? 'Accepted ✓' : 'Kabul edildi ✓';
+        try{ await loadFirmaMemberships(user.uid); await loadAdminFirmas(user.uid); }catch(e){}
+      } catch(e){
+        inviteMsgEl.style.color = 'var(--red,#E2544B)';
+        inviteMsgEl.textContent = MMGI18N.lang==='en' ? 'Something went wrong, please try again.' : 'Bir şeyler ters gitti, lütfen tekrar deneyin.';
+        inviteAcceptBtn.disabled = false; inviteRejectBtn.disabled = false;
+        inviteBannerBusy = false;
+        return;
+      }
+      setTimeout(() => {
+        pendingInviteQueue.shift();
+        inviteAcceptBtn.disabled = false; inviteRejectBtn.disabled = false;
+        inviteBannerBusy = false;
+        showNextPendingInvite(user, username);
+      }, 1100);
+    };
+
+    inviteRejectBtn.onclick = async () => {
+      inviteBannerBusy = true;
+      inviteAcceptBtn.disabled = true; inviteRejectBtn.disabled = true;
+      try{
+        await deleteDoc(doc(db, invite.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', invite.id));
+      } catch(e){ /* sessizce geç */ }
+      pendingInviteQueue.shift();
+      inviteAcceptBtn.disabled = false; inviteRejectBtn.disabled = false;
+      inviteBannerBusy = false;
+      showNextPendingInvite(user, username);
+    };
+  }
+
+  // ---- Firma Hesabı: hesap açılır menüsündeki gerçek "Veri Kaynağı" değiştiricisi ----
+  // Kullanıcı hem üye olduğu hem yönettiği firmalar arasından birini "aktif" seçebilir;
+  // seçim mmg_active_data_scope içinde saklanır ve araç sayfaları (Gelirler/Giderler/
+  // Nakit Akış) bu firmanın PAYLAŞIMLI veri havuzunu kullanır. "Kendi Verilerim" seçiliyse
+  // (varsayılan) her şey eskisi gibi kişisel hesaba kaydedilir.
+  let mmgFirmaMemberships = []; // [{id, name, role}]
+  async function loadFirmaMemberships(uid){
+    mmgFirmaMemberships = [];
+    try{
+      const snap = await getDoc(doc(db, 'users', uid));
+      const data = snap.exists() ? snap.data() : {};
+      const memberIds = Array.isArray(data.firmaIds) ? data.firmaIds : [];
+      const adminIds = Array.isArray(data.adminFirmaIds) ? data.adminFirmaIds : [];
+      const allIds = Array.from(new Set([...memberIds, ...adminIds]));
+      for(const fid of allIds){
+        try{
+          const fSnap = await getDoc(doc(db, 'firmaAccounts', fid));
+          if(fSnap.exists()){
+            mmgFirmaMemberships.push({
+              id: fid, name: fSnap.data().name || fid,
+              role: adminIds.includes(fid) ? MMGI18N.t('dropdown_user_management') : (MMGI18N.lang==='en' ? 'User' : 'Kullanıcı')
+            });
+          }
+        }catch(e){ /* tek bir firma okunamazsa listeyi bozmadan devam et */ }
+      }
+    }catch(e){ /* sessizce geç */ }
+    renderFirmaBadge();
+  }
+  function getActiveDataScope(){
+    return localStorage.getItem('mmg_active_data_scope') || 'personal';
+  }
+  function setActiveDataScope(scope){
+    localStorage.setItem('mmg_active_data_scope', scope);
+    renderFirmaBadge();
+    // Aktif veri kaynağı değiştiğinde açık olan araç sayfasının bunu hemen
+    // yansıtması için sayfayı GERÇEKTEN yeniden yüklüyoruz. "contentWindow.location.reload()"
+    // bazı durumlarda sessizce çalışmayabildiği için, garantili çalışan yöntem olarak
+    // iframe'in adresine benzersiz bir sorgu parametresi ekleyip tarayıcıyı gerçek,
+    // farksız kabul edilemeyecek bir URL değişikliğine zorluyoruz.
+    try{
+      if(frameWrap.style.display !== 'none' && iframe.src){
+        const base = iframe.src.split('?')[0];
+        iframe.src = base + '?_scope=' + Date.now();
+      }
+    }catch(e){ /* sessizce geç */ }
+  }
+  function renderFirmaBadge(){
+    const wrap = document.getElementById('mmgDataScopeWrap');
+    const listEl = document.getElementById('mmgDataScopeList');
+    const currentEl = document.getElementById('mmgDataScopeCurrent');
+    const firmaHeaderEl = document.getElementById('accountDropdownFirma');
+    if(!wrap) return;
+    if(!mmgFirmaMemberships.length){
+      wrap.style.display = 'none';
+      if(firmaHeaderEl) firmaHeaderEl.style.display = 'none';
+      return;
+    }
+    wrap.style.display = 'block';
+    const activeScope = getActiveDataScope();
+    const activeFirma = activeScope !== 'personal' ? mmgFirmaMemberships.find(f => f.id === activeScope) : null;
+    if(currentEl) currentEl.textContent = activeFirma ? ('🏢 ' + activeFirma.name) : MMGI18N.t('data_scope_personal');
+    if(firmaHeaderEl){
+      if(activeFirma){
+        firmaHeaderEl.textContent = '🏢 ' + activeFirma.name;
+        firmaHeaderEl.style.display = 'block';
+      } else {
+        firmaHeaderEl.style.display = 'none';
+      }
+    }
+    // Listede sadece ALTERNATİFLER görünür (o an aktif olan zaten üstte, canlı
+    // renkli gösteriliyor) — kalabalık olmasın diye herkes tekrar listelenmez.
+    if(listEl){
+      const others = [];
+      if(activeScope !== 'personal') others.push({ scope: 'personal', label: MMGI18N.t('data_scope_personal') });
+      mmgFirmaMemberships.forEach(f => {
+        if(f.id !== activeScope) others.push({ scope: f.id, label: '🏢 ' + f.name });
+      });
+      listEl.innerHTML = others.map(o =>
+        '<div class="mmg-account-row" data-scope="' + o.scope + '" style="opacity:0.68;">' +
+          '<span class="mmg-account-row-main">' + o.label + '</span>' +
+        '</div>'
+      ).join('');
+      listEl.querySelectorAll('[data-scope]').forEach(row => {
+        row.addEventListener('click', () => {
+          setActiveDataScope(row.dataset.scope);
+          listEl.style.display = 'none';
+          toggleAccountDropdown(false);
+        });
+      });
+    }
+  }
+  const mmgDataScopeToggleBtn = document.getElementById('mmgDataScopeToggleBtn');
+  if(mmgDataScopeToggleBtn){
+    mmgDataScopeToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const listEl = document.getElementById('mmgDataScopeList');
+      if(listEl) listEl.style.display = (listEl.style.display === 'none') ? 'block' : 'none';
+    });
+  }
+
+  // ================== Firma Yöneticiliği (rol tabanlı, ayrı giriş YOK) ==================
+  // Firma artık ayrı bir hesap türü değil — normal bir kullanıcı, bir ya da birden
+  // fazla firmanın "yöneticisi" (admin) olarak atanabilir. Bu, kendi kişisel
+  // hesabıyla veri girmesini hiçbir şekilde kısıtlamaz; sadece ek olarak "Kullanıcı
+  // Yönetim Paneli"ne erişim kazandırır (yönettiği firma(lar) için).
+  let mmgAdminFirmaIds = [];
+  async function loadAdminFirmas(uid){
+    mmgAdminFirmaIds = [];
+    try{
+      const snap = await getDoc(doc(db, 'users', uid));
+      if(snap.exists() && Array.isArray(snap.data().adminFirmaIds)){
+        mmgAdminFirmaIds = snap.data().adminFirmaIds;
+      }
+    } catch(e){ /* sessizce geç */ }
+    const isAdmin = mmgAdminFirmaIds.length > 0;
+    const dropdownBtn = document.getElementById('kullaniciYonetimBtn');
+    if(dropdownBtn) dropdownBtn.style.display = isAdmin ? 'flex' : 'none';
+  }
+
+  document.getElementById('kullaniciYonetimBtn').addEventListener('click', () => {
+    document.getElementById('accountDropdown').hidden = true;
+    openTarget('KullaniciYonetimi.html', MMGI18N.lang==='en' ? 'User Management Panel' : 'Kullanıcı Yönetim Paneli');
+  });
+
+  guestBtn.addEventListener('click', async () => {
+    try{ await signOut(auth); }catch(e){ /* zaten oturum yoksa sessizce geç */ }
+    localStorage.setItem('mmg_auth_state', 'guest');
+    localStorage.setItem('mmg_remember', document.getElementById('rememberMe').checked ? '1' : '0');
+    updateUserBadge();
+    closeAuthOverlay();
+  });
+
+  const googleBtn = document.getElementById('googleBtn');
+  googleBtn.addEventListener('click', async () => {
+    hideAuthError();
+    googleBtn.disabled = true;
+    const remember = document.getElementById('rememberMe').checked;
+    try{
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const email = user.email;
+      let customerNumber = null;
+      let username = null;
+      let avatar = null;
+      let profile = null;
+
+      const userRef = doc(db, 'users', user.uid);
+      const snap = await getDoc(userRef);
+      if(snap.exists()){
+        customerNumber = snap.data().customerNumber;
+        username = snap.data().username;
+        avatar = snap.data().avatarBase64 || null;
+        profile = snap.data().profile || null;
+      } else {
+        customerNumber = await getNextCustomerNumber();
+        username = (user.displayName || email.split('@')[0]).trim();
+        await setDoc(userRef, {
+          email: email,
+          username: username,
+          customerNumber: customerNumber,
+          createdAt: serverTimestamp()
+        });
+      }
+      // Bulutta özel bir avatar yoksa, Google profil fotoğrafını göster (sadece görüntüleme; bizim sunucumuzda saklanmıyor)
+      if(!avatar && user.photoURL) avatar = user.photoURL;
+
+      localStorage.setItem('mmg_auth_state', 'user:' + email);
+      if(customerNumber) localStorage.setItem('mmg_customer_no', String(customerNumber));
+      if(username) localStorage.setItem('mmg_username', username);
+      if(avatar) localStorage.setItem('mmg_avatar', avatar); else localStorage.removeItem('mmg_avatar');
+      if(profile) localStorage.setItem('mmg_profile', JSON.stringify(profile));
+      setAvatar(avatar);
+      localStorage.setItem('mmg_remember', remember ? '1' : '0');
+      updateUserBadge(customerNumber, username);
+      await applyPendingInviteIfAny(user, username);
+      await checkPendingInvites(user, username);
+      await syncCompanyCache(user.uid);
+      await loadAdminFirmas(user.uid);
+      closeAuthOverlay();
+    } catch(err){
+      if(err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request'){
+        showAuthError(mapFirebaseError(err.code));
+      }
+    } finally {
+      googleBtn.disabled = false;
+    }
+  });
+
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideAuthError();
+    if(!verifyCaptchaOrShowError()) return;
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const remember = document.getElementById('rememberMe').checked;
+
+    authSubmitBtn.disabled = true;
+    const originalLabel = authSubmitBtn.textContent;
+    authSubmitBtn.textContent = MMGI18N.t('please_wait');
+
+    try{
+      if(authMode === 'signup'){
+        const confirm = document.getElementById('authPasswordConfirm').value;
+        const username = document.getElementById('authUsername').value.trim();
+        if(!username){
+          showAuthError(MMGI18N.t('auth_err_need_username'));
+          return;
+        }
+        if(password !== confirm){
+          showAuthError(MMGI18N.t('auth_err_passwords_mismatch'));
+          return;
+        }
+        if(password.length < 6){
+          showAuthError(MMGI18N.t('auth_err_weak_password'));
+          return;
+        }
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        try{ await sendEmailVerification(cred.user); }catch(verifyErr){ /* gönderilemezse kaydı engellemesin */ }
+        const customerNumber = await getNextCustomerNumber();
+        const referralCodeRaw = document.getElementById('authReferralCode').value.trim();
+        const referralCode = referralCodeRaw ? referralCodeRaw.toUpperCase() : null;
+
+        // Referans kodu tanımlıysa (owner tarafından oluşturulmuşsa) faydasını (ücretsiz/indirimli) belirle
+        let premiumBenefit = null;
+        let referralLimitReached = false;
+        if(referralCode){
+          try{
+            const codeSnap = await getDoc(doc(db, 'referralCodes', referralCode));
+            if(codeSnap.exists() && codeSnap.data().active !== false){
+              const cd = codeSnap.data();
+              let usedCount = 0;
+              if(cd.maxUses){
+                try{
+                  const usageSnap = await getDoc(doc(db, 'referrals', referralCode));
+                  usedCount = usageSnap.exists() ? (usageSnap.data().count || 0) : 0;
+                }catch(usageErr){ usedCount = 0; }
+              }
+              if(cd.maxUses && usedCount >= cd.maxUses){
+                referralLimitReached = true;
+              } else {
+                premiumBenefit = {
+                  type: cd.benefitType || 'discount',
+                  discountPercent: cd.discountPercent || 0,
+                  code: referralCode
+                };
+              }
+            }
+          } catch(codeErr){ /* kod tanımlı değilse veya okunamazsa sessizce geç */ }
+        }
+
+        await setDoc(doc(db, 'users', cred.user.uid), {
+          email: email,
+          username: username,
+          customerNumber: customerNumber,
+          referredBy: referralCode,
+          isPremium: premiumBenefit && premiumBenefit.type === 'free' ? true : false,
+          premiumBenefit: premiumBenefit,
+          createdAt: serverTimestamp()
+        });
+        // Referans istatistiği: hangi kodun kaç kişi getirdiğini ve kimleri getirdiğini kaydet
+        if(referralCode){
+          try{
+            await setDoc(doc(db, 'referrals', referralCode), {
+              code: referralCode,
+              count: increment(1),
+              lastUsedAt: serverTimestamp()
+            }, { merge: true });
+            await setDoc(doc(db, 'referrals', referralCode, 'users', cred.user.uid), {
+              email: email,
+              username: username,
+              customerNumber: customerNumber,
+              joinedAt: serverTimestamp()
+            });
+            try{ gtag('event', 'signup_with_referral', { referral_code: referralCode }); }catch(gtagErr){}
+          } catch(refErr){
+            // Referans istatistiği kaydedilemezse sessizce geç, kayıt işlemini engellemesin
+          }
+        }
+        localStorage.setItem('mmg_auth_state', 'user:' + email);
+        localStorage.setItem('mmg_customer_no', String(customerNumber));
+        localStorage.setItem('mmg_username', username);
+        localStorage.setItem('mmg_remember', remember ? '1' : '0');
+        updateUserBadge(customerNumber, username);
+        if(premiumBenefit){
+          if(premiumBenefit.type === 'free'){
+            alert('🎉 "' + premiumBenefit.code + '" ' + MMGI18N.t('referral_used_free'));
+          } else {
+            alert('🎉 "' + premiumBenefit.code + '" ' + MMGI18N.t('referral_used_discount_prefix') + premiumBenefit.discountPercent + MMGI18N.t('referral_used_discount_suffix'));
+          }
+        } else if(referralLimitReached){
+          alert('"' + referralCode + '" ' + MMGI18N.t('referral_limit_reached'));
+        }
+
+        // ---- Bekleyen bir eski-sistem (Hesabım'dan gönderilmiş) daveti varsa uygula ----
+        await applyPendingInviteIfAny(cred.user, username);
+        await checkPendingInvites(cred.user, username);
+        await loadAdminFirmas(cred.user.uid);
+        try{ alert(MMGI18N.lang==='en' ? ('Your account has been created. 📩 We sent a verification email to ' + email + ' — please check your inbox (and spam folder) and confirm your email.') : ('Hesabınız oluşturuldu. 📩 ' + email + ' adresine bir doğrulama e-postası gönderdik, lütfen gelen kutunuzu (ve gereksiz/spam klasörünü) kontrol edip e-postanızı onaylayın.')); }catch(alertErr){}
+
+        closeAuthOverlay();
+      } else {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        let customerNumber = null;
+        let username = null;
+        let avatar = null;
+        let profile = null;
+        try{
+          const snap = await getDoc(doc(db, 'users', cred.user.uid));
+          if(snap.exists()){
+            customerNumber = snap.data().customerNumber;
+            username = snap.data().username;
+            avatar = snap.data().avatarBase64 || null;
+            profile = snap.data().profile || null;
+          }
+        } catch(err){ /* profil okunamadıysa sessizce geç */ }
+        localStorage.setItem('mmg_auth_state', 'user:' + email);
+        if(customerNumber) localStorage.setItem('mmg_customer_no', String(customerNumber));
+        if(username) localStorage.setItem('mmg_username', username);
+        if(avatar) { localStorage.setItem('mmg_avatar', avatar); setAvatar(avatar); }
+        if(profile) localStorage.setItem('mmg_profile', JSON.stringify(profile));
+        localStorage.setItem('mmg_remember', remember ? '1' : '0');
+        updateUserBadge(customerNumber, username);
+        await applyPendingInviteIfAny(cred.user, username);
+        await checkPendingInvites(cred.user, username);
+        await syncCompanyCache(cred.user.uid);
+        await loadAdminFirmas(cred.user.uid);
+        closeAuthOverlay();
+      }
+    } catch(err){
+      showAuthError(mapFirebaseError(err.code));
+    } finally {
+      authSubmitBtn.disabled = false;
+      authSubmitBtn.textContent = originalLabel;
+    }
+  });
+
+  async function performLogout(){
+    try { await signOut(auth); } catch(err){ /* önemli değil */ }
+    localStorage.removeItem('mmg_auth_state');
+    localStorage.removeItem('mmg_remember');
+    localStorage.removeItem('mmg_customer_no');
+    localStorage.removeItem('mmg_username');
+    localStorage.removeItem('mmg_avatar');
+    localStorage.removeItem('mmg_profile');
+    localStorage.removeItem('mmg_company_id');
+    localStorage.removeItem('mmg_company_role');
+    localStorage.removeItem('mmg_company_name');
+    localStorage.removeItem('mmg_active_company_id');
+    setAvatar(null);
+    updateUserBadge();
+    mmgAdminFirmaIds = [];
+    mmgFirmaMemberships = [];
+    renderFirmaBadge();
+    const dropdownBtn0 = document.getElementById('kullaniciYonetimBtn');
+    if(dropdownBtn0) dropdownBtn0.style.display = 'none';
+    document.getElementById('authEmail').value = '';
+    document.getElementById('authPassword').value = '';
+    document.getElementById('rememberMe').checked = false;
+    setAuthMode('login');
+    openAuthOverlay();
+  }
+
+  // ---- Açık / Koyu Görünüm Modu ----
+  // Kabuk (sidebar, üst bar, hero) burada; iframe içindeki hesaplayıcı
+  // sayfalarına da postMessage ile anında bildiriliyor, böylece kullanıcı
+  // bir araç sayfasının içindeyken tema değiştirirse iframe da hemen güncellenir.
+  function applyTheme(mode){
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+    localStorage.setItem('mmg_theme', mode);
+    const darkBtn = document.getElementById('mmgThemeDarkBtn');
+    const lightBtn = document.getElementById('mmgThemeLightBtn');
+    if(darkBtn) darkBtn.classList.toggle('active', mode !== 'light');
+    if(lightBtn) lightBtn.classList.toggle('active', mode === 'light');
+    try{
+      const frameEl = document.getElementById('app-frame');
+      if(frameEl && frameEl.contentWindow){
+        frameEl.contentWindow.postMessage({ mmgTheme: mode }, '*');
+      }
+    }catch(e){}
+  }
+  window.mmgApplyTheme = applyTheme;
+  applyTheme(localStorage.getItem('mmg_theme') || 'dark');
+</script>
+
+<button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır" data-i18n-title="scroll_down" data-i18n-aria="scroll_down">↓</button>
+<style>
+  #mmgScrollDownBtn{
+    position:fixed; right:20px; bottom:20px; z-index:500;
+    width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
+    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B);
+    font-size:20px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(0,0,0,0.35); transition:opacity .2s ease, transform .2s ease;
+    opacity:0; pointer-events:none;
+  }
+  #mmgScrollDownBtn.show{ opacity:1; pointer-events:auto; }
+  #mmgScrollDownBtn:hover{ transform:translateY(2px); }
+</style>
+<script>
+(function(){
+  var btn = document.getElementById('mmgScrollDownBtn');
+  function nearBottom(){
+    return (window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 40);
+  }
+  function updateVisibility(){
+    if(document.body.scrollHeight <= window.innerHeight + 60 || nearBottom()){
+      btn.classList.remove('show');
+    } else {
+      btn.classList.add('show');
+    }
+  }
+  btn.addEventListener('click', function(){
+    window.scrollBy({ top: window.innerHeight * 0.85, behavior: 'smooth' });
+  });
+  window.addEventListener('scroll', updateVisibility);
+  window.addEventListener('resize', updateVisibility);
+  updateVisibility();
+})();
+</script>
+
+<script>
+(function(){
+  // Sol üstteki logo kutusunun alt çizgisini, sağdaki hero panelinin alt çizgisiyle
+  // her zaman aynı hizada tutar (metin uzunluğu ya da ekran boyutu değişse bile).
+  function alignBrandWithHero(){
+    var heroEl = document.querySelector('.hero');
+    var brandEl = document.querySelector('.brand');
+    if(!heroEl || !brandEl) return;
+    brandEl.style.minHeight = heroEl.offsetHeight + 'px';
+  }
+  window.addEventListener('load', alignBrandWithHero);
+  window.addEventListener('resize', alignBrandWithHero);
+  setTimeout(alignBrandWithHero, 300);
+})();
+</script>
+
+
+<style>
+  #mmgSettingsOverlay{
+    position:fixed; inset:0; z-index:920; background:rgba(5,8,14,0.7);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  #mmgSettingsOverlay[hidden]{ display:none; }
+  #mmgSettingsPanel{
+    width:100%; max-width:380px; background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448);
+    border-radius:16px; box-shadow:0 24px 60px rgba(0,0,0,0.5); padding:22px;
+  }
+  #mmgSettingsPanel h3{ font-family:'Space Grotesk',sans-serif; font-size:17px; color:var(--text,#EAEDF3); margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; }
+  #mmgSettingsCloseBtn{ background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:16px; }
+  #mmgSettingsCloseBtn:hover{ color:var(--text,#EAEDF3); }
+  .mmg-settings-label{ font-size:12px; color:var(--muted,#8D96AC); margin-bottom:8px; font-weight:600; }
+  .mmg-lang-row{ display:flex; gap:8px; margin-bottom:6px; }
+  .mmg-lang-btn{
+    flex:1; padding:11px 0; border-radius:9px; border:1px solid var(--hairline,#2A3448); background:var(--surface-2,#1B2536);
+    color:var(--text,#EAEDF3); cursor:pointer; font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600;
+  }
+  .mmg-lang-btn.active{ border-color:var(--brass,#C6A15B); background:rgba(198,161,91,0.12); color:var(--brass,#C6A15B); }
+  .mmg-settings-note{ font-size:11.5px; color:var(--muted,#8D96AC); margin-top:14px; line-height:1.5; }
+</style>
+<div id="mmgSettingsOverlay" hidden>
+  <div id="mmgSettingsPanel">
+    <h3><span data-i18n="settings_title">Ayarlar</span><button type="button" id="mmgSettingsCloseBtn" aria-label="Kapat" data-i18n-aria="close">✕</button></h3>
+
+    <div class="mmg-settings-label" data-i18n="settings_lang_label">Dil / Language</div>
+    <div class="mmg-lang-row" style="margin-bottom:18px;">
+      <button type="button" class="mmg-lang-btn" data-lang="tr">Türkçe</button>
+      <button type="button" class="mmg-lang-btn" data-lang="en">English</button>
+    </div>
+
+    <div style="display:flex; gap:14px; margin-bottom:18px;">
+      <div style="flex:1;">
+        <div class="mmg-settings-label" data-i18n="settings_view_mode">Görünüm Modu</div>
+        <button type="button" class="mmg-lang-btn" id="mmgThemeDarkBtn" style="width:100%; margin-bottom:6px;"><span data-i18n="settings_dark_mode">☾ Koyu Mod</span></button>
+        <button type="button" class="mmg-lang-btn" id="mmgThemeLightBtn" style="width:100%;"><span data-i18n="settings_light_mode">☀ Açık Mod</span></button>
+      </div>
+      <div style="flex:1;">
+        <div class="mmg-settings-label" data-i18n="settings_fullscreen_mode">Tam Ekran Modu</div>
+        <button type="button" class="mmg-lang-btn" id="mmgFullscreenOnBtn" style="width:100%; margin-bottom:6px;"><span data-i18n="settings_fullscreen_on">⛶ Tam Ekran</span></button>
+        <button type="button" class="mmg-lang-btn" id="mmgFullscreenOffBtn" style="width:100%;" data-i18n="settings_window_mode">Pencere Modu</button>
+      </div>
+    </div>
+
+    <div class="mmg-settings-label" data-i18n="settings_notifications">Bildirimler</div>
+    <div class="mmg-lang-row" style="margin-bottom:18px;">
+      <button type="button" class="mmg-lang-btn" id="mmgNotifOnBtn" data-i18n="settings_on">Açık</button>
+      <button type="button" class="mmg-lang-btn" id="mmgNotifOffBtn" data-i18n="settings_off">Kapalı</button>
+    </div>
+
+    <div class="mmg-settings-label" data-i18n="settings_change_password">Şifre Değiştir</div>
+    <button type="button" class="mmg-lang-btn" id="mmgForgotPasswordToggleBtn" style="width:100%; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:6px;">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="15" r="4"/><path d="M10.5 12.5L20 3M20 3v4M20 3h-4"/></svg>
+      <span data-i18n="settings_forgot_password">Şifremi Unuttum</span>
+    </button>
+    <form id="mmgPasswordForm" style="margin-bottom:6px; display:none;">
+      <input type="password" id="mmgOldPassword" placeholder="Eski şifre" data-i18n-placeholder="settings_old_password" autocomplete="current-password"
+        style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13.5px; margin-bottom:8px; outline:none;">
+      <input type="password" id="mmgNewPassword" placeholder="Yeni şifre (en az 6 karakter)" data-i18n-placeholder="settings_new_password" autocomplete="new-password"
+        style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13.5px; margin-bottom:8px; outline:none;">
+      <input type="password" id="mmgNewPassword2" placeholder="Yeni şifre (tekrar)" data-i18n-placeholder="settings_new_password_repeat" autocomplete="new-password"
+        style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13.5px; margin-bottom:8px; outline:none;">
+      <button type="submit" class="mmg-lang-btn" id="mmgPasswordSubmitBtn" style="width:100%;" data-i18n="settings_update_password">Şifreyi Güncelle</button>
+      <div id="mmgPasswordMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>
+    </form>
+
+    <button type="button" id="mmgSettingsOkBtn" style="width:100%; margin-top:14px; padding:12px 0; border-radius:9px; border:none; cursor:pointer; background:linear-gradient(120deg, var(--coral,#FF6B4A), var(--brass,#C6A15B) 75%); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;" data-i18n="settings_ok">✓ Tamam</button>
+
+  </div>
+</div>
+<script type="module">
+import { getApps, getApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+const auth = getApps().length ? getAuth(getApp()) : null;
+(function(){
+  // ---- Ana sayfa kabuğu için TR/EN sözlüğü (motor: i18n-core.js) ----
+  MMGI18N.onChange(function(lang){
+    document.title = lang === 'en' ? 'mmgcreativity — Digital Finance Assistant' : 'mmgcreativity — Dijital Finans Asistanı';
+  });
+  function applyLang(lang){ MMGI18N.setLang(lang); }
+  function getSavedLang(){ return MMGI18N.getSavedLang() || 'tr'; }
+  function saveLang(lang){ MMGI18N.setLang(lang); }
+
+  const settingsBtn = document.getElementById('mmgSettingsBtn');
+  const overlay = document.getElementById('mmgSettingsOverlay');
+  const closeBtn = document.getElementById('mmgSettingsCloseBtn');
+  if(settingsBtn){
+    settingsBtn.addEventListener('click', () => {
+      document.getElementById('accountDropdown').hidden = true;
+      overlay.hidden = false;
+      // Ayarlar açılırken görünüm/bildirim butonlarının aktif durumunu güncelle
+      if(window.mmgApplyTheme) window.mmgApplyTheme(localStorage.getItem('mmg_theme') || 'dark');
+      refreshNotifButtons();
+      if(typeof refreshFullscreenButtons === 'function') refreshFullscreenButtons();
+    });
+  }
+  if(closeBtn) closeBtn.addEventListener('click', () => { overlay.hidden = true; });
+  const okBtn = document.getElementById('mmgSettingsOkBtn');
+  if(okBtn) okBtn.addEventListener('click', () => { overlay.hidden = true; });
+  if(overlay) overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.hidden = true; });
+  document.querySelectorAll('.mmg-lang-btn[data-lang]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      saveLang(btn.dataset.lang);
+      applyLang(btn.dataset.lang);
+    });
+  });
+
+  MMGI18N.detectAndApplyDefaultLang();
+
+  // ---- Görünüm Modu (Ayarlar paneli içinden) ----
+  const themeDarkBtn = document.getElementById('mmgThemeDarkBtn');
+  const themeLightBtn = document.getElementById('mmgThemeLightBtn');
+  if(themeDarkBtn) themeDarkBtn.addEventListener('click', () => { if(window.mmgApplyTheme) window.mmgApplyTheme('dark'); });
+  if(themeLightBtn) themeLightBtn.addEventListener('click', () => { if(window.mmgApplyTheme) window.mmgApplyTheme('light'); });
+
+  // ---- Tam Ekran Modu (F11 ile aynı tarayıcı API'si) ----
+  const fsOnBtn = document.getElementById('mmgFullscreenOnBtn');
+  const fsOffBtn = document.getElementById('mmgFullscreenOffBtn');
+  function refreshFullscreenButtons(){
+    const isFs = !!document.fullscreenElement;
+    if(fsOnBtn) fsOnBtn.classList.toggle('active', isFs);
+    if(fsOffBtn) fsOffBtn.classList.toggle('active', !isFs);
+  }
+  if(fsOnBtn){
+    fsOnBtn.addEventListener('click', async () => {
+      try{ await document.documentElement.requestFullscreen(); }
+      catch(e){ /* tarayici izin vermediyse sessizce gec */ }
+    });
+  }
+  if(fsOffBtn){
+    fsOffBtn.addEventListener('click', async () => {
+      try{ if(document.fullscreenElement) await document.exitFullscreen(); }
+      catch(e){ /* sessizce geç */ }
+    });
+  }
+  document.addEventListener('fullscreenchange', refreshFullscreenButtons);
+  refreshFullscreenButtons();
+
+  // ---- Bildirimler (uygulama içi uyarılar için tercih; tarayıcı push bildirimi değildir) ----
+  const notifOnBtn = document.getElementById('mmgNotifOnBtn');
+  const notifOffBtn = document.getElementById('mmgNotifOffBtn');
+  function refreshNotifButtons(){
+    const enabled = localStorage.getItem('mmg_notifications_enabled') !== '0';
+    if(notifOnBtn) notifOnBtn.classList.toggle('active', enabled);
+    if(notifOffBtn) notifOffBtn.classList.toggle('active', !enabled);
+  }
+  function setNotifEnabled(enabled){
+    localStorage.setItem('mmg_notifications_enabled', enabled ? '1' : '0');
+    refreshNotifButtons();
+  }
+  if(notifOnBtn) notifOnBtn.addEventListener('click', () => setNotifEnabled(true));
+  if(notifOffBtn) notifOffBtn.addEventListener('click', () => setNotifEnabled(false));
+  refreshNotifButtons();
+
+  // ---- Şifremi Unuttum / Şifre Değiştir ----
+  const pwToggleBtn = document.getElementById('mmgForgotPasswordToggleBtn');
+  const pwForm = document.getElementById('mmgPasswordForm');
+  const pwMsg = document.getElementById('mmgPasswordMsg');
+  if(pwToggleBtn && pwForm){
+    pwToggleBtn.addEventListener('click', () => {
+      const isHidden = pwForm.style.display === 'none';
+      pwForm.style.display = isHidden ? 'block' : 'none';
+      pwToggleBtn.querySelector('span').textContent = isHidden ? MMGI18N.t('settings_cancel') : MMGI18N.t('settings_forgot_password');
+      pwMsg.textContent = '';
+      if(isHidden){
+        const oldPwInput = document.getElementById('mmgOldPassword');
+        if(oldPwInput) oldPwInput.focus();
+      } else {
+        pwForm.reset();
+      }
+    });
+  }
+  if(pwForm){
+    pwForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      pwMsg.textContent = '';
+      const oldPw = document.getElementById('mmgOldPassword').value;
+      const p1 = document.getElementById('mmgNewPassword').value;
+      const p2 = document.getElementById('mmgNewPassword2').value;
+      if(!auth.currentUser){
+        pwMsg.style.color = 'var(--red,#E2544B)';
+        pwMsg.textContent = MMGI18N.t('pw_err_need_login');
+        return;
+      }
+      if(!oldPw){
+        pwMsg.style.color = 'var(--red,#E2544B)';
+        pwMsg.textContent = MMGI18N.t('pw_err_need_old');
+        return;
+      }
+      if(p1.length < 6){
+        pwMsg.style.color = 'var(--red,#E2544B)';
+        pwMsg.textContent = MMGI18N.t('auth_err_weak_password');
+        return;
+      }
+      if(p1 !== p2){
+        pwMsg.style.color = 'var(--red,#E2544B)';
+        pwMsg.textContent = MMGI18N.t('pw_err_mismatch');
+        return;
+      }
+      pwMsg.style.color = 'var(--muted,#8D96AC)';
+      pwMsg.textContent = MMGI18N.t('pw_updating');
+      try{
+        // Güvenlik gereği önce eski şifreyle kimlik doğrulaması yapılır, ardından yeni şifre ayarlanır.
+        const cred = EmailAuthProvider.credential(auth.currentUser.email, oldPw);
+        await reauthenticateWithCredential(auth.currentUser, cred);
+        await updatePassword(auth.currentUser, p1);
+        pwMsg.style.color = 'var(--teal,#3FB68A)';
+        pwMsg.textContent = MMGI18N.t('pw_updated');
+        pwForm.reset();
+        setTimeout(() => {
+          pwForm.style.display = 'none';
+          if(pwToggleBtn) pwToggleBtn.querySelector('span').textContent = MMGI18N.t('settings_forgot_password');
+          pwMsg.textContent = '';
+        }, 1500);
+      }catch(err){
+        pwMsg.style.color = 'var(--red,#E2544B)';
+        if(err && (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential')){
+          pwMsg.textContent = MMGI18N.t('pw_err_wrong_current');
+        } else if(err && err.code === 'auth/too-many-requests'){
+          pwMsg.textContent = MMGI18N.t('auth_err_too_many_requests');
+        } else {
+          pwMsg.textContent = MMGI18N.t('pw_err_update_failed');
+        }
+      }
+    });
+  }
+})();
+</script>
+
+<script src="mmg-feedback-widget.js"></script>
+
+<script type="module" src="mmg-chat-widget.js"></script>
+</body>
+</html>
