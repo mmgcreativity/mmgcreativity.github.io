@@ -220,13 +220,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 data-i18n="profile_info">Profil Bilgileri</h2>
     <form id="accountInfoForm">
       <div class="auth-field">
-        <label data-i18n="account_type">Hesap Türü</label>
-        <select id="profileType">
-          <option value="bireysel" data-i18n="individual">Bireysel</option>
-          <option value="firma" data-i18n="corporate">Kurumsal</option>
-        </select>
-      </div>
-      <div class="auth-field">
         <label id="profileNameLabel" data-i18n="full_name">Ad Soyad</label>
         <input type="text" id="profileName" placeholder="Ad Soyad">
       </div>
@@ -264,69 +257,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="card" id="companyCard">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;">
-      <h2 style="margin-bottom:0;" data-i18n="user_group">Kullanıcı Grubu</h2>
-      <button type="button" id="companyPreviewToggle" class="preview-toggle-btn" style="display:none;" data-i18n="sample_view">Dolu örnek görünüm</button>
-    </div>
-
-    <div id="companyLocked" style="display:none;">
-      <p class="referral-note" data-i18n="company_locked">Kullanıcı grubu özellikleri için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz.</p>
-    </div>
-
-    <div id="companyNone" style="display:none;">
-      <p class="referral-note" id="companyNoneNote" data-i18n="company_none">Şu anda bireysel bir hesaptır. Soldaki Profil Bilgileri'nden Hesap Türü'nü "Kurumsal" seçip firma adınızı girerek kaydedin — burada otomatik olarak kullanıcı grubunuz açılır ve diğer kullanıcıları (alt kullanıcı olarak) ekleyip aynı verileri birlikte görüp işleyebilirsiniz.</p>
-    </div>
-
-    <div id="companyActive" style="display:none;">
-      <div class="preview-badge" id="companyPreviewBadge" style="display:none;" data-i18n="preview_badge">Bu bir örnek görünümdür — gerçek veri değildir</div>
-      <div class="company-header">
-        <div>
-          <div class="company-name" id="companyNameText">—</div>
-          <div class="company-role" id="companyRoleText">—</div>
-        </div>
-      </div>
-
-      <div id="companyOwnerOnly" style="display:none;">
-        <div class="mini-label"><span data-i18n="company_code">Şirket Kodu</span> <span style="font-weight:400; color:var(--muted);" data-i18n="company_code_note">(gruplama için paylaşın)</span></div>
-        <div class="code-box" id="companyIdBox">—</div>
-
-        <div class="mini-label" style="margin-top:22px;" data-i18n="add_user">Kullanıcı Ekle</div>
-        <form id="inviteForm">
-          <div class="auth-field" style="display:flex; gap:8px; margin-bottom:6px;">
-            <input type="email" id="inviteEmail" placeholder="ornek@eposta.com" style="flex:1;" required>
-            <button type="submit" class="auth-submit" id="inviteSubmitBtn" style="width:auto; padding:12px 18px; margin-top:0;" data-i18n="invite_btn">Davet Et</button>
-          </div>
-          <div class="auth-error" id="inviteError"></div>
-          <div class="saved-msg" id="inviteSavedMsg" data-i18n="invite_sent">Davet gönderildi ✓</div>
-        </form>
-        <div id="pendingInvitesList" class="member-list"></div>
-      </div>
-
-      <div class="mini-label" style="margin-top:22px;" data-i18n="users_label">Kullanıcılar</div>
-      <div id="membersList" class="member-list"><p class="referral-note" data-i18n="loading">Yükleniyor...</p></div>
-
-      <div id="leaveCompanyWrap" style="display:none; margin-top:18px;">
-        <button type="button" id="leaveCompanyBtn" class="danger-btn" data-i18n="leave_group">Gruptan Ayrıl</button>
-      </div>
-
-      <div id="companyGroupSection" style="display:none; margin-top:26px; border-top:1px solid var(--hairline); padding-top:22px;">
-        <div class="mini-label" data-i18n="group_linked_companies">Grup — Bağlı Firmalar</div>
-        <p class="referral-note" data-i18n="group_note">Birden fazla firmayı aynı gruba bağlayıp aralarında geçiş yapabilirsiniz.</p>
-        <div id="groupCompaniesList" class="member-list"></div>
-        <form id="linkCompanyForm" style="margin-top:14px;">
-          <div class="auth-field" style="display:flex; gap:8px; margin-bottom:6px;">
-            <input type="text" id="linkCompanyId" placeholder="Bağlanacak firmanın Şirket Kodu" style="flex:1;">
-            <button type="submit" class="auth-submit" id="linkCompanyBtn" style="width:auto; padding:12px 18px; margin-top:0;" data-i18n="link_btn">Bağla</button>
-          </div>
-          <div class="auth-error" id="linkCompanyError"></div>
-        </form>
-
-        <div id="switchCompanyWrap" style="display:none; margin-top:18px;">
-          <div class="mini-label"><span data-i18n="active_company">Aktif Firma</span> <span style="font-weight:400; color:var(--muted);" data-i18n="active_company_note">(işlem yapacağınız firma)</span></div>
-          <select id="switchCompanySelect"></select>
-        </div>
-      </div>
-    </div>
+    <h2 style="margin-bottom:10px;" data-i18n="user_group">Firma / Kullanıcı Grubu</h2>
+    <p class="referral-note" style="margin-bottom:0;">
+      Firma hesapları artık kendi e-posta/şifresiyle ayrı giriş yapan, sadece kullanıcı ekleyip yetkilendirebilen
+      bağımsız hesaplardır — kişisel hesabınızdan yönetilmez. Bir firma hesabınız yoksa çıkış yapıp giriş ekranındaki
+      <strong>"🏢 Firma"</strong> sekmesinden yeni bir firma hesabı oluşturabilirsiniz. Bir firma sizi kullanıcı olarak
+      eklediyse, üye olduğunuz firmalar arasında sol alt köşedeki rozetten tek tıkla geçiş yapabilirsiniz.
+    </p>
   </div>
 
   <div class="card danger-card" id="dangerCard" style="display:none;">
@@ -406,72 +343,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const referralSavedMsg = document.getElementById('referralSavedMsg');
   let currentUserData = null;
 
-  // ---- Firma / Ekip ----
-  const companyLocked = document.getElementById('companyLocked');
-  const companyNone = document.getElementById('companyNone');
-  const companyActive = document.getElementById('companyActive');
-  const companyNameText = document.getElementById('companyNameText');
-  const companyRoleText = document.getElementById('companyRoleText');
-  const companyOwnerOnly = document.getElementById('companyOwnerOnly');
-  const companyIdBox = document.getElementById('companyIdBox');
-  const inviteForm = document.getElementById('inviteForm');
-  const inviteEmail = document.getElementById('inviteEmail');
-  const inviteError = document.getElementById('inviteError');
-  const inviteSubmitBtn = document.getElementById('inviteSubmitBtn');
-  const inviteSavedMsg = document.getElementById('inviteSavedMsg');
-  const pendingInvitesList = document.getElementById('pendingInvitesList');
-  const membersList = document.getElementById('membersList');
-  const leaveCompanyWrap = document.getElementById('leaveCompanyWrap');
-  const leaveCompanyBtn = document.getElementById('leaveCompanyBtn');
-  const companyGroupSection = document.getElementById('companyGroupSection');
-  const groupCompaniesList = document.getElementById('groupCompaniesList');
-  const linkCompanyForm = document.getElementById('linkCompanyForm');
-  const linkCompanyId = document.getElementById('linkCompanyId');
-  const linkCompanyError = document.getElementById('linkCompanyError');
-  const switchCompanyWrap = document.getElementById('switchCompanyWrap');
-  const switchCompanySelect = document.getElementById('switchCompanySelect');
-  const companyPreviewToggle = document.getElementById('companyPreviewToggle');
-  const companyPreviewBadge = document.getElementById('companyPreviewBadge');
-  const companyNoneNote = document.getElementById('companyNoneNote');
-  let previewOn = false;
-
-  function showCompanyPreview(){
-    previewOn = true;
-    companyPreviewToggle.textContent = 'Örnek görünümü kapat';
-    companyPreviewBadge.style.display = 'block';
-    companyNone.style.display = 'none';
-    companyActive.style.display = 'block';
-    companyNameText.textContent = 'Örnek Ticaret Ltd. Şti.';
-    companyRoleText.textContent = 'Yönetici (Admin)';
-    companyIdBox.textContent = 'ornek-sirket-kodu-123';
-    companyOwnerOnly.style.display = 'block';
-    leaveCompanyWrap.style.display = 'none';
-    pendingInvitesList.innerHTML = memberRowHtml('ayse@ornek.com', 'Davet bekliyor', 'Bekliyor', 'x1', false);
-    membersList.innerHTML =
-      memberRowHtml('Mehmet Güler', 'mehmet@ornek.com', 'Yönetici', 'x2', false) +
-      memberRowHtml('Ayşe Yıldız', 'ayse2@ornek.com', 'Kullanıcı', 'x3', true);
-    companyGroupSection.style.display = 'block';
-    linkCompanyForm.style.display = 'block';
-    groupCompaniesList.innerHTML =
-      memberRowHtml('Örnek Ticaret Ltd. Şti.', 'ornek-sirket-kodu-123', 'Bu firma', 'x4', false) +
-      memberRowHtml('Örnek Lojistik A.Ş.', 'ornek-sirket-kodu-456', 'Bağlı', 'x5', false);
-    switchCompanyWrap.style.display = 'block';
-    switchCompanySelect.innerHTML =
-      '<option>Örnek Ticaret Ltd. Şti.</option><option>Örnek Lojistik A.Ş.</option>';
-  }
-  function hideCompanyPreview(){
-    previewOn = false;
-    companyPreviewToggle.textContent = 'Dolu örnek görünüm';
-    companyPreviewBadge.style.display = 'none';
-    companyActive.style.display = 'none';
-    companyNone.style.display = 'block';
-  }
-  companyPreviewToggle.addEventListener('click', () => {
-    if(previewOn) hideCompanyPreview(); else showCompanyPreview();
-  });
-
-
-  const profileType = document.getElementById('profileType');
   const profileName = document.getElementById('profileName');
   const profileNameLabel = document.getElementById('profileNameLabel');
   const profilePhone = document.getElementById('profilePhone');
@@ -484,22 +355,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function getCachedProfile(){
     try{ return JSON.parse(localStorage.getItem('mmg_profile') || '{}'); } catch(e){ return {}; }
   }
-  function updateProfileNameLabel(){
-    profileNameLabel.textContent = profileType.value === 'firma' ? 'Firma Adı' : 'Ad Soyad';
-    profileName.placeholder = profileType.value === 'firma' ? 'Firma Adı' : 'Ad Soyad';
-  }
-  profileType.addEventListener('change', updateProfileNameLabel);
 
   function loadProfileIntoForm(data){
     const p = (data && data.profile) || getCachedProfile();
-    profileType.value = p.type || ((data && data.companyId) ? 'firma' : 'bireysel');
     profileName.value = p.name || (data && (data.companyName || data.username)) || '';
     profilePhone.value = p.phone || (data && data.phone) || '';
     const state = localStorage.getItem('mmg_auth_state');
     const defaultEmail = (state && state.startsWith('user:')) ? state.slice(5) : '';
     profileEmail.value = p.email || (data && data.email) || defaultEmail;
     profileAddress.value = p.address || (data && data.address) || '';
-    updateProfileNameLabel();
   }
 
   async function saveProfileToCloud(profile){
@@ -514,7 +378,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   accountInfoForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const profile = {
-      type: profileType.value,
       name: profileName.value.trim(),
       phone: profilePhone.value.trim(),
       email: profileEmail.value.trim(),
@@ -523,9 +386,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     localStorage.setItem('mmg_profile', JSON.stringify(profile));
     profileSaveBtn.disabled = true;
     await saveProfileToCloud(profile);
-    if(auth.currentUser && profile.type === 'firma' && (!currentUserData || !currentUserData.companyId) && profile.name){
-      await createCompanyFromProfileSave(profile.name);
-    }
     profileSaveBtn.disabled = false;
     profileSavedMsg.classList.add('show');
     setTimeout(() => profileSavedMsg.classList.remove('show'), 2000);
@@ -545,309 +405,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   lockReferralCard('Yükleniyor...');
 
-  // ================== Firma / Ekip ==================
-  function memberRowHtml(name, sub, badge, uid, showRemove){
-    return '<div class="member-row" data-uid="' + uid + '">' +
-      '<div class="member-info"><div class="member-name">' + (name || 'İsimsiz') + '</div>' +
-      '<div class="member-sub">' + (sub || '') + '</div></div>' +
-      '<div style="display:flex; align-items:center; gap:8px;">' +
-      '<span class="member-badge">' + badge + '</span>' +
-      (showRemove ? '<button type="button" class="member-remove-btn" data-remove-uid="' + uid + '">Kaldır</button>' : '') +
-      '</div></div>';
-  }
-
-  async function renderCompanySection(user, data){
-    if(!data.companyId){
-      companyNone.style.display = 'block';
-      companyActive.style.display = 'none';
-      return;
-    }
-    companyNone.style.display = 'none';
-    companyActive.style.display = 'block';
-    const isOwner = data.companyRole === 'owner';
-
-    let companyDoc = { name: data.companyName || '', groupId: null };
-    try{
-      const cSnap = await getDoc(doc(db, 'companies', data.companyId));
-      if(cSnap.exists()) companyDoc = cSnap.data();
-    } catch(e){ /* sessizce geç */ }
-
-    companyNameText.textContent = companyDoc.name || data.companyName || '(isimsiz firma)';
-    companyRoleText.textContent = isOwner ? 'Yönetici (Admin)' : 'Kullanıcı';
-    companyIdBox.textContent = data.companyId;
-    companyOwnerOnly.style.display = isOwner ? 'block' : 'none';
-    leaveCompanyWrap.style.display = isOwner ? 'none' : 'block';
-
-    // Üyeler listesi
-    membersList.innerHTML = '<p class="referral-note">Yükleniyor...</p>';
-    try{
-      const memSnap = await getDocs(collection(db, 'companies', data.companyId, 'members'));
-      const rows = [];
-      memSnap.forEach(m => {
-        const md = m.data();
-        const showRemove = isOwner && m.id !== user.uid;
-        rows.push(memberRowHtml(md.username || md.email, md.email || '', md.role === 'owner' ? 'Yönetici' : 'Kullanıcı', m.id, showRemove));
-      });
-      membersList.innerHTML = rows.join('') || '<p class="referral-note">Henüz üye yok.</p>';
-      membersList.querySelectorAll('[data-remove-uid]').forEach(btn => {
-        btn.addEventListener('click', () => removeMember(data.companyId, btn.dataset.removeUid));
-      });
-    } catch(e){
-      membersList.innerHTML = '<p class="referral-note">Üyeler yüklenemedi.</p>';
-    }
-
-    // Bekleyen davetler (sadece sahibi görür)
-    if(isOwner){
-      pendingInvitesList.innerHTML = '';
-      try{
-        const invQ = query(collection(db, 'invites'), where('companyId', '==', data.companyId));
-        const invSnap = await getDocs(invQ);
-        const rows = [];
-        invSnap.forEach(iv => {
-          rows.push('<div class="member-row" data-invite-email="' + iv.id + '">' +
-            '<div class="member-info"><div class="member-name">' + iv.id + '</div>' +
-            '<div class="member-sub">Davet bekliyor</div></div>' +
-            '<button type="button" class="member-remove-btn" data-cancel-invite="' + iv.id + '">İptal</button></div>');
-        });
-        pendingInvitesList.innerHTML = rows.join('');
-        pendingInvitesList.querySelectorAll('[data-cancel-invite]').forEach(btn => {
-          btn.addEventListener('click', () => cancelInvite(btn.dataset.cancelInvite));
-        });
-      } catch(e){ /* sessizce geç */ }
-    }
-
-    // Grup bölümü: sahibi her zaman görür (bağlantı kurabilmek için), üye sadece varsa görür
-    if(isOwner || companyDoc.groupId){
-      companyGroupSection.style.display = 'block';
-      linkCompanyForm.style.display = isOwner ? 'block' : 'none';
-      await renderGroupCompanies(data.companyId, companyDoc.groupId);
-    } else {
-      companyGroupSection.style.display = 'none';
-    }
-  }
-
-  async function renderGroupCompanies(companyId, groupId){
-    groupCompaniesList.innerHTML = '<p class="referral-note">Yükleniyor...</p>';
-    let companyIds = [companyId];
-    if(groupId){
-      try{
-        const gSnap = await getDoc(doc(db, 'groups', groupId));
-        if(gSnap.exists() && Array.isArray(gSnap.data().companyIds)){
-          companyIds = gSnap.data().companyIds;
-        }
-      } catch(e){ /* sessizce geç */ }
-    }
-    const rows = [];
-    const options = [];
-    for(const cid of companyIds){
-      try{
-        const cSnap = await getDoc(doc(db, 'companies', cid));
-        const name = cSnap.exists() ? (cSnap.data().name || cid) : cid;
-        rows.push(memberRowHtml(name, cid, cid === companyId ? 'Bu firma' : 'Bağlı', cid, false));
-        options.push({ id: cid, name: name });
-      } catch(e){ /* sessizce geç */ }
-    }
-    groupCompaniesList.innerHTML = rows.join('');
-
-    if(options.length > 1){
-      switchCompanyWrap.style.display = 'block';
-      const activeId = localStorage.getItem('mmg_active_company_id') || companyId;
-      switchCompanySelect.innerHTML = options.map(o =>
-        '<option value="' + o.id + '"' + (o.id === activeId ? ' selected' : '') + '>' + o.name + '</option>'
-      ).join('');
-    } else {
-      switchCompanyWrap.style.display = 'none';
-    }
-  }
-
-  // ---- Kurumsal hesap seçilip kaydedildiğinde otomatik kullanıcı grubu (firma) oluşturur ----
-  async function createCompanyFromProfileSave(name){
-    const errEl = document.getElementById('profileCompanyError');
-    if(errEl){ errEl.style.display = 'none'; errEl.textContent = ''; }
-    const user = auth.currentUser;
-    if(!user || !name) return;
-    const trimmedName = name.trim();
-    try{
-      let dupWarning = '';
-      try{
-        const dupCheck = await getDocs(query(collection(db, 'companies'), where('name', '==', trimmedName)));
-        const isOwnExistingCompany = !dupCheck.empty && dupCheck.docs.some(d => d.data().ownerUid === user.uid);
-        if(!dupCheck.empty && !isOwnExistingCompany){
-          dupWarning = '"' + trimmedName + '" adında başka bir firma da kayıtlı — karışıklık olmasın diye isterseniz daha ayırt edici bir isim kullanabilirsiniz.';
-        }
-      }catch(dupErr){ /* kontrol başarısız olsa da firma kurmayı engellemeyelim */ }
-
-      const companyRef = doc(collection(db, 'companies'));
-      const companyId = companyRef.id;
-      await setDoc(companyRef, { name: trimmedName, ownerUid: user.uid, groupId: null, createdAt: serverTimestamp() });
-      await setDoc(doc(db, 'companies', companyId, 'members', user.uid), {
-        email: user.email || '', username: (currentUserData && currentUserData.username) || '', role: 'owner', joinedAt: serverTimestamp()
-      });
-      await setDoc(doc(db, 'users', user.uid), { companyId: companyId, companyRole: 'owner', companyName: trimmedName }, { merge: true });
-      localStorage.setItem('mmg_company_id', companyId);
-      localStorage.setItem('mmg_company_role', 'owner');
-      localStorage.setItem('mmg_company_name', trimmedName);
-      currentUserData = Object.assign({}, currentUserData, { companyId: companyId, companyRole: 'owner', companyName: trimmedName });
-      await renderCompanySection(user, currentUserData);
-      if(dupWarning && errEl){
-        errEl.style.color = 'var(--brass,#C6A15B)';
-        errEl.textContent = dupWarning;
-        errEl.style.display = 'block';
-      }
-    } catch(err){
-      console.error('mmg: firma oluşturulamadı ->', err);
-      if(errEl){
-        errEl.style.color = 'var(--red,#E2544B)';
-        errEl.textContent = 'Firma oluşturulamadı: ' + (err && err.code ? err.code : (err && err.message) || 'bilinmeyen hata') + '. Lütfen F12 konsolunu kontrol edin.';
-        errEl.style.display = 'block';
-      }
-    }
-  }
-
-  // ---- Üye davet et ----
-  inviteForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    inviteError.classList.remove('show');
-    const user = auth.currentUser;
-    if(!user || !currentUserData || !currentUserData.companyId) return;
-    const email = inviteEmail.value.trim().toLowerCase();
-    if(!email){
-      inviteError.textContent = 'Lütfen bir e-posta adresi girin.';
-      inviteError.classList.add('show');
-      return;
-    }
-    inviteSubmitBtn.disabled = true;
-    try{
-      const existingInvite = await getDoc(doc(db, 'invites', email));
-      if(existingInvite.exists()){
-        inviteError.textContent = 'Bu e-posta adresine zaten bir davet gönderilmiş (bu firmaya ya da başka bir firmaya).';
-        inviteError.classList.add('show');
-        inviteSubmitBtn.disabled = false;
-        return;
-      }
-      await setDoc(doc(db, 'invites', email), {
-        companyId: currentUserData.companyId,
-        companyName: currentUserData.companyName || '',
-        invitedByUid: user.uid,
-        createdAt: serverTimestamp()
-      });
-      inviteEmail.value = '';
-      inviteSavedMsg.classList.add('show');
-      setTimeout(() => inviteSavedMsg.classList.remove('show'), 2500);
-      await renderCompanySection(user, currentUserData);
-    } catch(err){
-      inviteError.textContent = 'Davet gönderilemedi, lütfen tekrar deneyin.';
-      inviteError.classList.add('show');
-    } finally {
-      inviteSubmitBtn.disabled = false;
-    }
-  });
-
-  async function cancelInvite(email){
-    try{ await deleteDoc(doc(db, 'invites', email)); }catch(e){ /* sessizce geç */ }
-    const user = auth.currentUser;
-    if(user && currentUserData) await renderCompanySection(user, currentUserData);
-  }
-
-  async function removeMember(companyId, uid){
-    if(!confirm('Bu üyeyi firmadan kaldırmak istediğinize emin misiniz?')) return;
-    try{
-      await deleteDoc(doc(db, 'companies', companyId, 'members', uid));
-      // Not: Firestore güvenlik kurallarına bağlı olarak başka bir kullanıcının kendi
-      // hesap belgesindeki firma bilgisini temizlemek engellenmiş olabilir.
-      try{ await setDoc(doc(db, 'users', uid), { companyId: null, companyRole: null, companyName: null }, { merge: true }); }
-      catch(permErr){ /* izin yoksa sessizce geç; üye kaydı zaten silindi */ }
-      const user = auth.currentUser;
-      if(user && currentUserData) await renderCompanySection(user, currentUserData);
-    } catch(err){
-      alert('Üye kaldırılamadı. Lütfen tekrar deneyin.');
-    }
-  }
-
-  // ---- Firmadan ayrıl (üye) ----
-  leaveCompanyBtn.addEventListener('click', async () => {
-    const user = auth.currentUser;
-    if(!user || !currentUserData || !currentUserData.companyId) return;
-    if(!confirm('Bu firmadan ayrılmak istediğinize emin misiniz?')) return;
-    try{
-      try{ await deleteDoc(doc(db, 'companies', currentUserData.companyId, 'members', user.uid)); }catch(e){ /* sessizce geç */ }
-      await setDoc(doc(db, 'users', user.uid), { companyId: null, companyRole: null, companyName: null }, { merge: true });
-      localStorage.removeItem('mmg_company_id');
-      localStorage.removeItem('mmg_company_role');
-      localStorage.removeItem('mmg_company_name');
-      localStorage.removeItem('mmg_active_company_id');
-      currentUserData = Object.assign({}, currentUserData, { companyId: null, companyRole: null, companyName: null });
-      await renderCompanySection(user, currentUserData);
-    } catch(err){
-      alert('Firmadan ayrılırken bir hata oluştu.');
-    }
-  });
-
-  // ---- Firmaları gruba bağla ----
-  linkCompanyForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    linkCompanyError.classList.remove('show');
-    const user = auth.currentUser;
-    if(!user || !currentUserData || currentUserData.companyRole !== 'owner') return;
-    const targetId = linkCompanyId.value.trim();
-    if(!targetId){
-      linkCompanyError.textContent = 'Lütfen bağlanacak firmanın Şirket Kodu\'nu girin.';
-      linkCompanyError.classList.add('show');
-      return;
-    }
-    if(targetId === currentUserData.companyId){
-      linkCompanyError.textContent = 'Bir firma kendisine bağlanamaz.';
-      linkCompanyError.classList.add('show');
-      return;
-    }
-    linkCompanyBtn.disabled = true;
-    try{
-      const targetSnap = await getDoc(doc(db, 'companies', targetId));
-      if(!targetSnap.exists()){
-        linkCompanyError.textContent = 'Bu Şirket Kodu\'na sahip bir firma bulunamadı.';
-        linkCompanyError.classList.add('show');
-        return;
-      }
-      const ownCompanySnap = await getDoc(doc(db, 'companies', currentUserData.companyId));
-      const ownGroupId = ownCompanySnap.exists() ? ownCompanySnap.data().groupId : null;
-      let groupId = ownGroupId;
-      if(!groupId){
-        const groupRef = doc(collection(db, 'groups'));
-        groupId = groupRef.id;
-        await setDoc(groupRef, {
-          name: (currentUserData.companyName || 'Grup'), ownerUid: user.uid,
-          companyIds: [currentUserData.companyId, targetId], createdAt: serverTimestamp()
-        });
-        await setDoc(doc(db, 'companies', currentUserData.companyId), { groupId: groupId }, { merge: true });
-      } else {
-        await setDoc(doc(db, 'groups', groupId), { companyIds: arrayUnion(targetId) }, { merge: true });
-      }
-      // Hedef firmanın kendi belgesine yazmak, güvenlik kurallarına göre engellenmiş olabilir.
-      try{ await setDoc(doc(db, 'companies', targetId), { groupId: groupId }, { merge: true }); }
-      catch(permErr){ /* izin yoksa sessizce geç; grup listesi yine de bu firmayı içerir */ }
-      linkCompanyId.value = '';
-      await renderCompanySection(user, currentUserData);
-    } catch(err){
-      linkCompanyError.textContent = 'Firma bağlanamadı, lütfen tekrar deneyin.';
-      linkCompanyError.classList.add('show');
-    } finally {
-      linkCompanyBtn.disabled = false;
-    }
-  });
-
-  // ---- Aktif firma değiştir ----
-  switchCompanySelect.addEventListener('change', () => {
-    localStorage.setItem('mmg_active_company_id', switchCompanySelect.value);
-  });
-
-  // Şirket kodunu tıklayınca panoya kopyala
-  companyIdBox.addEventListener('click', () => {
-    const text = companyIdBox.textContent;
-    if(navigator.clipboard && text && text !== '—'){
-      navigator.clipboard.writeText(text).catch(()=>{});
-    }
-  });
-  // ================== /Firma / Ekip ==================
 
   onAuthStateChanged(auth, async (user) => {
     if(!user){
@@ -856,21 +413,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       dangerCard.style.display = 'block';
       lockReferralCard('Referans kodu girmek için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz.');
       currentUserData = null;
-      companyLocked.style.display = 'none';
-      companyNoneNote.textContent = 'Kullanıcı grubu özellikleri için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz. Tasarımı incelemek için sağ üstteki "Dolu örnek görünüm" butonunu kullanabilirsiniz.';
-      companyPreviewToggle.style.display = 'inline-block';
-      if(!previewOn){
-        companyNone.style.display = 'block';
-        companyActive.style.display = 'none';
-      }
       return;
     }
     statusPill.classList.remove('clickable');
-    companyPreviewToggle.style.display = 'none';
-    if(previewOn) hideCompanyPreview();
-    companyNoneNote.textContent = 'Şu anda bireysel bir hesaptır. Soldaki Profil Bilgileri\'nden Hesap Türü\'nü "Kurumsal" seçip firma adınızı girerek kaydedin — burada otomatik olarak kullanıcı grubunuz açılır ve diğer kullanıcıları (alt kullanıcı olarak) ekleyip aynı verileri birlikte görüp işleyebilirsiniz.';
     dangerCard.style.display = 'block';
-    companyLocked.style.display = 'none';
     try{
       const snap = await getDoc(doc(db, 'users', user.uid));
       const data = snap.exists() ? snap.data() : {};
@@ -882,7 +428,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       } else {
         unlockReferralCard('Referans kodu girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.');
       }
-      renderCompanySection(user, data);
     } catch(e){
       statusPillText.textContent = user.email || 'Üye';
     }
