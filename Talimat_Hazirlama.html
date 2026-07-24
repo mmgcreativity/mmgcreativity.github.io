@@ -3667,28 +3667,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const pendingMuhatapTur = localStorage.getItem('mmg_pending_sm_muhataptur') || '';
       const pendingMuhatapAdi = localStorage.getItem('mmg_pending_sm_muhatapadi') || '';
       const pendingFirma = localStorage.getItem('mmg_pending_sm_firma') || '';
+      const pendingAutoAction = localStorage.getItem('mmg_pending_sm_autoaction') || '';
       localStorage.removeItem('mmg_pending_sm_muhataptur');
       localStorage.removeItem('mmg_pending_sm_muhatapadi');
       localStorage.removeItem('mmg_pending_sm_firma');
+      localStorage.removeItem('mmg_pending_sm_autoaction');
       const apply = () => {
+        const kimeSel = document.getElementById('kimeSelect');
         const sel = document.getElementById('talimatTurSelect');
         const ta = document.getElementById('fSmMetin');
         const turSel = document.getElementById('fSmMuhatapTur');
         const adiInput = document.getElementById('fSmMuhatapAdi');
         const firmaInput = document.getElementById('fSmFirma');
-        if(!sel || !ta){ setTimeout(apply, 60); return; }
-        sel.value = 'serbest';
-        sel.dispatchEvent(new Event('change'));
+        const panel = document.getElementById('panel-serbest-metin');
+        if(!kimeSel || !sel || !ta || !panel){ setTimeout(apply, 60); return; }
+        // "Kime" → Banka seçilmeden "talimatTurSelect" (Havale/.../Serbest Metin) hiç görünmüyor;
+        // önce üst seviyeyi kuruyoruz, sonra alt seviyede Serbest Metin'i seçiyoruz.
+        kimeSel.value = 'banka';
+        kimeSel.dispatchEvent(new Event('change'));
         setTimeout(() => {
-          if(pendingMuhatapTur && turSel){
-            turSel.value = pendingMuhatapTur;
-            turSel.dispatchEvent(new Event('change'));
-          }
-          if(pendingMuhatapAdi && adiInput) adiInput.value = pendingMuhatapAdi;
-          if(pendingFirma && firmaInput) firmaInput.value = pendingFirma;
-          ta.value = pendingText;
-          ta.dispatchEvent(new Event('input'));
-          ta.focus();
+          sel.value = 'serbest';
+          sel.dispatchEvent(new Event('change'));
+          setTimeout(() => {
+            if(pendingMuhatapTur && turSel){
+              turSel.value = pendingMuhatapTur;
+              turSel.dispatchEvent(new Event('change'));
+            }
+            if(pendingMuhatapAdi && adiInput) adiInput.value = pendingMuhatapAdi;
+            if(pendingFirma && firmaInput) firmaInput.value = pendingFirma;
+            ta.value = pendingText;
+            ta.dispatchEvent(new Event('input'));
+            ta.focus();
+            // "Hazır Metin Talimatlar" sayfasında PDF/Word/Yazdır ikonlarından biri
+            // tıklanmışsa, panelin GERÇEKTEN görünür olduğunu doğruladıktan sonra
+            // aynı işlemi otomatik tetikle (sabit bir bekleme yerine kontrol ederek).
+            if(pendingAutoAction){
+              let tries = 0;
+              const waitForPanel = () => {
+                tries++;
+                const visible = panel.style.display === 'grid' || panel.offsetParent !== null;
+                if(!visible && tries < 40){ setTimeout(waitForPanel, 50); return; }
+                const btnId = pendingAutoAction === 'pdf' ? 'exportPdfSmBtn' : pendingAutoAction === 'docx' ? 'exportDocxSmBtn' : pendingAutoAction === 'print' ? 'printSmBtn' : null;
+                const btn = btnId ? document.getElementById(btnId) : null;
+                if(btn) btn.click();
+              };
+              waitForPanel();
+            }
+          }, 30);
         }, 30);
       };
       apply();
