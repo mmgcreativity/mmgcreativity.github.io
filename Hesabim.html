@@ -575,17 +575,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
       const blocks = [];
       for(const fid of firmaIds){
-        let name = fid;
+        let fData = { name: fid };
         try{
           const fSnap = await getDoc(doc(db, 'firmaAccounts', fid));
-          if(fSnap.exists()) name = fSnap.data().name || fid;
+          if(fSnap.exists()) fData = fSnap.data();
         }catch(e){ /* sessizce geç */ }
+        const esc = (s) => String(s || '').replace(/"/g, '&quot;');
         blocks.push(
           '<div class="member-row" data-firma-id="' + fid + '" style="flex-direction:column; align-items:stretch; gap:10px;">' +
-            '<div style="display:flex; align-items:center; justify-content:space-between;">' +
-              '<div class="member-name">🏢 ' + name + '</div>' +
-              '<span class="member-badge">Yöneticisisiniz</span>' +
+            '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
+              '<div class="member-name">🏢 ' + esc(fData.name || fid) + '</div>' +
+              '<div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">' +
+                '<span class="member-badge">Yöneticisisiniz</span>' +
+                '<button type="button" class="member-remove-btn firma-edit-toggle-btn" data-firma-id="' + fid + '">✏️ Düzenle</button>' +
+              '</div>' +
             '</div>' +
+
+            '<div class="firma-edit-panel" style="display:none; flex-direction:column; gap:8px; padding-top:6px; border-top:1px solid var(--hairline);">' +
+              '<div class="auth-field" style="margin-bottom:0;"><label>Firma Adı</label>' +
+                '<input type="text" class="firma-edit-name" value="' + esc(fData.name) + '"></div>' +
+              '<div class="auth-field" style="margin-bottom:0;"><label>Adres</label>' +
+                '<input type="text" class="firma-edit-address" value="' + esc(fData.address) + '"></div>' +
+              '<div style="display:flex; gap:8px;">' +
+                '<div class="auth-field" style="margin-bottom:0; flex:1;"><label>Telefon</label>' +
+                  '<input type="tel" class="firma-edit-phone" value="' + esc(fData.phone) + '"></div>' +
+                '<div class="auth-field" style="margin-bottom:0; flex:1;"><label>Vergi No</label>' +
+                  '<input type="text" class="firma-edit-taxid" value="' + esc(fData.taxId) + '"></div>' +
+              '</div>' +
+              '<div>' +
+                '<button type="button" class="auth-submit firma-edit-save-btn" data-firma-id="' + fid + '" style="width:auto; padding:9px 14px; margin-top:0; font-size:12.5px;">Kaydet</button>' +
+                '<span class="save-hint firma-edit-saved-hint">Kaydedildi ✓</span>' +
+              '</div>' +
+              '<div class="auth-error firma-edit-error"></div>' +
+            '</div>' +
+
             '<div style="display:flex; gap:8px;">' +
               '<input type="email" placeholder="Yönetici e-postası" class="firma-admin-invite-email" style="flex:1; background:var(--surface); border:1px solid var(--hairline); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13px;">' +
               '<button type="button" class="auth-submit firma-admin-invite-btn" data-firma-id="' + fid + '" style="width:auto; padding:9px 14px; margin-top:0; font-size:12.5px;">Yönetici Ekle</button>' +
@@ -596,6 +619,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         );
       }
       myFirmasList.innerHTML = blocks.join('');
+
+      myFirmasList.querySelectorAll('.firma-edit-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const row = btn.closest('.member-row');
+          const panel = row.querySelector('.firma-edit-panel');
+          const isHidden = panel.style.display === 'none';
+          panel.style.display = isHidden ? 'flex' : 'none';
+          btn.textContent = isHidden ? 'Vazgeç' : '✏️ Düzenle';
+        });
+      });
+      myFirmasList.querySelectorAll('.firma-edit-save-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const row = btn.closest('.member-row');
+          const errEl = row.querySelector('.firma-edit-error');
+          const hintEl = row.querySelector('.firma-edit-saved-hint');
+          errEl.classList.remove('show'); errEl.textContent = '';
+          const newName = row.querySelector('.firma-edit-name').value.trim();
+          if(!newName){
+            errEl.textContent = 'Firma adı boş olamaz.';
+            errEl.classList.add('show');
+            return;
+          }
+          btn.disabled = true;
+          try{
+            const fid = btn.dataset.firmaId;
+            await setDoc(doc(db, 'firmaAccounts', fid), {
+              name: newName,
+              address: row.querySelector('.firma-edit-address').value.trim(),
+              phone: row.querySelector('.firma-edit-phone').value.trim(),
+              taxId: row.querySelector('.firma-edit-taxid').value.trim()
+            }, { merge: true });
+            row.querySelector('.member-name').textContent = '🏢 ' + newName;
+            hintEl.classList.add('show');
+            setTimeout(() => hintEl.classList.remove('show'), 2000);
+          } catch(e){
+            errEl.textContent = 'Kaydedilemedi, tekrar deneyin.';
+            errEl.classList.add('show');
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      });
+
       myFirmasList.querySelectorAll('.firma-admin-invite-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const row = btn.closest('.member-row');
