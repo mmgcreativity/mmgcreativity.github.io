@@ -228,7 +228,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <input type="tel" id="profilePhone" placeholder="05xx xxx xx xx">
       </div>
       <div class="auth-field">
-        <label data-i18n="email">E-posta</label>
+        <label data-i18n="email">E-posta (iletişim bilgisi)</label>
         <input type="email" id="profileEmail" placeholder="ornek@eposta.com">
       </div>
       <div class="auth-field">
@@ -239,6 +239,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="saved-msg" id="profileSavedMsg" data-i18n="saved_ok">Kaydedildi ✓</div>
       <div class="auth-error" id="profileCompanyError" style="display:none;"></div>
     </form>
+
+    <div style="margin-top:18px; padding-top:18px; border-top:1px solid var(--hairline);">
+      <button type="button" id="emailChangeToggleBtn" class="auth-submit" style="background:var(--surface-2); color:var(--text); width:auto; padding:9px 14px; font-size:12.5px;">
+        🔑 Giriş E-postamı Değiştir
+      </button>
+      <div id="emailChangeWrap" style="display:none; margin-top:14px;">
+        <p class="referral-note" style="margin-bottom:12px;">Bu, hesabınıza <strong>giriş yaparken kullandığınız</strong> e-postayı değiştirir (yukarıdaki iletişim e-postasından farklıdır). Verileriniz aynı kalır, sadece giriş adresiniz değişir.</p>
+        <div class="auth-field">
+          <label>Mevcut Şifreniz</label>
+          <input type="password" id="emailChangeCurrentPassword" autocomplete="current-password">
+        </div>
+        <div class="auth-field">
+          <label>Yeni Giriş E-postası</label>
+          <input type="email" id="emailChangeNewEmail" placeholder="yeni@eposta.com">
+        </div>
+        <button type="button" id="emailChangeSubmitBtn" class="auth-submit" style="width:auto; padding:11px 18px;">E-postayı Güncelle</button>
+        <div class="auth-error" id="emailChangeError"></div>
+        <div class="saved-msg" id="emailChangeSavedMsg">Güncellendi ✓</div>
+      </div>
+    </div>
   </div>
   </div>
 
@@ -311,7 +331,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import {
-    getAuth, onAuthStateChanged, signOut, deleteUser,
+    getAuth, onAuthStateChanged, signOut, deleteUser, updateEmail, verifyBeforeUpdateEmail,
     EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, GoogleAuthProvider
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
@@ -382,6 +402,88 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   loadProfileIntoForm();
+
+  // ---- Giriş E-postasını Değiştir ----
+  const emailChangeToggleBtn = document.getElementById('emailChangeToggleBtn');
+  const emailChangeWrap = document.getElementById('emailChangeWrap');
+  const emailChangeCurrentPassword = document.getElementById('emailChangeCurrentPassword');
+  const emailChangeNewEmail = document.getElementById('emailChangeNewEmail');
+  const emailChangeSubmitBtn = document.getElementById('emailChangeSubmitBtn');
+  const emailChangeError = document.getElementById('emailChangeError');
+  const emailChangeSavedMsg = document.getElementById('emailChangeSavedMsg');
+
+  emailChangeToggleBtn.addEventListener('click', () => {
+    const isHidden = emailChangeWrap.style.display === 'none';
+    emailChangeWrap.style.display = isHidden ? 'block' : 'none';
+    emailChangeToggleBtn.textContent = isHidden ? 'Vazgeç' : '🔑 Giriş E-postamı Değiştir';
+    emailChangeError.classList.remove('show');
+    emailChangeError.textContent = '';
+    if(!isHidden){
+      emailChangeCurrentPassword.value = '';
+      emailChangeNewEmail.value = '';
+    }
+  });
+
+  emailChangeSubmitBtn.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    emailChangeError.classList.remove('show');
+    emailChangeError.textContent = '';
+    if(!user){
+      emailChangeError.textContent = 'Bu işlem için giriş yapmış olmanız gerekir.';
+      emailChangeError.classList.add('show');
+      return;
+    }
+    const newEmail = emailChangeNewEmail.value.trim();
+    const currentPassword = emailChangeCurrentPassword.value;
+    if(!newEmail || !newEmail.includes('@')){
+      emailChangeError.textContent = 'Lütfen geçerli bir e-posta girin.';
+      emailChangeError.classList.add('show');
+      return;
+    }
+    if(!currentPassword){
+      emailChangeError.textContent = 'Lütfen mevcut şifrenizi girin.';
+      emailChangeError.classList.add('show');
+      return;
+    }
+    emailChangeSubmitBtn.disabled = true;
+    const originalLabel = emailChangeSubmitBtn.textContent;
+    emailChangeSubmitBtn.textContent = 'Güncelleniyor…';
+    try{
+      const cred = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, cred);
+      try{
+        await updateEmail(user, newEmail);
+        localStorage.setItem('mmg_auth_state', 'user:' + newEmail);
+        emailChangeSavedMsg.textContent = 'Güncellendi ✓ Artık ' + newEmail + ' ile giriş yapabilirsiniz.';
+        emailChangeSavedMsg.classList.add('show');
+        setTimeout(() => emailChangeSavedMsg.classList.remove('show'), 4000);
+        emailChangeCurrentPassword.value = '';
+        emailChangeNewEmail.value = '';
+      } catch(updateErr){
+        if(updateErr && updateErr.code === 'auth/operation-not-allowed'){
+          // Bazı projelerde doğrudan değişime izin verilmiyor; yeni adrese onay e-postası gönderilir.
+          await verifyBeforeUpdateEmail(user, newEmail);
+          emailChangeSavedMsg.textContent = newEmail + ' adresine bir onay e-postası gönderildi. Onaylayınca giriş e-postanız değişecek.';
+          emailChangeSavedMsg.classList.add('show');
+          setTimeout(() => emailChangeSavedMsg.classList.remove('show'), 6000);
+        } else {
+          throw updateErr;
+        }
+      }
+    } catch(err){
+      if(err && (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential')){
+        emailChangeError.textContent = 'Şifre yanlış.';
+      } else if(err && err.code === 'auth/email-already-in-use'){
+        emailChangeError.textContent = 'Bu e-posta zaten başka bir hesapta kayıtlı.';
+      } else {
+        emailChangeError.textContent = 'E-posta güncellenemedi, lütfen tekrar deneyin.';
+      }
+      emailChangeError.classList.add('show');
+    } finally {
+      emailChangeSubmitBtn.disabled = false;
+      emailChangeSubmitBtn.textContent = originalLabel;
+    }
+  });
 
   accountInfoForm.addEventListener('submit', async (e) => {
     e.preventDefault();
