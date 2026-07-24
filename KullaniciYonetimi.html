@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script>
+(function(){
+  try{
+    var mode = localStorage.getItem('mmg_theme') || 'dark';
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+  }catch(e){}
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.mmgTheme){
+      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
+      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
+    }
+  });
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kullanıcı Yönetim Paneli — Dijital Finans Asistanı</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .page-wrap{ max-width:860px; margin:0 auto; padding:28px 24px 48px; }
+  .page-header{ margin-bottom:22px; }
+  .page-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:26px; letter-spacing:-0.01em; margin-bottom:6px; display:flex; align-items:center; gap:10px; }
+  .page-sub{ color:var(--muted); font-size:13.5px; line-height:1.5; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:16px;
+    padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.25); margin-bottom:22px;
+  }
+  .card h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; margin-bottom:6px; }
+  .card .card-sub{ color:var(--muted); font-size:12.5px; margin-bottom:16px; line-height:1.5; }
+
+  .auth-field{ margin-bottom:12px; }
+  .auth-field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:5px; }
+  .auth-field input{
+    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    padding:10px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
+    transition:border-color .15s ease;
+  }
+  .auth-field input:focus{ border-color:var(--brass-dim); }
+  .auth-submit{
+    padding:11px 20px; border-radius:9px; border:none; cursor:pointer;
+    background:var(--grad); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px;
+    transition:opacity .15s ease;
+  }
+  .auth-submit:hover{ opacity:0.9; }
+  .auth-submit:disabled{ opacity:0.6; cursor:default; }
+  .auth-error{ color:var(--coral); font-size:12.5px; margin:8px 0 0; display:none; }
+  .auth-error.show{ display:block; }
+  .auth-success{ color:var(--teal); font-size:12.5px; margin:8px 0 0; display:none; }
+  .auth-success.show{ display:block; }
+
+  .perm-grid{ display:flex; flex-wrap:wrap; gap:10px 18px; margin:12px 0 16px; }
+  .perm-check{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text); cursor:pointer; }
+  .perm-check input{ accent-color: var(--brass); width:15px; height:15px; cursor:pointer; }
+
+  .member-list{ display:flex; flex-direction:column; gap:10px; margin-top:6px; }
+  .member-row{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px; padding:14px 16px;
+  }
+  .member-row-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+  .member-info{ min-width:0; }
+  .member-name{ font-size:13.5px; font-weight:600; }
+  .member-sub{ font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .member-remove-btn{
+    background:transparent; border:1px solid var(--hairline); border-radius:6px; color:var(--muted);
+    font-size:11px; padding:6px 10px; cursor:pointer; flex-shrink:0; transition:color .15s ease, border-color .15s ease;
+  }
+  .member-remove-btn:hover{ color:var(--red); border-color:var(--red); }
+  .empty-note{ color:var(--muted); font-size:13px; padding:6px 2px; }
+
+  .invite-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:10px 14px; margin-bottom:8px;
+  }
+  .invite-row .invite-email{ font-size:13px; font-weight:600; }
+  .invite-cancel-btn{
+    background:transparent; border:1px solid var(--hairline); border-radius:6px; color:var(--muted);
+    font-size:11px; padding:5px 9px; cursor:pointer; flex-shrink:0;
+  }
+  .invite-cancel-btn:hover{ color:var(--red); border-color:var(--red); }
+
+  .guard-wrap{ text-align:center; padding:80px 20px; color:var(--muted); }
+  .guard-wrap h2{ font-family:'Space Grotesk',sans-serif; color:var(--text); margin-bottom:10px; }
+
+  .save-hint{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--teal); margin-left:8px; opacity:0; transition:opacity .3s ease; }
+  .save-hint.show{ opacity:1; }
+  .mini-label{ font-size:12.5px; color:var(--muted); margin-bottom:8px; font-weight:600; }
+</style>
+</head>
+<body>
+
+<div class="page-wrap" id="pageWrap" style="display:none;">
+  <div class="page-header">
+    <div class="page-title">👥 Kullanıcı Yönetim Paneli</div>
+    <div class="page-sub" id="firmaHeaderSub">Firma hesabınıza bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.</div>
+  </div>
+
+  <div class="card" id="firmaSelectorCard" style="display:none;">
+    <div class="mini-label" style="margin-bottom:8px;">Yönettiğiniz Firma</div>
+    <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;"></select>
+  </div>
+
+  <div class="card">
+    <h2>Kullanıcı Ekle</h2>
+    <div class="card-sub">Eklemek istediğiniz kişinin bu siteye kayıtlı e-posta adresini girin. Kişi az önce girdiğiniz e-postayla (veya henüz kaydı yoksa yeni kayıt olarak) giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.</div>
+    <div class="auth-field">
+      <label>Kullanıcının E-postası</label>
+      <input type="email" id="inviteEmail" placeholder="ornek@eposta.com">
+    </div>
+    <div class="perm-grid" id="invitePermGrid"></div>
+    <button type="button" class="auth-submit" id="inviteSubmitBtn">Davet Gönder</button>
+    <div class="auth-error" id="inviteError"></div>
+    <div class="auth-success" id="inviteSuccess"></div>
+  </div>
+
+  <div class="card" id="pendingInvitesCard" style="display:none;">
+    <h2>Bekleyen Davetler</h2>
+    <div class="card-sub">Bu kişiler henüz giriş yapıp daveti kabul etmedi.</div>
+    <div id="pendingInvitesList"></div>
+  </div>
+
+  <div class="card">
+    <h2>Kullanıcılarım</h2>
+    <div class="card-sub">Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.</div>
+    <div class="member-list" id="membersList"><div class="empty-note">Yükleniyor…</div></div>
+  </div>
+</div>
+
+<div class="guard-wrap" id="guardWrap" style="display:none;">
+  <h2 id="guardTitle">Bu sayfa sadece firma hesapları içindir</h2>
+  <p id="guardSub">Bir kullanıcı hesabıyla giriş yaptınız. Bu paneli görmek için firma hesabınızla giriş yapmanız gerekir.</p>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, serverTimestamp, arrayUnion, arrayRemove
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Bu panelde yönetilebilen yetki modülleri (sol menüdeki araç sayfalarıyla eşleşir).
+  const PERMISSION_MODULES = [
+    { key: 'gelirler', label: 'Gelirler' },
+    { key: 'giderler', label: 'Giderler' },
+    { key: 'nakitakis', label: 'Nakit Akış Tablosu' },
+    { key: 'talimat', label: 'Talimat Hazırlama' },
+    { key: 'hesaplama', label: 'Hesaplama Araçları' }
+  ];
+
+  function permGridHtml(idPrefix, values){
+    return PERMISSION_MODULES.map(m =>
+      '<label class="perm-check"><input type="checkbox" data-perm="' + m.key + '" id="' + idPrefix + '_' + m.key + '"' +
+      ((values && values[m.key] !== false) ? ' checked' : '') + '> ' + m.label + '</label>'
+    ).join('');
+  }
+  function readPermGrid(idPrefix){
+    const out = {};
+    PERMISSION_MODULES.forEach(m => {
+      const el = document.getElementById(idPrefix + '_' + m.key);
+      out[m.key] = el ? el.checked : true;
+    });
+    return out;
+  }
+
+  let firmaId = null;
+  let myAdminFirmas = []; // [{id, name}]
+
+  async function selectFirma(fid){
+    firmaId = fid;
+    const f = myAdminFirmas.find(x => x.id === fid);
+    document.getElementById('firmaHeaderSub').textContent =
+      '"' + (f ? f.name : fid) + '" firmasına bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.';
+    document.getElementById('invitePermGrid').innerHTML = permGridHtml('invite', null);
+    await loadMembers();
+    await loadPendingInvites();
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    const guardWrap = document.getElementById('guardWrap');
+    const pageWrap = document.getElementById('pageWrap');
+    if(!user){
+      guardWrap.style.display = 'block';
+      pageWrap.style.display = 'none';
+      document.getElementById('guardTitle').textContent = 'Giriş yapmadınız';
+      document.getElementById('guardSub').textContent = 'Bu paneli görmek için giriş yapmanız gerekir.';
+      return;
+    }
+    try{
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      const firmaIds = (snap.exists() && Array.isArray(snap.data().adminFirmaIds)) ? snap.data().adminFirmaIds : [];
+      if(!firmaIds.length){
+        guardWrap.style.display = 'block';
+        pageWrap.style.display = 'none';
+        document.getElementById('guardTitle').textContent = 'Henüz bir firmanın yöneticisi değilsiniz';
+        document.getElementById('guardSub').textContent = 'Bu paneli görmek için "Hesabım" sayfasından yeni bir firma oluşturabilir ya da mevcut bir firmanın yöneticisi olarak davet edilmeyi bekleyebilirsiniz.';
+        return;
+      }
+      myAdminFirmas = [];
+      for(const fid of firmaIds){
+        try{
+          const fSnap = await getDoc(doc(db, 'firmaAccounts', fid));
+          if(fSnap.exists()) myAdminFirmas.push({ id: fid, name: fSnap.data().name || fid });
+        } catch(e){ /* sessizce geç */ }
+      }
+      if(!myAdminFirmas.length){
+        guardWrap.style.display = 'block';
+        pageWrap.style.display = 'none';
+        return;
+      }
+      guardWrap.style.display = 'none';
+      pageWrap.style.display = 'block';
+      const selectorCard = document.getElementById('firmaSelectorCard');
+      const selector = document.getElementById('firmaSelector');
+      if(myAdminFirmas.length > 1){
+        selectorCard.style.display = 'block';
+        selector.innerHTML = myAdminFirmas.map(f => '<option value="' + f.id + '">' + f.name + '</option>').join('');
+        selector.onchange = () => selectFirma(selector.value);
+      } else {
+        selectorCard.style.display = 'none';
+      }
+      await selectFirma(myAdminFirmas[0].id);
+    } catch(e){
+      guardWrap.style.display = 'block';
+      pageWrap.style.display = 'none';
+      document.getElementById('guardTitle').textContent = 'Bir hata oluştu';
+      document.getElementById('guardSub').textContent = 'Panel yüklenemedi, lütfen sayfayı yenileyip tekrar deneyin.';
+    }
+  });
+
+  // ---- Kullanıcı Ekle (davet) ----
+  document.getElementById('inviteSubmitBtn').addEventListener('click', async () => {
+    const errEl = document.getElementById('inviteError');
+    const okEl = document.getElementById('inviteSuccess');
+    errEl.classList.remove('show'); okEl.classList.remove('show');
+    const emailInput = document.getElementById('inviteEmail');
+    const email = emailInput.value.trim().toLowerCase();
+    if(!email || !email.includes('@')){
+      errEl.textContent = 'Lütfen geçerli bir e-posta adresi girin.';
+      errEl.classList.add('show');
+      return;
+    }
+    const btn = document.getElementById('inviteSubmitBtn');
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = 'Gönderiliyor…';
+    try{
+      const fSnap = await getDoc(doc(db, 'firmaAccounts', firmaId));
+      await setDoc(doc(db, 'firmaInvites', email), {
+        firmaId: firmaId,
+        firmaName: fSnap.exists() ? (fSnap.data().name || '') : '',
+        permissions: readPermGrid('invite'),
+        createdAt: serverTimestamp()
+      });
+      okEl.textContent = 'Davet gönderildi. Kişi bu e-postayla giriş yaptığında otomatik olarak eklenecek.';
+      okEl.classList.add('show');
+      emailInput.value = '';
+      await loadPendingInvites();
+    } catch(e){
+      errEl.textContent = 'Davet gönderilemedi, lütfen tekrar deneyin.';
+      errEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
+
+  // ---- Bekleyen davetler ----
+  async function loadPendingInvites(){
+    const card = document.getElementById('pendingInvitesCard');
+    const listEl = document.getElementById('pendingInvitesList');
+    try{
+      const q = query(collection(db, 'firmaInvites'), where('firmaId', '==', firmaId));
+      const snap = await getDocs(q);
+      if(snap.empty){
+        card.style.display = 'none';
+        return;
+      }
+      card.style.display = 'block';
+      const rows = [];
+      snap.forEach(d => {
+        rows.push(
+          '<div class="invite-row" data-email="' + d.id + '">' +
+            '<span class="invite-email">' + d.id + '</span>' +
+            '<button type="button" class="invite-cancel-btn" data-cancel="' + d.id + '">Daveti İptal Et</button>' +
+          '</div>'
+        );
+      });
+      listEl.innerHTML = rows.join('');
+      listEl.querySelectorAll('[data-cancel]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try{ await deleteDoc(doc(db, 'firmaInvites', btn.dataset.cancel)); }catch(e){}
+          await loadPendingInvites();
+        });
+      });
+    } catch(e){ card.style.display = 'none'; }
+  }
+
+  // ---- Kullanıcı listesi ----
+  async function loadMembers(){
+    const listEl = document.getElementById('membersList');
+    try{
+      const snap = await getDocs(collection(db, 'firmaAccounts', firmaId, 'members'));
+      if(snap.empty){
+        listEl.innerHTML = '<div class="empty-note">Henüz eklenmiş kullanıcı yok.</div>';
+        return;
+      }
+      const rows = [];
+      snap.forEach(d => {
+        const md = d.data();
+        const idPrefix = 'm_' + d.id;
+        rows.push(
+          '<div class="member-row" data-uid="' + d.id + '">' +
+            '<div class="member-row-top">' +
+              '<div class="member-info">' +
+                '<div class="member-name">' + (md.username || md.email || d.id) + '</div>' +
+                '<div class="member-sub">' + (md.email || '') + '</div>' +
+              '</div>' +
+              '<button type="button" class="member-remove-btn" data-remove="' + d.id + '">Kaldır</button>' +
+            '</div>' +
+            '<div class="perm-grid">' + permGridHtml(idPrefix, md.permissions || {}) + '<span class="save-hint" id="' + idPrefix + '_hint">Kaydedildi ✓</span></div>' +
+          '</div>'
+        );
+      });
+      listEl.innerHTML = rows.join('');
+      listEl.querySelectorAll('.member-remove-btn').forEach(btn => {
+        btn.addEventListener('click', () => removeMember(btn.dataset.remove));
+      });
+      listEl.querySelectorAll('.perm-grid input[type="checkbox"]').forEach(chk => {
+        chk.addEventListener('change', (e) => {
+          const row = e.target.closest('.member-row');
+          const uid = row.dataset.uid;
+          savePermissions(uid, 'm_' + uid);
+        });
+      });
+    } catch(e){
+      listEl.innerHTML = '<div class="empty-note">Kullanıcılar yüklenemedi.</div>';
+    }
+  }
+
+  let savePermTimers = {};
+  function savePermissions(uid, idPrefix){
+    clearTimeout(savePermTimers[uid]);
+    savePermTimers[uid] = setTimeout(async () => {
+      try{
+        await setDoc(doc(db, 'firmaAccounts', firmaId, 'members', uid), {
+          permissions: readPermGrid(idPrefix)
+        }, { merge: true });
+        const hint = document.getElementById(idPrefix + '_hint');
+        if(hint){
+          hint.classList.add('show');
+          setTimeout(() => hint.classList.remove('show'), 1500);
+        }
+      } catch(e){ /* sessizce geç */ }
+    }, 400);
+  }
+
+  async function removeMember(uid){
+    if(!confirm('Bu kullanıcıyı firmadan kaldırmak istediğinize emin misiniz?')) return;
+    try{
+      await deleteDoc(doc(db, 'firmaAccounts', firmaId, 'members', uid));
+      await setDoc(doc(db, 'users', uid), { firmaIds: arrayRemove(firmaId) }, { merge: true });
+    } catch(e){ /* sessizce geç */ }
+    await loadMembers();
+  }
+</script>
+
+</body>
+</html>

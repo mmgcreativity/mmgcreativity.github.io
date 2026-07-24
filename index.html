@@ -674,11 +674,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="auth-title" id="authTitle" style="display:none;">Hoş geldiniz</div>
       <div class="auth-sub" id="authSub" style="display:none;">Kaldığınız yerden devam etmek için giriş yapın</div>
 
-      <div class="auth-tabs" id="authKindTabs" style="margin-bottom:10px;">
-        <button type="button" class="auth-tab active" id="authKindUserBtn">👤 Kullanıcı</button>
-        <button type="button" class="auth-tab" id="authKindFirmaBtn">🏢 Firma</button>
-      </div>
-
       <div class="auth-tabs">
         <button type="button" class="auth-tab active" id="tabLogin">Giriş Yap</button>
         <button type="button" class="auth-tab" id="tabSignup">Kayıt Ol</button>
@@ -688,10 +683,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="auth-success" id="authSuccess"></div>
 
       <form id="authForm" class="auth-grid">
-        <div class="auth-field auth-full" id="authFirmaNameWrap" style="display:none;">
-          <label>Firma Adı</label>
-          <input type="text" id="authFirmaName" placeholder="Örn. Mmg Creativity Ltd. Şti.">
-        </div>
         <div class="auth-field auth-full" id="authUsernameWrap" style="display:none;">
           <label id="authUsernameLabel">Ad Soyad</label>
           <input type="text" id="authUsername" placeholder="">
@@ -1090,15 +1081,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   }
 
-  var FIRMA_ALLOWED_TARGETS = ['KullaniciYonetimi.html', 'rehber.html', 'iletisim.html'];
   function openTarget(target, title){
     closeMobileNav();
-    // Firma hesapları veri giren araç sayfalarına giremez; izinli olmayan her hedef
-    // otomatik olarak Kullanıcı Yönetim Paneli'ne yönlendirilir.
-    if(window.mmgAccountKind === 'firma' && FIRMA_ALLOWED_TARGETS.indexOf(target) === -1){
-      target = 'KullaniciYonetimi.html';
-      title = 'Kullanıcı Yönetim Paneli';
-    }
     if(target === 'home'){
       homeScreen.style.display = 'flex';
       frameWrap.style.display = 'none';
@@ -1299,21 +1283,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       try{ gtag('set', 'user_properties', { user_type: 'guest' }); }catch(e){}
       return;
     }
-    // Önce hesabın Firma mı yoksa Kullanıcı mı olduğunu belirle (özellikle sayfa
-    // yenilemede/oturum geri yüklemede önemli — kayıt/giriş anında zaten belirleniyor).
-    try{
-      const fSnap = await getDoc(doc(db, 'firmaAccounts', user.uid));
-      if(fSnap.exists()){
-        localStorage.setItem('mmg_account_kind', 'firma');
-        localStorage.setItem('mmg_firma_name', fSnap.data().name || '');
-        updateUserBadge();
-        await applyAccountKindUI('firma', fSnap.data().name || '');
-        return; // firma hesaplarının kişisel 'users' verisi yok, devam etmeye gerek yok
-      } else if(mmgAccountKind === 'firma'){
-        // önceden firma sanılmıştı ama artık değil (ör. hesap silinmiş) — normale dön
-        await applyAccountKindUI('kullanici');
-      }
-    } catch(e){ /* sessizce geç, varsayılan kullanıcı akışıyla devam */ }
     try{
       const snap = await getDoc(doc(db, 'users', user.uid));
       const data = snap.exists() ? snap.data() : {};
@@ -1335,8 +1304,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         localStorage.removeItem('mmg_company_role');
         localStorage.removeItem('mmg_company_name');
       }
-      // Firma Hesabı (YENİ): bu kullanıcının üye olduğu firmaları yükle, sol-alt rozeti doldur
+      // Firma Hesabı (üyelik rozeti + yöneticilik yetkisi): her ikisini de yükle
       await loadFirmaMemberships(user.uid);
+      await loadAdminFirmas(user.uid);
     } catch(e){ /* sessizce geç */ }
   });
 
@@ -1371,43 +1341,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const referralWrap = document.getElementById('authReferralWrap');
   const guestBtn = document.getElementById('guestBtn');
 
-  const authKindUserBtn = document.getElementById('authKindUserBtn');
-  const authKindFirmaBtn = document.getElementById('authKindFirmaBtn');
-  const firmaNameWrap = document.getElementById('authFirmaNameWrap');
-  const authFirmaNameInput = document.getElementById('authFirmaName');
-
   let authMode = 'login';
-  let authKind = 'kullanici'; // 'kullanici' | 'firma'
-
-  function setAuthKind(kind){
-    authKind = kind;
-    authKindUserBtn.classList.toggle('active', kind === 'kullanici');
-    authKindFirmaBtn.classList.toggle('active', kind === 'firma');
-    setAuthMode(authMode); // alan görünürlüklerini yeni türe göre tazele
-  }
-  authKindUserBtn.addEventListener('click', () => setAuthKind('kullanici'));
-  authKindFirmaBtn.addEventListener('click', () => setAuthKind('firma'));
 
   function setAuthMode(mode){
     authMode = mode;
-    const isFirmaKind = authKind === 'firma';
     tabLogin.classList.toggle('active', mode === 'login');
     tabSignup.classList.toggle('active', mode === 'signup');
     passwordConfirmWrap.style.display = mode === 'signup' ? 'block' : 'none';
-    // Kişisel "Ad Soyad" alanı sadece Kullanıcı + Kayıt Ol'da görünür.
-    usernameWrap.style.display = (mode === 'signup' && !isFirmaKind) ? 'block' : 'none';
-    referralWrap.style.display = (mode === 'signup' && !isFirmaKind) ? 'block' : 'none';
-    // "Firma Adı" alanı sadece Firma + Kayıt Ol'da görünür.
-    firmaNameWrap.style.display = (mode === 'signup' && isFirmaKind) ? 'block' : 'none';
+    usernameWrap.style.display = mode === 'signup' ? 'block' : 'none';
+    referralWrap.style.display = mode === 'signup' ? 'block' : 'none';
     authRememberRow.style.display = mode === 'login' ? 'flex' : 'none';
-    if(isFirmaKind){
-      authTitle.textContent = mode === 'login' ? 'Firma Girişi' : 'Firma Hesabı Oluştur';
-      authSub.textContent = mode === 'login' ? 'Firma yönetici hesabınızla giriş yapın' : 'Kullanıcılarınızı ekleyip yetkilendireceğiniz firma hesabını oluşturun';
-    } else {
-      authTitle.textContent = mode === 'login' ? 'Hoş geldiniz' : 'Hesap oluşturun';
-      authSub.textContent = mode === 'login' ? 'Kaldığınız yerden devam etmek için giriş yapın' : 'Oranlarınızı ve tercihlerinizi kaydetmek için ücretsiz hesap açın';
-    }
-    authSubmitBtn.textContent = mode === 'login' ? 'Giriş Yap' : (isFirmaKind ? 'Firma Hesabı Oluştur' : 'Hesap Oluştur');
+    authTitle.textContent = mode === 'login' ? 'Hoş geldiniz' : 'Hesap oluşturun';
+    authSub.textContent = mode === 'login' ? 'Kaldığınız yerden devam etmek için giriş yapın' : 'Oranlarınızı ve tercihlerinizi kaydetmek için ücretsiz hesap açın';
+    authSubmitBtn.textContent = mode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur';
     hideAuthError();
     hideAuthSuccess();
   }
@@ -1491,13 +1437,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       dropdownSub.textContent = 'Misafir modundasınız';
     } else if(state.startsWith('user:')){
       const email = state.slice(5);
-      if(localStorage.getItem('mmg_account_kind') === 'firma'){
-        const fName = localStorage.getItem('mmg_firma_name') || email;
-        nameEl.textContent = '🏢 ' + fName;
-        dropdownName.textContent = fName;
-        dropdownSub.textContent = 'Firma Hesabı · ' + email;
-        return;
-      }
       const no = customerNumber || localStorage.getItem('mmg_customer_no');
       const uname = username || localStorage.getItem('mmg_username');
       nameEl.textContent = no ? ('#' + no) : (uname || email);
@@ -1834,42 +1773,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   }
 
-  // ================== Hesap Türü Arayüz Denetimi (Kullanıcı / Firma) ==================
-  // Bir firma hesabı sadece: hamburger menüdeki "Kullanıcı Yönetim Paneli", ve
-  // sabit Rehber/İletişim linklerini görür. Veri girişi yapılan tüm araç sayfaları
-  // (Gelirler, Giderler, Nakit Akış, Hesaplama Araçları, Talimat Hazırlama) gizlenir
-  // VE openTarget() içindeki denetimle doğrudan erişim de engellenir.
-  let mmgAccountKind = 'kullanici';
-  window.mmgAccountKind = mmgAccountKind;
-  const FIRMA_ALLOWED_TARGETS = ['KullaniciYonetimi.html', 'rehber.html', 'iletisim.html'];
-  const FIRMA_RESTRICTED_SIDEBAR_SELECTORS = [
-    '[data-target="home"]',
-    '#hesaplamaAraclariToggle',
-    '[data-target="Nakit_Akis_Tablosu.html"]',
-    '[data-target="Giderler.html"]',
-    '[data-target="Gelirler.html"]',
-    '[data-target="Talimat_Hazirlama.html"]'
-  ];
-  async function applyAccountKindUI(kind, firmaName){
-    mmgAccountKind = kind;
-    window.mmgAccountKind = kind;
-    const isFirma = kind === 'firma';
+  // ================== Firma Yöneticiliği (rol tabanlı, ayrı giriş YOK) ==================
+  // Firma artık ayrı bir hesap türü değil — normal bir kullanıcı, bir ya da birden
+  // fazla firmanın "yöneticisi" (admin) olarak atanabilir. Bu, kendi kişisel
+  // hesabıyla veri girmesini hiçbir şekilde kısıtlamaz; sadece ek olarak "Kullanıcı
+  // Yönetim Paneli"ne erişim kazandırır (yönettiği firma(lar) için).
+  let mmgAdminFirmaIds = [];
+  async function loadAdminFirmas(uid){
+    mmgAdminFirmaIds = [];
+    try{
+      const snap = await getDoc(doc(db, 'users', uid));
+      if(snap.exists() && Array.isArray(snap.data().adminFirmaIds)){
+        mmgAdminFirmaIds = snap.data().adminFirmaIds;
+      }
+    } catch(e){ /* sessizce geç */ }
+    const isAdmin = mmgAdminFirmaIds.length > 0;
     const navBtn = document.getElementById('navKullaniciYonetimBtn');
     const dropdownBtn = document.getElementById('kullaniciYonetimBtn');
-    if(navBtn) navBtn.style.display = isFirma ? 'flex' : 'none';
-    if(dropdownBtn) dropdownBtn.style.display = isFirma ? 'flex' : 'none';
-    FIRMA_RESTRICTED_SIDEBAR_SELECTORS.forEach(sel => {
-      document.querySelectorAll('aside nav ' + sel).forEach(el => { el.style.display = isFirma ? 'none' : ''; });
-    });
-    const firmaBadgeWrap = document.getElementById('mmgFirmaBadgeWrap');
-    if(firmaBadgeWrap && isFirma) firmaBadgeWrap.style.display = 'none'; // firma rozeti sadece kullanıcı hesaplarında görünür
-    if(!isFirma){
-      // kullanıcıysa, üye olduğu firmaları yükleyip rozeti güncelle
-      if(auth.currentUser) await loadFirmaMemberships(auth.currentUser.uid);
-    }
-    if(isFirma){
-      openTarget('KullaniciYonetimi.html', 'Kullanıcı Yönetim Paneli');
-    }
+    if(navBtn) navBtn.style.display = isAdmin ? 'flex' : 'none';
+    if(dropdownBtn) dropdownBtn.style.display = isAdmin ? 'flex' : 'none';
   }
 
   async function syncCompanyCache(uid){
@@ -1931,7 +1853,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(!avatar && user.photoURL) avatar = user.photoURL;
 
       localStorage.setItem('mmg_auth_state', 'user:' + email);
-      localStorage.setItem('mmg_account_kind', 'kullanici');
       if(customerNumber) localStorage.setItem('mmg_customer_no', String(customerNumber));
       if(username) localStorage.setItem('mmg_username', username);
       if(avatar) localStorage.setItem('mmg_avatar', avatar); else localStorage.removeItem('mmg_avatar');
@@ -1942,7 +1863,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       await applyPendingInviteIfAny(user, username);
       await applyPendingFirmaInviteIfAny(user, username);
       await syncCompanyCache(user.uid);
-      await applyAccountKindUI('kullanici');
+      await loadAdminFirmas(user.uid);
       closeAuthOverlay();
     } catch(err){
       if(err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request'){
@@ -1965,43 +1886,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     authSubmitBtn.textContent = 'Lütfen bekleyin...';
 
     try{
-      if(authKind === 'firma'){
-        // ================== Firma Hesabı (kişisel kullanıcı hesaplarından tamamen ayrı) ==================
-        if(authMode === 'signup'){
-          const confirm = document.getElementById('authPasswordConfirm').value;
-          const firmaAdi = authFirmaNameInput.value.trim();
-          if(!firmaAdi){ showAuthError('Lütfen firma adını girin.'); return; }
-          if(password !== confirm){ showAuthError('Şifreler eşleşmiyor.'); return; }
-          if(password.length < 6){ showAuthError('Şifre en az 6 karakter olmalı.'); return; }
-          const cred = await createUserWithEmailAndPassword(auth, email, password);
-          await setDoc(doc(db, 'firmaAccounts', cred.user.uid), {
-            name: firmaAdi, email: email, createdAt: serverTimestamp()
-          });
-          localStorage.setItem('mmg_auth_state', 'user:' + email);
-          localStorage.setItem('mmg_account_kind', 'firma');
-          localStorage.setItem('mmg_firma_name', firmaAdi);
-          updateUserBadge();
-          await applyAccountKindUI('firma', firmaAdi);
-          closeAuthOverlay();
-        } else {
-          const cred = await signInWithEmailAndPassword(auth, email, password);
-          const fSnap = await getDoc(doc(db, 'firmaAccounts', cred.user.uid));
-          if(!fSnap.exists()){
-            await signOut(auth);
-            showAuthError('Bu e-posta bir firma hesabı değil. Lütfen "Kullanıcı" sekmesinden giriş yapın.');
-            return;
-          }
-          const firmaAdi = fSnap.data().name || '';
-          localStorage.setItem('mmg_auth_state', 'user:' + email);
-          localStorage.setItem('mmg_account_kind', 'firma');
-          localStorage.setItem('mmg_firma_name', firmaAdi);
-          localStorage.setItem('mmg_remember', remember ? '1' : '0');
-          updateUserBadge();
-          await applyAccountKindUI('firma', firmaAdi);
-          closeAuthOverlay();
-        }
-        return;
-      }
       if(authMode === 'signup'){
         const confirm = document.getElementById('authPasswordConfirm').value;
         const username = document.getElementById('authUsername').value.trim();
@@ -2096,8 +1980,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         // ---- Bekleyen bir eski-sistem (Hesabım'dan gönderilmiş) daveti varsa uygula ----
         await applyPendingInviteIfAny(cred.user, username);
         await applyPendingFirmaInviteIfAny(cred.user, username);
-        localStorage.setItem('mmg_account_kind', 'kullanici');
-        await applyAccountKindUI('kullanici');
+        await loadAdminFirmas(cred.user.uid);
 
         closeAuthOverlay();
       } else {
@@ -2125,8 +2008,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         await applyPendingInviteIfAny(cred.user, username);
         await applyPendingFirmaInviteIfAny(cred.user, username);
         await syncCompanyCache(cred.user.uid);
-        localStorage.setItem('mmg_account_kind', 'kullanici');
-        await applyAccountKindUI('kullanici');
+        await loadAdminFirmas(cred.user.uid);
         closeAuthOverlay();
       }
     } catch(err){
@@ -2149,12 +2031,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     localStorage.removeItem('mmg_company_role');
     localStorage.removeItem('mmg_company_name');
     localStorage.removeItem('mmg_active_company_id');
-    localStorage.removeItem('mmg_account_kind');
-    localStorage.removeItem('mmg_firma_name');
+
     localStorage.removeItem('mmg_active_firma_id');
     setAvatar(null);
     updateUserBadge();
-    applyAccountKindUI('kullanici');
+    mmgAdminFirmaIds = [];
+    mmgFirmaMemberships = [];
+    renderFirmaBadge();
+    const navBtn0 = document.getElementById('navKullaniciYonetimBtn');
+    const dropdownBtn0 = document.getElementById('kullaniciYonetimBtn');
+    if(navBtn0) navBtn0.style.display = 'none';
+    if(dropdownBtn0) dropdownBtn0.style.display = 'none';
     document.getElementById('authEmail').value = '';
     document.getElementById('authPassword').value = '';
     document.getElementById('rememberMe').checked = false;

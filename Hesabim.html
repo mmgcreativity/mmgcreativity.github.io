@@ -277,13 +277,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="card" id="companyCard">
-    <h2 style="margin-bottom:10px;" data-i18n="user_group">Firma / Kullanıcı Grubu</h2>
-    <p class="referral-note" style="margin-bottom:0;">
-      Firma hesapları artık kendi e-posta/şifresiyle ayrı giriş yapan, sadece kullanıcı ekleyip yetkilendirebilen
-      bağımsız hesaplardır — kişisel hesabınızdan yönetilmez. Bir firma hesabınız yoksa çıkış yapıp giriş ekranındaki
-      <strong>"🏢 Firma"</strong> sekmesinden yeni bir firma hesabı oluşturabilirsiniz. Bir firma sizi kullanıcı olarak
-      eklediyse, üye olduğunuz firmalar arasında sol alt köşedeki rozetten tek tıkla geçiş yapabilirsiniz.
+    <h2 style="margin-bottom:10px;" data-i18n="user_group">Firma Yöneticiliği</h2>
+    <p class="referral-note" style="margin-bottom:14px;">
+      Firma, ayrı bir giriş değildir — kendi kullanıcı hesabınızla, bir ya da birden fazla firmanın
+      <strong>yöneticisi</strong> olabilirsiniz. Bu, kendi verilerinizi girmenizi hiçbir şekilde etkilemez;
+      sadece ek olarak o firma(lar)ın "Kullanıcı Yönetim Paneli"ne erişim kazandırır.
     </p>
+
+    <div id="myFirmasList" style="margin-bottom:16px;"></div>
+
+    <div style="padding-top:14px; border-top:1px solid var(--hairline);">
+      <div class="mini-label" style="margin-bottom:8px;">Yeni Firma Oluştur</div>
+      <form id="createFirmaForm" style="display:flex; gap:8px; margin-bottom:6px;">
+        <input type="text" id="createFirmaName" placeholder="Firma adı" style="flex:1;" required>
+        <button type="submit" class="auth-submit" id="createFirmaBtn" style="width:auto; padding:12px 18px; margin-top:0;">Oluştur</button>
+      </form>
+      <div class="auth-error" id="createFirmaError"></div>
+      <div class="saved-msg" id="createFirmaSavedMsg">Firma oluşturuldu ✓</div>
+    </div>
+
     <div id="legacyCompanyWrap" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--hairline);">
       <p class="referral-note" style="margin-bottom:10px;">
         Bu hesapta eski sistemden kalma bir firma kaydı bulundu: <strong id="legacyCompanyName">—</strong>.
@@ -537,6 +549,139 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     clearLegacyCompanyBtn.disabled = false;
   });
 
+  // ================== Firma Yöneticiliği ==================
+  const myFirmasList = document.getElementById('myFirmasList');
+  const createFirmaForm = document.getElementById('createFirmaForm');
+  const createFirmaName = document.getElementById('createFirmaName');
+  const createFirmaBtn = document.getElementById('createFirmaBtn');
+  const createFirmaError = document.getElementById('createFirmaError');
+  const createFirmaSavedMsg = document.getElementById('createFirmaSavedMsg');
+
+  async function loadMyFirmas(uid){
+    myFirmasList.innerHTML = '<p class="referral-note">Yükleniyor...</p>';
+    try{
+      const snap = await getDoc(doc(db, 'users', uid));
+      const firmaIds = (snap.exists() && Array.isArray(snap.data().adminFirmaIds)) ? snap.data().adminFirmaIds : [];
+      if(!firmaIds.length){
+        myFirmasList.innerHTML = '<p class="referral-note">Henüz yöneticisi olduğunuz bir firma yok.</p>';
+        return;
+      }
+      const blocks = [];
+      for(const fid of firmaIds){
+        let name = fid;
+        try{
+          const fSnap = await getDoc(doc(db, 'firmaAccounts', fid));
+          if(fSnap.exists()) name = fSnap.data().name || fid;
+        }catch(e){ /* sessizce geç */ }
+        blocks.push(
+          '<div class="member-row" data-firma-id="' + fid + '" style="flex-direction:column; align-items:stretch; gap:10px;">' +
+            '<div style="display:flex; align-items:center; justify-content:space-between;">' +
+              '<div class="member-name">🏢 ' + name + '</div>' +
+              '<span class="member-badge">Yöneticisisiniz</span>' +
+            '</div>' +
+            '<div style="display:flex; gap:8px;">' +
+              '<input type="email" placeholder="Yönetici e-postası" class="firma-admin-invite-email" style="flex:1; background:var(--surface); border:1px solid var(--hairline); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13px;">' +
+              '<button type="button" class="auth-submit firma-admin-invite-btn" data-firma-id="' + fid + '" style="width:auto; padding:9px 14px; margin-top:0; font-size:12.5px;">Yönetici Ekle</button>' +
+            '</div>' +
+            '<div class="auth-error firma-admin-invite-error"></div>' +
+            '<div class="saved-msg firma-admin-invite-saved">Eklendi ✓</div>' +
+          '</div>'
+        );
+      }
+      myFirmasList.innerHTML = blocks.join('');
+      myFirmasList.querySelectorAll('.firma-admin-invite-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const row = btn.closest('.member-row');
+          const emailInput = row.querySelector('.firma-admin-invite-email');
+          const errEl = row.querySelector('.firma-admin-invite-error');
+          const savedEl = row.querySelector('.firma-admin-invite-saved');
+          errEl.classList.remove('show'); errEl.textContent = '';
+          const inviteEmail = emailInput.value.trim().toLowerCase();
+          if(!inviteEmail || !inviteEmail.includes('@')){
+            errEl.textContent = 'Geçerli bir e-posta girin.';
+            errEl.classList.add('show');
+            return;
+          }
+          btn.disabled = true;
+          try{
+            const fid = btn.dataset.firmaId;
+            let fName = fid;
+            try{
+              const fSnap = await getDoc(doc(db, 'firmaAccounts', fid));
+              if(fSnap.exists()) fName = fSnap.data().name || fid;
+            }catch(e){ /* sessizce geç */ }
+            await setDoc(doc(db, 'firmaAdminInvites', inviteEmail), {
+              firmaId: fid, firmaName: fName, createdAt: serverTimestamp()
+            });
+            savedEl.classList.add('show');
+            emailInput.value = '';
+            setTimeout(() => savedEl.classList.remove('show'), 2500);
+          } catch(e){
+            errEl.textContent = 'Davet gönderilemedi, tekrar deneyin.';
+            errEl.classList.add('show');
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      });
+    } catch(e){
+      myFirmasList.innerHTML = '<p class="referral-note">Firmalar yüklenemedi.</p>';
+    }
+  }
+
+  createFirmaForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    createFirmaError.classList.remove('show');
+    createFirmaError.textContent = '';
+    const user = auth.currentUser;
+    if(!user){
+      createFirmaError.textContent = 'Firma oluşturmak için giriş yapmış olmanız gerekir.';
+      createFirmaError.classList.add('show');
+      return;
+    }
+    const name = createFirmaName.value.trim();
+    if(!name){
+      createFirmaError.textContent = 'Lütfen bir firma adı girin.';
+      createFirmaError.classList.add('show');
+      return;
+    }
+    createFirmaBtn.disabled = true;
+    try{
+      const firmaRef = doc(collection(db, 'firmaAccounts'));
+      await setDoc(firmaRef, { name: name, createdAt: serverTimestamp(), createdBy: user.uid });
+      await setDoc(doc(db, 'firmaAccounts', firmaRef.id, 'admins', user.uid), {
+        email: user.email || '', addedAt: serverTimestamp()
+      });
+      await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayUnion(firmaRef.id) }, { merge: true });
+      createFirmaSavedMsg.classList.add('show');
+      setTimeout(() => createFirmaSavedMsg.classList.remove('show'), 2500);
+      createFirmaName.value = '';
+      await loadMyFirmas(user.uid);
+    } catch(e){
+      createFirmaError.textContent = 'Firma oluşturulamadı, lütfen tekrar deneyin.';
+      createFirmaError.classList.add('show');
+    } finally {
+      createFirmaBtn.disabled = false;
+    }
+  });
+
+  // Bekleyen bir firma-yöneticiliği daveti varsa kabul et.
+  async function applyPendingFirmaAdminInviteIfAny(user){
+    if(!user || !user.email) return;
+    try{
+      const inviteRef = doc(db, 'firmaAdminInvites', user.email.toLowerCase());
+      const inviteSnap = await getDoc(inviteRef);
+      if(!inviteSnap.exists()) return;
+      const invite = inviteSnap.data();
+      await setDoc(doc(db, 'firmaAccounts', invite.firmaId, 'admins', user.uid), {
+        email: user.email || '', addedAt: serverTimestamp()
+      });
+      await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayUnion(invite.firmaId) }, { merge: true });
+      await deleteDoc(inviteRef);
+      try{ alert('🏢 "' + (invite.firmaName || 'Firma') + '" firmasına yönetici olarak eklendiniz.'); }catch(e){}
+    } catch(e){ /* sessizce geç */ }
+  }
+
   onAuthStateChanged(auth, async (user) => {
     if(!user){
       statusPillText.textContent = 'Misafir modundasınız';
@@ -566,6 +711,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       } else {
         legacyCompanyWrap.style.display = 'none';
       }
+      await applyPendingFirmaAdminInviteIfAny(user);
+      await loadMyFirmas(user.uid);
     } catch(e){
       statusPillText.textContent = user.email || 'Üye';
     }
