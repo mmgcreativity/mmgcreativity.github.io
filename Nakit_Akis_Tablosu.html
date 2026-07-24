@@ -112,10 +112,16 @@ function mmgApplyTurkishFont(doc){
         isPremium = data.isPremium === true;
         isAdmin = data.isAdmin === true;
         // Firma/Ekip: kullanıcı bir firmaya bağlıysa veriler kişi yerine firma altında paylaşılır
-        if(data.companyId){
+        // YENİ: kullanıcı sol-alt rozetten bilinçli bir "Veri Kaynağı" seçtiyse önce o uygulanır.
+        const activeScope = localStorage.getItem('mmg_active_data_scope');
+        if(activeScope && activeScope !== 'personal'){
+          window.mmgCloud.scopeCollection = 'firmaAccounts';
+          window.mmgCloud.scopeId = activeScope;
+        } else if(activeScope === 'personal'){
+          // kullanıcı bilinçli olarak kendi verisini seçti; scope zaten users/uid, dokunma.
+        } else if(data.companyId){
+          // Hiç seçim yapılmamışsa eski sistemle geriye dönük uyumluluk.
           window.mmgCloud.scopeCollection = 'companies';
-          // Kullanıcı Hesabım'dan bir "Aktif Firma" seçtiyse (grup içinde firmalar arası geçiş),
-          // bu terminal de o firmanın verisini kullanır; seçim yoksa kendi firmasını kullanır.
           const activeCompanyId = localStorage.getItem('mmg_active_company_id');
           window.mmgCloud.scopeId = activeCompanyId || data.companyId;
         }
@@ -772,10 +778,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
   // ================== Sabitler ==================
-  const AY_ADLARI = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
-  const GUN_ADLARI = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+  let MMG_LANG = 'tr';
+  try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
+  const AY_ADLARI_TR = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  const AY_ADLARI_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const GUN_ADLARI_TR = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+  const GUN_ADLARI_EN = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const AY_ADLARI = MMG_LANG === 'en' ? AY_ADLARI_EN : AY_ADLARI_TR;
+  const GUN_ADLARI = MMG_LANG === 'en' ? GUN_ADLARI_EN : GUN_ADLARI_TR;
+  // Not: Kategori isimleri Firestore'da bu Türkçe metinlerle SAKLANIYOR (değer/anahtar olarak).
+  // Bu yüzden GIDER_CATS/GELIR_CATS her zaman Türkçe kalır; İngilizce modda sadece
+  // catLabel() ile GÖRÜNEN metin çevrilir, saklanan veri/değer değişmez.
   const GIDER_CATS = ['Kira','Maaş / Personel','Tedarikçi / Stok','Kredi / Taksit Ödemesi','Kredi Kartı','Vergi / SGK','Fatura','Teminat Mektubu','Komisyon','Diğer Gider'];
   const GELIR_CATS = ['Nakit Tahsilat','Çek Tahsilatı','Senet Tahsilatı','POS Tahsilatı','Faiz Geliri'];
+  const CAT_LABELS_EN = {
+    'Kira':'Rent', 'Maaş / Personel':'Salary / Staff', 'Tedarikçi / Stok':'Supplier / Stock',
+    'Kredi / Taksit Ödemesi':'Loan / Installment Payment', 'Kredi Kartı':'Credit Card',
+    'Vergi / SGK':'Tax / Social Security', 'Fatura':'Bill', 'Teminat Mektubu':'Letter of Guarantee',
+    'Komisyon':'Commission', 'Diğer Gider':'Other Expense',
+    'Nakit Tahsilat':'Cash Collection', 'Çek Tahsilatı':'Check Collection',
+    'Senet Tahsilatı':'Promissory Note Collection', 'POS Tahsilatı':'POS Collection', 'Faiz Geliri':'Interest Income'
+  };
+  function catLabel(cat){ return (MMG_LANG === 'en' && CAT_LABELS_EN[cat]) ? CAT_LABELS_EN[cat] : cat; }
+  const NAT = MMG_LANG === 'en' ? {
+    expense:'Expense', income:'Income', net:'Net', desc:'Description', optional:'(optional)',
+    category:'Category', amount:'Amount', addBtn:'+ Add', descPlaceholderExpense:'e.g. Rent, Electricity bill...',
+    descPlaceholderIncome:'e.g. Rent Income, Cash Collection...', date:'Date', month:'Month',
+    today:'Today', ofYear:'year', moreThanSpent:'you are net positive', lessThanSpent:'you are net negative',
+    janToDec:'January - December · click a month to open it'
+  } : {
+    expense:'Gider', income:'Gelir', net:'Net', desc:'Açıklama', optional:'(opsiyonel)',
+    category:'Kategori', amount:'Tutar', addBtn:'+ Ekle', descPlaceholderExpense:'örn. Kira, Elektrik faturası...',
+    descPlaceholderIncome:'örn. Kira Geliri, Nakit Tahsilat...', date:'Tarih', month:'Ay',
+    today:'Bugün', ofYear:'yılında', moreThanSpent:'fazla veriyorsunuz', lessThanSpent:'açık veriyorsunuz',
+    janToDec:'Ocak - Aralık · bir aya tıklayarak o ayı açabilirsiniz'
+  };
   const CAT_COLORS = ['coral','magenta','violet','azure','teal','amber','red','blue'];
   const CAT_ALL = GIDER_CATS.concat(GELIR_CATS);
 
@@ -1194,15 +1231,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const cats = type === 'gider' ? GIDER_CATS : GELIR_CATS;
     let html = '<div class="drawer-inner">';
     html += '<div class="drawer-header-row">';
-    html += '<div class="drawer-title">' + (type==='gider' ? 'Gider' : 'Gelir') + '</div>';
+    html += '<div class="drawer-title">' + (type==='gider' ? NAT.expense : NAT.income) + '</div>';
     html += '<div class="add-item-form" data-day="'+key+'" data-type="'+type+'">' +
-      '<div class="field"><label>Açıklama <span style="color:var(--muted); font-weight:400;">(opsiyonel)</span></label>' +
-        '<input type="text" class="desc-in" placeholder="' + (type==='gider' ? 'örn. Kira, Elektrik faturası...' : 'örn. Kira Geliri, Nakit Tahsilat...') + '"></div>' +
-      '<div class="field"><label>Kategori</label>' +
-        '<select class="cat-in">' + cats.map(c=>'<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>').join('') + '</select></div>' +
-      '<div class="field"><label>Tutar</label>' +
+      '<div class="field"><label>' + NAT.desc + ' <span style="color:var(--muted); font-weight:400;">' + NAT.optional + '</span></label>' +
+        '<input type="text" class="desc-in" placeholder="' + (type==='gider' ? NAT.descPlaceholderExpense : NAT.descPlaceholderIncome) + '"></div>' +
+      '<div class="field"><label>' + NAT.category + '</label>' +
+        '<select class="cat-in">' + cats.map(c=>'<option value="'+escapeHtml(c)+'">'+escapeHtml(catLabel(c))+'</option>').join('') + '</select></div>' +
+      '<div class="field"><label>' + NAT.amount + '</label>' +
         '<input type="text" inputmode="decimal" class="amount-in" placeholder="0,00" data-decimals="2"></div>' +
-      '<button type="button" class="add-btn" data-action="add-item" data-day="'+key+'" data-type="'+type+'">+ Ekle</button>' +
+      '<button type="button" class="add-btn" data-action="add-item" data-day="'+key+'" data-type="'+type+'">' + NAT.addBtn + '</button>' +
     '</div>';
     html += '</div>';
     if(items && items.length > 0){
@@ -1211,7 +1248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         html += '<div class="item-row">' +
           '<div class="item-row-main">' +
             '<span class="item-desc">' + escapeHtml(it.desc || '(açıklama yok)') + '</span>' +
-            '<span class="item-cat" style="color:'+catColorVar(it.category)+';border-color:'+catColorVar(it.category)+'44;">' + escapeHtml(it.category) + '</span>' +
+            '<span class="item-cat" style="color:'+catColorVar(it.category)+';border-color:'+catColorVar(it.category)+'44;">' + escapeHtml(catLabel(it.category)) + '</span>' +
           '</div>' +
           '<div class="item-row-main">' +
             '<span class="item-amount" style="color:'+ (type==='gider' ? 'var(--red)' : 'var(--teal)') +';">' + fmtMoney(it.amount) + '</span>' +
@@ -1292,7 +1329,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         '<div class="week-header-left"><span class="week-title">' + (wIdx+1) + '. Hafta</span><span class="week-range">' + rangeLabel + '</span></div>' +
         '<span class="week-net ' + weekNetClass + '">' + (weekNet>=0?'+':'-') + fmtMoney(Math.abs(weekNet)) + '</span>' +
       '</div>' +
-      '<table class="day-table"><thead><tr><th>Tarih</th><th>Gider</th><th>Gelir</th><th>Net</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
+      '<table class="day-table"><thead><tr><th>'+NAT.date+'</th><th>'+NAT.expense+'</th><th>'+NAT.income+'</th><th>'+NAT.net+'</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
     '</div>';
   }
 
@@ -1463,10 +1500,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const totalNet = totalI - totalG;
     return '<div class="week-card">' +
       '<div class="week-header">' +
-        '<div class="week-header-left"><span class="week-title">' + selYear + ' Yılı</span><span class="week-range">Ocak - Aralık · bir aya tıklayarak o ayı açabilirsiniz</span></div>' +
+        '<div class="week-header-left"><span class="week-title">' + selYear + (MMG_LANG==='en' ? '' : ' Yılı') + '</span><span class="week-range">' + NAT.janToDec + '</span></div>' +
         '<span class="week-net ' + (totalNet>=0?'pos':'neg') + '">' + (totalNet>=0?'+':'-') + fmtMoney(Math.abs(totalNet)) + '</span>' +
       '</div>' +
-      '<table class="day-table"><thead><tr><th>Ay</th><th>Gider</th><th>Gelir</th><th>Net</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<table class="day-table"><thead><tr><th>'+NAT.month+'</th><th>'+NAT.expense+'</th><th>'+NAT.income+'</th><th>'+NAT.net+'</th></tr></thead><tbody>' + rows + '</tbody></table>' +
     '</div>';
   }
 
@@ -1486,15 +1523,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
     const net = iTotal - gTotal;
 
-    document.getElementById('sumGelirLabel').textContent = 'Gelir · ' + selYear;
-    document.getElementById('sumGiderLabel').textContent = 'Gider · ' + selYear;
-    document.getElementById('sumNetLabel').textContent = 'Net Durum · ' + selYear;
+    document.getElementById('sumGelirLabel').textContent = NAT.income + ' · ' + selYear;
+    document.getElementById('sumGiderLabel').textContent = NAT.expense + ' · ' + selYear;
+    document.getElementById('sumNetLabel').textContent = NAT.net + ' · ' + selYear;
     document.getElementById('sumGider').textContent = fmtMoney(gTotal);
     document.getElementById('sumGelir').textContent = fmtMoney(iTotal);
     const netEl = document.getElementById('sumNet');
     netEl.textContent = (net>=0?'':'-') + fmtMoney(Math.abs(net));
     netEl.className = 'summary-value ' + (net >= 0 ? 'pos' : 'neg');
-    document.getElementById('sumNetSub').textContent = net >= 0 ? (selYear + ' yılında fazla veriyorsunuz') : (selYear + ' yılında açık veriyorsunuz');
+    document.getElementById('sumNetSub').textContent = MMG_LANG==='en' ? (net >= 0 ? ('In ' + selYear + ' ' + NAT.moreThanSpent) : ('In ' + selYear + ' ' + NAT.lessThanSpent)) : (net >= 0 ? (selYear + ' yılında fazla veriyorsunuz') : (selYear + ' yılında açık veriyorsunuz'));
 
     const reportsList = document.getElementById('reportsList');
     const bdWrap = document.getElementById('breakdownWrap');
@@ -1775,8 +1812,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     let periodWord, periodTag;
     if(reportTab === 'gunluk'){
       const isToday = dayKey(selYear, selMonth, reportDay) === todayKey;
-      periodTag = isToday ? 'Bugün' : (reportDay + ' ' + AY_ADLARI[selMonth]);
-      periodWord = isToday ? 'Bugün' : periodTag;
+      periodTag = isToday ? NAT.today : (reportDay + ' ' + AY_ADLARI[selMonth]);
+      periodWord = isToday ? NAT.today : periodTag;
     } else if(reportTab === 'haftalik'){
       const weeksNow = buildWeeks(selYear, selMonth);
       const curWeek = weeksNow[reportWeekIdx] || [];
@@ -1789,15 +1826,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       periodWord = isCurrentMonth ? 'Bu ay' : periodTag;
     }
 
-    document.getElementById('sumGelirLabel').textContent = 'Gelir · ' + periodTag;
-    document.getElementById('sumGiderLabel').textContent = 'Gider · ' + periodTag;
-    document.getElementById('sumNetLabel').textContent = 'Net Durum · ' + periodTag;
+    document.getElementById('sumGelirLabel').textContent = NAT.income + ' · ' + periodTag;
+    document.getElementById('sumGiderLabel').textContent = NAT.expense + ' · ' + periodTag;
+    document.getElementById('sumNetLabel').textContent = NAT.net + ' · ' + periodTag;
     document.getElementById('sumGider').textContent = fmtMoney(gTotal);
     document.getElementById('sumGelir').textContent = fmtMoney(iTotal);
     const netEl = document.getElementById('sumNet');
     netEl.textContent = (net>=0?'':'-') + fmtMoney(Math.abs(net));
     netEl.className = 'summary-value ' + (net >= 0 ? 'pos' : 'neg');
-    document.getElementById('sumNetSub').textContent = net >= 0 ? (periodWord + ' fazla veriyorsunuz') : (periodWord + ' açık veriyorsunuz');
+    document.getElementById('sumNetSub').textContent = net >= 0 ? (periodWord + ' ' + NAT.moreThanSpent) : (periodWord + ' ' + NAT.lessThanSpent);
 
     const reportsList = document.getElementById('reportsList');
     const bdWrap = document.getElementById('breakdownWrap');

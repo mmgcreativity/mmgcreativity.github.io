@@ -88,10 +88,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       try{
         const snap = await getDoc(doc(db, 'users', user.uid));
         const data = snap.exists() ? snap.data() : {};
-        if(data.companyId){
+        // YENİ: kullanıcı sol-alt rozetten bilinçli bir "Veri Kaynağı" seçtiyse önce o uygulanır.
+        const activeScope = localStorage.getItem('mmg_active_data_scope');
+        if(activeScope && activeScope !== 'personal'){
+          window.mmgCloud.scopeCollection = 'firmaAccounts';
+          window.mmgCloud.scopeId = activeScope;
+        } else if(activeScope === 'personal'){
+          // kullanıcı bilinçli olarak kendi verisini seçti; scope zaten users/uid, dokunma.
+        } else if(data.companyId){
+          // Hiç seçim yapılmamışsa eski sistemle geriye dönük uyumluluk.
           window.mmgCloud.scopeCollection = 'companies';
-          // Kullanıcı Hesabım'dan bir "Aktif Firma" seçtiyse (grup içinde firmalar arası geçiş),
-          // bu terminal de o firmanın verisini kullanır; seçim yoksa kendi firmasını kullanır.
           const activeCompanyId = localStorage.getItem('mmg_active_company_id');
           window.mmgCloud.scopeId = activeCompanyId || data.companyId;
         }

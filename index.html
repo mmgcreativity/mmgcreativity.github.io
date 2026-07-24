@@ -1744,21 +1744,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     } catch(e){ /* davet kontrol edilemezse sessizce geç */ }
   }
 
-  // ---- Firma Hesabı (YENİ): sol-alt "Grup Firmaları" rozetini doldurur ----
-  let mmgFirmaMemberships = []; // [{id, name}]
+  // ---- Firma Hesabı: sol-alt rozet artık gerçek bir "Veri Kaynağı" değiştiricisi ----
+  // Kullanıcı hem üye olduğu hem yönettiği firmalar arasından birini "aktif" seçebilir;
+  // seçim mmg_active_data_scope içinde saklanır ve araç sayfaları (Gelirler/Giderler/
+  // Nakit Akış) bu firmanın PAYLAŞIMLI veri havuzunu kullanır. "Kendi Verilerim" seçiliyse
+  // (varsayılan) her şey eskisi gibi kişisel hesaba kaydedilir.
+  let mmgFirmaMemberships = []; // [{id, name, role}]
   async function loadFirmaMemberships(uid){
     mmgFirmaMemberships = [];
     try{
       const snap = await getDoc(doc(db, 'users', uid));
-      const firmaIds = (snap.exists() && Array.isArray(snap.data().firmaIds)) ? snap.data().firmaIds : [];
-      for(const fid of firmaIds){
+      const data = snap.exists() ? snap.data() : {};
+      const memberIds = Array.isArray(data.firmaIds) ? data.firmaIds : [];
+      const adminIds = Array.isArray(data.adminFirmaIds) ? data.adminFirmaIds : [];
+      const allIds = Array.from(new Set([...memberIds, ...adminIds]));
+      for(const fid of allIds){
         try{
           const fSnap = await getDoc(doc(db, 'firmaAccounts', fid));
-          if(fSnap.exists()) mmgFirmaMemberships.push({ id: fid, name: fSnap.data().name || fid });
+          if(fSnap.exists()){
+            mmgFirmaMemberships.push({ id: fid, name: fSnap.data().name || fid, role: adminIds.includes(fid) ? 'Yönetici' : 'Kullanıcı' });
+          }
         }catch(e){ /* tek bir firma okunamazsa listeyi bozmadan devam et */ }
       }
     }catch(e){ /* sessizce geç */ }
     renderFirmaBadge();
+  }
+  function getActiveDataScope(){
+    return localStorage.getItem('mmg_active_data_scope') || 'personal';
+  }
+  function setActiveDataScope(scope){
+    localStorage.setItem('mmg_active_data_scope', scope);
+    renderFirmaBadge();
+    // Aktif veri kaynağı değiştiğinde açık olan araç sayfasının bunu hemen
+    // yansıtması için sayfayı yeniden yüklüyoruz (kapsam sayfa açılışında okunuyor).
+    try{
+      if(frameWrap.style.display !== 'none' && iframe.src){
+        iframe.src = iframe.src;
+      }
+    }catch(e){ /* sessizce geç */ }
   }
   function renderFirmaBadge(){
     const wrap = document.getElementById('mmgFirmaBadgeWrap');
@@ -1770,22 +1793,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       return;
     }
     wrap.style.display = 'flex';
-    const activeId = localStorage.getItem('mmg_active_firma_id') || mmgFirmaMemberships[0].id;
-    if(!localStorage.getItem('mmg_active_firma_id')) localStorage.setItem('mmg_active_firma_id', activeId);
-    const active = mmgFirmaMemberships.find(f => f.id === activeId) || mmgFirmaMemberships[0];
-    if(nameEl) nameEl.textContent = active ? active.name : 'Firma';
+    const activeScope = getActiveDataScope();
+    const activeFirma = activeScope !== 'personal' ? mmgFirmaMemberships.find(f => f.id === activeScope) : null;
+    if(nameEl) nameEl.textContent = activeFirma ? ('🏢 ' + activeFirma.name) : '👤 Kendi Verilerim';
     if(listEl){
-      listEl.innerHTML = mmgFirmaMemberships.map(f =>
-        '<div class="mmg-account-row" data-firma-id="' + f.id + '">' +
-          (f.id === active.id ? '<span class="mmg-account-row-dot"></span>' : '<span style="width:7px;"></span>') +
-          '<span class="mmg-account-row-main">' + f.name + '</span>' +
+      const personalRow = '<div class="mmg-account-row" data-scope="personal">' +
+        (activeScope === 'personal' ? '<span class="mmg-account-row-dot"></span>' : '<span style="width:7px;"></span>') +
+        '<span class="mmg-account-row-main">👤 Kendi Verilerim</span></div>';
+      const firmaRows = mmgFirmaMemberships.map(f =>
+        '<div class="mmg-account-row" data-scope="' + f.id + '">' +
+          (f.id === activeScope ? '<span class="mmg-account-row-dot"></span>' : '<span style="width:7px;"></span>') +
+          '<span class="mmg-account-row-main">🏢 ' + f.name + '</span>' +
+          '<span class="member-badge" style="margin-left:auto; font-size:10px;">' + f.role + '</span>' +
         '</div>'
       ).join('');
-      listEl.querySelectorAll('[data-firma-id]').forEach(row => {
+      listEl.innerHTML = personalRow + firmaRows;
+      listEl.querySelectorAll('[data-scope]').forEach(row => {
         row.addEventListener('click', () => {
-          localStorage.setItem('mmg_active_firma_id', row.dataset.firmaId);
+          setActiveDataScope(row.dataset.scope);
           document.getElementById('mmgFirmaBadgeDropdown').hidden = true;
-          renderFirmaBadge();
         });
       });
     }

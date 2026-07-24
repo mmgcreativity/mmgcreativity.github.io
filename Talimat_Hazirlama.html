@@ -153,10 +153,16 @@ function mmgApplyTurkishFont(doc){
         const snap = await getDoc(doc(db, 'users', user.uid));
         const data = snap.exists() ? snap.data() : {};
         // Firma/Ekip: kullanıcı bir firmaya bağlıysa veriler kişi yerine firma altında paylaşılır
-        if(data.companyId){
+        // YENİ: kullanıcı sol-alt rozetten bilinçli bir "Veri Kaynağı" seçtiyse önce o uygulanır.
+        const activeScope = localStorage.getItem('mmg_active_data_scope');
+        if(activeScope && activeScope !== 'personal'){
+          window.mmgCloud.scopeCollection = 'firmaAccounts';
+          window.mmgCloud.scopeId = activeScope;
+        } else if(activeScope === 'personal'){
+          // kullanıcı bilinçli olarak kendi verisini seçti; scope zaten users/uid, dokunma.
+        } else if(data.companyId){
+          // Hiç seçim yapılmamışsa eski sistemle geriye dönük uyumluluk.
           window.mmgCloud.scopeCollection = 'companies';
-          // Kullanıcı Hesabım'dan bir "Aktif Firma" seçtiyse (grup içinde firmalar arası geçiş),
-          // bu terminal de o firmanın verisini kullanır; seçim yoksa kendi firmasını kullanır.
           const activeCompanyId = localStorage.getItem('mmg_active_company_id');
           window.mmgCloud.scopeId = activeCompanyId || data.companyId;
         }
@@ -1871,10 +1877,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.querySelectorAll('.mmg-zoom-flyout-wrap').forEach(wrap => {
     let hideTimer = null;
     const flyout = wrap.querySelector('.mmg-zoom-flyout');
+    const trigger = wrap.querySelector('.mmg-zoom-trigger-btn');
     function show(){ clearTimeout(hideTimer); flyout.style.opacity = '1'; flyout.style.visibility = 'visible'; flyout.style.pointerEvents = 'auto'; }
-    function scheduleHide(){ hideTimer = setTimeout(() => { flyout.style.opacity = ''; flyout.style.visibility = ''; flyout.style.pointerEvents = ''; }, 250); }
+    function hide(){ clearTimeout(hideTimer); flyout.style.opacity = ''; flyout.style.visibility = ''; flyout.style.pointerEvents = ''; }
+    function scheduleHide(){ hideTimer = setTimeout(hide, 250); }
     wrap.addEventListener('mouseenter', show);
     wrap.addEventListener('mouseleave', scheduleHide);
+    // Fare üzerine gelince açılan hover davranışına ek olarak, tıklayınca da
+    // açılıp kapanabilsin (dokunmatik ekranlarda hover hiç tetiklenmeyebiliyor).
+    if(trigger){
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = flyout.style.visibility === 'visible';
+        if(isOpen) hide(); else show();
+      });
+    }
+    document.addEventListener('click', (e) => {
+      if(!wrap.contains(e.target)) hide();
+    });
   });
 
   // ---- Önizleme yakınlaştırma/uzaklaştırma ----
