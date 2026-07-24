@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<script src="i18n-core.js"></script>
 <script>
 (function(){
   try{
@@ -442,6 +443,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <script>
+let MMG_LANG = 'tr';
+try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
+const KK_MONTH_WORD = MMG_LANG === 'en' ? 'Mo' : 'Ay';
 let offers = [
   {bank:"VAKIF KATILIM", amount:190043, monthlyRate:4.33, months:2, annualFeeRate:1.12},
   {bank:"KUVEYT TÜRK", amount:398478, monthlyRate:4.15, months:2, annualFeeRate:1.13},
@@ -577,7 +581,7 @@ function renderTable(){
       <td><input type="text" value="${o.bank}" data-idx="${idx}" data-field="bank" placeholder="Banka adı"></td>
       <td><input type="text" inputmode="numeric" value="${formatTRThousands(String(o.amount))}" data-idx="${idx}" data-field="amount" placeholder="100.000"></td>
       <td><select data-idx="${idx}" data-field="months">
-            ${[1,2,3,6,9,12,18,24,36,48].map(m => `<option value="${m}" ${o.months===m?'selected':''}>${m} Ay</option>`).join('')}
+            ${[1,2,3,6,9,12,18,24,36,48].map(m => `<option value="${m}" ${o.months===m?'selected':''}>${m} ${KK_MONTH_WORD}</option>`).join('')}
           </select></td>
       <td><input type="number" step="0.01" value="${o.monthlyRate}" data-idx="${idx}" data-field="monthlyRate" placeholder="4.33"></td>
       <td><input type="number" step="0.01" value="${o.annualFeeRate}" data-idx="${idx}" data-field="annualFeeRate" placeholder="1.12"></td>
@@ -731,14 +735,32 @@ renderStats();
 
 <script>
   document.getElementById('resetPageBtn').addEventListener('click', function(){
-    if(confirm('Girdiğiniz tüm veriler silinip sayfa varsayılan haline döndürülecek. Emin misiniz?')){
+    const msg = MMG_LANG === 'en'
+      ? 'All data you entered will be cleared and the page will return to its default state. Are you sure?'
+      : 'Girdiğiniz tüm veriler silinip sayfa varsayılan haline döndürülecek. Emin misiniz?';
+    if(confirm(msg)){
       window.location.reload();
     }
   });
 </script>
 <script>
 (function(){
-  const MMG_I18N = {
+  MMGI18N.registerDict({
+    tr: {
+      page_title:'Kredi Tekliflerini Karşılaştır',
+      page_subtitle:'Bankaların ihtiyaç kredisi tekliflerini gir; taksit tutarı, faiz, BSMV ve toplam geri ödeme otomatik hesaplansın, en uygun teklif otomatik öne çıksın.',
+      reset_btn:'Sıfırla', back_home:'← Ana Sayfa',
+      stat_best_offer:'En uygun teklif', stat_best_total:'En uygun toplam geri ödeme', stat_avg_installment:'Ortalama aylık taksit', stat_count:'Teklif sayısı',
+      compare_table_title:'Teklif Karşılaştırma Tablosu', calc_method:'Hesaplama Yöntemi',
+      mode_simple:'Basit Faiz (Vade Sonu)', mode_compound:'Bileşik Faiz (Periyodik Reeskont)',
+      period_label:'Periyot', period_nightly:'Gecelik (1 gün)', period_weekly:'Haftalık (7 gün)', period_monthly:'Aylık (30 gün)',
+      period_yearly:'Yıllık (360 gün)', period_custom:'Özel (gün gir)',
+      sort_label:'Sırala', sort_total:'Toplam Geri Ödemeye Göre', sort_rate:'Yıllık Orana Göre',
+      filter_label:'Filtrele', filter_placeholder:'Banka adına göre ara...',
+      th_bank:'Banka', th_amount:'Kredi Tutarı', th_term:'Vade', th_monthly_rate:'Aylık<br>Faiz %', th_annual_fee:'Yıllık<br>Kom. %',
+      th_annual_rate:'Oran<br>(Yıllık)', th_installment:'Taksit<br>Tutarı', th_commission:'Komisyon', th_loan_repay:'Kredi Geri<br>Ödeme', th_total_repay:'Toplam Geri<br>Ödeme',
+      empty_state:'Henüz teklif eklenmedi. Aşağıdan bir teklif ekleyerek başla.', add_offer:'+ Teklif Ekle'
+    },
     en: {
       page_title:'Compare Loan Offers',
       page_subtitle:"Enter banks' personal loan offers; installment amount, interest, tax, and total repayment are calculated automatically, with the best offer highlighted.",
@@ -754,30 +776,21 @@ renderStats();
       th_annual_rate:'Rate<br>(Annual)', th_installment:'Installment<br>Amount', th_commission:'Commission', th_loan_repay:'Loan<br>Repayment', th_total_repay:'Total<br>Repayment',
       empty_state:'No offer added yet. Start by adding one below.', add_offer:'+ Add Offer'
     }
-  };
-  function applyMmgLang(lang){
-    if(lang === 'tr'){ location.reload(); return; }
-    const dict = MMG_I18N[lang];
-    if(!dict) return;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      if(dict[key]) el.innerHTML = dict[key];
-    });
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-      const key = el.getAttribute('data-i18n-placeholder');
-      if(dict[key]) el.setAttribute('placeholder', dict[key]);
-    });
-  }
+  });
+
+  const ACTIVE_LANG = (typeof MMG_LANG !== 'undefined') ? MMG_LANG : (localStorage.getItem('mmg_lang') || 'tr');
+
   window.addEventListener('message', (ev) => {
-    if(ev && ev.data && ev.data.mmgLang){
+    if(ev && ev.data && ev.data.mmgLang && ev.data.mmgLang !== ACTIVE_LANG){
       try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
-      applyMmgLang(ev.data.mmgLang);
+      location.reload();
     }
   });
-  try{
-    const savedLang = localStorage.getItem('mmg_lang');
-    if(savedLang === 'en') applyMmgLang('en');
-  }catch(e){}
+
+  MMGI18N.onChange(function(lang){
+    if(lang !== ACTIVE_LANG){ location.reload(); }
+  });
+  MMGI18N.detectAndApplyDefaultLang();
 })();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>

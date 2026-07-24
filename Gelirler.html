@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<script src="i18n-core.js"></script>
 <script>
 (function(){
   try{
@@ -381,7 +382,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <main>
   <div class="controls-row" style="display:none;">
-    <div class="sync-status" id="syncStatus" style="display:none;">Senkronizasyon kontrol ediliyor…</div>
+    <div class="sync-status" id="syncStatus" style="display:none;" data-i18n="sync_checking">Senkronizasyon kontrol ediliyor…</div>
 
   </div>
 
@@ -448,32 +449,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <div class="io-msg" id="ioMsg"></div>
 
-      <div class="section-title" id="listTitle">Gelirler</div>
+      <div class="section-title" id="listTitle" data-i18n="all_incomes">Gelirler</div>
       <div class="payment-list" id="paymentList"></div>
     </div>
 
     <div class="content-side">
       <div class="summary-cards">
         <div class="summary-card sc-a">
-          <div class="summary-label">Bekleyen Toplam</div>
+          <div class="summary-label" data-i18n="pending_total">Bekleyen Toplam</div>
           <div class="summary-value" id="sumPending">0,00 TL</div>
           <div class="summary-sub" id="sumPendingSub">&nbsp;</div>
         </div>
         <div class="summary-card sc-b">
-          <div class="summary-label">Yaklaşan Vade</div>
+          <div class="summary-label" data-i18n="upcoming_due">Yaklaşan Vade</div>
           <div class="summary-value" id="sumNextDue" style="font-size:17px;">—</div>
           <div class="summary-sub" id="sumNextDueSub">&nbsp;</div>
         </div>
         <div class="summary-card sc-c">
-          <div class="summary-label">Toplam Kayıt</div>
+          <div class="summary-label" data-i18n="total_records">Toplam Kayıt</div>
           <div class="summary-value" id="sumCount">0</div>
           <div class="summary-sub" id="sumCountSub">&nbsp;</div>
         </div>
       </div>
 
       <div class="analysis-card">
-        <div class="analysis-title">📊 Gelir Analizi</div>
-        <div class="analysis-sub">Bu ay ile önceki ayın kategori bazlı karşılaştırması</div>
+        <div class="analysis-title">📊 <span data-i18n="income_analysis">Gelir Analizi</span></div>
+        <div class="analysis-sub" data-i18n="analysis_sub">Bu ay ile önceki ayın kategori bazlı karşılaştırması</div>
         <div id="analysisList"></div>
       </div>
     </div>
@@ -501,7 +502,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <footer>
   <div class="credit">
-    <span>powered by</span>
+    <span data-i18n="powered_by">powered by</span>
     <span class="signature-pill">
       <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
       <span id="credit-fallback" class="credit-fallback">M</span>
@@ -512,6 +513,62 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
   // ================== Yardımcılar ==================
+  let MMG_LANG = 'tr';
+  try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
+  const LBL = MMG_LANG === 'en' ? {
+    monthsShort:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    recWeekly:'Every Week', recMonthly:'Every Month', recYearly:'Every Year', recOnce:'One-time',
+    catAll:'All', noUpcoming:'No upcoming due income, everything is up to date.',
+    allIncomesTitle:'All Income',
+    selectIncomeTypeFirst:'Please select an income type first.', enterValidAmount:'Please enter a valid amount.',
+    selectDueDate:'Please select a due date.',
+    synced:'Synced', syncing:'Syncing…', lastSync:'Last sync: ',
+    noCategories:'All categories', noUpcomingDue:'No upcoming due date', recordedIncome:'recorded income',
+    newIncomeInCategory:' new income created (there was no record in this category last month).',
+    noIncomeThisMonth:' had no income this month (last month ',
+    increase:'increase', decrease:'decrease',
+    vsLastMonthIncome:' income compared to last month <b>%',
+    confirmDeleteIncome:'Are you sure you want to delete this income record?',
+    descriptionCol:'Description', noIncomeToExport:'No income records to export.',
+    excelDownloaded:'Excel file downloaded.', excelError:'An error occurred while creating the Excel file.',
+    pdfDownloaded:'PDF file downloaded.', pdfError:'An error occurred while creating the PDF file.',
+    descPlaceholderTemplate:'e.g. March Rent Income', doNotRepeat:'Do not repeat',
+    validCategories:'Valid Categories:', validRecurrenceValues:'Valid Recurrence Values:',
+    recurrenceOptionsList:'Do not repeat / Every Week / Every Month / Every Year',
+    templateName:'Template', templateDownloaded:'Template file downloaded.', templateError:'An error occurred while creating the template file.',
+    yearLabel:'year', recordsImported:' income record(s) imported.',
+    importParseError:'Could not read valid records from the file. Make sure the column headers are Description/Category/Amount/Due Date/Recurrence.',
+    excelReadError:'Could not read the Excel file: '
+  } : {
+    monthsShort:['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'],
+    recWeekly:'Her Hafta', recMonthly:'Her Ay', recYearly:'Her Yıl', recOnce:'Tek Seferlik',
+    catAll:'Tümü', noUpcoming:'Vadesi gelen bekleyen gelir yok, her şey güncel.',
+    allIncomesTitle:'Tüm Gelirler',
+    selectIncomeTypeFirst:'Lütfen önce gelir türünü seçin.', enterValidAmount:'Lütfen geçerli bir tutar girin.',
+    selectDueDate:'Lütfen bir vade tarihi seçin.',
+    synced:'Aktarıldı', syncing:'Aktarılıyor…', lastSync:'Son aktarım: ',
+    noCategories:'Tüm kategoriler', noUpcomingDue:'Yaklaşan vade yok', recordedIncome:'kayıtlı gelir',
+    newIncomeInCategory:' tutarında yeni bir gelir oluştu (önceki ay bu kategoride hiç kayıt yoktu).',
+    noIncomeThisMonth:' kaleminde bu ay hiç gelir oluşmadı (önceki ay ',
+    increase:'artış', decrease:'azalış',
+    vsLastMonthIncome:' gelirinde geçen aya göre <b>%',
+    confirmDeleteIncome:'Bu gelir kaydını silmek istediğinize emin misiniz?',
+    descriptionCol:'Açıklama', noIncomeToExport:'Aktarılacak gelir kaydı yok.',
+    excelDownloaded:'Excel dosyası indirildi.', excelError:'Excel oluşturulurken hata oluştu.',
+    pdfDownloaded:'PDF dosyası indirildi.', pdfError:'PDF oluşturulurken hata oluştu.',
+    descPlaceholderTemplate:'örn. Mart Ayı Kira Geliri', doNotRepeat:'Tekrarlanmasın',
+    validCategories:'Geçerli Kategoriler:', validRecurrenceValues:'Geçerli Tekrar Değerleri:',
+    recurrenceOptionsList:'Tekrarlanmasın / Her Hafta / Her Ay / Her Yıl',
+    templateName:'Şablon', templateDownloaded:'Şablon dosyası indirildi.', templateError:'Şablon oluşturulurken hata oluştu.',
+    yearLabel:'yıl', recordsImported:' gelir kaydı içeri aktarıldı.',
+    importParseError:'Dosyadan geçerli bir kayıt okunamadı. Sütun başlıklarının Açıklama/Kategori/Tutar/Vade Tarihi/Tekrar olduğundan emin olun.',
+    excelReadError:'Excel dosyası okunamadı: '
+  };
+  const CAT_LABELS_EN = {
+    'Nakit Tahsilat':'Cash Collection', 'Çek Tahsilatı':'Check Collection', 'Senet Tahsilatı':'Promissory Note Collection',
+    'POS Tahsilatı':'POS Collection', 'Faiz Geliri':'Interest Income', 'Kira Geliri':'Rent Income', 'Diğer':'Other'
+  };
+  function catLabelTxt(tr){ return (MMG_LANG === 'en' && CAT_LABELS_EN[tr]) ? CAT_LABELS_EN[tr] : tr; }
   function pad2(n){ return n < 10 ? '0'+n : ''+n; }
   function fmtTR(n, decimals){
     decimals = decimals === undefined ? 2 : decimals;
@@ -556,11 +613,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function fmtDateLabel(dstr){
     if(!dstr) return '—';
     const p = dstr.split('-').map(Number);
-    const AY = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+    const AY = LBL.monthsShort;
     return p[2] + ' ' + AY[p[1]-1] + ' ' + p[0];
   }
   function recurrenceLabel(r){
-    return r==='haftalik' ? 'Her Hafta' : r==='aylik' ? 'Her Ay' : r==='yillik' ? 'Her Yıl' : 'Tek Seferlik';
+    return r==='haftalik' ? LBL.recWeekly : r==='aylik' ? LBL.recMonthly : r==='yillik' ? LBL.recYearly : LBL.recOnce;
   }
 
   // Gelirler için yerel yedek (bu sayfa harici senkronizasyon dosyasına bağlı değildir)
@@ -579,13 +636,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   const CATS = window.MMG_INCOME_CATEGORIES || [
-    { id:'nakit-tahsilat', icon:'💵', label:'Nakit Tahsilat' },
-    { id:'cek-tahsilat', icon:'🧾', label:'Çek Tahsilatı' },
-    { id:'senet-tahsilat', icon:'📝', label:'Senet Tahsilatı' },
-    { id:'pos-tahsilat', icon:'💳', label:'POS Tahsilatı' },
-    { id:'faiz', icon:'🏦', label:'Faiz Geliri' },
-    { id:'kira-geliri', icon:'🏠', label:'Kira Geliri' },
-    { id:'diger', icon:'✳️', label:'Diğer' }
+    { id:'nakit-tahsilat', icon:'💵', label:catLabelTxt('Nakit Tahsilat') },
+    { id:'cek-tahsilat', icon:'🧾', label:catLabelTxt('Çek Tahsilatı') },
+    { id:'senet-tahsilat', icon:'📝', label:catLabelTxt('Senet Tahsilatı') },
+    { id:'pos-tahsilat', icon:'💳', label:catLabelTxt('POS Tahsilatı') },
+    { id:'faiz', icon:'🏦', label:catLabelTxt('Faiz Geliri') },
+    { id:'kira-geliri', icon:'🏠', label:catLabelTxt('Kira Geliri') },
+    { id:'diger', icon:'✳️', label:catLabelTxt('Diğer') }
   ];
   let activeCat = 'tumu';
   let selectedPaymentType = null;
@@ -608,7 +665,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return item;
   }
 
-  catFilterMenu.appendChild(buildDropdownItem('📋', 'Tümü', 'tumu', (id, icon, label) => {
+  catFilterMenu.appendChild(buildDropdownItem('📋', LBL.catAll, 'tumu', (id, icon, label) => {
     activeCat = id;
     catFilterTrigger.innerHTML = icon + ' ' + label + ' <span class="chev">▾</span>';
     catFilterMenu.hidden = true;
@@ -729,20 +786,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function runLocalSyncAndReport(){
     const result = mmgRunGelirSync();
     if(result.count > 0){
-      showSyncStatus('<b>' + result.count + ' kalem</b> Nakit Akış Tablosu\'na aktarıldı.');
+      showSyncStatus(MMG_LANG==='en' ? ('<b>' + result.count + ' item(s)</b> transferred to the Cash Flow Table.') : ('<b>' + result.count + ' kalem</b> Nakit Akış Tablosu\'na aktarıldı.'));
     } else {
-      showSyncStatus('Vadesi gelen bekleyen gelir yok, her şey güncel.');
+      showSyncStatus(LBL.noUpcoming);
     }
     return result;
   }
 
   document.getElementById('syncNowBtn').addEventListener('click', async () => {
-    showSyncStatus('Kontrol ediliyor…');
+    showSyncStatus(MMG_LANG==='en' ? 'Checking…' : 'Kontrol ediliyor…');
     const result = await mmgMergeCloudGelirAndSync();
     if(result.count > 0){
-      showSyncStatus('<b>' + result.count + ' kalem</b> Nakit Akış Tablosu\'na aktarıldı.');
+      showSyncStatus(MMG_LANG==='en' ? ('<b>' + result.count + ' item(s)</b> transferred to the Cash Flow Table.') : ('<b>' + result.count + ' kalem</b> Nakit Akış Tablosu\'na aktarıldı.'));
     } else {
-      showSyncStatus('Vadesi gelen bekleyen gelir yok, her şey güncel.');
+      showSyncStatus(LBL.noUpcoming);
     }
     renderAll();
   });
@@ -818,9 +875,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const recurrence = document.getElementById('newRecurrence').value;
     const cat = activeCat === 'tumu' ? selectedPaymentType : activeCat;
 
-    if(!cat){ alert('Lütfen önce gelir türünü seçin.'); return; }
-    if(amount <= 0){ alert('Lütfen geçerli bir tutar girin.'); return; }
-    if(!dueDate){ alert('Lütfen bir vade tarihi seçin.'); return; }
+    if(!cat){ alert(LBL.selectIncomeTypeFirst); return; }
+    if(amount <= 0){ alert(LBL.enterValidAmount); return; }
+    if(!dueDate){ alert(LBL.selectDueDate); return; }
     if(!desc){ desc = catInfo(cat).label || 'Gelir'; }
 
     const item = {
@@ -866,16 +923,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       return { label: 'Bekliyor', cls: 'warn' };
     }
     if(item.lastTransferredDate === item.dueDate){
-      return { label: 'Aktarıldı', cls: 'good' };
+      return { label: LBL.synced, cls: 'good' };
     }
-    return { label: 'Aktarılıyor…', cls: 'info' };
+    return { label: LBL.syncing, cls: 'info' };
   }
 
   function buildPaymentRowHtml(item, tKey){
     const cat = catInfo(item.category);
     const status = paymentStatus(item, tKey);
     let metaParts = ['Vade: ' + fmtDateLabel(item.dueDate)];
-    if(item.lastTransferredDate){ metaParts.push('Son aktarım: ' + fmtDateLabel(item.lastTransferredDate)); }
+    if(item.lastTransferredDate){ metaParts.push(LBL.lastSync + fmtDateLabel(item.lastTransferredDate)); }
     return '<div class="payment-row" data-id="' + item.id + '">' +
       '<div class="payment-row-main">' +
         '<div class="payment-row-desc">' +
@@ -906,7 +963,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     const catLabel = activeCat === 'tumu' ? '' : (' · ' + catInfo(activeCat).label);
     document.getElementById('addPaymentTitle').textContent = 'Yeni Gelir Ekle' + catLabel;
-    document.getElementById('listTitle').textContent = (activeCat === 'tumu' ? 'Tüm Gelirler' : catInfo(activeCat).label) + ' (' + sorted.length + ')';
+    document.getElementById('listTitle').textContent = (activeCat === 'tumu' ? LBL.allIncomesTitle : catInfo(activeCat).label) + ' (' + sorted.length + ')';
 
     // Özet kartları
     let pendingTotal = 0;
@@ -918,11 +975,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
     });
     document.getElementById('sumPending').textContent = fmtMoney(pendingTotal);
-    document.getElementById('sumPendingSub').textContent = activeCat === 'tumu' ? 'Tüm kategoriler' : catInfo(activeCat).label;
+    document.getElementById('sumPendingSub').textContent = activeCat === 'tumu' ? LBL.noCategories : catInfo(activeCat).label;
     document.getElementById('sumNextDue').textContent = nextDue ? fmtDateLabel(nextDue.dueDate) : '—';
-    document.getElementById('sumNextDueSub').textContent = nextDue ? escapeHtml(nextDue.desc) : 'Yaklaşan vade yok';
+    document.getElementById('sumNextDueSub').textContent = nextDue ? escapeHtml(nextDue.desc) : LBL.noUpcomingDue;
     document.getElementById('sumCount').textContent = sorted.length;
-    document.getElementById('sumCountSub').textContent = activeCat === 'tumu' ? 'kayıtlı gelir' : catInfo(activeCat).label + ' kategorisinde';
+    document.getElementById('sumCountSub').textContent = activeCat === 'tumu' ? LBL.recordedIncome : catInfo(activeCat).label + (MMG_LANG==='en' ? ' category' : ' kategorisinde');
 
     renderAnalysis(all);
 
@@ -964,21 +1021,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(cur === 0 && prev === 0) return;
       if(prev === 0 && cur > 0){
         insights.push({ type:'up', pct:100, icon:'🆕',
-          html: '<span class="analysis-cat">' + escapeHtml(cat) + '</span> kaleminde bu ay ' + fmtMoney(cur) + ' tutarında yeni bir gelir oluştu (önceki ay bu kategoride hiç kayıt yoktu).' });
+          html: MMG_LANG==='en'
+            ? ('<span class="analysis-cat">' + escapeHtml(catLabelTxt(cat)) + '</span> had a new income of ' + fmtMoney(cur) + ' this month (no record in this category last month).')
+            : ('<span class="analysis-cat">' + escapeHtml(cat) + '</span> kaleminde bu ay ' + fmtMoney(cur) + ' tutarında yeni bir gelir oluştu (önceki ay bu kategoride hiç kayıt yoktu).') });
         return;
       }
       if(cur === 0 && prev > 0){
         insights.push({ type:'down', pct:100, icon:'⚠️',
-          html: '<span class="analysis-cat">' + escapeHtml(cat) + '</span> kaleminde bu ay hiç tahsilat/gelir oluşmadı (önceki ay ' + fmtMoney(prev) + ' idi).' });
+          html: MMG_LANG==='en'
+            ? ('<span class="analysis-cat">' + escapeHtml(catLabelTxt(cat)) + '</span> had no collections/income this month (was ' + fmtMoney(prev) + ' last month).')
+            : ('<span class="analysis-cat">' + escapeHtml(cat) + '</span> kaleminde bu ay hiç tahsilat/gelir oluşmadı (önceki ay ' + fmtMoney(prev) + ' idi).') });
         return;
       }
       const pctChange = ((cur - prev) / prev) * 100;
       if(Math.abs(pctChange) >= 15){
-        const dir = pctChange > 0 ? 'artış' : 'azalış';
+        const dir = pctChange > 0 ? LBL.increase : LBL.decrease;
         const type = pctChange > 0 ? 'up' : 'down';
         const icon = pctChange > 0 ? '✅' : '⚠️';
         insights.push({ type, pct: Math.abs(pctChange), icon,
-          html: '<span class="analysis-cat">' + escapeHtml(cat) + '</span> gelirlerinde geçen aya göre <b>%' + Math.abs(Math.round(pctChange)) + ' ' + dir + '</b> var (' + fmtMoney(prev) + ' → ' + fmtMoney(cur) + ').' });
+          html: MMG_LANG==='en'
+            ? ('<span class="analysis-cat">' + escapeHtml(catLabelTxt(cat)) + '</span> income has a <b>%' + Math.abs(Math.round(pctChange)) + ' ' + dir + '</b> compared to last month (' + fmtMoney(prev) + ' → ' + fmtMoney(cur) + ').')
+            : ('<span class="analysis-cat">' + escapeHtml(cat) + '</span> gelirlerinde geçen aya göre <b>%' + Math.abs(Math.round(pctChange)) + ' ' + dir + '</b> var (' + fmtMoney(prev) + ' → ' + fmtMoney(cur) + ').') });
       }
     });
 
@@ -996,7 +1059,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.getElementById('paymentList').addEventListener('click', async (e) => {
     const delBtn = e.target.closest('[data-action="delete-payment"]');
     if(delBtn){
-      if(!confirm('Bu gelir kaydını silmek istediğinize emin misiniz?')) return;
+      if(!confirm(LBL.confirmDeleteIncome)) return;
       const id = delBtn.dataset.id;
       const list = window.mmgLocalPaymentsAPI.load().filter(p => p.id !== id);
       window.mmgLocalPaymentsAPI.save(list);
@@ -1020,9 +1083,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       showSyncStatus('Bulut verileriniz kontrol ediliyor…');
       const result = await mmgMergeCloudGelirAndSync();
       if(result.count > 0){
-        showSyncStatus('<b>' + result.count + ' kalem</b> Nakit Akış Tablosu\'na aktarıldı.');
+        showSyncStatus(MMG_LANG==='en' ? ('<b>' + result.count + ' item(s)</b> transferred to the Cash Flow Table.') : ('<b>' + result.count + ' kalem</b> Nakit Akış Tablosu\'na aktarıldı.'));
       } else {
-        showSyncStatus('Vadesi gelen bekleyen gelir yok, her şey güncel.');
+        showSyncStatus(LBL.noUpcoming);
       }
       renderAll();
     }
@@ -1039,7 +1102,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function buildGelirRowsForExport(){
     const list = window.mmgLocalPaymentsAPI.load();
-    const header = ['Açıklama', 'Kategori', 'Tutar', 'Vade Tarihi', 'Tekrar'];
+    const header = [LBL.descriptionCol, MMGI18N.t('category_col'), MMGI18N.t('amount_col'), MMGI18N.t('due_date_col'), MMGI18N.t('recurrence_col')];
     const rows = [header];
     list.forEach(item => {
       rows.push([
@@ -1056,25 +1119,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.getElementById('exportExcelBtn').addEventListener('click', () => {
     try{
       const rows = buildGelirRowsForExport();
-      if(rows.length <= 1){ showIoMsg('Aktarılacak gelir kaydı yok.', true); return; }
+      if(rows.length <= 1){ showIoMsg(LBL.noIncomeToExport, true); return; }
       const ws = XLSX.utils.aoa_to_sheet(rows);
       ws['!cols'] = [{wch:28},{wch:20},{wch:14},{wch:14},{wch:14}];
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Gelirler');
+      XLSX.utils.book_append_sheet(wb, ws, MMGI18N.t('page_title'));
       XLSX.writeFile(wb, 'gelirler.xlsx');
-      showIoMsg('Excel dosyası indirildi.');
-    } catch(e){ showIoMsg('Excel oluşturulurken hata oluştu.', true); }
+      showIoMsg(LBL.excelDownloaded);
+    } catch(e){ showIoMsg(LBL.excelError, true); }
   });
 
   document.getElementById('exportPdfBtn').addEventListener('click', () => {
     try{
       const rows = buildGelirRowsForExport();
-      if(rows.length <= 1){ showIoMsg('Aktarılacak gelir kaydı yok.', true); return; }
+      if(rows.length <= 1){ showIoMsg(LBL.noIncomeToExport, true); return; }
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape' });
       mmgApplyTurkishFont(doc);
       doc.setFontSize(14);
-      doc.text('Gelirler', 14, 16);
+      doc.text(MMGI18N.t('page_title'), 14, 16);
       doc.autoTable({
         startY: 24,
         head: [rows[0]],
@@ -1083,8 +1146,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         headStyles: { fillColor: [198,161,91], font: 'DejaVuSans' }
       });
       doc.save('gelirler.pdf');
-      showIoMsg('PDF dosyası indirildi.');
-    } catch(e){ showIoMsg('PDF oluşturulurken hata oluştu.', true); }
+      showIoMsg(LBL.pdfDownloaded);
+    } catch(e){ showIoMsg(LBL.pdfError, true); }
   });
 
   document.getElementById('importExcelBtn').addEventListener('click', () => {
@@ -1093,18 +1156,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
     try{
-      const header = ['Açıklama', 'Kategori', 'Tutar', 'Vade Tarihi', 'Tekrar'];
-      const example = ['örn. Ofis Kirası Tahsilatı', CATS[0].label, 1000, todayKey(), 'Tekrarlanmasın'];
-      const catNote = ['Geçerli Kategoriler:', CATS.map(c => c.label).join(' / ')];
-      const recNote = ['Geçerli Tekrar Değerleri:', 'Tekrarlanmasın / Her Hafta / Her Ay / Her Yıl'];
+      const header = [LBL.descriptionCol, MMGI18N.t('category_col'), MMGI18N.t('amount_col'), MMGI18N.t('due_date_col'), MMGI18N.t('recurrence_col')];
+      const example = [LBL.descPlaceholderTemplate, CATS[0].label, 1000, todayKey(), LBL.doNotRepeat];
+      const catNote = [LBL.validCategories, CATS.map(c => c.label).join(' / ')];
+      const recNote = [LBL.validRecurrenceValues, LBL.recurrenceOptionsList];
       const rows = [header, example, [], catNote, recNote];
       const ws = XLSX.utils.aoa_to_sheet(rows);
       ws['!cols'] = [{wch:28},{wch:20},{wch:14},{wch:14},{wch:18}];
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Şablon');
+      XLSX.utils.book_append_sheet(wb, ws, LBL.templateName);
       XLSX.writeFile(wb, 'gelirler-sablon.xlsx');
-      showIoMsg('Şablon dosyası indirildi.');
-    } catch(e){ showIoMsg('Şablon oluşturulurken hata oluştu.', true); }
+      showIoMsg(LBL.templateDownloaded);
+    } catch(e){ showIoMsg(LBL.templateError, true); }
   });
 
   document.getElementById('importExcelInput').addEventListener('change', async (e) => {
@@ -1120,17 +1183,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       let added = 0;
 
       for(const row of json){
-        const descRaw = String(row['Açıklama'] ?? row['Aciklama'] ?? '').trim();
-        const catRaw = String(row['Kategori'] ?? '').trim().toLowerCase();
-        const amountRaw = row['Tutar'];
-        let dueDateRaw = row['Vade Tarihi'] ?? row['Vade'] ?? '';
-        const recRaw = String(row['Tekrar'] ?? '').trim().toLowerCase();
+        const descRaw = String(row['Açıklama'] ?? row['Aciklama'] ?? row['Description'] ?? '').trim();
+        const catRaw = String(row['Kategori'] ?? row['Category'] ?? '').trim().toLowerCase();
+        const amountRaw = row['Tutar'] ?? row['Amount'];
+        let dueDateRaw = row['Vade Tarihi'] ?? row['Vade'] ?? row['Due Date'] ?? '';
+        const recRaw = String(row['Tekrar'] ?? row['Recurrence'] ?? '').trim().toLowerCase();
 
         const amount = typeof amountRaw === 'number' ? amountRaw : parseTR(String(amountRaw || '0'));
         if(!amount || amount <= 0) continue;
 
         // Kategori: Excel'deki etiketi kendi kategori listemizle eşleştir, bulamazsa ilk kategoriye düş
-        let matchedCat = CATS.find(c => c.label.toLowerCase() === catRaw);
+        let matchedCat = CATS.find(c => c.label.toLowerCase() === catRaw || c.id === catRaw);
         const category = matchedCat ? matchedCat.id : CATS[0].id;
 
         // Vade tarihi: Excel tarih hücresi Date objesi olarak gelebilir, ya da düz metin olabilir
@@ -1141,7 +1204,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           dueDate = String(dueDateRaw || '').trim() || todayKey();
         }
 
-        const recurrence = recRaw.includes('hafta') ? 'haftalik' : recRaw.includes('yıl') || recRaw.includes('yil') ? 'yillik' : recRaw.includes('ay') ? 'aylik' : 'yok';
+        const recurrence = (recRaw.includes('hafta') || recRaw.includes('week')) ? 'haftalik' : (recRaw.includes('yıl') || recRaw.includes('yil') || recRaw.includes('year')) ? 'yillik' : (recRaw.includes('ay') || recRaw.includes('month')) ? 'aylik' : 'yok';
 
         const item = {
           id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
@@ -1170,14 +1233,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       e.target.value = '';
 
       if(added > 0){
-        showIoMsg(added + ' gelir kaydı içeri aktarıldı.');
+        showIoMsg(added + LBL.recordsImported);
         runLocalSyncAndReport();
         renderAll();
       } else {
-        showIoMsg('Dosyadan geçerli bir kayıt okunamadı. Sütun başlıklarının Açıklama/Kategori/Tutar/Vade Tarihi/Tekrar olduğundan emin olun.', true);
+        showIoMsg(LBL.importParseError, true);
       }
     } catch(err){
-      showIoMsg('Excel dosyası okunamadı: ' + (err.message || 'bilinmeyen hata'), true);
+      showIoMsg(LBL.excelReadError + (err.message || (MMG_LANG==='en' ? 'unknown error' : 'bilinmeyen hata')), true);
       e.target.value = '';
     }
   });
@@ -1397,46 +1460,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
 (function(){
-  const MMG_I18N = {
-    tr: null, // Türkçe zaten HTML'in kendisinde; ayrıca sözlüğe gerek yok
+  MMGI18N.registerDict({
+    tr: {
+      page_title:'Gelirler', page_subtitle:'Tüm gelirlerinizi sisteme girerek, gelir takibinizi yapabilirsiniz.<br>Vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlenir.',
+      sync_now:'Şimdi Senkronize Et', back_home:'← Ana Sayfa', add_income_title:'Yeni Gelir Ekle', select_income_type:'Gelir türü seçin',
+      change_link:'değiştir', income_filter:'Gelir Filtreleme', filter_all:'Tümü', label_desc:'Açıklama', optional_tag:'(opsiyonel)',
+      label_amount:'Tutar', label_due_date:'Vade Tarihi', label_recurrence:'Tekrarlansın mı?', rec_none:'Tekrarlanmasın',
+      rec_weekly:'Evet, her hafta', rec_monthly:'Evet, her ay', rec_yearly:'Evet, her yıl', add_btn:'+ Ekle',
+      export_excel:'Excel\'e Aktar', export_pdf:'PDF\'e Aktar', import_excel:'Excel\'den Yükle', download_template:'Şablon İndir',
+      sync_checking:'Senkronizasyon kontrol ediliyor…', all_incomes:'Gelirler',
+      pending_total:'Bekleyen Toplam', upcoming_due:'Yaklaşan Vade', total_records:'Toplam Kayıt',
+      income_analysis:'Gelir Analizi', analysis_sub:'Bu ay ile önceki ayın kategori bazlı karşılaştırması',
+      powered_by:'powered by',
+      category_col:'Kategori', amount_col:'Tutar', due_date_col:'Vade Tarihi', recurrence_col:'Tekrar'
+    },
     en: {
       page_title:'Income', page_subtitle:'Record all your income here to track it.<br>It is automatically posted to the Cash Flow Table when due.',
       sync_now:'Sync Now', back_home:'← Home', add_income_title:'Add New Income', select_income_type:'Select income type',
       change_link:'change', income_filter:'Filter Income', filter_all:'All', label_desc:'Description', optional_tag:'(optional)',
       label_amount:'Amount', label_due_date:'Due Date', label_recurrence:'Repeat?', rec_none:'Do not repeat',
       rec_weekly:'Yes, weekly', rec_monthly:'Yes, monthly', rec_yearly:'Yes, yearly', add_btn:'+ Add',
-      export_excel:'Export to Excel', export_pdf:'Export to PDF', import_excel:'Import from Excel', download_template:'Download Template'
-    }
-  };
-  function applyMmgLang(lang){
-    if(lang === 'tr'){
-      // Sayfa zaten Türkçe yazıldığı için TR'ye dönmek üzere ayrıca bir uygulama gerekmiyor,
-      // ancak dinamik olarak İngilizce'ye çevrilmiş elemanları geri Türkçe'ye almak için orijinal metinleri
-      // data öznitelikleri yerine sayfa yeniden yüklendiğinde doğal haliyle görürüz.
-      location.reload();
-      return;
-    }
-    const dict = MMG_I18N[lang];
-    if(!dict) return;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      if(dict[key]) el.innerHTML = dict[key];
-    });
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-      const key = el.getAttribute('data-i18n-placeholder');
-      if(dict[key]) el.setAttribute('placeholder', dict[key]);
-    });
-  }
-  window.addEventListener('message', (ev) => {
-    if(ev && ev.data && ev.data.mmgLang){
-      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
-      applyMmgLang(ev.data.mmgLang);
+      export_excel:'Export to Excel', export_pdf:'Export to PDF', import_excel:'Import from Excel', download_template:'Download Template',
+      sync_checking:'Checking synchronization…', all_incomes:'All Income',
+      pending_total:'Pending Total', upcoming_due:'Upcoming Due', total_records:'Total Records',
+      income_analysis:'Income Analysis', analysis_sub:'Category comparison between this month and last month',
+      powered_by:'powered by',
+      category_col:'Category', amount_col:'Amount', due_date_col:'Due Date', recurrence_col:'Recurrence'
     }
   });
-  try{
-    const savedLang = localStorage.getItem('mmg_lang');
-    if(savedLang === 'en') applyMmgLang('en');
-  }catch(e){}
+
+  // Kategori listesi, ay adları ve içgörü metinleri MMG_LANG'a göre ilk yüklemede
+  // oluşturulur; dil değişince tam tutarlılık için sayfayı yeniden yükleriz.
+  const ACTIVE_LANG = (typeof MMG_LANG !== 'undefined') ? MMG_LANG : (localStorage.getItem('mmg_lang') || 'tr');
+
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang && ev.data.mmgLang !== ACTIVE_LANG){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      location.reload();
+    }
+  });
+
+  MMGI18N.onChange(function(lang){
+    if(lang !== ACTIVE_LANG){ location.reload(); }
+  });
+  MMGI18N.detectAndApplyDefaultLang();
 })();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>

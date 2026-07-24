@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<script src="i18n-core.js"></script>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -561,6 +562,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </script>
 
 <script>
+let MMG_LANG = 'tr';
+try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
+const LBL = MMG_LANG === 'en' ? {
+  ofPrincipal:' of principal', days:' days', daysNegative:' days (end date before start date)',
+  multiDraw:'Multiple draws (add more than one row)', premiumOnlyPrefix:'This feature', premiumOnlySuffix:' is available to premium members only. Upgrade to premium to use it.',
+  colTerm:'Term (days)', colTotalRepay:'Total Repayment', sheetName:'Revolving Loan Draws',
+  excelDownloaded:'Excel file downloaded.', excelError:'An error occurred while creating the Excel file.',
+  pdfTitle:'Revolving Loan Draw Table', footerTag:'mmgcreativity.com · Digital Finance Assistant', createdAt:'Created: ',
+  pdfDownloaded:'PDF file downloaded.', pdfError:'An error occurred while creating the PDF file.',
+  resetConfirm:'All data you entered will be cleared and the page will return to its default state. Are you sure?'
+} : {
+  ofPrincipal:' anapara üzerinden', days:' gün', daysNegative:' gün (bitiş tarihi başlangıçtan önce)',
+  multiDraw:'Çoklu çekim (birden fazla satır ekleme)', premiumOnlyPrefix:'Bu özellik', premiumOnlySuffix:' premium üyelere özeldir. Premium üyeliğe geçerek kullanabilirsiniz.',
+  colTerm:'Vade (gün)', colTotalRepay:'Toplam Geri Ödeme', sheetName:'Rotatif Kredi Çekimleri',
+  excelDownloaded:'Excel dosyası indirildi.', excelError:'Excel oluşturulurken hata oluştu.',
+  pdfTitle:'Rotatif Kredi Çekim Tablosu', footerTag:'mmgcreativity.com · Dijital Finans Asistanı', createdAt:'Oluşturulma: ',
+  pdfDownloaded:'PDF dosyası indirildi.', pdfError:'PDF oluşturulurken hata oluştu.',
+  resetConfirm:'Girdiğiniz tüm veriler silinip sayfa varsayılan haline döndürülecek. Emin misiniz?'
+};
 
 function fmtTL(n){ if(!isFinite(n)) return '—'; return n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' TL'; }
 function fmtTLShort(n){ if(!isFinite(n)) return '—'; return n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
@@ -623,7 +643,7 @@ function updateQuick(){
   const gbFaiz = num('qGunBaziFaiz'), gbKom = num('qGunBaziKom');
   const r = hesapla(tutar, vade, oran, komOran, bsmv, gbFaiz, gbKom);
   document.getElementById('rToplamGeri').textContent = fmtTL(r.toplamGeri);
-  document.getElementById('rToplamGeriSub').textContent = fmtTL(tutar) + ' anapara üzerinden';
+  document.getElementById('rToplamGeriSub').textContent = fmtTL(tutar) + LBL.ofPrincipal;
   document.getElementById('rFaiz').textContent = fmtTL(r.faiz);
   document.getElementById('rFaizBsmv').textContent = fmtTL(r.faizBsmv);
   document.getElementById('rKomisyon').textContent = fmtTL(r.komisyon);
@@ -656,7 +676,7 @@ function updateGun(){
   if(!b || !s){ out.textContent = '—'; return; }
   const d1 = new Date(b), d2 = new Date(s);
   const diff = Math.round((d2-d1)/86400000) - 1;
-  out.textContent = diff >= 0 ? diff + ' gün' : (diff) + ' gün (bitiş tarihi başlangıçtan önce)';
+  out.textContent = diff >= 0 ? diff + LBL.days : (diff) + LBL.daysNegative;
 }
 document.getElementById('gunBaslangic').addEventListener('input', updateGun);
 document.getElementById('gunBitis').addEventListener('input', updateGun);
@@ -747,7 +767,7 @@ function renderTranches(){
       <td>${fmtTLShort(r.komisyonBsmv)}</td>
       <td>${fmtTLShort(r.toplamGeri)}</td>
       <td>${fmtTLShort(r.toplamFark)}</td>
-      <td><button class="del-btn" data-del="${row.id}" aria-label="Satırı sil">✕</button></td>
+      <td><button class="del-btn" data-del="${row.id}" aria-label="${MMG_LANG==='en' ? 'Delete row' : 'Satırı sil'}">✕</button></td>
     `;
     trancheBody.appendChild(tr);
   });
@@ -778,11 +798,11 @@ function renderTranches(){
 }
 
 document.getElementById('addRow').addEventListener('click', ()=>{
-  if(!requirePremium('Çoklu çekim (birden fazla satır ekleme)')) return;
+  if(!requirePremium(LBL.multiDraw)) return;
   addTrancheRow();
 });
 document.getElementById('addFromQuick').addEventListener('click', ()=>{
-  if(!requirePremium('Çoklu çekim (birden fazla satır ekleme)')) return;
+  if(!requirePremium(LBL.multiDraw)) return;
   addTrancheRow({tutar:num('qTutar'), vade:num('qVade'), oran:num('qOran'), komOran:num('qKomOran')});
 });
 
@@ -799,7 +819,7 @@ function isPremiumUser(){
 // [[GEÇİCİ DONDURMA — BİTİŞ]]
 function requirePremium(featureLabel){
   if(!isPremiumUser()){
-    showIoMsg((featureLabel || 'Bu özellik') + ' premium üyelere özeldir. Premium üyeliğe geçerek kullanabilirsiniz.', true);
+    showIoMsg((featureLabel || LBL.premiumOnlyPrefix) + LBL.premiumOnlySuffix, true);
     try{ gtag('event', 'premium_gate_hit', { feature: featureLabel || 'rotatif_kredi_ozellik' }); }catch(e){}
     return false;
   }
@@ -836,7 +856,7 @@ function showIoMsg(msg, isError){
 
 function buildTrancheRows(){
   const bsmv = num('qBsmv'), gbFaiz = num('qGunBaziFaiz'), gbKom = num('qGunBaziKom');
-  const header = ['Tutar','Vade (gün)','Oran %','Kom.Oran %','Faiz','Faiz BSMV','Komisyon','Kom. BSMV','Toplam Geri Ödeme','Toplam Fark'];
+  const header = MMG_LANG==='en' ? ['Amount','Term (days)','Rate %','Com. Rate %','Interest','Interest Tax','Commission','Com. Tax','Total Repayment','Total Difference'] : ['Tutar','Vade (gün)','Oran %','Kom.Oran %','Faiz','Faiz BSMV','Komisyon','Kom. BSMV','Toplam Geri Ödeme','Toplam Fark'];
   const rows = [header];
   trancheRows.forEach(row=>{
     const r = hesapla(row.tutar, row.vade, row.oran, row.komOran, bsmv, gbFaiz, gbKom);
@@ -852,10 +872,10 @@ document.getElementById('exportExcelBtn').addEventListener('click', () => {
     const ws = XLSX.utils.aoa_to_sheet(rows);
     ws['!cols'] = rows[0].map(()=>({wch:16}));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Rotatif Kredi Çekimleri');
+    XLSX.utils.book_append_sheet(wb, ws, LBL.sheetName);
     XLSX.writeFile(wb, 'rotatif-kredi-cekim-tablosu.xlsx');
-    showIoMsg('Excel dosyası indirildi.');
-  } catch(e){ showIoMsg('Excel oluşturulurken hata oluştu.', true); }
+    showIoMsg(LBL.excelDownloaded);
+  } catch(e){ showIoMsg(LBL.excelError, true); }
 });
 
 // mmgcreativity: logo.png'yi çalışma anında okuyup PDF'e gömmek için yardımcı fonksiyon
@@ -887,7 +907,7 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
     }
     doc.setFontSize(14);
     const pageWidthHdr = doc.internal.pageSize.getWidth();
-    doc.text('Rotatif Kredi Çekim Tablosu', pageWidthHdr / 2, 16, { align: 'center' });
+    doc.text(LBL.pdfTitle, pageWidthHdr / 2, 16, { align: 'center' });
     try{ doc.addImage(MMG_APP_ICON_B64, 'PNG', pageWidthHdr - 14 - 12, 8, 12, 12); } catch(iconErr){ /* ikon eklenemezse sessizce geç */ }
     const rows = buildTrancheRows();
     doc.autoTable({
@@ -907,20 +927,20 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
         doc.line(14, pageHeight - 14, pageWidth - 14, pageHeight - 14);
         doc.setFontSize(8);
         doc.setTextColor(130,130,130);
-        doc.text('mmgcreativity.com · Dijital Finans Asistanı', 14, pageHeight - 9);
+        doc.text(LBL.footerTag, 14, pageHeight - 9);
         const dateStr = new Date().toLocaleString('tr-TR');
-        doc.text('Oluşturulma: ' + dateStr, pageWidth - 14, pageHeight - 9, { align: 'right' });
+        doc.text(LBL.createdAt + dateStr, pageWidth - 14, pageHeight - 9, { align: 'right' });
       }
     });
     doc.save('rotatif-kredi-cekim-tablosu.pdf');
-    showIoMsg('PDF dosyası indirildi.');
-  } catch(e){ showIoMsg('PDF oluşturulurken hata oluştu.', true); }
+    showIoMsg(LBL.pdfDownloaded);
+  } catch(e){ showIoMsg(LBL.pdfError, true); }
 });
 
 
 </script>
 
-<button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır">↓</button>
+<button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır" data-i18n-title="scroll_down" data-i18n-aria="scroll_down">↓</button>
 <style>
   #mmgScrollDownBtn{
     position:fixed; right:20px; bottom:20px; z-index:500;
@@ -1135,14 +1155,36 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
 
 <script>
   document.getElementById('resetPageBtn').addEventListener('click', function(){
-    if(confirm('Girdiğiniz tüm veriler silinip sayfa varsayılan haline döndürülecek. Emin misiniz?')){
+    if(confirm(LBL.resetConfirm)){
       window.location.reload();
     }
   });
 </script>
 <script>
 (function(){
-  const MMG_I18N = {
+  MMGI18N.registerDict({
+    tr: {
+      page_title:'Rotatif Kredi Hesaplama',
+      page_subtitle:'Tutar, oran ve vade girin; bankaların rotatif kredi, ek hesap ve işletme ek hesap kredilerinde uyguladığı aylık veya üç aylık faizi anında hesaplayın.<br>Bu modül, gecelik faiz işleyen borçları hesaplamayı kolaylaştırır.',
+      reset_btn:'Sıfırla', back_home:'← Ana Sayfa',
+      label_amount:'Kredi Tutarı', label_term:'Vade', unit_days:'gün', label_annual_rate:'Yıllık Faiz Oranı', label_commission_rate:'Komisyon Oranı',
+      adv_settings:'Gelişmiş ayarlar (BSMV oranı, gün bazı, tarihten vade hesaplama)',
+      adv_flag:'⚠ BSMV oranı ve gün bazları "Gelişmiş ayarlar"dan güncellenebilir; mevzuat değişirse buradan ayarlayın.',
+      label_bsmv:'Vergi Oranı (BSMV)', label_bsmv_note:'(faiz ve komisyon üzerinden alınan vergi)',
+      label_interest_daybase:'Faiz Gün Bazı', label_commission_daybase:'Komisyon Gün Bazı',
+      days_between_title:'İki Tarih Arasındaki Gün Sayısı', label_start_date:'Kullanım Tarihi', label_due_date:'Vade Tarihi',
+      days_result_label:'Gün sayısı (başlangıç hariç, banka usulü):', apply_to_term:'Vade alanına uygula',
+      total_repayment:'TOPLAM GERİ ÖDEME', interest_at_maturity:'Vade Sonu Faiz', interest_bsmv:'Faiz BSMV',
+      commission_amount:'Komisyon Tutarı', commission_bsmv:'Komisyon BSMV', loan_repayment:'Kredi Geri Ödeme',
+      loan_repayment_note:'(anapara+faiz+faiz BSMV)', total_difference:'Toplam Fark',
+      total_difference_note:'(anapara hariç ek maliyet)', effective_annual_cost:'Efektif Yıllık Maliyet Oranı', extra_indicator:'ek gösterge',
+      multi_draw:'Çoklu Çekim', tranche_table_title:'Rotatif Kredi Çekim Tablosu',
+      tranche_note:'Rotatif kredide birden fazla eş zamanlı çekim olabilir — her satır ayrı bir çekimi temsil eder. (Tutarlar TL cinsindendir.)',
+      add_from_quick:'Hızlı hesaptan satır ekle', add_row:'+ Satır Ekle', scroll_hint:'Daha fazla sütun için yatay kaydırın',
+      th_amount:'Tutar', th_term:'Vade', th_rate:'Oran %', th_com_rate:'Kom. Oran %', th_interest:'Faiz', th_interest_bsmv:'Faiz BSMV',
+      th_commission:'Komisyon', th_com_bsmv:'Kom. BSMV', th_total_repay:'Toplam Geri Ödeme', th_total_diff:'Toplam Fark',
+      export_excel:"Excel'e Aktar", export_pdf:"PDF'e Aktar", scroll_down:'Aşağı kaydır'
+    },
     en: {
       page_title:'Revolving Loan Calculator',
       page_subtitle:"Enter amount, rate, and term; instantly calculate the interest banks charge on revolving loans, overdrafts, and business overdraft loans, whether monthly or quarterly.<br>This module makes it easy to calculate debts with overnight-accruing interest logic.",
@@ -1163,28 +1205,25 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
       add_from_quick:'Add row from quick calc', add_row:'+ Add Row', scroll_hint:'Scroll horizontally for more columns',
       th_amount:'Amount', th_term:'Term', th_rate:'Rate %', th_com_rate:'Com. Rate %', th_interest:'Interest', th_interest_bsmv:'Interest Tax',
       th_commission:'Commission', th_com_bsmv:'Com. Tax', th_total_repay:'Total Repayment', th_total_diff:'Total Difference',
-      export_excel:"Export to Excel", export_pdf:"Export to PDF"
-    }
-  };
-  function applyMmgLang(lang){
-    if(lang === 'tr'){ location.reload(); return; }
-    const dict = MMG_I18N[lang];
-    if(!dict) return;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      if(dict[key]) el.innerHTML = dict[key];
-    });
-  }
-  window.addEventListener('message', (ev) => {
-    if(ev && ev.data && ev.data.mmgLang){
-      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
-      applyMmgLang(ev.data.mmgLang);
+      export_excel:"Export to Excel", export_pdf:"Export to PDF", scroll_down:'Scroll down'
     }
   });
-  try{
-    const savedLang = localStorage.getItem('mmg_lang');
-    if(savedLang === 'en') applyMmgLang('en');
-  }catch(e){}
+
+  // Bu sayfadaki hesaplama sonuçları/etiketler MMG_LANG'a göre ilk yüklemede
+  // üretiliyor; tam tutarlılık için dil değişince sayfayı yeniden yükleriz.
+  const ACTIVE_LANG = (typeof MMG_LANG !== 'undefined') ? MMG_LANG : (localStorage.getItem('mmg_lang') || 'tr');
+
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang && ev.data.mmgLang !== ACTIVE_LANG){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      location.reload();
+    }
+  });
+
+  MMGI18N.onChange(function(lang){
+    if(lang !== ACTIVE_LANG){ location.reload(); }
+  });
+  MMGI18N.detectAndApplyDefaultLang();
 })();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>

@@ -147,16 +147,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .nav-desc{ font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
   .nav-drawer-chevron{ margin-left:auto; font-size:11px; color:var(--muted); transition:transform .18s ease; flex-shrink:0; }
   .nav-item[aria-expanded="true"] .nav-drawer-chevron{ transform:rotate(180deg); color:var(--brass); }
+  .nav-drawer-wrap{ position:relative; }
   .nav-drawer{
-    display:flex; flex-direction:column; gap:2px; margin:2px 0 8px 14px; padding-left:8px;
-    border-left:2px solid var(--hairline);
-    opacity:0; transform:translateX(-10px);
-    transition:opacity .22s ease, transform .22s ease;
+    position:fixed; z-index:500; min-width:230px;
+    display:flex; flex-direction:column; gap:2px;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px;
+    padding:8px; box-shadow:0 14px 34px rgba(0,0,0,0.45);
+    opacity:0; transform:translateX(-8px); pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease;
   }
   .nav-drawer[hidden]{ display:none; }
-  .nav-drawer.open{ opacity:1; transform:translateX(0); }
-  .nav-subitem{ padding:9px 10px; margin-bottom:0; }
+  .nav-drawer.open{ opacity:1; transform:translateX(0); pointer-events:auto; }
+  .nav-subitem{ padding:9px 10px; margin-bottom:0; border-radius:8px; }
+  .nav-subitem:hover{ background:rgba(255,255,255,0.05); }
   .nav-subitem .nav-title{ font-size:12.5px; font-weight:600; }
+  @media (max-width: 860px){
+    .nav-drawer{
+      position:static; margin:2px 0 8px 14px; padding:0 0 0 8px; min-width:0;
+      border:none; border-left:2px solid var(--hairline); border-radius:0; box-shadow:none;
+      background:transparent; transform:translateX(-10px);
+    }
+    .nav-drawer.open{ transform:translateX(0); }
+  }
 
   /* ---------- Favori yıldızı ---------- */
   .fav-star{
@@ -645,6 +657,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </style>
 </head>
 <body>
+<script src="i18n-core.js"></script>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -664,18 +677,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <img class="auth-brand-logo" src="logo.png" alt="mmgcreativity" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
     <div class="auth-brand-fallback">M</div>
-    <div class="auth-brand-title">Dijital Finans Asistanı</div>
-    <div class="auth-brand-tagline">Finansal kararlarınızın dijital iş ortağı</div>
+    <div class="auth-brand-title" data-i18n="hero_title">Dijital Finans Asistanı</div>
+    <div class="auth-brand-tagline" data-i18n="hero_tagline">Finansal kararlarınızın dijital iş ortağı</div>
   </div>
 
   <div class="auth-form-panel">
     <div class="auth-form-inner">
-      <div class="auth-title" id="authTitle" style="display:none;">Hoş geldiniz</div>
-      <div class="auth-sub" id="authSub" style="display:none;">Kaldığınız yerden devam etmek için giriş yapın</div>
+      <div class="auth-title" id="authTitle" data-i18n="auth_title_login" style="display:none;">Hoş geldiniz</div>
+      <div class="auth-sub" id="authSub" data-i18n="auth_sub_login" style="display:none;">Kaldığınız yerden devam etmek için giriş yapın</div>
 
       <div class="auth-tabs">
-        <button type="button" class="auth-tab active" id="tabLogin">Giriş Yap</button>
-        <button type="button" class="auth-tab" id="tabSignup">Kayıt Ol</button>
+        <button type="button" class="auth-tab active" id="tabLogin" data-i18n="auth_tab_login">Giriş Yap</button>
+        <button type="button" class="auth-tab" id="tabSignup" data-i18n="auth_tab_signup">Kayıt Ol</button>
       </div>
 
       <div class="auth-error" id="authError"></div>
@@ -683,41 +696,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <form id="authForm" class="auth-grid">
         <div class="auth-field auth-full" id="authUsernameWrap" style="display:none;">
-          <label id="authUsernameLabel">Ad Soyad</label>
+          <label id="authUsernameLabel" data-i18n="auth_fullname">Ad Soyad</label>
           <input type="text" id="authUsername" placeholder="">
         </div>
         <div class="auth-field auth-full">
-          <label>E-posta</label>
+          <label data-i18n="auth_email">E-posta</label>
           <input type="email" id="authEmail" placeholder="ornek@eposta.com" required>
         </div>
         <div class="auth-field auth-half" id="authPasswordWrap">
-          <label>Şifre</label>
+          <label data-i18n="auth_password">Şifre</label>
           <input type="password" id="authPassword" placeholder="••••••••" required>
         </div>
         <div class="auth-field auth-half" id="authPasswordConfirmWrap" style="display:none;">
-          <label>Şifre (Tekrar)</label>
+          <label data-i18n="auth_password_repeat">Şifre (Tekrar)</label>
           <input type="password" id="authPasswordConfirm" placeholder="••••••••">
         </div>
         <div class="auth-field auth-full" id="authReferralWrap" style="display:none;">
-          <label>Referans Kodu <span style="color:var(--muted); font-weight:400;">(varsa, opsiyonel)</span></label>
+          <label data-i18n="auth_referral_label">Referans Kodu <span style="color:var(--muted); font-weight:400;" data-i18n="auth_referral_optional">(varsa, opsiyonel)</span></label>
           <input type="text" id="authReferralCode" placeholder="ör. AHMET10">
         </div>
         <div class="auth-remember-row" id="authRememberRow">
           <label class="auth-remember">
             <input type="checkbox" id="rememberMe">
-            <span>Oturumu açık tut</span>
+            <span data-i18n="auth_remember_me">Oturumu açık tut</span>
           </label>
-          <button type="button" class="auth-forgot-link" id="forgotPasswordBtn">Şifremi unuttum?</button>
+          <button type="button" class="auth-forgot-link" id="forgotPasswordBtn" data-i18n="auth_forgot_password">Şifremi unuttum?</button>
         </div>
-        <button type="submit" class="auth-submit auth-full" id="authSubmitBtn">Giriş Yap</button>
+        <button type="submit" class="auth-submit auth-full" id="authSubmitBtn" data-i18n="auth_tab_login">Giriş Yap</button>
       </form>
 
-      <div class="auth-divider">veya</div>
+      <div class="auth-divider" data-i18n="auth_or">veya</div>
       <button type="button" class="auth-google" id="googleBtn">
         <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6 29.6 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4C29.6 35.4 26.9 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.6 5.1C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.7l6.6 5.4C41.5 36.2 44 30.6 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
-        <span>Google ile devam et</span>
+        <span data-i18n="auth_google">Google ile devam et</span>
       </button>
-      <button type="button" class="auth-guest" id="guestBtn">Misafir olarak gir</button>
+      <button type="button" class="auth-guest" id="guestBtn" data-i18n="auth_guest">Misafir olarak gir</button>
     </div>
   </div>
 </div>
@@ -730,7 +743,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 
-  <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Menüyü aç/kapat">
+  <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Menüyü aç/kapat" data-i18n-aria="menu_toggle">
     <span class="mobile-nav-toggle-icon" id="mobileNavToggleIcon">☰</span>
   </button>
 
@@ -752,13 +765,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button class="nav-item" id="navKullaniciYonetimBtn" data-target="KullaniciYonetimi.html" data-title="Kullanıcı Yönetim Paneli" style="display:none;">
       <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title">Kullanıcı</span>
-        <span class="nav-desc">Yönetim Paneli</span>
+        <span class="nav-title" data-i18n="nav_user_mgmt_1">Kullanıcı</span>
+        <span class="nav-desc" data-i18n="nav_user_mgmt_2">Yönetim Paneli</span>
       </span>
     </button>
 
+    <div class="nav-drawer-wrap">
     <button class="nav-item" id="hesaplamaAraclariToggle" data-drawer-toggle="true" data-title="Hesaplama Araçları" aria-expanded="false">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="nav_calc">Hesaplama</span>
         <span class="nav-desc" data-i18n="nav_calc_desc">Araçları</span>
@@ -767,55 +781,59 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </button>
     <div class="nav-drawer" id="hesaplamaDrawer" hidden>
       <button class="nav-item nav-subitem" data-target="Rotatif_Kredi_Hesaplama.html" data-title="Rotatif Kredi Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Rotatif_Kredi_Hesaplama.html" data-fav-title="Rotatif Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Rotatif_Kredi_Hesaplama.html" data-fav-title="Rotatif Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_rotatif">Rotatif Kredi Hesaplama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="Ortalama_Vade_Hesaplama.html" data-title="Ortalama Vade Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Ortalama_Vade_Hesaplama.html" data-fav-title="Ortalama Vade Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Ortalama_Vade_Hesaplama.html" data-fav-title="Ortalama Vade Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_ortalama">Ortalama Vade Hesaplama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-title="Kredi Kartı Vade Farkı Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-fav-title="Kredi Kartı Vade Farkı" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-fav-title="Kredi Kartı Vade Farkı" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_kkvf">Kredi Kartı Vade Farkı</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="Vade_Sapma_Hesaplama.html" data-title="Vade Sapması Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Vade_Sapma_Hesaplama.html" data-fav-title="Vade Sapması Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Vade_Sapma_Hesaplama.html" data-fav-title="Vade Sapması Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_vadesapmasi">Vade Sapması Hesaplama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="vadeli-mevduat-faizi-hesaplama.html" data-title="Vadeli Mevduat Faizi Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="vadeli-mevduat-faizi-hesaplama.html" data-fav-title="Vadeli Mevduat Faizi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="vadeli-mevduat-faizi-hesaplama.html" data-fav-title="Vadeli Mevduat Faizi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_vadelimevduat">Vadeli Mevduat Faizi Hesaplama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="kredi-karsilastirma.html" data-title="Kredi Tekliflerini Karşılaştır">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="kredi-karsilastirma.html" data-fav-title="Kredi Tekliflerini Karşılaştır" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="kredi-karsilastirma.html" data-fav-title="Kredi Tekliflerini Karşılaştır" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_krediteklif">Kredi Tekliflerini Karşılaştır</span></span>
       </button>
     </div>
+    </div>
 
-    <button class="nav-item" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+    <div class="nav-drawer-wrap">
+    <button class="nav-item" id="butcelemeAraclariToggle" data-drawer-toggle="true" data-title="Bütçeleme Araçları" aria-expanded="false">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Bütçeleme Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title" data-i18n="nav_nakitakis">Nakit Akış</span>
-        <span class="nav-desc" data-i18n="nav_nakitakis_desc">Tablosu</span>
+        <span class="nav-title" data-i18n="nav_budget">Bütçeleme</span>
+        <span class="nav-desc" data-i18n="nav_budget_desc">Araçları</span>
       </span>
+      <span class="nav-drawer-chevron" id="butcelemeChevron">▾</span>
     </button>
-
-    <button class="nav-item" data-target="Giderler.html" data-title="Giderler">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-      <span class="nav-text-wrap">
-        <span class="nav-title" data-i18n="nav_giderler">Giderler</span>
-      </span>
-    </button>
-
-    <button class="nav-item" data-target="Gelirler.html" data-title="Gelirler">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-      <span class="nav-text-wrap">
-        <span class="nav-title" data-i18n="nav_gelirler">Gelirler</span>
-      </span>
-    </button>
+    <div class="nav-drawer" id="butcelemeDrawer" hidden>
+      <button class="nav-item nav-subitem" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_nakitakis">Nakit Akış Tablosu</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Gelirler.html" data-title="Gelirler">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_gelirler">Gelirler</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Giderler.html" data-title="Giderler">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_giderler">Giderler</span></span>
+      </button>
+    </div>
+    </div>
 
     <button class="nav-item" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="nav_talimat">Talimat</span>
         <span class="nav-desc" data-i18n="nav_talimat_desc">Hazırlama</span>
@@ -823,14 +841,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </button>
 
     <button class="nav-item" data-target="rehber.html" data-title="Rehber">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="nav_rehber">Rehber</span>
       </span>
     </button>
 
     <button class="nav-item" data-target="iletisim.html" data-title="İletişim">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="iletisim.html" data-fav-title="İletişim" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="iletisim.html" data-fav-title="İletişim" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="nav_iletisim">İletişim</span>
       </span>
@@ -858,51 +876,59 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <svg id="avatarDefaultIconLg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg>
       </span>
       <div class="account-dropdown-info">
-        <div class="account-dropdown-name" id="accountDropdownName">Misafir</div>
+        <div class="account-dropdown-name" id="accountDropdownName" data-i18n="guest">Misafir</div>
         <div class="account-dropdown-sub" id="accountDropdownSub"></div>
       </div>
     </div>
     <div class="account-dropdown-divider"></div>
+    <div id="mmgVerifyEmailWrap" style="display:none; padding:10px 4px;">
+      <div style="font-size:12px; color:var(--amber,#E3A23C); margin-bottom:8px;" data-i18n="verify_email_notice">✉️ E-posta adresiniz henüz doğrulanmadı.</div>
+      <button type="button" class="account-dropdown-item" id="mmgResendVerifyBtn" style="padding:8px 10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        <span data-i18n="verify_email_resend">Doğrulama E-postasını Tekrar Gönder</span>
+      </button>
+      <div class="saved-msg" id="mmgResendVerifySavedMsg" style="margin-top:6px;" data-i18n="verify_email_sent">Gönderildi ✓</div>
+    </div>
     <div id="mmgCompanySwitchWrap" style="display:none;">
-      <div class="account-dropdown-section-label">Bağlı Firmalar</div>
+      <div class="account-dropdown-section-label" data-i18n="dropdown_linked_companies">Bağlı Firmalar</div>
       <div id="mmgCompanySwitchList"></div>
       <div class="account-dropdown-divider"></div>
     </div>
     <div id="mmgDataScopeWrap" style="display:none;">
-      <div class="account-dropdown-section-label">Veri Kaynağı</div>
+      <div class="account-dropdown-section-label" data-i18n="data_scope_label">Veri Kaynağı</div>
       <div id="mmgDataScopeList"></div>
       <div class="account-dropdown-divider"></div>
     </div>
     <button type="button" class="account-dropdown-item" id="kullaniciYonetimBtn" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <span>Kullanıcı Yönetim Paneli</span>
+      <span data-i18n="dropdown_user_management">Kullanıcı Yönetim Paneli</span>
     </button>
     <div class="account-dropdown-divider"></div>
     <button type="button" class="account-dropdown-item" id="accountInfoBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M6 16c0-1.8 1.5-3 3-3s3 1.2 3 3"/><path d="M14 9h4"/><path d="M14 13h4"/></svg>
-      <span>Hesabım</span>
+      <span data-i18n="dropdown_my_account">Hesabım</span>
     </button>
     <button type="button" class="account-dropdown-item" id="changePhotoBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>
-      <span>Resmi Değiştir</span>
+      <span data-i18n="dropdown_change_photo">Resmi Değiştir</span>
     </button>
     <button type="button" class="account-dropdown-item" id="adminPanelBtn" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z"/></svg>
-      <span>Referans Kodu Yönetimi</span>
+      <span data-i18n="dropdown_referral_admin">Referans Kodu Yönetimi</span>
     </button>
     <button type="button" class="account-dropdown-item" id="begenIstatistikleriBtn" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/><path d="M2 20h20"/></svg>
-      <span>İstatistikler</span>
+      <span data-i18n="dropdown_stats">İstatistikler</span>
     </button>
     <div class="account-dropdown-divider"></div>
     <button type="button" class="account-dropdown-item" id="mmgSettingsBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span>Ayarlar</span>
+      <span data-i18n="settings_title">Ayarlar</span>
     </button>
     <div class="account-dropdown-divider"></div>
     <button type="button" class="account-dropdown-item account-dropdown-item-danger" id="dropdownLogoutBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-      <span>Oturumu Kapat</span>
+      <span data-i18n="dropdown_logout">Oturumu Kapat</span>
     </button>
   </div>
 
@@ -910,6 +936,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 </div>
+
 
 <main>
   <div class="frame-wrap" id="frame-wrap" style="display:none;">
@@ -932,10 +959,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <img src="DFA_icon.png" alt="Dijital Finans Asistanı" class="hero-app-icon">
         <div class="hero-top-text">
           <h1 class="hero-title" data-i18n="hero_title">Dijital Finans Asistanı</h1>
-          <p class="hero-tagline">Finansal kararlarınızın dijital iş ortağı</p>
+          <p class="hero-tagline" data-i18n="hero_tagline">Finansal kararlarınızın dijital iş ortağı</p>
         </div>
       </div>
-      <p class="hero-desc">Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.</p>
+      <p class="hero-desc" data-i18n="hero_desc">Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.</p>
     </section>
 
     <section class="tools-section">
@@ -948,38 +975,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <div class="card-grid" id="cardGrid">
         <button class="app-card" data-target="Hesaplama_Araclari.html" data-title="Hesaplama Araçları">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
-          <h3>Hesaplama Araçları</h3>
-          <p>Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.</p>
+          <h3 data-i18n="nav_hesaplamaaraclari">Hesaplama Araçları</h3>
+          <p data-i18n="card_calc_desc">Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.</p>
         </button>
 
         <button class="app-card" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
-          <h3>Nakit Akış Tablosu</h3>
-          <p>Ay ay, gün gün gelir ve giderlerinizi girin; haftalık ve aylık durumunuzu, kategori dağılımınızı ve otomatik uyarılarınızı anında görün.</p>
+          <h3 data-i18n="card_cashflow_title">Nakit Akış Tablosu</h3>
+          <p data-i18n="card_cashflow_desc">Ay ay, gün gün gelir ve giderlerinizi girin; haftalık ve aylık durumunuzu, kategori dağılımınızı ve otomatik uyarılarınızı anında görün.</p>
         </button>
 
         <button class="app-card" data-target="Giderler.html" data-title="Giderler">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
-          <h3>Giderler</h3>
-          <p>Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
+          <h3 data-i18n="nav_giderler">Giderler</h3>
+          <p data-i18n="card_expenses_desc">Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
         </button>
 
         <button class="app-card" data-target="Gelirler.html" data-title="Gelirler">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
-          <h3>Gelirler</h3>
-          <p>Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
+          <h3 data-i18n="nav_gelirler">Gelirler</h3>
+          <p data-i18n="card_income_desc">Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
         </button>
 
         <button class="app-card" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
-          <h3>Talimat Hazırlama</h3>
-          <p>Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.</p>
+          <h3 data-i18n="nav_talimat_full">Talimat Hazırlama</h3>
+          <p data-i18n="card_instructions_desc">Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.</p>
         </button>
       </div>
     </section>
@@ -987,9 +1014,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <footer>
       <div class="footer-final-row">
         <div class="footer-final-top-line">
-          <div class="footer-col-title" style="margin-bottom:0;">Bizi Takip Edin</div>
+          <div class="footer-col-title" style="margin-bottom:0;" data-i18n="footer_follow_us">Bizi Takip Edin</div>
           <div class="credit">
-            <span>Powered by</span>
+            <span data-i18n="footer_powered_by">Powered by</span>
             <span class="signature-pill">
               <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
               <span id="credit-fallback" class="credit-fallback">M</span>
@@ -1025,15 +1052,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
           <a href="#" class="app-badge app-badge-small">
             <svg viewBox="0 0 24 24"><path d="M3.6 2.6a1 1 0 0 0-.6.9v17a1 1 0 0 0 .6.9l9.7-9.4-9.7-9.4z" fill="#00d2ff"/><path d="M13.3 12l3-2.9 3.9 2.2c.9.5.9 1.4 0 1.9l-3.9 2.2-3-2.4z" fill="#ffd200"/><path d="M13.3 12L3.6 2.6c.2 0 .5 0 .7.1l11 6.3-2 2.9z" fill="#00e676"/><path d="M13.3 12l2 2.9-11 6.3c-.2.1-.5.1-.7.1L13.3 12z" fill="#ff3d57"/></svg>
-            <span class="app-badge-text"><span>Hemen İndirin</span><b>Google Play</b></span>
+            <span class="app-badge-text"><span data-i18n="footer_download_now">Hemen İndirin</span><b>Google Play</b></span>
           </a>
           </div>
         </div>
         <div class="legal-links">
-          <a href="hakkinda.html" target="_blank">Hakkında</a>
-          <a href="iletisim.html" target="_blank">İletişim</a>
-          <a href="gizlilik-politikasi.html" target="_blank">Gizlilik Politikası</a>
-          <a href="kullanim-sartlari.html" target="_blank">Kullanım Şartları</a>
+          <a href="hakkinda.html" target="_blank" data-i18n="footer_about">Hakkında</a>
+          <a href="iletisim.html" target="_blank" data-i18n="nav_iletisim">İletişim</a>
+          <a href="gizlilik-politikasi.html" target="_blank" data-i18n="footer_privacy">Gizlilik Politikası</a>
+          <a href="kullanim-sartlari.html" target="_blank" data-i18n="footer_terms">Kullanım Şartları</a>
         </div>
         </div>
       </div>
@@ -1093,21 +1120,73 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     el.addEventListener('click', ()=> openTarget(el.dataset.target, el.dataset.title));
   });
 
-  // ---- Hesaplama Araçları çekmecesi ----
-  const hesaplamaToggle = document.getElementById('hesaplamaAraclariToggle');
-  const hesaplamaDrawer = document.getElementById('hesaplamaDrawer');
-  hesaplamaToggle.addEventListener('click', ()=>{
-    const isOpen = hesaplamaToggle.getAttribute('aria-expanded') === 'true';
-    hesaplamaToggle.setAttribute('aria-expanded', String(!isOpen));
-    if(isOpen){
-      hesaplamaDrawer.classList.remove('open');
-      hesaplamaDrawer.hidden = true;
-    } else {
-      hesaplamaDrawer.hidden = false;
-      requestAnimationFrame(()=>{
-        requestAnimationFrame(()=> hesaplamaDrawer.classList.add('open'));
+  // ---- Hesaplama Araçları / Bütçeleme Araçları çekmeceleri (sağa açılan flyout) ----
+  function wireDrawerToggle(toggleId, drawerId){
+    const toggle = document.getElementById(toggleId);
+    const drawer = document.getElementById(drawerId);
+    if(!toggle || !drawer) return;
+    toggle.addEventListener('click', (e) => {
+      const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+      // Diğer açık çekmeceleri kapat, tek seferde yalnızca biri açık kalsın.
+      document.querySelectorAll('.nav-drawer.open').forEach(d => {
+        if(d !== drawer){
+          d.classList.remove('open');
+          d.hidden = true;
+          const otherToggle = d.previousElementSibling;
+          if(otherToggle) otherToggle.setAttribute('aria-expanded', 'false');
+        }
       });
-    }
+      toggle.setAttribute('aria-expanded', String(!isOpen));
+      if(isOpen){
+        drawer.classList.remove('open');
+        drawer.hidden = true;
+      } else {
+        // position:fixed kullanıldığı için konumu açılışta JS ile hesaplıyoruz
+        // (aside'ın overflow:auto'su nedeniyle position:absolute kırpılıyordu).
+        if(window.innerWidth > 860){
+          const rect = toggle.getBoundingClientRect();
+          drawer.style.left = (rect.right + 10) + 'px';
+          drawer.style.top = rect.top + 'px';
+          drawer.hidden = false;
+          const drawerHeight = drawer.offsetHeight;
+          const maxTop = window.innerHeight - drawerHeight - 12;
+          if(rect.top > maxTop) drawer.style.top = Math.max(12, maxTop) + 'px';
+        } else {
+          drawer.style.left = '';
+          drawer.style.top = '';
+          drawer.hidden = false;
+        }
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(()=> drawer.classList.add('open'));
+        });
+      }
+    });
+  }
+  wireDrawerToggle('hesaplamaAraclariToggle', 'hesaplamaDrawer');
+  wireDrawerToggle('butcelemeAraclariToggle', 'butcelemeDrawer');
+
+  // Flyout dışına tıklanınca ya da bir alt öge seçilince kapansın.
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.nav-drawer-wrap').forEach(wrap => {
+      if(!wrap.contains(e.target)){
+        const drawer = wrap.querySelector('.nav-drawer');
+        const toggle = wrap.querySelector('[data-drawer-toggle]');
+        if(drawer && drawer.classList.contains('open')){
+          drawer.classList.remove('open');
+          drawer.hidden = true;
+          if(toggle) toggle.setAttribute('aria-expanded', 'false');
+        }
+      }
+    });
+  });
+  document.querySelectorAll('.nav-subitem').forEach(item => {
+    item.addEventListener('click', () => {
+      const drawer = item.closest('.nav-drawer');
+      const wrap = item.closest('.nav-drawer-wrap');
+      const toggle = wrap ? wrap.querySelector('[data-drawer-toggle]') : null;
+      if(drawer){ drawer.classList.remove('open'); drawer.hidden = true; }
+      if(toggle) toggle.setAttribute('aria-expanded', 'false');
+    });
   });
 
   openTarget('home', 'Ana Sayfa');
@@ -1176,7 +1255,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     pinnedList.innerHTML = favInNav.map(t => {
       const title = knownTargets.get(t);
       return '<button class="nav-item" data-target="' + t + '" data-title="' + title + '">' +
-        '<span class="fav-star is-fav" role="button" tabindex="0" data-fav-target="' + t + '" data-fav-title="' + title + '" title="Favorilerden çıkar" aria-label="Favorilerden çıkar">' + STAR_SVG + '</span>' +
+        '<span class="fav-star is-fav" role="button" tabindex="0" data-fav-target="' + t + '" data-fav-title="' + title + '" title="Favorilerden çıkar" aria-label="Favorilerden çıkar" data-i18n-title="fav_remove" data-i18n-aria="fav_remove">' + STAR_SVG + '</span>' +
         '<span class="nav-text-wrap"><span class="nav-title">' + title + '</span></span>' +
       '</button>';
     }).join('');
@@ -1240,7 +1319,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
     signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup,
     deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup,
-    sendPasswordResetEmail, updatePassword
+    sendPasswordResetEmail, updatePassword, sendEmailVerification
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment,
@@ -1293,7 +1372,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         document.querySelectorAll('script[src*="adsbygoogle"]').forEach(s => s.remove());
         window.adsbygoogle = { push: function(){} }; // olası hataları sessizce yut
       }
-      // Firma / Ekip (eski sistem): mevcut firma bilgisini yerel önbelleğe yaz
+      // Firma / Ekip: mevcut firma bilgisini yerel önbelleğe yaz
       if(data.companyId){
         localStorage.setItem('mmg_company_id', data.companyId);
         localStorage.setItem('mmg_company_role', data.companyRole || 'member');
@@ -1316,10 +1395,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.getElementById('begenIstatistikleriBtn').addEventListener('click', () => {
     document.getElementById('accountDropdown').hidden = true;
     openTarget('Istatistikler.html', 'İstatistikler');
-  });
-  document.getElementById('kullaniciYonetimBtn').addEventListener('click', () => {
-    document.getElementById('accountDropdown').hidden = true;
-    openTarget('KullaniciYonetimi.html', 'Kullanıcı Yönetim Paneli');
   });
 
   // ---- Karşılama / Üyelik Ekranı ----
@@ -1350,9 +1425,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     usernameWrap.style.display = mode === 'signup' ? 'block' : 'none';
     referralWrap.style.display = mode === 'signup' ? 'block' : 'none';
     authRememberRow.style.display = mode === 'login' ? 'flex' : 'none';
-    authTitle.textContent = mode === 'login' ? 'Hoş geldiniz' : 'Hesap oluşturun';
-    authSub.textContent = mode === 'login' ? 'Kaldığınız yerden devam etmek için giriş yapın' : 'Oranlarınızı ve tercihlerinizi kaydetmek için ücretsiz hesap açın';
-    authSubmitBtn.textContent = mode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur';
+    authTitle.textContent = mode === 'login' ? MMGI18N.t('auth_title_login') : MMGI18N.t('auth_title_signup');
+    authSub.textContent = mode === 'login' ? MMGI18N.t('auth_sub_login') : MMGI18N.t('auth_sub_signup');
+    authSubmitBtn.textContent = mode === 'login' ? MMGI18N.t('auth_tab_login') : MMGI18N.t('auth_create_account');
     hideAuthError();
     hideAuthSuccess();
   }
@@ -1380,24 +1455,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const emailInput = document.getElementById('authEmail');
     const email = emailInput.value.trim();
     if(!email){
-      showAuthError('Şifre sıfırlama bağlantısı gönderebilmemiz için önce e-posta adresinizi yazın.');
+      showAuthError(MMGI18N.t('auth_err_need_email_reset'));
       emailInput.focus();
       return;
     }
     forgotPasswordBtn.disabled = true;
     const originalText = forgotPasswordBtn.textContent;
-    forgotPasswordBtn.textContent = 'Gönderiliyor...';
+    forgotPasswordBtn.textContent = MMGI18N.t('sending');
     try{
       await sendPasswordResetEmail(auth, email);
-      showAuthSuccess('Şifre sıfırlama bağlantısı ' + email + ' adresine gönderildi. Gelen kutunuzu (ve spam klasörünü) kontrol edin.');
+      showAuthSuccess(MMGI18N.t('auth_reset_sent_prefix') + email + MMGI18N.t('auth_reset_sent_suffix'));
     } catch(err){
       if(err.code === 'auth/invalid-email'){
-        showAuthError('Geçerli bir e-posta adresi girin.');
+        showAuthError(MMGI18N.t('auth_err_invalid_email'));
       } else if(err.code === 'auth/user-not-found'){
         // Güvenlik amacıyla, bu e-postanın kayıtlı olup olmadığını ayırt etmiyoruz.
-        showAuthSuccess('Eğer bu e-posta adresi sistemde kayıtlıysa, şifre sıfırlama bağlantısı gönderildi.');
+        showAuthSuccess(MMGI18N.t('auth_reset_maybe_sent'));
       } else {
-        showAuthError('Şifre sıfırlama e-postası gönderilemedi. Lütfen daha sonra tekrar deneyin.');
+        showAuthError(MMGI18N.t('auth_err_reset_failed'));
       }
     } finally {
       forgotPasswordBtn.disabled = false;
@@ -1422,18 +1497,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const dropdownName = document.getElementById('accountDropdownName');
     const dropdownSub = document.getElementById('accountDropdownSub');
     const isRealUser = !!state && state.startsWith('user:');
-    dropdownLogoutBtn.querySelector('span').textContent = isRealUser ? 'Oturumu Kapat' : 'Oturum Aç';
+    dropdownLogoutBtn.querySelector('span').textContent = isRealUser ? MMGI18N.t('dropdown_logout') : MMGI18N.t('dropdown_login');
     if(!state){
       badge.style.display = 'none';
-      dropdownName.textContent = 'Misafir';
-      dropdownSub.textContent = 'Giriş yapmadınız';
+      dropdownName.textContent = MMGI18N.t('guest');
+      dropdownSub.textContent = MMGI18N.t('auth_not_logged_in');
       return;
     }
     badge.style.display = 'flex';
     if(state === 'guest'){
-      nameEl.textContent = 'Misafir';
-      dropdownName.textContent = 'Misafir';
-      dropdownSub.textContent = 'Misafir modundasınız';
+      nameEl.textContent = MMGI18N.t('guest');
+      dropdownName.textContent = MMGI18N.t('guest');
+      dropdownSub.textContent = MMGI18N.t('auth_guest_mode');
     } else if(state.startsWith('user:')){
       const email = state.slice(5);
       const no = customerNumber || localStorage.getItem('mmg_customer_no');
@@ -1447,7 +1522,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const displayName = uname || email;
       nameEl.textContent = no ? ('#' + no) : displayName;
       dropdownName.textContent = displayName;
-      dropdownSub.textContent = no ? ('Kullanıcı Kodu: #' + no) : (uname ? email : 'Kullanıcı Kodu atanmamış');
+      dropdownSub.textContent = no ? (MMGI18N.t('auth_user_code') + no) : (uname ? email : MMGI18N.t('no_user_code'));
     }
   }
 
@@ -1518,11 +1593,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   }
 
-  // ================== Hesap Değiştirme ==================
   // Not: Kişisel hesaplar artık tek tek (kişi başı tek kullanıcı) — çoklu kişisel
   // hesap arasında geçiş özelliği kaldırıldı. Hesap/firma geçişi artık aşağıdaki
   // "Firma Üyeliklerim" (sol alt rozet) ve "Bağlı Firmalar" mekanizmalarıyla yapılır.
 
+  // B) Bağlı Firmalar: Şirket Kodu ile birbirine bağlanmış firmalar arasında geçiş
   //    (Hesabım sayfasındaki "Firmaları Bağla" özelliğiyle aynı veriyi kullanır).
   let mmgCompanySwitchOptions = [];
   async function renderCompanySwitchList(){
@@ -1583,7 +1658,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     avatarInput.click();
   });
 
-
   dropdownLogoutBtn.addEventListener('click', () => {
     toggleAccountDropdown(false);
     performLogout();
@@ -1616,19 +1690,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function mapFirebaseError(code){
     const map = {
-      'auth/email-already-in-use': 'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.',
-      'auth/invalid-email': 'Geçerli bir e-posta adresi girin.',
-      'auth/weak-password': 'Şifre en az 6 karakter olmalı.',
-      'auth/user-not-found': 'Bu e-posta ile kayıtlı bir hesap bulunamadı.',
-      'auth/wrong-password': 'Şifre hatalı.',
-      'auth/invalid-credential': 'E-posta veya şifre hatalı.',
-      'auth/too-many-requests': 'Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.',
-      'auth/network-request-failed': 'Bağlantı hatası. İnternetinizi kontrol edin.',
-      'auth/operation-not-allowed': 'Google ile giriş şu an aktif değil. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
-      'auth/unauthorized-domain': 'Bu site adresi Firebase\'de yetkili domainler listesinde değil. (Firebase Console → Authentication → Settings → Authorized domains)',
-      'auth/popup-blocked': 'Tarayıcınız açılır pencereyi (popup) engelledi. Popup engelleyiciyi kapatıp tekrar deneyin.'
+      'auth/email-already-in-use': MMGI18N.t('auth_err_email_in_use'),
+      'auth/invalid-email': MMGI18N.t('auth_err_invalid_email'),
+      'auth/weak-password': MMGI18N.t('auth_err_weak_password'),
+      'auth/user-not-found': MMGI18N.t('auth_err_user_not_found'),
+      'auth/wrong-password': MMGI18N.t('auth_err_wrong_password'),
+      'auth/invalid-credential': MMGI18N.t('auth_err_invalid_credential'),
+      'auth/too-many-requests': MMGI18N.t('auth_err_too_many_requests'),
+      'auth/network-request-failed': MMGI18N.t('auth_err_network'),
+      'auth/operation-not-allowed': MMGI18N.t('auth_err_google_disabled'),
+      'auth/unauthorized-domain': MMGI18N.t('auth_err_unauthorized_domain'),
+      'auth/popup-blocked': MMGI18N.t('auth_err_popup_blocked')
     };
-    return map[code] || ('Bir hata oluştu (' + (code || 'bilinmiyor') + '), lütfen tekrar deneyin.');
+    return map[code] || (MMGI18N.t('auth_err_generic_prefix') + (code || MMGI18N.t('unknown')) + MMGI18N.t('auth_err_generic_suffix'));
   }
 
   // Sıradaki müşteri numarasını atomik olarak üretir (1001'den başlar)
@@ -1698,6 +1772,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     } catch(e){ /* davet kontrol edilemezse sessizce geç */ }
   }
 
+  // ---- Firma / Ekip: giriş sonrası kullanıcının firma bilgisini yerel önbelleğe yükler ----
+  async function syncCompanyCache(uid){
+    try{
+      const snap = await getDoc(doc(db, 'users', uid));
+      const data = snap.exists() ? snap.data() : {};
+      if(data.companyId){
+        localStorage.setItem('mmg_company_id', data.companyId);
+        localStorage.setItem('mmg_company_role', data.companyRole || 'member');
+        localStorage.setItem('mmg_company_name', data.companyName || '');
+      } else {
+        localStorage.removeItem('mmg_company_id');
+        localStorage.removeItem('mmg_company_role');
+        localStorage.removeItem('mmg_company_name');
+      }
+    } catch(e){ /* sessizce geç */ }
+  }
+
   // ---- Firma Hesabı (YENİ): bekleyen bir kullanıcı daveti varsa, kullanıcıyı ilgili firmaya üye olarak ekler ----
   async function applyPendingFirmaInviteIfAny(user, username){
     if(!user || !user.email) return;
@@ -1713,11 +1804,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         firmaIds: arrayUnion(invite.firmaId)
       }, { merge: true });
       await deleteDoc(inviteRef);
-      try{ alert('🏢 "' + (invite.firmaName || 'Firma') + '" hesabına kullanıcı olarak eklendiniz.'); }catch(e){}
+      try{ alert('🏢 ' + (MMGI18N.lang==='en' ? ('You have been added as a user to the "' + (invite.firmaName || 'Company') + '" account.') : ('"' + (invite.firmaName || 'Firma') + '" hesabına kullanıcı olarak eklendiniz.'))); }catch(e){}
     } catch(e){ /* davet kontrol edilemezse sessizce geç */ }
   }
 
-  // ---- Firma Hesabı: sol-alt rozet artık gerçek bir "Veri Kaynağı" değiştiricisi ----
+  // ---- Firma Hesabı: hesap açılır menüsündeki gerçek "Veri Kaynağı" değiştiricisi ----
   // Kullanıcı hem üye olduğu hem yönettiği firmalar arasından birini "aktif" seçebilir;
   // seçim mmg_active_data_scope içinde saklanır ve araç sayfaları (Gelirler/Giderler/
   // Nakit Akış) bu firmanın PAYLAŞIMLI veri havuzunu kullanır. "Kendi Verilerim" seçiliyse
@@ -1735,7 +1826,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         try{
           const fSnap = await getDoc(doc(db, 'firmaAccounts', fid));
           if(fSnap.exists()){
-            mmgFirmaMemberships.push({ id: fid, name: fSnap.data().name || fid, role: adminIds.includes(fid) ? 'Yönetici' : 'Kullanıcı' });
+            mmgFirmaMemberships.push({
+              id: fid, name: fSnap.data().name || fid,
+              role: adminIds.includes(fid) ? MMGI18N.t('dropdown_user_management') : (MMGI18N.lang==='en' ? 'User' : 'Kullanıcı')
+            });
           }
         }catch(e){ /* tek bir firma okunamazsa listeyi bozmadan devam et */ }
       }
@@ -1749,10 +1843,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     localStorage.setItem('mmg_active_data_scope', scope);
     renderFirmaBadge();
     // Aktif veri kaynağı değiştiğinde açık olan araç sayfasının bunu hemen
-    // yansıtması için sayfayı yeniden yüklüyoruz (kapsam sayfa açılışında okunuyor).
+    // yansıtması için sayfayı GERÇEKTEN yeniden yüklüyoruz. "iframe.src = iframe.src"
+    // tarayıcıda genelde no-op sayıldığı (yeniden yüklemediği) için burada önce
+    // contentWindow.location.reload() deneniyor, olmazsa src'yi boşaltıp geri
+    // koyarak zorla yeniden yükleme yapılıyor.
     try{
       if(frameWrap.style.display !== 'none' && iframe.src){
-        iframe.src = iframe.src;
+        try{
+          iframe.contentWindow.location.reload();
+        }catch(reloadErr){
+          const currentSrc = iframe.getAttribute('src');
+          iframe.src = 'about:blank';
+          requestAnimationFrame(() => { iframe.src = currentSrc; });
+        }
       }
     }catch(e){ /* sessizce geç */ }
   }
@@ -1769,7 +1872,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(listEl){
       const personalRow = '<div class="mmg-account-row" data-scope="personal">' +
         (activeScope === 'personal' ? '<span class="mmg-account-row-dot"></span>' : '<span style="width:7px;"></span>') +
-        '<span class="mmg-account-row-main">👤 Kendi Verilerim</span></div>';
+        '<span class="mmg-account-row-main">' + MMGI18N.t('data_scope_personal') + '</span></div>';
       const firmaRows = mmgFirmaMemberships.map(f =>
         '<div class="mmg-account-row" data-scope="' + f.id + '">' +
           (f.id === activeScope ? '<span class="mmg-account-row-dot"></span>' : '<span style="width:7px;"></span>') +
@@ -1808,21 +1911,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(dropdownBtn) dropdownBtn.style.display = isAdmin ? 'flex' : 'none';
   }
 
-  async function syncCompanyCache(uid){
-    try{
-      const snap = await getDoc(doc(db, 'users', uid));
-      const data = snap.exists() ? snap.data() : {};
-      if(data.companyId){
-        localStorage.setItem('mmg_company_id', data.companyId);
-        localStorage.setItem('mmg_company_role', data.companyRole || 'member');
-        localStorage.setItem('mmg_company_name', data.companyName || '');
-      } else {
-        localStorage.removeItem('mmg_company_id');
-        localStorage.removeItem('mmg_company_role');
-        localStorage.removeItem('mmg_company_name');
-      }
-    } catch(e){ /* sessizce geç */ }
-  }
+  document.getElementById('kullaniciYonetimBtn').addEventListener('click', () => {
+    document.getElementById('accountDropdown').hidden = true;
+    openTarget('KullaniciYonetimi.html', MMGI18N.lang==='en' ? 'User Management Panel' : 'Kullanıcı Yönetim Paneli');
+  });
 
   guestBtn.addEventListener('click', async () => {
     try{ await signOut(auth); }catch(e){ /* zaten oturum yoksa sessizce geç */ }
@@ -1897,25 +1989,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     authSubmitBtn.disabled = true;
     const originalLabel = authSubmitBtn.textContent;
-    authSubmitBtn.textContent = 'Lütfen bekleyin...';
+    authSubmitBtn.textContent = MMGI18N.t('please_wait');
 
     try{
       if(authMode === 'signup'){
         const confirm = document.getElementById('authPasswordConfirm').value;
         const username = document.getElementById('authUsername').value.trim();
         if(!username){
-          showAuthError('Lütfen bir kullanıcı adı belirleyin.');
+          showAuthError(MMGI18N.t('auth_err_need_username'));
           return;
         }
         if(password !== confirm){
-          showAuthError('Şifreler eşleşmiyor.');
+          showAuthError(MMGI18N.t('auth_err_passwords_mismatch'));
           return;
         }
         if(password.length < 6){
-          showAuthError('Şifre en az 6 karakter olmalı.');
+          showAuthError(MMGI18N.t('auth_err_weak_password'));
           return;
         }
         const cred = await createUserWithEmailAndPassword(auth, email, password);
+        try{ await sendEmailVerification(cred.user); }catch(verifyErr){ /* gönderilemezse kaydı engellemesin */ }
         const customerNumber = await getNextCustomerNumber();
         const referralCodeRaw = document.getElementById('authReferralCode').value.trim();
         const referralCode = referralCodeRaw ? referralCodeRaw.toUpperCase() : null;
@@ -1983,18 +2076,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         updateUserBadge(customerNumber, username);
         if(premiumBenefit){
           if(premiumBenefit.type === 'free'){
-            alert('🎉 "' + premiumBenefit.code + '" kodunu kullandınız!\nHesabınıza ücretsiz premium tanımlandı.');
+            alert('🎉 "' + premiumBenefit.code + '" ' + MMGI18N.t('referral_used_free'));
           } else {
-            alert('🎉 "' + premiumBenefit.code + '" kodunu kullandınız!\nHesabınıza %' + premiumBenefit.discountPercent + ' indirimli premium tanımlandı.');
+            alert('🎉 "' + premiumBenefit.code + '" ' + MMGI18N.t('referral_used_discount_prefix') + premiumBenefit.discountPercent + MMGI18N.t('referral_used_discount_suffix'));
           }
         } else if(referralLimitReached){
-          alert('"' + referralCode + '" kodu kullanım limitine ulaştığı için geçerli değil.');
+          alert('"' + referralCode + '" ' + MMGI18N.t('referral_limit_reached'));
         }
 
         // ---- Bekleyen bir eski-sistem (Hesabım'dan gönderilmiş) daveti varsa uygula ----
         await applyPendingInviteIfAny(cred.user, username);
         await applyPendingFirmaInviteIfAny(cred.user, username);
         await loadAdminFirmas(cred.user.uid);
+        try{ alert('Hesabınız oluşturuldu. 📩 ' + email + ' adresine bir doğrulama e-postası gönderdik, lütfen gelen kutunuzu (ve gereksiz/spam klasörünü) kontrol edip e-postanızı onaylayın.'); }catch(alertErr){}
 
         closeAuthOverlay();
       } else {
@@ -2045,8 +2139,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     localStorage.removeItem('mmg_company_role');
     localStorage.removeItem('mmg_company_name');
     localStorage.removeItem('mmg_active_company_id');
-
-    localStorage.removeItem('mmg_active_firma_id');
     setAvatar(null);
     updateUserBadge();
     mmgAdminFirmaIds = [];
@@ -2059,7 +2151,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.getElementById('authEmail').value = '';
     document.getElementById('authPassword').value = '';
     document.getElementById('rememberMe').checked = false;
-    setAuthKind('kullanici');
     setAuthMode('login');
     openAuthOverlay();
   }
@@ -2086,7 +2177,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   applyTheme(localStorage.getItem('mmg_theme') || 'dark');
 </script>
 
-<button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır">↓</button>
+<button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır" data-i18n-title="scroll_down" data-i18n-aria="scroll_down">↓</button>
 <style>
   #mmgScrollDownBtn{
     position:fixed; right:20px; bottom:20px; z-index:500;
@@ -2162,7 +2253,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </style>
 <div id="mmgSettingsOverlay" hidden>
   <div id="mmgSettingsPanel">
-    <h3><span data-i18n="settings_title">Ayarlar</span><button type="button" id="mmgSettingsCloseBtn" aria-label="Kapat">✕</button></h3>
+    <h3><span data-i18n="settings_title">Ayarlar</span><button type="button" id="mmgSettingsCloseBtn" aria-label="Kapat" data-i18n-aria="close">✕</button></h3>
 
     <div class="mmg-settings-label" data-i18n="settings_lang_label">Dil / Language</div>
     <div class="mmg-lang-row" style="margin-bottom:18px;">
@@ -2170,40 +2261,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <button type="button" class="mmg-lang-btn" data-lang="en">English</button>
     </div>
 
-    <div class="mmg-settings-label">Görünüm Modu</div>
-    <div class="mmg-lang-row" style="margin-bottom:18px;">
-      <button type="button" class="mmg-lang-btn" id="mmgThemeDarkBtn">☾ Koyu Mod</button>
-      <button type="button" class="mmg-lang-btn" id="mmgThemeLightBtn">☀ Açık Mod</button>
+    <div style="display:flex; gap:14px; margin-bottom:18px;">
+      <div style="flex:1;">
+        <div class="mmg-settings-label" data-i18n="settings_view_mode">Görünüm Modu</div>
+        <button type="button" class="mmg-lang-btn" id="mmgThemeDarkBtn" style="width:100%; margin-bottom:6px;"><span data-i18n="settings_dark_mode">☾ Koyu Mod</span></button>
+        <button type="button" class="mmg-lang-btn" id="mmgThemeLightBtn" style="width:100%;"><span data-i18n="settings_light_mode">☀ Açık Mod</span></button>
+      </div>
+      <div style="flex:1;">
+        <div class="mmg-settings-label" data-i18n="settings_fullscreen_mode">Tam Ekran Modu</div>
+        <button type="button" class="mmg-lang-btn" id="mmgFullscreenOnBtn" style="width:100%; margin-bottom:6px;"><span data-i18n="settings_fullscreen_on">⛶ Tam Ekran</span></button>
+        <button type="button" class="mmg-lang-btn" id="mmgFullscreenOffBtn" style="width:100%;" data-i18n="settings_window_mode">Pencere Modu</button>
+      </div>
     </div>
 
-    <div class="mmg-settings-label">Tam Ekran Modu</div>
+    <div class="mmg-settings-label" data-i18n="settings_notifications">Bildirimler</div>
     <div class="mmg-lang-row" style="margin-bottom:18px;">
-      <button type="button" class="mmg-lang-btn" id="mmgFullscreenOnBtn">⛶ Tam Ekran</button>
-      <button type="button" class="mmg-lang-btn" id="mmgFullscreenOffBtn">Pencere Modu</button>
+      <button type="button" class="mmg-lang-btn" id="mmgNotifOnBtn" data-i18n="settings_on">Açık</button>
+      <button type="button" class="mmg-lang-btn" id="mmgNotifOffBtn" data-i18n="settings_off">Kapalı</button>
     </div>
 
-    <div class="mmg-settings-label">Bildirimler</div>
-    <div class="mmg-lang-row" style="margin-bottom:18px;">
-      <button type="button" class="mmg-lang-btn" id="mmgNotifOnBtn">Açık</button>
-      <button type="button" class="mmg-lang-btn" id="mmgNotifOffBtn">Kapalı</button>
-    </div>
-
+    <div class="mmg-settings-label" data-i18n="settings_change_password">Şifre Değiştir</div>
     <button type="button" class="mmg-lang-btn" id="mmgForgotPasswordToggleBtn" style="width:100%; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:6px;">
       <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="15" r="4"/><path d="M10.5 12.5L20 3M20 3v4M20 3h-4"/></svg>
-      <span>Şifremi Unuttum</span>
+      <span data-i18n="settings_forgot_password">Şifremi Unuttum</span>
     </button>
     <form id="mmgPasswordForm" style="margin-bottom:6px; display:none;">
-      <input type="password" id="mmgOldPassword" placeholder="Eski şifre" autocomplete="current-password"
+      <input type="password" id="mmgOldPassword" placeholder="Eski şifre" data-i18n-placeholder="settings_old_password" autocomplete="current-password"
         style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13.5px; margin-bottom:8px; outline:none;">
-      <input type="password" id="mmgNewPassword" placeholder="Yeni şifre (en az 6 karakter)" autocomplete="new-password"
+      <input type="password" id="mmgNewPassword" placeholder="Yeni şifre (en az 6 karakter)" data-i18n-placeholder="settings_new_password" autocomplete="new-password"
         style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13.5px; margin-bottom:8px; outline:none;">
-      <input type="password" id="mmgNewPassword2" placeholder="Yeni şifre (tekrar)" autocomplete="new-password"
+      <input type="password" id="mmgNewPassword2" placeholder="Yeni şifre (tekrar)" data-i18n-placeholder="settings_new_password_repeat" autocomplete="new-password"
         style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:13.5px; margin-bottom:8px; outline:none;">
-      <button type="submit" class="mmg-lang-btn" id="mmgPasswordSubmitBtn" style="width:100%;">Şifreyi Güncelle</button>
+      <button type="submit" class="mmg-lang-btn" id="mmgPasswordSubmitBtn" style="width:100%;" data-i18n="settings_update_password">Şifreyi Güncelle</button>
       <div id="mmgPasswordMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>
     </form>
 
-    <button type="button" id="mmgSettingsOkBtn" style="width:100%; margin-top:14px; padding:12px 0; border-radius:9px; border:none; cursor:pointer; background:linear-gradient(120deg, var(--coral,#FF6B4A), var(--brass,#C6A15B) 75%); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;">✓ Tamam</button>
+    <button type="button" id="mmgSettingsOkBtn" style="width:100%; margin-top:14px; padding:12px 0; border-radius:9px; border:none; cursor:pointer; background:linear-gradient(120deg, var(--coral,#FF6B4A), var(--brass,#C6A15B) 75%); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;" data-i18n="settings_ok">✓ Tamam</button>
 
   </div>
 </div>
@@ -2212,51 +2305,169 @@ import { getApps, getApp } from "https://www.gstatic.com/firebasejs/12.16.0/fire
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 const auth = getApps().length ? getAuth(getApp()) : null;
 (function(){
-  // ---- Basit i18n altyapısı (şimdilik ana sayfa kabuğu için) ----
-  const MMG_I18N = {
+  // ---- Ana sayfa kabuğu için TR/EN sözlüğü (motor: i18n-core.js) ----
+  MMGI18N.registerDict({
     tr: {
       nav_home:'Ana Sayfa', nav_calc:'Hesaplama', nav_rotatif:'Rotatif Kredi Hesaplama', nav_ortalama:'Ortalama Vade Hesaplama',
       nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması Hesaplama', nav_vadelimevduat:'Vadeli Mevduat Faizi Hesaplama',
       nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
-      nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim',
-      hero_title:'Dijital Finans Asistanı',
+      nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları',
+      nav_calc_desc:'Araçları', nav_nakitakis_desc:'Tablosu', nav_talimat_desc:'Hazırlama', nav_talimat_full:'Talimat Hazırlama',
+      nav_budget:'Bütçeleme', nav_budget_desc:'Araçları',
+      hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
+      hero_desc:'Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.',
+      card_calc_desc:'Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.',
+      card_cashflow_title:'Nakit Akış Tablosu',
+      card_cashflow_desc:'Ay ay, gün gün gelir ve giderlerinizi girin; haftalık ve aylık durumunuzu, kategori dağılımınızı ve otomatik uyarılarınızı anında görün.',
+      card_expenses_desc:'Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlensin.',
+      card_income_desc:'Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlensin.',
+      card_instructions_desc:'Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.',
+      footer_follow_us:'Bizi Takip Edin', footer_powered_by:'Powered by', footer_download_now:'Hemen İndirin',
+      footer_about:'Hakkında', footer_privacy:'Gizlilik Politikası', footer_terms:'Kullanım Şartları',
+      close:'Kapat',
       settings_title:'Ayarlar', settings_lang_label:'Dil / Language',
-      settings_note:''
+      settings_view_mode:'Görünüm Modu', settings_dark_mode:'☾ Koyu Mod', settings_light_mode:'☀ Açık Mod',
+      settings_fullscreen_mode:'Tam Ekran Modu', settings_fullscreen_on:'⛶ Tam Ekran', settings_window_mode:'Pencere Modu',
+      settings_notifications:'Bildirimler', settings_on:'Açık', settings_off:'Kapalı',
+      settings_change_password:'Şifre Değiştir', settings_new_password:'Yeni şifre (en az 6 karakter)',
+      settings_new_password_repeat:'Yeni şifre (tekrar)', settings_update_password:'Şifreyi Güncelle', settings_ok:'✓ Tamam',
+      settings_forgot_password:'Şifremi Unuttum', settings_cancel:'Vazgeç', settings_old_password:'Eski şifre',
+      pw_err_need_old:'Lütfen eski şifrenizi girin.', pw_updating:'Güncelleniyor…',
+      guest:'Misafir', unknown:'bilinmiyor', please_wait:'Lütfen bekleyin...', sending:'Gönderiliyor...',
+      dropdown_linked_companies:'Bağlı Firmalar', dropdown_my_accounts:'Hesaplarım', dropdown_add_account:'Başka Hesap Ekle',
+      dropdown_my_account:'Hesabım', dropdown_change_photo:'Resmi Değiştir', dropdown_referral_admin:'Referans Kodu Yönetimi',
+      dropdown_stats:'İstatistikler', dropdown_logout:'Oturumu Kapat', dropdown_login:'Oturum Aç',
+      dropdown_user_management:'Kullanıcı Yönetim Paneli', firma_badge_default:'Firma', group_companies:'Grup Firmaları',
+      data_scope_label:'Veri Kaynağı', data_scope_personal:'👤 Kendi Verilerim',
+      verify_email_notice:'✉️ E-posta adresiniz henüz doğrulanmadı.',
+      verify_email_resend:'Doğrulama E-postasını Tekrar Gönder', verify_email_sent:'Gönderildi ✓',
+      nav_user_mgmt_1:'Kullanıcı', nav_user_mgmt_2:'Yönetim Paneli',
+      auth_title_login:'Hoş geldiniz', auth_title_signup:'Hesap oluşturun',
+      auth_sub_login:'Kaldığınız yerden devam etmek için giriş yapın',
+      auth_sub_signup:'Oranlarınızı ve tercihlerinizi kaydetmek için ücretsiz hesap açın',
+      auth_tab_login:'Giriş Yap', auth_tab_signup:'Kayıt Ol', auth_create_account:'Hesap Oluştur',
+      auth_account_type:'Hesap Türü', auth_account_individual:'Bireysel', auth_account_corporate:'Kurumsal',
+      auth_fullname:'Ad Soyad', auth_company_title:'Firma Ünvanı', auth_email:'E-posta',
+      auth_password:'Şifre', auth_password_repeat:'Şifre (Tekrar)',
+      auth_referral_label:'Referans Kodu', auth_referral_optional:'(varsa, opsiyonel)',
+      auth_remember_me:'Oturumu açık tut', auth_forgot_password:'Şifremi unuttum?', auth_or:'veya',
+      auth_google:'Google ile devam et', auth_guest:'Misafir olarak gir',
+      auth_not_logged_in:'Giriş yapmadınız', auth_guest_mode:'Misafir modundasınız', auth_user_code:'Kullanıcı Kodu: #',
+      no_user_code:'Kullanıcı Kodu atanmamış',
+      auth_err_need_email_reset:'Şifre sıfırlama bağlantısı gönderebilmemiz için önce e-posta adresinizi yazın.',
+      auth_reset_sent_prefix:'Şifre sıfırlama bağlantısı ', auth_reset_sent_suffix:' adresine gönderildi. Gelen kutunuzu (ve spam klasörünü) kontrol edin.',
+      auth_reset_maybe_sent:'Eğer bu e-posta adresi sistemde kayıtlıysa, şifre sıfırlama bağlantısı gönderildi.',
+      auth_err_reset_failed:'Şifre sıfırlama e-postası gönderilemedi. Lütfen daha sonra tekrar deneyin.',
+      auth_err_need_username:'Lütfen bir kullanıcı adı belirleyin.',
+      auth_err_passwords_mismatch:'Şifreler eşleşmiyor.',
+      auth_err_email_in_use:'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.',
+      auth_err_invalid_email:'Geçerli bir e-posta adresi girin.',
+      auth_err_weak_password:'Şifre en az 6 karakter olmalı.',
+      auth_err_user_not_found:'Bu e-posta ile kayıtlı bir hesap bulunamadı.',
+      auth_err_wrong_password:'Şifre hatalı.',
+      auth_err_invalid_credential:'E-posta veya şifre hatalı.',
+      auth_err_too_many_requests:'Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.',
+      auth_err_network:'Bağlantı hatası. İnternetinizi kontrol edin.',
+      auth_err_google_disabled:'Google ile giriş şu an aktif değil. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
+      auth_err_unauthorized_domain:'Bu site adresi Firebase\'de yetkili domainler listesinde değil. (Firebase Console → Authentication → Settings → Authorized domains)',
+      auth_err_popup_blocked:'Tarayıcınız açılır pencereyi (popup) engelledi. Popup engelleyiciyi kapatıp tekrar deneyin.',
+      auth_err_generic_prefix:'Bir hata oluştu (', auth_err_generic_suffix:'), lütfen tekrar deneyin.',
+      referral_used_free:'kodunu kullandınız!\nHesabınıza ücretsiz premium tanımlandı.',
+      referral_used_discount_prefix:'kodunu kullandınız!\nHesabınıza %', referral_used_discount_suffix:' indirimli premium tanımlandı.',
+      referral_limit_reached:'kodu kullanım limitine ulaştığı için geçerli değil.',
+      pw_err_need_login:'Şifre değiştirmek için giriş yapmış olmanız gerekir.',
+      pw_err_mismatch:'Girdiğiniz iki şifre birbiriyle eşleşmiyor.',
+      pw_updated:'Şifreniz güncellendi. ✓',
+      pw_reauth_prompt:'Güvenlik nedeniyle önce mevcut şifrenizi girmeniz gerekiyor:',
+      pw_err_wrong_current:'Mevcut şifre yanlış ya da bir hata oluştu.',
+      pw_err_update_failed:'Şifre güncellenemedi, lütfen tekrar deneyin.',
+      fav_toggle:'Favorilere ekle/çıkar', fav_remove:'Favorilerden çıkar', menu_toggle:'Menüyü aç/kapat',
+      scroll_down:'Aşağı kaydır', remove_from_list:'Listeden kaldır'
     },
     en: {
       nav_home:'Home', nav_calc:'Calculators', nav_rotatif:'Revolving Loan Calculator', nav_ortalama:'Average Maturity Calculator',
       nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
       nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
-      nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact',
-      nav_calc_desc:'Tools', nav_nakitakis_desc:'Table', nav_talimat_desc:'Preparation',
-      hero_title:'Digital Finance Assistant',
+      nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools',
+      nav_calc_desc:'Tools', nav_nakitakis_desc:'Table', nav_talimat_desc:'Preparation', nav_talimat_full:'Instruction Preparation',
+      nav_budget:'Budgeting', nav_budget_desc:'Tools',
+      hero_title:'Digital Finance Assistant', hero_tagline:'Your digital partner for financial decisions',
+      hero_desc:'It helps your company with financial matters, and acts as a financial advisor for individual users. It performs the calculations you need in seconds and makes your budget planning easier.',
+      card_calc_desc:'Revolving Loan, Credit Card Late Fee, and Average Maturity calculators, all on one page, switching between tabs.',
+      card_cashflow_title:'Cash Flow Table',
+      card_cashflow_desc:'Enter your income and expenses month by month, day by day; instantly see your weekly and monthly status, category breakdown, and automatic alerts.',
+      card_expenses_desc:'Record recurring expenses such as bills, credit cards, letters of guarantee, commissions, and rent; they\'ll be automatically posted to the Cash Flow Table when due.',
+      card_income_desc:'Record your cash collections, check/note collections, POS collections, and interest income; they\'ll be automatically posted to the Cash Flow Table when due.',
+      card_instructions_desc:'Prepare transfer, check, letter of guarantee, and free-text instructions to banks, customers, institutions, and individuals in seconds.',
+      footer_follow_us:'Follow Us', footer_powered_by:'Powered by', footer_download_now:'Download Now',
+      footer_about:'About', footer_privacy:'Privacy Policy', footer_terms:'Terms of Use',
+      close:'Close',
       settings_title:'Settings', settings_lang_label:'Dil / Language',
-      settings_note:''
+      settings_view_mode:'Display Mode', settings_dark_mode:'☾ Dark Mode', settings_light_mode:'☀ Light Mode',
+      settings_fullscreen_mode:'Fullscreen Mode', settings_fullscreen_on:'⛶ Fullscreen', settings_window_mode:'Windowed Mode',
+      settings_notifications:'Notifications', settings_on:'On', settings_off:'Off',
+      settings_change_password:'Change Password', settings_new_password:'New password (at least 6 characters)',
+      settings_new_password_repeat:'New password (repeat)', settings_update_password:'Update Password', settings_ok:'✓ OK',
+      settings_forgot_password:'Forgot Password', settings_cancel:'Cancel', settings_old_password:'Current password',
+      pw_err_need_old:'Please enter your current password.', pw_updating:'Updating…',
+      guest:'Guest', unknown:'unknown', please_wait:'Please wait...', sending:'Sending...',
+      dropdown_linked_companies:'Linked Companies', dropdown_my_accounts:'My Accounts', dropdown_add_account:'Add Another Account',
+      dropdown_my_account:'My Account', dropdown_change_photo:'Change Photo', dropdown_referral_admin:'Referral Code Management',
+      dropdown_stats:'Statistics', dropdown_logout:'Sign Out', dropdown_login:'Sign In',
+      dropdown_user_management:'User Management Panel', firma_badge_default:'Company', group_companies:'Group Companies',
+      data_scope_label:'Data Source', data_scope_personal:'👤 My Own Data',
+      verify_email_notice:'✉️ Your email address is not verified yet.',
+      verify_email_resend:'Resend Verification Email', verify_email_sent:'Sent ✓',
+      nav_user_mgmt_1:'User', nav_user_mgmt_2:'Management Panel',
+      auth_title_login:'Welcome', auth_title_signup:'Create an account',
+      auth_sub_login:'Sign in to continue where you left off',
+      auth_sub_signup:'Open a free account to save your rates and preferences',
+      auth_tab_login:'Sign In', auth_tab_signup:'Sign Up', auth_create_account:'Create Account',
+      auth_account_type:'Account Type', auth_account_individual:'Individual', auth_account_corporate:'Corporate',
+      auth_fullname:'Full Name', auth_company_title:'Company Name', auth_email:'Email',
+      auth_password:'Password', auth_password_repeat:'Password (Repeat)',
+      auth_referral_label:'Referral Code', auth_referral_optional:'(optional, if any)',
+      auth_remember_me:'Keep me signed in', auth_forgot_password:'Forgot password?', auth_or:'or',
+      auth_google:'Continue with Google', auth_guest:'Continue as guest',
+      auth_not_logged_in:'You are not signed in', auth_guest_mode:'You are in guest mode', auth_user_code:'User Code: #',
+      no_user_code:'No user code assigned',
+      auth_err_need_email_reset:'Please enter your email address first so we can send a password reset link.',
+      auth_reset_sent_prefix:'A password reset link was sent to ', auth_reset_sent_suffix:'. Check your inbox (and spam folder).',
+      auth_reset_maybe_sent:'If this email address is registered in our system, a password reset link has been sent.',
+      auth_err_reset_failed:'The password reset email could not be sent. Please try again later.',
+      auth_err_need_username:'Please choose a username.',
+      auth_err_passwords_mismatch:'Passwords do not match.',
+      auth_err_email_in_use:'This email address is already registered. Try signing in instead.',
+      auth_err_invalid_email:'Enter a valid email address.',
+      auth_err_weak_password:'Password must be at least 6 characters.',
+      auth_err_user_not_found:'No account was found with this email.',
+      auth_err_wrong_password:'Incorrect password.',
+      auth_err_invalid_credential:'Incorrect email or password.',
+      auth_err_too_many_requests:'Too many attempts. Please try again shortly.',
+      auth_err_network:'Connection error. Please check your internet connection.',
+      auth_err_google_disabled:'Sign in with Google is not currently enabled. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
+      auth_err_unauthorized_domain:'This site\'s domain is not in Firebase\'s authorized domains list. (Firebase Console → Authentication → Settings → Authorized domains)',
+      auth_err_popup_blocked:'Your browser blocked the popup window. Please disable your popup blocker and try again.',
+      auth_err_generic_prefix:'An error occurred (', auth_err_generic_suffix:'), please try again.',
+      referral_used_free:'code was applied!\nFree premium has been activated on your account.',
+      referral_used_discount_prefix:'code was applied!\nA ', referral_used_discount_suffix:'% discounted premium has been activated on your account.',
+      referral_limit_reached:'code is no longer valid because it has reached its usage limit.',
+      pw_err_need_login:'You must be signed in to change your password.',
+      pw_err_mismatch:'The two passwords you entered do not match.',
+      pw_updated:'Your password has been updated. ✓',
+      pw_reauth_prompt:'For security reasons, please enter your current password first:',
+      pw_err_wrong_current:'The current password is incorrect, or an error occurred.',
+      pw_err_update_failed:'The password could not be updated, please try again.',
+      fav_toggle:'Add/remove favorite', fav_remove:'Remove from favorites', menu_toggle:'Open/close menu',
+      scroll_down:'Scroll down', remove_from_list:'Remove from list'
     }
-  };
-  function applyLang(lang){
-    const dict = MMG_I18N[lang] || MMG_I18N.tr;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      if(dict[key]) el.textContent = dict[key];
-    });
-    document.querySelectorAll('.mmg-lang-btn[data-lang]').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.lang === lang);
-    });
-    document.documentElement.setAttribute('lang', lang);
-    try{
-      const frameEl = document.getElementById('app-frame');
-      if(frameEl && frameEl.contentWindow){
-        frameEl.contentWindow.postMessage({ mmgLang: lang }, '*');
-      }
-    }catch(e){}
-  }
-  function getSavedLang(){
-    try{ return localStorage.getItem('mmg_lang') || 'tr'; }catch(e){ return 'tr'; }
-  }
-  function saveLang(lang){
-    try{ localStorage.setItem('mmg_lang', lang); }catch(e){}
-  }
+  });
+  MMGI18N.onChange(function(lang){
+    document.title = lang === 'en' ? 'mmgcreativity — Digital Finance Assistant' : 'mmgcreativity — Dijital Finans Asistanı';
+  });
+  function applyLang(lang){ MMGI18N.setLang(lang); }
+  function getSavedLang(){ return MMGI18N.getSavedLang() || 'tr'; }
+  function saveLang(lang){ MMGI18N.setLang(lang); }
 
   const settingsBtn = document.getElementById('mmgSettingsBtn');
   const overlay = document.getElementById('mmgSettingsOverlay');
@@ -2282,7 +2493,7 @@ const auth = getApps().length ? getAuth(getApp()) : null;
     });
   });
 
-  applyLang(getSavedLang());
+  MMGI18N.detectAndApplyDefaultLang();
 
   // ---- Görünüm Modu (Ayarlar paneli içinden) ----
   const themeDarkBtn = document.getElementById('mmgThemeDarkBtn');
@@ -2337,7 +2548,7 @@ const auth = getApps().length ? getAuth(getApp()) : null;
     pwToggleBtn.addEventListener('click', () => {
       const isHidden = pwForm.style.display === 'none';
       pwForm.style.display = isHidden ? 'block' : 'none';
-      pwToggleBtn.querySelector('span').textContent = isHidden ? 'Vazgeç' : 'Şifremi Unuttum';
+      pwToggleBtn.querySelector('span').textContent = isHidden ? MMGI18N.t('settings_cancel') : MMGI18N.t('settings_forgot_password');
       pwMsg.textContent = '';
       if(isHidden){
         const oldPwInput = document.getElementById('mmgOldPassword');
@@ -2356,47 +2567,47 @@ const auth = getApps().length ? getAuth(getApp()) : null;
       const p2 = document.getElementById('mmgNewPassword2').value;
       if(!auth.currentUser){
         pwMsg.style.color = 'var(--red,#E2544B)';
-        pwMsg.textContent = 'Şifre değiştirmek için giriş yapmış olmanız gerekir.';
+        pwMsg.textContent = MMGI18N.t('pw_err_need_login');
         return;
       }
       if(!oldPw){
         pwMsg.style.color = 'var(--red,#E2544B)';
-        pwMsg.textContent = 'Lütfen eski şifrenizi girin.';
+        pwMsg.textContent = MMGI18N.t('pw_err_need_old');
         return;
       }
       if(p1.length < 6){
         pwMsg.style.color = 'var(--red,#E2544B)';
-        pwMsg.textContent = 'Yeni şifre en az 6 karakter olmalı.';
+        pwMsg.textContent = MMGI18N.t('auth_err_weak_password');
         return;
       }
       if(p1 !== p2){
         pwMsg.style.color = 'var(--red,#E2544B)';
-        pwMsg.textContent = 'Girdiğiniz iki yeni şifre birbiriyle eşleşmiyor.';
+        pwMsg.textContent = MMGI18N.t('pw_err_mismatch');
         return;
       }
       pwMsg.style.color = 'var(--muted,#8D96AC)';
-      pwMsg.textContent = 'Güncelleniyor…';
+      pwMsg.textContent = MMGI18N.t('pw_updating');
       try{
         // Güvenlik gereği önce eski şifreyle kimlik doğrulaması yapılır, ardından yeni şifre ayarlanır.
         const cred = EmailAuthProvider.credential(auth.currentUser.email, oldPw);
         await reauthenticateWithCredential(auth.currentUser, cred);
         await updatePassword(auth.currentUser, p1);
         pwMsg.style.color = 'var(--teal,#3FB68A)';
-        pwMsg.textContent = 'Şifreniz güncellendi. ✓';
+        pwMsg.textContent = MMGI18N.t('pw_updated');
         pwForm.reset();
         setTimeout(() => {
           pwForm.style.display = 'none';
-          if(pwToggleBtn) pwToggleBtn.querySelector('span').textContent = 'Şifremi Unuttum';
+          if(pwToggleBtn) pwToggleBtn.querySelector('span').textContent = MMGI18N.t('settings_forgot_password');
           pwMsg.textContent = '';
         }, 1500);
       }catch(err){
         pwMsg.style.color = 'var(--red,#E2544B)';
         if(err && (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential')){
-          pwMsg.textContent = 'Eski şifre yanlış.';
+          pwMsg.textContent = MMGI18N.t('pw_err_wrong_current');
         } else if(err && err.code === 'auth/too-many-requests'){
-          pwMsg.textContent = 'Çok fazla deneme yapıldı, lütfen biraz sonra tekrar deneyin.';
+          pwMsg.textContent = MMGI18N.t('auth_err_too_many_requests');
         } else {
-          pwMsg.textContent = 'Şifre güncellenemedi, lütfen tekrar deneyin.';
+          pwMsg.textContent = MMGI18N.t('pw_err_update_failed');
         }
       }
     });

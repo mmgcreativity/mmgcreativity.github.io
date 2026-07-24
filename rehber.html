@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<script src="i18n-core.js"></script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-BFZXS7R9BN"></script>
@@ -71,42 +72,71 @@
 </head>
 <body>
 <div class="wrap">
-  <a href="index.html" class="back">← Ana Sayfaya Dön</a>
-  <div class="eyebrow">Finans Rehberi</div>
-  <h1>Finansal konuları sade dille anlatıyoruz</h1>
-  <p class="lead">Kredi, faiz, taksit ve bütçe planlaması gibi konularda pratik, anlaşılır rehberler. Yeni içerikler düzenli olarak eklenecek.</p>
+  <a href="index.html" class="back" data-i18n="back_home">← Ana Sayfaya Dön</a>
+  <div class="eyebrow" data-i18n="eyebrow">Finans Rehberi</div>
+  <h1 data-i18n="page_title">Finansal konuları sade dille anlatıyoruz</h1>
+  <p class="lead" data-i18n="page_lead">Kredi, faiz, taksit ve bütçe planlaması gibi konularda pratik, anlaşılır rehberler. Yeni içerikler düzenli olarak eklenecek.</p>
 
   <div class="article-list">
     <a href="rehber-rotatif-kredi-nedir.html" class="article-card">
-      <h3>Rotatif Kredi Nedir? Nasıl Hesaplanır?</h3>
-      <p>Bankaların 3 aylık devre sonu faizi uyguladığı rotatif kredi mekanizmasını ve maliyetini adım adım anlatıyoruz.</p>
+      <h3 data-i18n="a1_title">Rotatif Kredi Nedir? Nasıl Hesaplanır?</h3>
+      <p data-i18n="a1_desc">Bankaların 3 aylık devre sonu faizi uyguladığı rotatif kredi mekanizmasını ve maliyetini adım adım anlatıyoruz.</p>
     </a>
 
     <a href="rehber-kredi-karti-vade-farki.html" class="article-card">
-      <h3>Kredi Kartında Vade Farkı Nasıl Hesaplanır?</h3>
-      <p>Taksitli alışverişlerde ödediğiniz vade farkının mantığını ve en uygun taksit sayısını nasıl seçeceğinizi açıklıyoruz.</p>
+      <h3 data-i18n="a2_title">Kredi Kartında Vade Farkı Nasıl Hesaplanır?</h3>
+      <p data-i18n="a2_desc">Taksitli alışverişlerde ödediğiniz vade farkının mantığını ve en uygun taksit sayısını nasıl seçeceğinizi açıklıyoruz.</p>
     </a>
 
     <a href="rehber-nakit-akis-tablosu.html" class="article-card">
-      <h3>Nakit Akış Tablosu Nedir, Nasıl Hazırlanır?</h3>
-      <p>İşletmeniz veya kişisel bütçeniz için nakit akışını takip etmenin temel mantığını ve pratik yöntemlerini anlatıyoruz.</p>
+      <h3 data-i18n="a3_title">Nakit Akış Tablosu Nedir, Nasıl Hazırlanır?</h3>
+      <p data-i18n="a3_desc">İşletmeniz veya kişisel bütçeniz için nakit akışını takip etmenin temel mantığını ve pratik yöntemlerini anlatıyoruz.</p>
     </a>
 
     <a href="rehber-talimat-hazirlama.html" class="article-card">
-      <h3>Banka Talimatı Nedir? Doğru Nasıl Hazırlanır?</h3>
-      <p>Havale, çek, senet, teminat mektubu ve döviz talimatlarında bulunması gereken unsurları ve sık yapılan hataları açıklıyoruz.</p>
+      <h3 data-i18n="a4_title">Banka Talimatı Nedir? Doğru Nasıl Hazırlanır?</h3>
+      <p data-i18n="a4_desc">Havale, çek, senet, teminat mektubu ve döviz talimatlarında bulunması gereken unsurları ve sık yapılan hataları açıklıyoruz.</p>
     </a>
 
     <a href="rehber-gelir-takibi.html" class="article-card">
-      <h3>Gelir Takibi Neden Önemlidir, Nasıl Yapılır?</h3>
-      <p>Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kategori bazında takip etmenin faydalarını anlatıyoruz.</p>
+      <h3 data-i18n="a5_title">Gelir Takibi Neden Önemlidir, Nasıl Yapılır?</h3>
+      <p data-i18n="a5_desc">Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kategori bazında takip etmenin faydalarını anlatıyoruz.</p>
     </a>
 
     <a href="rehber-gider-takibi.html" class="article-card">
-      <h3>Gider Takibi: Düzenli Kayıt Tutmanın Faydaları</h3>
-      <p>Faturalar, kredi kartları ve diğer düzenli ödemelerinizi vade takibiyle birlikte kaydetmenin nakit akışınıza katkısını açıklıyoruz.</p>
+      <h3 data-i18n="a6_title">Gider Takibi: Düzenli Kayıt Tutmanın Faydaları</h3>
+      <p data-i18n="a6_desc">Faturalar, kredi kartları ve diğer düzenli ödemelerinizi vade takibiyle birlikte kaydetmenin nakit akışınıza katkısını açıklıyoruz.</p>
     </a>
   </div>
 </div>
+
+<script>
+(function(){
+  MMGI18N.registerDict({
+    tr: {
+      back_home:'← Ana Sayfaya Dön', eyebrow:'Finans Rehberi', page_title:'Finansal konuları sade dille anlatıyoruz',
+      page_lead:'Kredi, faiz, taksit ve bütçe planlaması gibi konularda pratik, anlaşılır rehberler. Yeni içerikler düzenli olarak eklenecek.',
+      a1_title:'Rotatif Kredi Nedir? Nasıl Hesaplanır?', a1_desc:'Bankaların 3 aylık devre sonu faizi uyguladığı rotatif kredi mekanizmasını ve maliyetini adım adım anlatıyoruz.',
+      a2_title:'Kredi Kartında Vade Farkı Nasıl Hesaplanır?', a2_desc:'Taksitli alışverişlerde ödediğiniz vade farkının mantığını ve en uygun taksit sayısını nasıl seçeceğinizi açıklıyoruz.',
+      a3_title:'Nakit Akış Tablosu Nedir, Nasıl Hazırlanır?', a3_desc:'İşletmeniz veya kişisel bütçeniz için nakit akışını takip etmenin temel mantığını ve pratik yöntemlerini anlatıyoruz.',
+      a4_title:'Banka Talimatı Nedir? Doğru Nasıl Hazırlanır?', a4_desc:'Havale, çek, senet, teminat mektubu ve döviz talimatlarında bulunması gereken unsurları ve sık yapılan hataları açıklıyoruz.',
+      a5_title:'Gelir Takibi Neden Önemlidir, Nasıl Yapılır?', a5_desc:'Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kategori bazında takip etmenin faydalarını anlatıyoruz.',
+      a6_title:'Gider Takibi: Düzenli Kayıt Tutmanın Faydaları', a6_desc:'Faturalar, kredi kartları ve diğer düzenli ödemelerinizi vade takibiyle birlikte kaydetmenin nakit akışınıza katkısını açıklıyoruz.'
+    },
+    en: {
+      back_home:'← Back to Home', eyebrow:'Finance Guide', page_title:'We explain financial topics in plain language',
+      page_lead:'Practical, easy-to-understand guides on loans, interest, installments, and budget planning. New content added regularly.',
+      a1_title:'What Is a Revolving Loan? How Is It Calculated?', a1_desc:'We explain step by step the revolving loan mechanism and cost, where banks apply interest at the end of a 3-month period.',
+      a2_title:'How Is Credit Card Installment Interest Calculated?', a2_desc:'We explain the logic behind installment interest on card purchases and how to choose the best number of installments.',
+      a3_title:'What Is a Cash Flow Table and How Do You Prepare One?', a3_desc:'We explain the basic logic and practical methods for tracking cash flow for your business or personal budget.',
+      a4_title:'What Is a Bank Instruction Letter? How Do You Prepare One Correctly?', a4_desc:'We explain the elements required in transfer, check, note, letter of guarantee, and FX instructions, and common mistakes.',
+      a5_title:'Why Is Income Tracking Important and How Is It Done?', a5_desc:'We explain the benefits of tracking cash collections, check/note collections, POS collections, and interest income by category.',
+      a6_title:'Expense Tracking: The Benefits of Keeping Regular Records', a6_desc:'We explain how recording bills, credit cards, and other regular payments along with their due dates helps your cash flow.'
+    }
+  });
+  MMGI18N.detectAndApplyDefaultLang();
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

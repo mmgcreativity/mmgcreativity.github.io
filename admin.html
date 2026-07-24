@@ -78,8 +78,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
   <div class="box" id="content">
-    <p>Yükleniyor…</p>
+    <p id="initialLoadingText">Yükleniyor…</p>
   </div>
+  <script>
+    try{
+      if((localStorage.getItem('mmg_lang') || 'tr') === 'en'){
+        document.getElementById('initialLoadingText').textContent = 'Loading…';
+      }
+    }catch(e){}
+  </script>
 
   <script>
     const firebaseConfig = {
@@ -112,7 +119,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       settings:'⚙️ Settings', settingsDesc:'Site settings (coming soon)',
       contentLbl:'📝 Content', contentDesc:'Content management (coming soon)',
       chatSection:'💬 User Chats', loadingTxt:'Loading…', selectChat:'Select a chat on the left.',
-      reply:'Reply…', send:'Send', error:'❌ Error'
+      reply:'Reply…', send:'Send', error:'❌ Error',
+      noChatMessage:'No message', noChatsYet:'No user chats yet.', chatsLoadFailed:'Chats could not be loaded.', noMessagesYet:'No messages yet.'
     } : {
       needLogin:'🔒 Giriş gerekli', needLoginDesc:'Bu sayfayı görüntülemek için ana sayfadan giriş yapmanız gerekiyor.',
       noAccess:'⛔ Yetkiniz yok', noAccessDesc:'Bu sayfaya sadece admin yetkisi olan kullanıcılar erişebilir.',
@@ -122,7 +130,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       settings:'⚙️ Ayarlar', settingsDesc:'Site ayarları (yakında)',
       contentLbl:'📝 İçerik', contentDesc:'İçerik yönetimi (yakında)',
       chatSection:'💬 Kullanıcı Sohbetleri', loadingTxt:'Yükleniyor…', selectChat:'Soldan bir sohbet seçin.',
-      reply:'Yanıt yazın…', send:'Gönder', error:'❌ Hata'
+      reply:'Yanıt yazın…', send:'Gönder', error:'❌ Hata',
+      noChatMessage:'Mesaj yok', noChatsYet:'Henüz kullanıcı sohbeti yok.', chatsLoadFailed:'Sohbetler yüklenemedi.', noMessagesYet:'Henüz mesaj yok.'
     };
 
     auth.onAuthStateChanged(async (user) => {
@@ -207,16 +216,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             const tb = b.lastMessageAt && b.lastMessageAt.toMillis ? b.lastMessageAt.toMillis() : 0;
             return tb - ta;
           });
-          if(!chats.length){ listEl.innerHTML = '<div class="chat-empty">Henüz kullanıcı sohbeti yok.</div>'; return; }
+          if(!chats.length){ listEl.innerHTML = '<div class="chat-empty">' + T.noChatsYet + '</div>'; return; }
           listEl.innerHTML = chats.map(c => `
             <div class="chat-list-item${c.id===activeChatId?' active':''}" data-id="${esc(c.id)}">
               <div class="nm">${esc(c.userEmail || c.userUid || c.id)}</div>
-              <div class="sub">${esc(c.lastMessage || 'Mesaj yok')}</div>
+              <div class="sub">${esc(c.lastMessage || T.noChatMessage)}</div>
             </div>`).join('');
           listEl.querySelectorAll('.chat-list-item').forEach(row => {
             row.addEventListener('click', () => openAdminChat(row.dataset.id));
           });
-        }, (err) => { listEl.innerHTML = '<div class="chat-empty">Sohbetler yüklenemedi.</div>'; console.error(err); });
+        }, (err) => { listEl.innerHTML = '<div class="chat-empty">' + T.chatsLoadFailed + '</div>'; console.error(err); });
     }
 
     function openAdminChat(chatId){
@@ -225,13 +234,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const msgsEl = document.getElementById('chatMsgs');
       const inputRow = document.getElementById('chatInputRow');
       inputRow.style.display = 'flex';
-      msgsEl.innerHTML = '<div class="chat-empty">Yükleniyor…</div>';
+      msgsEl.innerHTML = '<div class="chat-empty">' + T.loadingTxt + '</div>';
       if(chatUnsubMsgs) chatUnsubMsgs();
       chatUnsubMsgs = chatDb.collection('chats').doc(chatId).collection('messages').orderBy('createdAt', 'asc').limit(300)
         .onSnapshot((snap) => {
           const msgs = [];
           snap.forEach(d => msgs.push(d.data()));
-          if(!msgs.length){ msgsEl.innerHTML = '<div class="chat-empty">Henüz mesaj yok.</div>'; return; }
+          if(!msgs.length){ msgsEl.innerHTML = '<div class="chat-empty">' + T.noMessagesYet + '</div>'; return; }
           msgsEl.innerHTML = msgs.map(m => `
             <div class="chat-msg${m.senderIsAdmin ? ' me' : ''}">
               <div class="chat-bubble">${esc(m.text)}<div style="font-size:9.5px; opacity:.7; margin-top:4px; text-align:right;">${fmtTime(m.createdAt)}</div></div>

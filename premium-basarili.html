@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<script src="i18n-core.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>mmgcreativity — Ödeme Başarılı</title>
@@ -19,9 +20,26 @@
 <body>
   <div class="card">
     <div class="icon">✅</div>
-    <h1>Ödemeniz Alındı</h1>
-    <p>Premium üyeliğiniz aktifleştirildi. Reklamsız deneyim, Excel/PDF dışa aktarma ve çoklu çekim gibi tüm premium özellikler artık hesabınızda açık.</p>
-    <a href="index.html">Ana Sayfaya Dön</a>
+    <h1 data-i18n="title">Ödemeniz Alındı</h1>
+    <p data-i18n="desc">Premium üyeliğiniz aktifleştirildi. Reklamsız deneyim, Excel/PDF dışa aktarma ve çoklu çekim gibi tüm premium özellikler artık hesabınızda açık.</p>
+    <a href="index.html" data-i18n="btn">Ana Sayfaya Dön</a>
   </div>
+
+<script>
+(function(){
+  MMGI18N.registerDict({
+    tr: {
+      title:'Ödemeniz Alındı', desc:'Premium üyeliğiniz aktifleştirildi. Reklamsız deneyim, Excel/PDF dışa aktarma ve çoklu çekim gibi tüm premium özellikler artık hesabınızda açık.',
+      btn:'Ana Sayfaya Dön'
+    },
+    en: {
+      title:'Payment Received', desc:'Your premium membership has been activated. Ad-free experience, Excel/PDF export, and multi-draw are now all enabled on your account.',
+      btn:'Return to Home'
+    }
+  });
+  MMGI18N.detectAndApplyDefaultLang();
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<script src="i18n-core.js"></script>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -220,6 +221,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 data-i18n="profile_info">Profil Bilgileri</h2>
     <form id="accountInfoForm">
       <div class="auth-field">
+        <label data-i18n="account_type">Hesap Türü</label>
+        <select id="profileType">
+          <option value="bireysel" data-i18n="individual">Bireysel</option>
+          <option value="firma" data-i18n="corporate">Kurumsal</option>
+        </select>
+      </div>
+      <div class="auth-field">
         <label id="profileNameLabel" data-i18n="full_name">Ad Soyad</label>
         <input type="text" id="profileName" placeholder="Ad Soyad">
       </div>
@@ -242,21 +250,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <div style="margin-top:18px; padding-top:18px; border-top:1px solid var(--hairline);">
       <button type="button" id="emailChangeToggleBtn" class="auth-submit" style="background:var(--surface-2); color:var(--text); width:auto; padding:9px 14px; font-size:12.5px;">
-        🔑 Giriş E-postamı Değiştir
+        🔑 <span data-i18n="change_login_email">Giriş E-postamı Değiştir</span>
       </button>
       <div id="emailChangeWrap" style="display:none; margin-top:14px;">
-        <p class="referral-note" style="margin-bottom:12px;">Bu, hesabınıza <strong>giriş yaparken kullandığınız</strong> e-postayı değiştirir (yukarıdaki iletişim e-postasından farklıdır). Verileriniz aynı kalır, sadece giriş adresiniz değişir.</p>
+        <p class="referral-note" style="margin-bottom:12px;" data-i18n="change_login_email_note">Bu, hesabınıza <strong>giriş yaparken kullandığınız</strong> e-postayı değiştirir (yukarıdaki iletişim e-postasından farklıdır). Verileriniz aynı kalır, sadece giriş adresiniz değişir.</p>
         <div class="auth-field">
-          <label>Mevcut Şifreniz</label>
+          <label data-i18n="current_password">Mevcut Şifreniz</label>
           <input type="password" id="emailChangeCurrentPassword" autocomplete="current-password">
         </div>
         <div class="auth-field">
-          <label>Yeni Giriş E-postası</label>
+          <label data-i18n="new_login_email">Yeni Giriş E-postası</label>
           <input type="email" id="emailChangeNewEmail" placeholder="yeni@eposta.com">
         </div>
-        <button type="button" id="emailChangeSubmitBtn" class="auth-submit" style="width:auto; padding:11px 18px;">E-postayı Güncelle</button>
+        <button type="button" id="emailChangeSubmitBtn" class="auth-submit" style="width:auto; padding:11px 18px;" data-i18n="update_email_btn">E-postayı Güncelle</button>
         <div class="auth-error" id="emailChangeError"></div>
-        <div class="saved-msg" id="emailChangeSavedMsg">Güncellendi ✓</div>
+        <div class="saved-msg" id="emailChangeSavedMsg" data-i18n="email_updated_ok">Güncellendi ✓</div>
       </div>
     </div>
   </div>
@@ -277,13 +285,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="card" id="companyCard">
-    <h2 style="margin-bottom:10px;" data-i18n="user_group">Firma Yöneticiliği</h2>
-    <p class="referral-note" style="margin-bottom:12px;">
+    <h2 style="margin-bottom:10px;" data-i18n="firma_admin_title">Firma Yöneticiliği</h2>
+    <p class="referral-note" style="margin-bottom:12px;" data-i18n="firma_admin_desc">
       Firma, ayrı bir giriş değildir — kendi kullanıcı hesabınızla, bir ya da birden fazla firmanın
       <strong>yöneticisi</strong> olabilirsiniz. Bu, kendi verilerinizi girmenizi hiçbir şekilde etkilemez;
       sadece ek olarak o firma(lar)ın "Kullanıcı Yönetim Paneli"ne erişim kazandırır.
     </p>
-    <p class="referral-note" style="margin-bottom:14px; padding:12px 14px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; color:var(--amber);">
+    <p class="referral-note" style="margin-bottom:14px; padding:12px 14px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; color:var(--amber);" data-i18n="firma_admin_warning">
       ⚠️ <strong>Önemli:</strong> Birden fazla kişiyle ortak/paylaşımlı veri üzerinde çalışmak istiyorsanız önce
       aşağıdan bir firma oluşturup o firmanın yöneticisi (admin) olmanız gerekir. Bir firma oluşturmadan,
       başka kullanıcıları ortak bir veri havuzuna ekleyemezsiniz — bu işlem yalnızca bir firma yöneticisi
@@ -293,23 +301,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="myFirmasList" style="margin-bottom:16px;"></div>
 
     <div style="padding-top:14px; border-top:1px solid var(--hairline);">
-      <div class="mini-label" style="margin-bottom:8px;">Yeni Firma Oluştur</div>
+      <div class="mini-label" style="margin-bottom:8px;" data-i18n="create_new_firma">Yeni Firma Oluştur</div>
       <form id="createFirmaForm" style="display:flex; gap:8px; margin-bottom:6px;">
-        <input type="text" id="createFirmaName" placeholder="Firma adı" required
+        <input type="text" id="createFirmaName" placeholder="Firma adı" data-i18n-placeholder="firma_name_ph" required
           style="flex:1; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;">
-        <button type="submit" class="auth-submit" id="createFirmaBtn" style="width:auto; padding:12px 18px; margin-top:0;">Oluştur</button>
+        <button type="submit" class="auth-submit" id="createFirmaBtn" style="width:auto; padding:12px 18px; margin-top:0;" data-i18n="create_btn">Oluştur</button>
       </form>
       <div class="auth-error" id="createFirmaError"></div>
-      <div class="saved-msg" id="createFirmaSavedMsg">Firma oluşturuldu ✓</div>
+      <div class="saved-msg" id="createFirmaSavedMsg" data-i18n="firma_created_ok">Firma oluşturuldu ✓</div>
     </div>
 
     <div id="legacyCompanyWrap" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--hairline);">
       <p class="referral-note" style="margin-bottom:10px;">
-        Bu hesapta eski sistemden kalma bir firma kaydı bulundu: <strong id="legacyCompanyName">—</strong>.
-        Artık bir işlevi yok, isterseniz temizleyebilirsiniz.
+        <span data-i18n="legacy_company_note">Bu hesapta eski sistemden kalma bir firma kaydı bulundu:</span> <strong id="legacyCompanyName">—</strong>.
+        <span data-i18n="legacy_company_note2">Artık bir işlevi yok, isterseniz temizleyebilirsiniz.</span>
       </p>
-      <button type="button" id="clearLegacyCompanyBtn" class="danger-btn" style="width:auto; padding:10px 16px;">Eski Firma Kaydını Temizle</button>
-      <div class="saved-msg" id="legacyCompanyClearedMsg">Temizlendi ✓</div>
+      <button type="button" id="clearLegacyCompanyBtn" class="danger-btn" style="width:auto; padding:10px 16px;" data-i18n="clear_legacy_btn">Eski Firma Kaydını Temizle</button>
+      <div class="saved-msg" id="legacyCompanyClearedMsg" data-i18n="cleared_ok">Temizlendi ✓</div>
     </div>
   </div>
 
@@ -372,6 +380,112 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const db = getFirestore(fbApp);
   const googleProvider = new GoogleAuthProvider();
 
+  let MMG_LANG = 'tr';
+  try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
+  const LBL = MMG_LANG === 'en' ? {
+    closeSample:'Close sample view', sampleCompany:'Sample Trading Co.', adminRole:'Admin',
+    sampleUser1:'John Smith', roleAdmin:'Admin', sampleUser2:'Jane Doe', roleUser:'User',
+    sampleCompany2:'Sample Logistics Inc.', linked:'Linked', unnamed:'Unnamed',
+    companyCreateFail:'Company could not be created: ', checkConsole:'. Please check the F12 console.',
+    enterEmail:'Please enter an email address.', inviteAlreadySent:'An invitation has already been sent to this email (for this company or another).',
+    inviteFailed:'Invitation could not be sent, please try again.',
+    confirmRemoveMember:'Are you sure you want to remove this member from the company?',
+    memberRemoveFailed:'Member could not be removed. Please try again.',
+    confirmLeaveCompany:'Are you sure you want to leave this company?',
+    leaveCompanyError:'An error occurred while leaving the company.',
+    enterCompanyCodeToLink:'Please enter the Company Code of the company you want to link',
+    cannotLinkSelf:'A company cannot link to itself.',
+    companyCodeNotFound:'This Company Code',
+    companyLinkFailed:'Company could not be linked, please try again.',
+    guestMode:'You are in guest mode',
+    referralNeedsAccount:'You need an account to enter a referral code. This information cannot be stored in guest mode.',
+    individualAccountNote:"This is currently an individual account. From Profile Details on the left",
+    member:'Member',
+    referralNoteText:'Enter a referral code to use the benefit assigned to your membership.',
+    loginFirstReferral:'You must sign in first to enter a referral code.',
+    enterReferralCode:'Please enter a referral code.',
+    invalidReferralCode:'This referral code is not valid.',
+    referralLimitReached:'This referral code has reached its usage limit.',
+    discountedPremiumAssigned:'% discounted premium has been assigned.',
+    genericError:'An error occurred, please try again.',
+    noAccountToDelete:'There is no account to delete — you are currently in guest mode. You need to sign in first.',
+    confirmDeleteAccount:'Are you sure you want to permanently delete your account?',
+    accountDeleted:'Your account has been permanently deleted.',
+    wrongPassword:'Incorrect password.', wrongEmailOrPassword:'Incorrect email or password.',
+    tooManyRequests:'Too many attempts. Please try again shortly.',
+    networkError:'Connection error. Please check your internet connection.',
+    popupBlocked:'Your browser blocked the popup window. Please disable your popup blocker and try again.',
+    genericErrorPrefix:'An error occurred (', genericErrorSuffix:'), please try again.',
+    authFailed:'Authentication failed. Please try again.',
+    enterPassword:'Please enter your password.',
+    cancelBtn:'Cancel', changeLoginEmail:'Change My Login Email',
+    needLoginForThis:'You need to be signed in for this action.',
+    enterValidEmailShort:'Please enter a valid email.', enterCurrentPassword:'Please enter your current password.',
+    updating:'Updating…', emailUpdatedPrefix:'Updated ✓ You can now sign in with ', emailUpdatedSuffix:'.',
+    verificationEmailSent:' — a confirmation email has been sent. Your login email will change once you confirm it.',
+    emailInUse:'This email is already registered to another account.', emailUpdateFailed:'The email could not be updated, please try again.',
+    firmaCreateFailed:'The company could not be created, please try again.',
+    needLoginToCreateFirma:'You need to be signed in to create a company.', enterFirmaName:'Please enter a company name.',
+    youAreAdmin:'You are an admin', editBtn:'Edit', save:'Save', savedOk:'Saved ✓',
+    firmaNameEmpty:'Company name cannot be empty.', saveFailedRetry:'Could not be saved, please try again.',
+    addAdmin:'Add Admin', adminEmailPh:'Admin email', addedOk:'Added ✓',
+    validEmailPlease:'Please enter a valid email.', adminInviteFailed:'The invitation could not be sent, please try again.',
+    noManagedFirmasYet:'You are not an admin of any company yet.', firmasLoadFailed:'Companies could not be loaded.',
+    firmaNameLabel:'Company Name', addressLabel:'Address', phoneLabel:'Phone', taxIdLabel:'Tax ID',
+    loadingTxt:'Loading...'
+  } : {
+    closeSample:'Örnek görünümü kapat', sampleCompany:'Örnek Ticaret Ltd. Şti.', adminRole:'Yönetici (Admin)',
+    sampleUser1:'Mehmet Güler', roleAdmin:'Yönetici', sampleUser2:'Ayşe Yıldız', roleUser:'Kullanıcı',
+    sampleCompany2:'Örnek Lojistik A.Ş.', linked:'Bağlı', unnamed:'İsimsiz',
+    companyCreateFail:'Firma oluşturulamadı: ', checkConsole:'. Lütfen F12 konsolunu kontrol edin.',
+    enterEmail:'Lütfen bir e-posta adresi girin.', inviteAlreadySent:'Bu e-posta adresine zaten bir davet gönderilmiş (bu firmaya ya da başka bir firmaya).',
+    inviteFailed:'Davet gönderilemedi, lütfen tekrar deneyin.',
+    confirmRemoveMember:'Bu üyeyi firmadan kaldırmak istediğinize emin misiniz?',
+    memberRemoveFailed:'Üye kaldırılamadı. Lütfen tekrar deneyin.',
+    confirmLeaveCompany:'Bu firmadan ayrılmak istediğinize emin misiniz?',
+    leaveCompanyError:'Firmadan ayrılırken bir hata oluştu.',
+    enterCompanyCodeToLink:'Lütfen bağlanacak firmanın Şirket Kodu\'nu girin',
+    cannotLinkSelf:'Bir firma kendisine bağlanamaz.',
+    companyCodeNotFound:'Bu Şirket Kodu',
+    companyLinkFailed:'Firma bağlanamadı, lütfen tekrar deneyin.',
+    guestMode:'Misafir modundasınız',
+    referralNeedsAccount:'Referans kodu girmek için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz.',
+    individualAccountNote:'Şu anda bireysel bir hesaptır. Soldaki Profil Bilgileri\'nden',
+    member:'Üye',
+    referralNoteText:'Referans kodu girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.',
+    loginFirstReferral:'Referans kodu girmek için önce giriş yapmalısınız.',
+    enterReferralCode:'Lütfen bir referans kodu girin.',
+    invalidReferralCode:'Bu referans kodu geçerli değil.',
+    referralLimitReached:'Bu referans kodu kullanım limitine ulaştı.',
+    discountedPremiumAssigned:' indirimli premium tanımlandı.',
+    genericError:'Bir hata oluştu, lütfen tekrar deneyin.',
+    noAccountToDelete:'Silinecek bir hesap yok — şu anda misafir modundasınız. Önce giriş yapmanız gerekir.',
+    confirmDeleteAccount:'Hesabınızı kalıcı olarak silmek istediğinizden emin misiniz?',
+    accountDeleted:'Hesabınız kalıcı olarak silindi.',
+    wrongPassword:'Şifre hatalı.', wrongEmailOrPassword:'E-posta veya şifre hatalı.',
+    tooManyRequests:'Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.',
+    networkError:'Bağlantı hatası. İnternetinizi kontrol edin.',
+    popupBlocked:'Tarayıcınız açılır pencereyi (popup) engelledi. Popup engelleyiciyi kapatıp tekrar deneyin.',
+    genericErrorPrefix:'Bir hata oluştu (', genericErrorSuffix:'), lütfen tekrar deneyin.',
+    authFailed:'Kimlik doğrulama başarısız oldu. Lütfen tekrar deneyin.',
+    enterPassword:'Lütfen şifrenizi girin.',
+    cancelBtn:'Vazgeç', changeLoginEmail:'Giriş E-postamı Değiştir',
+    needLoginForThis:'Bu işlem için giriş yapmış olmanız gerekir.',
+    enterValidEmailShort:'Lütfen geçerli bir e-posta girin.', enterCurrentPassword:'Lütfen mevcut şifrenizi girin.',
+    updating:'Güncelleniyor…', emailUpdatedPrefix:'Güncellendi ✓ Artık ', emailUpdatedSuffix:' ile giriş yapabilirsiniz.',
+    verificationEmailSent:' adresine bir onay e-postası gönderildi. Onaylayınca giriş e-postanız değişecek.',
+    emailInUse:'Bu e-posta zaten başka bir hesapta kayıtlı.', emailUpdateFailed:'E-posta güncellenemedi, lütfen tekrar deneyin.',
+    firmaCreateFailed:'Firma oluşturulamadı, lütfen tekrar deneyin.',
+    needLoginToCreateFirma:'Firma oluşturmak için giriş yapmış olmanız gerekir.', enterFirmaName:'Lütfen bir firma adı girin.',
+    youAreAdmin:'Yöneticisisiniz', editBtn:'✏️ Düzenle', save:'Kaydet', savedOk:'Kaydedildi ✓',
+    firmaNameEmpty:'Firma adı boş olamaz.', saveFailedRetry:'Kaydedilemedi, tekrar deneyin.',
+    addAdmin:'Yönetici Ekle', adminEmailPh:'Yönetici e-postası', addedOk:'Eklendi ✓',
+    validEmailPlease:'Geçerli bir e-posta girin.', adminInviteFailed:'Davet gönderilemedi, tekrar deneyin.',
+    noManagedFirmasYet:'Henüz yöneticisi olduğunuz bir firma yok.', firmasLoadFailed:'Firmalar yüklenemedi.',
+    firmaNameLabel:'Firma Adı', addressLabel:'Adres', phoneLabel:'Telefon', taxIdLabel:'Vergi No',
+    loadingTxt:'Yükleniyor...'
+  };
+
   const statusPillText = document.getElementById('statusPillText');
   const statusPill = document.getElementById('statusPill');
   statusPill.addEventListener('click', () => {
@@ -390,38 +504,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const referralSavedMsg = document.getElementById('referralSavedMsg');
   let currentUserData = null;
 
-  const profileName = document.getElementById('profileName');
-  const profileNameLabel = document.getElementById('profileNameLabel');
-  const profilePhone = document.getElementById('profilePhone');
-  const profileEmail = document.getElementById('profileEmail');
-  const profileAddress = document.getElementById('profileAddress');
-  const profileSaveBtn = document.getElementById('profileSaveBtn');
-  const profileSavedMsg = document.getElementById('profileSavedMsg');
-  const accountInfoForm = document.getElementById('accountInfoForm');
-
-  function getCachedProfile(){
-    try{ return JSON.parse(localStorage.getItem('mmg_profile') || '{}'); } catch(e){ return {}; }
-  }
-
-  function loadProfileIntoForm(data){
-    const p = (data && data.profile) || getCachedProfile();
-    profileName.value = p.name || (data && (data.companyName || data.username)) || '';
-    profilePhone.value = p.phone || (data && data.phone) || '';
-    const state = localStorage.getItem('mmg_auth_state');
-    const defaultEmail = (state && state.startsWith('user:')) ? state.slice(5) : '';
-    profileEmail.value = p.email || (data && data.email) || defaultEmail;
-    profileAddress.value = p.address || (data && data.address) || '';
-  }
-
-  async function saveProfileToCloud(profile){
-    const user = auth.currentUser;
-    if(!user) return; // misafir bulutta saklanmaz
-    try{ await setDoc(doc(db, 'users', user.uid), { profile: profile }, { merge: true }); }
-    catch(err){ /* bulut kaydı başarısız olsa da yerelde zaten kayıtlı */ }
-  }
-
-  loadProfileIntoForm();
-
   // ---- Giriş E-postasını Değiştir ----
   const emailChangeToggleBtn = document.getElementById('emailChangeToggleBtn');
   const emailChangeWrap = document.getElementById('emailChangeWrap');
@@ -434,7 +516,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   emailChangeToggleBtn.addEventListener('click', () => {
     const isHidden = emailChangeWrap.style.display === 'none';
     emailChangeWrap.style.display = isHidden ? 'block' : 'none';
-    emailChangeToggleBtn.textContent = isHidden ? 'Vazgeç' : '🔑 Giriş E-postamı Değiştir';
+    emailChangeToggleBtn.querySelector('span').textContent = isHidden ? LBL.cancelBtn : LBL.changeLoginEmail;
     emailChangeError.classList.remove('show');
     emailChangeError.textContent = '';
     if(!isHidden){
@@ -448,32 +530,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     emailChangeError.classList.remove('show');
     emailChangeError.textContent = '';
     if(!user){
-      emailChangeError.textContent = 'Bu işlem için giriş yapmış olmanız gerekir.';
+      emailChangeError.textContent = LBL.needLoginForThis;
       emailChangeError.classList.add('show');
       return;
     }
     const newEmail = emailChangeNewEmail.value.trim();
     const currentPassword = emailChangeCurrentPassword.value;
     if(!newEmail || !newEmail.includes('@')){
-      emailChangeError.textContent = 'Lütfen geçerli bir e-posta girin.';
+      emailChangeError.textContent = LBL.enterValidEmailShort;
       emailChangeError.classList.add('show');
       return;
     }
     if(!currentPassword){
-      emailChangeError.textContent = 'Lütfen mevcut şifrenizi girin.';
+      emailChangeError.textContent = LBL.enterCurrentPassword;
       emailChangeError.classList.add('show');
       return;
     }
     emailChangeSubmitBtn.disabled = true;
     const originalLabel = emailChangeSubmitBtn.textContent;
-    emailChangeSubmitBtn.textContent = 'Güncelleniyor…';
+    emailChangeSubmitBtn.textContent = LBL.updating;
     try{
       const cred = EmailAuthProvider.credential(user.email, currentPassword);
       await reauthenticateWithCredential(user, cred);
       try{
         await updateEmail(user, newEmail);
         localStorage.setItem('mmg_auth_state', 'user:' + newEmail);
-        emailChangeSavedMsg.textContent = 'Güncellendi ✓ Artık ' + newEmail + ' ile giriş yapabilirsiniz.';
+        emailChangeSavedMsg.textContent = LBL.emailUpdatedPrefix + newEmail + LBL.emailUpdatedSuffix;
         emailChangeSavedMsg.classList.add('show');
         setTimeout(() => emailChangeSavedMsg.classList.remove('show'), 4000);
         emailChangeCurrentPassword.value = '';
@@ -482,7 +564,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(updateErr && updateErr.code === 'auth/operation-not-allowed'){
           // Bazı projelerde doğrudan değişime izin verilmiyor; yeni adrese onay e-postası gönderilir.
           await verifyBeforeUpdateEmail(user, newEmail);
-          emailChangeSavedMsg.textContent = newEmail + ' adresine bir onay e-postası gönderildi. Onaylayınca giriş e-postanız değişecek.';
+          emailChangeSavedMsg.textContent = newEmail + LBL.verificationEmailSent;
           emailChangeSavedMsg.classList.add('show');
           setTimeout(() => emailChangeSavedMsg.classList.remove('show'), 6000);
         } else {
@@ -491,11 +573,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
     } catch(err){
       if(err && (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential')){
-        emailChangeError.textContent = 'Şifre yanlış.';
+        emailChangeError.textContent = LBL.wrongPassword;
       } else if(err && err.code === 'auth/email-already-in-use'){
-        emailChangeError.textContent = 'Bu e-posta zaten başka bir hesapta kayıtlı.';
+        emailChangeError.textContent = LBL.emailInUse;
       } else {
-        emailChangeError.textContent = 'E-posta güncellenemedi, lütfen tekrar deneyin.';
+        emailChangeError.textContent = LBL.emailUpdateFailed;
       }
       emailChangeError.classList.add('show');
     } finally {
@@ -504,9 +586,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   });
 
+  const profileType = document.getElementById('profileType');
+  const profileName = document.getElementById('profileName');
+  const profileNameLabel = document.getElementById('profileNameLabel');
+  const profilePhone = document.getElementById('profilePhone');
+  const profileEmail = document.getElementById('profileEmail');
+  const profileAddress = document.getElementById('profileAddress');
+  const profileSaveBtn = document.getElementById('profileSaveBtn');
+  const profileSavedMsg = document.getElementById('profileSavedMsg');
+  const accountInfoForm = document.getElementById('accountInfoForm');
+
+  function getCachedProfile(){
+    try{ return JSON.parse(localStorage.getItem('mmg_profile') || '{}'); } catch(e){ return {}; }
+  }
+  function updateProfileNameLabel(){
+    profileNameLabel.textContent = profileType.value === 'firma' ? (MMG_LANG==='en'?'Company Name':'Firma Adı') : (MMG_LANG==='en'?'Full Name':'Ad Soyad');
+    profileName.placeholder = profileType.value === 'firma' ? (MMG_LANG==='en'?'Company Name':'Firma Adı') : (MMG_LANG==='en'?'Full Name':'Ad Soyad');
+  }
+  profileType.addEventListener('change', updateProfileNameLabel);
+
+  function loadProfileIntoForm(data){
+    const p = (data && data.profile) || getCachedProfile();
+    profileType.value = p.type || ((data && data.companyId) ? 'firma' : 'bireysel');
+    profileName.value = p.name || (data && (data.companyName || data.username)) || '';
+    profilePhone.value = p.phone || (data && data.phone) || '';
+    const state = localStorage.getItem('mmg_auth_state');
+    const defaultEmail = (state && state.startsWith('user:')) ? state.slice(5) : '';
+    profileEmail.value = p.email || (data && data.email) || defaultEmail;
+    profileAddress.value = p.address || (data && data.address) || '';
+    updateProfileNameLabel();
+  }
+
+  async function saveProfileToCloud(profile){
+    const user = auth.currentUser;
+    if(!user) return; // misafir bulutta saklanmaz
+    try{ await setDoc(doc(db, 'users', user.uid), { profile: profile }, { merge: true }); }
+    catch(err){ /* bulut kaydı başarısız olsa da yerelde zaten kayıtlı */ }
+  }
+
+  loadProfileIntoForm();
+
   accountInfoForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const profile = {
+      type: profileType.value,
       name: profileName.value.trim(),
       phone: profilePhone.value.trim(),
       email: profileEmail.value.trim(),
@@ -532,8 +655,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     referralInput.disabled = false;
     referralSubmitBtn.disabled = false;
   }
-  lockReferralCard('Yükleniyor...');
+  lockReferralCard(MMG_LANG==='en'?'Loading...':'Yükleniyor...');
 
+  // ================== Firma Yöneticiliği ==================
   const legacyCompanyWrap = document.getElementById('legacyCompanyWrap');
   const legacyCompanyName = document.getElementById('legacyCompanyName');
   const clearLegacyCompanyBtn = document.getElementById('clearLegacyCompanyBtn');
@@ -556,7 +680,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     clearLegacyCompanyBtn.disabled = false;
   });
 
-  // ================== Firma Yöneticiliği ==================
   const myFirmasList = document.getElementById('myFirmasList');
   const createFirmaForm = document.getElementById('createFirmaForm');
   const createFirmaName = document.getElementById('createFirmaName');
@@ -565,12 +688,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const createFirmaSavedMsg = document.getElementById('createFirmaSavedMsg');
 
   async function loadMyFirmas(uid){
-    myFirmasList.innerHTML = '<p class="referral-note">Yükleniyor...</p>';
+    myFirmasList.innerHTML = '<p class="referral-note">' + LBL.loadingTxt + '</p>';
     try{
       const snap = await getDoc(doc(db, 'users', uid));
       const firmaIds = (snap.exists() && Array.isArray(snap.data().adminFirmaIds)) ? snap.data().adminFirmaIds : [];
       if(!firmaIds.length){
-        myFirmasList.innerHTML = '<p class="referral-note">Henüz yöneticisi olduğunuz bir firma yok.</p>';
+        myFirmasList.innerHTML = '<p class="referral-note">' + LBL.noManagedFirmasYet + '</p>';
         return;
       }
       const blocks = [];
@@ -586,35 +709,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
               '<div class="member-name">🏢 ' + esc(fData.name || fid) + '</div>' +
               '<div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">' +
-                '<span class="member-badge">Yöneticisisiniz</span>' +
-                '<button type="button" class="member-remove-btn firma-edit-toggle-btn" data-firma-id="' + fid + '">✏️ Düzenle</button>' +
+                '<span class="member-badge">' + LBL.youAreAdmin + '</span>' +
+                '<button type="button" class="member-remove-btn firma-edit-toggle-btn" data-firma-id="' + fid + '">' + LBL.editBtn + '</button>' +
               '</div>' +
             '</div>' +
 
             '<div class="firma-edit-panel" style="display:none; flex-direction:column; gap:8px; padding-top:6px; border-top:1px solid var(--hairline);">' +
-              '<div class="auth-field" style="margin-bottom:0;"><label>Firma Adı</label>' +
+              '<div class="auth-field" style="margin-bottom:0;"><label>' + LBL.firmaNameLabel + '</label>' +
                 '<input type="text" class="firma-edit-name" value="' + esc(fData.name) + '"></div>' +
-              '<div class="auth-field" style="margin-bottom:0;"><label>Adres</label>' +
+              '<div class="auth-field" style="margin-bottom:0;"><label>' + LBL.addressLabel + '</label>' +
                 '<input type="text" class="firma-edit-address" value="' + esc(fData.address) + '"></div>' +
               '<div style="display:flex; gap:8px;">' +
-                '<div class="auth-field" style="margin-bottom:0; flex:1;"><label>Telefon</label>' +
+                '<div class="auth-field" style="margin-bottom:0; flex:1;"><label>' + LBL.phoneLabel + '</label>' +
                   '<input type="tel" class="firma-edit-phone" value="' + esc(fData.phone) + '"></div>' +
-                '<div class="auth-field" style="margin-bottom:0; flex:1;"><label>Vergi No</label>' +
+                '<div class="auth-field" style="margin-bottom:0; flex:1;"><label>' + LBL.taxIdLabel + '</label>' +
                   '<input type="text" class="firma-edit-taxid" value="' + esc(fData.taxId) + '"></div>' +
               '</div>' +
               '<div>' +
-                '<button type="button" class="auth-submit firma-edit-save-btn" data-firma-id="' + fid + '" style="width:auto; padding:9px 14px; margin-top:0; font-size:12.5px;">Kaydet</button>' +
-                '<span class="save-hint firma-edit-saved-hint">Kaydedildi ✓</span>' +
+                '<button type="button" class="auth-submit firma-edit-save-btn" data-firma-id="' + fid + '" style="width:auto; padding:9px 14px; margin-top:0; font-size:12.5px;">' + LBL.save + '</button>' +
+                '<span class="save-hint firma-edit-saved-hint">' + LBL.savedOk + '</span>' +
               '</div>' +
               '<div class="auth-error firma-edit-error"></div>' +
             '</div>' +
 
             '<div style="display:flex; gap:8px;">' +
-              '<input type="email" placeholder="Yönetici e-postası" class="firma-admin-invite-email" style="flex:1; background:var(--surface); border:1px solid var(--hairline); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13px;">' +
-              '<button type="button" class="auth-submit firma-admin-invite-btn" data-firma-id="' + fid + '" style="width:auto; padding:9px 14px; margin-top:0; font-size:12.5px;">Yönetici Ekle</button>' +
+              '<input type="email" placeholder="' + LBL.adminEmailPh + '" class="firma-admin-invite-email" style="flex:1; background:var(--surface); border:1px solid var(--hairline); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13px;">' +
+              '<button type="button" class="auth-submit firma-admin-invite-btn" data-firma-id="' + fid + '" style="width:auto; padding:9px 14px; margin-top:0; font-size:12.5px;">' + LBL.addAdmin + '</button>' +
             '</div>' +
             '<div class="auth-error firma-admin-invite-error"></div>' +
-            '<div class="saved-msg firma-admin-invite-saved">Eklendi ✓</div>' +
+            '<div class="saved-msg firma-admin-invite-saved">' + LBL.addedOk + '</div>' +
           '</div>'
         );
       }
@@ -626,7 +749,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           const panel = row.querySelector('.firma-edit-panel');
           const isHidden = panel.style.display === 'none';
           panel.style.display = isHidden ? 'flex' : 'none';
-          btn.textContent = isHidden ? 'Vazgeç' : '✏️ Düzenle';
+          btn.textContent = isHidden ? LBL.cancelBtn : LBL.editBtn;
         });
       });
       myFirmasList.querySelectorAll('.firma-edit-save-btn').forEach(btn => {
@@ -637,7 +760,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           errEl.classList.remove('show'); errEl.textContent = '';
           const newName = row.querySelector('.firma-edit-name').value.trim();
           if(!newName){
-            errEl.textContent = 'Firma adı boş olamaz.';
+            errEl.textContent = LBL.firmaNameEmpty;
             errEl.classList.add('show');
             return;
           }
@@ -654,7 +777,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             hintEl.classList.add('show');
             setTimeout(() => hintEl.classList.remove('show'), 2000);
           } catch(e){
-            errEl.textContent = 'Kaydedilemedi, tekrar deneyin.';
+            errEl.textContent = LBL.saveFailedRetry;
             errEl.classList.add('show');
           } finally {
             btn.disabled = false;
@@ -671,7 +794,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           errEl.classList.remove('show'); errEl.textContent = '';
           const inviteEmail = emailInput.value.trim().toLowerCase();
           if(!inviteEmail || !inviteEmail.includes('@')){
-            errEl.textContent = 'Geçerli bir e-posta girin.';
+            errEl.textContent = LBL.validEmailPlease;
             errEl.classList.add('show');
             return;
           }
@@ -690,7 +813,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             emailInput.value = '';
             setTimeout(() => savedEl.classList.remove('show'), 2500);
           } catch(e){
-            errEl.textContent = 'Davet gönderilemedi, tekrar deneyin.';
+            errEl.textContent = LBL.adminInviteFailed;
             errEl.classList.add('show');
           } finally {
             btn.disabled = false;
@@ -698,7 +821,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
       });
     } catch(e){
-      myFirmasList.innerHTML = '<p class="referral-note">Firmalar yüklenemedi.</p>';
+      myFirmasList.innerHTML = '<p class="referral-note">' + LBL.firmasLoadFailed + '</p>';
     }
   }
 
@@ -708,13 +831,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     createFirmaError.textContent = '';
     const user = auth.currentUser;
     if(!user){
-      createFirmaError.textContent = 'Firma oluşturmak için giriş yapmış olmanız gerekir.';
+      createFirmaError.textContent = LBL.needLoginToCreateFirma;
       createFirmaError.classList.add('show');
       return;
     }
     const name = createFirmaName.value.trim();
     if(!name){
-      createFirmaError.textContent = 'Lütfen bir firma adı girin.';
+      createFirmaError.textContent = LBL.enterFirmaName;
       createFirmaError.classList.add('show');
       return;
     }
@@ -731,7 +854,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       createFirmaName.value = '';
       await loadMyFirmas(user.uid);
     } catch(e){
-      createFirmaError.textContent = 'Firma oluşturulamadı, lütfen tekrar deneyin.';
+      createFirmaError.textContent = LBL.firmaCreateFailed;
       createFirmaError.classList.add('show');
     } finally {
       createFirmaBtn.disabled = false;
@@ -751,16 +874,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
       await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayUnion(invite.firmaId) }, { merge: true });
       await deleteDoc(inviteRef);
-      try{ alert('🏢 "' + (invite.firmaName || 'Firma') + '" firmasına yönetici olarak eklendiniz.'); }catch(e){}
+      try{ alert('🏢 ' + (MMG_LANG==='en' ? ('You have been added as an admin of the "' + (invite.firmaName || 'Company') + '" company.') : ('"' + (invite.firmaName || 'Firma') + '" firmasına yönetici olarak eklendiniz.'))); }catch(e){}
     } catch(e){ /* sessizce geç */ }
   }
 
   onAuthStateChanged(auth, async (user) => {
     if(!user){
-      statusPillText.textContent = 'Misafir modundasınız';
+      statusPillText.textContent = LBL.guestMode;
       statusPill.classList.add('clickable');
       dangerCard.style.display = 'block';
-      lockReferralCard('Referans kodu girmek için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz.');
+      lockReferralCard(LBL.referralNeedsAccount);
       currentUserData = null;
       return;
     }
@@ -770,12 +893,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const snap = await getDoc(doc(db, 'users', user.uid));
       const data = snap.exists() ? snap.data() : {};
       currentUserData = data;
-      statusPillText.textContent = data.username ? data.username : (user.email || 'Üye');
+      statusPillText.textContent = data.username ? data.username : (user.email || LBL.member);
       loadProfileIntoForm(data);
       if(data.referredBy){
-        lockReferralCard('"' + data.referredBy + '" referans kodunu zaten kullandınız.');
+        lockReferralCard('"' + data.referredBy + '" ' + (MMG_LANG==='en' ? 'referral code has already been used.' : 'referans kodunu zaten kullandınız.'));
       } else {
-        unlockReferralCard('Referans kodu girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.');
+        unlockReferralCard(LBL.referralNoteText);
       }
       // Eski sistemden kalma companyId varsa, temizleme seçeneğini göster.
       if(data.companyId){
@@ -787,9 +910,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       await applyPendingFirmaAdminInviteIfAny(user);
       await loadMyFirmas(user.uid);
     } catch(e){
-      statusPillText.textContent = user.email || 'Üye';
+      statusPillText.textContent = user.email || LBL.member;
     }
   });
+
 
   function showReferralError(msg){
     referralError.textContent = msg;
@@ -805,12 +929,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     hideReferralError();
     const user = auth.currentUser;
     if(!user){
-      showReferralError('Referans kodu girmek için önce giriş yapmalısınız.');
+      showReferralError(LBL.loginFirstReferral);
       return;
     }
     const code = referralInput.value.trim().toUpperCase();
     if(!code){
-      showReferralError('Lütfen bir referans kodu girin.');
+      showReferralError(LBL.enterReferralCode);
       return;
     }
     referralSubmitBtn.disabled = true;
@@ -819,7 +943,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     try{
       const codeSnap = await getDoc(doc(db, 'referralCodes', code));
       if(!codeSnap.exists() || codeSnap.data().active === false){
-        showReferralError('Bu referans kodu geçerli değil.');
+        showReferralError(LBL.invalidReferralCode);
         return;
       }
       const cd = codeSnap.data();
@@ -830,7 +954,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           usedCount = usageSnap.exists() ? (usageSnap.data().count || 0) : 0;
         }catch(usageErr){ usedCount = 0; }
         if(usedCount >= cd.maxUses){
-          showReferralError('Bu referans kodu kullanım limitine ulaştı.');
+          showReferralError(LBL.referralLimitReached);
           return;
         }
       }
@@ -854,13 +978,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       referralSavedMsg.classList.add('show');
       setTimeout(() => referralSavedMsg.classList.remove('show'), 2500);
       if(premiumBenefit.type === 'free'){
-        alert('🎉 "' + code + '" kodunu kullandınız!\nHesabınıza ücretsiz premium tanımlandı.');
+        alert('🎉 "' + code + '" ' + (MMG_LANG==='en' ? 'was applied!\nFree premium has been assigned to your account.' : 'kodunu kullandınız!\nHesabınıza ücretsiz premium tanımlandı.'));
       } else {
-        alert('🎉 "' + code + '" kodunu kullandınız!\nHesabınıza %' + premiumBenefit.discountPercent + ' indirimli premium tanımlandı.');
+        alert('🎉 "' + code + '" ' + (MMG_LANG==='en' ? ('was applied!\nA %' + premiumBenefit.discountPercent + ' discounted premium has been assigned to your account.') : ('kodunu kullandınız!\nHesabınıza %' + premiumBenefit.discountPercent + ' indirimli premium tanımlandı.')));
       }
-      lockReferralCard('"' + code + '" referans kodunu zaten kullandınız.');
+      lockReferralCard('"' + code + '" ' + (MMG_LANG==='en' ? 'referral code has already been used.' : 'referans kodunu zaten kullandınız.'));
     } catch(err){
-      showReferralError('Bir hata oluştu, lütfen tekrar deneyin.');
+      showReferralError(LBL.genericError);
     } finally {
       referralSubmitBtn.disabled = false;
       referralSubmitBtn.textContent = originalLabel;
@@ -887,10 +1011,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   deleteAccountBtn.addEventListener('click', async () => {
     if(!auth.currentUser){
-      alert('Silinecek bir hesap yok — şu anda misafir modundasınız. Önce giriş yapmanız gerekir.');
+      alert(LBL.noAccountToDelete);
       return;
     }
-    if(!confirm('Hesabınızı kalıcı olarak silmek istediğinizden emin misiniz?')) return;
+    if(!confirm(LBL.confirmDeleteAccount)) return;
     await attemptAccountDeletion();
   });
   deleteAccountClose.addEventListener('click', () => { deleteAccountOverlay.hidden = true; });
@@ -915,19 +1039,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     localStorage.removeItem('mmg_username');
     localStorage.removeItem('mmg_avatar');
     localStorage.removeItem('mmg_profile');
-    alert('Hesabınız kalıcı olarak silindi.');
+    alert(LBL.accountDeleted);
     window.top.location.href = 'index.html';
   }
 
   function mapFirebaseError(code){
     const map = {
-      'auth/wrong-password': 'Şifre hatalı.',
-      'auth/invalid-credential': 'E-posta veya şifre hatalı.',
-      'auth/too-many-requests': 'Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.',
-      'auth/network-request-failed': 'Bağlantı hatası. İnternetinizi kontrol edin.',
-      'auth/popup-blocked': 'Tarayıcınız açılır pencereyi (popup) engelledi. Popup engelleyiciyi kapatıp tekrar deneyin.'
+      'auth/wrong-password': LBL.wrongPassword,
+      'auth/invalid-credential': LBL.wrongEmailOrPassword,
+      'auth/too-many-requests': LBL.tooManyRequests,
+      'auth/network-request-failed': LBL.networkError,
+      'auth/popup-blocked': LBL.popupBlocked
     };
-    return map[code] || ('Bir hata oluştu (' + (code || 'bilinmiyor') + '), lütfen tekrar deneyin.');
+    return map[code] || (LBL.genericErrorPrefix + (code || (MMG_LANG==='en'?'unknown':'bilinmiyor')) + LBL.genericErrorSuffix);
   }
 
   async function attemptAccountDeletion(){
@@ -949,7 +1073,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             await deleteUser(user);
             finishAccountDeletion();
           } catch(reauthErr){
-            alert('Kimlik doğrulama başarısız oldu. Lütfen tekrar deneyin.');
+            alert(LBL.authFailed);
           }
         } else {
           hideDeleteAccountError();
@@ -969,7 +1093,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(!user){ deleteAccountOverlay.hidden = true; return; }
     hideDeleteAccountError();
     if(!deleteReauthPassword.value){
-      showDeleteAccountError('Lütfen şifrenizi girin.');
+      showDeleteAccountError(LBL.enterPassword);
       return;
     }
     deleteAccountConfirmBtn.disabled = true;
@@ -1005,7 +1129,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </script>
 <script>
 (function(){
-  const MMG_I18N = {
+  MMGI18N.registerDict({
+    tr: {
+      page_title:'Hesabım', page_subtitle:'Firma ya da kişisel bilgilerinizi girin. Bu bilgiler yalnızca sizin hesabınızda saklanır.',
+      back_home:'← Ana Sayfa', loading:'Yükleniyor...',
+      profile_info:'Profil Bilgileri', account_type:'Hesap Türü', individual:'Bireysel', corporate:'Kurumsal',
+      full_name:'Ad Soyad', phone:'Telefon', email:'E-posta', address:'Adres', save_btn:'Kaydet', saved_ok:'Kaydedildi ✓',
+      referral_code:'Referans Kodu', referral_note:'Referans kodu girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.', apply_btn:'Uygula', code_applied:'Kod uygulandı ✓',
+      user_group:'Kullanıcı Grubu', sample_view:'Dolu örnek görünüm',
+      company_locked:'Kullanıcı grubu özellikleri için bir hesabınızın olması gerekir. Misafir modunda bu bilgiler saklanamaz.',
+      company_none:'Şu anda bireysel bir hesaptır. Soldaki Profil Bilgileri\'nden Hesap Türü\'nü "Kurumsal" seçip firma adınızı girerek kaydedin — burada otomatik olarak kullanıcı grubunuz açılır ve diğer kullanıcıları (alt kullanıcı olarak) ekleyip aynı verileri birlikte görüp işleyebilirsiniz.',
+      preview_badge:'Bu bir örnek görünümdür — gerçek veri değildir',
+      company_code:'Şirket Kodu', company_code_note:'(gruplama için paylaşın)',
+      add_user:'Kullanıcı Ekle', invite_btn:'Davet Et', invite_sent:'Davet gönderildi ✓',
+      users_label:'Kullanıcılar', leave_group:'Gruptan Ayrıl',
+      group_linked_companies:'Grup — Bağlı Firmalar', group_note:'Birden fazla firmayı aynı gruba bağlayıp aralarında geçiş yapabilirsiniz.', link_btn:'Bağla',
+      active_company:'Aktif Firma', active_company_note:'(işlem yapacağınız firma)',
+      delete_account:'Hesabımı Kalıcı Olarak Sil',
+      enter_password:'Şifrenizi Girin', delete_confirm_desc:'Hesabınızı silmek için güvenlik amacıyla şifrenizi tekrar girmeniz gerekiyor.',
+      password:'Şifre', confirm_delete:'Onayla ve Sil'
+    },
     en: {
       page_title:'My Account', page_subtitle:'Enter your company or personal details. This information is stored only in your account.',
       back_home:'← Home', loading:'Loading...',
@@ -1025,26 +1168,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       enter_password:'Enter Your Password', delete_confirm_desc:'For security, please re-enter your password to delete your account.',
       password:'Password', confirm_delete:'Confirm and Delete'
     }
-  };
-  function applyMmgLang(lang){
-    if(lang === 'tr'){ location.reload(); return; }
-    const dict = MMG_I18N[lang];
-    if(!dict) return;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      if(dict[key]) el.innerHTML = dict[key];
-    });
-  }
-  window.addEventListener('message', (ev) => {
-    if(ev && ev.data && ev.data.mmgLang){
-      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
-      applyMmgLang(ev.data.mmgLang);
-    }
   });
-  try{
-    const savedLang = localStorage.getItem('mmg_lang');
-    if(savedLang === 'en') applyMmgLang('en');
-  }catch(e){}
+  MMGI18N.detectAndApplyDefaultLang();
 })();
 </script>
 </body>

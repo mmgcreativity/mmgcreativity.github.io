@@ -116,6 +116,29 @@ import {
   #mmgChatBubble.dragging{ cursor:grabbing; transition:none; box-shadow:0 14px 34px rgba(0,0,0,0.55); }
   #mmgChatBubble:hover{ transform:scale(0.742); }
   #mmgChatBubble[hidden]{ display:none; }
+  @keyframes mmgChatPulseRing{
+    0%{ box-shadow:0 0 0 0 rgba(63,182,138,0.55); }
+    70%{ box-shadow:0 0 0 12px rgba(63,182,138,0); }
+    100%{ box-shadow:0 0 0 0 rgba(63,182,138,0); }
+  }
+  @keyframes mmgChatBlinkDot{
+    0%, 100%{ opacity:1; transform:scale(1); }
+    50%{ opacity:0.35; transform:scale(0.82); }
+  }
+  @keyframes mmgChatFlashBubble{
+    0%, 100%{ transform:scale(0.7); }
+    25%{ transform:scale(0.82); }
+    50%{ transform:scale(0.7); }
+    75%{ transform:scale(0.8); }
+  }
+  #mmgChatBubble.mmg-chat-has-unread{ animation:mmgChatPulseRing 1.6s ease-out infinite; }
+  #mmgChatBubble.mmg-chat-flash{ animation:mmgChatFlashBubble .5s ease-in-out 2; }
+  #mmgChatOnlineDot{
+    position:absolute; bottom:2px; right:2px; width:13px; height:13px; border-radius:50%;
+    background:var(--teal,#3FB68A); border:2px solid var(--bg,#0D1420); pointer-events:none;
+    display:none;
+  }
+  #mmgChatOnlineDot.show{ display:block; animation:mmgChatBlinkDot 1s ease-in-out infinite; }
   #mmgChatBadge{
     position:absolute; top:-4px; right:-4px; background:var(--red,#E2544B); color:#fff;
     font-family:'Inter',sans-serif; font-size:11px; font-weight:700; min-width:18px; height:18px;
@@ -234,6 +257,27 @@ import {
     opacity:0.45; transition:opacity .12s ease; flex:0 0 auto; align-self:flex-start;
   }
   .mmg-chat-msg-delete:hover{ opacity:1; color:var(--red,#E2544B); }
+  .mmg-chat-react-btn{
+    background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:13px; padding:2px 4px;
+    opacity:0.45; transition:opacity .12s ease; flex:0 0 auto; align-self:flex-start;
+  }
+  .mmg-chat-react-btn:hover{ opacity:1; color:var(--brass,#C6A15B); }
+  .mmg-chat-react-picker{
+    position:fixed; z-index:920; background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448);
+    border-radius:999px; padding:5px 7px; display:flex; gap:3px; box-shadow:0 12px 30px rgba(0,0,0,0.45);
+  }
+  .mmg-chat-react-picker[hidden]{ display:none; }
+  .mmg-chat-react-picker span{ cursor:pointer; font-size:18px; padding:3px; border-radius:50%; line-height:1; transition:transform .1s ease; }
+  .mmg-chat-react-picker span:hover{ transform:scale(1.25); background:var(--surface-2,#1B2536); }
+  .mmg-chat-reactions{ display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+  .mmg-chat-msg.me .mmg-chat-reactions{ justify-content:flex-end; }
+  .mmg-chat-reaction-pill{
+    display:inline-flex; align-items:center; gap:3px; font-size:11px; padding:2px 7px; border-radius:999px;
+    background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); color:var(--text,#EAEDF3);
+    cursor:pointer; line-height:1.4;
+  }
+  .mmg-chat-reaction-pill.mine{ border-color:var(--brass,#C6A15B); background:rgba(198,161,91,0.14); }
+  .mmg-chat-reaction-pill:hover{ border-color:var(--brass-dim,#8A7440); }
   .mmg-chat-msg-row{ display:flex; align-items:flex-start; gap:4px; min-width:0; }
   .mmg-chat-msg.me .mmg-chat-msg-row{ flex-direction:row-reverse; }
   .mmg-chat-footer textarea{
@@ -285,6 +329,7 @@ import {
   <button type="button" id="mmgChatBubble" aria-label="Sohbet" hidden>
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
     <span id="mmgChatBadge" hidden>0</span>
+    <span id="mmgChatOnlineDot"></span>
   </button>
   <div id="mmgChatPanel" hidden>
     <div class="mmg-chat-head">
@@ -326,6 +371,7 @@ import {
   </div>`;
 
   const TOAST_HTML = `<div id="mmgChatToastContainer" aria-live="polite"></div>`;
+  const REACT_PICKER_HTML = `<div class="mmg-chat-react-picker" id="mmgChatReactPicker" hidden></div>`;
 
   function inject(){
     const styleTag = document.createElement('style');
@@ -338,6 +384,9 @@ import {
     const toastWrap = document.createElement('div');
     toastWrap.innerHTML = TOAST_HTML;
     document.body.appendChild(toastWrap.firstElementChild);
+    const reactWrap = document.createElement('div');
+    reactWrap.innerHTML = REACT_PICKER_HTML;
+    document.body.appendChild(reactWrap.firstElementChild);
     wireUp();
   }
 
@@ -347,6 +396,7 @@ import {
   function wireUp(){
     els.bubble = document.getElementById('mmgChatBubble');
     els.badge = document.getElementById('mmgChatBadge');
+    els.onlineDot = document.getElementById('mmgChatOnlineDot');
     els.panel = document.getElementById('mmgChatPanel');
     els.title = document.getElementById('mmgChatTitle');
     els.backBtn = document.getElementById('mmgChatBackBtn');
@@ -364,6 +414,7 @@ import {
     els.toastContainer = document.getElementById('mmgChatToastContainer');
     els.emojiBtn = document.getElementById('mmgChatEmojiBtn');
     els.emojiPicker = document.getElementById('mmgChatEmojiPicker');
+    els.reactPicker = document.getElementById('mmgChatReactPicker');
 
     els.bubble.addEventListener('pointerdown', onBubblePointerDown);
     els.closeBtn.addEventListener('click', () => { els.panel.hidden = true; });
@@ -439,8 +490,62 @@ import {
   }
 
   function setBadge(n){
-    if(n > 0){ els.badge.hidden = false; els.badge.textContent = n > 9 ? '9+' : String(n); }
-    else { els.badge.hidden = true; }
+    if(n > 0){
+      els.badge.hidden = false; els.badge.textContent = n > 9 ? '9+' : String(n);
+      els.bubble.classList.add('mmg-chat-has-unread');
+      if(els.onlineDot) els.onlineDot.classList.add('show');
+    } else {
+      els.badge.hidden = true;
+      els.bubble.classList.remove('mmg-chat-has-unread');
+      if(els.onlineDot) els.onlineDot.classList.remove('show');
+    }
+  }
+
+  // ---- Ses + tarayıcı bildirimi + baloncuk "flash" efekti ----
+  let audioCtx = null;
+  function playPingSound(){
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+      const t0 = audioCtx.currentTime;
+      [880, 1320].forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, t0 + i * 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.16, t0 + i * 0.09 + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.09 + 0.22);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(t0 + i * 0.09);
+        osc.stop(t0 + i * 0.09 + 0.24);
+      });
+    }catch(e){ /* ses çalınamazsa sessizce geç */ }
+  }
+  function requestNotifyPermission(){
+    try{
+      if(window.Notification && Notification.permission === 'default'){
+        Notification.requestPermission().catch(()=>{});
+      }
+    }catch(e){ /* sessizce geç */ }
+  }
+  function flashBubble(){
+    if(!els.bubble) return;
+    els.bubble.classList.remove('mmg-chat-flash');
+    void els.bubble.offsetWidth; // reflow: animasyonu baştan tetikler
+    els.bubble.classList.add('mmg-chat-flash');
+  }
+  function notifyNewMessage(title, message){
+    flashBubble();
+    playPingSound();
+    try{
+      if(window.Notification && Notification.permission === 'granted' && document.hidden){
+        const n = new Notification(title || 'Yeni mesaj', {
+          body: message || '', icon: 'icon-192.png', tag: 'mmg-chat', silent: true
+        });
+        n.onclick = () => { try{ window.focus(); }catch(e){} n.close(); };
+      }
+    }catch(e){ /* bildirim gösterilemezse sessizce geç */ }
   }
 
   // ---- Sağ altta beliren bildirim baloncuğu (toast) ----
@@ -549,6 +654,7 @@ import {
       saveBubblePos(rect.left / window.innerWidth, rect.top / window.innerHeight);
     } else {
       // Sürükleme olmadıysa normal bir tıklama/dokunuş: paneli aç/kapat
+      requestNotifyPermission();
       els.panel.hidden = !els.panel.hidden;
       if(!els.panel.hidden){ positionPanelNearBubble(); renderTab(); }
     }
@@ -647,6 +753,7 @@ import {
 
   function showToastForChat(id, c, kind){
     if(kind === 'chats' && c.isAdminChat){
+      notifyNewMessage('Sistem Yöneticiniz', c.lastMessage || 'Yeni mesaj');
       showChatToast({
         title: 'Sistem Yöneticiniz',
         message: c.lastMessage || 'Yeni mesaj',
@@ -663,6 +770,7 @@ import {
     }
     if(kind === 'groups'){
       const title = (c.name || 'Grup') + ' (Grup)';
+      notifyNewMessage(title, c.lastMessage || 'Yeni mesaj');
       showChatToast({
         title, message: c.lastMessage || 'Yeni mesaj', avatarLetter: '👥',
         onClick: () => {
@@ -679,6 +787,7 @@ import {
     const otherUid = (c.participants || []).find(u => u !== currentUser.uid);
     const info = (c.participantInfo && c.participantInfo[otherUid]) || {};
     const label = info.code ? ('Kod: ' + info.code) : 'Kullanıcı';
+    notifyNewMessage(label, c.lastMessage || 'Yeni mesaj');
     showChatToast({
       title: label, message: c.lastMessage || 'Yeni mesaj', avatarLetter: (info.code || '?').slice(0, 1),
       onClick: () => {
@@ -1228,6 +1337,8 @@ import {
     });
   }
 
+  const REACTION_EMOJIS = ['👍','❤️','😂','😮','😢','🙏'];
+
   function renderMessages(msgs){
     if(!msgs.length){
       els.body.innerHTML = `<div class="mmg-chat-empty">Henüz mesaj yok. İlk mesajı siz gönderin!</div>`;
@@ -1242,13 +1353,27 @@ import {
         const info = (groupInfo.memberInfo && groupInfo.memberInfo[m.senderUid]) || {};
         senderLabel = `<div style="font-size:10.5px; color:var(--brass,#C6A15B); margin-bottom:2px; font-family:'IBM Plex Mono',monospace;">${esc(info.code || 'Üye')}</div>`;
       }
+      const reactions = m.reactions || {};
+      const counts = {};
+      Object.keys(reactions).forEach(uid => {
+        const emo = reactions[uid];
+        if(!emo) return;
+        counts[emo] = (counts[emo] || 0) + 1;
+      });
+      const reactionsHtml = Object.keys(counts).length
+        ? `<div class="mmg-chat-reactions">${Object.keys(counts).map(emo =>
+            `<span class="mmg-chat-reaction-pill${reactions[currentUser.uid] === emo ? ' mine' : ''}" data-msg-id="${esc(m.id)}" data-emoji="${esc(emo)}">${emo} ${counts[emo]}</span>`
+          ).join('')}</div>`
+        : '';
       return `<div class="mmg-chat-msg ${mine ? 'me' : ''}">
         <div>
           ${senderLabel}
           <div class="mmg-chat-msg-row">
             <div class="mmg-chat-bubble">${esc(m.text)}</div>
+            <button type="button" class="mmg-chat-react-btn" data-msg-id="${esc(m.id)}" title="Emoji ile tepki ver">🙂+</button>
             ${mine ? `<button type="button" class="mmg-chat-msg-delete" data-msg-id="${esc(m.id)}" title="Mesajı sil">🗑</button>` : ''}
           </div>
+          ${reactionsHtml}
           <div class="mmg-chat-msg-time">${fmtTime(m.createdAt)}</div>
         </div>
       </div>`;
@@ -1260,7 +1385,66 @@ import {
         if(confirm('Bu mesajı silmek istediğinize emin misiniz?')) deleteMessage(msgId);
       });
     });
+    els.body.querySelectorAll('.mmg-chat-react-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openReactPicker(btn, btn.dataset.msgId);
+      });
+    });
+    els.body.querySelectorAll('.mmg-chat-reaction-pill').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        e.stopPropagation();
+        reactToMessage(pill.dataset.msgId, pill.dataset.emoji);
+      });
+    });
     els.body.scrollTop = els.body.scrollHeight;
+  }
+
+  // ---- Mesaja emoji ile tepki ver ----
+  let reactPickerMsgId = null;
+  function openReactPicker(anchorBtn, msgId){
+    if(!els.reactPicker) return;
+    if(reactPickerMsgId === msgId && !els.reactPicker.hidden){ closeReactPicker(); return; }
+    reactPickerMsgId = msgId;
+    els.reactPicker.innerHTML = REACTION_EMOJIS.map(e => `<span data-emoji="${e}">${e}</span>`).join('');
+    els.reactPicker.hidden = false;
+    const rect = anchorBtn.getBoundingClientRect();
+    const pickerW = 210;
+    let left = rect.left - pickerW / 2 + rect.width / 2;
+    left = Math.min(Math.max(8, left), window.innerWidth - pickerW - 8);
+    let top = rect.top - 44;
+    if(top < 8) top = rect.bottom + 6;
+    els.reactPicker.style.left = left + 'px';
+    els.reactPicker.style.top = top + 'px';
+    els.reactPicker.querySelectorAll('span').forEach(span => {
+      span.addEventListener('click', (e) => {
+        e.stopPropagation();
+        reactToMessage(msgId, span.dataset.emoji);
+        closeReactPicker();
+      });
+    });
+  }
+  function closeReactPicker(){
+    if(!els.reactPicker) return;
+    els.reactPicker.hidden = true;
+    reactPickerMsgId = null;
+  }
+  document.addEventListener('click', (e) => {
+    if(els.reactPicker && !els.reactPicker.hidden && !els.reactPicker.contains(e.target)) closeReactPicker();
+  });
+
+  async function reactToMessage(msgId, emoji){
+    if(!msgId || !openChatId || !currentUser) return;
+    try{
+      const msgRef = doc(db, openChatCollection, openChatId, 'messages', msgId);
+      const snap = await getDoc(msgRef);
+      const current = snap.exists() ? (snap.data().reactions || {}) : {};
+      const already = current[currentUser.uid] === emoji;
+      const updated = Object.assign({}, current);
+      if(already){ delete updated[currentUser.uid]; }
+      else { updated[currentUser.uid] = emoji; }
+      await setDoc(msgRef, { reactions: updated }, { merge: true });
+    }catch(e){ console.error('mmg-chat-widget: tepki eklenemedi', e); }
   }
 
   async function deleteMessage(msgId){

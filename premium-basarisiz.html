@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<script src="i18n-core.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>mmgcreativity — Ödeme Başarısız</title>
@@ -19,9 +20,26 @@
 <body>
   <div class="card">
     <div class="icon">⚠️</div>
-    <h1>Ödeme Tamamlanamadı</h1>
-    <p>Ödemeniz gerçekleştirilemedi ya da iptal edildi. Kartınızdan herhangi bir tutar çekilmediyse endişelenmenize gerek yok. Tekrar denemek isterseniz Premium sayfasına dönebilirsiniz.</p>
-    <a href="Premium.html">Tekrar Dene</a>
+    <h1 data-i18n="title">Ödeme Tamamlanamadı</h1>
+    <p data-i18n="desc">Ödemeniz gerçekleştirilemedi ya da iptal edildi. Kartınızdan herhangi bir tutar çekilmediyse endişelenmenize gerek yok. Tekrar denemek isterseniz Premium sayfasına dönebilirsiniz.</p>
+    <a href="premium.html" data-i18n="btn">Tekrar Dene</a>
   </div>
+
+<script>
+(function(){
+  MMGI18N.registerDict({
+    tr: {
+      title:'Ödeme Tamamlanamadı', desc:'Ödemeniz gerçekleştirilemedi ya da iptal edildi. Kartınızdan herhangi bir tutar çekilmediyse endişelenmenize gerek yok. Tekrar denemek isterseniz Premium sayfasına dönebilirsiniz.',
+      btn:'Tekrar Dene'
+    },
+    en: {
+      title:'Payment Could Not Be Completed', desc:'Your payment could not be completed or was cancelled. If no amount was charged to your card, there is no need to worry. You can return to the Premium page to try again.',
+      btn:'Try Again'
+    }
+  });
+  MMGI18N.detectAndApplyDefaultLang();
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

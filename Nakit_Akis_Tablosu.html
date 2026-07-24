@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<script src="i18n-core.js"></script>
 <script>
 (function(){
   try{
@@ -656,10 +657,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="trial-block-overlay" id="trialBlockOverlay" hidden>
   <div class="trial-block-card">
     <div class="trial-block-icon">🔒</div>
-    <h2>Ücretsiz Deneme Süreniz Sona Erdi</h2>
-    <p>Nakit Akış Tablosu premium üyelere aittir. 90 günlük ücretsiz deneme sürenizi tamamladınız — kullanmaya devam etmek için premium üyeliğe geçmeniz gerekiyor.</p>
-    <a href="iletisim.html" class="trial-block-btn">Premium Üyelik Hakkında Bilgi Al</a>
-    <a href="index.html" class="trial-block-link">← Ana Sayfa</a>
+    <h2 data-i18n="trial_over_title">Ücretsiz Deneme Süreniz Sona Erdi</h2>
+    <p data-i18n="trial_over_desc">Nakit Akış Tablosu premium üyelere aittir. 90 günlük ücretsiz deneme sürenizi tamamladınız — kullanmaya devam etmek için premium üyeliğe geçmeniz gerekiyor.</p>
+    <a href="iletisim.html" class="trial-block-btn" data-i18n="trial_over_cta">Premium Üyelik Hakkında Bilgi Al</a>
+    <a href="index.html" class="trial-block-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </div>
 
@@ -678,7 +679,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
             <div class="date-controls-group" id="dateNavGroup">
               <div class="month-nav">
-                <button type="button" class="nav-arrow-btn" id="prevMonthBtn" title="Önceki">◀</button>
+                <button type="button" class="nav-arrow-btn" id="prevMonthBtn" title="Önceki" data-i18n-title="prev">◀</button>
                 <div class="custom-select" id="daySelect" style="width:46px; display:none;">
                   <button type="button" class="select-trigger" id="dayTrigger"><span id="dayTriggerLabel">—</span></button>
                   <div class="select-options" id="dayOptions"></div>
@@ -691,7 +692,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                   <button type="button" class="select-trigger" id="yearTrigger"><span id="yearTriggerLabel">—</span></button>
                   <div class="select-options" id="yearOptions"></div>
                 </div>
-                <button type="button" class="nav-arrow-btn" id="nextMonthBtn" title="Sonraki">▶</button>
+                <button type="button" class="nav-arrow-btn" id="nextMonthBtn" title="Sonraki" data-i18n-title="next">▶</button>
               </div>
               <button type="button" class="ghost-btn" id="gotoTodayBtn">📍 <span data-i18n="goto_today">Bugün</span></button>
               <button type="button" class="ghost-btn" id="manualSaveBtn">💾 <span data-i18n="save_btn">Kaydet</span></button>
@@ -706,7 +707,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="weeks-container" id="weeksContainer"></div>
 
         <div class="archive-wrap" id="archiveContainer" style="display:none;">
-          <div class="section-title">Arşivlenmiş Raporlarım</div>
+          <div class="section-title" data-i18n="archived_reports_title">Arşivlenmiş Raporlarım</div>
           <div class="archive-list" id="archiveList"></div>
         </div>
       </div>
@@ -730,8 +731,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
         <div class="archive-btn-group">
-          <button type="button" class="archive-save-btn" id="archiveSaveBtn">🗄 Bu Raporu Arşivle</button>
-          <button type="button" class="archive-save-btn" id="viewArchiveBtn">📁 Arşiv</button>
+          <button type="button" class="archive-save-btn" id="archiveSaveBtn">🗄 <span data-i18n="archive_save_btn">Bu Raporu Arşivle</span></button>
+          <button type="button" class="archive-save-btn" id="viewArchiveBtn">📁 <span data-i18n="archive_view_btn">Arşiv</span></button>
         </div>
       </div>
     </div>
@@ -805,14 +806,62 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     category:'Category', amount:'Amount', addBtn:'+ Add', descPlaceholderExpense:'e.g. Rent, Electricity bill...',
     descPlaceholderIncome:'e.g. Rent Income, Cash Collection...', date:'Date', month:'Month',
     today:'Today', ofYear:'year', moreThanSpent:'you are net positive', lessThanSpent:'you are net negative',
-    janToDec:'January - December · click a month to open it'
+    janToDec:'January - December · click a month to open it',
+    archiveEmpty:'You have no archived reports yet. You can save your reports here by clicking the "🗄 Archive This Report" button in the Daily, Weekly, Monthly, or Yearly tabs.',
+    saved:'Saved ✓', cloudLoaded:'Your cloud data has been loaded.',
+    memberRequired:'You need to sign in as a member to use this feature (not available in guest mode).',
+    guestDataMigrated:'The data you entered as a guest has been transferred to your account ✓',
+    savedInBrowser:'Saved (in this browser).', savedInBrowser2:'Saved ✓ (stored in this browser).',
+    confirmClearMonth:'Are you sure you want to delete all records for this month?',
+    monthCleared:'Month cleared. You can undo it with "Undo".',
+    undone:'Undone.', noDescription:'(no description)',
+    prevYear:'Previous year', prevMonth:'Previous month', nextYear:'Next year', nextMonth:'Next month',
+    weekLabel:'Week', noRecordForReport:'No report to save. First enter data in the Daily, Weekly, Monthly, or Yearly tab.',
+    reportArchived:'Report saved to archive.', confirmDeleteArchived:'Are you sure you want to delete this archived report?',
+    increased:'increased', decreased:'decreased',
+    noRecordDay:'No entries yet for this day. You can add expenses or income above.',
+    noRecordWeek:'No entries yet for this week.',
+    noRecordMonth:'No entries yet for this month. You can start adding by clicking an expense or income for a date.',
+    enterValidAmount:'Please enter a valid amount.',
+    colDay:'Day', colWeeklyNet:'Weekly Net', colType:'Type', colDescription:'Description',
+    cashflowFileName:'Cash Flow', excelDownloaded:'Excel file downloaded.', excelError:'An error occurred while creating the Excel file.',
+    cashflowTableTitle:'Cash Flow Table — ', appFooterTag:'mmgcreativity.com · Digital Finance Assistant', createdAt:'Created: ',
+    pdfDownloaded:'PDF file downloaded.', pdfError:'An error occurred while creating the PDF file.',
+    thisYear:'this year', vsLastYear:'compared to last year', vsLastMonth:'compared to last month',
+    vsPrevWeek:'compared to the previous week', vsPrevDay:'compared to the previous day'
   } : {
     expense:'Gider', income:'Gelir', net:'Net', desc:'Açıklama', optional:'(opsiyonel)',
     category:'Kategori', amount:'Tutar', addBtn:'+ Ekle', descPlaceholderExpense:'örn. Kira, Elektrik faturası...',
     descPlaceholderIncome:'örn. Kira Geliri, Nakit Tahsilat...', date:'Tarih', month:'Ay',
     today:'Bugün', ofYear:'yılında', moreThanSpent:'fazla veriyorsunuz', lessThanSpent:'açık veriyorsunuz',
-    janToDec:'Ocak - Aralık · bir aya tıklayarak o ayı açabilirsiniz'
+    janToDec:'Ocak - Aralık · bir aya tıklayarak o ayı açabilirsiniz',
+    archiveEmpty:'Henüz arşivlenmiş bir raporunuz yok. Günlük, Haftalık, Aylık veya Yıllık sekmelerinde "🗄 Bu Raporu Arşivle" butonuna basarak raporlarınızı buraya kaydedebilirsiniz.',
+    saved:'Kaydedildi ✓', cloudLoaded:'Bulut verileriniz yüklendi.',
+    memberRequired:'Bu özelliği kullanmak için üye girişi yapmanız gerekiyor (misafir modunda kullanılamaz).',
+    guestDataMigrated:'Misafir modunda girdiğiniz veriler hesabınıza aktarıldı ✓',
+    savedInBrowser:'Kaydedildi (bu tarayıcıda).', savedInBrowser2:'Kaydedildi ✓ (bu tarayıcıda saklanıyor).',
+    confirmClearMonth:'Bu ayın tüm kayıtlarını silmek istediğinize emin misiniz?',
+    monthCleared:'Ay temizlendi. "Geri Al" ile eski haline döndürebilirsiniz.',
+    undone:'Geri alındı.', noDescription:'(açıklama yok)',
+    prevYear:'Önceki yıl', prevMonth:'Önceki ay', nextYear:'Sonraki yıl', nextMonth:'Sonraki ay',
+    weekLabel:'Hafta', noRecordForReport:'Kaydedilecek bir rapor bulunamadı. Önce Günlük, Haftalık, Aylık veya Yıllık sekmesinde veri girişi yapın.',
+    reportArchived:'Rapor arşive kaydedildi.', confirmDeleteArchived:'Bu arşivlenmiş raporu silmek istediğinize emin misiniz?',
+    increased:'arttı', decreased:'azaldı',
+    noRecordDay:'Bu gün için henüz kayıt yok. Yukarıdan gider veya gelir ekleyebilirsiniz.',
+    noRecordWeek:'Bu hafta için henüz kayıt yok.',
+    noRecordMonth:'Bu ay için henüz kayıt yok. Bir tarihe ait gider veya gelire tıklayarak eklemeye başlayabilirsiniz.',
+    enterValidAmount:'Lütfen geçerli bir tutar girin.',
+    colDay:'Gün', colWeeklyNet:'Haftalık Net', colType:'Tür', colDescription:'Açıklama',
+    cashflowFileName:'Nakit Akışı', excelDownloaded:'Excel dosyası indirildi.', excelError:'Excel oluşturulurken hata oluştu.',
+    cashflowTableTitle:'Nakit Akış Tablosu — ', appFooterTag:'mmgcreativity.com · Dijital Finans Asistanı', createdAt:'Oluşturulma: ',
+    pdfDownloaded:'PDF dosyası indirildi.', pdfError:'PDF oluşturulurken hata oluştu.',
+    thisYear:'bu yıl', vsLastYear:'geçen yıla göre', vsLastMonth:'geçen aya göre',
+    vsPrevWeek:'önceki haftaya göre', vsPrevDay:'bir önceki güne göre'
   };
+  function weekOrdinal(n){ return MMG_LANG === 'en' ? (NAT.weekLabel + ' ' + n) : (n + '. ' + NAT.weekLabel); }
+  const NAT_TABS = MMG_LANG === 'en'
+    ? { daily:'Daily', weekly:'Weekly', monthly:'Monthly', yearly:'Yearly' }
+    : { daily:'Günlük', weekly:'Haftalık', monthly:'Aylık', yearly:'Yıllık' };
   const CAT_COLORS = ['coral','magenta','violet','azure','teal','amber','red','blue'];
   const CAT_ALL = GIDER_CATS.concat(GELIR_CATS);
 
@@ -922,7 +971,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'cashflow', mk), {
         data: monthData, updatedAt: new Date().toISOString()
       });
-      showCloudMsg('Kaydedildi ✓');
+      showCloudMsg(NAT.saved);
     }catch(err){ /* sessizce geç */ }
   }
 
@@ -963,7 +1012,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(cloud){
         monthData = cloud;
         render();
-        showCloudMsg('Bulut verileriniz yüklendi.');
+        showCloudMsg(NAT.cloudLoaded);
       }
     }
   }
@@ -988,7 +1037,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function requireMember(){
     if(MMG_GATE_DISABLED_FOR_PREVIEW) return true;
     if(!isMember()){
-      showIoMsg('Bu özelliği kullanmak için üye girişi yapmanız gerekiyor (misafir modunda kullanılamaz).', true);
+      showIoMsg(NAT.memberRequired, true);
       return false;
     }
     return true;
@@ -1049,7 +1098,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     if(isMember()){
       const migrated = await migrateLocalGuestDataToCloud();
-      if(migrated) showCloudMsg('Misafir modunda girdiğiniz veriler hesabınıza aktarıldı ✓');
+      if(migrated) showCloudMsg(NAT.guestDataMigrated);
     }
     loadMonth();
   });
@@ -1176,7 +1225,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(isMember()){
       await saveCloud(mk);
     } else {
-      showIoMsg('Kaydedildi (bu tarayıcıda).');
+      showIoMsg(NAT.savedInBrowser);
     }
   });
 
@@ -1184,14 +1233,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   let clearedBackupKey = null;
 
   document.getElementById('clearMonthBtn').addEventListener('click', ()=>{
-    if(!confirm('Bu ayın tüm kayıtlarını silmek istediğinize emin misiniz?')) return;
+    if(!confirm(NAT.confirmClearMonth)) return;
     clearedBackup = JSON.parse(JSON.stringify(monthData));
     clearedBackupKey = monthKeyOf(selYear, selMonth);
     monthData = {};
     scheduleSave();
     render();
     document.getElementById('undoClearBtn').style.display = '';
-    showIoMsg('Ay temizlendi. "Geri Al" ile eski haline döndürebilirsiniz.');
+    showIoMsg(NAT.monthCleared);
   });
 
   document.getElementById('undoClearBtn').addEventListener('click', ()=>{
@@ -1199,7 +1248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       monthData = clearedBackup;
       scheduleSave();
       render();
-      showIoMsg('Geri alındı.');
+      showIoMsg(NAT.undone);
     }
     clearedBackup = null;
     clearedBackupKey = null;
@@ -1212,7 +1261,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(isMember()){
       await saveCloud(mk);
     } else {
-      showIoMsg('Kaydedildi ✓ (bu tarayıcıda saklanıyor).');
+      showIoMsg(NAT.savedInBrowser2);
     }
   });
 
@@ -1247,7 +1296,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       items.forEach(it => {
         html += '<div class="item-row">' +
           '<div class="item-row-main">' +
-            '<span class="item-desc">' + escapeHtml(it.desc || '(açıklama yok)') + '</span>' +
+            '<span class="item-desc">' + escapeHtml(it.desc || NAT.noDescription) + '</span>' +
             '<span class="item-cat" style="color:'+catColorVar(it.category)+';border-color:'+catColorVar(it.category)+'44;">' + escapeHtml(catLabel(it.category)) + '</span>' +
           '</div>' +
           '<div class="item-row-main">' +
@@ -1326,7 +1375,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     return '<div class="week-card">' +
       '<div class="week-header">' +
-        '<div class="week-header-left"><span class="week-title">' + (wIdx+1) + '. Hafta</span><span class="week-range">' + rangeLabel + '</span></div>' +
+        '<div class="week-header-left"><span class="week-title">' + weekOrdinal(wIdx+1) + '</span><span class="week-range">' + rangeLabel + '</span></div>' +
         '<span class="week-net ' + weekNetClass + '">' + (weekNet>=0?'+':'-') + fmtMoney(Math.abs(weekNet)) + '</span>' +
       '</div>' +
       '<table class="day-table"><thead><tr><th>'+NAT.date+'</th><th>'+NAT.expense+'</th><th>'+NAT.income+'</th><th>'+NAT.net+'</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
@@ -1364,8 +1413,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     // Yıllık sekmede ay seçimi anlamsız — sadece yıl kalsın
     document.getElementById('monthSelect').style.display = isYearly ? 'none' : '';
-    document.getElementById('prevMonthBtn').title = isYearly ? 'Önceki yıl' : 'Önceki ay';
-    document.getElementById('nextMonthBtn').title = isYearly ? 'Sonraki yıl' : 'Sonraki ay';
+    document.getElementById('prevMonthBtn').title = isYearly ? NAT.prevYear : NAT.prevMonth;
+    document.getElementById('nextMonthBtn').title = isYearly ? NAT.nextYear : NAT.nextMonth;
 
     // "Temizle" yalnızca tek bir ay üzerinde anlamlı
     document.getElementById('manualSaveBtn').style.display = isYearly ? 'none' : '';
@@ -1433,7 +1482,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(reportTab === 'haftalik'){
       let html = '';
       weeks.forEach((week, idx) => {
-        html += '<button type="button" class="picker-pill '+(idx===reportWeekIdx?'active':'')+'" data-week="'+idx+'">'+(idx+1)+'. Hafta</button>';
+        html += '<button type="button" class="picker-pill '+(idx===reportWeekIdx?'active':'')+'" data-week="'+idx+'">'+weekOrdinal(idx+1)+'</button>';
       });
       picker.innerHTML = html;
     } else {
@@ -1538,18 +1587,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const items = [];
 
     if(gTotal === 0 && iTotal === 0){
-      reportsList.innerHTML = '<div class="reports-empty">' + selYear + ' yılı için henüz kayıt yok.</div>';
+      reportsList.innerHTML = '<div class="reports-empty">' + (MMG_LANG==='en' ? ('No records yet for ' + selYear + '.') : (selYear + ' yılı için henüz kayıt yok.')) + '</div>';
       bdWrap.style.display = 'none';
       lastReportSnapshot = null;
       return;
     }
 
     if(net < 0){
-      items.push({cls:'bad', icon:'⚠️', text: selYear + ' yılında yaklaşık <b>' + fmtMoney(Math.abs(net)) + '</b> açık verdiniz.'});
+      items.push({cls:'bad', icon:'⚠️', text: MMG_LANG==='en' ? ('In ' + selYear + ' you had an estimated deficit of <b>' + fmtMoney(Math.abs(net)) + '</b>.') : (selYear + ' yılında yaklaşık <b>' + fmtMoney(Math.abs(net)) + '</b> açık verdiniz.')});
     } else if(net === 0){
-      items.push({cls:'info', icon:'ℹ️', text: selYear + ' yılında gelir ve gideriniz dengede.'});
+      items.push({cls:'info', icon:'ℹ️', text: MMG_LANG==='en' ? ('In ' + selYear + ' your income and expenses were balanced.') : (selYear + ' yılında gelir ve gideriniz dengede.')});
     } else {
-      items.push({cls:'good', icon:'✅', text: selYear + ' yılında net <b>' + fmtMoney(net) + '</b> fazla verdiniz.'});
+      items.push({cls:'good', icon:'✅', text: MMG_LANG==='en' ? ('In ' + selYear + ' you had a net surplus of <b>' + fmtMoney(net) + '</b>.') : (selYear + ' yılında net <b>' + fmtMoney(net) + '</b> fazla verdiniz.')});
     }
 
     let maxGiderMonth = null, maxGiderVal = -Infinity, worstNetMonth = null, worstNetVal = Infinity;
@@ -1559,10 +1608,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(n < worstNetVal){ worstNetVal = n; worstNetMonth = mo; }
     });
     if(maxGiderVal > 0){
-      items.push({cls:'info', icon:'📅', text:'En yüksek gider ayınız: <b>' + AY_ADLARI[maxGiderMonth.m] + '</b> (' + fmtMoney(maxGiderVal) + ').'});
+      items.push({cls:'info', icon:'📅', text: (MMG_LANG==='en' ? 'Your highest expense month: <b>' : 'En yüksek gider ayınız: <b>') + AY_ADLARI[maxGiderMonth.m] + '</b> (' + fmtMoney(maxGiderVal) + ').'});
     }
     if(worstNetMonth && worstNetVal < 0){
-      items.push({cls:'warn', icon:'⚠️', text:'En çok açık verdiğiniz ay: <b>' + AY_ADLARI[worstNetMonth.m] + '</b> (' + fmtMoney(Math.abs(worstNetVal)) + ' açık).'});
+      items.push({cls:'warn', icon:'⚠️', text: MMG_LANG==='en' ? ('Your month with the largest deficit: <b>' + AY_ADLARI[worstNetMonth.m] + '</b> (deficit of ' + fmtMoney(Math.abs(worstNetVal)) + ').') : ('En çok açık verdiğiniz ay: <b>' + AY_ADLARI[worstNetMonth.m] + '</b> (' + fmtMoney(Math.abs(worstNetVal)) + ' açık).')});
     }
 
     const giderCatSorted = Object.entries(giderByCat).sort((a,b)=>b[1]-a[1]);
@@ -1575,7 +1624,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         items.push({
           cls: isCredit ? 'warn' : 'info',
           icon: isCredit ? '💳' : '📊',
-          text: '<b>' + escapeHtml(topCat) + '</b> kalemi, yıllık giderinizin yaklaşık <b>%' + pct.toFixed(0) + '</b>\'ini oluşturuyor' + (isCredit ? ' — yıl boyunca kredi/kredi kartı yükünüz dikkat çekici seviyede.' : '.')
+          text: MMG_LANG==='en'
+            ? ('<b>' + escapeHtml(catLabel(topCat)) + '</b> makes up roughly <b>%' + pct.toFixed(0) + '</b> of your annual expenses' + (isCredit ? ' — your loan/credit card burden is notably high over the year.' : '.'))
+            : ('<b>' + escapeHtml(topCat) + '</b> kalemi, yıllık giderinizin yaklaşık <b>%' + pct.toFixed(0) + '</b>\'ini oluşturuyor' + (isCredit ? ' — yıl boyunca kredi/kredi kartı yükünüz dikkat çekici seviyede.' : '.'))
         });
       }
     }
@@ -1584,7 +1635,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(reportTab !== 'yillik' || selYear !== requestYear) return;
     let prevG = 0, prevI = 0;
     prevMonths.forEach(mo => { prevG += mo.gider; prevI += mo.gelir; });
-    pushCompareInsights(items, gTotal, prevG, iTotal, prevI, 'geçen yıla göre');
+    pushCompareInsights(items, gTotal, prevG, iTotal, prevI, NAT.vsLastYear);
 
     reportsList.innerHTML = items.map(it =>
       '<div class="report-item ' + it.cls + '"><span class="ric">' + it.icon + '</span><span>' + it.text + '</span></div>'
@@ -1617,16 +1668,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const weeks = buildWeeks(selYear, selMonth);
       const week = weeks[reportWeekIdx] || weeks[0] || [];
       const rangeTxt = week.length ? (week[0] + ' - ' + week[week.length-1] + ' ' + AY_ADLARI[selMonth]) : '';
-      return (reportWeekIdx+1) + '. Hafta (' + rangeTxt + ') · ' + selYear;
+      return weekOrdinal(reportWeekIdx+1) + ' (' + rangeTxt + ') · ' + selYear;
     }
     if(reportTab === 'yillik'){
-      return selYear + ' Yılı';
+      return selYear + (MMG_LANG==='en' ? '' : ' Yılı');
     }
     return AY_ADLARI[selMonth] + ' ' + selYear;
   }
 
   function scopeBadgeLabel(scope){
-    return scope === 'gunluk' ? 'Günlük' : scope === 'haftalik' ? 'Haftalık' : scope === 'yillik' ? 'Yıllık' : 'Aylık';
+    return scope === 'gunluk' ? NAT_TABS.daily : scope === 'haftalik' ? NAT_TABS.weekly : scope === 'yillik' ? NAT_TABS.yearly : NAT_TABS.monthly;
   }
 
   function localArchiveKey(){ return 'mmg_nat_archive'; }
@@ -1740,20 +1791,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const list = await loadArchiveList();
     if(reportTab !== 'arsiv') return;
     if(!list.length){
-      wrap.innerHTML = '<div class="list-empty">Henüz arşivlenmiş bir raporunuz yok. Günlük, Haftalık, Aylık veya Yıllık sekmelerinde "🗄 Bu Raporu Arşivle" butonuna basarak raporlarınızı buraya kaydedebilirsiniz.</div>';
+      wrap.innerHTML = '<div class="list-empty">' + NAT.archiveEmpty + '</div>';
       return;
     }
     wrap.innerHTML = list.map(entry => buildArchiveCardHtml(entry)).join('');
   }
 
   async function saveCurrentReportToArchive(){
-    if(!lastReportSnapshot){ showIoMsg('Kaydedilecek bir rapor bulunamadı. Önce Günlük, Haftalık, Aylık veya Yıllık sekmesinde veri girişi yapın.', true); return; }
+    if(!lastReportSnapshot){ showIoMsg(NAT.noRecordForReport, true); return; }
     const entry = Object.assign({}, lastReportSnapshot, {
       id: 'arc_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
       savedAt: new Date().toISOString()
     });
     await saveArchiveEntry(entry);
-    showIoMsg('Rapor arşive kaydedildi.');
+    showIoMsg(NAT.reportArchived);
   }
 
   document.getElementById('archiveSaveBtn').addEventListener('click', saveCurrentReportToArchive);
@@ -1772,7 +1823,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     const delBtn = e.target.closest('[data-action="delete-archive"]');
     if(delBtn){
-      if(!confirm('Bu arşivlenmiş raporu silmek istediğinize emin misiniz?')) return;
+      if(!confirm(NAT.confirmDeleteArchived)) return;
       await deleteArchiveEntry(delBtn.dataset.id);
       renderArchiveTab();
       return;
@@ -1784,13 +1835,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(prevGider > 0){
       const diffPct = ((curGider - prevGider) / prevGider) * 100;
       if(Math.abs(diffPct) >= 5){
-        items.push({cls: diffPct>0?'warn':'good', icon: diffPct>0?'📈':'📉', text:'Gideriniz '+phrase+' <b>%'+Math.abs(diffPct).toFixed(0)+'</b> '+(diffPct>0?'arttı':'azaldı')+'.'});
+        items.push({cls: diffPct>0?'warn':'good', icon: diffPct>0?'📈':'📉', text:(MMG_LANG==='en' ? ('Your expenses '+phrase+' <b>%'+Math.abs(diffPct).toFixed(0)+'</b> '+(diffPct>0?NAT.increased:NAT.decreased)+'.') : ('Gideriniz '+phrase+' <b>%'+Math.abs(diffPct).toFixed(0)+'</b> '+(diffPct>0?NAT.increased:NAT.decreased)+'.'))});
       }
     }
     if(prevGelir > 0){
       const diffPctG = ((curGelir - prevGelir) / prevGelir) * 100;
       if(Math.abs(diffPctG) >= 5){
-        items.push({cls: diffPctG>0?'good':'warn', icon: diffPctG>0?'📈':'📉', text:'Geliriniz '+phrase+' <b>%'+Math.abs(diffPctG).toFixed(0)+'</b> '+(diffPctG>0?'arttı':'azaldı')+'.'});
+        items.push({cls: diffPctG>0?'good':'warn', icon: diffPctG>0?'📈':'📉', text:(MMG_LANG==='en' ? ('Your income '+phrase+' <b>%'+Math.abs(diffPctG).toFixed(0)+'</b> '+(diffPctG>0?NAT.increased:NAT.decreased)+'.') : ('Geliriniz '+phrase+' <b>%'+Math.abs(diffPctG).toFixed(0)+'</b> '+(diffPctG>0?NAT.increased:NAT.decreased)+'.'))});
       }
     }
   }
@@ -1818,12 +1869,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const weeksNow = buildWeeks(selYear, selMonth);
       const curWeek = weeksNow[reportWeekIdx] || [];
       const isCurrentWeek = curWeek.some(d => dayKey(selYear, selMonth, d) === todayKey);
-      periodTag = isCurrentWeek ? 'Bu Hafta' : (AY_ADLARI[selMonth] + ' ' + (reportWeekIdx+1) + '. Hafta');
-      periodWord = isCurrentWeek ? 'Bu hafta' : periodTag;
+      periodTag = isCurrentWeek ? (MMG_LANG==='en' ? 'This Week' : 'Bu Hafta') : (AY_ADLARI[selMonth] + ' ' + weekOrdinal(reportWeekIdx+1));
+      periodWord = isCurrentWeek ? (MMG_LANG==='en' ? 'This week' : 'Bu hafta') : periodTag;
     } else {
       const isCurrentMonth = (selYear === today.getFullYear() && selMonth === today.getMonth());
-      periodTag = isCurrentMonth ? 'Bu Ay' : (AY_ADLARI[selMonth] + ' ' + selYear);
-      periodWord = isCurrentMonth ? 'Bu ay' : periodTag;
+      periodTag = isCurrentMonth ? (MMG_LANG==='en' ? 'This Month' : 'Bu Ay') : (AY_ADLARI[selMonth] + ' ' + selYear);
+      periodWord = isCurrentMonth ? (MMG_LANG==='en' ? 'This month' : 'Bu ay') : periodTag;
     }
 
     document.getElementById('sumGelirLabel').textContent = NAT.income + ' · ' + periodTag;
@@ -1841,9 +1892,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const items = [];
 
     if(gTotal === 0 && iTotal === 0){
-      const emptyMsg = reportTab === 'gunluk' ? 'Bu gün için henüz kayıt yok. Yukarıdan gider veya gelir ekleyebilirsiniz.' :
-                        reportTab === 'haftalik' ? 'Bu hafta için henüz kayıt yok.' :
-                        'Bu ay için henüz kayıt yok. Bir tarihe ait gider veya gelire tıklayarak eklemeye başlayabilirsiniz.';
+      const emptyMsg = reportTab === 'gunluk' ? NAT.noRecordDay :
+                        reportTab === 'haftalik' ? NAT.noRecordWeek :
+                        NAT.noRecordMonth;
       reportsList.innerHTML = '<div class="reports-empty">' + emptyMsg + '</div>';
       bdWrap.style.display = 'none';
       lastReportSnapshot = null;
@@ -1851,11 +1902,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     if(net < 0){
-      items.push({cls:'bad', icon:'⚠️', text: periodWord + ' yaklaşık <b>' + fmtMoney(Math.abs(net)) + '</b> açık verdiniz. Gelirlerinizi artırmayı veya giderlerinizi gözden geçirmeyi düşünebilirsiniz.'});
+      items.push({cls:'bad', icon:'⚠️', text: MMG_LANG==='en' ? (periodWord + ' you had an estimated deficit of <b>' + fmtMoney(Math.abs(net)) + '</b>. You may want to increase your income or review your expenses.') : (periodWord + ' yaklaşık <b>' + fmtMoney(Math.abs(net)) + '</b> açık verdiniz. Gelirlerinizi artırmayı veya giderlerinizi gözden geçirmeyi düşünebilirsiniz.')});
     } else if(net === 0){
-      items.push({cls:'info', icon:'ℹ️', text: periodWord + ' gelir ve gideriniz tam olarak dengede.'});
+      items.push({cls:'info', icon:'ℹ️', text: MMG_LANG==='en' ? (periodWord + ' your income and expenses were exactly balanced.') : (periodWord + ' gelir ve gideriniz tam olarak dengede.')});
     } else {
-      items.push({cls:'good', icon:'✅', text: periodWord + ' net <b>' + fmtMoney(net) + '</b> fazla verdiniz.'});
+      items.push({cls:'good', icon:'✅', text: MMG_LANG==='en' ? (periodWord + ' you had a net surplus of <b>' + fmtMoney(net) + '</b>.') : (periodWord + ' net <b>' + fmtMoney(net) + '</b> fazla verdiniz.')});
     }
 
     let monthlyWeeks = null;
@@ -1870,10 +1921,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
         if(wg > maxGiderWeekVal){ maxGiderWeekVal = wg; maxGiderWeekIdx = idx; }
         const first = week[0], last = week[week.length-1];
-        return { label: (idx+1) + '. Hafta (' + first + '-' + last + ' ' + AY_ADLARI[selMonth] + ')', gider: wg, gelir: wi, net: wi - wg };
+        return { label: weekOrdinal(idx+1) + ' (' + first + '-' + last + ' ' + AY_ADLARI[selMonth] + ')', gider: wg, gelir: wi, net: wi - wg };
       });
       if(maxGiderWeekVal > 0){
-        items.push({cls:'info', icon:'📅', text:'En yüksek gider haftanız: <b>' + (maxGiderWeekIdx+1) + '. Hafta</b> (' + fmtMoney(maxGiderWeekVal) + ').'});
+        items.push({cls:'info', icon:'📅', text:(MMG_LANG==='en' ? ('Your highest expense week: <b>' + weekOrdinal(maxGiderWeekIdx+1) + '</b> (' + fmtMoney(maxGiderWeekVal) + ').') : ('En yüksek gider haftanız: <b>' + weekOrdinal(maxGiderWeekIdx+1) + '</b> (' + fmtMoney(maxGiderWeekVal) + ').'))});
       }
     }
 
@@ -1881,7 +1932,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       let maxDayKey = null, maxDayVal = -Infinity;
       keys.forEach(key => { const g = dayTotal(key,'gider'); if(g > maxDayVal){ maxDayVal = g; maxDayKey = key; } });
       if(maxDayVal > 0){
-        items.push({cls:'info', icon:'📅', text:'Bu haftanın en yüksek gider günü: <b>' + formatDayKeyLabel(maxDayKey) + '</b> (' + fmtMoney(maxDayVal) + ').'});
+        items.push({cls:'info', icon:'📅', text:(MMG_LANG==='en' ? 'This week\'s highest expense day: <b>' : 'Bu haftanın en yüksek gider günü: <b>') + formatDayKeyLabel(maxDayKey) + '</b> (' + fmtMoney(maxDayVal) + ').'});
       }
     }
 
@@ -1895,7 +1946,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
       if(allItems.length){
         const top = allItems.slice().sort((a,b)=>b.amount-a.amount)[0];
-        items.push({cls:'info', icon:'🔎', text:'En yüksek kalem: <b>' + escapeHtml(top.desc || top.category) + '</b> (' + fmtMoney(top.amount) + ', ' + (top.type==='gider'?'gider':'gelir') + ').'});
+        items.push({cls:'info', icon:'🔎', text:(MMG_LANG==='en' ? 'Largest item: <b>' : 'En yüksek kalem: <b>') + escapeHtml(top.desc || catLabel(top.category)) + '</b> (' + fmtMoney(top.amount) + ', ' + (MMG_LANG==='en' ? (top.type==='gider'?'expense':'income') : (top.type==='gider'?'gider':'gelir')) + ').'});
       }
     }
 
@@ -1910,12 +1961,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         items.push({
           cls: isCredit ? 'warn' : 'info',
           icon: isCredit ? '💳' : '📊',
-          text: '<b>' + escapeHtml(topCat) + '</b> kalemi, ' + periodWord.toLowerCase() + ' giderinizin yaklaşık <b>%' + pct.toFixed(0) + '</b>\'ini oluşturuyor' + (isCredit ? ' — kredi/kredi kartı yükünüz dikkat çekici seviyede.' : '.')
+          text: MMG_LANG==='en'
+            ? ('<b>' + escapeHtml(catLabel(topCat)) + '</b> makes up roughly <b>%' + pct.toFixed(0) + '</b> of ' + periodWord.toLowerCase() + '\'s expenses' + (isCredit ? ' — your loan/credit card burden is notably high.' : '.'))
+            : ('<b>' + escapeHtml(topCat) + '</b> kalemi, ' + periodWord.toLowerCase() + ' giderinizin yaklaşık <b>%' + pct.toFixed(0) + '</b>\'ini oluşturuyor' + (isCredit ? ' — kredi/kredi kartı yükünüz dikkat çekici seviyede.' : '.'))
         });
       }
     }
     if(gelirCatSorted.length === 1 && iTotal > 0 && keys.length > 1){
-      items.push({cls:'warn', icon:'🎯', text: periodWord + ' geliriniz tamamen <b>' + escapeHtml(gelirCatSorted[0][0]) + '</b> kaynağına bağlı. Gelir çeşitliliğinizi artırmayı düşünebilirsiniz.'});
+      items.push({cls:'warn', icon:'🎯', text: MMG_LANG==='en' ? (periodWord + ' your income relied entirely on <b>' + escapeHtml(catLabel(gelirCatSorted[0][0])) + '</b>. You may want to diversify your income sources.') : (periodWord + ' geliriniz tamamen <b>' + escapeHtml(gelirCatSorted[0][0]) + '</b> kaynağına bağlı. Gelir çeşitliliğinizi artırmayı düşünebilirsiniz.')});
     }
 
     if(reportTab === 'aylik'){
@@ -1928,7 +1981,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           prevGider += (day.gider||[]).reduce((s,i)=>s+i.amount,0);
           prevGelir += (day.gelir||[]).reduce((s,i)=>s+i.amount,0);
         });
-        pushCompareInsights(items, gTotal, prevGider, iTotal, prevGelir, 'geçen aya göre');
+        pushCompareInsights(items, gTotal, prevGider, iTotal, prevGelir, NAT.vsLastMonth);
       }
     } else if(reportTab === 'haftalik'){
       const weeks = buildWeeks(selYear, selMonth);
@@ -1936,7 +1989,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const prevWeek = weeks[reportWeekIdx-1] || [];
         let prevGider = 0, prevGelir = 0;
         prevWeek.forEach(d => { const k = dayKey(selYear, selMonth, d); prevGider += dayTotal(k,'gider'); prevGelir += dayTotal(k,'gelir'); });
-        pushCompareInsights(items, gTotal, prevGider, iTotal, prevGelir, 'önceki haftaya göre');
+        pushCompareInsights(items, gTotal, prevGider, iTotal, prevGelir, NAT.vsPrevWeek);
       }
     } else if(reportTab === 'gunluk'){
       if(reportDay > 1){
@@ -1945,7 +1998,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(prevDay){
           const prevGider = (prevDay.gider||[]).reduce((s,i)=>s+i.amount,0);
           const prevGelir = (prevDay.gelir||[]).reduce((s,i)=>s+i.amount,0);
-          pushCompareInsights(items, gTotal, prevGider, iTotal, prevGelir, 'bir önceki güne göre');
+          pushCompareInsights(items, gTotal, prevGider, iTotal, prevGelir, NAT.vsPrevDay);
         }
       }
     }
@@ -2023,7 +2076,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const catIn = form.querySelector('.cat-in');
       const amountIn = form.querySelector('.amount-in');
       const amount = parseTR(amountIn.value);
-      if(amount <= 0){ showIoMsg('Lütfen geçerli bir tutar girin.', true); amountIn.focus(); return; }
+      if(amount <= 0){ showIoMsg(NAT.enterValidAmount, true); amountIn.focus(); return; }
       const day = ensureDay(key);
       day.expanded[type] = true;
       day[type].push({ id: 'it_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), desc: descIn.value.trim(), category: catIn.value, amount });
@@ -2053,7 +2106,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // ================== Excel / PDF dışa aktarma ==================
   function buildExportRows(){
     const weeks = buildWeeks(selYear, selMonth);
-    const rows = [['Hafta','Tarih','Gün','Gider','Gelir','Net','Haftalık Net']];
+    const rows = [[NAT.weekLabel, NAT.date, NAT.colDay, NAT.expense, NAT.income, NAT.net, NAT.colWeeklyNet]];
     weeks.forEach((week, wIdx) => {
       let weekNet = 0;
       week.forEach(d => {
@@ -2067,7 +2120,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const dow = GUN_ADLARI[getWeekdayMon0(dateObj)];
         const g = dayTotal(key,'gider'), i = dayTotal(key,'gelir');
         rows.push([
-          di === 0 ? ((wIdx+1) + '. Hafta') : '',
+          di === 0 ? weekOrdinal(wIdx+1) : '',
           d + ' ' + AY_ADLARI[selMonth] + ' ' + selYear,
           dow, g, i, i-g,
           di === 0 ? weekNet : ''
@@ -2077,7 +2130,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return rows;
   }
   function buildItemRows(){
-    const rows = [['Tarih','Tür','Kategori','Açıklama','Tutar']];
+    const rows = [[NAT.date, NAT.colType, NAT.category, NAT.colDescription, NAT.amount]];
     Object.keys(monthData).sort().forEach(key => {
       const day = monthData[key];
       (day.gider||[]).forEach(it => rows.push([key,'Gider',it.category,it.desc,it.amount]));
@@ -2092,13 +2145,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const wb = XLSX.utils.book_new();
       const ws1 = XLSX.utils.aoa_to_sheet(buildExportRows());
       ws1['!cols'] = [{wch:12},{wch:18},{wch:8},{wch:12},{wch:12},{wch:12},{wch:14}];
-      XLSX.utils.book_append_sheet(wb, ws1, 'Nakit Akışı');
+      XLSX.utils.book_append_sheet(wb, ws1, NAT.cashflowFileName);
       const ws2 = XLSX.utils.aoa_to_sheet(buildItemRows());
       ws2['!cols'] = [{wch:12},{wch:8},{wch:22},{wch:28},{wch:12}];
       XLSX.utils.book_append_sheet(wb, ws2, 'Kalemler');
       XLSX.writeFile(wb, 'nakit-akis-' + monthKeyOf(selYear, selMonth) + '.xlsx');
-      showIoMsg('Excel dosyası indirildi.');
-    } catch(e){ showIoMsg('Excel oluşturulurken hata oluştu.', true); }
+      showIoMsg(NAT.excelDownloaded);
+    } catch(e){ showIoMsg(NAT.excelError, true); }
   });
 
   function mmgGetLogoDataUrl(){
@@ -2125,7 +2178,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         try{ doc.addImage(logoDataUrl, 'PNG', 14, 8, 14, 14); } catch(imgErr){}
       }
       doc.setFontSize(14);
-      doc.text('Nakit Akış Tablosu — ' + AY_ADLARI[selMonth] + ' ' + selYear, titleX, 16);
+      doc.text(NAT.cashflowTableTitle + AY_ADLARI[selMonth] + ' ' + selYear, titleX, 16);
       doc.setFontSize(10);
       doc.text('mmgcreativity.com', titleX, 22);
       const rows = buildExportRows();
@@ -2143,14 +2196,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           doc.line(14, pageHeight - 14, pageWidth - 14, pageHeight - 14);
           doc.setFontSize(8);
           doc.setTextColor(130,130,130);
-          doc.text('mmgcreativity.com · Dijital Finans Asistanı', 14, pageHeight - 9);
+          doc.text(NAT.appFooterTag, 14, pageHeight - 9);
           const dateStr = new Date().toLocaleString('tr-TR');
-          doc.text('Oluşturulma: ' + dateStr, pageWidth - 14, pageHeight - 9, { align: 'right' });
+          doc.text(NAT.createdAt + dateStr, pageWidth - 14, pageHeight - 9, { align: 'right' });
         }
       });
       doc.save('nakit-akis-' + monthKeyOf(selYear, selMonth) + '.pdf');
-      showIoMsg('PDF dosyası indirildi.');
-    } catch(e){ showIoMsg('PDF oluşturulurken hata oluştu.', true); }
+      showIoMsg(NAT.pdfDownloaded);
+    } catch(e){ showIoMsg(NAT.pdfError, true); }
   });
 
   // ================== Başlangıç ==================
@@ -2374,33 +2427,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
 (function(){
-  const MMG_I18N = {
+  MMGI18N.registerDict({
+    tr: {
+      page_title:'Nakit Akış Tablosu',
+      page_subtitle:'Tarih seçin ve günlük, haftalık, aylık ve yıllık dönemlerde gelir gider analizinizi görün.',
+      nav_guide:'Rehber', nav_expenses:'Giderler', nav_income:'Gelirler', back_home:'← Ana Sayfa',
+      tab_daily:'Günlük', tab_weekly:'Haftalık', tab_monthly:'Aylık', tab_yearly:'Yıllık',
+      goto_today:'Bugün', save_btn:'Kaydet', clear_btn:'Temizle', undo_btn:'Geri Al',
+      trial_over_title:'Ücretsiz Deneme Süreniz Sona Erdi',
+      trial_over_desc:'Nakit Akış Tablosu premium üyelere aittir. 90 günlük ücretsiz deneme sürenizi tamamladınız — kullanmaya devam etmek için premium üyeliğe geçmeniz gerekiyor.',
+      trial_over_cta:'Premium Üyelik Hakkında Bilgi Al',
+      archived_reports_title:'Arşivlenmiş Raporlarım', archive_save_btn:'Bu Raporu Arşivle', archive_view_btn:'Arşiv',
+      prev:'Önceki', next:'Sonraki'
+    },
     en: {
       page_title:'Cash Flow Table', page_subtitle:'Pick a date and view your income/expense analysis by day, week, month, or year.',
       nav_guide:'Guide', nav_expenses:'Expenses', nav_income:'Income', back_home:'← Home',
       tab_daily:'Daily', tab_weekly:'Weekly', tab_monthly:'Monthly', tab_yearly:'Yearly',
-      goto_today:'Today', save_btn:'Save', clear_btn:'Clear', undo_btn:'Undo'
-    }
-  };
-  function applyMmgLang(lang){
-    if(lang === 'tr'){ location.reload(); return; }
-    const dict = MMG_I18N[lang];
-    if(!dict) return;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      if(dict[key]) el.innerHTML = dict[key];
-    });
-  }
-  window.addEventListener('message', (ev) => {
-    if(ev && ev.data && ev.data.mmgLang){
-      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
-      applyMmgLang(ev.data.mmgLang);
+      goto_today:'Today', save_btn:'Save', clear_btn:'Clear', undo_btn:'Undo',
+      trial_over_title:'Your Free Trial Has Ended',
+      trial_over_desc:'The Cash Flow Table is for premium members. You have completed your 90-day free trial — you need to upgrade to premium to keep using it.',
+      trial_over_cta:'Learn About Premium Membership',
+      archived_reports_title:'My Archived Reports', archive_save_btn:'Archive This Report', archive_view_btn:'Archive',
+      prev:'Previous', next:'Next'
     }
   });
-  try{
-    const savedLang = localStorage.getItem('mmg_lang');
-    if(savedLang === 'en') applyMmgLang('en');
-  }catch(e){}
+
+  // Bu sayfanın büyük bölümü (kategoriler, ay/gün adları, finansal özet metinleri)
+  // MMG_LANG'a göre ilk yüklemede oluşturulur; dil değişince tam tutarlılık için
+  // sayfayı yeniden yükleriz (yalnızca dil gerçekten değiştiyse).
+  const ACTIVE_LANG = (typeof MMG_LANG !== 'undefined') ? MMG_LANG : (localStorage.getItem('mmg_lang') || 'tr');
+
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang && ev.data.mmgLang !== ACTIVE_LANG){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      location.reload();
+    }
+  });
+
+  MMGI18N.onChange(function(lang){
+    if(lang !== ACTIVE_LANG){ location.reload(); }
+  });
+  MMGI18N.detectAndApplyDefaultLang();
 })();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>

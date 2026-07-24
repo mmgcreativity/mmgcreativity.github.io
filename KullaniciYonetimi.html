@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<script src="i18n-core.js"></script>
 <script>
 (function(){
   try{
@@ -118,44 +119,44 @@
 
 <div class="page-wrap" id="pageWrap" style="display:none;">
   <div class="page-header">
-    <div class="page-title">👥 Kullanıcı Yönetim Paneli</div>
-    <div class="page-sub" id="firmaHeaderSub">Firma hesabınıza bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.</div>
+    <div class="page-title" data-i18n="page_title">👥 Kullanıcı Yönetim Paneli</div>
+    <div class="page-sub" id="firmaHeaderSub" data-i18n="page_sub_default">Firma hesabınıza bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.</div>
   </div>
 
   <div class="card" id="firmaSelectorCard" style="display:none;">
-    <div class="mini-label" style="margin-bottom:8px;">Yönettiğiniz Firma</div>
+    <div class="mini-label" style="margin-bottom:8px;" data-i18n="managed_firma">Yönettiğiniz Firma</div>
     <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;"></select>
   </div>
 
   <div class="card">
-    <h2>Kullanıcı Ekle</h2>
-    <div class="card-sub">Eklemek istediğiniz kişinin bu siteye kayıtlı e-posta adresini girin. Kişi az önce girdiğiniz e-postayla (veya henüz kaydı yoksa yeni kayıt olarak) giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.</div>
+    <h2 data-i18n="add_user_title">Kullanıcı Ekle</h2>
+    <div class="card-sub" data-i18n="add_user_desc">Eklemek istediğiniz kişinin bu siteye kayıtlı e-posta adresini girin. Kişi az önce girdiğiniz e-postayla (veya henüz kaydı yoksa yeni kayıt olarak) giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.</div>
     <div class="auth-field">
-      <label>Kullanıcının E-postası</label>
+      <label data-i18n="user_email_label">Kullanıcının E-postası</label>
       <input type="email" id="inviteEmail" placeholder="ornek@eposta.com">
     </div>
     <div class="perm-grid" id="invitePermGrid"></div>
-    <button type="button" class="auth-submit" id="inviteSubmitBtn">Davet Gönder</button>
+    <button type="button" class="auth-submit" id="inviteSubmitBtn" data-i18n="send_invite">Davet Gönder</button>
     <div class="auth-error" id="inviteError"></div>
     <div class="auth-success" id="inviteSuccess"></div>
   </div>
 
   <div class="card" id="pendingInvitesCard" style="display:none;">
-    <h2>Bekleyen Davetler</h2>
-    <div class="card-sub">Bu kişiler henüz giriş yapıp daveti kabul etmedi.</div>
+    <h2 data-i18n="pending_invites_title">Bekleyen Davetler</h2>
+    <div class="card-sub" data-i18n="pending_invites_desc">Bu kişiler henüz giriş yapıp daveti kabul etmedi.</div>
     <div id="pendingInvitesList"></div>
   </div>
 
   <div class="card">
-    <h2>Kullanıcılarım</h2>
-    <div class="card-sub">Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.</div>
-    <div class="member-list" id="membersList"><div class="empty-note">Yükleniyor…</div></div>
+    <h2 data-i18n="my_users_title">Kullanıcılarım</h2>
+    <div class="card-sub" data-i18n="my_users_desc">Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.</div>
+    <div class="member-list" id="membersList"><div class="empty-note" data-i18n="loading">Yükleniyor…</div></div>
   </div>
 </div>
 
 <div class="guard-wrap" id="guardWrap" style="display:none;">
-  <h2 id="guardTitle">Bu sayfa sadece firma hesapları içindir</h2>
-  <p id="guardSub">Bir kullanıcı hesabıyla giriş yaptınız. Bu paneli görmek için firma hesabınızla giriş yapmanız gerekir.</p>
+  <h2 id="guardTitle" data-i18n="guard_title_default">Bu sayfa sadece firma hesapları içindir</h2>
+  <p id="guardSub" data-i18n="guard_sub_default">Bir kullanıcı hesabıyla giriş yaptınız. Bu paneli görmek için firma hesabınızla giriş yapmanız gerekir.</p>
 </div>
 
 <script type="module">
@@ -178,8 +179,42 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  let MMG_LANG = 'tr';
+  try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
+  const LBL = MMG_LANG === 'en' ? {
+    firmaSubPrefix:'You can add and manage the users connected to "', firmaSubSuffix:'" from here.',
+    notAdminYetTitle:'You are not an admin of any company yet',
+    notAdminYetSub:'To see this panel, you can create a new company from the "My Account" page, or wait to be invited as an admin of an existing company.',
+    notLoggedInTitle:'You are not signed in', notLoggedInSub:'You need to sign in to view this panel.',
+    errorTitle:'An error occurred', errorSub:'The panel could not be loaded, please refresh the page and try again.',
+    enterValidEmail:'Please enter a valid email address.', sending:'Sending…',
+    inviteSent:'Invitation sent. The person will be added automatically when they sign in with this email.',
+    inviteFailed:'Invitation could not be sent, please try again.',
+    cancelInvite:'Cancel Invite', noUsersAdded:'No users added yet.', remove:'Remove', saved:'Saved ✓',
+    confirmRemoveUser:'Are you sure you want to remove this user from the company?',
+    usersLoadFailed:'Users could not be loaded.'
+  } : {
+    firmaSubPrefix:'"', firmaSubSuffix:'" firmasına bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.',
+    notAdminYetTitle:'Henüz bir firmanın yöneticisi değilsiniz',
+    notAdminYetSub:'Bu paneli görmek için "Hesabım" sayfasından yeni bir firma oluşturabilir ya da mevcut bir firmanın yöneticisi olarak davet edilmeyi bekleyebilirsiniz.',
+    notLoggedInTitle:'Giriş yapmadınız', notLoggedInSub:'Bu paneli görmek için giriş yapmanız gerekir.',
+    errorTitle:'Bir hata oluştu', errorSub:'Panel yüklenemedi, lütfen sayfayı yenileyip tekrar deneyin.',
+    enterValidEmail:'Lütfen geçerli bir e-posta adresi girin.', sending:'Gönderiliyor…',
+    inviteSent:'Davet gönderildi. Kişi bu e-postayla giriş yaptığında otomatik olarak eklenecek.',
+    inviteFailed:'Davet gönderilemedi, lütfen tekrar deneyin.',
+    cancelInvite:'Daveti İptal Et', noUsersAdded:'Henüz eklenmiş kullanıcı yok.', remove:'Kaldır', saved:'Kaydedildi ✓',
+    confirmRemoveUser:'Bu kullanıcıyı firmadan kaldırmak istediğinize emin misiniz?',
+    usersLoadFailed:'Kullanıcılar yüklenemedi.'
+  };
+
   // Bu panelde yönetilebilen yetki modülleri (sol menüdeki araç sayfalarıyla eşleşir).
-  const PERMISSION_MODULES = [
+  const PERMISSION_MODULES = MMG_LANG === 'en' ? [
+    { key: 'gelirler', label: 'Income' },
+    { key: 'giderler', label: 'Expenses' },
+    { key: 'nakitakis', label: 'Cash Flow Table' },
+    { key: 'talimat', label: 'Instruction Preparation' },
+    { key: 'hesaplama', label: 'Calculation Tools' }
+  ] : [
     { key: 'gelirler', label: 'Gelirler' },
     { key: 'giderler', label: 'Giderler' },
     { key: 'nakitakis', label: 'Nakit Akış Tablosu' },
@@ -209,7 +244,7 @@
     firmaId = fid;
     const f = myAdminFirmas.find(x => x.id === fid);
     document.getElementById('firmaHeaderSub').textContent =
-      '"' + (f ? f.name : fid) + '" firmasına bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.';
+      LBL.firmaSubPrefix + (f ? f.name : fid) + LBL.firmaSubSuffix;
     document.getElementById('invitePermGrid').innerHTML = permGridHtml('invite', null);
     await loadMembers();
     await loadPendingInvites();
@@ -221,8 +256,8 @@
     if(!user){
       guardWrap.style.display = 'block';
       pageWrap.style.display = 'none';
-      document.getElementById('guardTitle').textContent = 'Giriş yapmadınız';
-      document.getElementById('guardSub').textContent = 'Bu paneli görmek için giriş yapmanız gerekir.';
+      document.getElementById('guardTitle').textContent = LBL.notLoggedInTitle;
+      document.getElementById('guardSub').textContent = LBL.notLoggedInSub;
       return;
     }
     try{
@@ -231,8 +266,8 @@
       if(!firmaIds.length){
         guardWrap.style.display = 'block';
         pageWrap.style.display = 'none';
-        document.getElementById('guardTitle').textContent = 'Henüz bir firmanın yöneticisi değilsiniz';
-        document.getElementById('guardSub').textContent = 'Bu paneli görmek için "Hesabım" sayfasından yeni bir firma oluşturabilir ya da mevcut bir firmanın yöneticisi olarak davet edilmeyi bekleyebilirsiniz.';
+        document.getElementById('guardTitle').textContent = LBL.notAdminYetTitle;
+        document.getElementById('guardSub').textContent = LBL.notAdminYetSub;
         return;
       }
       myAdminFirmas = [];
@@ -262,8 +297,8 @@
     } catch(e){
       guardWrap.style.display = 'block';
       pageWrap.style.display = 'none';
-      document.getElementById('guardTitle').textContent = 'Bir hata oluştu';
-      document.getElementById('guardSub').textContent = 'Panel yüklenemedi, lütfen sayfayı yenileyip tekrar deneyin.';
+      document.getElementById('guardTitle').textContent = LBL.errorTitle;
+      document.getElementById('guardSub').textContent = LBL.errorSub;
     }
   });
 
@@ -275,14 +310,14 @@
     const emailInput = document.getElementById('inviteEmail');
     const email = emailInput.value.trim().toLowerCase();
     if(!email || !email.includes('@')){
-      errEl.textContent = 'Lütfen geçerli bir e-posta adresi girin.';
+      errEl.textContent = LBL.enterValidEmail;
       errEl.classList.add('show');
       return;
     }
     const btn = document.getElementById('inviteSubmitBtn');
     btn.disabled = true;
     const original = btn.textContent;
-    btn.textContent = 'Gönderiliyor…';
+    btn.textContent = LBL.sending;
     try{
       const fSnap = await getDoc(doc(db, 'firmaAccounts', firmaId));
       await setDoc(doc(db, 'firmaInvites', email), {
@@ -291,12 +326,12 @@
         permissions: readPermGrid('invite'),
         createdAt: serverTimestamp()
       });
-      okEl.textContent = 'Davet gönderildi. Kişi bu e-postayla giriş yaptığında otomatik olarak eklenecek.';
+      okEl.textContent = LBL.inviteSent;
       okEl.classList.add('show');
       emailInput.value = '';
       await loadPendingInvites();
     } catch(e){
-      errEl.textContent = 'Davet gönderilemedi, lütfen tekrar deneyin.';
+      errEl.textContent = LBL.inviteFailed;
       errEl.classList.add('show');
     } finally {
       btn.disabled = false;
@@ -321,7 +356,7 @@
         rows.push(
           '<div class="invite-row" data-email="' + d.id + '">' +
             '<span class="invite-email">' + d.id + '</span>' +
-            '<button type="button" class="invite-cancel-btn" data-cancel="' + d.id + '">Daveti İptal Et</button>' +
+            '<button type="button" class="invite-cancel-btn" data-cancel="' + d.id + '">' + LBL.cancelInvite + '</button>' +
           '</div>'
         );
       });
@@ -341,7 +376,7 @@
     try{
       const snap = await getDocs(collection(db, 'firmaAccounts', firmaId, 'members'));
       if(snap.empty){
-        listEl.innerHTML = '<div class="empty-note">Henüz eklenmiş kullanıcı yok.</div>';
+        listEl.innerHTML = '<div class="empty-note">' + LBL.noUsersAdded + '</div>';
         return;
       }
       const rows = [];
@@ -355,9 +390,9 @@
                 '<div class="member-name">' + (md.username || md.email || d.id) + '</div>' +
                 '<div class="member-sub">' + (md.email || '') + '</div>' +
               '</div>' +
-              '<button type="button" class="member-remove-btn" data-remove="' + d.id + '">Kaldır</button>' +
+              '<button type="button" class="member-remove-btn" data-remove="' + d.id + '">' + LBL.remove + '</button>' +
             '</div>' +
-            '<div class="perm-grid">' + permGridHtml(idPrefix, md.permissions || {}) + '<span class="save-hint" id="' + idPrefix + '_hint">Kaydedildi ✓</span></div>' +
+            '<div class="perm-grid">' + permGridHtml(idPrefix, md.permissions || {}) + '<span class="save-hint" id="' + idPrefix + '_hint">' + LBL.saved + '</span></div>' +
           '</div>'
         );
       });
@@ -373,7 +408,7 @@
         });
       });
     } catch(e){
-      listEl.innerHTML = '<div class="empty-note">Kullanıcılar yüklenemedi.</div>';
+      listEl.innerHTML = '<div class="empty-note">' + LBL.usersLoadFailed + '</div>';
     }
   }
 
@@ -395,13 +430,43 @@
   }
 
   async function removeMember(uid){
-    if(!confirm('Bu kullanıcıyı firmadan kaldırmak istediğinize emin misiniz?')) return;
+    if(!confirm(LBL.confirmRemoveUser)) return;
     try{
       await deleteDoc(doc(db, 'firmaAccounts', firmaId, 'members', uid));
       await setDoc(doc(db, 'users', uid), { firmaIds: arrayRemove(firmaId) }, { merge: true });
     } catch(e){ /* sessizce geç */ }
     await loadMembers();
   }
+</script>
+
+<script>
+(function(){
+  MMGI18N.registerDict({
+    tr: {
+      page_title:'👥 Kullanıcı Yönetim Paneli', page_sub_default:'Firma hesabınıza bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.',
+      managed_firma:'Yönettiğiniz Firma',
+      add_user_title:'Kullanıcı Ekle', add_user_desc:'Eklemek istediğiniz kişinin bu siteye kayıtlı e-posta adresini girin. Kişi az önce girdiğiniz e-postayla (veya henüz kaydı yoksa yeni kayıt olarak) giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.',
+      user_email_label:'Kullanıcının E-postası', send_invite:'Davet Gönder',
+      pending_invites_title:'Bekleyen Davetler', pending_invites_desc:'Bu kişiler henüz giriş yapıp daveti kabul etmedi.',
+      my_users_title:'Kullanıcılarım', my_users_desc:'Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.',
+      loading:'Yükleniyor…',
+      guard_title_default:'Bu sayfa sadece firma hesapları içindir',
+      guard_sub_default:'Bir kullanıcı hesabıyla giriş yaptınız. Bu paneli görmek için firma hesabınızla giriş yapmanız gerekir.'
+    },
+    en: {
+      page_title:'👥 User Management Panel', page_sub_default:'You can add and manage the users connected to your company account here.',
+      managed_firma:'Company You Manage',
+      add_user_title:'Add User', add_user_desc:"Enter the email address the person you want to add has registered on this site with. The person will be automatically added as a user of your company when they sign in with the email you just entered (or register as a new user if they haven't yet).",
+      user_email_label:"User's Email", send_invite:'Send Invite',
+      pending_invites_title:'Pending Invites', pending_invites_desc:'These people have not yet signed in and accepted the invite.',
+      my_users_title:'My Users', my_users_desc:'Permissions are saved automatically when you change them.',
+      loading:'Loading…',
+      guard_title_default:'This page is only for company accounts',
+      guard_sub_default:'You are signed in with a user account. You need to sign in with your company account to view this panel.'
+    }
+  });
+  MMGI18N.detectAndApplyDefaultLang();
+})();
 </script>
 
 </body>

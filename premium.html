@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<script src="i18n-core.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Premium — mmgcreativity Dijital Finans Asistanı</title>
@@ -151,83 +152,83 @@
 <body>
 
 <div class="topbar">
-  <a class="topbar-back" href="index.html">&larr; Panele dön</a>
+  <a class="topbar-back" href="index.html" data-i18n="back_to_panel">&larr; Panele dön</a>
   <div class="topbar-brand mono">mmgcreativity</div>
 </div>
 
 <section class="hero">
   <span class="hero-eyebrow">Premium</span>
-  <h1 class="hero-title">Finansını yönetmenin <em>tam sürümü</em></h1>
-  <p class="hero-sub">Reklamsız deneyim, sınırsız nakit akış tablosu ve gelişmiş hesaplama araçlarıyla paranızı daha net görün.</p>
+  <h1 class="hero-title"><span data-i18n="hero_title_a">Finansını yönetmenin</span> <em data-i18n="hero_title_b">tam sürümü</em></h1>
+  <p class="hero-sub" data-i18n="hero_sub">Reklamsız deneyim, sınırsız nakit akış tablosu ve gelişmiş hesaplama araçlarıyla paranızı daha net görün.</p>
 </section>
 
 <div class="toggle-wrap">
   <div class="toggle" id="billingToggle">
-    <button class="active" data-plan="monthly" onclick="selectBilling('monthly')">Aylık</button>
+    <button class="active" data-plan="monthly" onclick="selectBilling('monthly')" data-i18n="monthly">Aylık</button>
     <button data-plan="yearly" onclick="selectBilling('yearly')">
-      Yıllık
-      <span class="save-badge">%20 indirim</span>
+      <span data-i18n="yearly">Yıllık</span>
+      <span class="save-badge" data-i18n="save_20">%20 indirim</span>
     </button>
   </div>
 </div>
 
 <div class="plans">
   <div class="plan-card featured">
-    <span class="plan-badge">En avantajlı</span>
+    <span class="plan-badge" data-i18n="best_value">En avantajlı</span>
     <div class="plan-name">mmgcreativity premium</div>
     <div class="plan-price">
       <span class="amount" id="priceAmount">999₺</span>
-      <span class="period" id="priceUnit">/ ay</span>
+      <span class="period" id="priceUnit" data-i18n="per_month">/ ay</span>
     </div>
-    <div class="plan-note" id="priceNote">İstediğiniz zaman iptal edin</div>
-    <button class="plan-cta" onclick="startSubscription()">Premium'a geç</button>
+    <div class="plan-note" id="priceNote" data-i18n="cancel_anytime">İstediğiniz zaman iptal edin</div>
+    <button class="plan-cta" onclick="startSubscription()" data-i18n="go_premium">Premium'a geç</button>
   </div>
 </div>
 
 <section class="features">
-  <h2>Premium ile neler değişir</h2>
+  <h2 data-i18n="features_title">Premium ile neler değişir</h2>
 
   <div class="feature-row">
     <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
     <div class="feature-text">
-      <b>Reklamsız kullanım</b>
-      <span>Tüm ekranlarda reklam gösterilmez, kesintisiz kullanım sağlanır.</span>
+      <b data-i18n="f1_title">Reklamsız kullanım</b>
+      <span data-i18n="f1_desc">Tüm ekranlarda reklam gösterilmez, kesintisiz kullanım sağlanır.</span>
     </div>
   </div>
 
   <div class="feature-row">
     <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
     <div class="feature-text">
-      <b>Sınırsız nakit akış tablosu</b>
-      <span>Geçmiş dönemleri, gelir/gider kırılımlarını sınırsız görüntüleyin.</span>
+      <b data-i18n="f2_title">Sınırsız nakit akış tablosu</b>
+      <span data-i18n="f2_desc">Geçmiş dönemleri, gelir/gider kırılımlarını sınırsız görüntüleyin.</span>
     </div>
   </div>
 
   <div class="feature-row">
     <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
     <div class="feature-text">
-      <b>Gelişmiş hesaplama araçları</b>
-      <span>Tüm finansal hesaplama modüllerine tam erişim.</span>
+      <b data-i18n="f3_title">Gelişmiş hesaplama araçları</b>
+      <span data-i18n="f3_desc">Tüm finansal hesaplama modüllerine tam erişim.</span>
     </div>
   </div>
 
   <div class="feature-row">
     <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
     <div class="feature-text">
-      <b>Öncelikli talimat hazırlama</b>
-      <span>Talimat şablonlarınızı daha hızlı oluşturun ve kaydedin.</span>
+      <b data-i18n="f4_title">Öncelikli talimat hazırlama</b>
+      <span data-i18n="f4_desc">Talimat şablonlarınızı daha hızlı oluşturun ve kaydedin.</span>
     </div>
   </div>
 </section>
 
 <div class="trust">
-  <p>Ödemeler PayTR güvenli altyapısıyla işlenir · İstediğiniz zaman iptal edebilirsiniz</p>
+  <p data-i18n="trust_note">Ödemeler PayTR güvenli altyapısıyla işlenir · İstediğiniz zaman iptal edebilirsiniz</p>
 </div>
 
 <footer class="legal">
-  <a href="mesafeli-satis-sozlesmesi.html">Mesafeli satış sözleşmesi</a> ·
-  <a href="iptal-iade.html">İptal &amp; iade</a> ·
-  <a href="kvkk.html">KVKK aydınlatma metni</a>
+  <a href="mesafeli-satis-sozlesmesi.html" data-i18n="legal1">Mesafeli satış sözleşmesi</a> ·
+  <a href="iptal-iade.html" data-i18n="legal2">İptal &amp; iade</a> ·
+  <a href="kvkk.html" data-i18n="legal3">KVKK aydınlatma metni</a>
 </footer>
 
 <script>
@@ -235,14 +236,20 @@
     monthly: { amount: '999₺', unit: '/ ay', note: "İstediğiniz zaman iptal edin" },
     yearly:  { amount: '799₺', unit: '/ ay, yıllık faturalandırılır', note: "9.588₺ / yıl · %20 tasarruf" }
   };
+  const PLANS_EN = {
+    monthly: { amount: '999₺', unit: '/ mo', note: "Cancel anytime" },
+    yearly:  { amount: '799₺', unit: '/ mo, billed annually', note: "9,588₺ / year · save 20%" }
+  };
   let currentPlan = 'monthly';
+  let mmgLang = 'tr';
+  try{ mmgLang = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
 
   function selectBilling(plan){
     currentPlan = plan;
     document.querySelectorAll('#billingToggle button').forEach(b=>{
       b.classList.toggle('active', b.dataset.plan === plan);
     });
-    const p = PLANS[plan];
+    const p = (mmgLang === 'en' ? PLANS_EN : PLANS)[plan];
     document.getElementById('priceAmount').textContent = p.amount;
     document.getElementById('priceUnit').textContent = p.unit;
     document.getElementById('priceNote').textContent = p.note;
@@ -251,9 +258,46 @@
   function startSubscription(){
     // TODO: Cloudflare Worker uzerinden PayTR abonelik baslatma endpoint'ine yonlendirilecek.
     // Ornek: window.location.href = `https://YOUR-WORKER.workers.dev/create-subscription?plan=${currentPlan}`;
-    alert('Odeme entegrasyonu henuz baglanmadi. Plan: ' + currentPlan);
+    alert((mmgLang === 'en' ? 'Payment integration is not connected yet. Plan: ' : 'Odeme entegrasyonu henuz baglanmadi. Plan: ') + currentPlan);
   }
 </script>
+<script>
+(function(){
+  MMGI18N.registerDict({
+    tr: {
+      back_to_panel:'&larr; Panele dön', hero_title_a:'Finansını yönetmenin', hero_title_b:'tam sürümü',
+      hero_sub:'Reklamsız deneyim, sınırsız nakit akış tablosu ve gelişmiş hesaplama araçlarıyla paranızı daha net görün.',
+      monthly:'Aylık', yearly:'Yıllık', save_20:'%20 indirim', best_value:'En avantajlı', per_month:'/ ay', cancel_anytime:'İstediğiniz zaman iptal edin',
+      go_premium:'Premium\'a geç', features_title:'Premium ile neler değişir',
+      f1_title:'Reklamsız kullanım', f1_desc:'Tüm ekranlarda reklam gösterilmez, kesintisiz kullanım sağlanır.',
+      f2_title:'Sınırsız nakit akış tablosu', f2_desc:'Geçmiş dönemleri, gelir/gider kırılımlarını sınırsız görüntüleyin.',
+      f3_title:'Gelişmiş hesaplama araçları', f3_desc:'Tüm finansal hesaplama modüllerine tam erişim.',
+      f4_title:'Öncelikli talimat hazırlama', f4_desc:'Talimat şablonlarınızı daha hızlı oluşturun ve kaydedin.',
+      trust_note:'Ödemeler PayTR güvenli altyapısıyla işlenir · İstediğiniz zaman iptal edebilirsiniz',
+      legal1:'Mesafeli satış sözleşmesi', legal2:'İptal &amp; iade', legal3:'KVKK aydınlatma metni'
+    },
+    en: {
+      back_to_panel:'&larr; Back to panel', hero_title_a:'The full version of', hero_title_b:'managing your finances',
+      hero_sub:'See your money more clearly with an ad-free experience, unlimited cash flow tables, and advanced calculation tools.',
+      monthly:'Monthly', yearly:'Yearly', save_20:'20% off', best_value:'Best value', per_month:'/ mo', cancel_anytime:'Cancel anytime',
+      go_premium:'Go Premium', features_title:'What changes with Premium',
+      f1_title:'Ad-free experience', f1_desc:'No ads shown on any screen, for uninterrupted use.',
+      f2_title:'Unlimited cash flow table', f2_desc:'View past periods and income/expense breakdowns without limit.',
+      f3_title:'Advanced calculation tools', f3_desc:'Full access to all financial calculation modules.',
+      f4_title:'Priority instruction preparation', f4_desc:'Create and save your instruction templates faster.',
+      trust_note:'Payments are processed securely via PayTR · Cancel anytime',
+      legal1:'Distance sales agreement', legal2:'Cancellation & refunds', legal3:'Privacy notice'
+    }
+  });
+
+  MMGI18N.onChange(function(lang){
+    mmgLang = lang;
+    if(typeof selectBilling === 'function') selectBilling(currentPlan);
+  });
+  MMGI18N.detectAndApplyDefaultLang();
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
 
 </body>
 </html>
