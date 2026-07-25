@@ -555,7 +555,7 @@
           await loadPendingInvites();
         });
       });
-    } catch(e){ card.style.display = 'none'; }
+    } catch(e){ console.error('loadPendingInvites hata:', e); card.style.display = 'none'; }
   }
 
   // ---- Kullanıcı listesi ----
