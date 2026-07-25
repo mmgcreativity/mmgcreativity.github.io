@@ -608,40 +608,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .auth-success{ color:var(--teal); font-size:12.5px; margin-bottom:14px; display:none; grid-column:1 / -1; }
   .auth-success.show{ display:block; }
   .auth-remember-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; grid-column:1 / -1; }
-  .mmg-invite-banner{
-    position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:960;
-    width:min(420px, calc(100vw - 24px)); background:var(--surface,#141C2B); border:1px solid var(--brass,#C6A15B);
-    border-radius:14px; padding:16px 18px; display:flex; gap:12px; box-shadow:0 18px 40px rgba(0,0,0,0.5);
-    animation:mmgInviteSlideIn .3s ease-out;
-  }
-  @keyframes mmgInviteSlideIn{
-    from{ opacity:0; transform:translate(-50%, -16px); }
-    to{ opacity:1; transform:translate(-50%, 0); }
-  }
-  .mmg-invite-icon{ font-size:26px; flex:0 0 auto; line-height:1; }
-  .mmg-invite-body{ flex:1; min-width:0; position:relative; }
-  .mmg-invite-close{
-    position:absolute; top:-6px; right:-6px; width:24px; height:24px; border-radius:7px; border:none;
-    background:transparent; color:var(--muted,#8D96AC); cursor:pointer; font-size:15px; line-height:1;
-    display:flex; align-items:center; justify-content:center; transition:background .12s ease, color .12s ease;
-  }
-  .mmg-invite-close:hover{ background:var(--surface-2,#1B2536); color:var(--text,#EAEDF3); }
-  .mmg-invite-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; color:var(--text,#EAEDF3); margin-bottom:3px; padding-right:22px; }
-  .mmg-invite-sub{ font-size:12.5px; color:var(--muted,#8D96AC); margin-bottom:6px; line-height:1.4; }
-  .mmg-invite-perms{ font-size:12px; color:var(--text,#EAEDF3); margin-bottom:10px; line-height:1.5; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:8px 10px; }
-  .mmg-invite-perms ul{ margin:4px 0 0 16px; padding:0; }
-  .mmg-invite-later{ font-size:11px; color:var(--muted,#8D96AC); margin-top:8px; line-height:1.4; }
-  .mmg-invite-actions{ display:flex; gap:8px; }
-  .mmg-invite-accept, .mmg-invite-reject{
-    flex:1; padding:8px 0; border-radius:8px; border:none; cursor:pointer; font-family:'Inter',sans-serif;
-    font-size:13px; font-weight:700; transition:opacity .12s ease;
-  }
-  .mmg-invite-accept{ background:linear-gradient(120deg, var(--teal,#3FB68A), #2E8C6A); color:#fff; }
-  .mmg-invite-reject{ background:var(--surface-2,#1B2536); color:var(--muted,#8D96AC); border:1px solid var(--hairline,#2A3448); }
-  .mmg-invite-accept:hover, .mmg-invite-reject:hover{ opacity:0.85; }
-  .mmg-invite-accept:disabled, .mmg-invite-reject:disabled{ opacity:0.5; cursor:default; }
-  .mmg-invite-msg{ font-size:11.5px; margin-top:8px; min-height:14px; color:var(--teal,#3FB68A); }
-  @media (max-width:480px){ .mmg-invite-banner{ top:10px; padding:13px 14px; } }
 
   /* ---- Giriş sonrası Karşılama / KVKK Onay Ekranı ---- */
   #welcomeOverlay{
@@ -1038,22 +1004,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </button>
       <button type="button" class="auth-guest" id="guestBtn" data-i18n="auth_guest">Misafir olarak gir</button>
     </div>
-  </div>
-</div>
-
-<div id="mmgInviteBanner" class="mmg-invite-banner" hidden>
-  <div class="mmg-invite-icon">🏢</div>
-  <div class="mmg-invite-body">
-    <button type="button" class="mmg-invite-close" id="mmgInviteCloseBtn" aria-label="Kapat" title="Kapat">✕</button>
-    <div class="mmg-invite-title" id="mmgInviteTitle"></div>
-    <div class="mmg-invite-sub" id="mmgInviteSub"></div>
-    <div class="mmg-invite-perms" id="mmgInvitePerms" hidden></div>
-    <div class="mmg-invite-actions">
-      <button type="button" class="mmg-invite-accept" id="mmgInviteAcceptBtn" data-i18n="invite_accept">✓ Kabul Et</button>
-      <button type="button" class="mmg-invite-reject" id="mmgInviteRejectBtn" data-i18n="invite_reject">✕ Reddet</button>
-    </div>
-    <div class="mmg-invite-msg" id="mmgInviteMsg"></div>
-    <div class="mmg-invite-later" id="mmgInviteLater" data-i18n="invite_later_note">Şimdi karar vermek istemiyorsanız kapatabilirsiniz — bu davet, kararınızı verene kadar "Hesabım" sayfasında bekleyecektir.</div>
   </div>
 </div>
 
@@ -1842,7 +1792,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       await loadFirmaMemberships(user.uid);
       await loadAdminFirmas(user.uid);
       // Zaten oturum açıkken gelen bekleyen davetleri de yakala (sadece giriş anında değil)
-      await checkPendingInvites(user, data.username);
     } catch(e){ /* sessizce geç */ }
   });
 
@@ -2340,144 +2289,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }catch(e){ /* okunamazsa temkinli davranıp göstermeyi atla */ }
   }
 
-  const inviteBanner = document.getElementById('mmgInviteBanner');
-  const inviteTitleEl = document.getElementById('mmgInviteTitle');
-  const inviteSubEl = document.getElementById('mmgInviteSub');
-  const invitePermsEl = document.getElementById('mmgInvitePerms');
-  const inviteMsgEl = document.getElementById('mmgInviteMsg');
-  const inviteAcceptBtn = document.getElementById('mmgInviteAcceptBtn');
-  const inviteRejectBtn = document.getElementById('mmgInviteRejectBtn');
-  const inviteCloseBtn = document.getElementById('mmgInviteCloseBtn');
-  let pendingInviteQueue = [];
-  let inviteBannerBusy = false;
-  let inviteFetchInProgress = false; // eşzamanlı checkPendingInvites çağrılarının kuyruğu birbirinin üstüne yazmasını (ve bildirimi boş göstermesini) önler
-
-  // Bu modüller KullaniciYonetimi.html'deki PERMISSION_MODULES ile birebir eşleşir;
-  // bir kullanıcı davetinde hangi yetkilerin verildiğini bildirimde açıkça göstermek için kullanılır.
-  const INVITE_PERMISSION_MODULES = MMGI18N.lang==='en' ? [
-    { key:'gelirler', label:'Income' }, { key:'giderler', label:'Expenses' },
-    { key:'nakitakis', label:'Cash Flow Table' }, { key:'talimat', label:'Instruction Preparation' },
-    { key:'hesaplama', label:'Calculation Tools' }
-  ] : [
-    { key:'gelirler', label:'Gelirler' }, { key:'giderler', label:'Giderler' },
-    { key:'nakitakis', label:'Nakit Akış Tablosu' }, { key:'talimat', label:'Talimat Hazırlama' },
-    { key:'hesaplama', label:'Hesaplama Araçları' }
-  ];
-
-  // Kullanıcının "kapat (✕)" ile geçtiği davetleri bu oturumda tekrar tekrar göstermemek için
-  // yerelde saklıyoruz; davet Firestore'dan SİLİNMEZ, kişi "Hesabım" sayfasından karar verebilir.
-  function getDismissedInviteKeys(){
-    try{ return JSON.parse(localStorage.getItem('mmg_dismissed_invites') || '[]'); }catch(e){ return []; }
-  }
-  function dismissInviteKey(key){
-    try{
-      const list = getDismissedInviteKeys();
-      if(!list.includes(key)) list.push(key);
-      localStorage.setItem('mmg_dismissed_invites', JSON.stringify(list));
-    }catch(e){ /* sessizce geç */ }
-  }
-
-  async function checkPendingInvites(user, username){
-    if(!user || !user.email || inviteBannerBusy || inviteFetchInProgress) return;
-    inviteFetchInProgress = true;
-    const email = user.email.toLowerCase();
-    const dismissed = getDismissedInviteKeys();
-    const freshQueue = [];
-    try{
-      const memberSnap = await getDoc(doc(db, 'firmaInvites', email));
-      if(memberSnap.exists() && !dismissed.includes('member:'+email)) freshQueue.push({ kind: 'member', id: email, data: memberSnap.data() || {} });
-    }catch(e){ /* sessizce geç */ }
-    try{
-      const adminSnap = await getDoc(doc(db, 'firmaAdminInvites', email));
-      if(adminSnap.exists() && !dismissed.includes('admin:'+email)) freshQueue.push({ kind: 'admin', id: email, data: adminSnap.data() || {} });
-    }catch(e){ /* sessizce geç */ }
-    pendingInviteQueue = freshQueue;
-    inviteFetchInProgress = false;
-    showNextPendingInvite(user, username);
-  }
-
-  function showNextPendingInvite(user, username){
-    if(!inviteBanner || !pendingInviteQueue.length){ if(inviteBanner) inviteBanner.hidden = true; return; }
-    const invite = pendingInviteQueue[0];
-    const firmaName = (invite.data && invite.data.firmaName) || (MMGI18N.lang==='en' ? 'a company' : 'bir firma');
-    const title = '🏢 ' + firmaName;
-    const sub = invite.kind === 'admin'
-      ? (MMGI18N.lang==='en' ? ('You have been invited to be an admin of "' + firmaName + '". As an admin you can add/remove users of this company and manage their permissions — you will not enter your own financial data under this role. Do you accept?') : ('"' + firmaName + '" firmasına yönetici olarak davet edildiniz. Yönetici olarak bu firmaya kullanıcı ekleyip çıkarabilir, yetkilerini düzenleyebilirsiniz — bu rolde kendi mali verilerinizi girmezsiniz. Kabul ediyor musunuz?'))
-      : (MMGI18N.lang==='en' ? ('You have been invited to be a user of "' + firmaName + '". If you accept, your data entries in the modules below will be shared with this company\'s pool instead of staying private to you. Do you accept?') : ('"' + firmaName + '" firmasına kullanıcı olarak davet edildiniz. Kabul ederseniz, aşağıdaki modüllerdeki veri girişleriniz size özel kalmak yerine bu firmanın ortak veri havuzuna dahil olur. Kabul ediyor musunuz?'));
-    // Güvenlik kontrolü: başlık/açıklama bir şekilde boş kalırsa bildirimi asla boş göstermeyiz,
-    // aksi halde kullanıcı ne için "Kabul Et" dediğini bilmeden onaylayabilir.
-    if(!title.trim() || !sub.trim()){
-      console.warn('mmgInviteBanner: başlık/açıklama boş geldi, bildirim gösterilmedi.', invite);
-      inviteBanner.hidden = true;
-      return;
-    }
-    inviteTitleEl.textContent = title;
-    inviteSubEl.textContent = sub;
-    if(invite.kind === 'member'){
-      const perms = (invite.data && invite.data.permissions) || {};
-      const allowedLabels = INVITE_PERMISSION_MODULES.filter(m => perms[m.key] !== false).map(m => m.label);
-      invitePermsEl.innerHTML = (MMGI18N.lang==='en' ? 'You will get access to:' : 'Erişim kazanacağınız bölümler:') +
-        '<ul>' + (allowedLabels.length ? allowedLabels.map(l => '<li>' + l + '</li>').join('') : ('<li>' + (MMGI18N.lang==='en' ? 'None (view-only)' : 'Hiçbiri (yalnızca görüntüleme)') + '</li>')) + '</ul>';
-      invitePermsEl.hidden = false;
-    } else {
-      invitePermsEl.hidden = true;
-      invitePermsEl.innerHTML = '';
-    }
-    inviteMsgEl.style.color = 'var(--teal,#3FB68A)';
-    inviteMsgEl.textContent = '';
-    inviteBanner.hidden = false;
-
-    inviteCloseBtn.onclick = () => {
-      dismissInviteKey(invite.kind + ':' + invite.id);
-      pendingInviteQueue.shift();
-      showNextPendingInvite(user, username);
-    };
-
-    inviteAcceptBtn.onclick = async () => {
-      inviteBannerBusy = true;
-      inviteAcceptBtn.disabled = true; inviteRejectBtn.disabled = true;
-      try{
-        if(invite.kind === 'admin'){
-          await setDoc(doc(db, 'firmaAccounts', invite.data.firmaId, 'admins', user.uid), {
-            email: user.email || '', addedAt: serverTimestamp()
-          });
-          await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayUnion(invite.data.firmaId) }, { merge: true });
-        } else {
-          await setDoc(doc(db, 'firmaAccounts', invite.data.firmaId, 'members', user.uid), {
-            email: user.email || '', username: username || '', permissions: invite.data.permissions || {}, addedAt: serverTimestamp()
-          });
-          await setDoc(doc(db, 'users', user.uid), { firmaIds: arrayUnion(invite.data.firmaId) }, { merge: true });
-        }
-        await deleteDoc(doc(db, invite.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', invite.id));
-        inviteMsgEl.textContent = MMGI18N.lang==='en' ? 'Accepted ✓' : 'Kabul edildi ✓';
-        try{ await loadFirmaMemberships(user.uid); await loadAdminFirmas(user.uid); }catch(e){}
-      } catch(e){
-        inviteMsgEl.style.color = 'var(--red,#E2544B)';
-        inviteMsgEl.textContent = MMGI18N.lang==='en' ? 'Something went wrong, please try again.' : 'Bir şeyler ters gitti, lütfen tekrar deneyin.';
-        inviteAcceptBtn.disabled = false; inviteRejectBtn.disabled = false;
-        inviteBannerBusy = false;
-        return;
-      }
-      setTimeout(() => {
-        pendingInviteQueue.shift();
-        inviteAcceptBtn.disabled = false; inviteRejectBtn.disabled = false;
-        inviteBannerBusy = false;
-        showNextPendingInvite(user, username);
-      }, 1100);
-    };
-
-    inviteRejectBtn.onclick = async () => {
-      inviteBannerBusy = true;
-      inviteAcceptBtn.disabled = true; inviteRejectBtn.disabled = true;
-      try{
-        await deleteDoc(doc(db, invite.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', invite.id));
-      } catch(e){ /* sessizce geç */ }
-      pendingInviteQueue.shift();
-      inviteAcceptBtn.disabled = false; inviteRejectBtn.disabled = false;
-      inviteBannerBusy = false;
-      showNextPendingInvite(user, username);
-    };
-  }
+  // (Eski altın çerçeveli firma daveti bildirimi kaldırıldı — artık mmg-chat-widget.js'deki
+  // "Bildirimler" sekmesinde gösteriliyor.)
 
   // ---- Firma Hesabı: hesap açılır menüsündeki gerçek "Veri Kaynağı" değiştiricisi ----
   // Kullanıcı hem üye olduğu hem yönettiği firmalar arasından birini "aktif" seçebilir;
@@ -2655,7 +2468,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       localStorage.setItem('mmg_remember', remember ? '1' : '0');
       updateUserBadge(customerNumber, username);
       await applyPendingInviteIfAny(user, username);
-      await checkPendingInvites(user, username);
       await syncCompanyCache(user.uid);
       await loadAdminFirmas(user.uid);
       closeAuthOverlay();
@@ -2788,7 +2600,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         // ---- Bekleyen bir eski-sistem (Hesabım'dan gönderilmiş) daveti varsa uygula ----
         await applyPendingInviteIfAny(cred.user, username);
-        await checkPendingInvites(cred.user, username);
         await loadAdminFirmas(cred.user.uid);
         try{ alert(MMGI18N.lang==='en' ? ('Your account has been created. 📩 We sent a verification email to ' + email + ' — please check your inbox (and spam folder) and confirm your email.') : ('Hesabınız oluşturuldu. 📩 ' + email + ' adresine bir doğrulama e-postası gönderdik, lütfen gelen kutunuzu (ve gereksiz/spam klasörünü) kontrol edip e-postanızı onaylayın.')); }catch(alertErr){}
 
@@ -2817,7 +2628,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
         await applyPendingInviteIfAny(cred.user, username);
-        await checkPendingInvites(cred.user, username);
         await syncCompanyCache(cred.user.uid);
         await loadAdminFirmas(cred.user.uid);
         closeAuthOverlay();

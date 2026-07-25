@@ -74,6 +74,8 @@ import {
   let groupsMap = {};        // groupId -> group data
   let groupInvitesMap = {};  // inviteId -> invite data
   let unsubGroups = null, unsubGroupInvites = null;
+  let unsubFirmaMemberInvite = null, unsubFirmaAdminInvite = null;
+  let firmaMemberInvite = null, firmaAdminInvite = null; // {id, kind, data} | null
   let friendsSubView = 'list'; // 'list' | 'newGroup'
   let pendingGroupMembers = []; // [{uid, code}] grup oluşturma formunda eklenen kişiler
   let chatsMap = {};     // chatId -> chat data
@@ -198,6 +200,23 @@ import {
     flex:0 0 auto; opacity:0.5; border-radius:6px; transition:opacity .12s ease, background .12s ease;
   }
   .mmg-chat-list-delete:hover{ opacity:1; color:var(--red,#E2544B); background:rgba(226,84,75,0.1); }
+  .mmg-notif-card{
+    background:var(--surface-2,#1B2536); border:1px solid var(--brass-dim,#8A7440); border-radius:10px;
+    padding:12px 13px; margin-bottom:10px;
+  }
+  .mmg-notif-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; color:var(--text,#EAEDF3); margin-bottom:5px; }
+  .mmg-notif-sub{ font-size:11.5px; color:var(--muted,#8D96AC); line-height:1.5; margin-bottom:8px; }
+  .mmg-notif-perms{ font-size:11px; color:var(--text,#EAEDF3); background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:7px 9px; margin-bottom:10px; line-height:1.5; }
+  .mmg-notif-perms ul{ margin:3px 0 0 15px; padding:0; }
+  .mmg-notif-actions{ display:flex; gap:8px; }
+  .mmg-notif-accept, .mmg-notif-reject{
+    flex:1; padding:7px 0; border-radius:7px; border:none; cursor:pointer; font-family:'Inter',sans-serif;
+    font-size:12px; font-weight:700;
+  }
+  .mmg-notif-accept{ background:linear-gradient(120deg, var(--teal,#3FB68A), #2E8C6A); color:#fff; }
+  .mmg-notif-reject{ background:var(--surface,#141C2B); color:var(--muted,#8D96AC); border:1px solid var(--hairline,#2A3448); }
+  .mmg-notif-accept:disabled, .mmg-notif-reject:disabled{ opacity:0.5; cursor:default; }
+  .mmg-notif-msg{ font-size:11px; margin-top:7px; min-height:13px; }
   .mmg-chat-req-row{
     background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:10px; padding:10px; margin-bottom:8px;
   }
@@ -353,6 +372,7 @@ import {
     <div id="mmgChatCodeBox" class="mmg-chat-code-box"></div>
     <div class="mmg-chat-tabs" id="mmgChatTabs">
       <div class="mmg-chat-tab active" data-tab="friends">Sohbetler</div>
+      <div class="mmg-chat-tab" data-tab="notifications">Bildirimler<span class="mmg-chat-dot" id="mmgChatNotifDot" hidden></span></div>
       <div class="mmg-chat-tab" data-tab="requests">İstekler<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
       <div class="mmg-chat-tab" data-tab="add">Kod ile Ekle</div>
       <div class="mmg-chat-tab" data-tab="admin">Yöneticiniz</div>
@@ -407,6 +427,7 @@ import {
     els.codeBox = document.getElementById('mmgChatCodeBox');
     els.tabs = document.getElementById('mmgChatTabs');
     els.reqDot = document.getElementById('mmgChatReqDot');
+    els.notifDot = document.getElementById('mmgChatNotifDot');
     els.body = document.getElementById('mmgChatBody');
     els.footer = document.getElementById('mmgChatFooter');
     els.input = document.getElementById('mmgChatInput');
@@ -835,11 +856,29 @@ import {
       if(activeTab === 'requests') renderTab();
       updateBadge();
     }, (err) => console.error('mmg-chat-widget groupInvites onSnapshot:', err));
+
+    // ---- Firma Hesabı davetleri (YENİ): eskiden ayrı bir açılır bildirim kutusundaydı,
+    // şimdi bu sohbet panelinin "Bildirimler" sekmesinde gösteriliyor ----
+    if(currentUser && currentUser.email){
+      const emailLower = currentUser.email.toLowerCase();
+      unsubFirmaMemberInvite = onSnapshot(doc(db, 'firmaInvites', emailLower), (snap) => {
+        firmaMemberInvite = snap.exists() ? { id: emailLower, kind: 'member', data: snap.data() || {} } : null;
+        if(activeTab === 'notifications') renderTab();
+        updateBadge();
+      }, (err) => console.error('mmg-chat-widget firmaInvites onSnapshot:', err));
+      unsubFirmaAdminInvite = onSnapshot(doc(db, 'firmaAdminInvites', emailLower), (snap) => {
+        firmaAdminInvite = snap.exists() ? { id: emailLower, kind: 'admin', data: snap.data() || {} } : null;
+        if(activeTab === 'notifications') renderTab();
+        updateBadge();
+      }, (err) => console.error('mmg-chat-widget firmaAdminInvites onSnapshot:', err));
+    }
   }
 
   function updateBadge(){
     const reqCount = Object.keys(requestsMap).length + Object.keys(groupInvitesMap).length;
     els.reqDot.hidden = reqCount === 0;
+    const firmaInviteCount = (firmaMemberInvite ? 1 : 0) + (firmaAdminInvite ? 1 : 0);
+    if(els.notifDot) els.notifDot.hidden = firmaInviteCount === 0;
     let unread = 0;
     Object.keys(chatsMap).forEach(id => {
       const c = chatsMap[id];
@@ -853,7 +892,7 @@ import {
       const readAt = c['lastRead_' + currentUser.uid] && c['lastRead_' + currentUser.uid].toMillis ? c['lastRead_' + currentUser.uid].toMillis() : 0;
       if(lastAt > readAt && c.lastSenderUid !== currentUser.uid) unread++;
     });
-    setBadge(unread + reqCount);
+    setBadge(unread + reqCount + firmaInviteCount);
   }
 
   function updateOpenChatHeaderIfNeeded(){ /* şu an ekstra bir şey gerekmiyor */ }
@@ -865,6 +904,101 @@ import {
     if(activeTab === 'friends') return renderFriendsTab();
     if(activeTab === 'requests') return renderRequestsTab();
     if(activeTab === 'add') return renderAddTab();
+    if(activeTab === 'notifications') return renderNotificationsTab();
+  }
+
+  // Bu modüller KullaniciYonetimi.html'deki PERMISSION_MODULES ile birebir eşleşir;
+  // bir kullanıcı davetinde hangi yetkilerin verildiğini bildirimde açıkça göstermek için kullanılır.
+  const NOTIF_PERM_MODULES = [
+    { key:'gelirler', label:'Gelirler' }, { key:'giderler', label:'Giderler' },
+    { key:'nakitakis', label:'Nakit Akış Tablosu' }, { key:'talimat', label:'Talimat Hazırlama' },
+    { key:'hesaplama', label:'Hesaplama Araçları' }
+  ];
+
+  function renderNotificationsTab(){
+    els.footer.hidden = true;
+    const invites = [];
+    if(firmaMemberInvite) invites.push(firmaMemberInvite);
+    if(firmaAdminInvite) invites.push(firmaAdminInvite);
+    if(!invites.length){
+      els.body.innerHTML = '<div class="mmg-chat-empty">Bekleyen bir bildiriminiz yok.</div>';
+      return;
+    }
+    els.body.innerHTML = invites.map((inv, idx) => renderInviteCard(inv, idx)).join('');
+    invites.forEach((inv, idx) => {
+      const acceptBtn = document.getElementById('mmgNotifAccept_' + idx);
+      const rejectBtn = document.getElementById('mmgNotifReject_' + idx);
+      if(acceptBtn) acceptBtn.addEventListener('click', () => acceptFirmaInvite(inv, idx));
+      if(rejectBtn) rejectBtn.addEventListener('click', () => rejectFirmaInvite(inv, idx));
+    });
+  }
+
+  function renderInviteCard(inv, idx){
+    const firmaName = (inv.data && inv.data.firmaName) || 'bir firma';
+    const isAdmin = inv.kind === 'admin';
+    const title = '🏢 ' + firmaName;
+    const sub = isAdmin
+      ? ('"' + firmaName + '" firmasına yönetici olarak davet edildiniz. Yönetici olarak bu firmaya kullanıcı ekleyip çıkarabilir, yetkilerini düzenleyebilirsiniz — bu rolde kendi mali verilerinizi girmezsiniz. Kabul ediyor musunuz?')
+      : ('"' + firmaName + '" firmasına kullanıcı olarak davet edildiniz. Kabul ederseniz, aşağıdaki modüllerdeki veri girişleriniz size özel kalmak yerine bu firmanın ortak veri havuzuna dahil olur. Kabul ediyor musunuz?');
+    let permsHtml = '';
+    if(!isAdmin){
+      const perms = (inv.data && inv.data.permissions) || {};
+      const allowed = NOTIF_PERM_MODULES.filter(m => perms[m.key] !== false).map(m => m.label);
+      permsHtml = '<div class="mmg-notif-perms"><b>Erişim kazanacağınız bölümler:</b><ul>' +
+        (allowed.length ? allowed.map(l => '<li>' + esc(l) + '</li>').join('') : '<li>Hiçbiri (yalnızca görüntüleme)</li>') + '</ul></div>';
+    }
+    return '<div class="mmg-notif-card">' +
+      '<div class="mmg-notif-title">' + esc(title) + '</div>' +
+      '<div class="mmg-notif-sub">' + esc(sub) + '</div>' +
+      permsHtml +
+      '<div class="mmg-notif-actions">' +
+        '<button type="button" class="mmg-notif-accept" id="mmgNotifAccept_' + idx + '">✓ Kabul Et</button>' +
+        '<button type="button" class="mmg-notif-reject" id="mmgNotifReject_' + idx + '">✕ Reddet</button>' +
+      '</div>' +
+      '<div class="mmg-notif-msg" id="mmgNotifMsg_' + idx + '"></div>' +
+    '</div>';
+  }
+
+  async function acceptFirmaInvite(invite, idx){
+    const msgEl = document.getElementById('mmgNotifMsg_' + idx);
+    const acceptBtn = document.getElementById('mmgNotifAccept_' + idx);
+    const rejectBtn = document.getElementById('mmgNotifReject_' + idx);
+    if(acceptBtn) acceptBtn.disabled = true;
+    if(rejectBtn) rejectBtn.disabled = true;
+    try{
+      if(invite.kind === 'admin'){
+        await setDoc(doc(db, 'firmaAccounts', invite.data.firmaId, 'admins', currentUser.uid), {
+          email: currentUser.email || '', addedAt: serverTimestamp()
+        });
+        await setDoc(doc(db, 'users', currentUser.uid), { adminFirmaIds: arrayUnion(invite.data.firmaId) }, { merge: true });
+      } else {
+        await setDoc(doc(db, 'firmaAccounts', invite.data.firmaId, 'members', currentUser.uid), {
+          email: currentUser.email || '', permissions: invite.data.permissions || {}, addedAt: serverTimestamp()
+        });
+        await setDoc(doc(db, 'users', currentUser.uid), { firmaIds: arrayUnion(invite.data.firmaId) }, { merge: true });
+      }
+      await deleteDoc(doc(db, invite.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', invite.id));
+      if(msgEl){ msgEl.style.color = 'var(--teal,#3FB68A)'; msgEl.textContent = 'Kabul edildi ✓'; }
+      // Yeni bağlantı sayfada (ana kabuk) hemen yansısın diye bir yenileme sinyali gönder.
+      try{ window.location.reload(); }catch(e){}
+    }catch(e){
+      if(msgEl){ msgEl.style.color = 'var(--red,#E2544B)'; msgEl.textContent = 'Bir şeyler ters gitti, lütfen tekrar deneyin.'; }
+      if(acceptBtn) acceptBtn.disabled = false;
+      if(rejectBtn) rejectBtn.disabled = false;
+    }
+  }
+
+  async function rejectFirmaInvite(invite, idx){
+    const acceptBtn = document.getElementById('mmgNotifAccept_' + idx);
+    const rejectBtn = document.getElementById('mmgNotifReject_' + idx);
+    if(acceptBtn) acceptBtn.disabled = true;
+    if(rejectBtn) rejectBtn.disabled = true;
+    try{
+      await deleteDoc(doc(db, invite.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', invite.id));
+    }catch(e){
+      if(acceptBtn) acceptBtn.disabled = false;
+      if(rejectBtn) rejectBtn.disabled = false;
+    }
   }
 
   function renderAdminTab(){
