@@ -49,6 +49,16 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.resource.data.uid == request.auth.uid;
     }
+    // Kullanıcı adı rezervasyonu: aynı kullanıcı adıyla ikinci kez kayıt
+    // olunamasın diye, doküman ID'si kullanıcı adının küçük harfli hali.
+    // "create" izni tek seferliktir — doküman zaten varsa create başarısız
+    // olur (update izni verilmediği için bir kez alınan isim asla değişip
+    // başkasına devredilemez).
+    match /usernames/{lowercaseUsername} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
     match /chatRequests/{reqId} {
       allow read: if request.auth != null && (
         resource == null ||
@@ -155,11 +165,27 @@ service cloud.firestore {
     match /forumPosts/{postId} {
       allow read: if request.auth != null;
       allow create: if request.auth != null && request.resource.data.authorUid == request.auth.uid;
-      allow update: if false;
+      // Beğeni/tekrarla (like/repost) sadece kendi uid'ini likes/repostUids
+      // dizisine ekleyip çıkarabilsin diye, ve yanıt sayısı (replyCount) artıp
+      // azalabilsin diye izin veriyoruz; gönderi metnini başkası değiştiremez.
+      allow update: if request.auth != null && (
+        resource.data.authorUid == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes','repostUids','replyCount'])
+      );
       allow delete: if request.auth != null && (
         resource.data.authorUid == request.auth.uid ||
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
       );
+
+      match /replies/{replyId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && request.resource.data.authorUid == request.auth.uid;
+        allow delete: if request.auth != null && (
+          resource.data.authorUid == request.auth.uid ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+        );
+      }
     }
   }
 }

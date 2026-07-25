@@ -135,6 +135,82 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .forum-empty-note{ text-align:center; color:var(--muted); font-size:13px; padding:36px 16px; }
   .forum-loading-note{ text-align:center; color:var(--muted); font-size:13px; padding:20px; }
+
+  /* ---- Composer araçları: emoji + görsel ekleme ---- */
+  .composer-tools{ display:flex; align-items:center; gap:6px; }
+  .composer-tool-btn{
+    background:none; border:1px solid var(--hairline); color:var(--muted); cursor:pointer;
+    width:34px; height:34px; border-radius:9px; font-size:16px; display:flex; align-items:center; justify-content:center;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .composer-tool-btn:hover{ border-color:var(--brass-dim); color:var(--text); }
+  .composer-footer-row{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; gap:10px; }
+  .emoji-picker{
+    position:absolute; z-index:60; background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px;
+    padding:10px; display:grid; grid-template-columns:repeat(8, 1fr); gap:4px; box-shadow:0 12px 30px rgba(0,0,0,0.4);
+    max-width:280px;
+  }
+  .emoji-picker[hidden]{ display:none; }
+  .emoji-picker button{ background:none; border:none; font-size:18px; cursor:pointer; padding:4px; border-radius:6px; }
+  .emoji-picker button:hover{ background:rgba(255,255,255,0.08); }
+  .composer-image-preview{ position:relative; margin-top:10px; display:inline-block; }
+  .composer-image-preview img{ max-height:160px; border-radius:10px; display:block; }
+  .composer-image-remove{
+    position:absolute; top:6px; right:6px; background:rgba(5,8,14,0.75); color:#fff; border:none;
+    width:24px; height:24px; border-radius:50%; cursor:pointer; font-size:12px;
+  }
+
+  /* ---- Gönderi görseli ---- */
+  .forum-post-image{ margin-top:10px; max-width:100%; border-radius:10px; display:block; }
+
+  /* ---- Alıntı kartı ---- */
+  .forum-quote-card{
+    margin-top:10px; border:1px solid var(--hairline); border-radius:10px; padding:10px 12px; background:var(--surface-2);
+  }
+  .forum-quote-name{ font-size:12.5px; font-weight:700; }
+  .forum-quote-text{ font-size:12.5px; color:var(--muted); margin-top:3px; white-space:pre-wrap; word-break:break-word; }
+
+  /* ---- Gönderi eylem çubuğu: yanıtla / tekrarla / beğen / paylaş ---- */
+  .forum-post-actions{ display:flex; align-items:center; gap:6px; margin-top:12px; }
+  .forum-action-btn{
+    display:flex; align-items:center; gap:6px; background:none; border:none; color:var(--muted); cursor:pointer;
+    font-size:12.5px; font-family:'Inter',sans-serif; padding:6px 10px; border-radius:8px; position:relative;
+    transition:background .15s ease, color .15s ease;
+  }
+  .forum-action-btn:hover{ background:rgba(255,255,255,0.06); }
+  .forum-action-btn.liked{ color:var(--red); }
+  .forum-action-btn.reposted{ color:var(--teal); }
+  .forum-repost-menu{
+    position:absolute; bottom:36px; left:0; z-index:50; background:var(--surface-2); border:1px solid var(--hairline);
+    border-radius:10px; padding:6px; display:flex; flex-direction:column; min-width:140px; box-shadow:0 12px 30px rgba(0,0,0,0.4);
+  }
+  .forum-repost-menu[hidden]{ display:none; }
+  .forum-repost-menu button{
+    background:none; border:none; color:var(--text); text-align:left; padding:8px 10px; border-radius:6px; cursor:pointer; font-size:12.5px;
+  }
+  .forum-repost-menu button:hover{ background:rgba(255,255,255,0.08); }
+
+  /* ---- Yanıt paneli ---- */
+  .forum-replies-panel{ margin-top:12px; border-top:1px solid var(--hairline); padding-top:12px; }
+  .forum-replies-panel[hidden]{ display:none; }
+  .forum-reply{ display:flex; gap:10px; margin-bottom:10px; }
+  .forum-reply .avatar-circle{ width:28px; height:28px; font-size:12px; }
+  .forum-reply-name{ font-size:12.5px; font-weight:700; }
+  .forum-reply-text{ font-size:12.5px; margin-top:2px; white-space:pre-wrap; word-break:break-word; }
+  .forum-reply-composer{ display:flex; gap:8px; align-items:flex-start; margin-top:8px; }
+  .forum-reply-composer .avatar-circle{ width:28px; height:28px; font-size:12px; }
+  .forum-reply-input{
+    flex:1; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 10px;
+    color:var(--text); font-family:'Inter',sans-serif; font-size:12.5px; outline:none; resize:none;
+  }
+  .forum-reply-input:focus{ border-color:var(--brass-dim); }
+  .forum-reply-send{
+    background:var(--grad); color:#fff; border:none; border-radius:8px; padding:8px 12px; font-size:12px; font-weight:700; cursor:pointer;
+  }
+  .forum-quote-composer-card{
+    border:1px solid var(--hairline); border-radius:10px; padding:10px 12px; background:var(--surface-2); margin-top:10px; font-size:12.5px;
+  }
+  .forum-quote-composer-card .cancel{ float:right; background:none; border:none; color:var(--muted); cursor:pointer; }
 </style>
 </head>
 <body>
@@ -154,8 +230,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div class="avatar-circle" id="composerAvatar">?</div>
         <div class="composer-body">
           <textarea id="forumComposerText" rows="3" maxlength="500" data-i18n-placeholder="composer_placeholder" placeholder="Aklından geçeni paylaş..."></textarea>
-          <div class="composer-footer">
+          <div class="forum-quote-composer-card" id="quotePreviewCard" hidden></div>
+          <div class="composer-image-preview" id="composerImagePreview" hidden>
+            <img id="composerImagePreviewImg" alt="">
+            <button type="button" class="composer-image-remove" id="composerImageRemoveBtn">✕</button>
+          </div>
+          <div class="composer-footer-row">
+            <div class="composer-tools">
+              <button type="button" class="composer-tool-btn" id="emojiBtn" title="Emoji ekle">🙂</button>
+              <button type="button" class="composer-tool-btn" id="imageAttachBtn" title="Görsel ekle">🖼️</button>
+              <input type="file" id="composerImageInput" accept="image/*" hidden>
+              <div class="emoji-picker" id="emojiPicker" hidden></div>
+            </div>
             <span class="char-count" id="forumCharCount">0 / 500</span>
+          </div>
+          <div class="composer-footer">
+            <span></span>
             <button type="button" class="post-btn" id="forumPostBtn" data-i18n="post_btn">Paylaş</button>
           </div>
           <div class="composer-error" id="forumComposerError"></div>
@@ -171,7 +261,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, collection, addDoc, deleteDoc, query, orderBy, limit, onSnapshot, serverTimestamp
+    getFirestore, doc, getDoc, collection, addDoc, deleteDoc, updateDoc, query, orderBy, limit, onSnapshot, serverTimestamp,
+    arrayUnion, arrayRemove, increment, getDocs
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -212,7 +303,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     loadingPosts:'Loading posts…', noPostsYet:'No posts yet. Be the first to share something!',
     postFailed:'Could not be posted, please try again.', emptyPostError:'Please write something first.',
     confirmDelete:'Are you sure you want to delete this post?', deleteFailed:'Could not be deleted, please try again.',
-    justNow:'just now', minutesAgo:'m ago', hoursAgo:'h ago', daysAgo:'d ago', anonymous:'Anonymous'
+    justNow:'just now', minutesAgo:'m ago', hoursAgo:'h ago', daysAgo:'d ago', anonymous:'Anonymous',
+    reply:'Reply', repost:'Repost', repostSimple:'Repost', quotePost:'Quote', like:'Like', share:'Share',
+    replyPlaceholder:'Post your reply...', send:'Send', linkCopied:'Link copied.', quoting:'Quoting', cancel:'Cancel',
+    imageTooBig:'Image is too large, please choose a smaller one.'
   } : {
     loginRequired:'Forumu görüntülemek için giriş yapmış olmanız gerekir.<br><br>',
     loginRequiredHint:'Herhangi bir modülden (örn. <a href="index.html">Ana Sayfa</a>) hesabınıza giriş yaptıktan sonra bu sayfayı yeniden açın.',
@@ -221,7 +315,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     loadingPosts:'Gönderiler yükleniyor…', noPostsYet:'Henüz gönderi yok. İlk paylaşımı sen yap!',
     postFailed:'Gönderilemedi, lütfen tekrar deneyin.', emptyPostError:'Önce bir şeyler yazmalısın.',
     confirmDelete:'Bu gönderiyi silmek istediğinize emin misiniz?', deleteFailed:'Silinemedi, lütfen tekrar deneyin.',
-    justNow:'az önce', minutesAgo:'dk önce', hoursAgo:'sa önce', daysAgo:'g önce', anonymous:'İsimsiz'
+    justNow:'az önce', minutesAgo:'dk önce', hoursAgo:'sa önce', daysAgo:'g önce', anonymous:'İsimsiz',
+    reply:'Yanıtla', repost:'Tekrarla', repostSimple:'Tekrarla', quotePost:'Alıntıla', like:'Beğen', share:'Paylaş',
+    replyPlaceholder:'Yanıtını yaz...', send:'Gönder', linkCopied:'Bağlantı kopyalandı.', quoting:'Alıntılanıyor', cancel:'Vazgeç',
+    imageTooBig:'Görsel çok büyük, lütfen daha küçük bir görsel seçin.'
   };
 
   MMGI18N.registerDict({
@@ -286,10 +383,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   let currentUid = null;
   let currentIsAdmin = false;
+  let currentUserName = '';
+  let currentUserAvatar = null;
   let unsubscribeFeed = null;
 
   function stopWatchingFeed(){
     if(unsubscribeFeed){ unsubscribeFeed(); unsubscribeFeed = null; }
+  }
+
+  function quoteCardHtml(q){
+    if(!q) return '';
+    return '<div class="forum-quote-card">' +
+      '<div class="forum-quote-name">' + escapeHtml(q.authorName || LBL.anonymous) + '</div>' +
+      '<div class="forum-quote-text">' + escapeHtml(q.text || '') + '</div>' +
+    '</div>';
   }
 
   function renderFeed(snap){
@@ -303,6 +410,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     snap.forEach(d => {
       const p = d.data();
       const canDelete = currentIsAdmin || p.authorUid === currentUid;
+      const likes = Array.isArray(p.likes) ? p.likes : [];
+      const reposts = Array.isArray(p.repostUids) ? p.repostUids : [];
+      const iLiked = currentUid && likes.indexOf(currentUid) !== -1;
+      const iReposted = currentUid && reposts.indexOf(currentUid) !== -1;
       rows.push(
         '<div class="forum-post" data-id="' + d.id + '">' +
           '<div class="forum-post-top">' +
@@ -314,6 +425,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             (canDelete ? '<button type="button" class="forum-delete-btn" data-delete-id="' + d.id + '" title="' + (MMG_LANG==='en'?'Delete':'Sil') + '">✕</button>' : '') +
           '</div>' +
           '<div class="forum-post-text">' + escapeHtml(p.text) + '</div>' +
+          (p.imageBase64 ? '<img class="forum-post-image" src="' + p.imageBase64 + '" alt="">' : '') +
+          quoteCardHtml(p.quoteOf) +
+          '<div class="forum-post-actions">' +
+            '<button type="button" class="forum-action-btn" data-reply-toggle="' + d.id + '">💬 <span>' + (p.replyCount || 0) + '</span></button>' +
+            '<div style="position:relative; display:inline-block;">' +
+              '<button type="button" class="forum-action-btn' + (iReposted ? ' reposted' : '') + '" data-repost-toggle="' + d.id + '">🔁 <span>' + reposts.length + '</span></button>' +
+              '<div class="forum-repost-menu" hidden data-repost-menu="' + d.id + '">' +
+                '<button type="button" data-repost-simple="' + d.id + '">' + (iReposted ? '↩ ' : '') + LBL.repostSimple + '</button>' +
+                '<button type="button" data-repost-quote="' + d.id + '">' + LBL.quotePost + '</button>' +
+              '</div>' +
+            '</div>' +
+            '<button type="button" class="forum-action-btn' + (iLiked ? ' liked' : '') + '" data-like-toggle="' + d.id + '">' + (iLiked ? '❤️' : '🤍') + ' <span>' + likes.length + '</span></button>' +
+            '<button type="button" class="forum-action-btn" data-share="' + d.id + '">📤 ' + LBL.share + '</button>' +
+          '</div>' +
+          '<div class="forum-replies-panel" hidden data-replies-panel="' + d.id + '">' +
+            '<div data-replies-list="' + d.id + '"></div>' +
+            '<div class="forum-reply-composer">' +
+              avatarHtml(currentUserName, currentUserAvatar, currentUid) +
+              '<textarea class="forum-reply-input" rows="1" placeholder="' + LBL.replyPlaceholder + '" data-reply-input="' + d.id + '"></textarea>' +
+              '<button type="button" class="forum-reply-send" data-reply-send="' + d.id + '">' + LBL.send + '</button>' +
+            '</div>' +
+          '</div>' +
         '</div>'
       );
     });
@@ -330,6 +463,137 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
       });
     });
+    wireFeedActions(feedEl);
+  }
+
+  // ---- Beğen / Tekrarla / Yanıtla / Paylaş etkileşimleri ----
+  function wireFeedActions(feedEl){
+    feedEl.querySelectorAll('[data-like-toggle]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.likeToggle;
+        const liked = btn.classList.contains('liked');
+        try{
+          await updateDoc(doc(db, 'forumPosts', id), { likes: liked ? arrayRemove(currentUid) : arrayUnion(currentUid) });
+        }catch(e){ /* sessizce geç */ }
+      });
+    });
+    feedEl.querySelectorAll('[data-repost-toggle]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.repostToggle;
+        feedEl.querySelectorAll('.forum-repost-menu').forEach(m => { if(m.dataset.repostMenu !== id) m.hidden = true; });
+        const menu = btn.parentElement.querySelector('[data-repost-menu="' + id + '"]');
+        if(menu) menu.hidden = !menu.hidden;
+      });
+    });
+    feedEl.querySelectorAll('[data-repost-simple]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.repostSimple;
+        const postEl = btn.closest('.forum-post');
+        const alreadyReposted = postEl.querySelector('[data-repost-toggle]').classList.contains('reposted');
+        try{
+          await updateDoc(doc(db, 'forumPosts', id), { repostUids: alreadyReposted ? arrayRemove(currentUid) : arrayUnion(currentUid) });
+        }catch(e2){ /* sessizce geç */ }
+        btn.closest('.forum-repost-menu').hidden = true;
+      });
+    });
+    feedEl.querySelectorAll('[data-repost-quote]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.repostQuote;
+        const postEl = btn.closest('.forum-post');
+        const name = postEl.querySelector('.forum-post-name').textContent;
+        const text = postEl.querySelector('.forum-post-text').textContent;
+        startQuote(id, name, text);
+        btn.closest('.forum-repost-menu').hidden = true;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+    feedEl.querySelectorAll('[data-share]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.share;
+        const url = location.href.split('#')[0] + '#post_' + id;
+        try{
+          if(navigator.share){
+            await navigator.share({ title: 'Forum — Dijital Finans Asistanı', url });
+          } else {
+            await navigator.clipboard.writeText(url);
+            toast(LBL.linkCopied);
+          }
+        }catch(e){ /* kullanıcı paylaşım penceresini kapattıysa sessizce geç */ }
+      });
+    });
+    feedEl.querySelectorAll('[data-reply-toggle]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.replyToggle;
+        const panel = feedEl.querySelector('[data-replies-panel="' + id + '"]');
+        if(!panel) return;
+        panel.hidden = !panel.hidden;
+        if(!panel.hidden) await loadReplies(id, panel);
+      });
+    });
+    feedEl.querySelectorAll('[data-reply-send]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.replySend;
+        const panel = feedEl.querySelector('[data-replies-panel="' + id + '"]');
+        const input = feedEl.querySelector('[data-reply-input="' + id + '"]');
+        const text = input.value.trim();
+        if(!text) return;
+        btn.disabled = true;
+        try{
+          const snap = await getDoc(doc(db, 'users', currentUid));
+          const data = snap.exists() ? snap.data() : {};
+          await addDoc(collection(db, 'forumPosts', id, 'replies'), {
+            authorUid: currentUid,
+            authorName: data.username || data.email || LBL.anonymous,
+            authorAvatar: data.avatarBase64 || data.logoBase64 || null,
+            text: text.slice(0, 300),
+            createdAt: serverTimestamp()
+          });
+          await updateDoc(doc(db, 'forumPosts', id), { replyCount: increment(1) });
+          input.value = '';
+          await loadReplies(id, panel);
+        }catch(e){ /* sessizce geç */ } finally { btn.disabled = false; }
+      });
+    });
+  }
+
+  async function loadReplies(id, panel){
+    const listEl = panel.querySelector('[data-replies-list="' + id + '"]');
+    listEl.innerHTML = '<div class="forum-loading-note">' + LBL.loadingPosts + '</div>';
+    try{
+      const q = query(collection(db, 'forumPosts', id, 'replies'), orderBy('createdAt', 'asc'), limit(100));
+      const snap = await getDocs(q);
+      if(snap.empty){ listEl.innerHTML = ''; return; }
+      const rows = [];
+      snap.forEach(rd => {
+        const r = rd.data();
+        rows.push(
+          '<div class="forum-reply">' +
+            avatarHtml(r.authorName, r.authorAvatar, r.authorUid) +
+            '<div><div class="forum-reply-name">' + escapeHtml(r.authorName || LBL.anonymous) + '</div>' +
+            '<div class="forum-reply-text">' + escapeHtml(r.text) + '</div></div>' +
+          '</div>'
+        );
+      });
+      listEl.innerHTML = rows.join('');
+    }catch(e){ listEl.innerHTML = ''; }
+  }
+
+  let toastTimer = null;
+  function toast(text){
+    let el = document.getElementById('mmgForumToast');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'mmgForumToast';
+      el.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); color:var(--text,#EAEDF3); padding:10px 18px; border-radius:10px; font-size:13px; z-index:1000; box-shadow:0 12px 30px rgba(0,0,0,0.4);';
+      document.body.appendChild(el);
+    }
+    el.textContent = text;
+    el.style.display = 'block';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.style.display = 'none'; }, 2500);
   }
 
   function watchFeed(){
@@ -357,6 +621,84 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     charCountEl.classList.toggle('warn', len >= MAX_LEN);
   });
 
+  // ---- Emoji seçici ----
+  const EMOJIS = ['😀','😂','😊','😍','🤔','👍','👏','🙏','🎉','🔥','❤️','💯','😅','😎','🤝','💰','📈','📉','✅','⚠️','😢','😮','🙌','👀'];
+  const emojiBtn = document.getElementById('emojiBtn');
+  const emojiPicker = document.getElementById('emojiPicker');
+  emojiPicker.innerHTML = EMOJIS.map(e => '<button type="button" data-emoji="' + e + '">' + e + '</button>').join('');
+  emojiBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    emojiPicker.hidden = !emojiPicker.hidden;
+  });
+  emojiPicker.querySelectorAll('[data-emoji]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const start = composerText.selectionStart || composerText.value.length;
+      const end = composerText.selectionEnd || composerText.value.length;
+      composerText.value = composerText.value.slice(0, start) + btn.dataset.emoji + composerText.value.slice(end);
+      composerText.dispatchEvent(new Event('input'));
+      composerText.focus();
+      emojiPicker.hidden = true;
+    });
+  });
+  document.addEventListener('click', (e) => {
+    if(!emojiPicker.hidden && !emojiPicker.contains(e.target) && e.target !== emojiBtn) emojiPicker.hidden = true;
+    document.querySelectorAll('.forum-repost-menu:not([hidden])').forEach(m => {
+      if(!m.contains(e.target) && !e.target.closest('[data-repost-toggle]')) m.hidden = true;
+    });
+  });
+
+  // ---- Görsel ekleme (avatar yüklemedeki gibi: canvas ile küçültüp base64'e çevir) ----
+  let composerImageDataUrl = null;
+  const imageAttachBtn = document.getElementById('imageAttachBtn');
+  const composerImageInput = document.getElementById('composerImageInput');
+  const composerImagePreview = document.getElementById('composerImagePreview');
+  const composerImagePreviewImg = document.getElementById('composerImagePreviewImg');
+  imageAttachBtn.addEventListener('click', () => composerImageInput.click());
+  composerImageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 720;
+        const scale = Math.min(1, maxW / img.width);
+        const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        if(dataUrl.length > 700000){ alert(LBL.imageTooBig); return; }
+        composerImageDataUrl = dataUrl;
+        composerImagePreviewImg.src = dataUrl;
+        composerImagePreview.hidden = false;
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+    composerImageInput.value = '';
+  });
+  document.getElementById('composerImageRemoveBtn').addEventListener('click', () => {
+    composerImageDataUrl = null;
+    composerImagePreview.hidden = true;
+  });
+
+  // ---- Alıntı (quote) durumu ----
+  let pendingQuote = null;
+  const quotePreviewCard = document.getElementById('quotePreviewCard');
+  function startQuote(id, name, text){
+    pendingQuote = { id, authorName: name, text: text.slice(0, 300) };
+    quotePreviewCard.innerHTML = '<button type="button" class="cancel" id="cancelQuoteBtn">✕</button>' +
+      '<b>' + LBL.quoting + ':</b> ' + escapeHtml(name) + ' — ' + escapeHtml(text.slice(0, 140)) + (text.length > 140 ? '…' : '');
+    quotePreviewCard.hidden = false;
+    document.getElementById('cancelQuoteBtn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      pendingQuote = null;
+      quotePreviewCard.hidden = true;
+    });
+    composerText.focus();
+  }
+
   postBtn.addEventListener('click', async () => {
     composerErrorEl.classList.remove('show');
     const text = composerText.value.trim();
@@ -374,13 +716,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       await addDoc(collection(db, 'forumPosts'), {
         authorUid: currentUid,
         authorName: data.username || data.email || LBL.anonymous,
-        authorAvatar: data.avatarBase64 || null,
+        authorAvatar: data.avatarBase64 || data.logoBase64 || null,
         text: text.slice(0, MAX_LEN),
+        imageBase64: composerImageDataUrl || null,
+        quoteOf: pendingQuote || null,
+        likes: [], repostUids: [], replyCount: 0,
         createdAt: serverTimestamp()
       });
       composerText.value = '';
       charCountEl.textContent = '0 / ' + MAX_LEN;
       charCountEl.classList.remove('warn');
+      composerImageDataUrl = null;
+      composerImagePreview.hidden = true;
+      pendingQuote = null;
+      quotePreviewCard.hidden = true;
     }catch(e){
       composerErrorEl.textContent = LBL.postFailed;
       composerErrorEl.classList.add('show');
@@ -402,10 +751,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const snap = await getDoc(doc(db, 'users', user.uid));
       const data = snap.exists() ? snap.data() : {};
       currentIsAdmin = data.isAdmin === true;
+      currentUserName = data.username || data.email || LBL.anonymous;
+      currentUserAvatar = data.avatarBase64 || data.logoBase64 || null;
       const composerAvatar = document.getElementById('composerAvatar');
       if(composerAvatar){
-        const name = data.username || data.email || LBL.anonymous;
-        const html = avatarHtml(name, data.avatarBase64, user.uid).replace('<div class="avatar-circle"', '<div class="avatar-circle" id="composerAvatar"');
+        const html = avatarHtml(currentUserName, currentUserAvatar, user.uid).replace('<div class="avatar-circle"', '<div class="avatar-circle" id="composerAvatar"');
         composerAvatar.outerHTML = html;
       }
       stateArea.innerHTML = '';
