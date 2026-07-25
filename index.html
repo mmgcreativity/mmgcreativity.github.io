@@ -3039,17 +3039,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // ilk daveti kendimiz kabul ettiğimizde (kendi yazdığımız için) doğru kalır. Gerçek üyelik
       // kaydı ise zaten "firmaAccounts" koleksiyonunda (herkese açık yazılabilir) tutulduğundan,
       // en güvenilir kaynak odur.
-      let memberIds = [];
+      let candidateIds = [];
       try{
         const memSnap = await getDocs(query(collectionGroup(db, 'members'), where('uid', '==', uid)));
         memSnap.forEach(d => {
           const fid = d.ref.parent.parent ? d.ref.parent.parent.id : null;
-          if(fid) memberIds.push(fid);
+          if(fid) candidateIds.push(fid);
         });
       }catch(e){
         // Sorgu (örn. eksik bir Firestore index'i yüzünden) başarısız olursa, en azından
         // ilk kabul ettiğimiz davetlerin yansıdığı eski "firmaIds" alanına geri dön.
-        memberIds = Array.isArray(data.firmaIds) ? data.firmaIds : [];
+        candidateIds = Array.isArray(data.firmaIds) ? data.firmaIds : [];
+      }
+
+      // GÜVENLİK KONTROLÜ (düzeltilen hata): Yukarıdaki collectionGroup sorgusu index
+      // eksikliği yüzünden başarısız olup bayat "firmaIds" alanına düştüğünde, bir admin
+      // bizi bir firmadan kaldırsa bile o firma bu bayat listede kalmaya devam edebiliyordu
+      // — kullanıcı, erişimi kaldırılmış bir firmayı görmeye devam ediyordu. Bunu engellemek
+      // için, kaynağı ne olursa olsun (sorgu başarılı da olsa, bayat alana da düşülse), her
+      // aday firma için GERÇEKTEN hâlâ üye olup olmadığımızı doğrudan üyelik belgesine
+      // bakarak teyit ediyoruz. Bu, koleksiyon grubu index'i olmadan da çalışır.
+      let memberIds = [];
+      for(const fid of candidateIds){
+        try{
+          const memberDoc = await getDoc(doc(db, 'firmaAccounts', fid, 'members', uid));
+          if(memberDoc.exists()) memberIds.push(fid);
+        }catch(e){ /* okunamazsa güvenli tarafta kal, listeye eklemiyoruz */ }
       }
 
       const allIds = Array.from(new Set([...memberIds, ...adminIds]));

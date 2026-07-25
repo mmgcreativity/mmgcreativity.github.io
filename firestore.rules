@@ -1,4 +1,4 @@
-rules_version = '2';
+rules_version = '2'; 
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId}/{document=**} {
@@ -186,6 +186,18 @@ service cloud.firestore {
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
         );
       }
+    }
+
+    // ---- Blog (Blog.html buradan okuyup yazıyor; bu kural daha önce eksikti,
+    // bu yüzden "Blog yüklenemedi" hatası alınıyordu) ----
+    match /blogPosts/{postId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.authorUid == request.auth.uid &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      allow update, delete: if request.auth != null && (
+        resource.data.authorUid == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+      );
     }
   }
 }
