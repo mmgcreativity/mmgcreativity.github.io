@@ -817,6 +817,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       auth_reset_maybe_sent:'Eğer bu e-posta adresi sistemde kayıtlıysa, şifre sıfırlama bağlantısı gönderildi.',
       auth_err_reset_failed:'Şifre sıfırlama e-postası gönderilemedi. Lütfen daha sonra tekrar deneyin.',
       auth_err_need_username:'Lütfen bir kullanıcı adı belirleyin.',
+      auth_err_username_taken:'Bu kullanıcı adı zaten kullanılıyor, lütfen başka bir kullanıcı adı seçin.',
       auth_err_passwords_mismatch:'Şifreler eşleşmiyor.',
       auth_err_email_in_use:'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.',
       auth_err_invalid_email:'Geçerli bir e-posta adresi girin.',
@@ -908,6 +909,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       auth_reset_maybe_sent:'If this email address is registered in our system, a password reset link has been sent.',
       auth_err_reset_failed:'The password reset email could not be sent. Please try again later.',
       auth_err_need_username:'Please choose a username.',
+      auth_err_username_taken:'This username is already taken, please choose a different one.',
       auth_err_passwords_mismatch:'Passwords do not match.',
       auth_err_email_in_use:'This email address is already registered. Try signing in instead.',
       auth_err_invalid_email:'Enter a valid email address.',
@@ -1800,26 +1802,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   }
 
-  // ---- Tek Oturum Kısıtlaması ----
+  // ---- Tek Oturum Kısıtlaması (platform bazlı: web + uygulama ayrı ayrı) ----
   // Premium artık kullanıcı başına satıldığı (firmaya değil) için, aynı hesabın aynı anda
-  // birden fazla cihaz/tarayıcıda açık kalmasını engelliyoruz. Her giriş, kendine özel bir
-  // "oturum kimliği" üretip bunu hem Firestore'a hem de bu cihazın localStorage'ına yazar.
-  // Başka bir yerden aynı hesapla giriş yapıldığında Firestore'daki değer değişir; bu cihaz
-  // gerçek zamanlı dinleyici (onSnapshot) sayesinde bunu anında fark edip kendini çıkışa zorlar.
+  // birden fazla cihaz/tarayıcıda açık kalmasını engelliyoruz. Ancak aynı kullanıcının BİR
+  // web oturumu + BİR uygulama oturumunu aynı anda açık tutabilmesi için, oturum kimliği
+  // artık tek bir alan değil, platforma göre iki AYRI alanda tutuluyor:
+  // activeSessionId_web / activeSessionId_app. Bir platformda yeni giriş yapıldığında sadece
+  // O platformun eski oturumu kapanır, diğer platform etkilenmez.
   const MMG_SESSION_KEY = 'mmg_session_id';
+
+  // Bu sayfa bir native uygulama sarmalayıcısı (WebView) içinde açıldıysa, o sarmalayıcının
+  // sayfa yüklenmeden önce window.mmgIsNativeApp = true atamış olması beklenir. Böyle bir
+  // işaret yoksa (PWA olarak yüklenmiş/"standalone" modda açılmış olsa bile) varsayılan
+  // olarak "web" kabul edilir.
+  function mmgSessionPlatform(){
+    try{
+      if(window.mmgIsNativeApp === true) return 'app';
+    }catch(e){}
+    return 'web';
+  }
+  const MMG_SESSION_FIELD = 'activeSessionId_' + mmgSessionPlatform();
   let mmgSessionUnsub = null;
 
   function mmgGenerateSessionId(){
     return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
   }
 
-  // Yeni bir oturum kimliği üretir, Firestore'a yazar ve bu cihazda saklar.
-  // Sadece giriş/kayıt anında çağrılır ("bu cihaz artık aktif oturum sahibi").
+  // Yeni bir oturum kimliği üretir, Firestore'a (bu platforma ait alana) yazar ve bu
+  // cihazda saklar. Sadece giriş/kayıt anında çağrılır ("bu cihaz artık bu platformun
+  // aktif oturum sahibi").
   async function mmgClaimSession(uid){
     const sessionId = mmgGenerateSessionId();
     try{
       await setDoc(doc(db, 'users', uid), {
-        activeSessionId: sessionId,
+        [MMG_SESSION_FIELD]: sessionId,
         activeSessionAt: serverTimestamp()
       }, { merge: true });
       localStorage.setItem(MMG_SESSION_KEY, sessionId);
@@ -1830,21 +1846,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(mmgSessionUnsub){ mmgSessionUnsub(); mmgSessionUnsub = null; }
   }
 
-  // Firestore'daki oturum kimliğini gerçek zamanlı izler; bu cihazınkinden farklı bir
-  // değere değiştiğini görürse (başka bir yerden giriş yapıldı demektir) oturumu kapatır.
+  // Firestore'daki (SADECE bu platforma ait) oturum kimliğini gerçek zamanlı izler; bu
+  // cihazınkinden farklı bir değere değiştiğini görürse (aynı platformda başka bir yerden
+  // giriş yapıldı demektir) oturumu kapatır. Diğer platformun alanı değişse bile bu cihazı
+  // etkilemez — böylece aynı hesap 1 web + 1 uygulamada aynı anda açık kalabilir.
   function mmgWatchSession(uid){
     mmgStopWatchingSession();
     mmgSessionUnsub = onSnapshot(doc(db, 'users', uid), (snap) => {
       if(!snap.exists()) return;
-      const remoteSessionId = snap.data().activeSessionId;
+      const remoteSessionId = snap.data()[MMG_SESSION_FIELD];
       const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
       if(remoteSessionId && localSessionId && remoteSessionId !== localSessionId){
         mmgStopWatchingSession();
         localStorage.removeItem(MMG_SESSION_KEY);
         alert(MMGI18N.t('session_kicked_message'));
-        signOut(auth).catch(()=>{});
-        localStorage.setItem('mmg_auth_state', 'guest');
-        window.location.reload();
+        // ÖNEMLİ: signOut() tamamlanmadan sayfa yenilenirse, Firebase Auth'un yerel
+        // (IndexedDB) oturum kaydı yarım kalmış halde kalabiliyor ve bu da az sonra aynı
+        // tarayıcıdan tekrar giriş yapmaya çalışıldığında başarısız olmasına sebep
+        // olabiliyordu. Bu yüzden artık signOut'un bitmesini BEKLEYİP öyle yeniliyoruz.
+        signOut(auth).catch(()=>{}).finally(() => {
+          localStorage.setItem('mmg_auth_state', 'guest');
+          window.location.reload();
+        });
       }
     }, () => { /* dinleme hatasında sessizce geç */ });
   }
@@ -1965,6 +1988,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const authUsernameInput = document.getElementById('authUsername');
   const referralWrap = document.getElementById('authReferralWrap');
   const guestBtn = document.getElementById('guestBtn');
+
+  // Kullanıcı adları her zaman büyük harfle kaydedilsin diye, kullanıcı yazarken
+  // canlı olarak büyük harfe çeviriyoruz. toLocaleUpperCase('tr-TR') kullanıyoruz,
+  // çünkü sıradan toUpperCase() Türkçe 'i' harfini yanlış çevirir (İ yerine I).
+  if(authUsernameInput){
+    authUsernameInput.addEventListener('input', () => {
+      const pos = authUsernameInput.selectionStart;
+      authUsernameInput.value = authUsernameInput.value.toLocaleUpperCase('tr-TR');
+      try{ authUsernameInput.setSelectionRange(pos, pos); }catch(e){}
+    });
+  }
 
   let authMode = 'login';
 
@@ -2649,7 +2683,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     try{
       if(authMode === 'signup'){
         const confirm = document.getElementById('authPasswordConfirm').value;
-        const username = document.getElementById('authUsername').value.trim();
+        const username = document.getElementById('authUsername').value.trim().toLocaleUpperCase('tr-TR');
         if(!username){
           showAuthError(MMGI18N.t('auth_err_need_username'));
           return;
@@ -2663,6 +2697,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           return;
         }
         const cred = await createUserWithEmailAndPassword(auth, email, password);
+        // Kullanıcı adı benzersizliği: "usernames/{kucukharfli-ad}" dokümanını
+        // rezerve etmeye çalış. Doküman zaten varsa (başka biri bu adı önce
+        // almışsa) Firestore kuralları update'e izin vermediği için bu yazma
+        // reddedilir — o zaman az önce oluşturduğumuz hesabı geri alıp
+        // kullanıcıya başka bir ad seçmesini söylüyoruz.
+        const usernameKey = username.toLocaleLowerCase('tr-TR');
+        try{
+          await setDoc(doc(db, 'usernames', usernameKey), { uid: cred.user.uid, email: email, createdAt: serverTimestamp() });
+        }catch(unameErr){
+          try{ await cred.user.delete(); }catch(delErr){ /* silinemezse sessizce geç */ }
+          showAuthError(MMGI18N.t('auth_err_username_taken'));
+          return;
+        }
         try{ await sendEmailVerification(cred.user); }catch(verifyErr){ /* gönderilemezse kaydı engellemesin */ }
         const customerNumber = await getNextCustomerNumber();
         const referralCodeRaw = document.getElementById('authReferralCode').value.trim();

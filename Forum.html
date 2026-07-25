@@ -417,7 +417,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       rows.push(
         '<div class="forum-post" data-id="' + d.id + '">' +
           '<div class="forum-post-top">' +
-            avatarHtml(p.authorName, p.authorAvatar, p.authorUid) +
+            avatarHtml(p.authorName, (p.authorUid === currentUid ? currentUserAvatar : null) || p.authorAvatar, p.authorUid) +
             '<div class="forum-post-meta">' +
               '<div class="forum-post-name">' + escapeHtml(p.authorName || LBL.anonymous) + '</div>' +
               '<div class="forum-post-time">' + fmtRelativeTime(p.createdAt) + '</div>' +
@@ -547,7 +547,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           await addDoc(collection(db, 'forumPosts', id, 'replies'), {
             authorUid: currentUid,
             authorName: data.username || data.email || LBL.anonymous,
-            authorAvatar: data.avatarBase64 || data.logoBase64 || null,
+            authorAvatar: data.avatarBase64 || data.logoBase64 || currentUserAvatar || null,
             text: text.slice(0, 300),
             createdAt: serverTimestamp()
           });
@@ -716,7 +716,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       await addDoc(collection(db, 'forumPosts'), {
         authorUid: currentUid,
         authorName: data.username || data.email || LBL.anonymous,
-        authorAvatar: data.avatarBase64 || data.logoBase64 || null,
+        authorAvatar: data.avatarBase64 || data.logoBase64 || currentUserAvatar || null,
         text: text.slice(0, MAX_LEN),
         imageBase64: composerImageDataUrl || null,
         quoteOf: pendingQuote || null,
@@ -752,7 +752,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const data = snap.exists() ? snap.data() : {};
       currentIsAdmin = data.isAdmin === true;
       currentUserName = data.username || data.email || LBL.anonymous;
-      currentUserAvatar = data.avatarBase64 || data.logoBase64 || null;
+      currentUserAvatar = data.avatarBase64 || data.logoBase64 || user.photoURL || null;
       const composerAvatar = document.getElementById('composerAvatar');
       if(composerAvatar){
         const html = avatarHtml(currentUserName, currentUserAvatar, user.uid).replace('<div class="avatar-circle"', '<div class="avatar-circle" id="composerAvatar"');

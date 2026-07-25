@@ -2786,8 +2786,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         { id:'glTutar', label:'Tutar', type:'tutar' },
         { id:'glAciklama', label:'Açıklama (opsiyonel)', type:'text', placeholder:'Örn. Kasa fazlası' }
       ],
-      body: v => 'Bankanızda bulunan ' + (v.glIban || '—') + ' nolu hesabımız için ' + (v.glKisi || '—') + ', ' + fmtTR(v.glTutar,2) + ' TL nakit para yatırmaya yetkilidir.' + (v.glAciklama ? ' ' + v.glAciklama : ''),
-      infoRows: v => [['Hesap IBAN', v.glIban||'—'], ['Yetkili Kişi', v.glKisi||'—'], ['Tutar', fmtTR(v.glTutar,2)+' TL']],
+      body: v => 'Bankanızda bulunan ' + (v.glIban || '—') + ' nolu hesabımız için ' + (v.glKisi || '—') + ', ' + fmtTR(v.glTutar,2) + ' TL nakit para yatırmaya yetkilidir.',
+      infoRows: v => [['Hesap IBAN', v.glIban||'—'], ['Yetkili Kişi', v.glKisi||'—'], ['Tutar', fmtTR(v.glTutar,2)+' TL']].concat(v.glAciklama ? [['Açıklama', v.glAciklama]] : []),
       fileName: 'nakit-yatirma-yetkilendirme-talimati.pdf',
       shareTitle: 'Nakit Para Yatırma Yetkilendirme Talimatı'
     },
@@ -2801,8 +2801,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         { id:'glTutar', label:'Tutar', type:'tutar' },
         { id:'glAciklama', label:'Açıklama (opsiyonel)', type:'text', placeholder:'Örn. Maaş ödemesi için' }
       ],
-      body: v => 'Bankanızda bulunan ' + (v.glIban || '—') + ' nolu hesabımız için ' + (v.glKisi || '—') + ', ' + fmtTR(v.glTutar,2) + ' TL nakit çekmeye yetkilidir.' + (v.glAciklama ? ' ' + v.glAciklama : ''),
-      infoRows: v => [['Hesap IBAN', v.glIban||'—'], ['Yetkili Kişi', v.glKisi||'—'], ['Tutar', fmtTR(v.glTutar,2)+' TL']],
+      body: v => 'Bankanızda bulunan ' + (v.glIban || '—') + ' nolu hesabımız için ' + (v.glKisi || '—') + ', ' + fmtTR(v.glTutar,2) + ' TL nakit çekmeye yetkilidir.',
+      infoRows: v => [['Hesap IBAN', v.glIban||'—'], ['Yetkili Kişi', v.glKisi||'—'], ['Tutar', fmtTR(v.glTutar,2)+' TL']].concat(v.glAciklama ? [['Açıklama', v.glAciklama]] : []),
       fileName: 'nakit-cekme-yetkilendirme-talimati.pdf',
       shareTitle: 'Nakit Para Çekme Yetkilendirme Talimatı'
     }
@@ -3980,6 +3980,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }catch(e){ /* sessizce geç */ }
   })();
 </script>
+<script src="mmg-banks-widget.js"></script>
 <script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>
