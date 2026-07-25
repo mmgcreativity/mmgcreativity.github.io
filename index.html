@@ -592,11 +592,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     color:var(--muted); cursor:pointer; transition:all .15s ease; background:transparent; border:none; font-family:'Inter',sans-serif;
   }
   .auth-tab.active{ background:var(--surface); color:var(--brass); box-shadow:0 2px 6px rgba(0,0,0,0.25); }
-  .auth-grid{ display:grid; grid-template-columns:1fr 1fr; column-gap:14px; align-items:start; }
+  .auth-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:14px; align-items:start; }
   .auth-full{ grid-column:1 / -1; }
   .auth-half{ grid-column:span 1; }
   .auth-field{ margin-bottom:16px; min-width:0; }
-  .auth-field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .auth-field label{ display:flex; align-items:center; min-height:22px; font-size:12.5px; font-weight:600; color:var(--brass,#C6A15B); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .auth-field input, .auth-field select{
     width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
     padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
@@ -608,24 +608,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .auth-success{ color:var(--teal); font-size:12.5px; margin-bottom:14px; display:none; grid-column:1 / -1; }
   .auth-success.show{ display:block; }
   .auth-remember-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; grid-column:1 / -1; }
-  .auth-2x2-col{ display:flex; flex-direction:column; gap:16px; min-width:0; margin-bottom:16px; }
-  .auth-2x2-col .auth-field{ margin-bottom:0; }
-  .auth-captcha-graphic-wrap{ margin-bottom:0; }
-  .auth-captcha-input-wrap{ margin-bottom:0; }
-  .auth-captcha-row{ display:flex; align-items:stretch; gap:8px; margin-bottom:8px; }
-  #authCaptchaCanvas{
-    flex:1; min-width:0; max-width:190px; height:56px; border-radius:8px; border:1px solid var(--hairline,#2A3448);
-    background:#f2f2f2; cursor:default;
-  }
-  .auth-captcha-actions{ display:flex; flex-direction:column; gap:6px; flex:0 0 auto; }
-  .auth-captcha-iconbtn{
-    width:32px; height:25px; border-radius:6px; border:1px solid var(--hairline,#2A3448);
-    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B); cursor:pointer;
-    display:flex; align-items:center; justify-content:center; transition:border-color .12s ease, color .12s ease;
-  }
-  .auth-captcha-iconbtn:hover{ border-color:var(--brass,#C6A15B); color:var(--text,#EAEDF3); }
-  .auth-captcha-label{ font-size:12.5px; font-weight:600; color:var(--brass,#C6A15B); margin-bottom:6px; }
-  .auth-captcha-error{ color:var(--coral); font-size:11.5px; margin-top:6px; min-height:14px; }
   .mmg-invite-banner{
     position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:960;
     width:min(420px, calc(100vw - 24px)); background:var(--surface,#141C2B); border:1px solid var(--brass,#C6A15B);
@@ -637,9 +619,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     to{ opacity:1; transform:translate(-50%, 0); }
   }
   .mmg-invite-icon{ font-size:26px; flex:0 0 auto; line-height:1; }
-  .mmg-invite-body{ flex:1; min-width:0; }
-  .mmg-invite-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; color:var(--text,#EAEDF3); margin-bottom:3px; min-height:1.2em; }
-  .mmg-invite-sub{ font-size:12.5px; color:var(--muted,#8D96AC); margin-bottom:10px; line-height:1.4; min-height:2.2em; }
+  .mmg-invite-body{ flex:1; min-width:0; position:relative; }
+  .mmg-invite-close{
+    position:absolute; top:-6px; right:-6px; width:24px; height:24px; border-radius:7px; border:none;
+    background:transparent; color:var(--muted,#8D96AC); cursor:pointer; font-size:15px; line-height:1;
+    display:flex; align-items:center; justify-content:center; transition:background .12s ease, color .12s ease;
+  }
+  .mmg-invite-close:hover{ background:var(--surface-2,#1B2536); color:var(--text,#EAEDF3); }
+  .mmg-invite-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; color:var(--text,#EAEDF3); margin-bottom:3px; padding-right:22px; }
+  .mmg-invite-sub{ font-size:12.5px; color:var(--muted,#8D96AC); margin-bottom:6px; line-height:1.4; }
+  .mmg-invite-perms{ font-size:12px; color:var(--text,#EAEDF3); margin-bottom:10px; line-height:1.5; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:8px 10px; }
+  .mmg-invite-perms ul{ margin:4px 0 0 16px; padding:0; }
+  .mmg-invite-later{ font-size:11px; color:var(--muted,#8D96AC); margin-top:8px; line-height:1.4; }
   .mmg-invite-actions{ display:flex; gap:8px; }
   .mmg-invite-accept, .mmg-invite-reject{
     flex:1; padding:8px 0; border-radius:8px; border:none; cursor:pointer; font-family:'Inter',sans-serif;
@@ -651,6 +642,92 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .mmg-invite-accept:disabled, .mmg-invite-reject:disabled{ opacity:0.5; cursor:default; }
   .mmg-invite-msg{ font-size:11.5px; margin-top:8px; min-height:14px; color:var(--teal,#3FB68A); }
   @media (max-width:480px){ .mmg-invite-banner{ top:10px; padding:13px 14px; } }
+
+  /* ---- Giriş sonrası Karşılama / KVKK Onay Ekranı ---- */
+  #welcomeOverlay{
+    position:fixed; inset:0; z-index:1100; display:flex; align-items:center; justify-content:center;
+    background:rgba(6,9,15,0.72); backdrop-filter:blur(3px); padding:20px;
+  }
+  #welcomeOverlay.hidden{ display:none; }
+  .welcome-frame{
+    position:relative; width:min(560px, 100%); max-height:88vh; overflow-y:auto;
+    background:var(--surface,#141C2B); border:1px solid var(--brass,#C6A15B); border-radius:18px;
+    padding:2px; box-shadow:0 30px 70px rgba(0,0,0,0.55);
+  }
+  .welcome-frame-inner{
+    border:1px solid var(--hairline,#2A3448); border-radius:16px; padding:30px 28px 26px;
+    background:
+      radial-gradient(700px 300px at 15% -10%, rgba(198,161,91,0.10), transparent 60%),
+      radial-gradient(600px 300px at 100% 110%, rgba(62,143,224,0.08), transparent 60%),
+      var(--surface,#141C2B);
+  }
+  .welcome-icon{ font-size:34px; text-align:center; margin-bottom:6px; }
+  .welcome-title{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; text-align:center;
+    color:var(--text,#EAEDF3); margin-bottom:14px; line-height:1.35;
+  }
+  .welcome-body{ font-size:13.5px; line-height:1.7; color:var(--text,#EAEDF3); margin-bottom:10px; }
+  .welcome-body strong{ color:var(--brass,#C6A15B); }
+  .welcome-divider{ height:1px; background:var(--hairline,#2A3448); margin:16px 0; }
+  .welcome-law-box{
+    font-size:12px; line-height:1.6; color:var(--muted,#8D96AC); background:var(--surface-2,#1B2536);
+    border:1px solid var(--hairline,#2A3448); border-radius:10px; padding:12px 14px; margin-bottom:14px;
+  }
+  .welcome-law-box a{ color:var(--azure,#3E8FE0); text-decoration:none; }
+  .welcome-law-box a:hover{ text-decoration:underline; }
+  .welcome-consents{ margin-bottom:6px; }
+  .welcome-consent-row{
+    display:flex; align-items:flex-start; gap:10px; padding:9px 0; border-bottom:1px solid var(--hairline,#2A3448);
+    font-size:12.5px; line-height:1.5; color:var(--text,#EAEDF3);
+  }
+  .welcome-consent-row:last-child{ border-bottom:none; }
+  .welcome-consent-row input[type="checkbox"]{ margin-top:2px; width:16px; height:16px; flex:0 0 auto; accent-color:var(--teal,#3FB68A); cursor:pointer; }
+  .welcome-consent-row label{ cursor:pointer; }
+  .welcome-consent-row .req{ color:var(--coral,#FF6B4A); font-weight:700; }
+  .welcome-select-all{
+    display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--brass,#C6A15B);
+    padding:8px 0 10px; cursor:pointer;
+  }
+  .welcome-select-all input[type="checkbox"]{ width:16px; height:16px; accent-color:var(--brass,#C6A15B); cursor:pointer; }
+  .welcome-kvkk-link{
+    display:inline-block; background:none; border:none; color:var(--azure,#3E8FE0); font-size:12.5px;
+    text-decoration:underline; cursor:pointer; padding:0; font-family:'Inter',sans-serif;
+  }
+  .welcome-actions{ margin-top:18px; }
+  .welcome-continue-btn{
+    width:100%; padding:13px 0; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif;
+    font-size:14.5px; font-weight:700; color:#fff; background:linear-gradient(120deg, var(--teal,#3FB68A), #2E8C6A);
+    transition:opacity .15s ease;
+  }
+  .welcome-continue-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .welcome-continue-btn:not(:disabled):hover{ opacity:0.9; }
+  .welcome-req-note{ font-size:11px; color:var(--muted,#8D96AC); text-align:center; margin-top:8px; }
+
+  /* ---- KVKK tam metin modalı ---- */
+  #kvkkFullModal{
+    position:fixed; inset:0; z-index:1200; display:flex; align-items:center; justify-content:center;
+    background:rgba(6,9,15,0.8); padding:20px;
+  }
+  #kvkkFullModal.hidden{ display:none; }
+  .kvkk-modal-box{
+    width:min(640px, 100%); max-height:82vh; display:flex; flex-direction:column;
+    background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448); border-radius:16px;
+    box-shadow:0 30px 70px rgba(0,0,0,0.55); overflow:hidden;
+  }
+  .kvkk-modal-head{
+    display:flex; align-items:center; justify-content:space-between; padding:18px 20px;
+    border-bottom:1px solid var(--hairline,#2A3448); flex:0 0 auto;
+  }
+  .kvkk-modal-head h3{ font-family:'Space Grotesk',sans-serif; font-size:15.5px; color:var(--text,#EAEDF3); }
+  .kvkk-modal-close{
+    width:28px; height:28px; border-radius:8px; border:none; background:var(--surface-2,#1B2536);
+    color:var(--muted,#8D96AC); cursor:pointer; font-size:15px;
+  }
+  .kvkk-modal-close:hover{ color:var(--text,#EAEDF3); }
+  .kvkk-modal-body{ padding:18px 20px; overflow-y:auto; font-size:12.5px; line-height:1.7; color:var(--text,#EAEDF3); }
+  .kvkk-modal-body h4{ font-size:13px; color:var(--brass,#C6A15B); margin:14px 0 6px; }
+  .kvkk-modal-body h4:first-child{ margin-top:0; }
+  @media (max-width:480px){ .welcome-frame-inner{ padding:22px 18px 20px; } }
   .auth-forgot-link{
     font-size:12.5px; color:var(--brass,#C6A15B); text-decoration:none; background:none; border:none;
     cursor:pointer; padding:0; font-family:inherit;
@@ -668,7 +745,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .auth-submit:hover{ opacity:0.9; }
   .auth-submit:disabled{ opacity:0.6; cursor:default; }
-  .auth-2x2-col .auth-submit{ margin-top:0; }
+  .auth-submit.auth-half{ margin-top:28px; }
   .auth-divider{ display:flex; align-items:center; gap:10px; margin:22px 0; color:var(--muted); font-size:11.5px; }
   .auth-divider::before, .auth-divider::after{ content:''; flex:1; height:1px; background:var(--hairline); }
   .auth-guest{
@@ -712,6 +789,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması Hesaplama', nav_vadelimevduat:'Vadeli Mevduat Faizi Hesaplama',
       nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
       nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları',
+      nav_blog:'Blog', nav_forum:'Forum',
       nav_calc_desc:'Araçları', nav_nakitakis_desc:'Tablosu', nav_talimat_desc:'Hazırlama', nav_talimat_full:'Talimat Hazırlama',
       nav_budget:'Bütçeleme', nav_budget_desc:'Araçları',
       hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
@@ -749,10 +827,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       auth_account_type:'Hesap Türü', auth_account_individual:'Bireysel', auth_account_corporate:'Kurumsal',
       auth_fullname:'Ad Soyad', auth_company_title:'Firma Ünvanı', auth_email:'E-posta',
       auth_password:'Şifre', auth_password_repeat:'Şifre (Tekrar)',
-      auth_referral_label:'Referans Kodu', auth_referral_optional:'(varsa, opsiyonel)',
+      auth_referral_label:'Referans Kodu', auth_referral_optional:'(opsiyonel)',
       captcha_label:'Güvenlik Kodu', captcha_refresh:'Yeni kod', captcha_listen:'Sesli oku',
       captcha_placeholder:'Yukarıdaki kodu girin', captcha_wrong:'Güvenlik kodu hatalı, lütfen tekrar deneyin.',
       invite_accept:'✓ Kabul Et', invite_reject:'✕ Reddet',
+      invite_later_note:'Şimdi karar vermek istemiyorsanız kapatabilirsiniz — bu davet, kararınızı verene kadar "Hesabım" sayfasında bekleyecektir.',
+      welcome_title:'Değerli Dijital Finans Asistanı Kullanıcısı',
+      welcome_kvkk_link_btn:'KVKK Aydınlatma Metni\'nin tamamında', welcome_select_all:'Tümünü Seç',
+      consent_kvkk_label:'KVKK Aydınlatma Metni\'ni okudum ve anladım.',
+      consent_data_label:'Girdiğim finansal verilerin hizmet sunulabilmesi amacıyla güvenli sunucularda işlenmesini kabul ediyorum.',
+      consent_marketing_label:'Kampanya, indirim ve ürün duyurularıyla ilgili e-posta almak istiyorum. (opsiyonel)',
+      welcome_continue_btn:'Devam Et', welcome_req_note:'(*) işaretli maddeler zorunludur.',
+      kvkk_modal_title:'KVKK Aydınlatma Metni',
       auth_remember_me:'Oturumu açık tut', auth_forgot_password:'Şifremi unuttum?', auth_or:'veya',
       auth_google:'Google ile devam et', auth_guest:'Misafir olarak gir',
       auth_not_logged_in:'Giriş yapmadınız', auth_guest_mode:'Misafir modundasınız', auth_user_code:'Kullanıcı Kodu: #',
@@ -792,6 +878,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
       nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
       nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools',
+      nav_blog:'Blog', nav_forum:'Forum',
       nav_calc_desc:'Tools', nav_nakitakis_desc:'Table', nav_talimat_desc:'Preparation', nav_talimat_full:'Instruction Preparation',
       nav_budget:'Budgeting', nav_budget_desc:'Tools',
       hero_title:'Digital Finance Assistant', hero_tagline:'Your digital partner for financial decisions',
@@ -829,10 +916,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       auth_account_type:'Account Type', auth_account_individual:'Individual', auth_account_corporate:'Corporate',
       auth_fullname:'Full Name', auth_company_title:'Company Name', auth_email:'Email',
       auth_password:'Password', auth_password_repeat:'Password (Repeat)',
-      auth_referral_label:'Referral Code', auth_referral_optional:'(optional, if any)',
+      auth_referral_label:'Referral Code', auth_referral_optional:'(optional)',
       captcha_label:'Security Code', captcha_refresh:'New code', captcha_listen:'Listen',
       captcha_placeholder:'Enter the code above', captcha_wrong:'Incorrect security code, please try again.',
       invite_accept:'✓ Accept', invite_reject:'✕ Decline',
+      invite_later_note:'If you\'re not ready to decide, you can close this — the invitation will wait for you on the "My Account" page until you decide.',
+      welcome_title:'Dear Digital Finance Assistant User',
+      welcome_kvkk_link_btn:'the full Data Protection Notice', welcome_select_all:'Select All',
+      consent_kvkk_label:'I have read and understood the Data Protection (KVKK) Notice.',
+      consent_data_label:'I consent to my financial data being processed on secure servers to provide the service.',
+      consent_marketing_label:'I would like to receive emails about campaigns, discounts and product news. (optional)',
+      welcome_continue_btn:'Continue', welcome_req_note:'(*) Items marked with an asterisk are required.',
+      kvkk_modal_title:'Data Protection (KVKK) Notice',
       auth_remember_me:'Keep me signed in', auth_forgot_password:'Forgot password?', auth_or:'or',
       auth_google:'Continue with Google', auth_guest:'Continue as guest',
       auth_not_logged_in:'You are not signed in', auth_guest_mode:'You are in guest mode', auth_user_code:'User Code: #',
@@ -914,39 +1009,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <label data-i18n="auth_email">E-posta</label>
           <input type="email" id="authEmail" placeholder="ornek@eposta.com" required>
         </div>
-        <div class="auth-2x2-col auth-half" id="authLeftCol">
-          <div class="auth-field" id="authPasswordWrap">
-            <label data-i18n="auth_password">Şifre</label>
-            <input type="password" id="authPassword" placeholder="••••••••" required>
-          </div>
-          <button type="submit" class="auth-submit" id="authSubmitBtn" data-i18n="auth_tab_login">Giriş Yap</button>
+        <div class="auth-field auth-full" id="authPasswordWrap">
+          <label data-i18n="auth_password">Şifre</label>
+          <input type="password" id="authPassword" placeholder="••••••••" required>
         </div>
-        <div class="auth-2x2-col auth-half">
-          <div class="auth-captcha-graphic-wrap" id="authCaptchaGraphicWrap">
-            <div class="auth-captcha-label" data-i18n="captcha_label">Güvenlik Kodu</div>
-            <div class="auth-captcha-row">
-              <canvas id="authCaptchaCanvas" width="180" height="56" aria-hidden="true"></canvas>
-              <div class="auth-captcha-actions">
-                <button type="button" class="auth-captcha-iconbtn" id="authCaptchaRefreshBtn" title="Yeni kod" data-i18n-title="captcha_refresh" aria-label="Yeni kod">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                </button>
-                <button type="button" class="auth-captcha-iconbtn" id="authCaptchaAudioBtn" title="Sesli oku" data-i18n-title="captcha_listen" aria-label="Sesli oku">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="auth-captcha-input-wrap" id="authCaptchaInputWrap">
-            <input type="text" id="authCaptchaInput" placeholder="" data-i18n-placeholder="captcha_placeholder" autocomplete="off" style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-family:'Inter',sans-serif; font-size:14px; outline:none;">
-            <div class="auth-captcha-error" id="authCaptchaError"></div>
-          </div>
-        </div>
-        <div class="auth-field auth-full" id="authPasswordConfirmWrap" style="display:none;">
+        <div class="auth-field auth-half" id="authPasswordConfirmWrap" style="display:none;">
           <label data-i18n="auth_password_repeat">Şifre (Tekrar)</label>
           <input type="password" id="authPasswordConfirm" placeholder="••••••••">
         </div>
-        <div class="auth-field auth-full" id="authReferralWrap" style="display:none;">
-          <label data-i18n="auth_referral_label">Referans Kodu <span style="color:var(--muted); font-weight:400;" data-i18n="auth_referral_optional">(varsa, opsiyonel)</span></label>
+        <div class="auth-field auth-half" id="authReferralWrap" style="display:none;">
+          <label data-i18n="auth_referral_label">Referans Kodu <span style="color:var(--muted); font-weight:400;" data-i18n="auth_referral_optional">(opsiyonel)</span></label>
           <input type="text" id="authReferralCode" placeholder="ör. AHMET10">
         </div>
         <div class="auth-remember-row" id="authRememberRow">
@@ -956,6 +1028,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </label>
           <button type="button" class="auth-forgot-link" id="forgotPasswordBtn" data-i18n="auth_forgot_password">Şifremi unuttum?</button>
         </div>
+        <button type="submit" class="auth-submit auth-full" id="authSubmitBtn">Giriş Yap</button>
       </form>
 
       <div class="auth-divider" data-i18n="auth_or">veya</div>
@@ -971,13 +1044,95 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="mmgInviteBanner" class="mmg-invite-banner" hidden>
   <div class="mmg-invite-icon">🏢</div>
   <div class="mmg-invite-body">
+    <button type="button" class="mmg-invite-close" id="mmgInviteCloseBtn" aria-label="Kapat" title="Kapat">✕</button>
     <div class="mmg-invite-title" id="mmgInviteTitle"></div>
     <div class="mmg-invite-sub" id="mmgInviteSub"></div>
+    <div class="mmg-invite-perms" id="mmgInvitePerms" hidden></div>
     <div class="mmg-invite-actions">
       <button type="button" class="mmg-invite-accept" id="mmgInviteAcceptBtn" data-i18n="invite_accept">✓ Kabul Et</button>
       <button type="button" class="mmg-invite-reject" id="mmgInviteRejectBtn" data-i18n="invite_reject">✕ Reddet</button>
     </div>
     <div class="mmg-invite-msg" id="mmgInviteMsg"></div>
+    <div class="mmg-invite-later" id="mmgInviteLater" data-i18n="invite_later_note">Şimdi karar vermek istemiyorsanız kapatabilirsiniz — bu davet, kararınızı verene kadar "Hesabım" sayfasında bekleyecektir.</div>
+  </div>
+</div>
+
+<div id="welcomeOverlay" class="hidden">
+  <div class="welcome-frame">
+    <div class="welcome-frame-inner">
+      <div class="welcome-icon">🔐</div>
+      <div class="welcome-title" data-i18n="welcome_title">Değerli Dijital Finans Asistanı Kullanıcısı</div>
+      <div class="welcome-body">
+        Verileriniz güvendedir. Girdiğiniz gelir, gider ve finansal bilgiler yalnızca sizin hesabınıza bağlı olarak,
+        <strong>Google Firebase</strong> altyapısının sunduğu şifreli ve güvenli sunucularda saklanır; sizin izniniz
+        veya davet ettiğiniz bir firma bağlantısı olmadan başka hiçbir kullanıcı ile paylaşılmaz.
+      </div>
+      <div class="welcome-body">
+        6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") kapsamında, kişisel verileriniz yalnızca size hizmet
+        sunabilmek amacıyla işlenir ve yasal saklama süreleri sona erdiğinde ya da hesabınızı sildiğinizde kalıcı
+        olarak silinir. Aklınızda soru işareti kalmasın diye aşağıdan aydınlatma metninin tamamına ulaşabilirsiniz.
+      </div>
+      <div class="welcome-law-box">
+        📄 <strong>Aydınlatma Metni:</strong> Verilerinizin hangi amaçla, ne kadar süreyle işlendiğini ve haklarınızı
+        <button type="button" class="welcome-kvkk-link" id="openKvkkFullBtn" data-i18n="welcome_kvkk_link_btn">KVKK Aydınlatma Metni'nin tamamında</button> okuyabilirsiniz.
+        Uygulama altyapısında kullanılan Google (Firebase) hizmetlerinin veri işleme esaslarına ise
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Gizlilik Politikası</a> üzerinden ulaşabilirsiniz.
+      </div>
+      <div class="welcome-law-box">
+        💳 <strong>Abonelik ve Ödeme Güvencesi:</strong> Premium abonelik ödemeleriniz, banka düzeyinde güvenlik
+        sertifikasına sahip <strong>PayTR</strong> güvenli ödeme altyapısı üzerinden alınır. Kart bilgileriniz bizim
+        sunucularımızda tutulmaz; istediğiniz zaman aboneliğinizi iptal edebilirsiniz.
+      </div>
+
+      <div class="welcome-select-all">
+        <input type="checkbox" id="welcomeSelectAll">
+        <label for="welcomeSelectAll" data-i18n="welcome_select_all">Tümünü Seç</label>
+      </div>
+
+      <div class="welcome-consents">
+        <div class="welcome-consent-row">
+          <input type="checkbox" id="consentKvkk">
+          <label for="consentKvkk"><span class="req">*</span> <span data-i18n="consent_kvkk_label">KVKK Aydınlatma Metni'ni okudum ve anladım.</span></label>
+        </div>
+        <div class="welcome-consent-row">
+          <input type="checkbox" id="consentData">
+          <label for="consentData"><span class="req">*</span> <span data-i18n="consent_data_label">Girdiğim finansal verilerin hizmet sunulabilmesi amacıyla güvenli sunucularda işlenmesini kabul ediyorum.</span></label>
+        </div>
+        <div class="welcome-consent-row">
+          <input type="checkbox" id="consentMarketing">
+          <label for="consentMarketing"><span data-i18n="consent_marketing_label">Kampanya, indirim ve ürün duyurularıyla ilgili e-posta almak istiyorum. (opsiyonel)</span></label>
+        </div>
+      </div>
+
+      <div class="welcome-actions">
+        <button type="button" class="welcome-continue-btn" id="welcomeContinueBtn" disabled data-i18n="welcome_continue_btn">Devam Et</button>
+        <div class="welcome-req-note" data-i18n="welcome_req_note">(*) işaretli maddeler zorunludur.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="kvkkFullModal" class="hidden">
+  <div class="kvkk-modal-box">
+    <div class="kvkk-modal-head">
+      <h3 data-i18n="kvkk_modal_title">KVKK Aydınlatma Metni</h3>
+      <button type="button" class="kvkk-modal-close" id="kvkkFullCloseBtn" aria-label="Kapat">✕</button>
+    </div>
+    <div class="kvkk-modal-body" id="kvkkFullBody">
+      <h4>1. Veri Sorumlusu</h4>
+      <p>Bu uygulama kapsamında kişisel verileriniz, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca veri sorumlusu sıfatıyla işlenmektedir.</p>
+      <h4>2. İşlenen Kişisel Veriler</h4>
+      <p>Ad-soyad/firma adı, e-posta adresi, telefon, adres ve tarafınızca uygulamaya girilen gelir/gider, nakit akış ve talimat verileri işlenir.</p>
+      <h4>3. İşleme Amaçları</h4>
+      <p>Verileriniz; hesabınızın oluşturulması, hizmetin sunulması, finansal hesaplama araçlarının çalıştırılması, abonelik/ödeme işlemlerinin yürütülmesi ve yasal yükümlülüklerin yerine getirilmesi amacıyla işlenir.</p>
+      <h4>4. Verilerin Aktarımı</h4>
+      <p>Verileriniz, barındırma hizmeti aldığımız Google Firebase ve ödeme işlemleri için PayTR dışında, açık rızanız veya bir firma/ekip bağlantınız olmadıkça üçüncü kişilerle paylaşılmaz.</p>
+      <h4>5. Saklama Süresi</h4>
+      <p>Verileriniz, hesabınız aktif olduğu sürece ve ilgili mevzuatta öngörülen zamanaşımı süreleri boyunca saklanır; hesap silme talebinizle birlikte mevzuatın izin verdiği ölçüde silinir/anonimleştirilir.</p>
+      <h4>6. Haklarınız</h4>
+      <p>KVKK'nın 11. maddesi uyarınca; verilerinizin işlenip işlenmediğini öğrenme, işlenmişse buna ilişkin bilgi talep etme, düzeltilmesini veya silinmesini isteme haklarına sahipsiniz. Taleplerinizi "Hesabım" sayfası üzerinden veya uygulama içi destek kanallarından iletebilirsiniz.</p>
+      <p style="margin-top:14px; color:var(--muted); font-size:11.5px;">Bu metin genel bilgilendirme amaçlıdır; şirketinize özel nihai KVKK Aydınlatma Metni'nin bir hukuk danışmanı tarafından gözden geçirilmesi önerilir.</p>
+    </div>
   </div>
 </div>
 
@@ -1082,6 +1237,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span class="fav-star" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="nav_rehber">Rehber</span>
+      </span>
+    </button>
+
+    <button class="nav-item" data-target="Blog.html" data-title="Blog">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Blog.html" data-fav-title="Blog" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v12H7l-3 3V4z"/><path d="M8 9h8M8 12.5h5"/></svg></span>
+      <span class="nav-text-wrap">
+        <span class="nav-title" data-i18n="nav_blog">Blog</span>
+      </span>
+    </button>
+
+    <button class="nav-item" data-target="Forum.html" data-title="Forum">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Forum.html" data-fav-title="Forum" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M20 12a7 7 0 1 1-3.1-5.8"/><path d="M20 5v4h-4"/></svg></span>
+      <span class="nav-text-wrap">
+        <span class="nav-title" data-i18n="nav_forum">Forum</span>
       </span>
     </button>
 
@@ -1698,13 +1867,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const authSubmitBtn = document.getElementById('authSubmitBtn');
   const tabLogin = document.getElementById('tabLogin');
   const tabSignup = document.getElementById('tabSignup');
+  const passwordWrap = document.getElementById('authPasswordWrap');
   const passwordConfirmWrap = document.getElementById('authPasswordConfirmWrap');
   const usernameWrap = document.getElementById('authUsernameWrap');
   const authUsernameInput = document.getElementById('authUsername');
   const referralWrap = document.getElementById('authReferralWrap');
   const guestBtn = document.getElementById('guestBtn');
-  const authCaptchaInputWrap = document.getElementById('authCaptchaInputWrap');
-  const authLeftCol = document.getElementById('authLeftCol');
 
   let authMode = 'login';
 
@@ -1713,24 +1881,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     tabLogin.classList.toggle('active', mode === 'login');
     tabSignup.classList.toggle('active', mode === 'signup');
     passwordConfirmWrap.style.display = mode === 'signup' ? 'block' : 'none';
+    passwordWrap.classList.toggle('auth-full', mode === 'login');
+    passwordWrap.classList.toggle('auth-half', mode === 'signup');
     usernameWrap.style.display = mode === 'signup' ? 'block' : 'none';
     referralWrap.style.display = mode === 'signup' ? 'block' : 'none';
     authRememberRow.style.display = mode === 'login' ? 'flex' : 'none';
-    // Giriş ekranında buton, Şifre kutusunun hemen altında aynı sütun içinde kalır (2x2 blok);
-    // kayıt ekranında ek alanlar (kullanıcı adı, şifre tekrar, referans) araya girdiği için
-    // buton formun en altına, tam genişlikte taşınır.
-    if(mode === 'signup'){
-      authSubmitBtn.classList.add('auth-full');
-      authForm.appendChild(authSubmitBtn);
-    } else {
-      authSubmitBtn.classList.remove('auth-full');
-      if(authLeftCol) authLeftCol.appendChild(authSubmitBtn);
-    }
+    // Kayıt ekranında en altta solda Referans Kodu, sağında "Hesap Oluştur" butonu yan yana durur;
+    // giriş ekranında buton formun en altında tam genişlikte kalır.
+    try{
+      if(mode === 'signup'){
+        authSubmitBtn.classList.remove('auth-full');
+        authSubmitBtn.classList.add('auth-half');
+        referralWrap.insertAdjacentElement('afterend', authSubmitBtn);
+      } else {
+        authSubmitBtn.classList.remove('auth-half');
+        authSubmitBtn.classList.add('auth-full');
+        authForm.appendChild(authSubmitBtn);
+      }
+    }catch(relocErr){ console.warn('auth submit button reposition failed', relocErr); }
+    if(guestBtn) guestBtn.style.display = mode === 'login' ? '' : 'none';
     authTitle.textContent = mode === 'login' ? MMGI18N.t('auth_title_login') : MMGI18N.t('auth_title_signup');
     authSub.textContent = mode === 'login' ? MMGI18N.t('auth_sub_login') : MMGI18N.t('auth_sub_signup');
     authSubmitBtn.textContent = mode === 'login' ? MMGI18N.t('auth_tab_login') : MMGI18N.t('auth_create_account');
     hideAuthError();
     hideAuthSuccess();
+  }
+  // Dil değiştiğinde (Ayarlar > Dil), butonun/başlıkların o anki moda (giriş/kayıt) göre
+  // doğru dilde kalması için mevcut modu yeniden uygula.
+  if(typeof MMGI18N !== 'undefined' && MMGI18N.onChange){
+    MMGI18N.onChange(function(){ setAuthMode(authMode); });
   }
 
   function showAuthError(msg){
@@ -1789,115 +1968,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   function openAuthOverlay(){
     authOverlay.classList.remove('hidden');
-    refreshCaptcha();
   }
-
-  // ---- Güvenlik Kodu (CAPTCHA) ----
-  const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // karışabilecek 0/O, 1/I/L hariç
-  let currentCaptchaCode = '';
-  const captchaCanvas = document.getElementById('authCaptchaCanvas');
-  const captchaInput = document.getElementById('authCaptchaInput');
-  const captchaError = document.getElementById('authCaptchaError');
-  const captchaRefreshBtn = document.getElementById('authCaptchaRefreshBtn');
-  const captchaAudioBtn = document.getElementById('authCaptchaAudioBtn');
-
-  function generateCaptchaCode(len){
-    len = len || 5;
-    let code = '';
-    for(let i = 0; i < len; i++){
-      code += CAPTCHA_CHARS[Math.floor(Math.random() * CAPTCHA_CHARS.length)];
-    }
-    return code;
-  }
-
-  function drawCaptcha(code){
-    if(!captchaCanvas) return;
-    const ctx = captchaCanvas.getContext('2d');
-    const w = captchaCanvas.width, h = captchaCanvas.height;
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = '#f2f2f2';
-    ctx.fillRect(0, 0, w, h);
-
-    // Arka plan gürültü çizgileri
-    for(let i = 0; i < 5; i++){
-      ctx.strokeStyle = `rgba(60,60,70,${0.12 + Math.random() * 0.12})`;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(Math.random() * w, Math.random() * h);
-      ctx.bezierCurveTo(Math.random()*w, Math.random()*h, Math.random()*w, Math.random()*h, Math.random()*w, Math.random()*h);
-      ctx.stroke();
-    }
-    // Arka plan noktaları
-    for(let i = 0; i < 40; i++){
-      ctx.fillStyle = `rgba(40,40,50,${0.10 + Math.random() * 0.15})`;
-      ctx.beginPath();
-      ctx.arc(Math.random() * w, Math.random() * h, Math.random() * 1.4, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Karakterleri tek tek, hafifçe döndürerek ve dalgalı bir taban çizgisinde çiz
-    const charW = w / code.length;
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'center';
-    for(let i = 0; i < code.length; i++){
-      const ch = code[i];
-      const x = charW * i + charW / 2 + (Math.random() * 6 - 3);
-      const y = h / 2 + Math.sin(i * 1.4) * 6 + (Math.random() * 6 - 3);
-      const angle = (Math.random() * 32 - 16) * Math.PI / 180;
-      const size = 24 + Math.random() * 8;
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(angle);
-      ctx.font = `700 ${size}px 'Space Grotesk', sans-serif`;
-      ctx.lineWidth = 1.6;
-      ctx.strokeStyle = `hsl(${Math.random()*360}, 55%, 30%)`;
-      ctx.strokeText(ch, 0, 0);
-      ctx.restore();
-    }
-    // Ortadan geçen ince bir dalga çizgisi
-    ctx.strokeStyle = 'rgba(30,30,40,0.4)';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    for(let x = 0; x <= w; x += 4){
-      const y = h / 2 + Math.sin((x / w) * Math.PI * 3) * 5;
-      if(x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-  }
-
-  function refreshCaptcha(){
-    currentCaptchaCode = generateCaptchaCode(5);
-    drawCaptcha(currentCaptchaCode);
-    if(captchaInput) captchaInput.value = '';
-    if(captchaError) captchaError.textContent = '';
-  }
-
-  function speakCaptcha(){
-    try{
-      if(!('speechSynthesis' in window) || !currentCaptchaCode) return;
-      window.speechSynthesis.cancel();
-      const spoken = currentCaptchaCode.split('').join(', ');
-      const utter = new SpeechSynthesisUtterance(spoken);
-      utter.lang = (typeof MMGI18N !== 'undefined' && MMGI18N.lang === 'en') ? 'en-US' : 'tr-TR';
-      utter.rate = 0.75;
-      window.speechSynthesis.speak(utter);
-    }catch(e){ /* sesli okunamazsa sessizce geç */ }
-  }
-
-  function verifyCaptchaOrShowError(){
-    const val = (captchaInput && captchaInput.value ? captchaInput.value : '').trim().toUpperCase();
-    if(!val || val !== currentCaptchaCode){
-      if(captchaError) captchaError.textContent = MMGI18N.t('captcha_wrong');
-      refreshCaptcha();
-      return false;
-    }
-    if(captchaError) captchaError.textContent = '';
-    return true;
-  }
-
-  if(captchaRefreshBtn) captchaRefreshBtn.addEventListener('click', refreshCaptcha);
-  if(captchaAudioBtn) captchaAudioBtn.addEventListener('click', speakCaptcha);
-  refreshCaptcha();
 
   function updateUserBadge(customerNumber, username){
     const state = localStorage.getItem('mmg_auth_state');
@@ -2200,28 +2271,125 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   // ---- Firma Hesabı (YENİ): bekleyen bir kullanıcı veya yöneticilik daveti varsa,
   // otomatik eklemek yerine site içinde bir bildirim gösterir; kullanıcı kabul/red eder ----
+  // ---- Giriş sonrası Karşılama / KVKK Onay Ekranı ----
+  const welcomeOverlay = document.getElementById('welcomeOverlay');
+  const welcomeSelectAll = document.getElementById('welcomeSelectAll');
+  const consentKvkk = document.getElementById('consentKvkk');
+  const consentData = document.getElementById('consentData');
+  const consentMarketing = document.getElementById('consentMarketing');
+  const welcomeContinueBtn = document.getElementById('welcomeContinueBtn');
+  const kvkkFullModal = document.getElementById('kvkkFullModal');
+  const openKvkkFullBtn = document.getElementById('openKvkkFullBtn');
+  const kvkkFullCloseBtn = document.getElementById('kvkkFullCloseBtn');
+  let welcomePendingUid = null; // null => misafir; dolu => giriş yapmış kullanıcının uid'si
+
+  function updateWelcomeContinueState(){
+    welcomeContinueBtn.disabled = !(consentKvkk.checked && consentData.checked);
+  }
+  [consentKvkk, consentData, consentMarketing].forEach(chk => {
+    chk.addEventListener('change', () => {
+      welcomeSelectAll.checked = consentKvkk.checked && consentData.checked && consentMarketing.checked;
+      updateWelcomeContinueState();
+    });
+  });
+  welcomeSelectAll.addEventListener('change', () => {
+    consentKvkk.checked = consentData.checked = consentMarketing.checked = welcomeSelectAll.checked;
+    updateWelcomeContinueState();
+  });
+  if(openKvkkFullBtn) openKvkkFullBtn.addEventListener('click', () => { kvkkFullModal.classList.remove('hidden'); });
+  if(kvkkFullCloseBtn) kvkkFullCloseBtn.addEventListener('click', () => { kvkkFullModal.classList.add('hidden'); });
+
+  function openWelcomeOverlay(uid){
+    welcomePendingUid = uid;
+    consentKvkk.checked = false; consentData.checked = false; consentMarketing.checked = false;
+    welcomeSelectAll.checked = false;
+    updateWelcomeContinueState();
+    welcomeOverlay.classList.remove('hidden');
+  }
+
+  welcomeContinueBtn.addEventListener('click', async () => {
+    if(welcomeContinueBtn.disabled) return;
+    welcomeContinueBtn.disabled = true;
+    const marketingOptIn = !!consentMarketing.checked;
+    try{
+      if(welcomePendingUid){
+        await setDoc(doc(db, 'users', welcomePendingUid), {
+          kvkkAccepted: true, kvkkAcceptedAt: serverTimestamp(), marketingOptIn: marketingOptIn
+        }, { merge: true });
+      } else {
+        localStorage.setItem('mmg_kvkk_accepted_guest', '1');
+        localStorage.setItem('mmg_marketing_optin_guest', marketingOptIn ? '1' : '0');
+      }
+    }catch(e){ /* Firestore'a yazılamasa bile kullanıcıyı uygulamada bekletmiyoruz */ }
+    welcomeOverlay.classList.add('hidden');
+    welcomePendingUid = null;
+  });
+
+  // Giriş akışlarının (misafir / Google / e-posta) her başarılı sonrasında çağrılır;
+  // KVKK onayı daha önce verilmemişse karşılama ekranını açar, verilmişse hiçbir şey yapmaz.
+  async function showWelcomeIfNeeded(uid){
+    try{
+      if(uid){
+        const snap = await getDoc(doc(db, 'users', uid));
+        const already = snap.exists() && snap.data().kvkkAccepted === true;
+        if(!already) openWelcomeOverlay(uid);
+      } else {
+        const already = localStorage.getItem('mmg_kvkk_accepted_guest') === '1';
+        if(!already) openWelcomeOverlay(null);
+      }
+    }catch(e){ /* okunamazsa temkinli davranıp göstermeyi atla */ }
+  }
+
   const inviteBanner = document.getElementById('mmgInviteBanner');
   const inviteTitleEl = document.getElementById('mmgInviteTitle');
   const inviteSubEl = document.getElementById('mmgInviteSub');
+  const invitePermsEl = document.getElementById('mmgInvitePerms');
   const inviteMsgEl = document.getElementById('mmgInviteMsg');
   const inviteAcceptBtn = document.getElementById('mmgInviteAcceptBtn');
   const inviteRejectBtn = document.getElementById('mmgInviteRejectBtn');
+  const inviteCloseBtn = document.getElementById('mmgInviteCloseBtn');
   let pendingInviteQueue = [];
   let inviteBannerBusy = false;
   let inviteFetchInProgress = false; // eşzamanlı checkPendingInvites çağrılarının kuyruğu birbirinin üstüne yazmasını (ve bildirimi boş göstermesini) önler
+
+  // Bu modüller KullaniciYonetimi.html'deki PERMISSION_MODULES ile birebir eşleşir;
+  // bir kullanıcı davetinde hangi yetkilerin verildiğini bildirimde açıkça göstermek için kullanılır.
+  const INVITE_PERMISSION_MODULES = MMGI18N.lang==='en' ? [
+    { key:'gelirler', label:'Income' }, { key:'giderler', label:'Expenses' },
+    { key:'nakitakis', label:'Cash Flow Table' }, { key:'talimat', label:'Instruction Preparation' },
+    { key:'hesaplama', label:'Calculation Tools' }
+  ] : [
+    { key:'gelirler', label:'Gelirler' }, { key:'giderler', label:'Giderler' },
+    { key:'nakitakis', label:'Nakit Akış Tablosu' }, { key:'talimat', label:'Talimat Hazırlama' },
+    { key:'hesaplama', label:'Hesaplama Araçları' }
+  ];
+
+  // Kullanıcının "kapat (✕)" ile geçtiği davetleri bu oturumda tekrar tekrar göstermemek için
+  // yerelde saklıyoruz; davet Firestore'dan SİLİNMEZ, kişi "Hesabım" sayfasından karar verebilir.
+  function getDismissedInviteKeys(){
+    try{ return JSON.parse(localStorage.getItem('mmg_dismissed_invites') || '[]'); }catch(e){ return []; }
+  }
+  function dismissInviteKey(key){
+    try{
+      const list = getDismissedInviteKeys();
+      if(!list.includes(key)) list.push(key);
+      localStorage.setItem('mmg_dismissed_invites', JSON.stringify(list));
+    }catch(e){ /* sessizce geç */ }
+  }
 
   async function checkPendingInvites(user, username){
     if(!user || !user.email || inviteBannerBusy || inviteFetchInProgress) return;
     inviteFetchInProgress = true;
     const email = user.email.toLowerCase();
+    const dismissed = getDismissedInviteKeys();
     const freshQueue = [];
     try{
       const memberSnap = await getDoc(doc(db, 'firmaInvites', email));
-      if(memberSnap.exists()) freshQueue.push({ kind: 'member', id: email, data: memberSnap.data() || {} });
+      if(memberSnap.exists() && !dismissed.includes('member:'+email)) freshQueue.push({ kind: 'member', id: email, data: memberSnap.data() || {} });
     }catch(e){ /* sessizce geç */ }
     try{
       const adminSnap = await getDoc(doc(db, 'firmaAdminInvites', email));
-      if(adminSnap.exists()) freshQueue.push({ kind: 'admin', id: email, data: adminSnap.data() || {} });
+      if(adminSnap.exists() && !dismissed.includes('admin:'+email)) freshQueue.push({ kind: 'admin', id: email, data: adminSnap.data() || {} });
     }catch(e){ /* sessizce geç */ }
     pendingInviteQueue = freshQueue;
     inviteFetchInProgress = false;
@@ -2234,8 +2402,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const firmaName = (invite.data && invite.data.firmaName) || (MMGI18N.lang==='en' ? 'a company' : 'bir firma');
     const title = '🏢 ' + firmaName;
     const sub = invite.kind === 'admin'
-      ? (MMGI18N.lang==='en' ? ('You have been invited to be an admin of "' + firmaName + '". Do you accept?') : ('"' + firmaName + '" firmasına yönetici olarak davet edildiniz. Kabul ediyor musunuz?'))
-      : (MMGI18N.lang==='en' ? ('You have been invited to be a user of "' + firmaName + '". Do you accept?') : ('"' + firmaName + '" firmasına kullanıcı olarak davet edildiniz. Kabul ediyor musunuz?'));
+      ? (MMGI18N.lang==='en' ? ('You have been invited to be an admin of "' + firmaName + '". As an admin you can add/remove users of this company and manage their permissions — you will not enter your own financial data under this role. Do you accept?') : ('"' + firmaName + '" firmasına yönetici olarak davet edildiniz. Yönetici olarak bu firmaya kullanıcı ekleyip çıkarabilir, yetkilerini düzenleyebilirsiniz — bu rolde kendi mali verilerinizi girmezsiniz. Kabul ediyor musunuz?'))
+      : (MMGI18N.lang==='en' ? ('You have been invited to be a user of "' + firmaName + '". If you accept, your data entries in the modules below will be shared with this company\'s pool instead of staying private to you. Do you accept?') : ('"' + firmaName + '" firmasına kullanıcı olarak davet edildiniz. Kabul ederseniz, aşağıdaki modüllerdeki veri girişleriniz size özel kalmak yerine bu firmanın ortak veri havuzuna dahil olur. Kabul ediyor musunuz?'));
     // Güvenlik kontrolü: başlık/açıklama bir şekilde boş kalırsa bildirimi asla boş göstermeyiz,
     // aksi halde kullanıcı ne için "Kabul Et" dediğini bilmeden onaylayabilir.
     if(!title.trim() || !sub.trim()){
@@ -2245,8 +2413,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     inviteTitleEl.textContent = title;
     inviteSubEl.textContent = sub;
+    if(invite.kind === 'member'){
+      const perms = (invite.data && invite.data.permissions) || {};
+      const allowedLabels = INVITE_PERMISSION_MODULES.filter(m => perms[m.key] !== false).map(m => m.label);
+      invitePermsEl.innerHTML = (MMGI18N.lang==='en' ? 'You will get access to:' : 'Erişim kazanacağınız bölümler:') +
+        '<ul>' + (allowedLabels.length ? allowedLabels.map(l => '<li>' + l + '</li>').join('') : ('<li>' + (MMGI18N.lang==='en' ? 'None (view-only)' : 'Hiçbiri (yalnızca görüntüleme)') + '</li>')) + '</ul>';
+      invitePermsEl.hidden = false;
+    } else {
+      invitePermsEl.hidden = true;
+      invitePermsEl.innerHTML = '';
+    }
+    inviteMsgEl.style.color = 'var(--teal,#3FB68A)';
     inviteMsgEl.textContent = '';
     inviteBanner.hidden = false;
+
+    inviteCloseBtn.onclick = () => {
+      dismissInviteKey(invite.kind + ':' + invite.id);
+      pendingInviteQueue.shift();
+      showNextPendingInvite(user, username);
+    };
 
     inviteAcceptBtn.onclick = async () => {
       inviteBannerBusy = true;
@@ -2424,6 +2609,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     localStorage.setItem('mmg_remember', document.getElementById('rememberMe').checked ? '1' : '0');
     updateUserBadge();
     closeAuthOverlay();
+    await showWelcomeIfNeeded(null);
   });
 
   const googleBtn = document.getElementById('googleBtn');
@@ -2473,6 +2659,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       await syncCompanyCache(user.uid);
       await loadAdminFirmas(user.uid);
       closeAuthOverlay();
+      await showWelcomeIfNeeded(user.uid);
     } catch(err){
       if(err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request'){
         showAuthError(mapFirebaseError(err.code));
@@ -2485,7 +2672,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     hideAuthError();
-    if(!verifyCaptchaOrShowError()) return;
     const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value;
     const remember = document.getElementById('rememberMe').checked;
@@ -2519,11 +2705,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         // Referans kodu tanımlıysa (owner tarafından oluşturulmuşsa) faydasını (ücretsiz/indirimli) belirle
         let premiumBenefit = null;
         let referralLimitReached = false;
+        let referralOwnerUid = null;
         if(referralCode){
           try{
             const codeSnap = await getDoc(doc(db, 'referralCodes', referralCode));
             if(codeSnap.exists() && codeSnap.data().active !== false){
               const cd = codeSnap.data();
+              referralOwnerUid = cd.ownerUid || null;
               let usedCount = 0;
               if(cd.maxUses){
                 try{
@@ -2567,6 +2755,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               customerNumber: customerNumber,
               joinedAt: serverTimestamp()
             });
+            // Bu kodun sahibi (satış ortağı) tanımlıysa, "birisi senin kodunla katıldı" bildirimi bırak;
+            // sahibi kendi "Hesabım" sayfasındaki Referans Ortaklığı kartında bunu görecek.
+            if(referralOwnerUid){
+              try{
+                await setDoc(doc(collection(db, 'referralSignups')), {
+                  code: referralCode, ownerUid: referralOwnerUid,
+                  newUserUid: cred.user.uid, newUserName: username, newUserEmail: email,
+                  joinedAt: serverTimestamp()
+                });
+              }catch(notifErr){ /* bildirim yazılamazsa kaydı engellemesin */ }
+            }
             try{ gtag('event', 'signup_with_referral', { referral_code: referralCode }); }catch(gtagErr){}
           } catch(refErr){
             // Referans istatistiği kaydedilemezse sessizce geç, kayıt işlemini engellemesin
@@ -2594,6 +2793,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         try{ alert(MMGI18N.lang==='en' ? ('Your account has been created. 📩 We sent a verification email to ' + email + ' — please check your inbox (and spam folder) and confirm your email.') : ('Hesabınız oluşturuldu. 📩 ' + email + ' adresine bir doğrulama e-postası gönderdik, lütfen gelen kutunuzu (ve gereksiz/spam klasörünü) kontrol edip e-postanızı onaylayın.')); }catch(alertErr){}
 
         closeAuthOverlay();
+        await showWelcomeIfNeeded(cred.user.uid);
       } else {
         const cred = await signInWithEmailAndPassword(auth, email, password);
         let customerNumber = null;
@@ -2621,6 +2821,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         await syncCompanyCache(cred.user.uid);
         await loadAdminFirmas(cred.user.uid);
         closeAuthOverlay();
+        await showWelcomeIfNeeded(cred.user.uid);
       }
     } catch(err){
       showAuthError(mapFirebaseError(err.code));
