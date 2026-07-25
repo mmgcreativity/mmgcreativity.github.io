@@ -25,7 +25,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>mmgcreativity — Referans Kodu Yönetimi</title>
+<title>mmgcreativity — Referans Paneli</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0D1420">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -121,6 +121,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .code-row .mmg-admin-del{
     background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:12px; flex:0 0 auto; padding:4px;
   }
+  .code-row .code-owner{ color:var(--brass); font-size:11px; flex:0 0 auto; overflow:hidden; text-overflow:ellipsis; max-width:130px; }
+
+  .owner-code-card{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:14px; margin-bottom:12px;
+  }
+  .owner-code-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+  .owner-code-name{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13.5px; }
+  .owner-code-pill{
+    font-size:11px; padding:3px 8px; border-radius:999px; background:var(--surface); border:1px solid var(--hairline); color:var(--brass);
+  }
+  .owner-signup-row{
+    display:flex; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid var(--hairline); font-size:12px;
+  }
+  .owner-signup-row:last-child{ border-bottom:none; }
 </style>
 </head>
 <body>
@@ -130,8 +144,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <header class="masthead">
   <div>
-    <h1 class="title" data-i18n="page_title">Referans Kodu Yönetimi</h1>
-    <div class="subtitle" data-i18n="page_subtitle">Yeni bir referans kodu tanımlayın: bu kodla kayıt olan üyelere ücretsiz ya da indirimli premium tanınır.</div>
+    <h1 class="title" data-i18n="page_title">Referans Paneli</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Referans kodlarını yönetin, bir kullanıcıya atayın ve kendi referansınızla kaç kişinin katıldığını görün.</div>
   </div>
 </header>
 <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
@@ -162,6 +176,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <label><span data-i18n="usage_limit">Kullanım Limiti</span> <span style="color:var(--muted); font-weight:400;" data-i18n="usage_limit_note">(boş = sınırsız, örn. 1 = tek kişi)</span></label>
           <input type="number" id="mmgAdminMaxUses" min="1" placeholder="Sınırsız için boş bırakın" data-i18n-placeholder="unlimited_placeholder">
         </div>
+        <div class="auth-field">
+          <label data-i18n="assign_owner">Kullanıcıya Ata (Kullanıcı Kodu)</label>
+          <input type="text" id="mmgAdminOwnerCode" inputmode="numeric" placeholder="ör. 1018 — boş bırakılırsa kimseye atanmaz" data-i18n-placeholder="assign_owner_ph">
+        </div>
+        <div class="auth-field">
+          <label data-i18n="commission_percent">Komisyon Yüzdesi</label>
+          <input type="number" id="mmgAdminCommissionPercent" min="0" max="100" placeholder="ör. 10" data-i18n-placeholder="commission_percent_ph">
+        </div>
         <button type="submit" class="auth-submit" id="mmgAdminSubmitBtn" data-i18n="save_code">Kodu Kaydet</button>
         <button type="button" id="mmgAdminCancelEditBtn" style="display:none; margin-top:8px; background:transparent; border:1px solid var(--hairline); border-radius:8px; padding:9px 14px; color:var(--muted); font-size:12.5px; cursor:pointer;" data-i18n="cancel_edit">Düzenlemeyi İptal Et</button>
       </form>
@@ -173,12 +195,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="mmgAdminCodeList"></div>
     </div>
   </div>
+
+  <div id="ownerContent" hidden>
+    <div class="panel">
+      <div class="codes-title" data-i18n="my_codes_title">Kodlarım</div>
+      <div class="panel-sub" data-i18n="my_codes_desc">Size atanmış referans kod(lar)ıyla kimlerin katıldığını burada görebilirsiniz.</div>
+      <div id="mmgOwnerCodeList"></div>
+    </div>
+  </div>
 </main>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
@@ -207,6 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   const stateArea = document.getElementById('stateArea');
   const content = document.getElementById('content');
+  const ownerContent = document.getElementById('ownerContent');
 
   let MMG_LANG = 'tr';
   try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
@@ -221,7 +252,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     adminHint:'To make your account an admin, go to Firebase Console → Firestore Database → the <b>users</b> collection → the document with your UID → add the <b>isAdmin</b> field as <b>true</b> (boolean).</span>',
     loadingTxt:'Loading…', noCodesYet:'No referral codes defined yet.', codesLoadFailed:'Codes could not be loaded.',
     confirmDeleteCode:'Are you sure you want to delete the code "', codeSaved:'" code saved. ✓', codeSaveFailed:'Code could not be saved, please try again.',
-    updateCodePrefix:'Update "', updateCodeSuffix:'" Code'
+    updateCodePrefix:'Update "', updateCodeSuffix:'" Code',
+    ownerNotFound:'No user was found with this user code.', unassigned:'Unassigned', assignedTo:'Assigned to',
+    noPermissionOwner:'This page is only available to admins, or to users who have a referral code assigned to them.<br><br>',
+    myCodesLoadFailed:'Your codes could not be loaded.', noSignupsYet:'No one has signed up with this code yet.',
+    joinedLabel:'Joined', commissionLabel:'Commission'
   } : {
     freePremium:'Ücretsiz Premium', discountSuffix:' İndirim', used:' kullanıldı', usedUnlimited:' kullanıldı · Sınırsız',
     deleteBtn:'Sil', editBtn:'Düzenle', enterCode:'Lütfen bir kod girin.',
@@ -233,11 +268,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     adminHint:'Hesabınızı admin yapmak için Firebase Console → Firestore Database → <b>users</b> koleksiyonu → sizin UID\'niz olan belge → <b>isAdmin</b> alanını <b>true</b> (boolean) olarak ekleyin.</span>',
     loadingTxt:'Yükleniyor…', noCodesYet:'Henüz tanımlı bir referans kodu yok.', codesLoadFailed:'Kodlar yüklenemedi.',
     confirmDeleteCode:'"', codeSaved:'" kodu kaydedildi. ✓', codeSaveFailed:'Kod kaydedilemedi, tekrar deneyin.',
-    updateCodePrefix:'"', updateCodeSuffix:'" Kodunu Güncelle'
+    updateCodePrefix:'"', updateCodeSuffix:'" Kodunu Güncelle',
+    ownerNotFound:'Bu kullanıcı koduna sahip bir kullanıcı bulunamadı.', unassigned:'Atanmamış', assignedTo:'Atandı',
+    noPermissionOwner:'Bu sayfa yalnızca yöneticilere ya da kendisine bir referans kodu atanmış kullanıcılara açıktır.<br><br>',
+    myCodesLoadFailed:'Kodlarınız yüklenemedi.', noSignupsYet:'Bu kodla henüz kimse katılmadı.',
+    joinedLabel:'Katılım', commissionLabel:'Komisyon'
   };
 
   function showState(html){
     content.hidden = true;
+    ownerContent.hidden = true;
     stateArea.innerHTML = '<div class="state-box">' + html + '</div>';
   }
 
@@ -265,11 +305,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const benefitLabel = c.benefitType === 'free' ? LBL.freePremium : ('%' + (c.discountPercent||0) + LBL.discountSuffix);
         const used = usageCounts[c.id] || 0;
         const limitLabel = c.maxUses ? (used + '/' + c.maxUses + LBL.used) : (used + LBL.usedUnlimited);
-        return '<div class="code-row">' +
+        const ownerLabel = c.ownerCode ? ('👤 #' + c.ownerCode) : LBL.unassigned;
+        return '<div class="code-row" title="' + LBL.assignedTo + ': ' + ownerLabel + '">' +
           '<span class="code-name" title="' + c.id + '">' + c.id + '</span>' +
           '<span class="code-benefit" title="' + benefitLabel + '">' + benefitLabel + '</span>' +
+          '<span class="code-owner">' + ownerLabel + '</span>' +
           '<span class="code-usage">' + limitLabel + '</span>' +
-          '<button type="button" class="mmg-admin-edit" data-code="' + c.id + '" data-benefit-type="' + (c.benefitType||'free') + '" data-discount="' + (c.discountPercent||0) + '" data-max-uses="' + (c.maxUses||'') + '">' + LBL.editBtn + '</button>' +
+          '<button type="button" class="mmg-admin-edit" data-code="' + c.id + '" data-benefit-type="' + (c.benefitType||'free') + '" data-discount="' + (c.discountPercent||0) + '" data-max-uses="' + (c.maxUses||'') + '" data-owner-code="' + (c.ownerCode||'') + '" data-commission="' + (c.commissionPercent||'') + '">' + LBL.editBtn + '</button>' +
           '<button type="button" class="mmg-admin-del" data-code="' + c.id + '">' + LBL.deleteBtn + '</button>' +
           '</div>';
       }).join('');
@@ -280,6 +322,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           document.getElementById('mmgAdminDiscountWrap').style.display = btn.dataset.benefitType === 'discount' ? 'block' : 'none';
           document.getElementById('mmgAdminDiscountPercent').value = btn.dataset.discount || 20;
           document.getElementById('mmgAdminMaxUses').value = btn.dataset.maxUses || '';
+          document.getElementById('mmgAdminOwnerCode').value = btn.dataset.ownerCode || '';
+          document.getElementById('mmgAdminCommissionPercent').value = btn.dataset.commission || '';
           document.getElementById('mmgAdminSubmitBtn').textContent = LBL.updateCodePrefix + btn.dataset.code + LBL.updateCodeSuffix;
           document.getElementById('mmgAdminCancelEditBtn').style.display = 'inline-block';
           document.getElementById('mmgAdminForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -308,20 +352,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.getElementById('mmgAdminForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const msgEl = document.getElementById('mmgAdminMsg');
+    msgEl.style.color = '';
     const code = document.getElementById('mmgAdminCode').value.trim().toUpperCase();
     const benefitType = document.getElementById('mmgAdminBenefitType').value;
     const discountPercent = parseInt(document.getElementById('mmgAdminDiscountPercent').value, 10) || 0;
     const maxUsesRaw = document.getElementById('mmgAdminMaxUses').value.trim();
     const maxUses = maxUsesRaw ? parseInt(maxUsesRaw, 10) : null;
+    const ownerCodeRaw = document.getElementById('mmgAdminOwnerCode').value.trim();
+    const commissionPercent = parseInt(document.getElementById('mmgAdminCommissionPercent').value, 10) || 0;
     if(!code){ msgEl.textContent = LBL.enterCode; msgEl.style.color = 'var(--red,#e2544b)'; return; }
+    const submitBtn = document.getElementById('mmgAdminSubmitBtn');
+    submitBtn.disabled = true;
     try{
+      let ownerUid = null, ownerCode = null, ownerLabel = null;
+      if(ownerCodeRaw){
+        // Kullanıcı kodunu gerçek hesaba (uid) çeviriyoruz. Bu sayfa zaten sadece
+        // yöneticilere açık olduğundan, tüm "users" koleksiyonunu bu amaçla sorgulayabiliriz.
+        const ownerSnap = await getDocs(query(collection(db, 'users'), where('customerNumber', '==', parseInt(ownerCodeRaw, 10))));
+        if(ownerSnap.empty){
+          msgEl.textContent = LBL.ownerNotFound;
+          msgEl.style.color = 'var(--red,#e2544b)';
+          return;
+        }
+        const ownerDoc = ownerSnap.docs[0];
+        ownerUid = ownerDoc.id;
+        ownerCode = ownerCodeRaw;
+        ownerLabel = ownerDoc.data().username || ownerDoc.data().email || ownerCodeRaw;
+      }
       await setDoc(doc(db, 'referralCodes', code), {
         benefitType: benefitType,
         discountPercent: benefitType === 'discount' ? discountPercent : 0,
         maxUses: maxUses,
+        ownerUid: ownerUid,
+        ownerCode: ownerCode,
+        ownerLabel: ownerLabel,
+        commissionPercent: commissionPercent,
         active: true,
         createdAt: serverTimestamp()
-      });
+      }, { merge: true });
       msgEl.textContent = '"' + code + LBL.codeSaved;
       msgEl.style.color = 'var(--teal,#3FB68A)';
       mmgResetAdminForm();
@@ -330,8 +398,59 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     } catch(err){
       msgEl.textContent = LBL.codeSaveFailed;
       msgEl.style.color = 'var(--red,#e2544b)';
+    } finally {
+      submitBtn.disabled = false;
     }
   });
+
+  // ---- Sahip görünümü: admin olmayıp kendisine bir referans kodu atanmış kullanıcılar için ----
+  function escHtml(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  async function mmgLoadOwnerCodes(uid){
+    const listEl = document.getElementById('mmgOwnerCodeList');
+    listEl.innerHTML = '<div style="font-size:12px; color:var(--muted);">' + LBL.loadingTxt + '</div>';
+    try{
+      const codesSnap = await getDocs(query(collection(db, 'referralCodes'), where('ownerUid', '==', uid)));
+      if(codesSnap.empty){
+        listEl.innerHTML = '<div style="font-size:12px; color:var(--muted);">' + LBL.noCodesYet + '</div>';
+        return;
+      }
+      const codes = [];
+      codesSnap.forEach(d => codes.push({ id: d.id, ...d.data() }));
+
+      const cards = await Promise.all(codes.map(async (c) => {
+        const benefitLabel = c.benefitType === 'free' ? LBL.freePremium : ('%' + (c.discountPercent||0) + LBL.discountSuffix);
+        let signups = [];
+        try{
+          const signupsSnap = await getDocs(query(collection(db, 'referralSignups'), where('ownerUid', '==', uid), where('code', '==', c.id)));
+          signupsSnap.forEach(d => signups.push(d.data()));
+        }catch(e){ /* sessizce geç, aşağıda "henüz kimse yok" gösterilir */ }
+        signups.sort((a,b) => (b.joinedAt && b.joinedAt.seconds || 0) - (a.joinedAt && a.joinedAt.seconds || 0));
+        const signupsHtml = signups.length ? signups.map(s => {
+          const dt = s.joinedAt && s.joinedAt.seconds ? new Date(s.joinedAt.seconds * 1000).toLocaleDateString(MMG_LANG==='en' ? 'en-US' : 'tr-TR') : '';
+          return '<div class="owner-signup-row">' +
+            '<span>' + escHtml(s.newUserName || s.newUserEmail || '—') + '</span>' +
+            '<span style="color:var(--muted);">' + LBL.joinedLabel + ': ' + dt + '</span>' +
+          '</div>';
+        }).join('') : ('<p style="margin:0; font-size:12px; color:var(--muted);">' + LBL.noSignupsYet + '</p>');
+
+        return '<div class="owner-code-card">' +
+          '<div class="owner-code-head">' +
+            '<span class="owner-code-name">' + escHtml(c.id) + '</span>' +
+            '<span class="owner-code-pill">' + escHtml(benefitLabel) + '</span>' +
+            '<span class="owner-code-pill">' + LBL.commissionLabel + ': %' + (c.commissionPercent||0) + '</span>' +
+            '<span class="owner-code-pill">' + signups.length + '</span>' +
+          '</div>' +
+          signupsHtml +
+        '</div>';
+      }));
+
+      listEl.innerHTML = cards.join('');
+    }catch(e){
+      listEl.innerHTML = '<div style="font-size:12px; color:var(--red,#e2544b);">' + LBL.myCodesLoadFailed + '</div>';
+    }
+  }
 
   onAuthStateChanged(auth, async (user) => {
     if(!user){
@@ -349,40 +468,63 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       isAdmin = !!(snap.exists() && snap.data().isAdmin === true);
     }catch(e){ isAdmin = false; }
 
-    if(!isAdmin){
-      showState(
-        '<div class="big">⛔</div>' +
-        LBL.noPermission +
-        LBL.adminOnly +
-        '<span style="font-size:11.5px; opacity:0.7;">' + LBL.adminHint
-      );
+    if(isAdmin){
+      stateArea.innerHTML = '';
+      content.hidden = false;
+      ownerContent.hidden = true;
+      mmgLoadAdminCodes();
       return;
     }
-    stateArea.innerHTML = '';
-    content.hidden = false;
-    mmgLoadAdminCodes();
+
+    // Global yönetici değilse, kendisine bir referans kodu atanmış mı diye bak —
+    // öyleyse sadece kendi kodu/istatistikleri için salt-okunur görünümü aç.
+    let ownsAnyCode = false;
+    try{
+      const ownedSnap = await getDocs(query(collection(db, 'referralCodes'), where('ownerUid', '==', user.uid)));
+      ownsAnyCode = !ownedSnap.empty;
+    }catch(e){ ownsAnyCode = false; }
+
+    if(ownsAnyCode){
+      stateArea.innerHTML = '';
+      content.hidden = true;
+      ownerContent.hidden = false;
+      mmgLoadOwnerCodes(user.uid);
+      return;
+    }
+
+    showState(
+      '<div class="big">⛔</div>' +
+      LBL.noPermission +
+      LBL.noPermissionOwner
+    );
   });
 </script>
 <script>
 (function(){
   MMGI18N.registerDict({
     tr: {
-      page_title:'Referans Kodu Yönetimi',
-      page_subtitle:'Yeni bir referans kodu tanımlayın: bu kodla kayıt olan üyelere ücretsiz ya da indirimli premium tanınır.',
+      page_title:'Referans Paneli',
+      page_subtitle:'Referans kodlarını yönetin, bir kullanıcıya atayın ve kendi referansınızla kaç kişinin katıldığını görün.',
       back_home:'← Ana Sayfa',
       define_new_code:'Yeni Kod Tanımla', code_label:'Kod', benefit_type:'Fayda Türü',
       free_premium:'Ücretsiz Premium', discounted_premium:'İndirimli Premium', discount_percent:'İndirim Yüzdesi',
       usage_limit:'Kullanım Limiti', usage_limit_note:'(boş = sınırsız, örn. 1 = tek kişi)', unlimited_placeholder:'Sınırsız için boş bırakın',
-      save_code:'Kodu Kaydet', defined_codes:'Tanımlı Kodlar', cancel_edit:'Düzenlemeyi İptal Et'
+      assign_owner:'Kullanıcıya Ata (Kullanıcı Kodu)', assign_owner_ph:'ör. 1018 — boş bırakılırsa kimseye atanmaz',
+      commission_percent:'Komisyon Yüzdesi', commission_percent_ph:'ör. 10',
+      save_code:'Kodu Kaydet', defined_codes:'Tanımlı Kodlar', cancel_edit:'Düzenlemeyi İptal Et',
+      my_codes_title:'Kodlarım', my_codes_desc:'Size atanmış referans kod(lar)ıyla kimlerin katıldığını burada görebilirsiniz.'
     },
     en: {
-      page_title:'Referral Code Management',
-      page_subtitle:'Define a new referral code: members who sign up with this code get free or discounted premium.',
+      page_title:'Referral Panel',
+      page_subtitle:'Manage referral codes, assign them to a user, and see how many people joined with your own referral.',
       back_home:'← Home',
       define_new_code:'Define New Code', code_label:'Code', benefit_type:'Benefit Type',
       free_premium:'Free Premium', discounted_premium:'Discounted Premium', discount_percent:'Discount Percentage',
       usage_limit:'Usage Limit', usage_limit_note:'(blank = unlimited, e.g. 1 = single person)', unlimited_placeholder:'Leave blank for unlimited',
-      save_code:'Save Code', defined_codes:'Defined Codes', cancel_edit:'Cancel Editing'
+      assign_owner:"Assign to User (User Code)", assign_owner_ph:'e.g. 1018 — leave blank to assign no one',
+      commission_percent:'Commission Percentage', commission_percent_ph:'e.g. 10',
+      save_code:'Save Code', defined_codes:'Defined Codes', cancel_edit:'Cancel Editing',
+      my_codes_title:'My Codes', my_codes_desc:'See who joined using the referral code(s) assigned to you here.'
     }
   });
   MMGI18N.detectAndApplyDefaultLang();
