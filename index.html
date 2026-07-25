@@ -828,6 +828,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       auth_err_google_disabled:'Google ile giriş şu an aktif değil. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
       auth_err_unauthorized_domain:'Bu site adresi Firebase\'de yetkili domainler listesinde değil. (Firebase Console → Authentication → Settings → Authorized domains)',
       auth_err_popup_blocked:'Tarayıcınız açılır pencereyi (popup) engelledi. Popup engelleyiciyi kapatıp tekrar deneyin.',
+      session_kicked_message:'Hesabınıza başka bir cihaz veya tarayıcıdan giriş yapıldığı için bu oturum sonlandırıldı.',
       auth_err_generic_prefix:'Bir hata oluştu (', auth_err_generic_suffix:'), lütfen tekrar deneyin.',
       referral_used_free:'kodunu kullandınız!\nHesabınıza ücretsiz premium tanımlandı.',
       referral_used_discount_prefix:'kodunu kullandınız!\nHesabınıza %', referral_used_discount_suffix:' indirimli premium tanımlandı.',
@@ -917,6 +918,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       auth_err_google_disabled:'Sign in with Google is not currently enabled. (Firebase Console → Authentication → Sign-in method → Google → Enable)',
       auth_err_unauthorized_domain:'This site\'s domain is not in Firebase\'s authorized domains list. (Firebase Console → Authentication → Settings → Authorized domains)',
       auth_err_popup_blocked:'Your browser blocked the popup window. Please disable your popup blocker and try again.',
+      session_kicked_message:'This session has been ended because your account was signed in from another device or browser.',
       auth_err_generic_prefix:'An error occurred (', auth_err_generic_suffix:'), please try again.',
       referral_used_free:'code was applied!\nFree premium has been activated on your account.',
       referral_used_discount_prefix:'code was applied!\nA ', referral_used_discount_suffix:'% discounted premium has been activated on your account.',
@@ -1748,7 +1750,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment,
-    query, where, arrayUnion, arrayRemove
+    query, where, arrayUnion, arrayRemove, onSnapshot
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -1783,12 +1785,74 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   }
 
+  // ---- Tek Oturum Kısıtlaması ----
+  // Premium artık kullanıcı başına satıldığı (firmaya değil) için, aynı hesabın aynı anda
+  // birden fazla cihaz/tarayıcıda açık kalmasını engelliyoruz. Her giriş, kendine özel bir
+  // "oturum kimliği" üretip bunu hem Firestore'a hem de bu cihazın localStorage'ına yazar.
+  // Başka bir yerden aynı hesapla giriş yapıldığında Firestore'daki değer değişir; bu cihaz
+  // gerçek zamanlı dinleyici (onSnapshot) sayesinde bunu anında fark edip kendini çıkışa zorlar.
+  const MMG_SESSION_KEY = 'mmg_session_id';
+  let mmgSessionUnsub = null;
+
+  function mmgGenerateSessionId(){
+    return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+  }
+
+  // Yeni bir oturum kimliği üretir, Firestore'a yazar ve bu cihazda saklar.
+  // Sadece giriş/kayıt anında çağrılır ("bu cihaz artık aktif oturum sahibi").
+  async function mmgClaimSession(uid){
+    const sessionId = mmgGenerateSessionId();
+    try{
+      await setDoc(doc(db, 'users', uid), {
+        activeSessionId: sessionId,
+        activeSessionAt: serverTimestamp()
+      }, { merge: true });
+      localStorage.setItem(MMG_SESSION_KEY, sessionId);
+    }catch(e){ /* oturum kimliği yazılamazsa sessizce geç, kritik bir işlev değil */ }
+  }
+
+  function mmgStopWatchingSession(){
+    if(mmgSessionUnsub){ mmgSessionUnsub(); mmgSessionUnsub = null; }
+  }
+
+  // Firestore'daki oturum kimliğini gerçek zamanlı izler; bu cihazınkinden farklı bir
+  // değere değiştiğini görürse (başka bir yerden giriş yapıldı demektir) oturumu kapatır.
+  function mmgWatchSession(uid){
+    mmgStopWatchingSession();
+    mmgSessionUnsub = onSnapshot(doc(db, 'users', uid), (snap) => {
+      if(!snap.exists()) return;
+      const remoteSessionId = snap.data().activeSessionId;
+      const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
+      if(remoteSessionId && localSessionId && remoteSessionId !== localSessionId){
+        mmgStopWatchingSession();
+        localStorage.removeItem(MMG_SESSION_KEY);
+        alert(MMGI18N.t('session_kicked_message'));
+        signOut(auth).catch(()=>{});
+        localStorage.setItem('mmg_auth_state', 'guest');
+        window.location.reload();
+      }
+    }, () => { /* dinleme hatasında sessizce geç */ });
+  }
+
+  // Sayfa yeniden yüklendiğinde (yeni bir giriş değil, mevcut oturumun devamı) çağrılır:
+  // bu cihazda daha önce hiç oturum kimliği kaydedilmemişse (ör. bu özellik yeni eklendiği
+  // için ya da localStorage temizlenmiş olabileceği için) yeni bir tane iddia eder;
+  // varsa sadece dinlemeye devam eder, mevcut sahipliği bozmaz.
+  async function mmgEnsureSessionOwnership(uid){
+    const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
+    if(!localSessionId){
+      await mmgClaimSession(uid);
+    }
+    mmgWatchSession(uid);
+  }
+
   onAuthStateChanged(auth, async (user) => {
     const adminBtn = document.getElementById('navReferansPaneliBtn');
     const begenBtn = document.getElementById('navIstatistiklerBtn');
     if(!user){
       if(adminBtn) adminBtn.style.display = 'none';
       if(begenBtn) begenBtn.style.display = 'none';
+      mmgStopWatchingSession();
       // Firma yöneticiliğine bağlı her şeyi sıfırla: aksi halde misafir moduna geçildiğinde
       // (ya da oturum tutarsızlığı düzeltilirken) önceki oturumdan kalma "Kullanıcı Yönetim
       // Paneli" linki ve firma rozeti ekranda asılı kalabiliyordu.
@@ -1808,6 +1872,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     try{
       const snap = await getDoc(doc(db, 'users', user.uid));
       let data = snap.exists() ? snap.data() : {};
+      mmgEnsureSessionOwnership(user.uid);
       // Eski/taşınmış hesaplarda müşteri kodu hiç atanmamış olabilir — bu durumda
       // şimdi bir tane atayıp kaydediyoruz, böylece rozet e-posta yerine kod gösterebilsin.
       if(!data.customerNumber){
@@ -2539,6 +2604,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       localStorage.setItem('mmg_remember', remember ? '1' : '0');
       updateUserBadge(customerNumber, username);
       syncUserDirectory(user.uid, customerNumber, username, email);
+      await mmgClaimSession(user.uid);
+      mmgWatchSession(user.uid);
       await applyPendingInviteIfAny(user, username);
       await syncCompanyCache(user.uid);
       await loadAdminFirmas(user.uid);
@@ -2661,6 +2728,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
         syncUserDirectory(cred.user.uid, customerNumber, username, email);
+        await mmgClaimSession(cred.user.uid);
+        mmgWatchSession(cred.user.uid);
         if(premiumBenefit){
           if(premiumBenefit.type === 'free'){
             alert('🎉 "' + premiumBenefit.code + '" ' + MMGI18N.t('referral_used_free'));
@@ -2700,6 +2769,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(profile) localStorage.setItem('mmg_profile', JSON.stringify(profile));
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
+        await mmgClaimSession(cred.user.uid);
+        mmgWatchSession(cred.user.uid);
         await applyPendingInviteIfAny(cred.user, username);
         await syncCompanyCache(cred.user.uid);
         await loadAdminFirmas(cred.user.uid);
@@ -2715,6 +2786,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
 
   async function performLogout(){
+    mmgStopWatchingSession();
+    localStorage.removeItem(MMG_SESSION_KEY);
     try { await signOut(auth); } catch(err){ /* önemli değil */ }
     localStorage.removeItem('mmg_auth_state');
     localStorage.removeItem('mmg_remember');
