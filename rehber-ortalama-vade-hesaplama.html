@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BFZXS7R9BN"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-BFZXS7R9BN');
+
+  (function(){
+    try{
+      var src = sessionStorage.getItem('mmg_app_source');
+      if(!src){
+        src = (document.referrer.indexOf('android-app://') === 0) ? 'twa_app'
+            : (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ? 'pwa_app'
+            : 'web';
+        sessionStorage.setItem('mmg_app_source', src);
+      }
+      gtag('set', 'user_properties', { app_source: src });
+    }catch(e){}
+  })();
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ortalama Vade Nedir, Nasıl Hesaplanır? — mmgcreativity</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; line-height:1.75;
+    -webkit-font-smoothing:antialiased; padding:48px 24px 80px;
+  }
+  .wrap{ max-width:700px; margin:0 auto; }
+  .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; color:var(--brass); text-transform:uppercase; margin-bottom:14px; }
+  h1{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:30px; letter-spacing:-0.02em; margin-bottom:20px; }
+  h2{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:19px; margin:32px 0 12px; }
+  p{ color:var(--text); font-size:15px; margin-bottom:14px; opacity:0.88; }
+  ul, ol{ padding-left:20px; margin-bottom:16px; }
+  li{ color:var(--text); font-size:15px; margin-bottom:8px; opacity:0.88; }
+  a{ color:var(--coral); }
+  .back{ display:inline-block; margin-bottom:28px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); text-decoration:none; border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; }
+  .back:hover{ color:var(--coral); border-color:var(--coral); }
+  .cta{
+    margin-top:36px; padding:22px; background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
+  }
+  .cta a.btn{
+    display:inline-block; margin-top:10px; background:var(--grad); color:#fff; font-weight:600;
+    padding:10px 20px; border-radius:8px; text-decoration:none; font-size:14px;
+  }
+  .note{ background:var(--surface-2); border-left:3px solid var(--brass); padding:14px 18px; border-radius:4px; margin:20px 0; font-size:14px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="rehber.html" class="back" data-i18n="back_guide">← Finans Rehberi'ne Dön</a>
+  <div class="eyebrow" data-i18n="eyebrow">Hesaplama · 5 dakikalık okuma</div>
+  <h1 data-i18n="title">Ortalama Vade Nedir, Nasıl Hesaplanır?</h1>
+
+  <p data-i18n="p1">Bir ödeme tek seferde değil, farklı tarihlerde birden fazla taksit veya tahsilat halinde gerçekleşiyorsa, bu ödemelerin "ortalama" olarak hangi tarihte yapıldığını bilmek işinize yarar. Ortalama vade, tutarları ağırlık olarak kullanarak hesaplanan bu tek özet tarihtir.</p>
+
+  <h2 data-i18n="h1">Ortalama Vade Neden Önemlidir?</h2>
+  <p data-i18n="p2">Taksitli satış yapan bir işletme için, toplam tutar aynı olsa bile taksitlerin dağılımı değiştiğinde paranın elinize geçtiği "ortalama an" da değişir. Bu, fiyatlandırmanızı ve vade farkı hesaplarınızı doğrudan etkiler.</p>
+
+  <p data-i18n="p3">Aynı şekilde, iki farklı ödeme planını (örneğin 3 taksit ile 5 taksit) adil bir şekilde karşılaştırmak için, sadece taksit sayısına değil, ortalama vadeye bakmak gerekir.</p>
+
+  <h2 data-i18n="h2">Ortalama Vade Nasıl Hesaplanır?</h2>
+  <p data-i18n="p4">Hesaplama mantığı basittir: her taksitin tutarı, o taksitin vadesine (bugünden kaç gün sonra ödeneceğine) göre ağırlıklandırılır ve tüm taksitlerin ağırlıklı ortalaması alınır.</p>
+
+  <ul>
+    <li data-i18n="li1"><strong>Tutar (i):</strong> Her bir taksit veya ödemenin tutarı</li>
+    <li data-i18n="li2"><strong>Vade (gün):</strong> O ödemenin bugünden kaç gün sonra yapılacağı</li>
+    <li data-i18n="li3"><strong>Ağırlıklı ortalama:</strong> Σ(Tutar × Vade) ÷ Σ(Tutar) formülüyle bulunan, tüm ödemeleri temsil eden tek gün sayısı</li>
+  </ul>
+
+  <h2 data-i18n="h3">Nerelerde Kullanılır?</h2>
+  <p data-i18n="p5">Taksitli satışlarda doğru fiyatlandırma, farklı kredi tekliflerinin gerçek vadesini karşılaştırma ve tahsilat planlamasında nakit akışını daha isabetli tahmin etme gibi konularda ortalama vade önemli bir referans noktasıdır.</p>
+
+  <div class="note" data-i18n="note1">
+    💡 İpucu: Toplam tutarı aynı olan "3 taksit" ve "5 taksit" seçeneklerini adil karşılaştırmak istiyorsanız, ikisinin de ortalama vadesini hesaplayıp yan yana koyun — hangisinin sizin için daha erken/geç nakit girişi sağladığını net görürsünüz.
+  </div>
+
+  <div class="cta">
+    <strong data-i18n="cta_title">Kendi ödeme planınızın ortalama vadesini hesaplamak ister misiniz?</strong>
+    <p style="margin-top:8px; margin-bottom:0;" data-i18n="cta_desc">Ortalama Vade Hesaplama aracımızla taksit tutar ve tarihlerinizi girin, ağırlıklı ortalama vadenizi saniyeler içinde görün.</p>
+    <a href="Ortalama_Vade_Hesaplama.html" class="btn" data-i18n="cta_btn">Hesaplama Aracını Aç →</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  MMGI18N.registerDict({
+    tr: {
+      back_guide:"← Finans Rehberi'ne Dön", eyebrow:'Hesaplama · 5 dakikalık okuma', title:'Ortalama Vade Nedir, Nasıl Hesaplanır?',
+      p1:'Bir ödeme tek seferde değil, farklı tarihlerde birden fazla taksit veya tahsilat halinde gerçekleşiyorsa, bu ödemelerin "ortalama" olarak hangi tarihte yapıldığını bilmek işinize yarar. Ortalama vade, tutarları ağırlık olarak kullanarak hesaplanan bu tek özet tarihtir.',
+      h1:'Ortalama Vade Neden Önemlidir?',
+      p2:'Taksitli satış yapan bir işletme için, toplam tutar aynı olsa bile taksitlerin dağılımı değiştiğinde paranın elinize geçtiği "ortalama an" da değişir. Bu, fiyatlandırmanızı ve vade farkı hesaplarınızı doğrudan etkiler.',
+      p3:'Aynı şekilde, iki farklı ödeme planını (örneğin 3 taksit ile 5 taksit) adil bir şekilde karşılaştırmak için, sadece taksit sayısına değil, ortalama vadeye bakmak gerekir.',
+      h2:'Ortalama Vade Nasıl Hesaplanır?',
+      p4:'Hesaplama mantığı basittir: her taksitin tutarı, o taksitin vadesine (bugünden kaç gün sonra ödeneceğine) göre ağırlıklandırılır ve tüm taksitlerin ağırlıklı ortalaması alınır.',
+      li1:'<strong>Tutar (i):</strong> Her bir taksit veya ödemenin tutarı',
+      li2:'<strong>Vade (gün):</strong> O ödemenin bugünden kaç gün sonra yapılacağı',
+      li3:'<strong>Ağırlıklı ortalama:</strong> Σ(Tutar × Vade) ÷ Σ(Tutar) formülüyle bulunan, tüm ödemeleri temsil eden tek gün sayısı',
+      h3:'Nerelerde Kullanılır?',
+      p5:'Taksitli satışlarda doğru fiyatlandırma, farklı kredi tekliflerinin gerçek vadesini karşılaştırma ve tahsilat planlamasında nakit akışını daha isabetli tahmin etme gibi konularda ortalama vade önemli bir referans noktasıdır.',
+      note1:'💡 İpucu: Toplam tutarı aynı olan "3 taksit" ve "5 taksit" seçeneklerini adil karşılaştırmak istiyorsanız, ikisinin de ortalama vadesini hesaplayıp yan yana koyun — hangisinin sizin için daha erken/geç nakit girişi sağladığını net görürsünüz.',
+      cta_title:'Kendi ödeme planınızın ortalama vadesini hesaplamak ister misiniz?', cta_desc:'Ortalama Vade Hesaplama aracımızla taksit tutar ve tarihlerinizi girin, ağırlıklı ortalama vadenizi saniyeler içinde görün.', cta_btn:'Hesaplama Aracını Aç →'
+    },
+    en: {
+      back_guide:'← Back to Finance Guide', eyebrow:'Calculators · 5 min read', title:'What Is Average Maturity and How Is It Calculated?',
+      p1:'When a payment isn\'t made all at once but instead as several installments or collections on different dates, it helps to know the single date those payments effectively average out to. Average maturity is exactly that — a weighted summary date, using the amounts as weights.',
+      h1:'Why Does Average Maturity Matter?',
+      p2:'For a business selling on installments, even if the total amount stays the same, changing how the installments are spread out changes the average moment the money actually reaches you. That directly affects your pricing and maturity-difference calculations.',
+      p3:'Similarly, to fairly compare two different payment plans — say, 3 installments versus 5 — you need to look at the average maturity, not just the number of installments.',
+      h2:'How Is Average Maturity Calculated?',
+      p4:'The logic is simple: each installment\'s amount is weighted by its maturity (how many days from today it falls due), and then a weighted average is taken across all installments.',
+      li1:'<strong>Amount (i):</strong> The amount of each installment or payment',
+      li2:'<strong>Maturity (days):</strong> How many days from today that payment falls due',
+      li3:'<strong>Weighted average:</strong> Σ(Amount × Maturity) ÷ Σ(Amount) — a single day count representing all the payments together',
+      h3:'Where Is It Used?',
+      p5:'Average maturity is a key reference point for pricing installment sales correctly, comparing the real maturity of different loan offers, and forecasting cash flow more accurately when planning collections.',
+      note1:'💡 Tip: To fairly compare a "3 installments" option against a "5 installments" option with the same total, calculate the average maturity for both and place them side by side — you\'ll clearly see which one brings cash in earlier or later for you.',
+      cta_title:'Want to calculate the average maturity of your own payment plan?', cta_desc:'Enter your installment amounts and dates in our Average Maturity Calculator and see your weighted average maturity in seconds.', cta_btn:'Open the Calculator →'
+    }
+  });
+  MMGI18N.detectAndApplyDefaultLang();
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
+</body>
+</html>

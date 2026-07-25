@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7339763610555735" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BFZXS7R9BN"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-BFZXS7R9BN');
+
+  (function(){
+    try{
+      var src = sessionStorage.getItem('mmg_app_source');
+      if(!src){
+        src = (document.referrer.indexOf('android-app://') === 0) ? 'twa_app'
+            : (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ? 'pwa_app'
+            : 'web';
+        sessionStorage.setItem('mmg_app_source', src);
+      }
+      gtag('set', 'user_properties', { app_source: src });
+    }catch(e){}
+  })();
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referans Programı Nasıl Çalışır? — mmgcreativity</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; line-height:1.75;
+    -webkit-font-smoothing:antialiased; padding:48px 24px 80px;
+  }
+  .wrap{ max-width:700px; margin:0 auto; }
+  .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; color:var(--brass); text-transform:uppercase; margin-bottom:14px; }
+  h1{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:30px; letter-spacing:-0.02em; margin-bottom:20px; }
+  h2{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:19px; margin:32px 0 12px; }
+  p{ color:var(--text); font-size:15px; margin-bottom:14px; opacity:0.88; }
+  ul, ol{ padding-left:20px; margin-bottom:16px; }
+  li{ color:var(--text); font-size:15px; margin-bottom:8px; opacity:0.88; }
+  a{ color:var(--coral); }
+  .back{ display:inline-block; margin-bottom:28px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); text-decoration:none; border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; }
+  .back:hover{ color:var(--coral); border-color:var(--coral); }
+  .cta{
+    margin-top:36px; padding:22px; background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
+  }
+  .cta a.btn{
+    display:inline-block; margin-top:10px; background:var(--grad); color:#fff; font-weight:600;
+    padding:10px 20px; border-radius:8px; text-decoration:none; font-size:14px;
+  }
+  .note{ background:var(--surface-2); border-left:3px solid var(--brass); padding:14px 18px; border-radius:4px; margin:20px 0; font-size:14px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="rehber.html" class="back" data-i18n="back_guide">← Finans Rehberi'ne Dön</a>
+  <div class="eyebrow" data-i18n="eyebrow">Hesabım · 4 dakikalık okuma</div>
+  <h1 data-i18n="title">Referans Programı Nasıl Çalışır?</h1>
+
+  <p data-i18n="p1">Referans programı, kendi özel kodunuzu paylaşarak yeni kullanıcıları platforma davet etmenizi ve bu davetler karşılığında avantaj kazanmanızı sağlayan bir sistemdir.</p>
+
+  <h2 data-i18n="h1">Referans Kodu Nasıl Kullanılır?</h2>
+  <p data-i18n="p2">Kendi referans kodunuzu tanıdıklarınızla veya iş ortaklarınızla paylaşırsınız. Onlar kayıt olurken bu kodu girdiğinde, hesabınız o kullanıcıyla referans olarak eşleşir ve panelinizde görünür hale gelir.</p>
+
+  <h2 data-i18n="h2">Referans Paneli Neleri Takip Eder?</h2>
+  <ul>
+    <li data-i18n="li1"><strong>Kayıt sayısı:</strong> Kodunuzla kayıt olan toplam kullanıcı sayısı</li>
+    <li data-i18n="li2"><strong>Kullanıcı durumu:</strong> Referans olduğunuz kullanıcıların aktif/pasif durumu</li>
+    <li data-i18n="li3"><strong>Kazanılan avantajlar:</strong> Referanslarınız karşılığında hesabınıza yansıyan avantajların özeti</li>
+  </ul>
+
+  <h2 data-i18n="h3">Dikkat Edilmesi Gerekenler</h2>
+  <p data-i18n="p3">Referans kodunuz sizin adınıza tanımlı olduğundan, kimin sizin üzerinizden kaydolduğunu her zaman panelden takip edebilirsiniz.</p>
+
+  <div class="note" data-i18n="note1">
+    💡 İpucu: Kodunuzu yalnızca platformu gerçekten kullanacağını düşündüğünüz, güvendiğiniz kişilerle paylaşın; bu hem sizin hem de davet ettiğiniz kişi için daha anlamlı bir deneyim sağlar.
+  </div>
+
+  <div class="cta">
+    <strong data-i18n="cta_title">Kendi referans kodunuzu ve davet ettiğiniz kullanıcıları görmek ister misiniz?</strong>
+    <p style="margin-top:8px; margin-bottom:0;" data-i18n="cta_desc">Referans Paneli'ni açın, kodunuzu paylaşın ve kazandığınız avantajları takip edin.</p>
+    <a href="ReferansKoduYonetimi.html" class="btn" data-i18n="cta_btn">Referans Panelini Aç →</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  MMGI18N.registerDict({
+    tr: {
+      back_guide:"← Finans Rehberi'ne Dön", eyebrow:'Hesabım · 4 dakikalık okuma', title:'Referans Programı Nasıl Çalışır?',
+      p1:'Referans programı, kendi özel kodunuzu paylaşarak yeni kullanıcıları platforma davet etmenizi ve bu davetler karşılığında avantaj kazanmanızı sağlayan bir sistemdir.',
+      h1:'Referans Kodu Nasıl Kullanılır?',
+      p2:'Kendi referans kodunuzu tanıdıklarınızla veya iş ortaklarınızla paylaşırsınız. Onlar kayıt olurken bu kodu girdiğinde, hesabınız o kullanıcıyla referans olarak eşleşir ve panelinizde görünür hale gelir.',
+      h2:'Referans Paneli Neleri Takip Eder?',
+      li1:'<strong>Kayıt sayısı:</strong> Kodunuzla kayıt olan toplam kullanıcı sayısı',
+      li2:'<strong>Kullanıcı durumu:</strong> Referans olduğunuz kullanıcıların aktif/pasif durumu',
+      li3:'<strong>Kazanılan avantajlar:</strong> Referanslarınız karşılığında hesabınıza yansıyan avantajların özeti',
+      h3:'Dikkat Edilmesi Gerekenler',
+      p3:'Referans kodunuz sizin adınıza tanımlı olduğundan, kimin sizin üzerinizden kaydolduğunu her zaman panelden takip edebilirsiniz.',
+      note1:'💡 İpucu: Kodunuzu yalnızca platformu gerçekten kullanacağını düşündüğünüz, güvendiğiniz kişilerle paylaşın; bu hem sizin hem de davet ettiğiniz kişi için daha anlamlı bir deneyim sağlar.',
+      cta_title:'Kendi referans kodunuzu ve davet ettiğiniz kullanıcıları görmek ister misiniz?', cta_desc:'Referans Paneli\'ni açın, kodunuzu paylaşın ve kazandığınız avantajları takip edin.', cta_btn:'Referans Panelini Aç →'
+    },
+    en: {
+      back_guide:'← Back to Finance Guide', eyebrow:'Account · 4 min read', title:'How Does the Referral Program Work?',
+      p1:'The referral program lets you invite new users to the platform by sharing your own unique code, and earn a benefit in return for those invitations.',
+      h1:'How Do You Use a Referral Code?',
+      p2:'You share your referral code with people you know or business contacts. When they enter that code while signing up, your account gets matched with them as the referrer, and it becomes visible in your panel.',
+      h2:'What Does the Referral Panel Track?',
+      li1:'<strong>Sign-up count:</strong> The total number of users who signed up with your code',
+      li2:'<strong>User status:</strong> Whether the users you referred are active or inactive',
+      li3:'<strong>Benefits earned:</strong> A summary of the benefits reflected on your account for your referrals',
+      h3:'What to Keep in Mind',
+      p3:'Since your referral code is tied to your name, you can always track who signed up through you from the panel.',
+      note1:'💡 Tip: Share your code only with people you trust and genuinely think will use the platform — it makes for a more meaningful experience both for you and for the person you invite.',
+      cta_title:'Want to see your own referral code and the users you\'ve invited?', cta_desc:'Open the Referral Panel, share your code, and track the benefits you\'ve earned.', cta_btn:'Open the Referral Panel →'
+    }
+  });
+  MMGI18N.detectAndApplyDefaultLang();
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
+</body>
+</html>

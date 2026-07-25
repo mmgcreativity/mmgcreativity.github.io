@@ -123,18 +123,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   @keyframes mmgFadeIn{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
   .forum-post-top{ display:flex; align-items:flex-start; gap:12px; }
   .forum-post-meta{ flex:1; min-width:0; }
-  .forum-post-name{ font-size:14.5px; font-weight:700; }
+  .forum-post-name{ font-size:13.5px; font-weight:700; }
+  .forum-post-time{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); margin-top:1px; }
   .forum-delete-btn{
     background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:4px; flex-shrink:0;
     transition:color .15s ease;
   }
   .forum-delete-btn:hover{ color:var(--red); }
   .forum-post-text{
-    margin-top:10px; margin-left:52px; font-size:15px; line-height:1.6; white-space:pre-wrap; word-break:break-word;
-  }
-  .forum-post-footer{
-    margin-top:14px; margin-left:52px; padding-top:12px; border-top:1px solid var(--hairline);
-    font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--muted);
+    margin-top:10px; font-size:14px; line-height:1.55; white-space:pre-wrap; word-break:break-word;
   }
   .forum-empty-note{ text-align:center; color:var(--muted); font-size:13px; padding:36px 16px; }
   .forum-loading-note{ text-align:center; color:var(--muted); font-size:13px; padding:20px; }
@@ -264,22 +261,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }catch(e){ return ''; }
   }
 
-  // X/Twitter tarzı tam tarih+saat gösterimi (ör. "22:31 · 11 Eyl 2024" / "10:31 PM · Sep 11, 2024").
-  // Gönderinin altında, göreli zaman ("3sa önce") yerine kullanılıyor — kullanıcı gönderinin
-  // TAM olarak ne zaman paylaşıldığını görmek istiyor.
-  function fmtFullDateTime(ts){
-    try{
-      const d = (ts && ts.toDate) ? ts.toDate() : new Date(ts);
-      if(isNaN(d.getTime())) return '';
-      const locale = MMG_LANG === 'en' ? 'en-US' : 'tr-TR';
-      const timeStr = d.toLocaleTimeString(locale, MMG_LANG === 'en'
-        ? { hour: 'numeric', minute: '2-digit', hour12: true }
-        : { hour: '2-digit', minute: '2-digit', hour12: false });
-      const dateStr = d.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
-      return timeStr + ' · ' + dateStr;
-    }catch(e){ return ''; }
-  }
-
   // Görünen ada göre sabit (ama çeşitli) bir gradyan üretir, böylece her kullanıcının
   // avatarı görsel olarak biraz farklı olur.
   const AVATAR_GRADIENTS = [
@@ -328,11 +309,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             avatarHtml(p.authorName, p.authorAvatar, p.authorUid) +
             '<div class="forum-post-meta">' +
               '<div class="forum-post-name">' + escapeHtml(p.authorName || LBL.anonymous) + '</div>' +
+              '<div class="forum-post-time">' + fmtRelativeTime(p.createdAt) + '</div>' +
             '</div>' +
             (canDelete ? '<button type="button" class="forum-delete-btn" data-delete-id="' + d.id + '" title="' + (MMG_LANG==='en'?'Delete':'Sil') + '">✕</button>' : '') +
           '</div>' +
           '<div class="forum-post-text">' + escapeHtml(p.text) + '</div>' +
-          '<div class="forum-post-footer">' + fmtFullDateTime(p.createdAt) + '</div>' +
         '</div>'
       );
     });
