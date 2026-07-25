@@ -1267,10 +1267,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="mmgDataScopeList" style="display:none; padding-left:6px; margin-top:2px;"></div>
       <div class="account-dropdown-divider"></div>
     </div>
-    <button type="button" class="account-dropdown-item" id="kullaniciYonetimBtn" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <span data-i18n="dropdown_user_management">Kullanıcı Yönetim Paneli</span>
-    </button>
     <div class="account-dropdown-divider"></div>
     <button type="button" class="account-dropdown-item" id="accountInfoBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M6 16c0-1.8 1.5-3 3-3s3 1.2 3 3"/><path d="M14 9h4"/><path d="M14 13h4"/></svg>
@@ -1758,6 +1754,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(!user){
       if(adminBtn) adminBtn.style.display = 'none';
       if(begenBtn) begenBtn.style.display = 'none';
+      // Firma yöneticiliğine bağlı her şeyi sıfırla: aksi halde misafir moduna geçildiğinde
+      // (ya da oturum tutarsızlığı düzeltilirken) önceki oturumdan kalma "Kullanıcı Yönetim
+      // Paneli" linki ve firma rozeti ekranda asılı kalabiliyordu.
+      mmgAdminFirmaIds = [];
+      mmgFirmaMemberships = [];
+      const navBtn = document.getElementById('navKullaniciYonetimBtn');
+      if(navBtn) navBtn.style.display = 'none';
+      try{ renderFirmaBadge(); }catch(e){}
       try{ gtag('set', 'user_properties', { user_type: 'guest' }); }catch(e){}
       return;
     }
@@ -2414,16 +2418,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
     } catch(e){ /* sessizce geç */ }
     const isAdmin = mmgAdminFirmaIds.length > 0;
-    const dropdownBtn = document.getElementById('kullaniciYonetimBtn');
-    if(dropdownBtn) dropdownBtn.style.display = isAdmin ? 'flex' : 'none';
     const navBtn = document.getElementById('navKullaniciYonetimBtn');
     if(navBtn) navBtn.style.display = isAdmin ? 'flex' : 'none';
   }
-
-  document.getElementById('kullaniciYonetimBtn').addEventListener('click', () => {
-    document.getElementById('accountDropdown').hidden = true;
-    openTarget('KullaniciYonetimi.html', MMGI18N.lang==='en' ? 'User Management Panel' : 'Kullanıcı Yönetim Paneli');
-  });
 
   guestBtn.addEventListener('click', async () => {
     try{ await signOut(auth); }catch(e){ /* zaten oturum yoksa sessizce geç */ }
@@ -2667,8 +2664,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     mmgAdminFirmaIds = [];
     mmgFirmaMemberships = [];
     renderFirmaBadge();
-    const dropdownBtn0 = document.getElementById('kullaniciYonetimBtn');
-    if(dropdownBtn0) dropdownBtn0.style.display = 'none';
     const navBtn0 = document.getElementById('navKullaniciYonetimBtn');
     if(navBtn0) navBtn0.style.display = 'none';
     document.getElementById('authEmail').value = '';
