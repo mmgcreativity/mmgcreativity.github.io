@@ -204,6 +204,33 @@
       <div class="auth-error" id="adminInviteError"></div>
       <div class="auth-success" id="adminInviteSuccess"></div>
     </div>
+
+    <div class="card" id="dataGroupCard" style="display:none;">
+      <h2 data-i18n="data_group_title">🔗 Veri Paylaşım Grubu</h2>
+      <div class="card-sub" data-i18n="data_group_desc">Birden fazla firmanızın (örn. aynı grubun/holdingin parçası) müşteri, tedarikçi, muhatap ve banka verilerini ortak kullanmak isterseniz, burada bir ana firma seçip diğer firmalarınızı ona bağlayabilirsiniz. Kod kopyalamanıza gerek yok.</div>
+
+      <div id="dataGroupSetupWrap">
+        <div class="mini-label" data-i18n="data_group_hub_label">Ana Firma (verinin tutulacağı merkez — bir kez seçildikten sonra değiştirilemez):</div>
+        <div id="dataGroupHubGrid" style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;"></div>
+      </div>
+
+      <div id="dataGroupHubFixedNote" style="display:none; font-size:12.5px; color:var(--muted); margin-bottom:10px;">
+        <span data-i18n="data_group_hub_fixed_prefix">Ana Firma:</span> <strong id="dataGroupHubName"></strong>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
+        <label style="margin-bottom:0; font-size:12.5px; color:var(--muted); font-weight:600;" data-i18n="data_group_members_label">Bu Gruba Bağlı Diğer Firmalar</label>
+        <label class="perm-select-all-label" style="margin:0;">
+          <input type="checkbox" id="dataGroupSelectAll">
+          <span data-i18n="select_all_perms">Tümünü Seç</span>
+        </label>
+      </div>
+      <div class="invite-firma-grid" id="dataGroupMembersGrid"></div>
+
+      <button type="button" class="auth-submit" id="dataGroupSaveBtn" style="margin-top:12px;" data-i18n="data_group_save_btn">Kaydet</button>
+      <div class="auth-error" id="dataGroupError"></div>
+      <div class="auth-success" id="dataGroupSuccess"></div>
+    </div>
   </div>
   </div>
 </div>
@@ -249,7 +276,10 @@
     confirmRemoveUser:'Are you sure you want to remove this user from the company?',
     confirmCancelInvite:'Are you sure you want to cancel this invite?',
     usersLoadFailed:'Users could not be loaded.',
-    pendingKindUser:'user', pendingKindAdmin:'admin', inviteSentBadge:'Invite Sent'
+    pendingKindUser:'user', pendingKindAdmin:'admin', inviteSentBadge:'Invite Sent',
+    dataGroupPickHub:'Please select a main company first.',
+    dataGroupSaved:'Data sharing group saved ✓',
+    dataGroupSaveFailed:'Could not be saved, please try again.'
   } : {
     firmaSubPrefix:'"', firmaSubSuffix:'" firmasına bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.',
     notAdminYetTitle:'Henüz bir firmanın yöneticisi değilsiniz',
@@ -264,7 +294,10 @@
     confirmRemoveUser:'Bu kullanıcıyı firmadan kaldırmak istediğinize emin misiniz?',
     confirmCancelInvite:'Bu daveti iptal etmek istediğinize emin misiniz?',
     usersLoadFailed:'Kullanıcılar yüklenemedi.',
-    pendingKindUser:'kullanıcı', pendingKindAdmin:'yönetici', inviteSentBadge:'Davet Gönderildi'
+    pendingKindUser:'kullanıcı', pendingKindAdmin:'yönetici', inviteSentBadge:'Davet Gönderildi',
+    dataGroupPickHub:'Lütfen önce bir ana firma seçin.',
+    dataGroupSaved:'Veri paylaşım grubu kaydedildi ✓',
+    dataGroupSaveFailed:'Kaydedilemedi, lütfen tekrar deneyin.'
   };
 
   // Bu panelde yönetilebilen yetki modülleri (sol menüdeki araç sayfalarıyla eşleşir).
@@ -351,6 +384,120 @@
     return checked.length ? checked : [firmaId];
   }
 
+  // ---- Veri Paylaşım Grubu (Ana Firma + Bağlı Firmalar) ----
+  // TASARIM NOTU: Grup üyeliği, her firmanın firmaAccounts dokümanındaki "dataGroupId"
+  // alanı üzerinden yürütülüyor — VeriGirisPaneli.html'deki resolveScope fonksiyonu bu
+  // alanı zaten okuyup effectiveScopeId olarak kullanıyor, o dosyada HİÇBİR değişiklik
+  // gerekmiyor; burada SADECE bu alanı doğru/tutarlı şekilde ayarlıyoruz. Ana firma (hub),
+  // verinin FİZİKSEL olarak tutulduğu firmadır (kendi dataGroupId'si hep boş kalır);
+  // diğer üye firmaların dataGroupId'si ana firmanın id'sine eşitlenir. Eskiden bu işlem
+  // "kod kopyala-yapıştır" ile pairwise yapılıyordu (N firma için N² kombinasyon riski);
+  // artık admin burada checkbox'larla tek seferde tüm grubu yönetiyor. Ana firma bir kez
+  // belirlendikten sonra KASITLI olarak değiştirilemez (aksi halde eski veriye erişim
+  // karışabilir, veri fiziksel olarak taşınmıyor).
+  function detectDataGroupHub(){
+    for(const f of myAdminFirmas){
+      const isHubForSomeone = myAdminFirmas.some(other => other.id !== f.id && other.dataGroupId === f.id);
+      if(isHubForSomeone) return f.id;
+    }
+    return null;
+  }
+  function dataGroupHubGridHtml(){
+    return myAdminFirmas.map(f =>
+      '<label class="perm-check"><input type="radio" name="dataGroupHubRadio" class="data-group-hub-radio" value="' + f.id + '"> ' + f.name + '</label>'
+    ).join('');
+  }
+  function dataGroupMembersGridHtml(hubId){
+    return myAdminFirmas.filter(f => f.id !== hubId).map(f =>
+      '<label class="perm-check"><input type="checkbox" class="data-group-member-check" value="' + f.id + '"' +
+      (f.dataGroupId === hubId ? ' checked' : '') + '> ' + f.name + '</label>'
+    ).join('');
+  }
+  function wireDataGroupSelectAll(){
+    const selectAllEl = document.getElementById('dataGroupSelectAll');
+    if(!selectAllEl) return;
+    const getChecks = () => Array.from(document.querySelectorAll('.data-group-member-check'));
+    const sync = () => {
+      const checks = getChecks();
+      selectAllEl.checked = checks.length > 0 && checks.every(c => c.checked);
+    };
+    selectAllEl.onchange = () => { getChecks().forEach(c => { c.checked = selectAllEl.checked; }); };
+    getChecks().forEach(c => c.addEventListener('change', sync));
+    sync();
+  }
+  function renderDataGroupCard(){
+    const card = document.getElementById('dataGroupCard');
+    if(!card) return;
+    if(myAdminFirmas.length < 2){ card.style.display = 'none'; return; }
+    card.style.display = 'block';
+
+    const existingHub = detectDataGroupHub();
+    const setupWrap = document.getElementById('dataGroupSetupWrap');
+    const fixedNote = document.getElementById('dataGroupHubFixedNote');
+
+    if(existingHub){
+      setupWrap.style.display = 'none';
+      fixedNote.style.display = 'block';
+      const hubFirma = myAdminFirmas.find(f => f.id === existingHub);
+      document.getElementById('dataGroupHubName').textContent = hubFirma ? hubFirma.name : existingHub;
+      document.getElementById('dataGroupMembersGrid').innerHTML = dataGroupMembersGridHtml(existingHub);
+    } else {
+      setupWrap.style.display = 'block';
+      fixedNote.style.display = 'none';
+      document.getElementById('dataGroupHubGrid').innerHTML = dataGroupHubGridHtml();
+      document.getElementById('dataGroupMembersGrid').innerHTML = '';
+      document.querySelectorAll('.data-group-hub-radio').forEach(r => {
+        r.addEventListener('change', () => {
+          document.getElementById('dataGroupMembersGrid').innerHTML = dataGroupMembersGridHtml(r.value);
+          wireDataGroupSelectAll();
+        });
+      });
+    }
+    wireDataGroupSelectAll();
+  }
+
+  document.getElementById('dataGroupSaveBtn').addEventListener('click', async () => {
+    const errEl = document.getElementById('dataGroupError');
+    const okEl = document.getElementById('dataGroupSuccess');
+    errEl.classList.remove('show'); okEl.classList.remove('show');
+
+    const existingHub = detectDataGroupHub();
+    let hubId = existingHub;
+    if(!hubId){
+      const checkedRadio = document.querySelector('.data-group-hub-radio:checked');
+      if(!checkedRadio){
+        errEl.textContent = LBL.dataGroupPickHub;
+        errEl.classList.add('show');
+        return;
+      }
+      hubId = checkedRadio.value;
+    }
+
+    const selectedIds = Array.from(document.querySelectorAll('.data-group-member-check:checked')).map(c => c.value);
+
+    const btn = document.getElementById('dataGroupSaveBtn');
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = LBL.sending;
+    try{
+      await Promise.all(myAdminFirmas.map(async (f) => {
+        if(f.id === hubId) return; // ana firmanın kendi dataGroupId'sine dokunulmuyor
+        const shouldBeMember = selectedIds.includes(f.id);
+        await setDoc(doc(db, 'firmaAccounts', f.id), { dataGroupId: shouldBeMember ? hubId : null }, { merge: true });
+        f.dataGroupId = shouldBeMember ? hubId : null;
+      }));
+      okEl.textContent = LBL.dataGroupSaved;
+      okEl.classList.add('show');
+      renderDataGroupCard();
+    } catch(e){
+      errEl.textContent = LBL.dataGroupSaveFailed;
+      errEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
+
   async function selectFirma(fid){
     firmaId = fid;
     const f = myAdminFirmas.find(x => x.id === fid);
@@ -394,7 +541,7 @@
       for(const fid of firmaIds){
         try{
           const fSnap = await getDoc(doc(db, 'firmaAccounts', fid));
-          if(fSnap.exists()) myAdminFirmas.push({ id: fid, name: fSnap.data().name || fid });
+          if(fSnap.exists()) myAdminFirmas.push({ id: fid, name: fSnap.data().name || fid, dataGroupId: fSnap.data().dataGroupId || null });
         } catch(e){ /* sessizce geç */ }
       }
       if(!myAdminFirmas.length){
@@ -413,6 +560,7 @@
       } else {
         selectorCard.style.display = 'none';
       }
+      renderDataGroupCard();
       await selectFirma(myAdminFirmas[0].id);
     } catch(e){
       guardWrap.style.display = 'block';
@@ -752,7 +900,13 @@
       my_users_title:'Kullanıcılarım', my_users_desc:'Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.',
       loading:'Yükleniyor…',
       guard_title_default:'Bu sayfa sadece firma hesapları içindir',
-      guard_sub_default:'Bir kullanıcı hesabıyla giriş yaptınız. Bu paneli görmek için firma hesabınızla giriş yapmanız gerekir.'
+      guard_sub_default:'Bir kullanıcı hesabıyla giriş yaptınız. Bu paneli görmek için firma hesabınızla giriş yapmanız gerekir.',
+      data_group_title:'🔗 Veri Paylaşım Grubu',
+      data_group_desc:'Birden fazla firmanızın (örn. aynı grubun/holdingin parçası) müşteri, tedarikçi, muhatap ve banka verilerini ortak kullanmak isterseniz, burada bir ana firma seçip diğer firmalarınızı ona bağlayabilirsiniz. Kod kopyalamanıza gerek yok.',
+      data_group_hub_label:'Ana Firma (verinin tutulacağı merkez — bir kez seçildikten sonra değiştirilemez):',
+      data_group_hub_fixed_prefix:'Ana Firma:',
+      data_group_members_label:'Bu Gruba Bağlı Diğer Firmalar',
+      data_group_save_btn:'Kaydet'
     },
     en: {
       page_title:'👥 User Management Panel', page_sub_default:'You can add and manage the users connected to your company account here.',
@@ -767,7 +921,13 @@
       my_users_title:'My Users', my_users_desc:'Permissions are saved automatically when you change them.',
       loading:'Loading…',
       guard_title_default:'This page is only for company accounts',
-      guard_sub_default:'You are signed in with a user account. You need to sign in with your company account to view this panel.'
+      guard_sub_default:'You are signed in with a user account. You need to sign in with your company account to view this panel.',
+      data_group_title:'🔗 Data Sharing Group',
+      data_group_desc:'If you want to share customer, supplier, contact, and bank data across several of your companies (e.g. companies belonging to the same holding), pick one main company here and connect your other companies to it. No need to copy codes around.',
+      data_group_hub_label:'Main Company (where the data will physically live — cannot be changed once chosen):',
+      data_group_hub_fixed_prefix:'Main Company:',
+      data_group_members_label:'Other Companies Connected to This Group',
+      data_group_save_btn:'Save'
     }
   });
   MMGI18N.detectAndApplyDefaultLang();
