@@ -2738,7 +2738,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script>
 (function(){
   // Sol üstteki logo kutusunun alt çizgisini, sağdaki hero panelinin alt çizgisiyle
-  // her zaman aynı hizada tutar (metin uzunluğu ya da ekran boyutu değişse bile).
+  // her zaman aynı hizada tutar. Önceden sadece load/resize olaylarında ve tek seferlik
+  // bir setTimeout ile hesaplanıyordu; yazı tipleri geç yüklendiğinde ya da hero içeriği
+  // sonradan boy değiştirdiğinde (satır kayması vb.) eski ölçü kullanılmaya devam edip
+  // hizadan kayabiliyordu. ResizeObserver ile hero'nun gerçek boyu her değiştiğinde
+  // (ne zaman olursa olsun) anında yeniden hizalanır.
   function alignBrandWithHero(){
     var heroEl = document.querySelector('.hero');
     var brandEl = document.querySelector('.brand');
@@ -2748,6 +2752,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   window.addEventListener('load', alignBrandWithHero);
   window.addEventListener('resize', alignBrandWithHero);
   setTimeout(alignBrandWithHero, 300);
+  try{
+    var heroElForObserver = document.querySelector('.hero');
+    if(heroElForObserver && 'ResizeObserver' in window){
+      new ResizeObserver(alignBrandWithHero).observe(heroElForObserver);
+    }
+  }catch(e){ /* ResizeObserver desteklenmiyorsa mevcut load/resize/timeout yeterli olsun */ }
 })();
 </script>
 
