@@ -151,6 +151,70 @@
   </div>
 </div>
 
+<script type="module">
+  // ---- Grup Firmaları: Talimat Hazırlama'daki ile aynı mantık. Bu sayfa
+  // genelde index.html içinde bir iframe olarak açıldığı için, üst pencerenin
+  // zaten kurulu auth/db nesnesini paylaşırız (ayrı bir Firebase Auth örneği
+  // açıp olası IndexedDB yarış durumuna sebep olmamak için).
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  let auth, db;
+  try{
+    if(window.parent && window.parent !== window && window.parent.mmgAuth && window.parent.mmgDb){
+      auth = window.parent.mmgAuth;
+      db = window.parent.mmgDb;
+    }
+  }catch(e){ /* farklı origin ihtimaline karşı sessizce geç */ }
+  if(!auth || !db){
+    const fbApp = initializeApp(firebaseConfig);
+    auth = getAuth(fbApp);
+    db = getFirestore(fbApp);
+  }
+
+  window.mmgGroupFirmalar = []; // [{ id, name }] — hazır olduğunda dolduruluyor
+  onAuthStateChanged(auth, async (user) => {
+    if(!user) return;
+    try{
+      let scopeCollection = 'users', scopeId = user.uid;
+      const activeScope = localStorage.getItem('mmg_active_data_scope');
+      if(activeScope && activeScope !== 'personal'){
+        scopeCollection = 'firmaAccounts';
+        scopeId = activeScope;
+      } else if(!activeScope){
+        const uSnap = await getDoc(doc(db, 'users', user.uid));
+        const uData = uSnap.exists() ? uSnap.data() : {};
+        if(uData.companyId){
+          scopeCollection = 'companies';
+          scopeId = localStorage.getItem('mmg_active_company_id') || uData.companyId;
+        }
+      }
+      if(scopeCollection !== 'firmaAccounts') return; // grup kavramı sadece firma hesaplarında var
+      const fSnap = await getDoc(doc(db, 'firmaAccounts', scopeId));
+      const fData = fSnap.exists() ? fSnap.data() : {};
+      const hubId = fData.dataGroupId || scopeId;
+      const hubSnap = hubId === scopeId ? fSnap : await getDoc(doc(db, 'firmaAccounts', hubId));
+      const members = new Map();
+      members.set(hubId, hubSnap.exists() ? (hubSnap.data().name || hubId) : hubId);
+      if(!members.has(scopeId)) members.set(scopeId, fData.name || scopeId);
+      const qSnap = await getDocs(query(collection(db, 'firmaAccounts'), where('dataGroupId', '==', hubId)));
+      qSnap.forEach(d => members.set(d.id, d.data().name || d.id));
+      window.mmgGroupFirmalar = Array.from(members, ([id, name]) => ({ id, name }));
+      document.dispatchEvent(new CustomEvent('mmg-group-firmalar-ready'));
+    }catch(e){ /* sessizce geç: grup yoksa ya da erişilemiyorsa sadece kayıtlı liste kullanılır */ }
+  });
+</script>
+
 <script>
   const BANKS = ['Akbank','Ziraat Bankası','QNB','Halkbank','Vakıfbank','Garanti BBVA','Yapı Kredi','İş Bankası','TEB','Şekerbank','Kuveyt Türk','Vakıf Katılım','Diğer'];
   function bankSelectField(key, label){
@@ -422,7 +486,11 @@
           '</select></div>';
       }
       if(f.source){
-        const saved = readSavedList(f.source);
+        let saved = readSavedList(f.source);
+        if(f.key === 'firma' && Array.isArray(window.mmgGroupFirmalar) && window.mmgGroupFirmalar.length){
+          const grupAdlari = window.mmgGroupFirmalar.map(function(g){ return g.name; });
+          saved = grupAdlari.concat(saved.filter(function(s){ return grupAdlari.indexOf(s) === -1; }));
+        }
         const dlId = 'dl_' + f.key;
         const dl = saved.length ? '<datalist id="' + dlId + '">' + saved.map(function(s){ return '<option value="' + String(s).replace(/"/g,'&quot;') + '">'; }).join('') + '</datalist>' : '';
         return '<div class="modal-field"><label>' + f.label + (saved.length ? ' <span style="color:var(--teal); font-weight:400;">· kayıtlılardan seçebilirsiniz</span>' : '') + '</label>' +
@@ -484,6 +552,21 @@
 
   renderChips();
   renderList(TEMPLATES);
+
+  // Grup firmaları listesi modal açıkken gelirse (Firebase asenkron olduğu için),
+  // Firma Adı alanının datalist'ini yerinde güncelle — kullanıcının o ana kadar
+  // yazdığı değeri bozmadan.
+  document.addEventListener('mmg-group-firmalar-ready', function(){
+    if(!activeTemplate) return;
+    const firmaField = activeTemplate.fields.find(function(f){ return f.key === 'firma'; });
+    if(!firmaField) return;
+    const dl = document.getElementById('dl_firma');
+    if(!dl) return;
+    let saved = readSavedList(firmaField.source);
+    const grupAdlari = (window.mmgGroupFirmalar || []).map(function(g){ return g.name; });
+    saved = grupAdlari.concat(saved.filter(function(s){ return grupAdlari.indexOf(s) === -1; }));
+    dl.innerHTML = saved.map(function(s){ return '<option value="' + String(s).replace(/"/g,'&quot;') + '">'; }).join('');
+  });
 </script>
 
 </body>
