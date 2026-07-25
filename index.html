@@ -1840,6 +1840,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // iddia işlemlerini TEK bir sıraya (kuyruğa) alıp birbiri ardına, asla iç içe geçmeyecek
   // şekilde çalıştırıyoruz.
   let mmgSessionOpQueue = Promise.resolve();
+
+  // KRİTİK DÜZELTME 2 (paylaşılan localStorage sorunu): Aynı tarayıcının/gizli pencere
+  // grubunun TÜM sekmeleri localStorage'ı PAYLAŞIR. mmgEnsureSessionOwnership normalde
+  // "localStorage'da bu kullanıcıya ait bir oturum ID'si zaten varsa yeniden iddia etme"
+  // mantığıyla çalışıyor (sayfa yenilemesinde gereksiz yeniden-iddiayı önlemek için) — ama bu,
+  // BAŞKA bir sekmede AZ ÖNCE aynı hesapla GERÇEKTEN giriş yapıldığında da devreye girip,
+  // "zaten var" diyerek yeni oturumu iddia ETMEMESİNE, dolayısıyla eski sekmenin hiç
+  // kicklenmemesine (tek-oturum kısıtlamasının sessizce devre dışı kalmasına) sebep oluyordu.
+  // Çözüm: giriş/kayıt formu SADECE gerçekten submit edildiğinde bu bayrağı true yapıyoruz;
+  // mmgEnsureSessionOwnership bunu görünce, localStorage'da ne olursa olsun oturumu ZORLA
+  // yeniden iddia ediyor (böylece diğer sekmeler/cihazlar doğru şekilde kicklenir). Sıradan
+  // bir sayfa yenilemesinde bu bayrak false olduğu için mevcut davranış (gereksiz yeniden
+  // iddia etmeme) korunuyor.
+  let mmgJustAuthenticatedThisTab = false;
   function mmgQueueSessionOp(fn){
     mmgSessionOpQueue = mmgSessionOpQueue.then(fn, fn);
     return mmgSessionOpQueue;
@@ -1884,12 +1898,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // kapatır. "Son giriş" her zaman kazanır. Diğer platformun alanı değişse bile bu cihazı
   // etkilemez — böylece aynı hesap 1 web + 1 uygulamada aynı anda açık kalabilir.
   function mmgWatchSession(uid){
+    console.log('[MMG_DEBUG] mmgWatchSession ÇAĞRILDI', {uid, localSessionId: localStorage.getItem(MMG_SESSION_KEY), zaman: new Date().toISOString()});
     mmgStopWatchingSession();
     mmgSessionUnsub = onSnapshot(doc(db, 'users', uid), (snap) => {
-      if(!snap.exists()) return;
+      if(!snap.exists()){ console.log('[MMG_DEBUG] onSnapshot: doküman yok'); return; }
       const remoteSessionId = snap.data()[MMG_SESSION_FIELD];
       const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
+      console.log('[MMG_DEBUG] onSnapshot TETİKLENDİ', {
+        remoteSessionId, localSessionId, field: MMG_SESSION_FIELD,
+        fromCache: snap.metadata.fromCache, hasPendingWrites: snap.metadata.hasPendingWrites,
+        esitMi: remoteSessionId === localSessionId, zaman: new Date().toISOString()
+      });
       if(remoteSessionId && localSessionId && remoteSessionId !== localSessionId){
+        console.log('[MMG_DEBUG] >>> KICK TETİKLENDİ <<<', {remoteSessionId, localSessionId});
         mmgStopWatchingSession();
         localStorage.removeItem(MMG_SESSION_KEY);
         localStorage.removeItem(MMG_SESSION_UID_KEY);
@@ -1903,7 +1924,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           window.location.reload();
         });
       }
-    }, () => { /* dinleme hatasında sessizce geç */ });
+    }, (err) => { console.log('[MMG_DEBUG] onSnapshot HATA VERDİ', {code: err && err.code, message: err && err.message}); });
   }
 
   // Sayfa yeniden yüklendiğinde (yeni bir giriş değil, mevcut oturumun devamı) çağrılır.
@@ -1919,9 +1940,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // kullanıcıya aitse ya da hiç yoksa) bu cihaz için sıfırdan yeni bir oturum iddia ediyoruz.
   async function mmgEnsureSessionOwnership(uid){
     return mmgQueueSessionOp(async () => {
+      const forceClaim = mmgJustAuthenticatedThisTab;
+      mmgJustAuthenticatedThisTab = false; // bayrağı sadece bir kere kullan (tüket)
       const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
       const localSessionUid = localStorage.getItem(MMG_SESSION_UID_KEY);
-      if(!localSessionId || localSessionUid !== uid){
+      if(forceClaim || !localSessionId || localSessionUid !== uid){
         await mmgClaimSessionUnsafe(uid);
       }
       mmgWatchSession(uid);
@@ -2660,6 +2683,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     googleBtn.disabled = true;
     const remember = document.getElementById('rememberMe').checked;
     try{
+      mmgJustAuthenticatedThisTab = true;
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       const email = user.email;
@@ -2746,6 +2770,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           showAuthError(MMGI18N.t('auth_err_weak_password'));
           return;
         }
+        mmgJustAuthenticatedThisTab = true;
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         // Kullanıcı adı benzersizliği: "usernames/{kucukharfli-ad}" dokümanını
         // rezerve etmeye çalış. Doküman zaten varsa (başka biri bu adı önce
@@ -2861,6 +2886,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         closeAuthOverlay();
         await showWelcomeIfNeeded(cred.user.uid);
       } else {
+        mmgJustAuthenticatedThisTab = true;
         const cred = await signInWithEmailAndPassword(auth, email, password);
         let customerNumber = null;
         let username = null;
