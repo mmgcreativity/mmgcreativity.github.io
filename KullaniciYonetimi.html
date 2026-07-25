@@ -54,6 +54,8 @@
     background:var(--surface); border:1px solid var(--hairline); border-radius:16px;
     padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.25); margin-bottom:22px;
   }
+  .two-col-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; align-items:start; }
+  @media (max-width:760px){ .two-col-grid{ grid-template-columns:1fr; } }
   .card h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; margin-bottom:6px; }
   .card .card-sub{ color:var(--muted); font-size:12.5px; margin-bottom:16px; line-height:1.5; }
 
@@ -91,15 +93,19 @@
   .member-row{
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px; padding:14px 16px;
   }
-  .member-row-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+  .member-row-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .member-info{ min-width:0; }
   .member-name{ font-size:13.5px; font-weight:600; }
   .member-sub{ font-size:11.5px; color:var(--muted); margin-top:2px; }
-  .member-remove-btn{
-    background:transparent; border:1px solid var(--hairline); border-radius:6px; color:var(--muted);
-    font-size:11px; padding:6px 10px; cursor:pointer; flex-shrink:0; transition:color .15s ease, border-color .15s ease;
+  .member-row-actions{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .member-icon-btn{
+    width:30px; height:30px; border-radius:7px; border:1px solid var(--hairline); background:transparent;
+    color:var(--muted); font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:color .15s ease, border-color .15s ease, background .15s ease;
   }
-  .member-remove-btn:hover{ color:var(--red); border-color:var(--red); }
+  .member-icon-btn:hover{ color:var(--brass); border-color:var(--brass-dim,#8A7440); background:var(--surface); }
+  .member-icon-btn-danger:hover{ color:var(--red); border-color:var(--red); }
+  .member-perm-panel{ margin-top:12px; padding-top:12px; border-top:1px solid var(--hairline); }
   .empty-note{ color:var(--muted); font-size:13px; padding:6px 2px; }
 
   .invite-row{
@@ -129,8 +135,8 @@
     <div class="page-sub" id="firmaHeaderSub" data-i18n="page_sub_default">Firma hesabınıza bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.</div>
   </div>
 
-  <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
-  <div style="display:flex; flex-direction:column; gap:16px; flex:0 0 360px; min-width:300px;">
+  <div class="two-col-grid">
+  <div style="display:flex; flex-direction:column; gap:16px; min-width:0;">
     <div class="card" id="firmaSelectorCard" style="display:none;">
       <div class="mini-label" style="margin-bottom:8px;" data-i18n="managed_firma">Yönettiğiniz Firma</div>
       <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;"></select>
@@ -142,7 +148,7 @@
     </div>
   </div>
 
-  <div style="display:flex; flex-direction:column; gap:16px; flex:1; min-width:280px; max-width:640px;">
+  <div style="display:flex; flex-direction:column; gap:16px; min-width:0;">
     <div class="card">
       <h2 data-i18n="add_user_title">Kullanıcı Ekle</h2>
       <div class="card-sub" data-i18n="add_user_desc">Eklemek istediğiniz kişinin bu siteye kayıtlı e-posta adresini girin. Kişi az önce girdiğiniz e-postayla (veya henüz kaydı yoksa yeni kayıt olarak) giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.</div>
@@ -207,7 +213,7 @@
     enterValidEmail:'Please enter a valid email address.', sending:'Sending…',
     inviteSent:'Invitation sent. The person will be added automatically when they sign in with this email.',
     inviteFailed:'Invitation could not be sent, please try again.',
-    cancelInvite:'Cancel Invite', noUsersAdded:'No users added yet.', remove:'Remove', saved:'Saved ✓', selectAllPerms:'Select All',
+    cancelInvite:'Cancel Invite', noUsersAdded:'No users added yet.', remove:'Remove', saved:'Saved ✓', selectAllPerms:'Select All', editPerms:'Edit permissions',
     confirmRemoveUser:'Are you sure you want to remove this user from the company?',
     usersLoadFailed:'Users could not be loaded.'
   } : {
@@ -219,7 +225,7 @@
     enterValidEmail:'Lütfen geçerli bir e-posta adresi girin.', sending:'Gönderiliyor…',
     inviteSent:'Davet gönderildi. Kişi bu e-postayla giriş yaptığında otomatik olarak eklenecek.',
     inviteFailed:'Davet gönderilemedi, lütfen tekrar deneyin.',
-    cancelInvite:'Daveti İptal Et', noUsersAdded:'Henüz eklenmiş kullanıcı yok.', remove:'Kaldır', saved:'Kaydedildi ✓', selectAllPerms:'Tümünü Seç',
+    cancelInvite:'Daveti İptal Et', noUsersAdded:'Henüz eklenmiş kullanıcı yok.', remove:'Kaldır', saved:'Kaydedildi ✓', selectAllPerms:'Tümünü Seç', editPerms:'Yetkileri düzenle',
     confirmRemoveUser:'Bu kullanıcıyı firmadan kaldırmak istediğinize emin misiniz?',
     usersLoadFailed:'Kullanıcılar yüklenemedi.'
   };
@@ -428,16 +434,27 @@
                 '<div class="member-name">' + (md.username || md.email || d.id) + '</div>' +
                 '<div class="member-sub">' + (md.email || '') + '</div>' +
               '</div>' +
-              '<button type="button" class="member-remove-btn" data-remove="' + d.id + '">' + LBL.remove + '</button>' +
+              '<div class="member-row-actions">' +
+                '<button type="button" class="member-icon-btn member-edit-btn" data-edit="' + d.id + '" title="' + LBL.editPerms + '" aria-label="' + LBL.editPerms + '">✏️</button>' +
+                '<button type="button" class="member-icon-btn member-icon-btn-danger member-remove-btn" data-remove="' + d.id + '" title="' + LBL.remove + '" aria-label="' + LBL.remove + '">✕</button>' +
+              '</div>' +
             '</div>' +
-            '<div class="perm-select-all-row"><label class="perm-select-all-label"><input type="checkbox" id="' + idPrefix + '_selectAll"> ' + LBL.selectAllPerms + '</label></div>' +
-            '<div class="perm-grid">' + permGridHtml(idPrefix, md.permissions || {}) + '<span class="save-hint" id="' + idPrefix + '_hint">' + LBL.saved + '</span></div>' +
+            '<div class="member-perm-panel" id="' + idPrefix + '_panel" hidden>' +
+              '<div class="perm-select-all-row"><label class="perm-select-all-label"><input type="checkbox" id="' + idPrefix + '_selectAll"> ' + LBL.selectAllPerms + '</label></div>' +
+              '<div class="perm-grid">' + permGridHtml(idPrefix, md.permissions || {}) + '<span class="save-hint" id="' + idPrefix + '_hint">' + LBL.saved + '</span></div>' +
+            '</div>' +
           '</div>'
         );
       });
       listEl.innerHTML = rows.join('');
       listEl.querySelectorAll('.member-remove-btn').forEach(btn => {
         btn.addEventListener('click', () => removeMember(btn.dataset.remove));
+      });
+      listEl.querySelectorAll('.member-edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const panel = document.getElementById('m_' + btn.dataset.edit + '_panel');
+          if(panel) panel.hidden = !panel.hidden;
+        });
       });
       snap.forEach(d => {
         wirePermSelectAll('m_' + d.id, () => savePermissions(d.id, 'm_' + d.id));

@@ -271,6 +271,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="col-stack">
+  <div class="card" id="pendingInvitesCard" style="display:none;">
+    <h2 style="margin-bottom:6px;" data-i18n="pending_invites_title">Bekleyen Davetler</h2>
+    <p class="referral-note" style="margin-bottom:14px;" data-i18n="pending_invites_desc">Bir firma tarafından kullanıcı ya da yönetici olarak davet edildiğinizde, karar verene kadar burada bekler.</p>
+    <div id="pendingInvitesList"></div>
+  </div>
+
+  <div class="card" id="affiliateCard" style="display:none;">
+    <h2 style="margin-bottom:6px;" data-i18n="affiliate_title">Referans Ortaklığım</h2>
+    <p class="referral-note" style="margin-bottom:14px;" data-i18n="affiliate_desc">Adınıza tanımlanmış referans kod(lar)ıyla kimlerin katıldığını ve komisyon oranınızı burada görebilirsiniz.</p>
+    <div id="affiliateList"></div>
+  </div>
+
   <div class="card" id="referralCard">
     <h2 data-i18n="referral_code">Referans Kodu</h2>
     <p class="referral-note" id="referralNote" data-i18n="referral_note">Referans kodu girerek üyeliğinize tanımlı avantajı kullanabilirsiniz.</p>
@@ -426,13 +438,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     emailInUse:'This email is already registered to another account.', emailUpdateFailed:'The email could not be updated, please try again.',
     firmaCreateFailed:'The company could not be created, please try again.',
     needLoginToCreateFirma:'You need to be signed in to create a company.', enterFirmaName:'Please enter a company name.',
-    youAreAdmin:'You are an admin', editBtn:'Edit', save:'Save', savedOk:'Saved ✓',
+    youAreAdmin:'You are an admin', editBtn:'Edit', save:'Save', savedOk:'Saved ✓', gotoUserPanel:'👥 User Management Panel',
     firmaNameEmpty:'Company name cannot be empty.', saveFailedRetry:'Could not be saved, please try again.',
     addAdmin:'Add Admin', adminEmailPh:'Admin email', addedOk:'Added ✓',
     validEmailPlease:'Please enter a valid email.', adminInviteFailed:'The invitation could not be sent, please try again.',
     noManagedFirmasYet:'You are not an admin of any company yet.', firmasLoadFailed:'Companies could not be loaded.',
     firmaNameLabel:'Company Name', addressLabel:'Address', phoneLabel:'Phone', taxIdLabel:'Tax ID',
-    loadingTxt:'Loading...'
+    loadingTxt:'Loading...',
+    pendingInviteAdminSub:'You have been invited as an admin. You can add and manage users; you will not enter your own financial data under this role.',
+    pendingInviteMemberSub:'You have been invited as a user. If you accept, your data entries in the modules below will be shared with this company\'s pool.',
+    pendingInviteAccessTo:'You will get access to:', pendingInviteNone:'None (view-only)',
+    pendingInviteAccept:'✓ Accept', pendingInviteReject:'✕ Decline', pendingInviteAccepted:'Accepted ✓', pendingInviteRejected:'Declined',
+    pendingInviteError:'Something went wrong, please try again.', pendingInviteAdminBadge:'Admin Invitation', pendingInviteMemberBadge:'User Invitation',
+    affiliateCodeLabel:'Code', affiliateCommissionLabel:'Commission', affiliateJoinedLabel:'Joined',
+    affiliateNoSignupsYet:'No one has joined with this code yet.', affiliateLoadFailed:'Could not load referral partnership data.'
   } : {
     closeSample:'Örnek görünümü kapat', sampleCompany:'Örnek Ticaret Ltd. Şti.', adminRole:'Yönetici (Admin)',
     sampleUser1:'Mehmet Güler', roleAdmin:'Yönetici', sampleUser2:'Ayşe Yıldız', roleUser:'Kullanıcı',
@@ -477,13 +496,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     emailInUse:'Bu e-posta zaten başka bir hesapta kayıtlı.', emailUpdateFailed:'E-posta güncellenemedi, lütfen tekrar deneyin.',
     firmaCreateFailed:'Firma oluşturulamadı, lütfen tekrar deneyin.',
     needLoginToCreateFirma:'Firma oluşturmak için giriş yapmış olmanız gerekir.', enterFirmaName:'Lütfen bir firma adı girin.',
-    youAreAdmin:'Yöneticisisiniz', editBtn:'✏️ Düzenle', save:'Kaydet', savedOk:'Kaydedildi ✓',
+    youAreAdmin:'Yöneticisisiniz', editBtn:'✏️ Düzenle', save:'Kaydet', savedOk:'Kaydedildi ✓', gotoUserPanel:'👥 Kullanıcı Yönetim Paneline Git',
     firmaNameEmpty:'Firma adı boş olamaz.', saveFailedRetry:'Kaydedilemedi, tekrar deneyin.',
     addAdmin:'Yönetici Ekle', adminEmailPh:'Yönetici e-postası', addedOk:'Eklendi ✓',
     validEmailPlease:'Geçerli bir e-posta girin.', adminInviteFailed:'Davet gönderilemedi, tekrar deneyin.',
     noManagedFirmasYet:'Henüz yöneticisi olduğunuz bir firma yok.', firmasLoadFailed:'Firmalar yüklenemedi.',
     firmaNameLabel:'Firma Adı', addressLabel:'Adres', phoneLabel:'Telefon', taxIdLabel:'Vergi No',
-    loadingTxt:'Yükleniyor...'
+    loadingTxt:'Yükleniyor...',
+    pendingInviteAdminSub:'Yönetici olarak davet edildiniz. Kullanıcı ekleyip yetkilendirebilirsiniz; kendi mali verilerinizi bu rolde girmezsiniz.',
+    pendingInviteMemberSub:'Kullanıcı olarak davet edildiniz. Kabul ederseniz aşağıdaki modüllerdeki veri girişleriniz bu firmanın ortak havuzuna dahil olur.',
+    pendingInviteAccessTo:'Erişim kazanacağınız bölümler:', pendingInviteNone:'Hiçbiri (yalnızca görüntüleme)',
+    pendingInviteAccept:'✓ Kabul Et', pendingInviteReject:'✕ Reddet', pendingInviteAccepted:'Kabul edildi ✓', pendingInviteRejected:'Reddedildi',
+    pendingInviteError:'Bir şeyler ters gitti, lütfen tekrar deneyin.', pendingInviteAdminBadge:'Yöneticilik Daveti', pendingInviteMemberBadge:'Kullanıcı Daveti',
+    affiliateCodeLabel:'Kod', affiliateCommissionLabel:'Komisyon', affiliateJoinedLabel:'Katıldı',
+    affiliateNoSignupsYet:'Bu kodla henüz kimse katılmadı.', affiliateLoadFailed:'Referans ortaklığı bilgileri yüklenemedi.'
   };
 
   const statusPillText = document.getElementById('statusPillText');
@@ -710,6 +736,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               '<div class="member-name">🏢 ' + esc(fData.name || fid) + '</div>' +
               '<div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">' +
                 '<span class="member-badge">' + LBL.youAreAdmin + '</span>' +
+                '<button type="button" class="member-remove-btn firma-goto-panel-btn" data-firma-id="' + fid + '">' + LBL.gotoUserPanel + '</button>' +
                 '<button type="button" class="member-remove-btn firma-edit-toggle-btn" data-firma-id="' + fid + '">' + LBL.editBtn + '</button>' +
               '</div>' +
             '</div>' +
@@ -742,6 +769,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         );
       }
       myFirmasList.innerHTML = blocks.join('');
+
+      myFirmasList.querySelectorAll('.firma-goto-panel-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          try{
+            if(window.top && typeof window.top.openTarget === 'function'){
+              window.top.openTarget('KullaniciYonetimi.html', MMG_LANG==='en' ? 'User Management Panel' : 'Kullanıcı Yönetim Paneli');
+            } else {
+              window.top.location.href = 'index.html';
+            }
+          }catch(e){ window.top.location.href = 'index.html'; }
+        });
+      });
 
       myFirmasList.querySelectorAll('.firma-edit-toggle-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -861,8 +900,155 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   });
 
-  // Not: Firma yöneticiliği davetleri artık burada sessizce kabul edilmiyor;
-  // ana kabuk (index.html) bunu bir "Kabul Et / Reddet" bildirimiyle yönetiyor.
+  // ================== Referans Ortaklığım ==================
+  // Admin tarafından ReferansKoduYonetimi.html'de bir kod bu kullanıcının e-postasına atanmışsa
+  // (ownerUid == bu kullanıcı), burada hangi kod(lar)ın kendisine ait olduğunu, komisyon oranını
+  // ve o kodla kimlerin katıldığını (referralSignups) gösteriyoruz.
+  const affiliateCard = document.getElementById('affiliateCard');
+  const affiliateList = document.getElementById('affiliateList');
+
+  async function loadAffiliateData(user){
+    if(!user){ affiliateCard.style.display = 'none'; return; }
+    try{
+      const codesSnap = await getDocs(query(collection(db, 'referralCodes'), where('ownerUid', '==', user.uid)));
+      if(codesSnap.empty){ affiliateCard.style.display = 'none'; affiliateList.innerHTML = ''; return; }
+      const codes = [];
+      codesSnap.forEach(d => codes.push({ id: d.id, ...d.data() }));
+
+      const rows = await Promise.all(codes.map(async (c) => {
+        let signups = [];
+        try{
+          const signupsSnap = await getDocs(query(collection(db, 'referralSignups'), where('code', '==', c.id)));
+          signupsSnap.forEach(d => signups.push(d.data()));
+        }catch(e){ /* sessizce geç */ }
+        signups.sort((a,b) => (b.joinedAt && b.joinedAt.seconds || 0) - (a.joinedAt && a.joinedAt.seconds || 0));
+        const signupsHtml = signups.length ? signups.map(s => {
+          const dt = s.joinedAt && s.joinedAt.seconds ? new Date(s.joinedAt.seconds * 1000).toLocaleDateString(MMG_LANG==='en' ? 'en-US' : 'tr-TR') : '';
+          return '<div style="display:flex; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid var(--hairline); font-size:12px;">' +
+            '<span>' + esc(s.newUserName || s.newUserEmail || '—') + '</span>' +
+            '<span style="color:var(--muted);">' + LBL.affiliateJoinedLabel + ': ' + dt + '</span>' +
+          '</div>';
+        }).join('') : ('<p class="referral-note" style="margin:0;">' + LBL.affiliateNoSignupsYet + '</p>');
+
+        return '<div style="border:1px solid var(--hairline); border-radius:10px; padding:14px; margin-bottom:10px; background:var(--surface-2);">' +
+          '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;">' +
+            '<strong style="font-family:\'IBM Plex Mono\',monospace;">' + LBL.affiliateCodeLabel + ': ' + esc(c.id) + '</strong>' +
+            '<span style="font-size:11px; padding:3px 8px; border-radius:999px; background:var(--surface); border:1px solid var(--hairline); color:var(--brass);">' + LBL.affiliateCommissionLabel + ': %' + (c.commissionPercent || 0) + '</span>' +
+          '</div>' +
+          signupsHtml +
+        '</div>';
+      }));
+
+      affiliateCard.style.display = 'block';
+      affiliateList.innerHTML = rows.join('');
+    }catch(e){
+      affiliateCard.style.display = 'block';
+      affiliateList.innerHTML = '<p class="referral-note" style="color:var(--red);">' + LBL.affiliateLoadFailed + '</p>';
+    }
+  }
+  function esc(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // ================== Bekleyen Davetler ==================
+  // Bu bölüm, index.html'deki üst bildirimde "✕ kapat" ile geçilen ya da henüz karar verilmemiş
+  // firma davetlerini (kullanıcı/yönetici) burada listeler; davet Firestore'da silinene kadar
+  // (kabul ya da red edilene kadar) burada görünmeye devam eder.
+  const pendingInvitesCard = document.getElementById('pendingInvitesCard');
+  const pendingInvitesList = document.getElementById('pendingInvitesList');
+  const INVITE_PERM_MODULES = MMG_LANG === 'en' ? [
+    { key:'gelirler', label:'Income' }, { key:'giderler', label:'Expenses' },
+    { key:'nakitakis', label:'Cash Flow Table' }, { key:'talimat', label:'Instruction Preparation' },
+    { key:'hesaplama', label:'Calculation Tools' }
+  ] : [
+    { key:'gelirler', label:'Gelirler' }, { key:'giderler', label:'Giderler' },
+    { key:'nakitakis', label:'Nakit Akış Tablosu' }, { key:'talimat', label:'Talimat Hazırlama' },
+    { key:'hesaplama', label:'Hesaplama Araçları' }
+  ];
+
+  async function loadPendingInvites(user){
+    if(!user || !user.email){ pendingInvitesCard.style.display = 'none'; return; }
+    const email = user.email.toLowerCase();
+    const invites = [];
+    try{
+      const memberSnap = await getDoc(doc(db, 'firmaInvites', email));
+      if(memberSnap.exists()) invites.push({ kind:'member', id:email, data:memberSnap.data() });
+    }catch(e){ /* sessizce geç */ }
+    try{
+      const adminSnap = await getDoc(doc(db, 'firmaAdminInvites', email));
+      if(adminSnap.exists()) invites.push({ kind:'admin', id:email, data:adminSnap.data() });
+    }catch(e){ /* sessizce geç */ }
+
+    if(!invites.length){ pendingInvitesCard.style.display = 'none'; pendingInvitesList.innerHTML = ''; return; }
+    pendingInvitesCard.style.display = 'block';
+    pendingInvitesList.innerHTML = invites.map((inv, idx) => renderPendingInviteRow(inv, idx)).join('');
+
+    invites.forEach((inv, idx) => {
+      const acceptBtn = document.getElementById('pendInvAccept_' + idx);
+      const rejectBtn = document.getElementById('pendInvReject_' + idx);
+      const msgEl = document.getElementById('pendInvMsg_' + idx);
+      if(acceptBtn) acceptBtn.onclick = async () => {
+        acceptBtn.disabled = true; if(rejectBtn) rejectBtn.disabled = true;
+        try{
+          if(inv.kind === 'admin'){
+            await setDoc(doc(db, 'firmaAccounts', inv.data.firmaId, 'admins', user.uid), { email: user.email || '', addedAt: serverTimestamp() });
+            await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayUnion(inv.data.firmaId) }, { merge: true });
+          } else {
+            await setDoc(doc(db, 'firmaAccounts', inv.data.firmaId, 'members', user.uid), {
+              email: user.email || '', username: (currentUserData && currentUserData.username) || '', permissions: inv.data.permissions || {}, addedAt: serverTimestamp()
+            });
+            await setDoc(doc(db, 'users', user.uid), { firmaIds: arrayUnion(inv.data.firmaId) }, { merge: true });
+          }
+          await deleteDoc(doc(db, inv.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', inv.id));
+          if(msgEl){ msgEl.style.color = 'var(--teal)'; msgEl.textContent = LBL.pendingInviteAccepted; }
+          try{ await loadMyFirmas(user.uid); }catch(e){}
+          setTimeout(() => loadPendingInvites(user), 900);
+        }catch(e){
+          if(msgEl){ msgEl.style.color = 'var(--red)'; msgEl.textContent = LBL.pendingInviteError; }
+          acceptBtn.disabled = false; if(rejectBtn) rejectBtn.disabled = false;
+        }
+      };
+      if(rejectBtn) rejectBtn.onclick = async () => {
+        acceptBtn.disabled = true; rejectBtn.disabled = true;
+        try{
+          await deleteDoc(doc(db, inv.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', inv.id));
+          if(msgEl){ msgEl.style.color = 'var(--muted)'; msgEl.textContent = LBL.pendingInviteRejected; }
+          setTimeout(() => loadPendingInvites(user), 700);
+        }catch(e){
+          if(msgEl){ msgEl.style.color = 'var(--red)'; msgEl.textContent = LBL.pendingInviteError; }
+          acceptBtn.disabled = false; rejectBtn.disabled = false;
+        }
+      };
+    });
+  }
+
+  function renderPendingInviteRow(inv, idx){
+    const firmaName = inv.data.firmaName || (MMG_LANG === 'en' ? 'a company' : 'bir firma');
+    const badge = inv.kind === 'admin' ? LBL.pendingInviteAdminBadge : LBL.pendingInviteMemberBadge;
+    const sub = inv.kind === 'admin' ? LBL.pendingInviteAdminSub : LBL.pendingInviteMemberSub;
+    let permsHtml = '';
+    if(inv.kind === 'member'){
+      const perms = inv.data.permissions || {};
+      const allowed = INVITE_PERM_MODULES.filter(m => perms[m.key] !== false).map(m => m.label);
+      permsHtml = '<div style="font-size:12px; margin:8px 0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 10px;">' +
+        LBL.pendingInviteAccessTo + '<ul style="margin:4px 0 0 16px; padding:0;">' +
+        (allowed.length ? allowed.map(l => '<li>' + l + '</li>').join('') : ('<li>' + LBL.pendingInviteNone + '</li>')) +
+        '</ul></div>';
+    }
+    return '<div style="border:1px solid var(--hairline); border-radius:10px; padding:14px; margin-bottom:10px; background:var(--surface-2);">' +
+      '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">' +
+        '<strong style="font-family:\'Space Grotesk\',sans-serif;">🏢 ' + firmaName + '</strong>' +
+        '<span style="font-size:11px; padding:3px 8px; border-radius:999px; background:var(--surface); border:1px solid var(--hairline); color:var(--brass);">' + badge + '</span>' +
+      '</div>' +
+      '<p class="referral-note" style="margin-bottom:0;">' + sub + '</p>' +
+      permsHtml +
+      '<div style="display:flex; gap:8px; margin-top:10px;">' +
+        '<button type="button" id="pendInvAccept_' + idx + '" class="auth-submit" style="width:auto; padding:9px 16px; margin-top:0;">' + LBL.pendingInviteAccept + '</button>' +
+        '<button type="button" id="pendInvReject_' + idx + '" class="danger-btn" style="width:auto; padding:9px 16px;">' + LBL.pendingInviteReject + '</button>' +
+      '</div>' +
+      '<div id="pendInvMsg_' + idx + '" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>' +
+    '</div>';
+  }
 
   onAuthStateChanged(auth, async (user) => {
     if(!user){
@@ -871,6 +1057,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       dangerCard.style.display = 'block';
       lockReferralCard(LBL.referralNeedsAccount);
       currentUserData = null;
+      pendingInvitesCard.style.display = 'none';
+      affiliateCard.style.display = 'none';
       return;
     }
     statusPill.classList.remove('clickable');
@@ -894,6 +1082,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         legacyCompanyWrap.style.display = 'none';
       }
       await loadMyFirmas(user.uid);
+      await loadPendingInvites(user);
+      await loadAffiliateData(user);
     } catch(e){
       statusPillText.textContent = user.email || LBL.member;
     }
@@ -1132,7 +1322,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       active_company:'Aktif Firma', active_company_note:'(işlem yapacağınız firma)',
       delete_account:'Hesabımı Kalıcı Olarak Sil',
       enter_password:'Şifrenizi Girin', delete_confirm_desc:'Hesabınızı silmek için güvenlik amacıyla şifrenizi tekrar girmeniz gerekiyor.',
-      password:'Şifre', confirm_delete:'Onayla ve Sil'
+      password:'Şifre', confirm_delete:'Onayla ve Sil',
+      pending_invites_title:'Bekleyen Davetler',
+      pending_invites_desc:'Bir firma tarafından kullanıcı ya da yönetici olarak davet edildiğinizde, karar verene kadar burada bekler.',
+      affiliate_title:'Referans Ortaklığım',
+      affiliate_desc:'Adınıza tanımlanmış referans kod(lar)ıyla kimlerin katıldığını ve komisyon oranınızı burada görebilirsiniz.'
     },
     en: {
       page_title:'My Account', page_subtitle:'Enter your company or personal details. This information is stored only in your account.',
@@ -1151,7 +1345,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       active_company:'Active Company', active_company_note:'(the company you will work in)',
       delete_account:'Permanently Delete My Account',
       enter_password:'Enter Your Password', delete_confirm_desc:'For security, please re-enter your password to delete your account.',
-      password:'Password', confirm_delete:'Confirm and Delete'
+      password:'Password', confirm_delete:'Confirm and Delete',
+      pending_invites_title:'Pending Invitations',
+      pending_invites_desc:'When a company invites you as a user or admin, it waits here until you decide.',
+      affiliate_title:'My Referral Partnership',
+      affiliate_desc:'See who joined using your referral code(s) and your commission rate here.'
     }
   });
   MMGI18N.detectAndApplyDefaultLang();
