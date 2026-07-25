@@ -859,18 +859,16 @@ import {
 
     // ---- Firma Hesabı davetleri (YENİ): eskiden ayrı bir açılır bildirim kutusundaydı,
     // şimdi bu sohbet panelinin "Bildirimler" sekmesinde gösteriliyor ----
-    // Kullanıcı ("üye") daveti artık e-posta değil, kullanıcının kendi kodu (myChatCode / Kullanıcı Kodu) ile eşleşir.
+    // Hem "kullanıcı" hem de "yönetici" daveti artık e-posta değil, kullanıcının kendi kodu
+    // (myChatCode / Kullanıcı Kodu) ile eşleşir.
     if(myChatCode){
       unsubFirmaMemberInvite = onSnapshot(doc(db, 'firmaInvites', myChatCode), (snap) => {
         firmaMemberInvite = snap.exists() ? { id: myChatCode, kind: 'member', data: snap.data() || {} } : null;
         if(activeTab === 'notifications') renderTab();
         updateBadge();
       }, (err) => console.error('mmg-chat-widget firmaInvites onSnapshot:', err));
-    }
-    if(currentUser && currentUser.email){
-      const emailLower = currentUser.email.toLowerCase();
-      unsubFirmaAdminInvite = onSnapshot(doc(db, 'firmaAdminInvites', emailLower), (snap) => {
-        firmaAdminInvite = snap.exists() ? { id: emailLower, kind: 'admin', data: snap.data() || {} } : null;
+      unsubFirmaAdminInvite = onSnapshot(doc(db, 'firmaAdminInvites', myChatCode), (snap) => {
+        firmaAdminInvite = snap.exists() ? { id: myChatCode, kind: 'admin', data: snap.data() || {} } : null;
         if(activeTab === 'notifications') renderTab();
         updateBadge();
       }, (err) => console.error('mmg-chat-widget firmaAdminInvites onSnapshot:', err));

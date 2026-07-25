@@ -773,12 +773,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const esc = (s) => String(s || '').replace(/"/g, '&quot;');
     myFirmasList.innerHTML =
       '<div class="member-row" data-firma-id="' + fid + '" style="flex-direction:column; align-items:stretch; gap:10px;">' +
-        '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">' +
-          '<div class="member-name">🏢 ' + esc(fData.name || fid) + '</div>' +
-          '<div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">' +
-            '<button type="button" class="member-remove-btn firma-goto-panel-btn" data-firma-id="' + fid + '">' + LBL.gotoUserPanel + '</button>' +
-            '<button type="button" class="member-remove-btn firma-edit-toggle-btn" data-firma-id="' + fid + '">' + LBL.editBtn + '</button>' +
-          '</div>' +
+        '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">' +
+          '<button type="button" class="member-remove-btn firma-goto-panel-btn" data-firma-id="' + fid + '">' + LBL.gotoUserPanel + '</button>' +
+          '<button type="button" class="member-remove-btn firma-edit-toggle-btn" data-firma-id="' + fid + '">' + LBL.editBtn + '</button>' +
         '</div>' +
 
         '<div class="firma-edit-panel" style="display:none; flex-direction:column; gap:8px; padding-top:6px; border-top:1px solid var(--hairline);">' +
@@ -798,13 +795,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           '</div>' +
           '<div class="auth-error firma-edit-error"></div>' +
         '</div>' +
-
-        '<div style="display:flex; gap:8px;">' +
-          '<input type="email" placeholder="' + LBL.adminEmailPh + '" class="firma-admin-invite-email" style="flex:1; background:var(--surface); border:1px solid var(--hairline); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13px;">' +
-          '<button type="button" class="auth-submit firma-admin-invite-btn" data-firma-id="' + fid + '" style="width:auto; padding:9px 14px; margin-top:0; font-size:12.5px;">' + LBL.addAdmin + '</button>' +
-        '</div>' +
-        '<div class="auth-error firma-admin-invite-error"></div>' +
-        '<div class="saved-msg firma-admin-invite-saved">' + LBL.addedOk + '</div>' +
       '</div>';
 
     myFirmasList.querySelectorAll('.firma-goto-panel-btn').forEach(btn => {
@@ -849,7 +839,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             phone: row.querySelector('.firma-edit-phone').value.trim(),
             taxId: row.querySelector('.firma-edit-taxid').value.trim()
           }, { merge: true });
-          row.querySelector('.member-name').textContent = '🏢 ' + newName;
           const entry2 = myAdminFirmasArr.find(f => f.id === fid2);
           if(entry2) entry2.data.name = newName;
           const opt = myFirmasSelector.querySelector('option[value="' + fid2 + '"]');
@@ -858,42 +847,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           setTimeout(() => hintEl.classList.remove('show'), 2000);
         } catch(e){
           errEl.textContent = LBL.saveFailedRetry;
-          errEl.classList.add('show');
-        } finally {
-          btn.disabled = false;
-        }
-      });
-    });
-
-    myFirmasList.querySelectorAll('.firma-admin-invite-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const row = btn.closest('.member-row');
-        const emailInput = row.querySelector('.firma-admin-invite-email');
-        const errEl = row.querySelector('.firma-admin-invite-error');
-        const savedEl = row.querySelector('.firma-admin-invite-saved');
-        errEl.classList.remove('show'); errEl.textContent = '';
-        const inviteEmail = emailInput.value.trim().toLowerCase();
-        if(!inviteEmail || !inviteEmail.includes('@')){
-          errEl.textContent = LBL.validEmailPlease;
-          errEl.classList.add('show');
-          return;
-        }
-        btn.disabled = true;
-        try{
-          const fid2 = btn.dataset.firmaId;
-          let fName = fid2;
-          try{
-            const fSnap = await getDoc(doc(db, 'firmaAccounts', fid2));
-            if(fSnap.exists()) fName = fSnap.data().name || fid2;
-          }catch(e){ /* sessizce geç */ }
-          await setDoc(doc(db, 'firmaAdminInvites', inviteEmail), {
-            firmaId: fid2, firmaName: fName, createdAt: serverTimestamp()
-          });
-          savedEl.classList.add('show');
-          emailInput.value = '';
-          setTimeout(() => savedEl.classList.remove('show'), 2500);
-        } catch(e){
-          errEl.textContent = LBL.adminInviteFailed;
           errEl.classList.add('show');
         } finally {
           btn.disabled = false;
@@ -1006,8 +959,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   async function loadPendingInvites(user){
     if(!user){ pendingInvitesCard.style.display = 'none'; return; }
-    const email = (user.email || '').toLowerCase();
-    // Kullanıcı ("üye") davetleri artık e-posta değil, kişinin kendi kullanıcı koduyla eşleştirilir.
+    // Hem "kullanıcı" hem de "yönetici" davetleri artık e-posta değil, kişinin kendi
+    // kullanıcı koduyla eşleştirilir (bkz. KullaniciYonetimi.html).
     const code = (currentUserData && currentUserData.customerNumber != null) ? String(currentUserData.customerNumber) : null;
     const invites = [];
     try{
@@ -1017,9 +970,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
     }catch(e){ /* sessizce geç */ }
     try{
-      if(email){
-        const adminSnap = await getDoc(doc(db, 'firmaAdminInvites', email));
-        if(adminSnap.exists()) invites.push({ kind:'admin', id:email, data:adminSnap.data() });
+      if(code){
+        const adminSnap = await getDoc(doc(db, 'firmaAdminInvites', code));
+        if(adminSnap.exists()) invites.push({ kind:'admin', id:code, data:adminSnap.data() });
       }
     }catch(e){ /* sessizce geç */ }
 

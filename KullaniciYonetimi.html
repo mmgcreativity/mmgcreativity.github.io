@@ -169,6 +169,18 @@
     </div>
 
     <div class="card">
+      <h2 data-i18n="add_admin_title">Yönetici Ekle</h2>
+      <div class="card-sub" data-i18n="add_admin_desc">Eklemek istediğiniz kişinin kullanıcı kodunu girin. Kişi bu kodla ilişkili hesabıyla giriş yaptığında bu firmaya yönetici olarak eklenecek ve bu paneli görebilecek.</div>
+      <div class="auth-field">
+        <label data-i18n="admin_code_label">Yöneticinin Kodu</label>
+        <input type="text" id="adminInviteCode" inputmode="numeric" placeholder="ör. 1016" maxlength="12">
+      </div>
+      <button type="button" class="auth-submit" id="adminInviteSubmitBtn" data-i18n="send_invite">Davet Gönder</button>
+      <div class="auth-error" id="adminInviteError"></div>
+      <div class="auth-success" id="adminInviteSuccess"></div>
+    </div>
+
+    <div class="card">
       <h2 data-i18n="my_users_title">Kullanıcılarım</h2>
       <div class="card-sub" data-i18n="my_users_desc">Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.</div>
       <div class="member-list" id="membersList"><div class="empty-note" data-i18n="loading">Yükleniyor…</div></div>
@@ -215,7 +227,8 @@
     inviteFailed:'Invitation could not be sent, please try again.',
     cancelInvite:'Cancel', noUsersAdded:'No users added yet.', remove:'Remove', saved:'Saved ✓', selectAllPerms:'Select All', editPerms:'Edit permissions',
     confirmRemoveUser:'Are you sure you want to remove this user from the company?',
-    usersLoadFailed:'Users could not be loaded.'
+    usersLoadFailed:'Users could not be loaded.',
+    pendingKindUser:'user', pendingKindAdmin:'admin'
   } : {
     firmaSubPrefix:'"', firmaSubSuffix:'" firmasına bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.',
     notAdminYetTitle:'Henüz bir firmanın yöneticisi değilsiniz',
@@ -227,7 +240,8 @@
     inviteFailed:'Davet gönderilemedi, lütfen tekrar deneyin.',
     cancelInvite:'İptal Et', noUsersAdded:'Henüz eklenmiş kullanıcı yok.', remove:'Kaldır', saved:'Kaydedildi ✓', selectAllPerms:'Tümünü Seç', editPerms:'Yetkileri düzenle',
     confirmRemoveUser:'Bu kullanıcıyı firmadan kaldırmak istediğinize emin misiniz?',
-    usersLoadFailed:'Kullanıcılar yüklenemedi.'
+    usersLoadFailed:'Kullanıcılar yüklenemedi.',
+    pendingKindUser:'kullanıcı', pendingKindAdmin:'yönetici'
   };
 
   // Bu panelde yönetilebilen yetki modülleri (sol menüdeki araç sayfalarıyla eşleşir).
@@ -385,31 +399,78 @@
     }
   });
 
+  // ---- Yönetici Ekle (davet) ----
+  document.getElementById('adminInviteSubmitBtn').addEventListener('click', async () => {
+    const errEl = document.getElementById('adminInviteError');
+    const okEl = document.getElementById('adminInviteSuccess');
+    errEl.classList.remove('show'); okEl.classList.remove('show');
+    const codeInput = document.getElementById('adminInviteCode');
+    const code = codeInput.value.trim();
+    if(!code || !/^[0-9]+$/.test(code)){
+      errEl.textContent = LBL.enterValidCode;
+      errEl.classList.add('show');
+      return;
+    }
+    const btn = document.getElementById('adminInviteSubmitBtn');
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = LBL.sending;
+    try{
+      const fSnap = await getDoc(doc(db, 'firmaAccounts', firmaId));
+      // Yönetici daveti de kullanıcı kodu ile eşleştirilir (bkz. firmaAdminInvites/{kod}).
+      await setDoc(doc(db, 'firmaAdminInvites', code), {
+        firmaId: firmaId,
+        firmaName: fSnap.exists() ? (fSnap.data().name || '') : '',
+        createdAt: serverTimestamp()
+      });
+      okEl.textContent = LBL.inviteSent;
+      okEl.classList.add('show');
+      codeInput.value = '';
+      await loadPendingInvites();
+    } catch(e){
+      errEl.textContent = LBL.inviteFailed;
+      errEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
+
   // ---- Bekleyen davetler ----
   async function loadPendingInvites(){
     const card = document.getElementById('pendingInvitesCard');
     const listEl = document.getElementById('pendingInvitesList');
     try{
-      const q = query(collection(db, 'firmaInvites'), where('firmaId', '==', firmaId));
-      const snap = await getDocs(q);
-      if(snap.empty){
+      const [memberSnap, adminSnap] = await Promise.all([
+        getDocs(query(collection(db, 'firmaInvites'), where('firmaId', '==', firmaId))),
+        getDocs(query(collection(db, 'firmaAdminInvites'), where('firmaId', '==', firmaId)))
+      ]);
+      if(memberSnap.empty && adminSnap.empty){
         card.style.display = 'none';
         return;
       }
       card.style.display = 'block';
       const rows = [];
-      snap.forEach(d => {
+      memberSnap.forEach(d => {
         rows.push(
           '<div class="invite-row" data-code="' + d.id + '">' +
-            '<span class="invite-email">#' + d.id + '</span>' +
-            '<button type="button" class="invite-cancel-btn" data-cancel="' + d.id + '">' + LBL.cancelInvite + '</button>' +
+            '<span class="invite-email">#' + d.id + ' &middot; ' + LBL.pendingKindUser + '</span>' +
+            '<button type="button" class="invite-cancel-btn" data-cancel="' + d.id + '" data-coll="firmaInvites">' + LBL.cancelInvite + '</button>' +
+          '</div>'
+        );
+      });
+      adminSnap.forEach(d => {
+        rows.push(
+          '<div class="invite-row" data-code="' + d.id + '">' +
+            '<span class="invite-email">#' + d.id + ' &middot; ' + LBL.pendingKindAdmin + '</span>' +
+            '<button type="button" class="invite-cancel-btn" data-cancel="' + d.id + '" data-coll="firmaAdminInvites">' + LBL.cancelInvite + '</button>' +
           '</div>'
         );
       });
       listEl.innerHTML = rows.join('');
       listEl.querySelectorAll('[data-cancel]').forEach(btn => {
         btn.addEventListener('click', async () => {
-          try{ await deleteDoc(doc(db, 'firmaInvites', btn.dataset.cancel)); }catch(e){}
+          try{ await deleteDoc(doc(db, btn.dataset.coll, btn.dataset.cancel)); }catch(e){}
           await loadPendingInvites();
         });
       });
@@ -509,6 +570,8 @@
       add_user_title:'Kullanıcı Ekle', add_user_desc:'Eklemek istediğiniz kişinin kullanıcı kodunu girin (profil menüsünde "Kullanıcı Kodu: #..." olarak görünür). Kişi bu kodla ilişkili hesabıyla giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.',
       select_all_perms:'Tümünü Seç',
       user_code_label:'Kullanıcının Kodu', send_invite:'Davet Gönder',
+      add_admin_title:'Yönetici Ekle', add_admin_desc:'Eklemek istediğiniz kişinin kullanıcı kodunu girin. Kişi bu kodla ilişkili hesabıyla giriş yaptığında bu firmaya yönetici olarak eklenecek ve bu paneli görebilecek.',
+      admin_code_label:'Yöneticinin Kodu',
       pending_invites_title:'Bekleyen Davetler', pending_invites_desc:'Bu kişiler henüz giriş yapıp daveti kabul etmedi.',
       my_users_title:'Kullanıcılarım', my_users_desc:'Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.',
       loading:'Yükleniyor…',
@@ -521,6 +584,8 @@
       add_user_title:'Add User', add_user_desc:"Enter the user code of the person you want to add (shown in their profile menu as \"User Code: #...\"). The person will be automatically added as a user of your company when they sign in with the account that has this code.",
       select_all_perms:'Select All',
       user_code_label:"User's Code", send_invite:'Send Invite',
+      add_admin_title:'Add Admin', add_admin_desc:"Enter the user code of the person you want to add. The person will be added as an admin of this company (with access to this panel) when they sign in with the account that has this code.",
+      admin_code_label:"Admin's Code",
       pending_invites_title:'Pending Invites', pending_invites_desc:'These people have not yet signed in and accepted the invite.',
       my_users_title:'My Users', my_users_desc:'Permissions are saved automatically when you change them.',
       loading:'Loading…',
