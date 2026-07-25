@@ -1829,20 +1829,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
   }
 
-  // Yeni bir oturum kimliği üretir, Firestore'a (bu platforma ait alana) yazar ve bu
-  // cihazda saklar (hangi kullanıcıya ait olduğuyla birlikte — bkz. mmgEnsureSessionOwnership
-  // içindeki açıklama). Sadece giriş/kayıt anında çağrılır ("bu cihaz artık bu platformun
-  // aktif oturum sahibi").
-  async function mmgClaimSession(uid){
+  // KRİTİK DÜZELTME (öz-atma / kendi kendini kicklemesi sorunu): Girişte HEM bu fonksiyon
+  // (mmgClaimSession) doğrudan çağrılıyor HEM DE onAuthStateChanged (aşağıda) neredeyse aynı anda
+  // tetiklenip mmgEnsureSessionOwnership'i çağırıyordu. İkisi de birbirinden habersiz şekilde
+  // "sessionId üret → Firestore'a yaz → localStorage'a yaz" adımlarını AYNI ANDA çalıştırabiliyordu;
+  // adımlar iç içe geçtiğinde (örn. Firestore yazması S1 için S2'den sonra tamamlanırsa ama
+  // localStorage'a S2 en son yazılırsa) bu cihazın kendi localStorage'ı ile Firestore'daki değer
+  // birbirini tutmuyor ve cihaz GİRİŞ YAPAR YAPMAZ "başka bir yerden girildi" sanıp kendini
+  // atıyordu — "hesabı hiçbir şekilde açamıyorum" şikayetinin sebebi buydu. Çözüm: tüm oturum
+  // iddia işlemlerini TEK bir sıraya (kuyruğa) alıp birbiri ardına, asla iç içe geçmeyecek
+  // şekilde çalıştırıyoruz.
+  let mmgSessionOpQueue = Promise.resolve();
+  function mmgQueueSessionOp(fn){
+    mmgSessionOpQueue = mmgSessionOpQueue.then(fn, fn);
+    return mmgSessionOpQueue;
+  }
+
+  // Ham iddia işlemi (kuyruğa alınmadan doğrudan çağrılmamalı — bkz. mmgClaimSession /
+  // mmgEnsureSessionOwnership).
+  async function mmgClaimSessionUnsafe(uid){
     const sessionId = mmgGenerateSessionId();
+    // ÖNEMLİ: localStorage'ı Firestore yazmasından ÖNCE güncelliyoruz. Firestore SDK'sı bir
+    // yazmayı yerel önbelleğe hemen (sunucu onayını beklemeden) yansıtıp aktif onSnapshot
+    // dinleyicilerini anında tetikleyebiliyor. localStorage güncellemesi bu yazmadan SONRA
+    // gelseydi, aynı cihazın kendi az önce yazdığı yeni oturumu, henüz güncellenmemiş eski
+    // localStorage değeriyle karşılaştırıp "başka biri girdi" sanıp kendini anında
+    // atabiliyordu (giriş yapar yapmaz kendi kendini kicklemesi sorununun asıl sebebi).
+    localStorage.setItem(MMG_SESSION_KEY, sessionId);
+    localStorage.setItem(MMG_SESSION_UID_KEY, uid);
     try{
       await setDoc(doc(db, 'users', uid), {
         [MMG_SESSION_FIELD]: sessionId,
         activeSessionAt: serverTimestamp()
       }, { merge: true });
-      localStorage.setItem(MMG_SESSION_KEY, sessionId);
-      localStorage.setItem(MMG_SESSION_UID_KEY, uid);
-    }catch(e){ /* oturum kimliği yazılamazsa sessizce geç, kritik bir işlev değil */ }
+    }catch(e){ /* Firestore'a yazılamazsa sessizce geç, kritik bir işlev değil */ }
+  }
+
+  // Yeni bir oturum kimliği üretir, Firestore'a (bu platforma ait alana) yazar ve bu
+  // cihazda saklar (hangi kullanıcıya ait olduğuyla birlikte — bkz. mmgEnsureSessionOwnership
+  // içindeki açıklama). Sadece giriş/kayıt anında çağrılır ("bu cihaz artık bu platformun
+  // aktif oturum sahibi"). Kuyruğa alınarak çağrılır, böylece onAuthStateChanged'in aynı anda
+  // tetikleyebileceği mmgEnsureSessionOwnership ile asla iç içe geçmez.
+  async function mmgClaimSession(uid){
+    return mmgQueueSessionOp(() => mmgClaimSessionUnsafe(uid));
   }
 
   function mmgStopWatchingSession(){
@@ -1889,12 +1918,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // kimliğinin GERÇEKTEN bu uid'e mi ait olduğunu da kontrol ediyoruz; değilse (farklı bir
   // kullanıcıya aitse ya da hiç yoksa) bu cihaz için sıfırdan yeni bir oturum iddia ediyoruz.
   async function mmgEnsureSessionOwnership(uid){
-    const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
-    const localSessionUid = localStorage.getItem(MMG_SESSION_UID_KEY);
-    if(!localSessionId || localSessionUid !== uid){
-      await mmgClaimSession(uid);
-    }
-    mmgWatchSession(uid);
+    return mmgQueueSessionOp(async () => {
+      const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
+      const localSessionUid = localStorage.getItem(MMG_SESSION_UID_KEY);
+      if(!localSessionId || localSessionUid !== uid){
+        await mmgClaimSessionUnsafe(uid);
+      }
+      mmgWatchSession(uid);
+    });
   }
 
   onAuthStateChanged(auth, async (user) => {
