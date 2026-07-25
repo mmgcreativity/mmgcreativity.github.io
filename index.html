@@ -1206,21 +1206,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </span>
     </button>
 
-    <button class="nav-item" id="navKullaniciYonetimBtn" data-target="KullaniciYonetimi.html" data-title="Kullanıcı Yönetim Paneli" style="display:none;">
+    <button class="nav-item" id="navKullaniciYonetimBtn" data-target="KullaniciYonetimi.html" data-title="Kullanıcı Yönetim Paneli" data-gated="true" style="display:none;">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="KullaniciYonetimi.html" data-fav-title="Kullanıcı Yönetim Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="dropdown_user_management">Kullanıcı Yönetim Paneli</span>
       </span>
     </button>
 
-    <button class="nav-item" id="navReferansPaneliBtn" data-target="ReferansKoduYonetimi.html" data-title="Referans Paneli" style="display:none;">
+    <button class="nav-item" id="navReferansPaneliBtn" data-target="ReferansKoduYonetimi.html" data-title="Referans Paneli" data-gated="true" style="display:none;">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="ReferansKoduYonetimi.html" data-fav-title="Referans Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="dropdown_referral_admin">Referans Paneli</span>
       </span>
     </button>
 
-    <button class="nav-item" id="navIstatistiklerBtn" data-target="Istatistikler.html" data-title="İstatistikler" style="display:none;">
+    <button class="nav-item" id="navIstatistiklerBtn" data-target="Istatistikler.html" data-title="İstatistikler" data-gated="true" style="display:none;">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Istatistikler.html" data-fav-title="İstatistikler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/><path d="M2 20h20"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="dropdown_stats">İstatistikler</span>
@@ -1624,12 +1624,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.querySelectorAll('.fav-star, .fav-star-card').forEach(star=>{
       star.classList.toggle('is-fav', favs.includes(star.dataset.favTarget));
     });
-    // Nav'daki orijinal öğeyi favorilendiyse gizle (üstteki pinned listede zaten gösteriliyor), değilse geri göster
+    // Nav'daki orijinal öğeyi favorilendiyse gizle (üstteki pinned listede zaten gösteriliyor), değilse geri göster.
+    // "data-gated" işaretli öğeler (Kullanıcı Yönetim Paneli, Referans Paneli, İstatistikler gibi
+    // yetkiye bağlı menü öğeleri) burada asla açılmaz — onların görünürlüğünü tamamen yetki
+    // kontrolü belirler; aksi halde yetki kontrolü sonuçlanmadan önce bir anlığına herkese görünürlerdi.
     document.querySelectorAll('.fav-star[data-fav-target]').forEach(star=>{
       if(star.closest('#navFavPinned')) return; // pinned listedeki kopyaları hariç tut
       const item = star.closest('.nav-item');
       if(!item) return;
-      item.style.display = favs.includes(star.dataset.favTarget) ? 'none' : '';
+      if(favs.includes(star.dataset.favTarget)){
+        item.style.display = 'none';
+      } else if(item.dataset.gated !== 'true'){
+        item.style.display = '';
+      }
     });
   }
 
