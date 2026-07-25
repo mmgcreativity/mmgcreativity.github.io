@@ -2230,9 +2230,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // sayfa yüklenmeden önce window.mmgIsNativeApp = true atamış olması beklenir. Böyle bir
   // işaret yoksa (PWA olarak yüklenmiş/"standalone" modda açılmış olsa bile) varsayılan
   // olarak "web" kabul edilir.
+  // Bu sayfa bir native uygulama sarmalayıcısı (WebView) içinde açıldıysa, o sarmalayıcının
+  // sayfa yüklenmeden önce window.mmgIsNativeApp = true atamış olması beklenir. Ayrıca,
+  // Android TWA (Trusted Web Activity — Play Store'daki uygulamanın gerçek çalışma şekli)
+  // üzerinden açıldığında tarayıcı "document.referrer"ı "android-app://..." ile başlatır;
+  // bu da güvenilir, kendiliğinden çalışan bir tespit yöntemi (aynı kontrol, sayfanın en
+  // başındaki analytics kodunda "app_source" için zaten kullanılıyor). Böyle bir işaret de
+  // yoksa (PWA olarak yüklenmiş/"standalone" modda açılmış olsa bile) varsayılan olarak
+  // "web" kabul edilir.
   function mmgSessionPlatform(){
     try{
       if(window.mmgIsNativeApp === true) return 'app';
+      if(document.referrer && document.referrer.indexOf('android-app://') === 0) return 'app';
+      if(sessionStorage.getItem('mmg_app_source') === 'twa_app') return 'app';
     }catch(e){}
     return 'web';
   }
@@ -2254,6 +2264,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // iddia işlemlerini TEK bir sıraya (kuyruğa) alıp birbiri ardına, asla iç içe geçmeyecek
   // şekilde çalıştırıyoruz.
   let mmgSessionOpQueue = Promise.resolve();
+
+  // KRİTİK DÜZELTME 2 (paylaşılan localStorage sorunu): Aynı tarayıcının/gizli pencere
+  // grubunun TÜM sekmeleri localStorage'ı PAYLAŞIR. mmgEnsureSessionOwnership normalde
+  // "localStorage'da bu kullanıcıya ait bir oturum ID'si zaten varsa yeniden iddia etme"
+  // mantığıyla çalışıyor (sayfa yenilemesinde gereksiz yeniden-iddiayı önlemek için) — ama bu,
+  // BAŞKA bir sekmede AZ ÖNCE aynı hesapla GERÇEKTEN giriş yapıldığında da devreye girip,
+  // "zaten var" diyerek yeni oturumu iddia ETMEMESİNE, dolayısıyla eski sekmenin hiç
+  // kicklenmemesine (tek-oturum kısıtlamasının sessizce devre dışı kalmasına) sebep oluyordu.
+  // Çözüm: giriş/kayıt formu SADECE gerçekten submit edildiğinde bu bayrağı true yapıyoruz;
+  // mmgEnsureSessionOwnership bunu görünce, localStorage'da ne olursa olsun oturumu ZORLA
+  // yeniden iddia ediyor (böylece diğer sekmeler/cihazlar doğru şekilde kicklenir). Sıradan
+  // bir sayfa yenilemesinde bu bayrak false olduğu için mevcut davranış (gereksiz yeniden
+  // iddia etmeme) korunuyor.
+  let mmgJustAuthenticatedThisTab = false;
   function mmgQueueSessionOp(fn){
     mmgSessionOpQueue = mmgSessionOpQueue.then(fn, fn);
     return mmgSessionOpQueue;
@@ -2263,6 +2287,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // mmgEnsureSessionOwnership).
   async function mmgClaimSessionUnsafe(uid){
     const sessionId = mmgGenerateSessionId();
+    console.log('[MMG_DEBUG] mmgClaimSessionUnsafe BAŞLADI', {uid, newSessionId: sessionId, field: MMG_SESSION_FIELD, platform: mmgSessionPlatform(), stack: (new Error()).stack});
     // ÖNEMLİ: localStorage'ı Firestore yazmasından ÖNCE güncelliyoruz. Firestore SDK'sı bir
     // yazmayı yerel önbelleğe hemen (sunucu onayını beklemeden) yansıtıp aktif onSnapshot
     // dinleyicilerini anında tetikleyebiliyor. localStorage güncellemesi bu yazmadan SONRA
@@ -2276,7 +2301,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         [MMG_SESSION_FIELD]: sessionId,
         activeSessionAt: serverTimestamp()
       }, { merge: true });
-    }catch(e){ /* Firestore'a yazılamazsa sessizce geç, kritik bir işlev değil */ }
+      console.log('[MMG_DEBUG] Firestore yazma BAŞARILI', {uid, sessionId, field: MMG_SESSION_FIELD});
+    }catch(e){
+      console.log('[MMG_DEBUG] Firestore yazma HATA VERDİ (YUTULDU)', {uid, sessionId, errorCode: e && e.code, errorMessage: e && e.message});
+    }
   }
 
   // Yeni bir oturum kimliği üretir, Firestore'a (bu platforma ait alana) yazar ve bu
@@ -2298,12 +2326,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // kapatır. "Son giriş" her zaman kazanır. Diğer platformun alanı değişse bile bu cihazı
   // etkilemez — böylece aynı hesap 1 web + 1 uygulamada aynı anda açık kalabilir.
   function mmgWatchSession(uid){
+    console.log('[MMG_DEBUG] mmgWatchSession ÇAĞRILDI', {uid, localSessionId: localStorage.getItem(MMG_SESSION_KEY), platform: mmgSessionPlatform(), field: MMG_SESSION_FIELD});
     mmgStopWatchingSession();
     mmgSessionUnsub = onSnapshot(doc(db, 'users', uid), (snap) => {
       if(!snap.exists()) return;
       const remoteSessionId = snap.data()[MMG_SESSION_FIELD];
       const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
+      console.log('[MMG_DEBUG] onSnapshot TETİKLENDİ', {
+        remoteSessionId, localSessionId, field: MMG_SESSION_FIELD,
+        fromCache: snap.metadata.fromCache, hasPendingWrites: snap.metadata.hasPendingWrites,
+        esitMi: remoteSessionId === localSessionId
+      });
       if(remoteSessionId && localSessionId && remoteSessionId !== localSessionId){
+        console.log('[MMG_DEBUG] >>> KICK TETİKLENDİ <<<', {remoteSessionId, localSessionId, field: MMG_SESSION_FIELD});
         mmgStopWatchingSession();
         localStorage.removeItem(MMG_SESSION_KEY);
         localStorage.removeItem(MMG_SESSION_UID_KEY);
@@ -2333,9 +2368,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // kullanıcıya aitse ya da hiç yoksa) bu cihaz için sıfırdan yeni bir oturum iddia ediyoruz.
   async function mmgEnsureSessionOwnership(uid){
     return mmgQueueSessionOp(async () => {
+      const forceClaim = mmgJustAuthenticatedThisTab;
+      mmgJustAuthenticatedThisTab = false; // bayrağı sadece bir kere kullan (tüket)
       const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
       const localSessionUid = localStorage.getItem(MMG_SESSION_UID_KEY);
-      if(!localSessionId || localSessionUid !== uid){
+      console.log('[MMG_DEBUG] mmgEnsureSessionOwnership ÇALIŞTI', {uid, localSessionId, localSessionUid, forceClaim, yenidenIddiaEdilecekMi: (forceClaim || !localSessionId || localSessionUid !== uid)});
+      if(forceClaim || !localSessionId || localSessionUid !== uid){
         await mmgClaimSessionUnsafe(uid);
       }
       mmgWatchSession(uid);
@@ -3104,6 +3142,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     googleBtn.disabled = true;
     const remember = document.getElementById('rememberMe').checked;
     try{
+      mmgJustAuthenticatedThisTab = true;
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       const email = user.email;
@@ -3141,8 +3180,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       localStorage.setItem('mmg_remember', remember ? '1' : '0');
       updateUserBadge(customerNumber, username);
       syncUserDirectory(user.uid, customerNumber, username, email);
-      await mmgClaimSession(user.uid);
-      mmgWatchSession(user.uid);
+      // NOT: Oturum iddiası (mmgClaimSession) burada BİLEREK çağrılmıyor. Bu satır önceden
+      // hem burada HEM DE onAuthStateChanged içindeki mmgEnsureSessionOwnership tarafından
+      // (neredeyse aynı anda) tetikleniyordu. İkisi ayrı kuyruğa alınmış olsa da, ilk claim'in
+      // Firestore dinleyicisinin (onSnapshot) GECİKMELİ ilk tetiklenmesi, ikinci claim'in
+      // localStorage'ı değiştirmesinden SONRA geliyor ve eski değerle karşılaştırıp kullanıcıyı
+      // GİRER GİRMEZ yanlışlıkla "başkası girdi" sanıp kicklemesine sebep oluyordu. Tek doğru
+      // çözüm: oturumu SADECE TEK BİR yerden iddia etmek. Bu iş artık sadece
+      // onAuthStateChanged → mmgEnsureSessionOwnership tarafından yapılıyor.
       await applyPendingInviteIfAny(user, username);
       await syncCompanyCache(user.uid);
       await loadAdminFirmas(user.uid);
@@ -3184,6 +3229,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           showAuthError(MMGI18N.t('auth_err_weak_password'));
           return;
         }
+        mmgJustAuthenticatedThisTab = true;
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         // Kullanıcı adı benzersizliği: "usernames/{kucukharfli-ad}" dokümanını
         // rezerve etmeye çalış. Doküman zaten varsa (başka biri bu adı önce
@@ -3278,8 +3324,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
         syncUserDirectory(cred.user.uid, customerNumber, username, email);
-        await mmgClaimSession(cred.user.uid);
-        mmgWatchSession(cred.user.uid);
+        // NOT: bkz. Google girişindeki aynı isimli not — oturum iddiası artık sadece
+        // onAuthStateChanged → mmgEnsureSessionOwnership tarafından yapılıyor, burada tekrar
+        // çağrılmıyor (öz-atma/self-kick yarış durumunu önlemek için).
         if(premiumBenefit){
           if(premiumBenefit.type === 'free'){
             alert('🎉 "' + premiumBenefit.code + '" ' + MMGI18N.t('referral_used_free'));
@@ -3298,6 +3345,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         closeAuthOverlay();
         await showWelcomeIfNeeded(cred.user.uid);
       } else {
+        mmgJustAuthenticatedThisTab = true;
         const cred = await signInWithEmailAndPassword(auth, email, password);
         let customerNumber = null;
         let username = null;
@@ -3319,8 +3367,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(profile) localStorage.setItem('mmg_profile', JSON.stringify(profile));
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
-        await mmgClaimSession(cred.user.uid);
-        mmgWatchSession(cred.user.uid);
+        // NOT: bkz. Google girişindeki aynı isimli not — oturum iddiası artık sadece
+        // onAuthStateChanged → mmgEnsureSessionOwnership tarafından yapılıyor, burada tekrar
+        // çağrılmıyor (öz-atma/self-kick yarış durumunu önlemek için).
         await applyPendingInviteIfAny(cred.user, username);
         await syncCompanyCache(cred.user.uid);
         await loadAdminFirmas(cred.user.uid);
