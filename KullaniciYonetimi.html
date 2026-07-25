@@ -109,6 +109,13 @@
   .member-perm-panel{ margin-top:12px; padding-top:12px; border-top:1px solid var(--hairline); }
   .empty-note{ color:var(--muted); font-size:13px; padding:6px 2px; }
 
+  .member-row-pending{ border-style:dashed; opacity:0.9; }
+  .invite-pending-badge{
+    display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600;
+    color:var(--brass); background:rgba(198,161,91,0.1); border:1px solid rgba(198,161,91,0.3);
+    border-radius:999px; padding:2px 8px;
+  }
+
   .invite-row{
     display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:10px 14px; margin-bottom:8px;
@@ -241,7 +248,7 @@
     cancelInvite:'Cancel', noUsersAdded:'No users added yet.', remove:'Remove', saved:'Saved ✓', selectAllPerms:'Select All', editPerms:'Edit permissions',
     confirmRemoveUser:'Are you sure you want to remove this user from the company?',
     usersLoadFailed:'Users could not be loaded.',
-    pendingKindUser:'user', pendingKindAdmin:'admin'
+    pendingKindUser:'user', pendingKindAdmin:'admin', inviteSentBadge:'Invite Sent'
   } : {
     firmaSubPrefix:'"', firmaSubSuffix:'" firmasına bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.',
     notAdminYetTitle:'Henüz bir firmanın yöneticisi değilsiniz',
@@ -255,7 +262,7 @@
     cancelInvite:'İptal Et', noUsersAdded:'Henüz eklenmiş kullanıcı yok.', remove:'Kaldır', saved:'Kaydedildi ✓', selectAllPerms:'Tümünü Seç', editPerms:'Yetkileri düzenle',
     confirmRemoveUser:'Bu kullanıcıyı firmadan kaldırmak istediğinize emin misiniz?',
     usersLoadFailed:'Kullanıcılar yüklenemedi.',
-    pendingKindUser:'kullanıcı', pendingKindAdmin:'yönetici'
+    pendingKindUser:'kullanıcı', pendingKindAdmin:'yönetici', inviteSentBadge:'Davet Gönderildi'
   };
 
   // Bu panelde yönetilebilen yetki modülleri (sol menüdeki araç sayfalarıyla eşleşir).
@@ -453,6 +460,7 @@
       okEl.textContent = LBL.inviteSent;
       okEl.classList.add('show');
       codeInput.value = '';
+      await loadMembers();
       await loadPendingInvites();
     } catch(e){
       errEl.textContent = LBL.inviteFailed;
@@ -507,25 +515,18 @@
     }
   });
 
-  // ---- Bekleyen davetler ----
+  // ---- Bekleyen davetler (sadece Yönetici davetleri; kullanıcı davetleri artık Kullanıcılarım listesinde gösteriliyor) ----
   async function loadPendingInvites(){
     const card = document.getElementById('pendingInvitesCard');
     const listEl = document.getElementById('pendingInvitesList');
     try{
-      // Kullanıcı davetleri artık firmaInvites/{kod}/firmas/{firmaId} altında (bir kod birden
-      // fazla firmaya davet edilebildiği için), o yüzden bu firmaya ait olanları bulmak için
-      // koleksiyonlar-arası (collection group) sorgu kullanıyoruz.
-      const [memberSnap, adminSnap] = await Promise.all([
-        getDocs(query(collectionGroup(db, 'firmas'), where('firmaId', '==', firmaId))),
-        getDocs(query(collection(db, 'firmaAdminInvites'), where('firmaId', '==', firmaId)))
-      ]);
-      if(memberSnap.empty && adminSnap.empty){
+      const adminSnap = await getDocs(query(collection(db, 'firmaAdminInvites'), where('firmaId', '==', firmaId)));
+      if(adminSnap.empty){
         card.style.display = 'none';
         return;
       }
       card.style.display = 'block';
       const entries = [];
-      memberSnap.forEach(d => entries.push({ code: d.ref.parent.parent.id, kind: 'member', path: d.ref.path }));
       adminSnap.forEach(d => entries.push({ code: d.id, kind: 'admin', path: 'firmaAdminInvites/' + d.id }));
 
       // Kod başına görünen adı bulmak için kullanıcı dizinine bakıyoruz (bulunamazsa koda düşer).
@@ -557,17 +558,36 @@
     } catch(e){ card.style.display = 'none'; }
   }
 
-  // ---- Kullanıcı listesi ----
+  // ---- Kullanıcı listesi (aktif üyeler + davet gönderilmiş ama henüz kabul edilmemiş kişiler) ----
   async function loadMembers(){
     const listEl = document.getElementById('membersList');
     try{
-      const snap = await getDocs(collection(db, 'firmaAccounts', firmaId, 'members'));
-      if(snap.empty){
+      const membersSnap = await getDocs(collection(db, 'firmaAccounts', firmaId, 'members'));
+
+      // Bekleyen (henüz kabul edilmemiş) davetleri ayrı bir try/catch içinde çekiyoruz;
+      // bu sorgu (örn. eksik bir Firestore index'i yüzünden) başarısız olursa bile
+      // aşağıdaki gerçek üye listesi etkilenmesin.
+      let pendingInvites = [];
+      try{
+        const inviteSnap = await getDocs(query(collectionGroup(db, 'firmas'), where('firmaId', '==', firmaId)));
+        inviteSnap.forEach(d => pendingInvites.push({ code: d.ref.parent.parent.id, path: d.ref.path }));
+        await Promise.all(pendingInvites.map(async (inv) => {
+          try{
+            const dirSnap = await getDoc(doc(db, 'userDirectory', inv.code));
+            inv.label = dirSnap.exists() ? (dirSnap.data().username || dirSnap.data().email || ('#' + inv.code)) : ('#' + inv.code);
+          }catch(e){ inv.label = '#' + inv.code; }
+        }));
+      }catch(inviteErr){
+        console.warn('Bekleyen davetler yüklenemedi (muhtemelen Firestore index eksik):', inviteErr);
+        pendingInvites = [];
+      }
+
+      if(membersSnap.empty && !pendingInvites.length){
         listEl.innerHTML = '<div class="empty-note">' + LBL.noUsersAdded + '</div>';
         return;
       }
       const rows = [];
-      snap.forEach(d => {
+      membersSnap.forEach(d => {
         const md = d.data();
         const idPrefix = 'm_' + d.id;
         rows.push(
@@ -589,6 +609,24 @@
           '</div>'
         );
       });
+      // Bekleyen (henüz kabul edilmemiş) davetleri de "Davet Gönderildi" etiketiyle listeye ekle.
+      pendingInvites.forEach((inv, idx) => {
+        rows.push(
+          '<div class="member-row member-row-pending">' +
+            '<div class="member-row-top">' +
+              '<div class="member-info">' +
+                '<div class="member-name">' + inv.label + '</div>' +
+                '<div class="member-sub">' +
+                  '<span class="invite-pending-badge">' + LBL.inviteSentBadge + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<div class="member-row-actions">' +
+                '<button type="button" class="member-icon-btn member-icon-btn-danger member-cancel-invite-btn" data-cancel-invite-idx="' + idx + '" title="' + LBL.cancelInvite + '" aria-label="' + LBL.cancelInvite + '">✕</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>'
+        );
+      });
       listEl.innerHTML = rows.join('');
       listEl.querySelectorAll('.member-remove-btn').forEach(btn => {
         btn.addEventListener('click', () => removeMember(btn.dataset.remove));
@@ -599,7 +637,17 @@
           if(panel) panel.hidden = !panel.hidden;
         });
       });
-      snap.forEach(d => {
+      listEl.querySelectorAll('.member-cancel-invite-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const inv = pendingInvites[parseInt(btn.dataset.cancelInviteIdx, 10)];
+          try{
+            const segs = inv.path.split('/');
+            await deleteDoc(doc(db, ...segs));
+          }catch(e){}
+          await loadMembers();
+        });
+      });
+      membersSnap.forEach(d => {
         wirePermSelectAll('m_' + d.id, () => savePermissions(d.id, 'm_' + d.id));
       });
       listEl.querySelectorAll('.perm-grid input[type="checkbox"]').forEach(chk => {
