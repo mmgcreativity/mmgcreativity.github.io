@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{
+    var mode = localStorage.getItem('mmg_theme') || 'dark';
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+  }catch(e){}
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.mmgTheme){
+      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
+      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
+    }
+  });
+})();
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<!-- End Google Tag Manager -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forum — Dijital Finans Asistanı</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --teal:#3FB68A; --azure:#3E8FE0; --coral:#FF6B4A;
+    --magenta:#D6407A; --violet:#7C4DD9;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; min-height:100vh; padding-bottom:60px;
+  }
+  header.masthead{
+    max-width:640px; margin:0 auto; padding:36px 24px 24px;
+    border-bottom:1px solid var(--hairline);
+  }
+  h1.title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,32px); letter-spacing:-0.01em; margin:0; display:flex; align-items:center; gap:10px; }
+  .subtitle{ color:var(--muted); font-size:13.5px; margin-top:6px; line-height:1.5; }
+  .back-link{
+    position:fixed; top:16px; right:68px; z-index:800;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  @media (max-width:480px){ .back-link{ top:64px; right:8px; } }
+
+  main{ max-width:640px; margin:0 auto; padding:24px 24px 60px; }
+
+  .state-box{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:40px 24px;
+    text-align:center; color:var(--muted); font-size:13.5px; line-height:1.6;
+  }
+  .state-box .big{ font-size:28px; margin-bottom:10px; }
+  .state-box a{ color:var(--brass); }
+
+  .card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
+    padding:18px; box-shadow:0 10px 30px rgba(0,0,0,0.2); margin-bottom:18px;
+  }
+
+  /* ---- Yazı yazma (composer) alanı ---- */
+  .composer-row{ display:flex; gap:12px; align-items:flex-start; }
+  .avatar-circle{
+    width:40px; height:40px; border-radius:50%; flex-shrink:0; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; color:#fff;
+    background:var(--grad);
+  }
+  .avatar-circle img{ width:100%; height:100%; object-fit:cover; }
+  .composer-body{ flex:1; min-width:0; }
+  #forumComposerText{
+    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px;
+    padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
+    resize:vertical; min-height:56px; transition:border-color .15s ease;
+  }
+  #forumComposerText:focus{ border-color:var(--brass-dim); }
+  .composer-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; gap:10px; }
+  .char-count{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--muted); }
+  .char-count.warn{ color:var(--coral); }
+  .post-btn{
+    padding:9px 20px; border-radius:9px; border:none; cursor:pointer;
+    background:var(--grad); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px;
+    transition:opacity .15s ease; white-space:nowrap;
+  }
+  .post-btn:hover{ opacity:0.9; }
+  .post-btn:disabled{ opacity:0.5; cursor:default; }
+  .composer-error{ color:var(--red); font-size:12px; margin-top:8px; display:none; }
+  .composer-error.show{ display:block; }
+
+  /* ---- Akış (feed) ---- */
+  #forumFeed{ display:flex; flex-direction:column; gap:12px; }
+  .forum-post{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:16px;
+    animation:mmgFadeIn .25s ease;
+  }
+  @keyframes mmgFadeIn{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
+  .forum-post-top{ display:flex; align-items:flex-start; gap:12px; }
+  .forum-post-meta{ flex:1; min-width:0; }
+  .forum-post-name{ font-size:13.5px; font-weight:700; }
+  .forum-post-time{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); margin-top:1px; }
+  .forum-delete-btn{
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:4px; flex-shrink:0;
+    transition:color .15s ease;
+  }
+  .forum-delete-btn:hover{ color:var(--red); }
+  .forum-post-text{
+    margin-top:10px; font-size:14px; line-height:1.55; white-space:pre-wrap; word-break:break-word;
+  }
+  .forum-empty-note{ text-align:center; color:var(--muted); font-size:13px; padding:36px 16px; }
+  .forum-loading-note{ text-align:center; color:var(--muted); font-size:13px; padding:20px; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <h1 class="title" data-i18n="page_title">💬 Forum</h1>
+  <div class="subtitle" data-i18n="page_subtitle">Diğer kullanıcılarla sohbet edin, sorularınızı ve deneyimlerinizi paylaşın.</div>
+</header>
+<a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
+
+<main>
+  <div id="stateArea"></div>
+
+  <div id="content" hidden>
+    <div class="card">
+      <div class="composer-row">
+        <div class="avatar-circle" id="composerAvatar">?</div>
+        <div class="composer-body">
+          <textarea id="forumComposerText" rows="3" maxlength="500" data-i18n-placeholder="composer_placeholder" placeholder="Aklından geçeni paylaş..."></textarea>
+          <div class="composer-footer">
+            <span class="char-count" id="forumCharCount">0 / 500</span>
+            <button type="button" class="post-btn" id="forumPostBtn" data-i18n="post_btn">Paylaş</button>
+          </div>
+          <div class="composer-error" id="forumComposerError"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="forumFeed"></div>
+  </div>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, collection, addDoc, deleteDoc, query, orderBy, limit, onSnapshot, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  // Üst pencere (index.html) zaten giriş yapmış kullanıcının auth/db nesnesini tutuyor.
+  // Bu sayfa bir iframe içinde açıldıysa onu paylaşarak ayrı bir Firebase Auth
+  // örneğinin (ve olası IndexedDB yarış durumunun) önüne geçiyoruz.
+  let auth, db;
+  try{
+    if(window.parent && window.parent !== window && window.parent.mmgAuth && window.parent.mmgDb){
+      auth = window.parent.mmgAuth;
+      db = window.parent.mmgDb;
+    }
+  }catch(e){ /* farklı origin ihtimaline karşı sessizce geç */ }
+  if(!auth || !db){
+    auth = getAuth(fbApp);
+    db = getFirestore(fbApp);
+  }
+
+  const stateArea = document.getElementById('stateArea');
+  const content = document.getElementById('content');
+
+  let MMG_LANG = 'tr';
+  try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
+  const LBL = MMG_LANG === 'en' ? {
+    loginRequired:'You must be signed in to view the forum.<br><br>',
+    loginRequiredHint:'Sign in to your account from any module (e.g. <a href="index.html">Home</a>) and reopen this page.',
+    checkingPermission:'Checking…',
+    errorTitle:'An error occurred', errorSub:'The forum could not be loaded, please refresh the page and try again.',
+    loadingPosts:'Loading posts…', noPostsYet:'No posts yet. Be the first to share something!',
+    postFailed:'Could not be posted, please try again.', emptyPostError:'Please write something first.',
+    confirmDelete:'Are you sure you want to delete this post?', deleteFailed:'Could not be deleted, please try again.',
+    justNow:'just now', minutesAgo:'m ago', hoursAgo:'h ago', daysAgo:'d ago', anonymous:'Anonymous'
+  } : {
+    loginRequired:'Forumu görüntülemek için giriş yapmış olmanız gerekir.<br><br>',
+    loginRequiredHint:'Herhangi bir modülden (örn. <a href="index.html">Ana Sayfa</a>) hesabınıza giriş yaptıktan sonra bu sayfayı yeniden açın.',
+    checkingPermission:'Kontrol ediliyor…',
+    errorTitle:'Bir hata oluştu', errorSub:'Forum yüklenemedi, lütfen sayfayı yenileyip tekrar deneyin.',
+    loadingPosts:'Gönderiler yükleniyor…', noPostsYet:'Henüz gönderi yok. İlk paylaşımı sen yap!',
+    postFailed:'Gönderilemedi, lütfen tekrar deneyin.', emptyPostError:'Önce bir şeyler yazmalısın.',
+    confirmDelete:'Bu gönderiyi silmek istediğinize emin misiniz?', deleteFailed:'Silinemedi, lütfen tekrar deneyin.',
+    justNow:'az önce', minutesAgo:'dk önce', hoursAgo:'sa önce', daysAgo:'g önce', anonymous:'İsimsiz'
+  };
+
+  MMGI18N.registerDict({
+    tr: {
+      page_title:'💬 Forum', page_subtitle:'Diğer kullanıcılarla sohbet edin, sorularınızı ve deneyimlerinizi paylaşın.',
+      back_home:'← Ana Sayfa', composer_placeholder:'Aklından geçeni paylaş...', post_btn:'Paylaş'
+    },
+    en: {
+      page_title:'💬 Forum', page_subtitle:'Chat with other users, share your questions and experiences.',
+      back_home:'← Home', composer_placeholder:"What's on your mind...", post_btn:'Post'
+    }
+  });
+  MMGI18N.detectAndApplyDefaultLang();
+
+  function showState(html){
+    content.hidden = true;
+    stateArea.innerHTML = '<div class="state-box">' + html + '</div>';
+  }
+
+  function escapeHtml(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function fmtRelativeTime(ts){
+    try{
+      const d = (ts && ts.toDate) ? ts.toDate() : new Date(ts);
+      if(isNaN(d.getTime())) return '';
+      const diffSec = Math.floor((Date.now() - d.getTime()) / 1000);
+      if(diffSec < 60) return LBL.justNow;
+      const diffMin = Math.floor(diffSec / 60);
+      if(diffMin < 60) return diffMin + LBL.minutesAgo;
+      const diffHour = Math.floor(diffMin / 60);
+      if(diffHour < 24) return diffHour + LBL.hoursAgo;
+      const diffDay = Math.floor(diffHour / 24);
+      if(diffDay < 7) return diffDay + LBL.daysAgo;
+      return d.toLocaleDateString(MMG_LANG === 'en' ? 'en-US' : 'tr-TR');
+    }catch(e){ return ''; }
+  }
+
+  // Görünen ada göre sabit (ama çeşitli) bir gradyan üretir, böylece her kullanıcının
+  // avatarı görsel olarak biraz farklı olur.
+  const AVATAR_GRADIENTS = [
+    'linear-gradient(120deg, #FF6B4A, #D6407A 60%)',
+    'linear-gradient(120deg, #7C4DD9, #3E8FE0 60%)',
+    'linear-gradient(120deg, #3FB68A, #3E8FE0 60%)',
+    'linear-gradient(120deg, #C6A15B, #FF6B4A 60%)',
+    'linear-gradient(120deg, #D6407A, #7C4DD9 60%)'
+  ];
+  function avatarGradientFor(seed){
+    let h = 0;
+    const str = String(seed || '');
+    for(let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+    return AVATAR_GRADIENTS[h % AVATAR_GRADIENTS.length];
+  }
+  function avatarHtml(name, avatarBase64, uid){
+    if(avatarBase64){
+      return '<div class="avatar-circle"><img src="' + avatarBase64 + '" alt=""></div>';
+    }
+    const initial = (name || '?').trim().charAt(0).toUpperCase() || '?';
+    return '<div class="avatar-circle" style="background:' + avatarGradientFor(uid || name) + '">' + escapeHtml(initial) + '</div>';
+  }
+
+  let currentUid = null;
+  let currentIsAdmin = false;
+  let unsubscribeFeed = null;
+
+  function stopWatchingFeed(){
+    if(unsubscribeFeed){ unsubscribeFeed(); unsubscribeFeed = null; }
+  }
+
+  function renderFeed(snap){
+    const feedEl = document.getElementById('forumFeed');
+    if(!feedEl) return;
+    if(snap.empty){
+      feedEl.innerHTML = '<div class="forum-empty-note">' + LBL.noPostsYet + '</div>';
+      return;
+    }
+    const rows = [];
+    snap.forEach(d => {
+      const p = d.data();
+      const canDelete = currentIsAdmin || p.authorUid === currentUid;
+      rows.push(
+        '<div class="forum-post" data-id="' + d.id + '">' +
+          '<div class="forum-post-top">' +
+            avatarHtml(p.authorName, p.authorAvatar, p.authorUid) +
+            '<div class="forum-post-meta">' +
+              '<div class="forum-post-name">' + escapeHtml(p.authorName || LBL.anonymous) + '</div>' +
+              '<div class="forum-post-time">' + fmtRelativeTime(p.createdAt) + '</div>' +
+            '</div>' +
+            (canDelete ? '<button type="button" class="forum-delete-btn" data-delete-id="' + d.id + '" title="' + (MMG_LANG==='en'?'Delete':'Sil') + '">✕</button>' : '') +
+          '</div>' +
+          '<div class="forum-post-text">' + escapeHtml(p.text) + '</div>' +
+        '</div>'
+      );
+    });
+    feedEl.innerHTML = rows.join('');
+    feedEl.querySelectorAll('[data-delete-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm(LBL.confirmDelete)) return;
+        btn.disabled = true;
+        try{
+          await deleteDoc(doc(db, 'forumPosts', btn.dataset.deleteId));
+        }catch(e){
+          alert(LBL.deleteFailed);
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  function watchFeed(){
+    stopWatchingFeed();
+    const feedEl = document.getElementById('forumFeed');
+    if(feedEl) feedEl.innerHTML = '<div class="forum-loading-note">' + LBL.loadingPosts + '</div>';
+    const q = query(collection(db, 'forumPosts'), orderBy('createdAt', 'desc'), limit(150));
+    unsubscribeFeed = onSnapshot(q, (snap) => {
+      renderFeed(snap);
+    }, () => {
+      if(feedEl) feedEl.innerHTML = '<div class="forum-empty-note">' + LBL.errorSub + '</div>';
+    });
+  }
+
+  // ---- Composer ----
+  const composerText = document.getElementById('forumComposerText');
+  const charCountEl = document.getElementById('forumCharCount');
+  const postBtn = document.getElementById('forumPostBtn');
+  const composerErrorEl = document.getElementById('forumComposerError');
+  const MAX_LEN = 500;
+
+  composerText.addEventListener('input', () => {
+    const len = composerText.value.length;
+    charCountEl.textContent = len + ' / ' + MAX_LEN;
+    charCountEl.classList.toggle('warn', len >= MAX_LEN);
+  });
+
+  postBtn.addEventListener('click', async () => {
+    composerErrorEl.classList.remove('show');
+    const text = composerText.value.trim();
+    if(!text){
+      composerErrorEl.textContent = LBL.emptyPostError;
+      composerErrorEl.classList.add('show');
+      return;
+    }
+    postBtn.disabled = true;
+    const originalText = postBtn.textContent;
+    postBtn.textContent = MMG_LANG === 'en' ? 'Posting…' : 'Paylaşılıyor…';
+    try{
+      const snap = await getDoc(doc(db, 'users', currentUid));
+      const data = snap.exists() ? snap.data() : {};
+      await addDoc(collection(db, 'forumPosts'), {
+        authorUid: currentUid,
+        authorName: data.username || data.email || LBL.anonymous,
+        authorAvatar: data.avatarBase64 || null,
+        text: text.slice(0, MAX_LEN),
+        createdAt: serverTimestamp()
+      });
+      composerText.value = '';
+      charCountEl.textContent = '0 / ' + MAX_LEN;
+      charCountEl.classList.remove('warn');
+    }catch(e){
+      composerErrorEl.textContent = LBL.postFailed;
+      composerErrorEl.classList.add('show');
+    } finally {
+      postBtn.disabled = false;
+      postBtn.textContent = originalText;
+    }
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    if(!user){
+      currentUid = null;
+      stopWatchingFeed();
+      showState('<div class="big">🔒</div>' + LBL.loginRequired + LBL.loginRequiredHint);
+      return;
+    }
+    try{
+      currentUid = user.uid;
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      const data = snap.exists() ? snap.data() : {};
+      currentIsAdmin = data.isAdmin === true;
+      const composerAvatar = document.getElementById('composerAvatar');
+      if(composerAvatar){
+        const name = data.username || data.email || LBL.anonymous;
+        const html = avatarHtml(name, data.avatarBase64, user.uid).replace('<div class="avatar-circle"', '<div class="avatar-circle" id="composerAvatar"');
+        composerAvatar.outerHTML = html;
+      }
+      stateArea.innerHTML = '';
+      content.hidden = false;
+      watchFeed();
+    } catch(e){
+      showState('<div class="big">⚠️</div><b>' + LBL.errorTitle + '</b><br>' + LBL.errorSub);
+    }
+  });
+</script>
+
+</body>
+</html>

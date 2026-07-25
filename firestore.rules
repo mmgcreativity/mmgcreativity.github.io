@@ -151,5 +151,15 @@ service cloud.firestore {
     match /firmaAdminInvites/{email} {
       allow read, write: if request.auth != null;
     }
+    // ---- Forum (basit akış: herkes mesaj atar, alt alta sıralanır) ----
+    match /forumPosts/{postId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.authorUid == request.auth.uid;
+      allow update: if false;
+      allow delete: if request.auth != null && (
+        resource.data.authorUid == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+      );
+    }
   }
 }
