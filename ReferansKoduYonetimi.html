@@ -101,7 +101,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .auth-submit:hover{ opacity:0.9; }
   .codes-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; margin-bottom:10px; }
-  #mmgAdminMsg{ font-size:12.5px; margin-top:10px; }
+  #mmgAdminMsg{ font-size:13px; margin-top:10px; font-weight:600; min-height:16px; }
   #mmgAdminCodeList{ max-height:600px; overflow-y:auto; }
 
   .mmg-assign-overlay{
@@ -302,7 +302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     adminOnly:'This page is only available to accounts marked as admin.<br><br>',
     adminHint:'To make your account an admin, go to Firebase Console → Firestore Database → the <b>users</b> collection → the document with your UID → add the <b>isAdmin</b> field as <b>true</b> (boolean).</span>',
     loadingTxt:'Loading…', noCodesYet:'No referral codes defined yet.', codesLoadFailed:'Codes could not be loaded.',
-    confirmDeleteCode:'Are you sure you want to delete the code "', codeSaved:'" code saved. ✓', codeSaveFailed:'Code could not be saved, please try again.',
+    confirmDeleteCode:'Are you sure you want to delete the code "', codeSaved:'" code saved. ✓', codeSaveFailed:'Code could not be saved, please try again.', codeSavedBtn:'Saved',
     updateCodePrefix:'Update "', updateCodeSuffix:'" Code',
     saveChanges:'Save Changes', saving:'Saving…',
     ownerNotFound:'No user was found with this user code.', unassigned:'Unassigned', assignedTo:'Assigned to',
@@ -325,7 +325,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     adminOnly:'Bu sayfa yalnızca yönetici (admin) olarak işaretlenmiş hesaplara açıktır.<br><br>',
     adminHint:'Hesabınızı admin yapmak için Firebase Console → Firestore Database → <b>users</b> koleksiyonu → sizin UID\'niz olan belge → <b>isAdmin</b> alanını <b>true</b> (boolean) olarak ekleyin.</span>',
     loadingTxt:'Yükleniyor…', noCodesYet:'Henüz tanımlı bir referans kodu yok.', codesLoadFailed:'Kodlar yüklenemedi.',
-    confirmDeleteCode:'"', codeSaved:'" kodu kaydedildi. ✓', codeSaveFailed:'Kod kaydedilemedi, tekrar deneyin.',
+    confirmDeleteCode:'"', codeSaved:'" kodu kaydedildi. ✓', codeSaveFailed:'Kod kaydedilemedi, tekrar deneyin.', codeSavedBtn:'Kaydedildi',
     updateCodePrefix:'"', updateCodeSuffix:'" Kodunu Güncelle',
     saveChanges:'Değişiklikleri Kaydet', saving:'Kaydediliyor…',
     ownerNotFound:'Bu kullanıcı koduna sahip bir kullanıcı bulunamadı.', unassigned:'Atanmamış', assignedTo:'Atandı',
@@ -567,6 +567,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(ownerSnap.empty){
           msgEl.textContent = LBL.ownerNotFound;
           msgEl.style.color = 'var(--red,#e2544b)';
+          msgEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           submitBtn.textContent = originalBtnText;
           return;
         }
@@ -588,12 +589,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }, { merge: true });
       msgEl.textContent = '"' + code + LBL.codeSaved;
       msgEl.style.color = 'var(--teal,#3FB68A)';
-      mmgResetAdminForm();
+      msgEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      // Butonun kendisinde de kısa süreliğine gözden kaçmayacak bir onay göster —
+      // sadece formun altındaki küçük yazıya değil, doğrudan tıklanan yere geri bildirim verir.
+      const savedOriginalBg = submitBtn.style.background;
+      submitBtn.textContent = '✓ ' + LBL.codeSavedBtn;
+      submitBtn.style.background = 'var(--teal,#3FB68A)';
+      setTimeout(() => {
+        submitBtn.style.background = savedOriginalBg;
+        mmgResetAdminForm();
+      }, 900);
       document.getElementById('mmgAdminMaxUses').value = '';
       mmgLoadAdminCodes();
     } catch(err){
       msgEl.textContent = LBL.codeSaveFailed;
       msgEl.style.color = 'var(--red,#e2544b)';
+      msgEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       submitBtn.textContent = originalBtnText;
     } finally {
       submitBtn.disabled = false;
