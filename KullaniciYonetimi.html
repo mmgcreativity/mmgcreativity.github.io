@@ -158,6 +158,12 @@
       </div>
       <div class="auth-field" id="inviteFirmaMultiWrap" style="display:none;">
         <label data-i18n="invite_firmas_label">Hangi Firma(lar)a Eklensin?</label>
+        <div class="perm-select-all-row">
+          <label class="perm-select-all-label">
+            <input type="checkbox" id="inviteFirmaSelectAll">
+            <span data-i18n="select_all_perms">Tümünü Seç</span>
+          </label>
+        </div>
         <div class="perm-grid" id="inviteFirmaMultiGrid"></div>
       </div>
       <div class="perm-select-all-row">
@@ -311,6 +317,22 @@
       (f.id === firmaId ? ' checked' : '') + '> ' + f.name + '</label>'
     ).join('');
   }
+  function wireInviteFirmaSelectAll(){
+    const selectAllEl = document.getElementById('inviteFirmaSelectAll');
+    if(!selectAllEl) return;
+    const getChecks = () => Array.from(document.querySelectorAll('.invite-firma-check'));
+    const syncSelectAllState = () => {
+      const checks = getChecks();
+      selectAllEl.checked = checks.length > 0 && checks.every(c => c.checked);
+    };
+    selectAllEl.onchange = () => {
+      getChecks().forEach(c => { c.checked = selectAllEl.checked; });
+    };
+    getChecks().forEach(c => {
+      c.addEventListener('change', syncSelectAllState);
+    });
+    syncSelectAllState();
+  }
   function getSelectedInviteFirmaIds(){
     const wrap = document.getElementById('inviteFirmaMultiWrap');
     if(wrap.style.display === 'none') return [firmaId];
@@ -329,6 +351,7 @@
     if(myAdminFirmas.length > 1){
       multiWrap.style.display = 'block';
       document.getElementById('inviteFirmaMultiGrid').innerHTML = inviteFirmaMultiGridHtml();
+      wireInviteFirmaSelectAll();
     } else {
       multiWrap.style.display = 'none';
     }
