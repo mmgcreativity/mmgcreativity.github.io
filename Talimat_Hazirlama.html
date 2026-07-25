@@ -47,7 +47,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
 
 <script>
 // mmgcreativity: jsPDF varsayılan fontları Türkçe karakterleri (ş,ğ,ı,İ,ç,ö,ü vb.)
@@ -661,6 +661,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <option value="cek">Çek</option>
             <option value="senet">Senet</option>
             <option value="doviz">Döviz Al/Sat</option>
+            <option value="nakit">Nakit Yatırma/Çekme</option>
             <option value="teminat">Teminat Mektubu</option>
             <option value="serbest">Serbest Metin</option>
           </select>
@@ -1120,6 +1121,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     doviz: [
       { value: 'doviz-alim', label: 'Döviz Alımı', enabled: true },
       { value: 'doviz-satim', label: 'Döviz Satımı', enabled: true }
+    ],
+    nakit: [
+      { value: 'nakit-yatirma', label: 'Nakit Para Yatırma Yetkilendirme', enabled: true },
+      { value: 'nakit-cekme', label: 'Nakit Para Çekme Yetkilendirme', enabled: true }
     ]
   };
 
@@ -1142,7 +1147,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.getElementById('paraBirimiSlotHavale').style.display = 'none';
   }
 
-  const GENERIC_LETTER_IDS = ['cek-karne','cek-takas','cek-iade','senet-teslim','senet-tahsil','senet-takas','tm-talep','tm-uzatim','tm-teslim','doviz-alim','doviz-satim'];
+  const GENERIC_LETTER_IDS = ['cek-karne','cek-takas','cek-iade','senet-teslim','senet-tahsil','senet-takas','tm-talep','tm-uzatim','tm-teslim','doviz-alim','doviz-satim','nakit-yatirma','nakit-cekme'];
 
   function showPanel(panelId){
     if(GENERIC_LETTER_IDS.includes(panelId)){
@@ -2770,6 +2775,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       infoRows: v => [['Gönderen IBAN', v.glGonderenIban||'—'],['Alıcı IBAN', v.glAliciIban||'—'],['Tutar', fmtTR(v.glTutar,2)+' '+(v.glParaBirimi||'')],['Kur', v.glKur||'—']],
       fileName: 'doviz-satim-talimati.pdf',
       shareTitle: 'Döviz Satım Talimatı'
+    },
+    'nakit-yatirma': {
+      title: 'Nakit Para Yatırma Yetkilendirme Talimatı',
+      fields: [
+        { id:'glBanka', label:'Banka', type:'bank' },
+        { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
+        { id:'glIban', label:'Hesap IBAN', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' },
+        { id:'glKisi', label:'Yetkili Kişi', type:'multi-person-tc' },
+        { id:'glTutar', label:'Tutar', type:'tutar' },
+        { id:'glAciklama', label:'Açıklama (opsiyonel)', type:'text', placeholder:'Örn. Kasa fazlası' }
+      ],
+      body: v => 'Bankanızda bulunan ' + (v.glIban || '—') + ' nolu hesabımız için ' + (v.glKisi || '—') + ', ' + fmtTR(v.glTutar,2) + ' TL nakit para yatırmaya yetkilidir.' + (v.glAciklama ? ' ' + v.glAciklama : ''),
+      infoRows: v => [['Hesap IBAN', v.glIban||'—'], ['Yetkili Kişi', v.glKisi||'—'], ['Tutar', fmtTR(v.glTutar,2)+' TL']],
+      fileName: 'nakit-yatirma-yetkilendirme-talimati.pdf',
+      shareTitle: 'Nakit Para Yatırma Yetkilendirme Talimatı'
+    },
+    'nakit-cekme': {
+      title: 'Nakit Para Çekme Yetkilendirme Talimatı',
+      fields: [
+        { id:'glBanka', label:'Banka', type:'bank' },
+        { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
+        { id:'glIban', label:'Hesap IBAN', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' },
+        { id:'glKisi', label:'Yetkili Kişi', type:'multi-person-tc' },
+        { id:'glTutar', label:'Tutar', type:'tutar' },
+        { id:'glAciklama', label:'Açıklama (opsiyonel)', type:'text', placeholder:'Örn. Maaş ödemesi için' }
+      ],
+      body: v => 'Bankanızda bulunan ' + (v.glIban || '—') + ' nolu hesabımız için ' + (v.glKisi || '—') + ', ' + fmtTR(v.glTutar,2) + ' TL nakit çekmeye yetkilidir.' + (v.glAciklama ? ' ' + v.glAciklama : ''),
+      infoRows: v => [['Hesap IBAN', v.glIban||'—'], ['Yetkili Kişi', v.glKisi||'—'], ['Tutar', fmtTR(v.glTutar,2)+' TL']],
+      fileName: 'nakit-cekme-yetkilendirme-talimati.pdf',
+      shareTitle: 'Nakit Para Çekme Yetkilendirme Talimatı'
     }
   };
 

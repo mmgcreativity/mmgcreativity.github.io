@@ -341,11 +341,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <div class="veri-tab-panel" id="panel-banks">
       <div class="card">
         <h2 data-i18n="banks_title">Çalıştığınız Bankalar</h2>
-        <div class="card-sub" data-i18n="banks_desc">Burada eklediğiniz bankalar, müşteri/tedarikçi IBAN bilgisi girerken öneri olarak çıkar.</div>
-        <div class="inline-add-row">
-          <input type="text" id="bankNameInput" data-i18n-placeholder="bank_name_ph" placeholder="ör. Ziraat Bankası">
-          <button type="button" class="auth-submit" id="addBankBtn" style="margin-top:0;" data-i18n="add_bank_btn">Ekle</button>
+        <div class="card-sub" data-i18n="banks_desc">Kendi banka hesaplarınızı (banka + IBAN) buraya kaydedin; müşteri/tedarikçi IBAN bilgisi girerken ve talimat hazırlarken öneri olarak çıkar.</div>
+        <div class="field-row">
+          <div class="auth-field">
+            <label data-i18n="bank_select_label">Banka</label>
+            <select id="bankNameSelect"></select>
+          </div>
+          <div class="auth-field">
+            <label data-i18n="bank_iban_label">IBAN (opsiyonel)</label>
+            <input type="text" id="bankIbanInput" data-i18n-placeholder="bank_iban_ph" placeholder="TR__ ____ ____ ____ ____ ____ __">
+          </div>
         </div>
+        <button type="button" class="auth-submit" id="addBankBtn" data-i18n="add_bank_btn">Ekle</button>
         <div class="bank-chip-list" id="banksChipList"></div>
         <div class="form-msg" id="banks_msg"></div>
       </div>
@@ -462,8 +469,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       add_counterparty_desc:'Teminat mektuplarında muhatap olarak gösterilecek kurum/kişileri buraya kaydedin (ör. ihaleyi açan kurum).',
       counterparty_name_ph:'ör. Karayolları Genel Müdürlüğü', notes_label:'Not / Adres (opsiyonel)', counterparty_notes_ph:'ör. Ankara, ihale no: 2025/123',
       save_counterparty_btn:'Muhatabı Kaydet',
-      banks_title:'Çalıştığınız Bankalar', banks_desc:'Burada eklediğiniz bankalar, müşteri/tedarikçi IBAN bilgisi girerken öneri olarak çıkar.',
-      bank_name_ph:'ör. Ziraat Bankası', add_bank_btn:'Ekle'
+      banks_title:'Çalıştığınız Bankalar', banks_desc:'Kendi banka hesaplarınızı (banka + IBAN) buraya kaydedin; müşteri/tedarikçi IBAN bilgisi girerken ve talimat hazırlarken öneri olarak çıkar.',
+      bank_select_label:'Banka', bank_iban_label:'IBAN (opsiyonel)', bank_iban_ph:'TR__ ____ ____ ____ ____ ____ __', add_bank_btn:'Ekle'
     },
     en: {
       page_title:'🗂️ Data Entry Panel',
@@ -484,8 +491,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       add_counterparty_desc:'Register the institutions/people who will appear as the counterparty on letters of guarantee (e.g. the tendering authority).',
       counterparty_name_ph:'e.g. Highway Authority', notes_label:'Notes / Address (optional)', counterparty_notes_ph:'e.g. Ankara, tender no: 2025/123',
       save_counterparty_btn:'Save Counterparty',
-      banks_title:'Banks You Work With', banks_desc:'Banks you add here will appear as suggestions when entering customer/supplier IBAN details.',
-      bank_name_ph:'e.g. Ziraat Bank', add_bank_btn:'Add'
+      banks_title:'Banks You Work With', banks_desc:'Save your own bank accounts (bank + IBAN) here; they will appear as suggestions when entering customer/supplier IBAN details and when preparing instructions.',
+      bank_select_label:'Bank', bank_iban_label:'IBAN (optional)', bank_iban_ph:'TR__ ____ ____ ____ ____ ____ __', add_bank_btn:'Add'
     }
   });
   MMGI18N.detectAndApplyDefaultLang();
@@ -623,18 +630,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     });
   });
 
+  const BANKS = ['AKBANK','ALBARAKA','ANADOLUBANK','BURGAN BANK','DENİZBANK','EMLAK KATILIM','FİBABANKA','GARANTİ BANKASI','HALKBANK','ING','İŞ BANKASI','KUVEYT TÜRK','ODEA BANK','QNB','ŞEKERBANK','TEB','VAKIF KATILIM','VAKIFBANK','YAPI KREDİ','ZİRAAT BANKASI'];
+  function fillBankSelect(){
+    const sel = document.getElementById('bankNameSelect');
+    if(sel) sel.innerHTML = '<option value="">Seçiniz</option>' + BANKS.map(b => `<option value="${b}">${b}</option>`).join('');
+  }
+  fillBankSelect();
+
   let banksList = [];
   async function loadBanks(){
     const snap = await getDocs(colRef('banks'));
     banksList = [];
-    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '' }));
+    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '', iban: d.data().iban || '' }));
     banksList.sort((a,b) => a.name.localeCompare(b.name, 'tr'));
     renderBanks();
   }
   function renderBanks(){
     const listEl = document.getElementById('banksChipList');
     listEl.innerHTML = banksList.length ? banksList.map(b =>
-      '<span class="bank-chip">' + escapeHtml(b.name) + '<button type="button" data-remove-bank="' + b.id + '" title="' + LBL.delete + '">✕</button></span>'
+      '<span class="bank-chip">' + escapeHtml(b.name) + (b.iban ? ' · ' + escapeHtml(b.iban) : '') + '<button type="button" data-remove-bank="' + b.id + '" title="' + LBL.delete + '">✕</button></span>'
     ).join('') : '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
     listEl.querySelectorAll('[data-remove-bank]').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -648,13 +662,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     datalist.innerHTML = banksList.map(b => '<option value="' + escapeHtml(b.name) + '"></option>').join('');
   }
   document.getElementById('addBankBtn').addEventListener('click', async () => {
-    const input = document.getElementById('bankNameInput');
-    const name = input.value.trim();
+    const select = document.getElementById('bankNameSelect');
+    const ibanInput = document.getElementById('bankIbanInput');
+    const name = select.value;
+    const iban = ibanInput.value.trim().toUpperCase().replace(/\s+/g, '');
     if(!name){ showMsg('banks_msg', LBL.enterValidName, true); return; }
     try{
       const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-      await setDoc(docRef('banks', id), { name, createdAt: serverTimestamp() });
-      input.value = '';
+      await setDoc(docRef('banks', id), { name, iban, createdAt: serverTimestamp() });
+      select.value = ''; ibanInput.value = '';
       showMsg('banks_msg', LBL.saved, false);
       await loadBanks();
     }catch(e){ showMsg('banks_msg', LBL.saveFailed, true); }
