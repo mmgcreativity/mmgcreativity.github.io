@@ -1241,8 +1241,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </span>
       <div class="account-dropdown-info">
         <div class="account-dropdown-name" id="accountDropdownName" data-i18n="guest">Misafir</div>
-        <div class="account-dropdown-sub" id="accountDropdownSub"></div>
-        <div id="accountDropdownFirma" style="display:none; font-weight:700; font-size:13px; color:var(--brass); margin-top:3px;"></div>
       </div>
     </div>
     <div class="account-dropdown-divider"></div>
@@ -1759,9 +1757,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // Paneli" linki ve firma rozeti ekranda asılı kalabiliyordu.
       mmgAdminFirmaIds = [];
       mmgFirmaMemberships = [];
+      localStorage.removeItem('mmg_customer_no');
+      localStorage.removeItem('mmg_company_id');
+      localStorage.removeItem('mmg_company_role');
+      localStorage.removeItem('mmg_company_name');
       const navBtn = document.getElementById('navKullaniciYonetimBtn');
       if(navBtn) navBtn.style.display = 'none';
       try{ renderFirmaBadge(); }catch(e){}
+      try{ updateUserBadge(); }catch(e){}
       try{ gtag('set', 'user_properties', { user_type: 'guest' }); }catch(e){}
       return;
     }
@@ -1802,6 +1805,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // Firma Hesabı (üyelik rozeti + yöneticilik yetkisi): her ikisini de yükle
       await loadFirmaMemberships(user.uid);
       await loadAdminFirmas(user.uid);
+      // Ekran adı bilgisini (localStorage 'mmg_auth_state') gerçek oturumla senkronize et.
+      // Aksi halde eskiden misafir moduna geçilmiş ya da bayrak başka bir sebeple eskimişse,
+      // gerçekten giriş yapılmış olsa bile üstte "Misafir" yazmaya devam edebiliyordu.
+      if(user.email){
+        localStorage.setItem('mmg_auth_state', 'user:' + user.email);
+      }
+      if(data.customerNumber) localStorage.setItem('mmg_customer_no', String(data.customerNumber));
+      if(data.username) localStorage.setItem('mmg_username', data.username);
+      updateUserBadge(data.customerNumber, data.username);
       // Zaten oturum açıkken gelen bekleyen davetleri de yakala (sadece giriş anında değil)
     } catch(e){ /* sessizce geç */ }
   });
@@ -1935,20 +1947,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const badge = document.getElementById('userBadge');
     const nameEl = document.getElementById('userBadgeName');
     const dropdownName = document.getElementById('accountDropdownName');
-    const dropdownSub = document.getElementById('accountDropdownSub');
     const isRealUser = !!state && state.startsWith('user:');
     dropdownLogoutBtn.querySelector('span').textContent = isRealUser ? MMGI18N.t('dropdown_logout') : MMGI18N.t('dropdown_login');
     if(!state){
       badge.style.display = 'none';
       dropdownName.textContent = MMGI18N.t('guest');
-      dropdownSub.textContent = MMGI18N.t('auth_not_logged_in');
       return;
     }
     badge.style.display = 'flex';
     if(state === 'guest'){
       nameEl.textContent = MMGI18N.t('guest');
       dropdownName.textContent = MMGI18N.t('guest');
-      dropdownSub.textContent = MMGI18N.t('auth_guest_mode');
     } else if(state.startsWith('user:')){
       const email = state.slice(5);
       const no = customerNumber || localStorage.getItem('mmg_customer_no');
@@ -1962,7 +1971,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const displayName = uname || email;
       nameEl.textContent = no ? ('#' + no) : displayName;
       dropdownName.textContent = displayName;
-      dropdownSub.textContent = no ? (MMGI18N.t('auth_user_code') + no) : (uname ? email : MMGI18N.t('no_user_code'));
     }
   }
 
@@ -2353,25 +2361,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const wrap = document.getElementById('mmgDataScopeWrap');
     const listEl = document.getElementById('mmgDataScopeList');
     const currentEl = document.getElementById('mmgDataScopeCurrent');
-    const firmaHeaderEl = document.getElementById('accountDropdownFirma');
     if(!wrap) return;
     if(!mmgFirmaMemberships.length){
       wrap.style.display = 'none';
-      if(firmaHeaderEl) firmaHeaderEl.style.display = 'none';
       return;
     }
     wrap.style.display = 'block';
     const activeScope = getActiveDataScope();
     const activeFirma = activeScope !== 'personal' ? mmgFirmaMemberships.find(f => f.id === activeScope) : null;
     if(currentEl) currentEl.textContent = activeFirma ? ('🏢 ' + activeFirma.name) : MMGI18N.t('data_scope_personal');
-    if(firmaHeaderEl){
-      if(activeFirma){
-        firmaHeaderEl.textContent = '🏢 ' + activeFirma.name;
-        firmaHeaderEl.style.display = 'block';
-      } else {
-        firmaHeaderEl.style.display = 'none';
-      }
-    }
     // Listede sadece ALTERNATİFLER görünür (o an aktif olan zaten üstte, canlı
     // renkli gösteriliyor) — kalabalık olmasın diye herkes tekrar listelenmez.
     if(listEl){
