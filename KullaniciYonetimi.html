@@ -247,6 +247,7 @@
     inviteFailed:'Invitation could not be sent, please try again.',
     cancelInvite:'Cancel', noUsersAdded:'No users added yet.', remove:'Remove', saved:'Saved ✓', selectAllPerms:'Select All', editPerms:'Edit permissions',
     confirmRemoveUser:'Are you sure you want to remove this user from the company?',
+    confirmCancelInvite:'Are you sure you want to cancel this invite?',
     usersLoadFailed:'Users could not be loaded.',
     pendingKindUser:'user', pendingKindAdmin:'admin', inviteSentBadge:'Invite Sent'
   } : {
@@ -261,6 +262,7 @@
     inviteFailed:'Davet gönderilemedi, lütfen tekrar deneyin.',
     cancelInvite:'İptal Et', noUsersAdded:'Henüz eklenmiş kullanıcı yok.', remove:'Kaldır', saved:'Kaydedildi ✓', selectAllPerms:'Tümünü Seç', editPerms:'Yetkileri düzenle',
     confirmRemoveUser:'Bu kullanıcıyı firmadan kaldırmak istediğinize emin misiniz?',
+    confirmCancelInvite:'Bu daveti iptal etmek istediğinize emin misiniz?',
     usersLoadFailed:'Kullanıcılar yüklenemedi.',
     pendingKindUser:'kullanıcı', pendingKindAdmin:'yönetici', inviteSentBadge:'Davet Gönderildi'
   };
@@ -572,7 +574,7 @@
       let pendingInvites = [];
       try{
         const inviteSnap = await getDocs(query(collectionGroup(db, 'firmas'), where('firmaId', '==', firmaId)));
-        inviteSnap.forEach(d => pendingInvites.push({ code: d.ref.parent.parent.id, path: d.ref.path }));
+        inviteSnap.forEach(d => pendingInvites.push({ code: d.ref.parent.parent.id, path: d.ref.path, permissions: d.data().permissions || {} }));
         await Promise.all(pendingInvites.map(async (inv) => {
           try{
             const dirSnap = await getDoc(doc(db, 'userDirectory', inv.code));
@@ -614,18 +616,24 @@
       });
       // Bekleyen (henüz kabul edilmemiş) davetleri de "Davet Gönderildi" etiketiyle listeye ekle.
       pendingInvites.forEach((inv, idx) => {
+        const idPrefix = 'p_' + idx;
         rows.push(
-          '<div class="member-row member-row-pending">' +
+          '<div class="member-row member-row-pending" data-invite-idx="' + idx + '">' +
             '<div class="member-row-top">' +
               '<div class="member-info">' +
                 '<div class="member-name">' + inv.label + '</div>' +
                 '<div class="member-sub">' +
-                  '<span class="invite-pending-badge">' + LBL.inviteSentBadge + '</span>' +
+                  '#' + inv.code + ' &middot; <span class="invite-pending-badge">' + LBL.inviteSentBadge + '</span>' +
                 '</div>' +
               '</div>' +
               '<div class="member-row-actions">' +
+                '<button type="button" class="member-icon-btn invite-edit-btn" data-edit-invite="' + idx + '" title="' + LBL.editPerms + '" aria-label="' + LBL.editPerms + '">✏️</button>' +
                 '<button type="button" class="member-icon-btn member-icon-btn-danger member-cancel-invite-btn" data-cancel-invite-idx="' + idx + '" title="' + LBL.cancelInvite + '" aria-label="' + LBL.cancelInvite + '">✕</button>' +
               '</div>' +
+            '</div>' +
+            '<div class="member-perm-panel" id="' + idPrefix + '_panel" hidden>' +
+              '<div class="perm-select-all-row"><label class="perm-select-all-label"><input type="checkbox" id="' + idPrefix + '_selectAll"> ' + LBL.selectAllPerms + '</label></div>' +
+              '<div class="perm-grid">' + permGridHtml(idPrefix, inv.permissions) + '<span class="save-hint" id="' + idPrefix + '_hint">' + LBL.saved + '</span></div>' +
             '</div>' +
           '</div>'
         );
@@ -643,6 +651,7 @@
       listEl.querySelectorAll('.member-cancel-invite-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const inv = pendingInvites[parseInt(btn.dataset.cancelInviteIdx, 10)];
+          if(!confirm(LBL.confirmCancelInvite)) return;
           try{
             const segs = inv.path.split('/');
             await deleteDoc(doc(db, ...segs));
@@ -650,14 +659,31 @@
           await loadMembers();
         });
       });
+      listEl.querySelectorAll('[data-edit-invite]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const panel = document.getElementById('p_' + btn.dataset.editInvite + '_panel');
+          if(panel) panel.hidden = !panel.hidden;
+        });
+      });
       membersSnap.forEach(d => {
         wirePermSelectAll('m_' + d.id, () => savePermissions(d.id, 'm_' + d.id));
       });
-      listEl.querySelectorAll('.perm-grid input[type="checkbox"]').forEach(chk => {
+      pendingInvites.forEach((inv, idx) => {
+        const idPrefix = 'p_' + idx;
+        wirePermSelectAll(idPrefix, () => savePendingInvitePermissions(inv.path, idPrefix));
+      });
+      listEl.querySelectorAll('.member-row:not(.member-row-pending) .perm-grid input[type="checkbox"]').forEach(chk => {
         chk.addEventListener('change', (e) => {
           const row = e.target.closest('.member-row');
           const uid = row.dataset.uid;
           savePermissions(uid, 'm_' + uid);
+        });
+      });
+      listEl.querySelectorAll('.member-row-pending .perm-grid input[type="checkbox"]').forEach(chk => {
+        chk.addEventListener('change', (e) => {
+          const row = e.target.closest('.member-row-pending');
+          const idx = parseInt(row.dataset.inviteIdx, 10);
+          savePendingInvitePermissions(pendingInvites[idx].path, 'p_' + idx);
         });
       });
     } catch(e){
@@ -671,6 +697,24 @@
     savePermTimers[uid] = setTimeout(async () => {
       try{
         await setDoc(doc(db, 'firmaAccounts', firmaId, 'members', uid), {
+          permissions: readPermGrid(idPrefix)
+        }, { merge: true });
+        const hint = document.getElementById(idPrefix + '_hint');
+        if(hint){
+          hint.classList.add('show');
+          setTimeout(() => hint.classList.remove('show'), 1500);
+        }
+      } catch(e){ /* sessizce geç */ }
+    }, 400);
+  }
+
+  let saveInviteTimers = {};
+  function savePendingInvitePermissions(path, idPrefix){
+    clearTimeout(saveInviteTimers[path]);
+    saveInviteTimers[path] = setTimeout(async () => {
+      try{
+        const segs = path.split('/');
+        await setDoc(doc(db, ...segs), {
           permissions: readPermGrid(idPrefix)
         }, { merge: true });
         const hint = document.getElementById(idPrefix + '_hint');
