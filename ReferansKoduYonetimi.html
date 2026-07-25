@@ -126,11 +126,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   #mmgAdminCodeList table{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
   #mmgAdminCodeList thead th{
-    text-align:center; padding:8px 8px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.03em;
+    text-align:center; padding:9px 8px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.03em;
     text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hairline); background:var(--surface-2);
     position:sticky; top:0; white-space:nowrap;
   }
-  #mmgAdminCodeList tbody td{ padding:8px 8px; border-bottom:1px solid rgba(42,52,72,0.5); font-size:12px; vertical-align:middle; }
+  #mmgAdminCodeList tbody td{ padding:9px 8px; border-bottom:1px solid rgba(42,52,72,0.5); font-size:12.5px; vertical-align:middle; }
   #mmgAdminCodeList tbody tr:last-child td{ border-bottom:none; }
   #mmgAdminCodeList tbody tr:hover{ background:rgba(198,161,91,0.03); }
   #mmgAdminCodeList tbody tr{ cursor:pointer; }
@@ -140,6 +140,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   #mmgAdminCodeList .code-usage{ color:var(--muted); white-space:nowrap; text-align:right; }
   #mmgAdminCodeList thead th.text-center{ text-align:center; }
   #mmgAdminCodeList tbody td.text-center{ text-align:center; }
+  /* Kişi Ata / Atamayı Kaldır sütunu: gereksiz yere geniş açılmasın, sadece içeriği kadar yer kaplasın */
+  #mmgAdminCodeList thead th:nth-child(6), #mmgAdminCodeList tbody td:nth-child(6){ width:1%; padding-left:6px; padding-right:6px; }
   #mmgAdminCodeList .mmg-admin-edit{
     background:none; border:none; color:var(--brass,#C6A15B); cursor:pointer; font-size:11px; padding:3px; font-weight:600; white-space:nowrap;
   }
@@ -293,7 +295,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   let MMG_LANG = 'tr';
   try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
   const LBL = MMG_LANG === 'en' ? {
-    freePremium:'Free Premium', discountSuffix:' Discount', used:' used', usedUnlimited:' used · Unlimited',
+    freePremium:'Premium', discountSuffix:' Discount', used:' used', usedUnlimited:' used · Unlimited',
     deleteBtn:'Delete', editBtn:'Edit', enterCode:'Please enter a code.',
     loginRequired:'You must be signed in to view this page.<br><br>',
     loginRequiredHint:'Sign in to your account from any module (e.g. <a href="index.html">Home</a>) and reopen this page.',
@@ -309,14 +311,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     noPermissionOwner:'This page is only available to admins, or to users who have a referral code assigned to them.<br><br>',
     myCodesLoadFailed:'Your codes could not be loaded.', noSignupsYet:'No one has signed up with this code yet.',
     joinedLabel:'Joined', commissionLabel:'Commission',
-    thCode:'Code', thType:'Type', thLimit:'Limit', thUsedCount:'Used', thAssigned:'Assigned To', thEdit:'Edit', thDelete:'Delete',
+    thCode:'Referral Name', thType:'Type', thLimit:'Limit', thUsedCount:'Used', thAssigned:'Assigned To', thEdit:'Edit', thDelete:'Delete',
     unlimitedLabel:'Unlimited',
     assignBtn:'Assign Person', assignModalTitle:'Assign Referral Code', assignModalDesc:'Enter the user code of the person this referral code belongs to.',
     assignUserCodeLabel:'User Code', assignCommissionLabel:'Commission Percent', assignSaveBtn:'Save', assignCancelBtn:'Cancel',
     assignClearNote:'Leave the user code empty and save to unassign this code.', assignSaved:'Assignment saved. ✓', assignSaveFailed:'Could not save, please try again.',
     removeAssignBtn:'Remove Assignment', confirmRemoveAssign:'Are you sure you want to remove the assigned person from this code?',
   } : {
-    freePremium:'Ücretsiz Premium', discountSuffix:' İndirim', used:' kullanıldı', usedUnlimited:' kullanıldı · Sınırsız',
+    freePremium:'Premium', discountSuffix:' İndirim', used:' kullanıldı', usedUnlimited:' kullanıldı · Sınırsız',
     deleteBtn:'Sil', editBtn:'Düzenle', enterCode:'Lütfen bir kod girin.',
     loginRequired:'Bu sayfayı görüntülemek için giriş yapmış olmanız gerekir.<br><br>',
     loginRequiredHint:'Herhangi bir modülden (örn. <a href="index.html">Ana Sayfa</a>) hesabınıza giriş yaptıktan sonra bu sayfayı yeniden açın.',
@@ -332,7 +334,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     noPermissionOwner:'Bu sayfa yalnızca yöneticilere ya da kendisine bir referans kodu atanmış kullanıcılara açıktır.<br><br>',
     myCodesLoadFailed:'Kodlarınız yüklenemedi.', noSignupsYet:'Bu kodla henüz kimse katılmadı.',
     joinedLabel:'Katılım', commissionLabel:'Komisyon',
-    thCode:'Referans Kodu', thType:'Türü', thLimit:'Limit', thUsedCount:'Kullanılan', thAssigned:'Atanan Kişi', thEdit:'Düzenle', thDelete:'Sil',
+    thCode:'Referans Adı', thType:'Türü', thLimit:'Limit', thUsedCount:'Kullanılan', thAssigned:'Atanan Kişi', thEdit:'Düzenle', thDelete:'Sil',
     unlimitedLabel:'Sınırsız',
     assignBtn:'Kişi Ata', assignModalTitle:'Referans Kodunu Ata', assignModalDesc:'Bu referans kodunun ait olacağı kişinin kullanıcı kodunu girin.',
     assignUserCodeLabel:'Kullanıcı Kodu', assignCommissionLabel:'Komisyon Yüzdesi', assignSaveBtn:'Kaydet', assignCancelBtn:'İptal',
@@ -379,7 +381,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           '<td class="code-benefit">' + benefitLabel + '</td>' +
           '<td class="code-usage">' + limitCell + '</td>' +
           '<td class="code-usage text-center">' + used + '</td>' +
-          '<td>' + ownerLabel + '</td>' +
+          '<td class="text-center">' + ownerLabel + '</td>' +
           '<td class="text-center">' + assignBtnHtml + '</td>' +
           '<td><button type="button" class="mmg-admin-edit" data-code="' + c.id + '" data-benefit-type="' + (c.benefitType||'free') + '" data-discount="' + (c.discountPercent||0) + '" data-max-uses="' + (c.maxUses||'') + '" data-owner-code="' + (c.ownerCode||'') + '" data-commission="' + (c.commissionPercent||'') + '">' + LBL.editBtn + '</button></td>' +
           '<td><button type="button" class="mmg-admin-del" data-code="' + c.id + '">' + LBL.deleteBtn + '</button></td>' +
