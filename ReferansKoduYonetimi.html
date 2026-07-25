@@ -147,6 +147,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   #mmgAdminCodeList .mmg-admin-assign{
     background:none; border:none; color:var(--azure,#3E8FE0); cursor:pointer; font-size:12px; padding:4px; font-weight:600; white-space:nowrap;
   }
+  #mmgAdminCodeList .mmg-admin-unassign{
+    background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:12px; padding:4px; font-weight:600; white-space:nowrap;
+  }
 
   .owner-code-card{
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:14px; margin-bottom:12px;
@@ -309,6 +312,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     assignBtn:'Assign Person', assignModalTitle:'Assign Referral Code', assignModalDesc:'Enter the user code of the person this referral code belongs to.',
     assignUserCodeLabel:'User Code', assignCommissionLabel:'Commission Percent', assignSaveBtn:'Save', assignCancelBtn:'Cancel',
     assignClearNote:'Leave the user code empty and save to unassign this code.', assignSaved:'Assignment saved. ✓', assignSaveFailed:'Could not save, please try again.',
+    removeAssignBtn:'Remove Assignment', confirmRemoveAssign:'Are you sure you want to remove the assigned person from this code?',
   } : {
     freePremium:'Ücretsiz Premium', discountSuffix:' İndirim', used:' kullanıldı', usedUnlimited:' kullanıldı · Sınırsız',
     deleteBtn:'Sil', editBtn:'Düzenle', enterCode:'Lütfen bir kod girin.',
@@ -331,6 +335,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     assignBtn:'Kişi Ata', assignModalTitle:'Referans Kodunu Ata', assignModalDesc:'Bu referans kodunun ait olacağı kişinin kullanıcı kodunu girin.',
     assignUserCodeLabel:'Kullanıcı Kodu', assignCommissionLabel:'Komisyon Yüzdesi', assignSaveBtn:'Kaydet', assignCancelBtn:'İptal',
     assignClearNote:'Atamayı kaldırmak için kullanıcı kodunu boş bırakıp kaydedin.', assignSaved:'Atama kaydedildi. ✓', assignSaveFailed:'Kaydedilemedi, tekrar deneyin.',
+    removeAssignBtn:'Atamayı Kaldır', confirmRemoveAssign:'Bu kodun kişi atamasını kaldırmak istediğinize emin misiniz?',
   };
 
   function showState(html){
@@ -364,13 +369,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const used = usageCounts[c.id] || 0;
         const limitCell = c.maxUses ? String(c.maxUses) : LBL.unlimitedLabel;
         const ownerLabel = c.ownerCode ? ('👤 #' + c.ownerCode) : LBL.unassigned;
+        const assignBtnHtml = c.ownerCode
+          ? '<button type="button" class="mmg-admin-unassign" data-code="' + c.id + '">' + LBL.removeAssignBtn + '</button>'
+          : '<button type="button" class="mmg-admin-assign" data-code="' + c.id + '" data-owner-code="' + (c.ownerCode||'') + '" data-commission="' + (c.commissionPercent||'') + '">' + LBL.assignBtn + '</button>';
         return '<tr>' +
           '<td class="code-name">' + c.id + '</td>' +
           '<td class="code-benefit">' + benefitLabel + '</td>' +
           '<td class="code-usage">' + limitCell + '</td>' +
           '<td class="code-usage text-center">' + used + '</td>' +
           '<td>' + ownerLabel + '</td>' +
-          '<td><button type="button" class="mmg-admin-assign" data-code="' + c.id + '" data-owner-code="' + (c.ownerCode||'') + '" data-commission="' + (c.commissionPercent||'') + '">' + LBL.assignBtn + '</button></td>' +
+          '<td>' + assignBtnHtml + '</td>' +
           '<td><button type="button" class="mmg-admin-edit" data-code="' + c.id + '" data-benefit-type="' + (c.benefitType||'free') + '" data-discount="' + (c.discountPercent||0) + '" data-max-uses="' + (c.maxUses||'') + '" data-owner-code="' + (c.ownerCode||'') + '" data-commission="' + (c.commissionPercent||'') + '">' + LBL.editBtn + '</button></td>' +
           '<td><button type="button" class="mmg-admin-del" data-code="' + c.id + '">' + LBL.deleteBtn + '</button></td>' +
           '</tr>';
@@ -389,6 +397,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       listEl.querySelectorAll('.mmg-admin-assign').forEach(btn => {
         btn.addEventListener('click', () => {
           openAssignModal(btn.dataset.code, btn.dataset.ownerCode || '', btn.dataset.commission || '');
+        });
+      });
+      listEl.querySelectorAll('.mmg-admin-unassign').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if(!confirm(LBL.confirmRemoveAssign)) return;
+          btn.disabled = true;
+          try{
+            await setDoc(doc(db, 'referralCodes', btn.dataset.code), {
+              ownerUid: null, ownerCode: null, ownerLabel: null, commissionPercent: 0
+            }, { merge: true });
+            mmgLoadAdminCodes();
+          } catch(e){
+            btn.disabled = false;
+          }
         });
       });
       listEl.querySelectorAll('.mmg-admin-edit').forEach(btn => {
