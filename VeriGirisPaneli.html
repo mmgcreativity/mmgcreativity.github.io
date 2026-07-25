@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{
+    var mode = localStorage.getItem('mmg_theme') || 'dark';
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+  }catch(e){}
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.mmgTheme){
+      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
+      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
+    }
+  });
+})();
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<!-- End Google Tag Manager -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Veri Giriş Paneli</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --teal:#3FB68A; --azure:#3E8FE0; --coral:#FF6B4A;
+    --magenta:#D6407A; --violet:#7C4DD9;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; min-height:100vh; padding-bottom:60px;
+  }
+  header.masthead{
+    max-width:980px; margin:0 auto; padding:36px 24px 24px;
+    border-bottom:1px solid var(--hairline);
+  }
+  h1.title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,32px); letter-spacing:-0.01em; margin:0; display:flex; align-items:center; gap:10px; }
+  .subtitle{ color:var(--muted); font-size:13.5px; margin-top:6px; line-height:1.5; }
+  .back-link{
+    position:fixed; top:16px; right:68px; z-index:800;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  @media (max-width:480px){ .back-link{ top:64px; right:8px; } }
+
+  main{ max-width:980px; margin:0 auto; padding:24px 24px 60px; }
+
+  .state-box{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:40px 24px;
+    text-align:center; color:var(--muted); font-size:13.5px; line-height:1.6;
+  }
+  .state-box .big{ font-size:28px; margin-bottom:10px; }
+  .state-box a{ color:var(--brass); }
+
+  .card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
+    padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.2); margin-bottom:18px;
+  }
+  .card h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15.5px; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+  .card .card-sub{ color:var(--muted); font-size:12.5px; margin-bottom:14px; line-height:1.5; }
+
+  .scope-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px; padding:12px 16px; margin-bottom:18px;
+  }
+  .scope-banner-text{ font-size:12.5px; color:var(--muted); }
+  .scope-banner-text b{ color:var(--text); }
+  .scope-link-btn{
+    background:none; border:1px solid var(--hairline); border-radius:7px; padding:6px 12px; color:var(--brass);
+    font-size:11.5px; font-weight:600; cursor:pointer; white-space:nowrap;
+  }
+  .scope-link-btn:hover{ border-color:var(--brass-dim); }
+
+  .group-panel{ margin-top:12px; padding-top:12px; border-top:1px solid var(--hairline); display:none; }
+  .group-panel.open{ display:block; }
+  .group-panel-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+  .group-code-box{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; background:var(--surface); border:1px solid var(--hairline);
+    border-radius:6px; padding:6px 10px; word-break:break-all; flex:1; min-width:160px;
+  }
+
+  .veri-tabs{ display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; padding-bottom:2px; }
+  .veri-tab-btn{
+    padding:9px 16px; border-radius:9px; border:1px solid var(--hairline); background:var(--surface-2);
+    color:var(--muted); font-weight:700; font-size:12.5px; cursor:pointer; white-space:nowrap;
+    font-family:'Space Grotesk',sans-serif; transition:all .15s ease;
+  }
+  .veri-tab-btn.active{ background:var(--grad); color:#fff; border-color:transparent; }
+  .veri-tab-panel{ display:none; }
+  .veri-tab-panel.active{ display:block; }
+
+  .auth-field{ margin-bottom:12px; }
+  .auth-field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:5px; }
+  .auth-field input, .auth-field select{
+    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    padding:10px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
+    transition:border-color .15s ease;
+  }
+  .auth-field input:focus, .auth-field select:focus{ border-color:var(--brass-dim); }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media (max-width:560px){ .field-row{ grid-template-columns:1fr; } }
+
+  .iban-editor{ background:var(--surface-2); border:1px dashed var(--hairline); border-radius:10px; padding:12px; margin-bottom:12px; }
+  .iban-editor-label{ font-size:11.5px; color:var(--muted); font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:.03em; }
+  .iban-row{ display:grid; grid-template-columns:1.3fr 1.6fr 0.7fr auto; gap:8px; margin-bottom:8px; align-items:center; }
+  @media (max-width:640px){ .iban-row{ grid-template-columns:1fr 1fr; } }
+  .iban-row input{
+    width:100%; background:var(--surface); border:1px solid var(--hairline); border-radius:7px;
+    padding:8px 10px; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; outline:none;
+  }
+  .iban-row-remove{
+    background:none; border:1px solid var(--hairline); border-radius:7px; color:var(--muted); cursor:pointer;
+    width:32px; height:32px; flex-shrink:0; font-size:13px;
+  }
+  .iban-row-remove:hover{ color:var(--red); border-color:var(--red); }
+  .iban-add-btn{
+    background:none; border:1px dashed var(--brass-dim); border-radius:7px; color:var(--brass);
+    padding:7px 12px; font-size:12px; font-weight:600; cursor:pointer;
+  }
+  .iban-add-btn:hover{ background:rgba(198,161,91,0.08); }
+
+  .auth-submit{
+    padding:11px 22px; border-radius:9px; border:none; cursor:pointer;
+    background:var(--grad); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px;
+    transition:opacity .15s ease; margin-top:4px;
+  }
+  .auth-submit:hover{ opacity:0.9; }
+  .auth-submit:disabled{ opacity:0.6; cursor:default; }
+  .btn-secondary{
+    padding:11px 22px; border-radius:9px; border:1px solid var(--hairline); cursor:pointer;
+    background:transparent; color:var(--text); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px;
+  }
+  .btn-secondary:hover{ border-color:var(--brass-dim); color:var(--brass); }
+  .form-msg{ font-size:12.5px; margin-top:10px; display:none; }
+  .form-msg.show{ display:block; }
+  .form-msg.err{ color:var(--red); }
+  .form-msg.ok{ color:var(--teal); }
+
+  .party-list{ display:flex; flex-direction:column; gap:10px; margin-top:16px; }
+  .party-row{ background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px; padding:14px 16px; }
+  .party-row-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .party-name{ font-size:14px; font-weight:700; }
+  .party-idnum{ font-size:11.5px; color:var(--muted); margin-top:2px; font-family:'IBM Plex Mono',monospace; }
+  .party-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .party-icon-btn{
+    width:30px; height:30px; border-radius:7px; border:1px solid var(--hairline); background:transparent;
+    color:var(--muted); font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .party-icon-btn:hover{ color:var(--brass); border-color:var(--brass-dim); }
+  .party-icon-btn.danger:hover{ color:var(--red); border-color:var(--red); }
+  .iban-chip-wrap{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .iban-chip{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; background:var(--surface); border:1px solid var(--hairline);
+    border-radius:999px; padding:4px 10px; color:var(--text); white-space:nowrap;
+  }
+  .iban-chip b{ color:var(--brass); }
+  .empty-note{ color:var(--muted); font-size:13px; padding:16px 2px; text-align:center; }
+
+  .bank-chip-list{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .bank-chip{
+    display:flex; align-items:center; gap:8px; background:var(--surface-2); border:1px solid var(--hairline);
+    border-radius:999px; padding:7px 8px 7px 14px; font-size:13px; font-weight:600;
+  }
+  .bank-chip button{
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; width:20px; height:20px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+  }
+  .bank-chip button:hover{ color:var(--red); background:rgba(226,84,75,0.1); }
+  .inline-add-row{ display:flex; gap:8px; }
+  .inline-add-row input{ flex:1; }
+
+  .bulk-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+  .bulk-preview-table{ width:100%; border-collapse:collapse; margin-top:14px; font-size:12px; }
+  .bulk-preview-table th, .bulk-preview-table td{ padding:7px 8px; border-bottom:1px solid var(--hairline); text-align:left; }
+  .bulk-preview-table th{ color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; }
+  .bulk-preview-wrap{ max-height:260px; overflow-y:auto; margin-top:10px; border:1px solid var(--hairline); border-radius:10px; }
+  .bulk-summary{ font-size:12.5px; color:var(--muted); margin-top:10px; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <h1 class="title" data-i18n="page_title">🗂️ Veri Giriş Paneli</h1>
+  <div class="subtitle" data-i18n="page_subtitle">Müşteri, tedarikçi, muhatap ve banka bilgilerinizi burada tek yerde toplayın; talimat ve mektup hazırlarken otomatik kullanılsın.</div>
+</header>
+<a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
+
+<main>
+  <div id="stateArea"></div>
+
+  <div id="content" hidden>
+    <div class="scope-banner">
+      <div class="scope-banner-text" id="scopeBannerText"></div>
+      <button type="button" class="scope-link-btn" id="groupToggleBtn" style="display:none;">🔗 <span data-i18n="group_link_toggle">Grup Bağlantısı</span></button>
+    </div>
+    <div class="card group-panel" id="groupPanel">
+      <h2 data-i18n="group_link_title">🔗 Grup Firmaları Ortak Veri</h2>
+      <div class="card-sub" data-i18n="group_link_desc">Aynı grubun (holding) parçası olan başka bir firma ile bu paneldeki verileri (müşteri, tedarikçi, muhatap, banka) ortak kullanmak istersen, kendi firma kodunu diğer firmayla paylaş ya da onların kodunu buraya yapıştır.</div>
+      <div class="group-panel-row">
+        <label style="font-size:11.5px; color:var(--muted); white-space:nowrap;" data-i18n="group_my_code">Bu firmanın kodu:</label>
+        <span class="group-code-box" id="myFirmaCodeBox">—</span>
+        <button type="button" class="btn-secondary" id="copyFirmaCodeBtn" style="padding:6px 12px; font-size:11.5px;" data-i18n="copy_btn">Kopyala</button>
+      </div>
+      <div class="group-panel-row">
+        <input type="text" id="joinGroupInput" data-i18n-placeholder="group_join_ph" placeholder="Başka bir firmanın kodunu buraya yapıştır">
+        <button type="button" class="auth-submit" id="joinGroupBtn" style="margin-top:0; padding:9px 16px;" data-i18n="group_join_btn">Bağlan</button>
+      </div>
+      <div id="groupCurrentStatus" style="font-size:12px; color:var(--muted); margin-top:6px;"></div>
+      <button type="button" class="scope-link-btn" id="leaveGroupBtn" style="display:none; margin-top:8px; color:var(--red); border-color:var(--red);" data-i18n="group_leave_btn">Bağlantıyı Kaldır</button>
+      <div class="form-msg" id="groupMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="bulk_title">📥 Toplu Excel ile Yükle</h2>
+      <div class="card-sub" data-i18n="bulk_desc">Müşteri ve tedarikçilerinizi (banka, IBAN, döviz türü dahil) tek seferde yüklemek için şablonu indirin, doldurun ve tekrar yükleyin.</div>
+      <div class="bulk-actions">
+        <button type="button" class="btn-secondary" id="downloadTemplateBtn" data-i18n="download_template_btn">⬇️ Şablonu İndir</button>
+        <button type="button" class="btn-secondary" id="importExcelBtn" data-i18n="upload_excel_btn">📤 Excel Yükle</button>
+        <input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none;">
+      </div>
+      <div id="bulkPreviewWrap" style="display:none;">
+        <div class="bulk-preview-wrap"><table class="bulk-preview-table" id="bulkPreviewTable"></table></div>
+        <div class="bulk-summary" id="bulkSummary"></div>
+        <div class="bulk-actions" style="margin-top:12px;">
+          <button type="button" class="auth-submit" id="bulkConfirmBtn" style="margin-top:0;" data-i18n="bulk_confirm_btn">Kaydet</button>
+          <button type="button" class="btn-secondary" id="bulkCancelBtn" data-i18n="bulk_cancel_btn">İptal</button>
+        </div>
+      </div>
+      <div class="form-msg" id="bulkMsg"></div>
+    </div>
+
+    <div class="veri-tabs" id="tabBar">
+      <button type="button" class="veri-tab-btn active" data-tab="customers" data-i18n="tab_customers">👤 Müşteriler</button>
+      <button type="button" class="veri-tab-btn" data-tab="suppliers" data-i18n="tab_suppliers">🚚 Tedarikçiler</button>
+      <button type="button" class="veri-tab-btn" data-tab="counterparties" data-i18n="tab_counterparties">🏛️ Muhataplar</button>
+      <button type="button" class="veri-tab-btn" data-tab="banks" data-i18n="tab_banks">🏦 Bankalarım</button>
+    </div>
+
+    <div class="veri-tab-panel active" id="panel-customers">
+      <div class="card">
+        <h2 data-i18n="add_customer_title">Yeni Müşteri Ekle</h2>
+        <div class="field-row">
+          <div class="auth-field">
+            <label data-i18n="party_name_label">Ünvan / Ad Soyad</label>
+            <input type="text" id="cust_name" data-i18n-placeholder="party_name_ph" placeholder="ör. ABC İnşaat A.Ş.">
+          </div>
+          <div class="auth-field">
+            <label data-i18n="party_idnum_label">TC / Vergi No</label>
+            <input type="text" id="cust_idnum" inputmode="numeric" placeholder="ör. 1234567890">
+          </div>
+        </div>
+        <div class="iban-editor">
+          <div class="iban-editor-label" data-i18n="iban_editor_label">IBAN Bilgileri</div>
+          <div id="cust_ibanRows"></div>
+          <button type="button" class="iban-add-btn" data-add-iban="customers" data-i18n="add_iban_btn">+ IBAN Ekle</button>
+        </div>
+        <button type="button" class="auth-submit" data-save="customers" data-i18n="save_party_btn">Müşteriyi Kaydet</button>
+        <div class="form-msg" id="customers_msg"></div>
+      </div>
+      <div class="party-list" id="customersList"></div>
+    </div>
+
+    <div class="veri-tab-panel" id="panel-suppliers">
+      <div class="card">
+        <h2 data-i18n="add_supplier_title">Yeni Tedarikçi Ekle</h2>
+        <div class="field-row">
+          <div class="auth-field">
+            <label data-i18n="party_name_label">Ünvan / Ad Soyad</label>
+            <input type="text" id="supp_name" data-i18n-placeholder="party_name_ph" placeholder="ör. ABC İnşaat A.Ş.">
+          </div>
+          <div class="auth-field">
+            <label data-i18n="party_idnum_label">TC / Vergi No</label>
+            <input type="text" id="supp_idnum" inputmode="numeric" placeholder="ör. 1234567890">
+          </div>
+        </div>
+        <div class="iban-editor">
+          <div class="iban-editor-label" data-i18n="iban_editor_label">IBAN Bilgileri</div>
+          <div id="supp_ibanRows"></div>
+          <button type="button" class="iban-add-btn" data-add-iban="suppliers" data-i18n="add_iban_btn">+ IBAN Ekle</button>
+        </div>
+        <button type="button" class="auth-submit" data-save="suppliers" data-i18n="save_party_btn2">Tedarikçiyi Kaydet</button>
+        <div class="form-msg" id="suppliers_msg"></div>
+      </div>
+      <div class="party-list" id="suppliersList"></div>
+    </div>
+
+    <div class="veri-tab-panel" id="panel-counterparties">
+      <div class="card">
+        <h2 data-i18n="add_counterparty_title">Yeni Muhatap Ekle</h2>
+        <div class="card-sub" data-i18n="add_counterparty_desc">Teminat mektuplarında muhatap olarak gösterilecek kurum/kişileri buraya kaydedin (ör. ihaleyi açan kurum).</div>
+        <div class="field-row">
+          <div class="auth-field">
+            <label data-i18n="party_name_label">Ünvan / Ad Soyad</label>
+            <input type="text" id="cp_name" data-i18n-placeholder="counterparty_name_ph" placeholder="ör. Karayolları Genel Müdürlüğü">
+          </div>
+          <div class="auth-field">
+            <label data-i18n="party_idnum_label">TC / Vergi No</label>
+            <input type="text" id="cp_idnum" inputmode="numeric" placeholder="ör. 1234567890">
+          </div>
+        </div>
+        <div class="auth-field">
+          <label data-i18n="notes_label">Not / Adres (opsiyonel)</label>
+          <input type="text" id="cp_notes" data-i18n-placeholder="counterparty_notes_ph" placeholder="ör. Ankara, ihale no: 2025/123">
+        </div>
+        <button type="button" class="auth-submit" data-save="counterparties" data-i18n="save_counterparty_btn">Muhatabı Kaydet</button>
+        <div class="form-msg" id="counterparties_msg"></div>
+      </div>
+      <div class="party-list" id="counterpartiesList"></div>
+    </div>
+
+    <div class="veri-tab-panel" id="panel-banks">
+      <div class="card">
+        <h2 data-i18n="banks_title">Çalıştığınız Bankalar</h2>
+        <div class="card-sub" data-i18n="banks_desc">Burada eklediğiniz bankalar, müşteri/tedarikçi IBAN bilgisi girerken öneri olarak çıkar.</div>
+        <div class="inline-add-row">
+          <input type="text" id="bankNameInput" data-i18n-placeholder="bank_name_ph" placeholder="ör. Ziraat Bankası">
+          <button type="button" class="auth-submit" id="addBankBtn" style="margin-top:0;" data-i18n="add_bank_btn">Ekle</button>
+        </div>
+        <div class="bank-chip-list" id="banksChipList"></div>
+        <div class="form-msg" id="banks_msg"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<datalist id="banksDatalist"></datalist>
+<datalist id="currencyDatalist">
+  <option value="TRY"></option>
+  <option value="USD"></option>
+  <option value="EUR"></option>
+  <option value="GBP"></option>
+  <option value="CHF"></option>
+</datalist>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  let auth, db;
+  try{
+    if(window.parent && window.parent !== window && window.parent.mmgAuth && window.parent.mmgDb){
+      auth = window.parent.mmgAuth;
+      db = window.parent.mmgDb;
+    }
+  }catch(e){ /* farklı origin ihtimaline karşı sessizce geç */ }
+  if(!auth || !db){
+    const fbApp = initializeApp(firebaseConfig);
+    auth = getAuth(fbApp);
+    db = getFirestore(fbApp);
+  }
+
+  const stateArea = document.getElementById('stateArea');
+  const content = document.getElementById('content');
+
+  let MMG_LANG = 'tr';
+  try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
+  const LBL = MMG_LANG === 'en' ? {
+    loginRequired:'You must be signed in to view this page.<br><br>',
+    loginRequiredHint:'Sign in to your account from any module (e.g. <a href="index.html">Home</a>) and reopen this page.',
+    errorTitle:'An error occurred', errorSub:'The page could not be loaded, please refresh and try again.',
+    scopePersonal:'You are currently entering data for your <b>personal</b> account.',
+    scopeFirma:'You are currently entering data for <b>{name}</b>.',
+    scopeGrouped:' (sharing data with a linked group company)',
+    enterValidName:'Please enter a name.', saved:'Saved. ✓', saveFailed:'Could not save, please try again.',
+    deleted:'Deleted.', deleteFailed:'Could not delete, please try again.', confirmDelete:'Are you sure you want to delete this record?',
+    noRecordsYet:'No records added yet.', edit:'Edit', delete:'Delete', unlimited:'',
+    bankRequired:'Please add at least one bank before entering data.',
+    groupCopySuccess:'Copied.', groupJoinSuccess:'Linked. This firm now shares data with the entered firm.',
+    groupJoinFailed:'Could not link, please check the code and try again.', groupLeaveSuccess:'Link removed, this firm now uses its own data again.',
+    groupNotAdmin:'Only the firm admin can change the group link.',
+    groupStatusOwn:'This firm is currently using its own data (not linked to another firm).',
+    groupStatusLinked:'This firm is currently sharing data with another firm.',
+    enterGroupCode:'Please paste a code first.',
+    bulkNoFile:'Please choose a file first.', bulkParseError:'The file could not be read, please check the format.',
+    bulkNoRows:'No valid rows found in the file.', bulkTypeCol:'Type', bulkNameCol:'Name', bulkIdCol:'TC/Tax No',
+    bulkBankCol:'Bank', bulkIbanCol:'IBAN', bulkCurrencyCol:'Currency', bulkSummaryText:'{n} rows found, grouped into {p} records.',
+    bulkSaving:'Saving…', bulkDone:'{n} records saved successfully.', bulkTypeCustomer:'Customer', bulkTypeSupplier:'Supplier',
+    templateDownloaded:'Template downloaded.', templateError:'Template could not be created.'
+  } : {
+    loginRequired:'Bu sayfayı görüntülemek için giriş yapmış olmanız gerekir.<br><br>',
+    loginRequiredHint:'Herhangi bir modülden (örn. <a href="index.html">Ana Sayfa</a>) hesabınıza giriş yaptıktan sonra bu sayfayı yeniden açın.',
+    errorTitle:'Bir hata oluştu', errorSub:'Sayfa yüklenemedi, lütfen yenileyip tekrar deneyin.',
+    scopePersonal:'Şu anda <b>kişisel</b> hesabınız için veri giriyorsunuz.',
+    scopeFirma:'Şu anda <b>{name}</b> için veri giriyorsunuz.',
+    scopeGrouped:' (bağlı grup firmasıyla ortak veri kullanılıyor)',
+    enterValidName:'Lütfen bir ad/ünvan girin.', saved:'Kaydedildi. ✓', saveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
+    deleted:'Silindi.', deleteFailed:'Silinemedi, lütfen tekrar deneyin.', confirmDelete:'Bu kaydı silmek istediğinize emin misiniz?',
+    noRecordsYet:'Henüz kayıt eklenmedi.', edit:'Düzenle', delete:'Sil', unlimited:'',
+    bankRequired:'Veri girmeden önce en az bir banka eklemelisiniz.',
+    groupCopySuccess:'Kopyalandı.', groupJoinSuccess:'Bağlandı. Bu firma artık girilen firmayla veri paylaşıyor.',
+    groupJoinFailed:'Bağlanamadı, kodu kontrol edip tekrar deneyin.', groupLeaveSuccess:'Bağlantı kaldırıldı, bu firma yine kendi verisini kullanıyor.',
+    groupNotAdmin:'Grup bağlantısını sadece firma yöneticisi değiştirebilir.',
+    groupStatusOwn:'Bu firma şu anda kendi verisini kullanıyor (başka bir firmayla bağlı değil).',
+    groupStatusLinked:'Bu firma şu anda başka bir firmayla veri paylaşıyor.',
+    enterGroupCode:'Önce bir kod yapıştırmalısınız.',
+    bulkNoFile:'Önce bir dosya seçmelisiniz.', bulkParseError:'Dosya okunamadı, formatını kontrol edin.',
+    bulkNoRows:'Dosyada geçerli satır bulunamadı.', bulkTypeCol:'Tip', bulkNameCol:'Ünvan', bulkIdCol:'TC/Vergi No',
+    bulkBankCol:'Banka', bulkIbanCol:'IBAN', bulkCurrencyCol:'Döviz', bulkSummaryText:'{n} satır bulundu, {p} kayıda gruplandı.',
+    bulkSaving:'Kaydediliyor…', bulkDone:'{n} kayıt başarıyla kaydedildi.', bulkTypeCustomer:'Müşteri', bulkTypeSupplier:'Tedarikçi',
+    templateDownloaded:'Şablon indirildi.', templateError:'Şablon oluşturulamadı.'
+  };
+
+  MMGI18N.registerDict({
+    tr: {
+      page_title:'🗂️ Veri Giriş Paneli',
+      page_subtitle:'Müşteri, tedarikçi, muhatap ve banka bilgilerinizi burada tek yerde toplayın; talimat ve mektup hazırlarken otomatik kullanılsın.',
+      back_home:'← Ana Sayfa',
+      group_link_toggle:'Grup Bağlantısı', group_link_title:'🔗 Grup Firmaları Ortak Veri',
+      group_link_desc:'Aynı grubun (holding) parçası olan başka bir firma ile bu paneldeki verileri (müşteri, tedarikçi, muhatap, banka) ortak kullanmak istersen, kendi firma kodunu diğer firmayla paylaş ya da onların kodunu buraya yapıştır.',
+      group_my_code:'Bu firmanın kodu:', copy_btn:'Kopyala', group_join_ph:'Başka bir firmanın kodunu buraya yapıştır', group_join_btn:'Bağlan', group_leave_btn:'Bağlantıyı Kaldır',
+      bulk_title:'📥 Toplu Excel ile Yükle',
+      bulk_desc:'Müşteri ve tedarikçilerinizi (banka, IBAN, döviz türü dahil) tek seferde yüklemek için şablonu indirin, doldurun ve tekrar yükleyin.',
+      download_template_btn:'⬇️ Şablonu İndir', upload_excel_btn:'📤 Excel Yükle', bulk_confirm_btn:'Kaydet', bulk_cancel_btn:'İptal',
+      tab_customers:'👤 Müşteriler', tab_suppliers:'🚚 Tedarikçiler', tab_counterparties:'🏛️ Muhataplar', tab_banks:'🏦 Bankalarım',
+      add_customer_title:'Yeni Müşteri Ekle', add_supplier_title:'Yeni Tedarikçi Ekle',
+      party_name_label:'Ünvan / Ad Soyad', party_name_ph:'ör. ABC İnşaat A.Ş.', party_idnum_label:'TC / Vergi No',
+      iban_editor_label:'IBAN Bilgileri', add_iban_btn:'+ IBAN Ekle',
+      save_party_btn:'Müşteriyi Kaydet', save_party_btn2:'Tedarikçiyi Kaydet',
+      add_counterparty_title:'Yeni Muhatap Ekle',
+      add_counterparty_desc:'Teminat mektuplarında muhatap olarak gösterilecek kurum/kişileri buraya kaydedin (ör. ihaleyi açan kurum).',
+      counterparty_name_ph:'ör. Karayolları Genel Müdürlüğü', notes_label:'Not / Adres (opsiyonel)', counterparty_notes_ph:'ör. Ankara, ihale no: 2025/123',
+      save_counterparty_btn:'Muhatabı Kaydet',
+      banks_title:'Çalıştığınız Bankalar', banks_desc:'Burada eklediğiniz bankalar, müşteri/tedarikçi IBAN bilgisi girerken öneri olarak çıkar.',
+      bank_name_ph:'ör. Ziraat Bankası', add_bank_btn:'Ekle'
+    },
+    en: {
+      page_title:'🗂️ Data Entry Panel',
+      page_subtitle:'Collect your customer, supplier, counterparty and bank details in one place; they will be used automatically when preparing instructions and letters.',
+      back_home:'← Home',
+      group_link_toggle:'Group Link', group_link_title:'🔗 Shared Data Across Group Companies',
+      group_link_desc:"If this firm is part of the same group (holding) as another firm and you want to share this panel's data (customers, suppliers, counterparties, banks), share this firm's code with the other one, or paste their code here.",
+      group_my_code:"This firm's code:", copy_btn:'Copy', group_join_ph:"Paste another firm's code here", group_join_btn:'Link', group_leave_btn:'Remove Link',
+      bulk_title:'📥 Bulk Upload via Excel',
+      bulk_desc:'Download the template, fill it in, and re-upload it to add your customers and suppliers (including bank, IBAN, currency) all at once.',
+      download_template_btn:'⬇️ Download Template', upload_excel_btn:'📤 Upload Excel', bulk_confirm_btn:'Save', bulk_cancel_btn:'Cancel',
+      tab_customers:'👤 Customers', tab_suppliers:'🚚 Suppliers', tab_counterparties:'🏛️ Counterparties', tab_banks:'🏦 My Banks',
+      add_customer_title:'Add New Customer', add_supplier_title:'Add New Supplier',
+      party_name_label:'Name / Company', party_name_ph:'e.g. ABC Construction Inc.', party_idnum_label:'ID / Tax No',
+      iban_editor_label:'IBAN Details', add_iban_btn:'+ Add IBAN',
+      save_party_btn:'Save Customer', save_party_btn2:'Save Supplier',
+      add_counterparty_title:'Add New Counterparty',
+      add_counterparty_desc:'Register the institutions/people who will appear as the counterparty on letters of guarantee (e.g. the tendering authority).',
+      counterparty_name_ph:'e.g. Highway Authority', notes_label:'Notes / Address (optional)', counterparty_notes_ph:'e.g. Ankara, tender no: 2025/123',
+      save_counterparty_btn:'Save Counterparty',
+      banks_title:'Banks You Work With', banks_desc:'Banks you add here will appear as suggestions when entering customer/supplier IBAN details.',
+      bank_name_ph:'e.g. Ziraat Bank', add_bank_btn:'Add'
+    }
+  });
+  MMGI18N.detectAndApplyDefaultLang();
+
+  function showState(html){
+    content.hidden = true;
+    stateArea.innerHTML = '<div class="state-box">' + html + '</div>';
+  }
+  function escapeHtml(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function fmt(str, params){
+    return str.replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null) ? params[k] : m);
+  }
+  function showMsg(elId, text, isErr){
+    const el = document.getElementById(elId);
+    if(!el) return;
+    el.textContent = text;
+    el.className = 'form-msg show' + (isErr ? ' err' : ' ok');
+    setTimeout(() => { el.classList.remove('show'); }, 4000);
+  }
+
+  let scopeCollection = 'users';
+  let scopeId = null;
+  let effectiveScopeId = null;
+  let isFirmaAdmin = false;
+  let currentUid = null;
+
+  function colRef(name){ return collection(db, scopeCollection, effectiveScopeId, name); }
+  function docRef(name, id){ return doc(db, scopeCollection, effectiveScopeId, name, id); }
+
+  async function resolveScope(user){
+    currentUid = user.uid;
+    scopeId = user.uid;
+    scopeCollection = 'users';
+    let firmaName = '';
+    try{
+      const activeScope = localStorage.getItem('mmg_active_data_scope');
+      if(activeScope && activeScope !== 'personal'){
+        scopeCollection = 'firmaAccounts';
+        scopeId = activeScope;
+      } else if(!activeScope){
+        const uSnap = await getDoc(doc(db, 'users', user.uid));
+        const uData = uSnap.exists() ? uSnap.data() : {};
+        if(uData.companyId){
+          scopeCollection = 'companies';
+          scopeId = localStorage.getItem('mmg_active_company_id') || uData.companyId;
+        }
+      }
+    }catch(e){}
+
+    effectiveScopeId = scopeId;
+    isFirmaAdmin = false;
+
+    if(scopeCollection === 'firmaAccounts'){
+      try{
+        const fSnap = await getDoc(doc(db, 'firmaAccounts', scopeId));
+        const fData = fSnap.exists() ? fSnap.data() : {};
+        firmaName = fData.name || '';
+        if(fData.dataGroupId){ effectiveScopeId = fData.dataGroupId; }
+      }catch(e){}
+      try{
+        const uSnap = await getDoc(doc(db, 'users', user.uid));
+        const uData = uSnap.exists() ? uSnap.data() : {};
+        const adminIds = Array.isArray(uData.adminFirmaIds) ? uData.adminFirmaIds : [];
+        isFirmaAdmin = adminIds.includes(scopeId);
+      }catch(e){}
+    }
+
+    renderScopeBanner(firmaName);
+  }
+
+  function renderScopeBanner(firmaName){
+    const textEl = document.getElementById('scopeBannerText');
+    const toggleBtn = document.getElementById('groupToggleBtn');
+    if(scopeCollection === 'firmaAccounts'){
+      let html = fmt(LBL.scopeFirma, { name: escapeHtml(firmaName || scopeId) });
+      if(effectiveScopeId !== scopeId) html += '<span style="color:var(--brass);">' + LBL.scopeGrouped + '</span>';
+      textEl.innerHTML = html;
+      toggleBtn.style.display = isFirmaAdmin ? 'inline-block' : 'none';
+      document.getElementById('myFirmaCodeBox').textContent = scopeId;
+      const statusEl = document.getElementById('groupCurrentStatus');
+      const leaveBtn = document.getElementById('leaveGroupBtn');
+      if(effectiveScopeId !== scopeId){
+        statusEl.textContent = LBL.groupStatusLinked;
+        leaveBtn.style.display = 'inline-block';
+      } else {
+        statusEl.textContent = LBL.groupStatusOwn;
+        leaveBtn.style.display = 'none';
+      }
+    } else {
+      textEl.innerHTML = LBL.scopePersonal;
+      toggleBtn.style.display = 'none';
+    }
+  }
+
+  document.getElementById('groupToggleBtn').addEventListener('click', () => {
+    document.getElementById('groupPanel').classList.toggle('open');
+  });
+  document.getElementById('copyFirmaCodeBtn').addEventListener('click', () => {
+    const code = document.getElementById('myFirmaCodeBox').textContent;
+    navigator.clipboard.writeText(code).then(() => showMsg('groupMsg', LBL.groupCopySuccess, false)).catch(()=>{});
+  });
+  document.getElementById('joinGroupBtn').addEventListener('click', async () => {
+    if(!isFirmaAdmin){ showMsg('groupMsg', LBL.groupNotAdmin, true); return; }
+    const code = document.getElementById('joinGroupInput').value.trim();
+    if(!code){ showMsg('groupMsg', LBL.enterGroupCode, true); return; }
+    try{
+      await setDoc(doc(db, 'firmaAccounts', scopeId), { dataGroupId: code }, { merge: true });
+      showMsg('groupMsg', LBL.groupJoinSuccess, false);
+      await resolveScope({ uid: currentUid });
+      await loadAll();
+    }catch(e){
+      showMsg('groupMsg', LBL.groupJoinFailed, true);
+    }
+  });
+  document.getElementById('leaveGroupBtn').addEventListener('click', async () => {
+    if(!isFirmaAdmin){ showMsg('groupMsg', LBL.groupNotAdmin, true); return; }
+    try{
+      await setDoc(doc(db, 'firmaAccounts', scopeId), { dataGroupId: null }, { merge: true });
+      showMsg('groupMsg', LBL.groupLeaveSuccess, false);
+      await resolveScope({ uid: currentUid });
+      await loadAll();
+    }catch(e){
+      showMsg('groupMsg', LBL.groupJoinFailed, true);
+    }
+  });
+
+  document.querySelectorAll('.veri-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.veri-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.veri-tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  let banksList = [];
+  async function loadBanks(){
+    const snap = await getDocs(colRef('banks'));
+    banksList = [];
+    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '' }));
+    banksList.sort((a,b) => a.name.localeCompare(b.name, 'tr'));
+    renderBanks();
+  }
+  function renderBanks(){
+    const listEl = document.getElementById('banksChipList');
+    listEl.innerHTML = banksList.length ? banksList.map(b =>
+      '<span class="bank-chip">' + escapeHtml(b.name) + '<button type="button" data-remove-bank="' + b.id + '" title="' + LBL.delete + '">✕</button></span>'
+    ).join('') : '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
+    listEl.querySelectorAll('[data-remove-bank]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try{
+          await deleteDoc(docRef('banks', btn.dataset.removeBank));
+          await loadBanks();
+        }catch(e){ showMsg('banks_msg', LBL.deleteFailed, true); }
+      });
+    });
+    const datalist = document.getElementById('banksDatalist');
+    datalist.innerHTML = banksList.map(b => '<option value="' + escapeHtml(b.name) + '"></option>').join('');
+  }
+  document.getElementById('addBankBtn').addEventListener('click', async () => {
+    const input = document.getElementById('bankNameInput');
+    const name = input.value.trim();
+    if(!name){ showMsg('banks_msg', LBL.enterValidName, true); return; }
+    try{
+      const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+      await setDoc(docRef('banks', id), { name, createdAt: serverTimestamp() });
+      input.value = '';
+      showMsg('banks_msg', LBL.saved, false);
+      await loadBanks();
+    }catch(e){ showMsg('banks_msg', LBL.saveFailed, true); }
+  });
+
+  function ibanRowHtml(idx, prefix, values){
+    values = values || {};
+    return '<div class="iban-row" data-iban-idx="' + idx + '">' +
+      '<input type="text" list="banksDatalist" placeholder="' + (MMG_LANG==='en'?'Bank':'Banka') + '" class="iban-bank" value="' + escapeHtml(values.bank||'') + '">' +
+      '<input type="text" placeholder="IBAN" class="iban-num" value="' + escapeHtml(values.iban||'') + '">' +
+      '<input type="text" list="currencyDatalist" placeholder="' + (MMG_LANG==='en'?'Currency':'Döviz') + '" class="iban-cur" value="' + escapeHtml(values.currency||'TRY') + '">' +
+      '<button type="button" class="iban-row-remove" data-remove-row>✕</button>' +
+      '</div>';
+  }
+  function addIbanRow(prefix, values){
+    const wrap = document.getElementById(prefix + '_ibanRows');
+    const idx = wrap.children.length;
+    wrap.insertAdjacentHTML('beforeend', ibanRowHtml(idx, prefix, values));
+    wrap.querySelectorAll('[data-remove-row]').forEach(btn => {
+      btn.onclick = () => { btn.closest('.iban-row').remove(); };
+    });
+  }
+  document.querySelectorAll('[data-add-iban]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const prefix = btn.dataset.addIban === 'customers' ? 'cust' : 'supp';
+      addIbanRow(prefix);
+    });
+  });
+  function readIbanRows(prefix){
+    const wrap = document.getElementById(prefix + '_ibanRows');
+    const out = [];
+    wrap.querySelectorAll('.iban-row').forEach(row => {
+      const bank = row.querySelector('.iban-bank').value.trim();
+      const iban = row.querySelector('.iban-num').value.trim().toUpperCase().replace(/\s+/g, '');
+      const currency = row.querySelector('.iban-cur').value.trim().toUpperCase() || 'TRY';
+      if(bank || iban) out.push({ bank, iban, currency });
+    });
+    return out;
+  }
+  function clearIbanRows(prefix){
+    document.getElementById(prefix + '_ibanRows').innerHTML = '';
+    addIbanRow(prefix);
+  }
+  addIbanRow('cust');
+  addIbanRow('supp');
+
+  const PARTY_COLLECTIONS = { customers: 'customersList', suppliers: 'suppliersList' };
+  let partyCache = { customers: [], suppliers: [] };
+
+  async function loadParties(kind){
+    const snap = await getDocs(colRef(kind));
+    const list = [];
+    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+    list.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'tr'));
+    partyCache[kind] = list;
+    renderParties(kind);
+  }
+
+  function renderParties(kind){
+    const listEl = document.getElementById(PARTY_COLLECTIONS[kind]);
+    const list = partyCache[kind];
+    if(!list.length){
+      listEl.innerHTML = '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
+      return;
+    }
+    listEl.innerHTML = list.map(p => {
+      const ibansHtml = (p.ibans || []).map(i =>
+        '<span class="iban-chip"><b>' + escapeHtml(i.bank || '—') + '</b> · ' + escapeHtml(i.iban || '—') + ' · ' + escapeHtml(i.currency || 'TRY') + '</span>'
+      ).join('');
+      return '<div class="party-row" data-id="' + p.id + '">' +
+        '<div class="party-row-top">' +
+          '<div>' +
+            '<div class="party-name">' + escapeHtml(p.name) + '</div>' +
+            (p.idNumber ? '<div class="party-idnum">' + escapeHtml(p.idNumber) + '</div>' : '') +
+          '</div>' +
+          '<div class="party-actions">' +
+            '<button type="button" class="party-icon-btn danger" data-del="' + kind + '" data-id="' + p.id + '" title="' + LBL.delete + '">✕</button>' +
+          '</div>' +
+        '</div>' +
+        (ibansHtml ? '<div class="iban-chip-wrap">' + ibansHtml + '</div>' : '') +
+      '</div>';
+    }).join('');
+    listEl.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm(LBL.confirmDelete)) return;
+        try{
+          await deleteDoc(docRef(btn.dataset.del, btn.dataset.id));
+          await loadParties(btn.dataset.del);
+        }catch(e){ showMsg(btn.dataset.del + '_msg', LBL.deleteFailed, true); }
+      });
+    });
+  }
+
+  async function saveParty(kind, prefix){
+    const nameEl = document.getElementById(prefix + '_name');
+    const idnumEl = document.getElementById(prefix + '_idnum');
+    const name = nameEl.value.trim();
+    if(!name){ showMsg(kind + '_msg', LBL.enterValidName, true); return; }
+    const ibans = readIbanRows(prefix);
+    try{
+      const id = kind[0] + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+      await setDoc(docRef(kind, id), {
+        name, idNumber: idnumEl.value.trim(), ibans, createdAt: serverTimestamp()
+      });
+      nameEl.value = ''; idnumEl.value = '';
+      clearIbanRows(prefix);
+      showMsg(kind + '_msg', LBL.saved, false);
+      await loadParties(kind);
+    }catch(e){ showMsg(kind + '_msg', LBL.saveFailed, true); }
+  }
+  document.querySelectorAll('[data-save]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const kind = btn.dataset.save;
+      const prefix = kind === 'customers' ? 'cust' : (kind === 'suppliers' ? 'supp' : null);
+      if(prefix){ saveParty(kind, prefix); }
+      else { saveCounterparty(); }
+    });
+  });
+
+  let counterpartyCache = [];
+  async function loadCounterparties(){
+    const snap = await getDocs(colRef('counterparties'));
+    const list = [];
+    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+    list.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'tr'));
+    counterpartyCache = list;
+    renderCounterparties();
+  }
+  function renderCounterparties(){
+    const listEl = document.getElementById('counterpartiesList');
+    if(!counterpartyCache.length){
+      listEl.innerHTML = '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
+      return;
+    }
+    listEl.innerHTML = counterpartyCache.map(p =>
+      '<div class="party-row" data-id="' + p.id + '">' +
+        '<div class="party-row-top">' +
+          '<div>' +
+            '<div class="party-name">' + escapeHtml(p.name) + '</div>' +
+            (p.idNumber ? '<div class="party-idnum">' + escapeHtml(p.idNumber) + '</div>' : '') +
+            (p.notes ? '<div class="party-idnum">' + escapeHtml(p.notes) + '</div>' : '') +
+          '</div>' +
+          '<div class="party-actions">' +
+            '<button type="button" class="party-icon-btn danger" data-del-cp="' + p.id + '" title="' + LBL.delete + '">✕</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+    listEl.querySelectorAll('[data-del-cp]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm(LBL.confirmDelete)) return;
+        try{
+          await deleteDoc(docRef('counterparties', btn.dataset.delCp));
+          await loadCounterparties();
+        }catch(e){ showMsg('counterparties_msg', LBL.deleteFailed, true); }
+      });
+    });
+  }
+  async function saveCounterparty(){
+    const nameEl = document.getElementById('cp_name');
+    const idnumEl = document.getElementById('cp_idnum');
+    const notesEl = document.getElementById('cp_notes');
+    const name = nameEl.value.trim();
+    if(!name){ showMsg('counterparties_msg', LBL.enterValidName, true); return; }
+    try{
+      const id = 'cp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+      await setDoc(docRef('counterparties', id), {
+        name, idNumber: idnumEl.value.trim(), notes: notesEl.value.trim(), createdAt: serverTimestamp()
+      });
+      nameEl.value = ''; idnumEl.value = ''; notesEl.value = '';
+      showMsg('counterparties_msg', LBL.saved, false);
+      await loadCounterparties();
+    }catch(e){ showMsg('counterparties_msg', LBL.saveFailed, true); }
+  }
+
+  document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
+    try{
+      const header = [LBL.bulkTypeCol, LBL.bulkNameCol, LBL.bulkIdCol, LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol];
+      const example1 = [LBL.bulkTypeCustomer, 'ABC İnşaat A.Ş.', '1234567890', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY'];
+      const example2 = [LBL.bulkTypeCustomer, 'ABC İnşaat A.Ş.', '1234567890', 'İş Bankası', 'TR111111111111111111111111', 'USD'];
+      const example3 = [LBL.bulkTypeSupplier, 'XYZ Ticaret Ltd.', '9876543210', 'Garanti BBVA', 'TR222222222222222222222222', 'TRY'];
+      const note = [MMG_LANG==='en' ? 'Type must be exactly "Customer" or "Supplier". A party with multiple IBANs should repeat on multiple rows with the same Name.' : '"Tip" sütunu tam olarak "Müşteri" ya da "Tedarikçi" olmalı. Birden fazla IBAN\'ı olan bir firma için aynı Ünvan\'ı birden fazla satırda tekrar edin.'];
+      const rows = [header, example1, example2, example3, [], note];
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{wch:12},{wch:28},{wch:16},{wch:20},{wch:30},{wch:10}];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, MMG_LANG==='en' ? 'Template' : 'Şablon');
+      XLSX.writeFile(wb, 'veri-girisi-sablon.xlsx');
+      showMsg('bulkMsg', LBL.templateDownloaded, false);
+    } catch(e){ showMsg('bulkMsg', LBL.templateError, true); }
+  });
+
+  let pendingBulkGroups = null;
+  document.getElementById('importExcelBtn').addEventListener('click', () => {
+    document.getElementById('importExcelInput').click();
+  });
+  document.getElementById('importExcelInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if(!file) return;
+    try{
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data, { type: 'array', cellDates: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+      const groups = new Map();
+      let rowCount = 0;
+      for(const row of json){
+        const typeRaw = String(row['Tip'] ?? row['Type'] ?? '').trim().toLowerCase();
+        const name = String(row['Ünvan'] ?? row['Unvan'] ?? row['Name'] ?? '').trim();
+        if(!name) continue;
+        const isSupplier = typeRaw.includes('tedarik') || typeRaw.includes('supplier');
+        const kind = isSupplier ? 'suppliers' : 'customers';
+        const idNumber = String(row['TC/Vergi No'] ?? row['TC'] ?? row['Vergi No'] ?? row['ID'] ?? row['TC/Tax No'] ?? '').trim();
+        const bank = String(row['Banka'] ?? row['Bank'] ?? '').trim();
+        const iban = String(row['IBAN'] ?? '').trim().toUpperCase().replace(/\s+/g, '');
+        const currency = String(row['Döviz'] ?? row['Doviz'] ?? row['Currency'] ?? '').trim().toUpperCase() || 'TRY';
+        rowCount++;
+
+        const key = kind + '::' + name.toLowerCase();
+        if(!groups.has(key)) groups.set(key, { kind, name, idNumber, ibans: [] });
+        const g = groups.get(key);
+        if(!g.idNumber && idNumber) g.idNumber = idNumber;
+        if(bank || iban) g.ibans.push({ bank, iban, currency });
+      }
+
+      if(!groups.size){ showMsg('bulkMsg', LBL.bulkNoRows, true); return; }
+
+      pendingBulkGroups = groups;
+      renderBulkPreview(rowCount, groups);
+    } catch(err){
+      showMsg('bulkMsg', LBL.bulkParseError, true);
+    }
+  });
+
+  function renderBulkPreview(rowCount, groups){
+    const wrap = document.getElementById('bulkPreviewWrap');
+    const table = document.getElementById('bulkPreviewTable');
+    const rows = [];
+    groups.forEach(g => {
+      const ibansText = g.ibans.map(i => (i.bank||'—') + ' · ' + (i.iban||'—') + ' · ' + i.currency).join('<br>') || '—';
+      rows.push('<tr><td>' + (g.kind === 'suppliers' ? LBL.bulkTypeSupplier : LBL.bulkTypeCustomer) + '</td><td>' + escapeHtml(g.name) + '</td><td>' + escapeHtml(g.idNumber||'—') + '</td><td>' + ibansText + '</td></tr>');
+    });
+    table.innerHTML = '<thead><tr><th>' + LBL.bulkTypeCol + '</th><th>' + LBL.bulkNameCol + '</th><th>' + LBL.bulkIdCol + '</th><th>IBAN</th></tr></thead><tbody>' + rows.join('') + '</tbody>';
+    document.getElementById('bulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: rowCount, p: groups.size });
+    wrap.style.display = 'block';
+  }
+
+  document.getElementById('bulkCancelBtn').addEventListener('click', () => {
+    pendingBulkGroups = null;
+    document.getElementById('bulkPreviewWrap').style.display = 'none';
+  });
+
+  document.getElementById('bulkConfirmBtn').addEventListener('click', async () => {
+    if(!pendingBulkGroups){ showMsg('bulkMsg', LBL.bulkNoFile, true); return; }
+    const btn = document.getElementById('bulkConfirmBtn');
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = LBL.bulkSaving;
+    try{
+      let count = 0;
+      for(const g of pendingBulkGroups.values()){
+        const id = g.kind[0] + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
+        await setDoc(docRef(g.kind, id), {
+          name: g.name, idNumber: g.idNumber || '', ibans: g.ibans, createdAt: serverTimestamp()
+        });
+        count++;
+      }
+      showMsg('bulkMsg', fmt(LBL.bulkDone, { n: count }), false);
+      pendingBulkGroups = null;
+      document.getElementById('bulkPreviewWrap').style.display = 'none';
+      await loadParties('customers');
+      await loadParties('suppliers');
+    } catch(e){
+      showMsg('bulkMsg', LBL.saveFailed, true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
+
+  async function loadAll(){
+    await loadBanks();
+    await loadParties('customers');
+    await loadParties('suppliers');
+    await loadCounterparties();
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if(!user){
+      showState('<div class="big">🔒</div>' + LBL.loginRequired + LBL.loginRequiredHint);
+      return;
+    }
+    try{
+      await resolveScope(user);
+      stateArea.innerHTML = '';
+      content.hidden = false;
+      await loadAll();
+    } catch(e){
+      showState('<div class="big">⚠️</div><b>' + LBL.errorTitle + '</b><br>' + LBL.errorSub);
+    }
+  });
+</script>
+
+</body>
+</html>

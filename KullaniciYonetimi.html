@@ -271,13 +271,15 @@
     { key: 'giderler', label: 'Expenses' },
     { key: 'nakitakis', label: 'Cash Flow Table' },
     { key: 'talimat', label: 'Instruction Preparation' },
-    { key: 'hesaplama', label: 'Calculation Tools' }
+    { key: 'hesaplama', label: 'Calculation Tools' },
+    { key: 'veri_girisi', label: 'Data Entry Panel' }
   ] : [
     { key: 'gelirler', label: 'Gelirler' },
     { key: 'giderler', label: 'Giderler' },
     { key: 'nakitakis', label: 'Nakit Akış Tablosu' },
     { key: 'talimat', label: 'Talimat Hazırlama' },
-    { key: 'hesaplama', label: 'Hesaplama Araçları' }
+    { key: 'hesaplama', label: 'Hesaplama Araçları' },
+    { key: 'veri_girisi', label: 'Veri Giriş Paneli' }
   ];
 
   function permGridHtml(idPrefix, values){
@@ -586,6 +588,7 @@
         listEl.innerHTML = '<div class="empty-note">' + LBL.noUsersAdded + '</div>';
         return;
       }
+
       const rows = [];
       membersSnap.forEach(d => {
         const md = d.data();
