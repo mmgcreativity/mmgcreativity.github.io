@@ -262,7 +262,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     </div>
 
     <div class="veri-tabs" id="tabBar">
-      <button type="button" class="veri-tab-btn" data-tab="banks" data-i18n="tab_banks">🏦 Bankalarım</button>
+      <button type="button" class="veri-tab-btn" data-tab="banks" data-i18n="tab_banks">💳 İBAN'larım</button>
+      <button type="button" class="veri-tab-btn" data-tab="bankList" data-i18n="tab_bankList">🏦 Çalıştığım Bankalar</button>
       <button type="button" class="veri-tab-btn active" data-tab="customers" data-i18n="tab_customers">👤 Müşteriler</button>
       <button type="button" class="veri-tab-btn" data-tab="suppliers" data-i18n="tab_suppliers">🚚 Tedarikçiler</button>
       <button type="button" class="veri-tab-btn" data-tab="counterparties" data-i18n="tab_counterparties">🏛️ Muhataplar</button>
@@ -324,7 +325,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <div class="veri-tab-panel" id="panel-banks">
       <div class="card">
-        <h2 data-i18n="banks_title">Çalıştığınız Bankalar</h2>
+        <h2 data-i18n="banks_title">İBAN'larım</h2>
         <div class="card-sub" data-i18n="banks_desc">Kendi banka hesaplarınızı (banka + IBAN) buraya kaydedin; müşteri/tedarikçi IBAN bilgisi girerken ve talimat hazırlarken öneri olarak çıkar.</div>
         <div class="field-row">
           <div class="auth-field">
@@ -339,6 +340,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <button type="button" class="auth-submit" id="addBankBtn" data-i18n="add_bank_btn">Ekle</button>
         <div class="bank-chip-list" id="banksChipList"></div>
         <div class="form-msg" id="banks_msg"></div>
+      </div>
+    </div>
+
+    <div class="veri-tab-panel" id="panel-bankList">
+      <div class="card">
+        <h2 data-i18n="bankList_title">🏦 Çalıştığım Bankalar</h2>
+        <div class="card-sub" data-i18n="bankList_desc">Bu liste, Veri Giriş Paneli, Talimat Hazırlama ve Hazır Metin Talimatları'ndaki "Banka" açılır listelerinde görünür. Buradan banka ekleyebilir, çıkarabilir ya da adını düzenleyebilirsiniz. Hiçbir değişiklik yapmazsanız varsayılan banka listesi kullanılmaya devam eder.</div>
+        <div class="field-row">
+          <div class="auth-field" style="flex:1;">
+            <label data-i18n="bankList_new_label">Yeni Banka Adı</label>
+            <input type="text" id="newBankNameInput" data-i18n-placeholder="bankList_new_ph" placeholder="ör. TÜRKİYE FİNANS">
+          </div>
+        </div>
+        <button type="button" class="auth-submit" id="addBankNameBtn" data-i18n="bankList_add_btn">Ekle</button>
+        <div id="bankListEditor" style="margin-top:14px; display:flex; flex-direction:column; gap:8px;"></div>
+        <div class="form-msg" id="bankList_msg"></div>
       </div>
     </div>
   </div>
@@ -408,7 +425,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     bulkNoRows:'No valid rows found in the file.', bulkTypeCol:'Type', bulkNameCol:'Name', bulkIdCol:'TC/Tax No',
     bulkBankCol:'Bank', bulkIbanCol:'IBAN', bulkCurrencyCol:'Currency', bulkSummaryText:'{n} rows found, grouped into {p} records.',
     bulkSaving:'Saving…', bulkDone:'{n} records saved successfully.', bulkTypeCustomer:'Customer', bulkTypeSupplier:'Supplier',
-    templateDownloaded:'Template downloaded.', templateError:'Template could not be created.'
+    templateDownloaded:'Template downloaded.', templateError:'Template could not be created.',
+    bankListAdded:'Bank added.', bankListSaved:'Saved ✓', bankListSaveFailed:'Could not be saved, please try again.',
+    bankListRemoveFailed:'Could not be removed, please try again.', bankListEnterName:'Please enter a bank name.',
+    bankListDuplicate:'This bank name is already in the list.'
   } : {
     loginRequired:'Bu sayfayı görüntülemek için giriş yapmış olmanız gerekir.<br><br>',
     loginRequiredHint:'Herhangi bir modülden (örn. <a href="index.html">Ana Sayfa</a>) hesabınıza giriş yaptıktan sonra bu sayfayı yeniden açın.',
@@ -430,7 +450,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     bulkNoRows:'Dosyada geçerli satır bulunamadı.', bulkTypeCol:'Tip', bulkNameCol:'Ünvan', bulkIdCol:'TC/Vergi No',
     bulkBankCol:'Banka', bulkIbanCol:'IBAN', bulkCurrencyCol:'Döviz', bulkSummaryText:'{n} satır bulundu, {p} kayıda gruplandı.',
     bulkSaving:'Kaydediliyor…', bulkDone:'{n} kayıt başarıyla kaydedildi.', bulkTypeCustomer:'Müşteri', bulkTypeSupplier:'Tedarikçi',
-    templateDownloaded:'Şablon indirildi.', templateError:'Şablon oluşturulamadı.'
+    templateDownloaded:'Şablon indirildi.', templateError:'Şablon oluşturulamadı.',
+    bankListAdded:'Banka eklendi.', bankListSaved:'Kaydedildi ✓', bankListSaveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
+    bankListRemoveFailed:'Çıkarılamadı, lütfen tekrar deneyin.', bankListEnterName:'Lütfen bir banka adı girin.',
+    bankListDuplicate:'Bu banka adı zaten listede var.'
   };
 
   MMGI18N.registerDict({
@@ -444,7 +467,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       bulk_title:'📥 Toplu Excel ile Yükle',
       bulk_desc:'Müşteri ve tedarikçilerinizi (banka, IBAN, döviz türü dahil) tek seferde yüklemek için şablonu indirin, doldurun ve tekrar yükleyin.',
       download_template_btn:'⬇️ Şablonu İndir', upload_excel_btn:'📤 Excel Yükle', bulk_confirm_btn:'Kaydet', bulk_cancel_btn:'İptal',
-      tab_customers:'👤 Müşteriler', tab_suppliers:'🚚 Tedarikçiler', tab_counterparties:'🏛️ Muhataplar', tab_banks:'🏦 Bankalarım',
+      tab_customers:'👤 Müşteriler', tab_suppliers:'🚚 Tedarikçiler', tab_counterparties:'🏛️ Muhataplar', tab_banks:'💳 İBAN\'larım', tab_bankList:'🏦 Çalıştığım Bankalar',
       add_customer_title:'Yeni Müşteri Ekle', add_supplier_title:'Yeni Tedarikçi Ekle',
       party_name_label:'Ünvan / Ad Soyad', party_name_ph:'ör. ABC İnşaat A.Ş.', party_idnum_label:'TC / Vergi No',
       iban_editor_label:'IBAN Bilgileri', add_iban_btn:'+ IBAN Ekle',
@@ -453,7 +476,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       add_counterparty_desc:'Teminat mektuplarında muhatap olarak gösterilecek kurum/kişileri buraya kaydedin (ör. ihaleyi açan kurum).',
       counterparty_name_ph:'ör. Karayolları Genel Müdürlüğü', notes_label:'Not / Adres (opsiyonel)', counterparty_notes_ph:'ör. Ankara, ihale no: 2025/123',
       save_counterparty_btn:'Muhatabı Kaydet',
-      banks_title:'Çalıştığınız Bankalar', banks_desc:'Kendi banka hesaplarınızı (banka + IBAN) buraya kaydedin; müşteri/tedarikçi IBAN bilgisi girerken ve talimat hazırlarken öneri olarak çıkar.',
+      banks_title:'İBAN\'larım', banks_desc:'Kendi banka hesaplarınızı (banka + IBAN) buraya kaydedin; müşteri/tedarikçi IBAN bilgisi girerken ve talimat hazırlarken öneri olarak çıkar.',
+      bankList_title:'🏦 Çalıştığım Bankalar',
+      bankList_desc:'Bu liste, Veri Giriş Paneli, Talimat Hazırlama ve Hazır Metin Talimatları\'ndaki "Banka" açılır listelerinde görünür. Buradan banka ekleyebilir, çıkarabilir ya da adını düzenleyebilirsiniz. Hiçbir değişiklik yapmazsanız varsayılan banka listesi kullanılmaya devam eder.',
+      bankList_new_label:'Yeni Banka Adı', bankList_new_ph:'ör. TÜRKİYE FİNANS', bankList_add_btn:'Ekle',
       bank_select_label:'Banka', bank_iban_label:'IBAN (opsiyonel)', bank_iban_ph:'TR__ ____ ____ ____ ____ ____ __', add_bank_btn:'Ekle'
     },
     en: {
@@ -466,7 +492,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       bulk_title:'📥 Bulk Upload via Excel',
       bulk_desc:'Download the template, fill it in, and re-upload it to add your customers and suppliers (including bank, IBAN, currency) all at once.',
       download_template_btn:'⬇️ Download Template', upload_excel_btn:'📤 Upload Excel', bulk_confirm_btn:'Save', bulk_cancel_btn:'Cancel',
-      tab_customers:'👤 Customers', tab_suppliers:'🚚 Suppliers', tab_counterparties:'🏛️ Counterparties', tab_banks:'🏦 My Banks',
+      tab_customers:'👤 Customers', tab_suppliers:'🚚 Suppliers', tab_counterparties:'🏛️ Counterparties', tab_banks:'💳 My IBANs', tab_bankList:'🏦 Banks I Work With',
       add_customer_title:'Add New Customer', add_supplier_title:'Add New Supplier',
       party_name_label:'Name / Company', party_name_ph:'e.g. ABC Construction Inc.', party_idnum_label:'ID / Tax No',
       iban_editor_label:'IBAN Details', add_iban_btn:'+ Add IBAN',
@@ -475,7 +501,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       add_counterparty_desc:'Register the institutions/people who will appear as the counterparty on letters of guarantee (e.g. the tendering authority).',
       counterparty_name_ph:'e.g. Highway Authority', notes_label:'Notes / Address (optional)', counterparty_notes_ph:'e.g. Ankara, tender no: 2025/123',
       save_counterparty_btn:'Save Counterparty',
-      banks_title:'Banks You Work With', banks_desc:'Save your own bank accounts (bank + IBAN) here; they will appear as suggestions when entering customer/supplier IBAN details and when preparing instructions.',
+      banks_title:'My IBANs', banks_desc:'Save your own bank accounts (bank + IBAN) here; they will appear as suggestions when entering customer/supplier IBAN details and when preparing instructions.',
+      bankList_title:'🏦 Banks I Work With',
+      bankList_desc:'This list appears in the "Bank" dropdowns across Data Entry Panel, Instruction Preparation, and Ready-made Text Instructions. You can add, remove, or rename banks here. If you make no changes, the default bank list keeps being used.',
+      bankList_new_label:'New Bank Name', bankList_new_ph:'e.g. TÜRKİYE FİNANS', bankList_add_btn:'Add',
       bank_select_label:'Bank', bank_iban_label:'IBAN (optional)', bank_iban_ph:'TR__ ____ ____ ____ ____ ____ __', add_bank_btn:'Add'
     }
   });
@@ -615,11 +644,90 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   });
 
   const BANKS = ['AKBANK','ALBARAKA','ANADOLUBANK','BURGAN BANK','DENİZBANK','EMLAK KATILIM','FİBABANKA','GARANTİ BANKASI','HALKBANK','ING','İŞ BANKASI','KUVEYT TÜRK','ODEA BANK','QNB','ŞEKERBANK','TEB','VAKIF KATILIM','VAKIFBANK','YAPI KREDİ','ZİRAAT BANKASI'];
+  // "Çalıştığım Bankalar" sekmesinde admin bu listeyi özelleştirebilir (ekle/çıkar/yeniden
+  // adlandır). Özelleştirilmiş bir liste kaydedilmişse (effectiveScopeId altında
+  // settings/bankList dokümanında) o kullanılır; hiç kaydedilmemişse yukarıdaki varsayılan
+  // BANKS listesi aynen kullanılmaya devam eder — böylece hiçbir mevcut kullanıcı etkilenmez.
+  // Bu liste, Talimat_Hazirlama.html ve HazirMetinTalimatlari.html tarafından da (aynı
+  // effectiveScopeId üzerinden) okunur, böylece "Banka" açılır listesi TÜM panellerde
+  // tutarlı kalır.
+  let customBankNames = null;
+  function currentBankNames(){
+    return (customBankNames && customBankNames.length) ? customBankNames : BANKS;
+  }
   function fillBankSelect(){
     const sel = document.getElementById('bankNameSelect');
-    if(sel) sel.innerHTML = '<option value="">Seçiniz</option>' + BANKS.map(b => `<option value="${b}">${b}</option>`).join('');
+    if(sel) sel.innerHTML = '<option value="">Seçiniz</option>' + currentBankNames().map(b => `<option value="${b}">${b}</option>`).join('');
   }
   fillBankSelect();
+
+  async function loadBankList(){
+    try{
+      const snap = await getDoc(doc(db, scopeCollection, effectiveScopeId, 'settings', 'bankList'));
+      customBankNames = (snap.exists() && Array.isArray(snap.data().names) && snap.data().names.length) ? snap.data().names : null;
+    }catch(e){ customBankNames = null; }
+    fillBankSelect();
+    renderBankListEditor();
+  }
+  async function saveBankListNames(names){
+    customBankNames = names;
+    try{
+      await setDoc(doc(db, scopeCollection, effectiveScopeId, 'settings', 'bankList'), { names: names }, { merge: true });
+      return true;
+    }catch(e){ return false; }
+  }
+  function renderBankListEditor(){
+    const editorEl = document.getElementById('bankListEditor');
+    if(!editorEl) return;
+    const names = currentBankNames();
+    editorEl.innerHTML = names.map((name, idx) =>
+      '<div class="field-row" data-bank-idx="' + idx + '" style="align-items:center;">' +
+        '<input type="text" class="bankList-name-input" value="' + escapeHtml(name) + '" style="flex:1;">' +
+        '<button type="button" class="member-icon-btn member-icon-btn-danger" data-remove-bank-idx="' + idx + '" title="' + LBL.delete + '">✕</button>' +
+      '</div>'
+    ).join('');
+    editorEl.querySelectorAll('[data-remove-bank-idx]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = parseInt(btn.dataset.removeBankIdx, 10);
+        const newNames = currentBankNames().slice();
+        newNames.splice(idx, 1);
+        const ok = await saveBankListNames(newNames);
+        showMsg('bankList_msg', ok ? LBL.bankListSaved : LBL.bankListRemoveFailed, !ok);
+        fillBankSelect();
+        renderBankListEditor();
+      });
+    });
+    let renameTimers = {};
+    editorEl.querySelectorAll('.bankList-name-input').forEach(input => {
+      input.addEventListener('change', async () => {
+        const row = input.closest('[data-bank-idx]');
+        const idx = parseInt(row.dataset.bankIdx, 10);
+        const newNames = currentBankNames().slice();
+        const newVal = input.value.trim();
+        if(!newVal){ renderBankListEditor(); return; }
+        newNames[idx] = newVal;
+        const ok = await saveBankListNames(newNames);
+        showMsg('bankList_msg', ok ? LBL.bankListSaved : LBL.bankListSaveFailed, !ok);
+        fillBankSelect();
+      });
+    });
+  }
+  document.getElementById('addBankNameBtn').addEventListener('click', async () => {
+    const input = document.getElementById('newBankNameInput');
+    const name = input.value.trim();
+    if(!name){ showMsg('bankList_msg', LBL.bankListEnterName, true); return; }
+    const existing = currentBankNames();
+    if(existing.some(b => b.toLocaleUpperCase('tr-TR') === name.toLocaleUpperCase('tr-TR'))){
+      showMsg('bankList_msg', LBL.bankListDuplicate, true);
+      return;
+    }
+    const newNames = existing.concat([name]);
+    const ok = await saveBankListNames(newNames);
+    input.value = '';
+    showMsg('bankList_msg', ok ? LBL.bankListAdded : LBL.bankListSaveFailed, !ok);
+    fillBankSelect();
+    renderBankListEditor();
+  });
 
   let banksList = [];
   async function loadBanks(){
@@ -936,6 +1044,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   });
 
   async function loadAll(){
+    await loadBankList();
     await loadBanks();
     await loadParties('customers');
     await loadParties('suppliers');

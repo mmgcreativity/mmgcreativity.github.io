@@ -1268,9 +1268,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   // ---- Yardımcı fonksiyonlar ----
   const BANKS = ['AKBANK','ALBARAKA','ANADOLUBANK','BURGAN BANK','DENİZBANK','EMLAK KATILIM','FİBABANKA','GARANTİ BANKASI','HALKBANK','ING','İŞ BANKASI','KUVEYT TÜRK','ODEA BANK','QNB','ŞEKERBANK','TEB','VAKIF KATILIM','VAKIFBANK','YAPI KREDİ','ZİRAAT BANKASI'];
+  // KRİTİK NOT: Banka listesi artık VeriGirisPaneli.html > "Bankalarım" > "Çalıştığım Bankalar"
+  // sekmesinden düzenlenebiliyor (ekleme/çıkarma/yeniden adlandırma). O ekrandan bir liste
+  // kaydedilmişse (aynı kapsam — kişisel/firma/grup — için), o özel liste burada da
+  // kullanılır; hiç kaydedilmemişse yukarıdaki varsayılan BANKS listesi aynen kullanılmaya
+  // devam eder (geriye dönük uyumluluk, hiçbir şey bozulmaz).
+  let CUSTOM_BANKS = null;
   function fillBankOptions(selectEl){
-    selectEl.innerHTML = '<option value="">Seçiniz</option>' + BANKS.map(b => `<option value="${b}">${b}</option>`).join('');
+    const list = (CUSTOM_BANKS && CUSTOM_BANKS.length) ? CUSTOM_BANKS : BANKS;
+    selectEl.innerHTML = '<option value="">Seçiniz</option>' + list.map(b => `<option value="${b}">${b}</option>`).join('');
   }
+  document.addEventListener('mmg-scope-ready', async () => {
+    try{
+      const cloud = window.mmgCloud;
+      if(!cloud || !cloud.scopeCollection || !cloud.effectiveScopeId) return;
+      const snap = await cloud.getDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.effectiveScopeId, 'settings', 'bankList'));
+      if(snap.exists() && Array.isArray(snap.data().names) && snap.data().names.length){
+        CUSTOM_BANKS = snap.data().names;
+        // Sayfa yüklenirken zaten (varsayılan listeyle) doldurulmuş olan banka select'lerini,
+        // seçili değerlerini koruyarak özel listeyle yeniden dolduruyoruz.
+        const selectsToRefresh = [];
+        const gonderen = document.getElementById('fGonderenBanka');
+        if(gonderen) selectsToRefresh.push(gonderen);
+        document.querySelectorAll('select[id^="fAliciBanka_"]').forEach(sel => selectsToRefresh.push(sel));
+        selectsToRefresh.forEach(sel => {
+          const prevVal = sel.value;
+          fillBankOptions(sel);
+          sel.value = prevVal;
+        });
+      }
+    }catch(e){ /* sessizce geç */ }
+  });
   fillBankOptions(document.getElementById('fGonderenBanka'));
 
   // ---- Kayıtlı Bilgiler (Firestore) ----

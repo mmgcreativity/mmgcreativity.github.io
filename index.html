@@ -757,8 +757,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması Hesaplama', nav_vadelimevduat:'Vadeli Mevduat Faizi Hesaplama',
       nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
       nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları', nav_verigirisi:'Veri Girişi',
-      nav_blog:'Blog', nav_forum:'Forum',
-      nav_calc_desc:'Araçları', nav_nakitakis_desc:'Tablosu', nav_talimat_desc:'Hazırlama', nav_talimat_full:'Talimat Hazırlama',
+      nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'SOSYAL', nav_label_verigirisi:'VERİ GİRİŞİ',
       nav_talimatlar:'Talimatlar', nav_talimatlar_desc:'İşlemleri', nav_hazirmetin:'Hazır Metin Talimatları',
       nav_budget:'Bütçeleme', nav_budget_desc:'Araçları',
       hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
@@ -849,8 +848,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
       nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
       nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools', nav_verigirisi:'Data Entry',
-      nav_blog:'Blog', nav_forum:'Forum',
-      nav_calc_desc:'Tools', nav_nakitakis_desc:'Table', nav_talimat_desc:'Preparation', nav_talimat_full:'Instruction Preparation',
+      nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'SOCIAL', nav_label_verigirisi:'DATA ENTRY',
       nav_talimatlar:'Instructions', nav_talimatlar_desc:'Center', nav_hazirmetin:'Ready-made Text Instructions',
       nav_budget:'Budgeting', nav_budget_desc:'Tools',
       hero_title:'Digital Finance Assistant', hero_tagline:'Your digital partner for financial decisions',
@@ -1203,12 +1201,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     </div>
 
-    <button class="nav-item" data-target="VeriGirisPaneli.html" data-title="Veri Giriş Paneli">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="VeriGirisPaneli.html" data-fav-title="Veri Giriş Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-      <span class="nav-text-wrap">
-        <span class="nav-title" data-i18n="nav_verigirisi">Veri Girişi</span>
-      </span>
-    </button>
+    <div class="nav-label" data-i18n="nav_label_sosyal">SOSYAL</div>
 
     <button class="nav-item" data-target="rehber.html" data-title="Rehber">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
@@ -1238,6 +1231,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </span>
     </button>
 
+    <button class="nav-item" id="navIstatistiklerBtn" data-target="Istatistikler.html" data-title="İstatistikler" data-gated="true" style="display:none;">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Istatistikler.html" data-fav-title="İstatistikler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="nav-text-wrap">
+        <span class="nav-title" data-i18n="dropdown_stats">İstatistikler</span>
+      </span>
+    </button>
+
     <button class="nav-item" id="navReferansPaneliBtn" data-target="ReferansKoduYonetimi.html" data-title="Referans Paneli" data-gated="true" style="display:none;">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="ReferansKoduYonetimi.html" data-fav-title="Referans Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
@@ -1245,10 +1245,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </span>
     </button>
 
-    <button class="nav-item" id="navIstatistiklerBtn" data-target="Istatistikler.html" data-title="İstatistikler" data-gated="true" style="display:none;">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Istatistikler.html" data-fav-title="İstatistikler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+    <div class="nav-label" data-i18n="nav_label_verigirisi">VERİ GİRİŞİ</div>
+
+    <button class="nav-item" data-target="VeriGirisPaneli.html" data-title="Veri Giriş Paneli">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="VeriGirisPaneli.html" data-fav-title="Veri Giriş Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title" data-i18n="dropdown_stats">İstatistikler</span>
+        <span class="nav-title" data-i18n="nav_verigirisi">Veri Girişi</span>
       </span>
     </button>
   </nav>
@@ -1840,20 +1842,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // iddia işlemlerini TEK bir sıraya (kuyruğa) alıp birbiri ardına, asla iç içe geçmeyecek
   // şekilde çalıştırıyoruz.
   let mmgSessionOpQueue = Promise.resolve();
-
-  // KRİTİK DÜZELTME 2 (paylaşılan localStorage sorunu): Aynı tarayıcının/gizli pencere
-  // grubunun TÜM sekmeleri localStorage'ı PAYLAŞIR. mmgEnsureSessionOwnership normalde
-  // "localStorage'da bu kullanıcıya ait bir oturum ID'si zaten varsa yeniden iddia etme"
-  // mantığıyla çalışıyor (sayfa yenilemesinde gereksiz yeniden-iddiayı önlemek için) — ama bu,
-  // BAŞKA bir sekmede AZ ÖNCE aynı hesapla GERÇEKTEN giriş yapıldığında da devreye girip,
-  // "zaten var" diyerek yeni oturumu iddia ETMEMESİNE, dolayısıyla eski sekmenin hiç
-  // kicklenmemesine (tek-oturum kısıtlamasının sessizce devre dışı kalmasına) sebep oluyordu.
-  // Çözüm: giriş/kayıt formu SADECE gerçekten submit edildiğinde bu bayrağı true yapıyoruz;
-  // mmgEnsureSessionOwnership bunu görünce, localStorage'da ne olursa olsun oturumu ZORLA
-  // yeniden iddia ediyor (böylece diğer sekmeler/cihazlar doğru şekilde kicklenir). Sıradan
-  // bir sayfa yenilemesinde bu bayrak false olduğu için mevcut davranış (gereksiz yeniden
-  // iddia etmeme) korunuyor.
-  let mmgJustAuthenticatedThisTab = false;
   function mmgQueueSessionOp(fn){
     mmgSessionOpQueue = mmgSessionOpQueue.then(fn, fn);
     return mmgSessionOpQueue;
@@ -1898,19 +1886,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // kapatır. "Son giriş" her zaman kazanır. Diğer platformun alanı değişse bile bu cihazı
   // etkilemez — böylece aynı hesap 1 web + 1 uygulamada aynı anda açık kalabilir.
   function mmgWatchSession(uid){
-    console.log('[MMG_DEBUG] mmgWatchSession ÇAĞRILDI', {uid, localSessionId: localStorage.getItem(MMG_SESSION_KEY), zaman: new Date().toISOString()});
     mmgStopWatchingSession();
     mmgSessionUnsub = onSnapshot(doc(db, 'users', uid), (snap) => {
-      if(!snap.exists()){ console.log('[MMG_DEBUG] onSnapshot: doküman yok'); return; }
+      if(!snap.exists()) return;
       const remoteSessionId = snap.data()[MMG_SESSION_FIELD];
       const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
-      console.log('[MMG_DEBUG] onSnapshot TETİKLENDİ', {
-        remoteSessionId, localSessionId, field: MMG_SESSION_FIELD,
-        fromCache: snap.metadata.fromCache, hasPendingWrites: snap.metadata.hasPendingWrites,
-        esitMi: remoteSessionId === localSessionId, zaman: new Date().toISOString()
-      });
       if(remoteSessionId && localSessionId && remoteSessionId !== localSessionId){
-        console.log('[MMG_DEBUG] >>> KICK TETİKLENDİ <<<', {remoteSessionId, localSessionId});
         mmgStopWatchingSession();
         localStorage.removeItem(MMG_SESSION_KEY);
         localStorage.removeItem(MMG_SESSION_UID_KEY);
@@ -1924,7 +1905,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           window.location.reload();
         });
       }
-    }, (err) => { console.log('[MMG_DEBUG] onSnapshot HATA VERDİ', {code: err && err.code, message: err && err.message}); });
+    }, () => { /* dinleme hatasında sessizce geç */ });
   }
 
   // Sayfa yeniden yüklendiğinde (yeni bir giriş değil, mevcut oturumun devamı) çağrılır.
@@ -1940,11 +1921,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // kullanıcıya aitse ya da hiç yoksa) bu cihaz için sıfırdan yeni bir oturum iddia ediyoruz.
   async function mmgEnsureSessionOwnership(uid){
     return mmgQueueSessionOp(async () => {
-      const forceClaim = mmgJustAuthenticatedThisTab;
-      mmgJustAuthenticatedThisTab = false; // bayrağı sadece bir kere kullan (tüket)
       const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
       const localSessionUid = localStorage.getItem(MMG_SESSION_UID_KEY);
-      if(forceClaim || !localSessionId || localSessionUid !== uid){
+      if(!localSessionId || localSessionUid !== uid){
         await mmgClaimSessionUnsafe(uid);
       }
       mmgWatchSession(uid);
@@ -2683,7 +2662,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     googleBtn.disabled = true;
     const remember = document.getElementById('rememberMe').checked;
     try{
-      mmgJustAuthenticatedThisTab = true;
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       const email = user.email;
@@ -2721,14 +2699,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       localStorage.setItem('mmg_remember', remember ? '1' : '0');
       updateUserBadge(customerNumber, username);
       syncUserDirectory(user.uid, customerNumber, username, email);
-      // NOT: Oturum iddiası (mmgClaimSession) burada BİLEREK çağrılmıyor. Bu satır önceden
-      // hem burada HEM DE onAuthStateChanged içindeki mmgEnsureSessionOwnership tarafından
-      // (neredeyse aynı anda) tetikleniyordu. İkisi ayrı kuyruğa alınmış olsa da, ilk claim'in
-      // Firestore dinleyicisinin (onSnapshot) GECİKMELİ ilk tetiklenmesi, ikinci claim'in
-      // localStorage'ı değiştirmesinden SONRA geliyor ve eski değerle karşılaştırıp kullanıcıyı
-      // GİRER GİRMEZ yanlışlıkla "başkası girdi" sanıp kicklemesine sebep oluyordu. Tek doğru
-      // çözüm: oturumu SADECE TEK BİR yerden iddia etmek. Bu iş artık sadece
-      // onAuthStateChanged → mmgEnsureSessionOwnership tarafından yapılıyor.
+      await mmgClaimSession(user.uid);
+      mmgWatchSession(user.uid);
       await applyPendingInviteIfAny(user, username);
       await syncCompanyCache(user.uid);
       await loadAdminFirmas(user.uid);
@@ -2770,7 +2742,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           showAuthError(MMGI18N.t('auth_err_weak_password'));
           return;
         }
-        mmgJustAuthenticatedThisTab = true;
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         // Kullanıcı adı benzersizliği: "usernames/{kucukharfli-ad}" dokümanını
         // rezerve etmeye çalış. Doküman zaten varsa (başka biri bu adı önce
@@ -2865,9 +2836,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
         syncUserDirectory(cred.user.uid, customerNumber, username, email);
-        // NOT: bkz. Google girişindeki aynı isimli not — oturum iddiası artık sadece
-        // onAuthStateChanged → mmgEnsureSessionOwnership tarafından yapılıyor, burada tekrar
-        // çağrılmıyor (öz-atma/self-kick yarış durumunu önlemek için).
+        await mmgClaimSession(cred.user.uid);
+        mmgWatchSession(cred.user.uid);
         if(premiumBenefit){
           if(premiumBenefit.type === 'free'){
             alert('🎉 "' + premiumBenefit.code + '" ' + MMGI18N.t('referral_used_free'));
@@ -2886,7 +2856,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         closeAuthOverlay();
         await showWelcomeIfNeeded(cred.user.uid);
       } else {
-        mmgJustAuthenticatedThisTab = true;
         const cred = await signInWithEmailAndPassword(auth, email, password);
         let customerNumber = null;
         let username = null;
@@ -2908,9 +2877,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(profile) localStorage.setItem('mmg_profile', JSON.stringify(profile));
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
-        // NOT: bkz. Google girişindeki aynı isimli not — oturum iddiası artık sadece
-        // onAuthStateChanged → mmgEnsureSessionOwnership tarafından yapılıyor, burada tekrar
-        // çağrılmıyor (öz-atma/self-kick yarış durumunu önlemek için).
+        await mmgClaimSession(cred.user.uid);
+        mmgWatchSession(cred.user.uid);
         await applyPendingInviteIfAny(cred.user, username);
         await syncCompanyCache(cred.user.uid);
         await loadAdminFirmas(cred.user.uid);

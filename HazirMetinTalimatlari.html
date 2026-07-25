@@ -213,10 +213,48 @@
       document.dispatchEvent(new CustomEvent('mmg-group-firmalar-ready'));
     }catch(e){ /* sessizce geç: grup yoksa ya da erişilemiyorsa sadece kayıtlı liste kullanılır */ }
   });
+
+  // ---- Özelleştirilmiş Banka Listesi (VeriGirisPaneli.html > Bankalarım > Çalıştığım
+  // Bankalar sekmesinde düzenlenir) — hiç kaydedilmemişse aşağıdaki (plain script'teki)
+  // varsayılan liste aynen kullanılmaya devam eder, hiçbir şey bozulmaz.
+  onAuthStateChanged(auth, async (user) => {
+    if(!user) return;
+    try{
+      let scopeCollection = 'users', scopeId = user.uid;
+      const activeScope = localStorage.getItem('mmg_active_data_scope');
+      if(activeScope && activeScope !== 'personal'){
+        scopeCollection = 'firmaAccounts';
+        scopeId = activeScope;
+      } else if(!activeScope){
+        const uSnap = await getDoc(doc(db, 'users', user.uid));
+        const uData = uSnap.exists() ? uSnap.data() : {};
+        if(uData.companyId){
+          scopeCollection = 'companies';
+          scopeId = localStorage.getItem('mmg_active_company_id') || uData.companyId;
+        }
+      }
+      let effectiveScopeId = scopeId;
+      if(scopeCollection === 'firmaAccounts'){
+        const fSnap = await getDoc(doc(db, 'firmaAccounts', scopeId));
+        const fData = fSnap.exists() ? fSnap.data() : {};
+        if(fData.dataGroupId) effectiveScopeId = fData.dataGroupId;
+      }
+      const listSnap = await getDoc(doc(db, scopeCollection, effectiveScopeId, 'settings', 'bankList'));
+      if(listSnap.exists() && Array.isArray(listSnap.data().names) && listSnap.data().names.length){
+        window.mmgCustomBanks = listSnap.data().names;
+        document.dispatchEvent(new CustomEvent('mmg-bank-list-ready'));
+      }
+    }catch(e){ /* sessizce geç */ }
+  });
 </script>
 
 <script>
   const BANKS = ['Akbank','Ziraat Bankası','QNB','Halkbank','Vakıfbank','Garanti BBVA','Yapı Kredi','İş Bankası','TEB','Şekerbank','Kuveyt Türk','Vakıf Katılım','Diğer'];
+  document.addEventListener('mmg-bank-list-ready', () => {
+    if(window.mmgCustomBanks && window.mmgCustomBanks.length){
+      F.banka.options = window.mmgCustomBanks;
+    }
+  });
   function bankSelectField(key, label){
     return { key: key, label: label || 'Banka', type: 'select', options: BANKS, placeholder: '' };
   }
