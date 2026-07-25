@@ -279,7 +279,9 @@
     pendingKindUser:'user', pendingKindAdmin:'admin', inviteSentBadge:'Invite Sent',
     dataGroupPickHub:'Please select a main company first.',
     dataGroupSaved:'Data sharing group saved ✓',
-    dataGroupSaveFailed:'Could not be saved, please try again.'
+    dataGroupSaveFailed:'Could not be saved, please try again.',
+    memberFirmaAccessLabel:'Company Access',
+    currentFirmaTag:'currently viewing'
   } : {
     firmaSubPrefix:'"', firmaSubSuffix:'" firmasına bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.',
     notAdminYetTitle:'Henüz bir firmanın yöneticisi değilsiniz',
@@ -297,7 +299,9 @@
     pendingKindUser:'kullanıcı', pendingKindAdmin:'yönetici', inviteSentBadge:'Davet Gönderildi',
     dataGroupPickHub:'Lütfen önce bir ana firma seçin.',
     dataGroupSaved:'Veri paylaşım grubu kaydedildi ✓',
-    dataGroupSaveFailed:'Kaydedilemedi, lütfen tekrar deneyin.'
+    dataGroupSaveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
+    memberFirmaAccessLabel:'Firma Erişimleri',
+    currentFirmaTag:'şu an görüntülenen'
   };
 
   // Bu panelde yönetilebilen yetki modülleri (sol menüdeki araç sayfalarıyla eşleşir).
@@ -739,25 +743,55 @@
         return;
       }
 
+      // ---- Bu üyelerin, adminin yönettiği DİĞER firmalarında da erişimi var mı? ----
+      // Bir kullanıcı ilk davet edilirken hangi firma(lar)a ekleneceği seçilebiliyordu,
+      // ama daha sonra bu firma listesini değiştirmenin (yeni firma ekleme/çıkarma) hiçbir
+      // yolu yoktu — kullanıcı sadece "Kullanıcı Ekle" ile yeniden davet edilip tekrar giriş
+      // yapmasını beklemek zorunda kalıyordu. Şimdi her üyenin, adminin yönettiği TÜM
+      // firmalardaki gerçek üyelik durumunu (var/yok) burada baştan çekip, aşağıda anında
+      // (yeniden davet/yeniden giriş gerekmeden) değiştirilebilen bir checkbox listesi olarak
+      // gösteriyoruz.
+      const memberDocs = [];
+      membersSnap.forEach(d => memberDocs.push({ id: d.id, data: d.data() }));
+      const firmaAccessMap = {}; // { uid: { firmaId: true/false } }
+      await Promise.all(memberDocs.map(async (m) => {
+        firmaAccessMap[m.id] = {};
+        await Promise.all(myAdminFirmas.map(async (f) => {
+          if(f.id === firmaId){ firmaAccessMap[m.id][f.id] = true; return; } // zaten burada listeleniyor
+          try{
+            const s = await getDoc(doc(db, 'firmaAccounts', f.id, 'members', m.id));
+            firmaAccessMap[m.id][f.id] = s.exists();
+          }catch(e){ firmaAccessMap[m.id][f.id] = false; }
+        }));
+      }));
+
       const rows = [];
-      membersSnap.forEach(d => {
-        const md = d.data();
-        const idPrefix = 'm_' + d.id;
+      memberDocs.forEach(({ id, data: md }) => {
+        const idPrefix = 'm_' + id;
+        const firmaAccessHtml = myAdminFirmas.length > 1
+          ? '<div class="mini-label" style="margin-top:12px;">' + LBL.memberFirmaAccessLabel + '</div>' +
+            '<div class="invite-firma-grid">' + myAdminFirmas.map(f =>
+              '<label class="perm-check"><input type="checkbox" class="member-firma-access-check" data-uid="' + id + '" data-firma="' + f.id + '"' +
+              (firmaAccessMap[id][f.id] ? ' checked' : '') + (f.id === firmaId ? ' disabled' : '') + '> ' + f.name +
+              (f.id === firmaId ? ' <span style="color:var(--muted); font-size:11px;">(' + LBL.currentFirmaTag + ')</span>' : '') + '</label>'
+            ).join('') + '</div>'
+          : '';
         rows.push(
-          '<div class="member-row" data-uid="' + d.id + '">' +
+          '<div class="member-row" data-uid="' + id + '">' +
             '<div class="member-row-top">' +
               '<div class="member-info">' +
-                '<div class="member-name">' + (md.username || md.email || d.id) + '</div>' +
+                '<div class="member-name">' + (md.username || md.email || id) + '</div>' +
                 '<div class="member-sub">' + (md.email || '') + '</div>' +
               '</div>' +
               '<div class="member-row-actions">' +
-                '<button type="button" class="member-icon-btn member-edit-btn" data-edit="' + d.id + '" title="' + LBL.editPerms + '" aria-label="' + LBL.editPerms + '">✏️</button>' +
-                '<button type="button" class="member-icon-btn member-icon-btn-danger member-remove-btn" data-remove="' + d.id + '" title="' + LBL.remove + '" aria-label="' + LBL.remove + '">✕</button>' +
+                '<button type="button" class="member-icon-btn member-edit-btn" data-edit="' + id + '" title="' + LBL.editPerms + '" aria-label="' + LBL.editPerms + '">✏️</button>' +
+                '<button type="button" class="member-icon-btn member-icon-btn-danger member-remove-btn" data-remove="' + id + '" title="' + LBL.remove + '" aria-label="' + LBL.remove + '">✕</button>' +
               '</div>' +
             '</div>' +
             '<div class="member-perm-panel" id="' + idPrefix + '_panel" hidden>' +
               '<div class="perm-select-all-row"><label class="perm-select-all-label"><input type="checkbox" id="' + idPrefix + '_selectAll"> ' + LBL.selectAllPerms + '</label></div>' +
               '<div class="perm-grid">' + permGridHtml(idPrefix, md.permissions || {}) + '<span class="save-hint" id="' + idPrefix + '_hint">' + LBL.saved + '</span></div>' +
+              firmaAccessHtml +
             '</div>' +
           '</div>'
         );
@@ -813,8 +847,8 @@
           if(panel) panel.hidden = !panel.hidden;
         });
       });
-      membersSnap.forEach(d => {
-        wirePermSelectAll('m_' + d.id, () => savePermissions(d.id, 'm_' + d.id));
+      memberDocs.forEach(({ id, data: md }) => {
+        wirePermSelectAll('m_' + id, () => savePermissions(id, 'm_' + id));
       });
       pendingInvites.forEach((inv, idx) => {
         const idPrefix = 'p_' + idx;
@@ -834,9 +868,44 @@
           savePendingInvitePermissions(pendingInvites[idx].path, 'p_' + idx);
         });
       });
+      // ---- Firma Erişimleri checkbox'ları: işaretlenince/kaldırılınca ANINDA uygulanır ----
+      listEl.querySelectorAll('.member-firma-access-check').forEach(chk => {
+        chk.addEventListener('change', async (e) => {
+          const targetUid = e.target.dataset.uid;
+          const targetFirmaId = e.target.dataset.firma;
+          const memberEntry = memberDocs.find(m => m.id === targetUid);
+          e.target.disabled = true;
+          await toggleMemberFirmaAccess(targetUid, targetFirmaId, e.target.checked, memberEntry ? memberEntry.data : {});
+          e.target.disabled = false;
+        });
+      });
     } catch(e){
       listEl.innerHTML = '<div class="empty-note">' + LBL.usersLoadFailed + '</div>';
     }
+  }
+
+  // Bir üyeyi, ADMİNİN YÖNETTİĞİ başka bir firmaya anında ekler ya da o firmadan çıkarır
+  // (davet gönderip kullanıcının tekrar giriş yapmasını beklemeye GEREK KALMADAN). Eklerken,
+  // kullanıcının o an düzenlediğimiz firmadaki adı/e-postası kopyalanır ve tüm yetkiler
+  // varsayılan olarak açık verilir (admin dilerse sonradan o firmanın kendi panelinden
+  // yetkileri daraltabilir).
+  async function toggleMemberFirmaAccess(uid, targetFirmaId, shouldHaveAccess, memberData){
+    try{
+      if(shouldHaveAccess){
+        const defaultPermissions = {};
+        PERMISSION_MODULES.forEach(m => { defaultPermissions[m.key] = true; });
+        await setDoc(doc(db, 'firmaAccounts', targetFirmaId, 'members', uid), {
+          username: memberData.username || '',
+          email: memberData.email || '',
+          permissions: defaultPermissions,
+          addedAt: serverTimestamp()
+        });
+        await setDoc(doc(db, 'users', uid), { firmaIds: arrayUnion(targetFirmaId) }, { merge: true });
+      } else {
+        await deleteDoc(doc(db, 'firmaAccounts', targetFirmaId, 'members', uid));
+        await setDoc(doc(db, 'users', uid), { firmaIds: arrayRemove(targetFirmaId) }, { merge: true });
+      }
+    } catch(e){ /* sessizce geç */ }
   }
 
   let savePermTimers = {};
