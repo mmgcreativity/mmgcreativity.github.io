@@ -79,6 +79,12 @@
 
   .perm-grid{ display:flex; flex-wrap:wrap; gap:10px 18px; margin:12px 0 16px; }
   .perm-check{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text); cursor:pointer; }
+  .perm-select-all-row{ margin-top:10px; }
+  .perm-select-all-label{
+    display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; color:var(--brass,#C6A15B); cursor:pointer;
+  }
+  .perm-select-all-label input[type="checkbox"]{ width:15px; height:15px; accent-color:var(--brass,#C6A15B); cursor:pointer; }
+  .member-row .perm-select-all-row{ margin-top:0; margin-bottom:8px; }
   .perm-check input{ accent-color: var(--brass); width:15px; height:15px; cursor:pointer; }
 
   .member-list{ display:flex; flex-direction:column; gap:10px; margin-top:6px; }
@@ -124,36 +130,43 @@
   </div>
 
   <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
-  <div class="card" id="firmaSelectorCard" style="display:none; flex:0 0 300px; min-width:240px;">
-    <div class="mini-label" style="margin-bottom:8px;" data-i18n="managed_firma">Yönettiğiniz Firma</div>
-    <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;"></select>
-  </div>
-
-  <div class="card" style="flex:1; min-width:280px;">
-    <h2 data-i18n="add_user_title">Kullanıcı Ekle</h2>
-    <div class="card-sub" data-i18n="add_user_desc">Eklemek istediğiniz kişinin bu siteye kayıtlı e-posta adresini girin. Kişi az önce girdiğiniz e-postayla (veya henüz kaydı yoksa yeni kayıt olarak) giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.</div>
-    <div class="auth-field">
-      <label data-i18n="user_email_label">Kullanıcının E-postası</label>
-      <input type="email" id="inviteEmail" placeholder="ornek@eposta.com">
+  <div style="display:flex; flex-direction:column; gap:16px; flex:0 0 300px; min-width:240px;">
+    <div class="card" id="firmaSelectorCard" style="display:none;">
+      <div class="mini-label" style="margin-bottom:8px;" data-i18n="managed_firma">Yönettiğiniz Firma</div>
+      <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;"></select>
     </div>
-    <div class="perm-grid" id="invitePermGrid"></div>
-    <button type="button" class="auth-submit" id="inviteSubmitBtn" data-i18n="send_invite">Davet Gönder</button>
-    <div class="auth-error" id="inviteError"></div>
-    <div class="auth-success" id="inviteSuccess"></div>
-  </div>
-  </div>
-
-  <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
-  <div class="card" id="pendingInvitesCard" style="display:none; flex:1; min-width:280px;">
-    <h2 data-i18n="pending_invites_title">Bekleyen Davetler</h2>
-    <div class="card-sub" data-i18n="pending_invites_desc">Bu kişiler henüz giriş yapıp daveti kabul etmedi.</div>
-    <div id="pendingInvitesList"></div>
+    <div class="card">
+      <h2 data-i18n="my_users_title">Kullanıcılarım</h2>
+      <div class="card-sub" data-i18n="my_users_desc">Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.</div>
+      <div class="member-list" id="membersList"><div class="empty-note" data-i18n="loading">Yükleniyor…</div></div>
+    </div>
   </div>
 
-  <div class="card" style="flex:1; min-width:280px;">
-    <h2 data-i18n="my_users_title">Kullanıcılarım</h2>
-    <div class="card-sub" data-i18n="my_users_desc">Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.</div>
-    <div class="member-list" id="membersList"><div class="empty-note" data-i18n="loading">Yükleniyor…</div></div>
+  <div style="display:flex; flex-direction:column; gap:16px; flex:1; min-width:280px;">
+    <div class="card">
+      <h2 data-i18n="add_user_title">Kullanıcı Ekle</h2>
+      <div class="card-sub" data-i18n="add_user_desc">Eklemek istediğiniz kişinin bu siteye kayıtlı e-posta adresini girin. Kişi az önce girdiğiniz e-postayla (veya henüz kaydı yoksa yeni kayıt olarak) giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.</div>
+      <div class="auth-field">
+        <label data-i18n="user_email_label">Kullanıcının E-postası</label>
+        <input type="email" id="inviteEmail" placeholder="ornek@eposta.com">
+      </div>
+      <div class="perm-select-all-row">
+        <label class="perm-select-all-label">
+          <input type="checkbox" id="inviteSelectAll">
+          <span data-i18n="select_all_perms">Tümünü Seç</span>
+        </label>
+      </div>
+      <div class="perm-grid" id="invitePermGrid"></div>
+      <button type="button" class="auth-submit" id="inviteSubmitBtn" data-i18n="send_invite">Davet Gönder</button>
+      <div class="auth-error" id="inviteError"></div>
+      <div class="auth-success" id="inviteSuccess"></div>
+    </div>
+
+    <div class="card" id="pendingInvitesCard" style="display:none;">
+      <h2 data-i18n="pending_invites_title">Bekleyen Davetler</h2>
+      <div class="card-sub" data-i18n="pending_invites_desc">Bu kişiler henüz giriş yapıp daveti kabul etmedi.</div>
+      <div id="pendingInvitesList"></div>
+    </div>
   </div>
   </div>
 </div>
@@ -194,7 +207,7 @@
     enterValidEmail:'Please enter a valid email address.', sending:'Sending…',
     inviteSent:'Invitation sent. The person will be added automatically when they sign in with this email.',
     inviteFailed:'Invitation could not be sent, please try again.',
-    cancelInvite:'Cancel Invite', noUsersAdded:'No users added yet.', remove:'Remove', saved:'Saved ✓',
+    cancelInvite:'Cancel Invite', noUsersAdded:'No users added yet.', remove:'Remove', saved:'Saved ✓', selectAllPerms:'Select All',
     confirmRemoveUser:'Are you sure you want to remove this user from the company?',
     usersLoadFailed:'Users could not be loaded.'
   } : {
@@ -206,7 +219,7 @@
     enterValidEmail:'Lütfen geçerli bir e-posta adresi girin.', sending:'Gönderiliyor…',
     inviteSent:'Davet gönderildi. Kişi bu e-postayla giriş yaptığında otomatik olarak eklenecek.',
     inviteFailed:'Davet gönderilemedi, lütfen tekrar deneyin.',
-    cancelInvite:'Daveti İptal Et', noUsersAdded:'Henüz eklenmiş kullanıcı yok.', remove:'Kaldır', saved:'Kaydedildi ✓',
+    cancelInvite:'Daveti İptal Et', noUsersAdded:'Henüz eklenmiş kullanıcı yok.', remove:'Kaldır', saved:'Kaydedildi ✓', selectAllPerms:'Tümünü Seç',
     confirmRemoveUser:'Bu kullanıcıyı firmadan kaldırmak istediğinize emin misiniz?',
     usersLoadFailed:'Kullanıcılar yüklenemedi.'
   };
@@ -240,6 +253,26 @@
     });
     return out;
   }
+  // Bir "Tümünü Seç" kutusunu, aynı gruptaki tüm yetki kutucuklarıyla iki yönlü bağlar:
+  // tümünü seç işaretlenince hepsi işaretlenir; herhangi biri elle değiştirilince
+  // hepsi işaretliyse tümünü seç de otomatik işaretlenir, değilse kalkar.
+  function wirePermSelectAll(idPrefix, onIndividualChange){
+    const selectAllEl = document.getElementById(idPrefix + '_selectAll');
+    if(!selectAllEl) return;
+    const getChecks = () => PERMISSION_MODULES.map(m => document.getElementById(idPrefix + '_' + m.key)).filter(Boolean);
+    const syncSelectAllState = () => {
+      const checks = getChecks();
+      selectAllEl.checked = checks.length > 0 && checks.every(c => c.checked);
+    };
+    selectAllEl.addEventListener('change', () => {
+      getChecks().forEach(c => { c.checked = selectAllEl.checked; });
+      if(onIndividualChange) onIndividualChange();
+    });
+    getChecks().forEach(c => {
+      c.addEventListener('change', syncSelectAllState);
+    });
+    syncSelectAllState();
+  }
 
   let firmaId = null;
   let myAdminFirmas = []; // [{id, name}]
@@ -250,6 +283,7 @@
     document.getElementById('firmaHeaderSub').textContent =
       LBL.firmaSubPrefix + (f ? f.name : fid) + LBL.firmaSubSuffix;
     document.getElementById('invitePermGrid').innerHTML = permGridHtml('invite', null);
+    wirePermSelectAll('invite');
     await loadMembers();
     await loadPendingInvites();
   }
@@ -396,6 +430,7 @@
               '</div>' +
               '<button type="button" class="member-remove-btn" data-remove="' + d.id + '">' + LBL.remove + '</button>' +
             '</div>' +
+            '<div class="perm-select-all-row"><label class="perm-select-all-label"><input type="checkbox" id="' + idPrefix + '_selectAll"> ' + LBL.selectAllPerms + '</label></div>' +
             '<div class="perm-grid">' + permGridHtml(idPrefix, md.permissions || {}) + '<span class="save-hint" id="' + idPrefix + '_hint">' + LBL.saved + '</span></div>' +
           '</div>'
         );
@@ -403,6 +438,9 @@
       listEl.innerHTML = rows.join('');
       listEl.querySelectorAll('.member-remove-btn').forEach(btn => {
         btn.addEventListener('click', () => removeMember(btn.dataset.remove));
+      });
+      snap.forEach(d => {
+        wirePermSelectAll('m_' + d.id, () => savePermissions(d.id, 'm_' + d.id));
       });
       listEl.querySelectorAll('.perm-grid input[type="checkbox"]').forEach(chk => {
         chk.addEventListener('change', (e) => {
@@ -450,6 +488,7 @@
       page_title:'👥 Kullanıcı Yönetim Paneli', page_sub_default:'Firma hesabınıza bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.',
       managed_firma:'Yönettiğiniz Firma',
       add_user_title:'Kullanıcı Ekle', add_user_desc:'Eklemek istediğiniz kişinin bu siteye kayıtlı e-posta adresini girin. Kişi az önce girdiğiniz e-postayla (veya henüz kaydı yoksa yeni kayıt olarak) giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.',
+      select_all_perms:'Tümünü Seç',
       user_email_label:'Kullanıcının E-postası', send_invite:'Davet Gönder',
       pending_invites_title:'Bekleyen Davetler', pending_invites_desc:'Bu kişiler henüz giriş yapıp daveti kabul etmedi.',
       my_users_title:'Kullanıcılarım', my_users_desc:'Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.',
@@ -461,6 +500,7 @@
       page_title:'👥 User Management Panel', page_sub_default:'You can add and manage the users connected to your company account here.',
       managed_firma:'Company You Manage',
       add_user_title:'Add User', add_user_desc:"Enter the email address the person you want to add has registered on this site with. The person will be automatically added as a user of your company when they sign in with the email you just entered (or register as a new user if they haven't yet).",
+      select_all_perms:'Select All',
       user_email_label:"User's Email", send_invite:'Send Invite',
       pending_invites_title:'Pending Invites', pending_invites_desc:'These people have not yet signed in and accepted the invite.',
       my_users_title:'My Users', my_users_desc:'Permissions are saved automatically when you change them.',
