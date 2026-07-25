@@ -413,6 +413,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .desktop-edit-btn:hover{ border-color:var(--brass); color:var(--brass); }
   .desktop-edit-btn.active{ background:var(--brass); border-color:var(--brass); color:#141220; }
   .desktop-edit-btn svg{ width:15px; height:15px; }
+  .desktop-toolbar-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .desktop-reset-btn{ color:var(--muted); }
+  .desktop-reset-btn:hover{ border-color:#e05d5d; color:#e05d5d; }
+  .desktop-reset-btn[hidden]{ display:none; }
   .desktop-hint{
     display:flex; align-items:flex-start; gap:10px; max-width:1400px; margin-bottom:16px; padding:12px 14px;
     background:var(--surface); border:1px solid var(--hairline); border-left:3px solid var(--brass);
@@ -1425,10 +1429,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <div class="desktop-toolbar">
         <h2 data-i18n="desktop_title">Masaüstünüz</h2>
-        <button type="button" class="desktop-edit-btn" id="desktopEditToggle" aria-pressed="false">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-          <span id="desktopEditToggleLabel" data-i18n="desktop_edit_start">Masaüstünü Düzenle</span>
-        </button>
+        <div class="desktop-toolbar-actions">
+          <button type="button" class="desktop-edit-btn" id="desktopEditToggle" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+            <span id="desktopEditToggleLabel" data-i18n="desktop_edit_start">Masaüstünü Düzenle</span>
+          </button>
+          <button type="button" class="desktop-edit-btn desktop-reset-btn" id="desktopResetBtn" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+            <span data-i18n="desktop_reset">Sıfırla</span>
+          </button>
+        </div>
       </div>
       <div class="desktop-hint" id="desktopHint" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v.01"/><path d="M11 12h1v5h1"/></svg>
@@ -2088,11 +2098,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // ---- Düzenleme modu ----
   var editBtn = document.getElementById('desktopEditToggle');
   var editLabel = document.getElementById('desktopEditToggleLabel');
+  var resetBtn = document.getElementById('desktopResetBtn');
   function setEditMode(on){
     grid.classList.toggle('edit-mode', on);
     editBtn.classList.toggle('active', on);
     editBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
     editLabel.textContent = on ? 'Düzenlemeyi Bitir' : 'Masaüstünü Düzenle';
+    if(resetBtn) resetBtn.hidden = !on;
     Array.prototype.forEach.call(grid.querySelectorAll('.app-card'), function(c){
       c.setAttribute('draggable', on ? 'true' : 'false');
     });
@@ -2100,6 +2112,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   if(editBtn){
     editBtn.addEventListener('click', function(){
       setEditMode(!grid.classList.contains('edit-mode'));
+    });
+  }
+
+  // ---- Masaüstünü sıfırla (yalnızca düzenleme modunda görünür) ----
+  if(resetBtn){
+    resetBtn.addEventListener('click', function(){
+      var ok = window.confirm('Masaüstü düzenini sıfırlamak istediğinize emin misiniz? Eklediğiniz kısayollar, kaldırdığınız kartlar ve yaptığınız boyut değişiklikleri geri alınacak ve varsayılan görünüme dönülecek.');
+      if(!ok) return;
+      try{
+        localStorage.removeItem(LAYOUT_KEY);
+        localStorage.removeItem(SIZE_KEY);
+        localStorage.removeItem(REMOVED_KEY);
+      }catch(e){}
+      location.reload();
     });
   }
 
