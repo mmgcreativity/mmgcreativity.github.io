@@ -2367,17 +2367,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       return;
     }
     wrap.style.display = 'block';
-    const activeScope = getActiveDataScope();
-    const activeFirma = activeScope !== 'personal' ? mmgFirmaMemberships.find(f => f.id === activeScope) : null;
-    if(currentEl) currentEl.textContent = activeFirma ? ('🏢 ' + activeFirma.name) : MMGI18N.t('data_scope_personal');
-    // Listede sadece ALTERNATİFLER görünür (o an aktif olan zaten üstte, canlı
+    // "Kendi Verilerim" menüde bir seçenek olarak sunulmuyor: firmalı bir kullanıcı için
+    // burada her zaman bir firma adı gösterilir. Saklı seçim 'personal' ya da artık
+    // geçerli olmayan bir firmaysa, sessizce listedeki ilk firmaya geçilir.
+    let activeScope = getActiveDataScope();
+    if(activeScope === 'personal' || !mmgFirmaMemberships.some(f => f.id === activeScope)){
+      activeScope = mmgFirmaMemberships[0].id;
+      localStorage.setItem('mmg_active_data_scope', activeScope);
+    }
+    const activeFirma = mmgFirmaMemberships.find(f => f.id === activeScope);
+    if(currentEl) currentEl.textContent = '🏢 ' + (activeFirma ? activeFirma.name : '');
+    // Listede sadece DİĞER firmalar görünür (o an aktif olan zaten üstte, canlı
     // renkli gösteriliyor) — kalabalık olmasın diye herkes tekrar listelenmez.
     if(listEl){
-      const others = [];
-      if(activeScope !== 'personal') others.push({ scope: 'personal', label: MMGI18N.t('data_scope_personal') });
-      mmgFirmaMemberships.forEach(f => {
-        if(f.id !== activeScope) others.push({ scope: f.id, label: '🏢 ' + f.name });
-      });
+      const others = mmgFirmaMemberships
+        .filter(f => f.id !== activeScope)
+        .map(f => ({ scope: f.id, label: '🏢 ' + f.name }));
       listEl.innerHTML = others.map(o =>
         '<div class="mmg-account-row" data-scope="' + o.scope + '" style="opacity:0.68;">' +
           '<span class="mmg-account-row-main">' + o.label + '</span>' +
