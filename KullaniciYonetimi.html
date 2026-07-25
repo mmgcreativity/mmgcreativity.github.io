@@ -139,8 +139,13 @@
   <div class="two-col-grid">
   <div style="display:flex; flex-direction:column; gap:16px; min-width:0;">
     <div class="card" id="firmaSelectorCard" style="display:none;">
-      <div class="mini-label" style="margin-bottom:8px;" data-i18n="managed_firma">Yönettiğiniz Firma</div>
+      <div class="mini-label" style="margin-bottom:8px;" data-i18n="managed_firma">Firmalarım</div>
       <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;"></select>
+    </div>
+    <div class="card">
+      <h2 data-i18n="my_users_title">Kullanıcılarım</h2>
+      <div class="card-sub" data-i18n="my_users_desc">Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.</div>
+      <div class="member-list" id="membersList"><div class="empty-note" data-i18n="loading">Yükleniyor…</div></div>
     </div>
     <div class="card" id="pendingInvitesCard" style="display:none;">
       <h2 data-i18n="pending_invites_title">Bekleyen Davetler</h2>
@@ -191,12 +196,6 @@
       </div>
       <div class="auth-error" id="adminInviteError"></div>
       <div class="auth-success" id="adminInviteSuccess"></div>
-    </div>
-
-    <div class="card">
-      <h2 data-i18n="my_users_title">Kullanıcılarım</h2>
-      <div class="card-sub" data-i18n="my_users_desc">Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.</div>
-      <div class="member-list" id="membersList"><div class="empty-note" data-i18n="loading">Yükleniyor…</div></div>
     </div>
   </div>
   </div>
@@ -555,7 +554,7 @@
           await loadPendingInvites();
         });
       });
-    } catch(e){ console.error('loadPendingInvites hata:', e); card.style.display = 'none'; }
+    } catch(e){ card.style.display = 'none'; }
   }
 
   // ---- Kullanıcı listesi ----
@@ -647,7 +646,7 @@
   MMGI18N.registerDict({
     tr: {
       page_title:'👥 Kullanıcı Yönetim Paneli', page_sub_default:'Firma hesabınıza bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.',
-      managed_firma:'Yönettiğiniz Firma',
+      managed_firma:'Firmalarım',
       add_user_title:'Kullanıcı Ekle', add_user_desc:'Eklemek istediğiniz kişinin kullanıcı kodunu girin (profil menüsünde "Kullanıcı Kodu: #..." olarak görünür). Kişi bu kodla ilişkili hesabıyla giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.',
       select_all_perms:'Tümünü Seç',
       user_code_label:'Kullanıcının Kodu', send_invite:'Davet Gönder',
