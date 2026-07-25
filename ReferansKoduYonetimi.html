@@ -253,6 +253,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     loadingTxt:'Loading…', noCodesYet:'No referral codes defined yet.', codesLoadFailed:'Codes could not be loaded.',
     confirmDeleteCode:'Are you sure you want to delete the code "', codeSaved:'" code saved. ✓', codeSaveFailed:'Code could not be saved, please try again.',
     updateCodePrefix:'Update "', updateCodeSuffix:'" Code',
+    saveChanges:'Save Changes', saving:'Saving…',
     ownerNotFound:'No user was found with this user code.', unassigned:'Unassigned', assignedTo:'Assigned to',
     noPermissionOwner:'This page is only available to admins, or to users who have a referral code assigned to them.<br><br>',
     myCodesLoadFailed:'Your codes could not be loaded.', noSignupsYet:'No one has signed up with this code yet.',
@@ -270,6 +271,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     loadingTxt:'Yükleniyor…', noCodesYet:'Henüz tanımlı bir referans kodu yok.', codesLoadFailed:'Kodlar yüklenemedi.',
     confirmDeleteCode:'"', codeSaved:'" kodu kaydedildi. ✓', codeSaveFailed:'Kod kaydedilemedi, tekrar deneyin.',
     updateCodePrefix:'"', updateCodeSuffix:'" Kodunu Güncelle',
+    saveChanges:'Değişiklikleri Kaydet', saving:'Kaydediliyor…',
     ownerNotFound:'Bu kullanıcı koduna sahip bir kullanıcı bulunamadı.', unassigned:'Atanmamış', assignedTo:'Atandı',
     noPermissionOwner:'Bu sayfa yalnızca yöneticilere ya da kendisine bir referans kodu atanmış kullanıcılara açıktır.<br><br>',
     myCodesLoadFailed:'Kodlarınız yüklenemedi.', noSignupsYet:'Bu kodla henüz kimse katılmadı.',
@@ -333,9 +335,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           document.getElementById('mmgAdminMaxUses').value = btn.dataset.maxUses || '';
           document.getElementById('mmgAdminOwnerCode').value = btn.dataset.ownerCode || '';
           document.getElementById('mmgAdminCommissionPercent').value = btn.dataset.commission || '';
-          document.getElementById('mmgAdminSubmitBtn').textContent = LBL.updateCodePrefix + btn.dataset.code + LBL.updateCodeSuffix;
+          document.getElementById('mmgAdminSubmitBtn').textContent = LBL.saveChanges;
           document.getElementById('mmgAdminCancelEditBtn').style.display = 'inline-block';
           document.getElementById('mmgAdminForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          mmgIsEditingCode = true;
         });
       });
       listEl.querySelectorAll('.mmg-admin-del').forEach(btn => {
@@ -350,11 +353,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   }
 
+  let mmgIsEditingCode = false;
+
   function mmgResetAdminForm(){
     document.getElementById('mmgAdminForm').reset();
     document.getElementById('mmgAdminDiscountWrap').style.display = 'none';
     document.getElementById('mmgAdminSubmitBtn').textContent = MMGI18N.t('save_code');
     document.getElementById('mmgAdminCancelEditBtn').style.display = 'none';
+    mmgIsEditingCode = false;
   }
   document.getElementById('mmgAdminCancelEditBtn').addEventListener('click', mmgResetAdminForm);
 
@@ -372,6 +378,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(!code){ msgEl.textContent = LBL.enterCode; msgEl.style.color = 'var(--red,#e2544b)'; return; }
     const submitBtn = document.getElementById('mmgAdminSubmitBtn');
     submitBtn.disabled = true;
+    const originalBtnText = submitBtn.textContent;
+    submitBtn.textContent = LBL.saving;
+    msgEl.textContent = '';
     try{
       let ownerUid = null, ownerCode = null, ownerLabel = null;
       if(ownerCodeRaw){
@@ -381,6 +390,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(ownerSnap.empty){
           msgEl.textContent = LBL.ownerNotFound;
           msgEl.style.color = 'var(--red,#e2544b)';
+          submitBtn.textContent = originalBtnText;
           return;
         }
         const ownerDoc = ownerSnap.docs[0];
@@ -407,6 +417,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     } catch(err){
       msgEl.textContent = LBL.codeSaveFailed;
       msgEl.style.color = 'var(--red,#e2544b)';
+      submitBtn.textContent = originalBtnText;
     } finally {
       submitBtn.disabled = false;
     }
