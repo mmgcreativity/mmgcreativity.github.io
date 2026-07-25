@@ -1476,6 +1476,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.body.style.overflow = willOpen ? 'hidden' : '';
   });
 
+  // Bir çekmece başlığının (Hesaplama Araçları, Bütçeleme Araçları, Talimatlar gibi)
+  // "yanık" (active) görünmesi gereken iki durum var: (1) çekmece o an açıksa (kullanıcı
+  // az önce tıkladı), (2) çekmece kapalıyken bile içindeki bir alt sayfa hâlâ görüntüleniyorsa.
+  // Bu iki koşulu tek bir yerden hesaplayıp her yerde aynı şekilde uyguluyoruz.
+  function updateDrawerToggleActiveState(toggle){
+    if(!toggle) return;
+    const wrap = toggle.closest('.nav-drawer-wrap');
+    const drawer = wrap ? wrap.querySelector('.nav-drawer') : null;
+    const isOpen = !!(drawer && drawer.classList.contains('open'));
+    const hasActiveChild = !!(drawer && drawer.querySelector('.nav-item.active'));
+    toggle.classList.toggle('active', isOpen || hasActiveChild);
+  }
+
   function setActive(target){
     document.querySelectorAll('.nav-item').forEach(el=>{
       el.classList.toggle('active', el.dataset.target === target);
@@ -1483,11 +1496,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // Aktif sayfa bir çekmece (drawer) içindeki alt ögeyse, üstteki başlık
     // (Hesaplama Araçları, Bütçeleme Araçları, Talimatlar gibi) de aynı
     // vurgulamayı (arka plan + renkli sol çizgi) alsın.
-    document.querySelectorAll('.nav-drawer-wrap').forEach(wrap=>{
-      const toggle = wrap.querySelector('[data-drawer-toggle]');
-      const hasActiveChild = wrap.querySelector('.nav-drawer .nav-item.active');
-      if(toggle) toggle.classList.toggle('active', !!hasActiveChild);
-    });
+    document.querySelectorAll('[data-drawer-toggle]').forEach(updateDrawerToggleActiveState);
   }
 
   // F5 ile sayfa yenilendiğinde kullanıcıyı ana sayfaya değil, en son açık olduğu
@@ -1561,11 +1570,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       requestAnimationFrame(()=>{
         requestAnimationFrame(()=> drawer.classList.add('open'));
       });
+      updateDrawerToggleActiveState(toggle);
     }
     function closeDrawer(){
       drawer.classList.remove('open');
       drawer.hidden = true;
       toggle.setAttribute('aria-expanded', 'false');
+      updateDrawerToggleActiveState(toggle);
     }
 
     toggle.addEventListener('click', () => {
@@ -1602,6 +1613,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           drawer.classList.remove('open');
           drawer.hidden = true;
           if(toggle) toggle.setAttribute('aria-expanded', 'false');
+          if(toggle) updateDrawerToggleActiveState(toggle);
         }
       }
     });
