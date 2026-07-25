@@ -348,8 +348,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <th style="width:20px;">#</th>
               <th style="width:110px;" data-i18n="th_bank">Banka</th>
               <th class="num" style="width:66px;" data-i18n="th_principal">Anapara</th>
-              <th class="num" style="width:40px;" data-i18n="th_term_days">Vade<br>(Gün)</th>
-              <th class="num" style="width:46px;" data-i18n="th_annual_rate">Yıllık<br>Oran %</th>
+              <th class="num" style="width:40px;" data-i18n-html="th_term_days">Vade<br>(Gün)</th>
+              <th class="num" style="width:46px;" data-i18n-html="th_annual_rate">Yıllık<br>Oran %</th>
               <th style="width:26px;"></th>
             </tr>
           </thead>
@@ -371,8 +371,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <tr>
               <th style="width:18px;"></th>
               <th data-i18n="th_bank">Banka</th>
-              <th class="num" style="width:52px;" data-i18n="th_term_days">Vade<br>(Gün)</th>
-              <th class="num" style="width:96px;" data-i18n="th_final_balance">Vade Sonu<br>Bakiye</th>
+              <th class="num" style="width:52px;" data-i18n-html="th_term_days">Vade<br>(Gün)</th>
+              <th class="num" style="width:96px;" data-i18n-html="th_final_balance">Vade Sonu<br>Bakiye</th>
             </tr>
           </thead>
           <tbody id="resultBody"></tbody>
@@ -380,7 +380,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <div class="empty" id="emptyState" data-i18n="empty_state">Henüz teklif eklenmedi. Soldan bir teklif ekleyerek başla.</div>
 
-      <div class="assump" data-i18n="assumption_note">
+      <div class="assump" data-i18n-html="assumption_note">
         <b>Yöntem:</b> Brüt Faiz, TL vadeli mevduatta kullanılan basit faiz (Actual/365) yöntemiyle hesaplanır:
         <code>Brüt Faiz = Anapara × Yıllık Oran × Vade(Gün) / 365</code>. Stopaj oranı, 09.07.2025 tarihli 2025/66 sayılı
         Cumhurbaşkanı Kararı'na göre vade gününe göre otomatik uygulanır: 183 güne kadar <b>%17,5</b>, 366 güne kadar <b>%15</b>,
