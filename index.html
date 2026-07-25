@@ -759,6 +759,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları', nav_verigirisi:'Veri Girişi',
       nav_blog:'Blog', nav_forum:'Forum',
       nav_calc_desc:'Araçları', nav_nakitakis_desc:'Tablosu', nav_talimat_desc:'Hazırlama', nav_talimat_full:'Talimat Hazırlama',
+      nav_talimatlar:'Talimatlar', nav_talimatlar_desc:'İşlemleri', nav_hazirmetin:'Hazır Metin Talimatları',
       nav_budget:'Bütçeleme', nav_budget_desc:'Araçları',
       hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
       hero_desc:'Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.',
@@ -849,6 +850,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools', nav_verigirisi:'Data Entry',
       nav_blog:'Blog', nav_forum:'Forum',
       nav_calc_desc:'Tools', nav_nakitakis_desc:'Table', nav_talimat_desc:'Preparation', nav_talimat_full:'Instruction Preparation',
+      nav_talimatlar:'Instructions', nav_talimatlar_desc:'Center', nav_hazirmetin:'Ready-made Text Instructions',
       nav_budget:'Budgeting', nav_budget_desc:'Tools',
       hero_title:'Digital Finance Assistant', hero_tagline:'Your digital partner for financial decisions',
       hero_desc:'It helps your company with financial matters, and acts as a financial advisor for individual users. It performs the calculations you need in seconds and makes your budget planning easier.',
@@ -1179,13 +1181,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     </div>
 
-    <button class="nav-item" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
+    <div class="nav-drawer-wrap">
+    <button class="nav-item" id="talimatlarAraclariToggle" data-drawer-toggle="true" data-title="Talimatlar" aria-expanded="false">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title" data-i18n="nav_talimat">Talimat</span>
-        <span class="nav-desc" data-i18n="nav_talimat_desc">Hazırlama</span>
+        <span class="nav-title" data-i18n="nav_talimatlar">Talimatlar</span>
       </span>
+      <span class="nav-drawer-chevron" id="talimatlarChevron">›</span>
     </button>
+    <div class="nav-drawer" id="talimatlarDrawer" hidden>
+      <button class="nav-item nav-subitem" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_talimat_full">Talimat Hazırlama</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="HazirMetinTalimatlari.html" data-title="Hazır Metin Talimatları">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="HazirMetinTalimatlari.html" data-fav-title="Hazır Metin Talimatları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_hazirmetin">Hazır Metin Talimatları</span></span>
+      </button>
+    </div>
+    </div>
 
     <button class="nav-item" data-target="VeriGirisPaneli.html" data-title="Veri Giriş Paneli">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="VeriGirisPaneli.html" data-fav-title="Veri Giriş Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
@@ -1202,14 +1216,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </button>
 
     <button class="nav-item" data-target="Blog.html" data-title="Blog">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Blog.html" data-fav-title="Blog" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v12H7l-3 3V4z"/><path d="M8 9h8M8 12.5h5"/></svg></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Blog.html" data-fav-title="Blog" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="nav_blog">Blog</span>
       </span>
     </button>
 
     <button class="nav-item" data-target="Forum.html" data-title="Forum">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Forum.html" data-fav-title="Forum" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M20 12a7 7 0 1 1-3.1-5.8"/><path d="M20 5v4h-4"/></svg></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Forum.html" data-fav-title="Forum" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="nav_forum">Forum</span>
       </span>
@@ -1223,23 +1237,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </button>
 
     <button class="nav-item" id="navReferansPaneliBtn" data-target="ReferansKoduYonetimi.html" data-title="Referans Paneli" data-gated="true" style="display:none;">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="ReferansKoduYonetimi.html" data-fav-title="Referans Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z"/></svg></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="ReferansKoduYonetimi.html" data-fav-title="Referans Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="dropdown_referral_admin">Referans Paneli</span>
       </span>
     </button>
 
     <button class="nav-item" id="navIstatistiklerBtn" data-target="Istatistikler.html" data-title="İstatistikler" data-gated="true" style="display:none;">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Istatistikler.html" data-fav-title="İstatistikler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/><path d="M2 20h20"/></svg></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Istatistikler.html" data-fav-title="İstatistikler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="dropdown_stats">İstatistikler</span>
-      </span>
-    </button>
-
-    <button class="nav-item" data-target="iletisim.html" data-title="İletişim">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="iletisim.html" data-fav-title="İletişim" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-      <span class="nav-text-wrap">
-        <span class="nav-title" data-i18n="nav_iletisim">İletişim</span>
       </span>
     </button>
   </nav>
@@ -1576,6 +1583,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   wireDrawerToggle('hesaplamaAraclariToggle', 'hesaplamaDrawer');
   wireDrawerToggle('butcelemeAraclariToggle', 'butcelemeDrawer');
+  wireDrawerToggle('talimatlarAraclariToggle', 'talimatlarDrawer');
 
   // Flyout dışına tıklanınca ya da bir alt öge seçilince kapansın.
   document.addEventListener('click', (e) => {

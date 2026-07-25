@@ -115,7 +115,7 @@ function mmgApplyTurkishFont(doc){
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
@@ -177,6 +177,33 @@ function mmgApplyTurkishFont(doc){
     } else {
       try{ gtag('set', 'user_properties', { user_type: 'guest' }); }catch(e){}
     }
+    // ---- Grup (dataGroupId) çözümlemesi: VeriGirisPaneli.html'deki "Grup Firmaları
+    // Ortak Veri" ile birebir aynı mantık. Bir firma başka bir firmanın koduna
+    // bağlandıysa (dataGroupId), o ortak havuzun id'sini effectiveScopeId olarak
+    // saklıyoruz; ayrıca aynı havuza bağlı TÜM firmaları (+ havuzun sahibini) bulup
+    // "Grup Firmaları — Çoklu Talimat" listesini doldurmak için kullanıyoruz.
+    window.mmgCloud.effectiveScopeId = window.mmgCloud.scopeId;
+    window.mmgCloud.groupFirmalar = [];
+    try{
+      if(window.mmgCloud.scopeCollection === 'firmaAccounts' && window.mmgCloud.scopeId){
+        const myId = window.mmgCloud.scopeId;
+        const fSnap = await getDoc(doc(db, 'firmaAccounts', myId));
+        const fData = fSnap.exists() ? fSnap.data() : {};
+        const hubId = fData.dataGroupId || myId;
+        window.mmgCloud.effectiveScopeId = hubId;
+        const hubSnap = hubId === myId ? fSnap : await getDoc(doc(db, 'firmaAccounts', hubId));
+        const members = new Map();
+        if(hubSnap.exists()) members.set(hubId, hubSnap.data().name || hubId);
+        else members.set(hubId, hubId);
+        if(!members.has(myId)) members.set(myId, fData.name || myId);
+        try{
+          const q = query(collection(db, 'firmaAccounts'), where('dataGroupId', '==', hubId));
+          const qSnap = await getDocs(q);
+          qSnap.forEach(d => members.set(d.id, d.data().name || d.id));
+        }catch(e){ /* sessizce geç */ }
+        window.mmgCloud.groupFirmalar = Array.from(members, ([id, name]) => ({ id, name }));
+      }
+    }catch(e){ /* sessizce geç */ }
     document.dispatchEvent(new CustomEvent('mmg-scope-ready', { detail: { scopeId: window.mmgCloud.scopeId } }));
   });
   try{ gtag('event', 'tool_used', { tool_name: 'talimat_hazirlama' }); }catch(e){}
@@ -350,6 +377,11 @@ function mmgApplyTurkishFont(doc){
   @media (max-width:900px){
     .doc-preview-row{ flex-direction:column; }
     .vtool-col{ flex-direction:row; flex-wrap:wrap; padding-top:0; margin-top:10px; }
+    /* mmgcreativity: 400px'lik sabit min-width, dar ekranlarda kutunun viewport'tan
+       taşmasına ve sayfanın altında gereksiz bir yatay kaydırma çubuğu çıkmasına
+       sebep oluyordu. Dar ekranda bu alt sınırı kaldırıyoruz; A4 önizleme zaten
+       JS tarafında (mmgApplyPreviewScale) mevcut genişliğe göre ölçekleniyor. */
+    .doc-preview-row .doc-preview{ min-width:0; }
   }
 
   .form-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:26px; }
@@ -693,6 +725,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
 
+      <div class="form-card" id="grupFirmaCard" style="margin-bottom:16px; padding-top:14px; display:none;">
+        <div class="xcell-title" style="margin-top:0; padding-left:24px;">🏢 Grup Firmaları — Çoklu Talimat</div>
+        <div style="padding:0 24px 4px; font-size:12.5px; color:var(--muted); line-height:1.5;">
+          Aynı alıcıya birden fazla grup firmasından ayrı ayrı talimat hazırlamak için aşağıdan firmaları seç. Seçtiğin her firma için, girdiğin alıcı bilgileriyle ayrı bir PDF/Word talimatı otomatik oluşturulur.
+        </div>
+        <div id="grupFirmaList" style="display:flex; flex-direction:column; gap:2px; padding:8px 24px 16px;"></div>
+      </div>
+
       <div class="form-card" style="margin-bottom:0;">
         <div class="xcell-title" style="margin-top:0; padding-left:24px;">Alıcı Bilgileri</div>
         <div id="aliciRowsContainer"></div>
@@ -702,7 +742,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <div class="panel-right-col">
         <div class="doc-preview-row">
-        <div class="doc-preview" id="docPreview" style="padding:0; overflow:auto; position:relative;">
+        <div class="doc-preview" id="docPreview" style="padding:0; overflow:hidden; position:relative;">
           <button type="button" class="mmg-fullscreen-exit-btn" title="Tam Ekrandan Çık" style="display:none; position:absolute; top:12px; right:12px; z-index:50; background:rgba(20,28,43,0.85); color:#fff; border:1px solid rgba(255,255,255,0.25); border-radius:8px; padding:8px 14px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer; align-items:center; gap:6px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
             Tam Ekrandan Çık
@@ -1510,12 +1550,138 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.addEventListener('mmg-scope-ready', (e) => {
     if(window.mmgCloud && window.mmgCloud.currentUser){
       const scopeId = e.detail.scopeId;
-      loadSavedData(scopeId);
+      loadSavedData(scopeId).then(loadGrupMuhatapDb);
       loadCompanyLogo(scopeId);
       loadStamp(scopeId);
       loadHistory(scopeId);
+      renderGrupFirmaList();
     }
   });
+
+  // ---- Veri Giriş Paneli'ndeki gerçek müşteri/tedarikçi/muhatap veritabanı ----
+  // Talimat Hazırlama'nın kendi ayrı "kayıtlı alıcı" listesiyle karışıklık olmasın
+  // diye buradan çekilen kayıtlar aynı "📋 Kayıtlı" listesine eklenir (zaten aynı
+  // isimde bir kayıt varsa tekrar eklenmez). Grup firmalarında (dataGroupId) ortak
+  // havuzdan (effectiveScopeId) okunur; böylece grup içindeki hiçbir firma aynı
+  // müşteri/tedarikçi/IBAN'ı tekrar tekrar girmek zorunda kalmaz.
+  async function loadGrupMuhatapDb(){
+    try{
+      const cloud = window.mmgCloud;
+      if(cloud.scopeCollection !== 'firmaAccounts') return;
+      const baseId = cloud.effectiveScopeId || cloud.scopeId;
+      const kinds = ['customers', 'suppliers', 'counterparties'];
+      for(const kind of kinds){
+        const snap = await getDocs(collection(db, 'firmaAccounts', baseId, kind));
+        snap.forEach(d => {
+          const p = d.data();
+          const ad = (p.name || '').trim();
+          if(!ad) return;
+          if(!savedAliciFirms.some(f => f.name.trim().toLowerCase() === ad.toLowerCase())){
+            savedAliciFirms.push({ name: ad, logo: null, logoW: null, logoH: null, _db: true });
+          }
+          (p.ibans || []).forEach(ib => {
+            if(!ib.iban) return;
+            if(savedIbans.some(b => b.iban === ib.iban && b.firma.trim().toLowerCase() === ad.toLowerCase())) return;
+            savedIbans.push({ label: ad + (ib.bank ? ' — ' + ib.bank : ''), banka: ib.bank || '', iban: ib.iban, firma: ad, _db: true });
+          });
+        });
+      }
+      renderFirmaSelects();
+      renderIbanSelects();
+    }catch(e){ /* sessizce geç: veritabanı yoksa veya erişilemiyorsa sessizce atlanır */ }
+  }
+
+  // ---- Grup Firmaları — Çoklu Talimat: aynı grubun parçası olan diğer firmalar
+  // varsa (bkz. VeriGirisPaneli.html "Grup Firmaları Ortak Veri"), burada listeler;
+  // seçilen her firma için, aynı alıcı bilgileriyle ayrı bir talimat üretilir.
+  function renderGrupFirmaList(){
+    const card = document.getElementById('grupFirmaCard');
+    const listEl = document.getElementById('grupFirmaList');
+    const grup = (window.mmgCloud && window.mmgCloud.groupFirmalar) || [];
+    if(!card || !listEl || grup.length < 2){
+      if(card) card.style.display = 'none';
+      return;
+    }
+    const myId = window.mmgCloud.scopeId;
+    listEl.innerHTML = grup.map(f => {
+      const checked = f.id === myId ? 'checked disabled' : '';
+      return '<label style="display:flex; align-items:center; gap:8px; font-size:13.5px; padding:4px 0; cursor:' + (f.id===myId?'default':'pointer') + ';">' +
+        '<input type="checkbox" class="grup-firma-check" value="' + f.id + '" ' + checked + '>' +
+        '<span>' + escapeHtmlMmg(f.name) + (f.id === myId ? ' <span style="color:var(--muted); font-size:12px;">(bu firma)</span>' : '') +
+        '</span></label>';
+    }).join('');
+    card.style.display = 'block';
+  }
+  function escapeHtmlMmg(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function getSelectedGrupFirmalar(){
+    const grup = (window.mmgCloud && window.mmgCloud.groupFirmalar) || [];
+    const checked = Array.from(document.querySelectorAll('.grup-firma-check:checked')).map(c => c.value);
+    return grup.filter(f => checked.includes(f.id));
+  }
+  // Diğer bir grup firmasının kendi adı / logosu / kaşesi / son kullandığı
+  // gönderen banka+IBAN bilgisini getirir (kendi firmaProfili + kayitliMuhataplar
+  // kayıtlarından); talimatı o firma adına hazırlarken kullanılır.
+  async function fetchFirmaGonderenBilgisi(firmaId){
+    const out = { name: firmaId, banka: '', iban: '', logo: null, logoDims: null, stamp: null, stampDims: null };
+    try{
+      const fSnap = await getDoc(doc(db, 'firmaAccounts', firmaId));
+      if(fSnap.exists()) out.name = fSnap.data().name || firmaId;
+    }catch(e){}
+    try{
+      const pSnap = await getDoc(doc(db, 'firmaAccounts', firmaId, 'talimat', 'firmaProfili'));
+      if(pSnap.exists()){
+        const d = pSnap.data();
+        if(d.logoBase64){ out.logo = d.logoBase64; out.logoDims = (d.logoW && d.logoH) ? { w:d.logoW, h:d.logoH } : null; }
+        if(d.stampBase64){ out.stamp = d.stampBase64; out.stampDims = (d.stampW && d.stampH) ? { w:d.stampW, h:d.stampH } : null; }
+      }
+    }catch(e){}
+    try{
+      const mSnap = await getDoc(doc(db, 'firmaAccounts', firmaId, 'talimat', 'kayitliMuhataplar'));
+      if(mSnap.exists()){
+        const ibans = mSnap.data().ibans || [];
+        const own = ibans.find(b => (b.firma||'').trim().toLowerCase() === out.name.trim().toLowerCase()) || ibans[0];
+        if(own){ out.banka = own.banka || ''; out.iban = own.iban || ''; }
+      }
+    }catch(e){}
+    return out;
+  }
+  // Belirtilen grup firması için gönderen alanlarını (firma/banka/IBAN, logo, kaşe)
+  // geçici olarak değiştirir, callback'i çalıştırır, sonra orijinal değerlere
+  // geri döner. Bu sayede tek bir talimat oluşturma fonksiyonu (buildHavalePdf/
+  // buildHavaleDocx), formu bozmadan her grup firması için tekrar tekrar kullanılabiliyor.
+  async function withGrupFirmaSwap(firma, fn){
+    const firmaEl = document.getElementById('fGonderenFirma');
+    const bankaEl = document.getElementById('fGonderenBanka');
+    const ibanEl = document.getElementById('fGonderenIban');
+    const prev = {
+      firma: firmaEl.value, banka: bankaEl.value, iban: ibanEl.value,
+      logo: companyLogoDataUrl, logoDims: companyLogoDims,
+      stamp: stampDataUrl, stampDims: stampDims
+    };
+    try{
+      if(firma.id !== window.mmgCloud.scopeId){
+        const info = await fetchFirmaGonderenBilgisi(firma.id);
+        firmaEl.value = info.name;
+        if(info.banka) bankaEl.value = info.banka;
+        ibanEl.value = info.iban || '';
+        companyLogoDataUrl = info.logo || null; companyLogoDims = info.logoDims || null;
+        stampDataUrl = info.stamp || null; stampDims = info.stampDims || null;
+      }
+      await fn();
+    } finally {
+      firmaEl.value = prev.firma; bankaEl.value = prev.banka; ibanEl.value = prev.iban;
+      companyLogoDataUrl = prev.logo; companyLogoDims = prev.logoDims;
+      stampDataUrl = prev.stamp; stampDims = prev.stampDims;
+    }
+  }
+  function slugifyMmg(s){
+    return String(s || 'firma')
+      .toLocaleLowerCase('tr')
+      .replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ç/g,'c')
+      .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'firma';
+  }
 
   // ---- Kaşe / İmza ----
   let stampDataUrl = null;
@@ -1914,9 +2080,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const container = frame.parentElement;
     if(!container) return;
     const containerWidth = container.clientWidth || IFRAME_NATIVE_WIDTH;
-    const fitScale = containerWidth / IFRAME_NATIVE_WIDTH;
+    // mmgcreativity: tam %100 sığdırmaya çalışmak, bir kaç alt piksellik yuvarlama
+    // farkında bile kaydırma çubuğu çıkmasına sebep oluyordu. Bunun yerine kutuya
+    // sığdırırken bilerek küçük bir güvenlik payı bırakıyoruz (%97) — gözle fark
+    // edilmeyecek kadar az ama her koşulda taşmayı kesin olarak önlüyor.
+    const FIT_SAFETY_MARGIN = 0.97;
+    const fitScale = (containerWidth / IFRAME_NATIVE_WIDTH) * FIT_SAFETY_MARGIN;
     const userZoom = mmgPreviewUserZoom[frame.id] || 1;
     frame.style.transform = 'scale(' + (fitScale * userZoom) + ')';
+    // İlk açılışta ve sıfırlandığında (userZoom <= 1, yani "kutuya sığdırılmış"
+    // durumda) taşma birkaç saniyelik alt piksel yuvarlama farkından bile
+    // kaynaklansa gereksiz bir kaydırma çubuğu göstermesin diye kutuyu tamamen
+    // "hidden" yapıyoruz. Kullanıcı gerçekten yakınlaştırıp (+ butonuyla) görünüm
+    // alanının dışına taştığında ise kaydırabilmesi için "auto"ya dönüyoruz.
+    if(userZoom > 1){
+      container.style.overflow = 'auto';
+    } else {
+      container.style.overflow = 'hidden';
+      container.scrollLeft = 0;
+      container.scrollTop = 0;
+    }
   }
   window.addEventListener('resize', () => { mmgApplyPreviewScale(document.getElementById('docPreviewFrame')); });
   document.querySelectorAll('.mmg-zoom-in-btn, .mmg-zoom-out-btn').forEach(btn => {
@@ -1942,6 +2125,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // sığdırılmış hale küçülen içerik, eski kaydırma konumunda "boş" görünür.
       const container = frame.parentElement;
       if(container){ container.scrollLeft = 0; container.scrollTop = 0; }
+      // Önemli: içerik gerçek bir PDF olduğu için tarayıcının kendi PDF
+      // görüntüleyicisinin DE bir kaydırma konumu vardır ve bu, üstteki
+      // kutunun scrollLeft/scrollTop'unu sıfırlamakla değişmez (ayrı bir
+      // kaydırma bağlamıdır). Bu yüzden PDF'i sıfırda ve tam kutuya sığmış
+      // halde göstermek için önizlemeyi tamamen yeniden üretip iframe'e
+      // taze bir blob URL ile yüklüyoruz; böylece alttaki yatay kaydırma
+      // çubuğuna hiç gerek kalmıyor.
+      if(frameId === 'docPreviewFrame' && typeof updateLivePdfPreview === 'function'){
+        updateLivePdfPreview();
+      }
     });
   });
 
@@ -2224,6 +2417,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   document.getElementById('exportPdfBtn').addEventListener('click', async () => {
+    const secilenFirmalar = getSelectedGrupFirmalar();
+    if(secilenFirmalar.length > 1){
+      try{
+        let sayac = 0;
+        for(const firma of secilenFirmalar){
+          await withGrupFirmaSwap(firma, async () => {
+            const { doc, ozet, veri } = buildHavalePdf();
+            doc.save('banka-havale-talimati-' + slugifyMmg(firma.name) + '.pdf');
+            addHistoryEntry('havale-tekli', ozet, veri);
+            sayac++;
+          });
+        }
+        showIoMsg(sayac + ' firma için PDF talimatı ayrı ayrı indirildi.');
+      } catch(e){ showIoMsg('Toplu PDF oluşturulurken hata oluştu.', true); }
+      return;
+    }
     try{
       const { doc, ozet, veri } = buildHavalePdf();
       doc.save('banka-havale-talimati.pdf');
@@ -2296,6 +2505,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return { doc, ozet, veri };
   }
   document.getElementById('exportDocxBtn').addEventListener('click', async () => {
+    const secilenFirmalar = getSelectedGrupFirmalar();
+    if(secilenFirmalar.length > 1){
+      try{
+        let sayac = 0;
+        for(const firma of secilenFirmalar){
+          await withGrupFirmaSwap(firma, async () => {
+            const { doc, ozet, veri } = buildHavaleDocx();
+            mmgDownloadDocx(doc, 'banka-havale-talimati-' + slugifyMmg(firma.name) + '.docx');
+            addHistoryEntry('havale-tekli', ozet, veri);
+            sayac++;
+          });
+        }
+        showIoMsg(sayac + ' firma için Word talimatı ayrı ayrı indirildi.');
+      } catch(e){ showIoMsg('Toplu Word oluşturulurken hata oluştu.', true); }
+      return;
+    }
     try{
       const { doc, ozet, veri } = buildHavaleDocx();
       mmgDownloadDocx(doc, 'banka-havale-talimati.docx');
