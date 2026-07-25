@@ -245,7 +245,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, query, where, serverTimestamp, arrayUnion, arrayRemove
+    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, query, where, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -754,6 +754,18 @@
       // gösteriyoruz.
       const memberDocs = [];
       membersSnap.forEach(d => memberDocs.push({ id: d.id, data: d.data() }));
+
+      // ---- Geriye dönük uyumluluk: bu düzeltmeden ÖNCE oluşturulmuş üyelik kayıtlarında
+      // "uid" alanı yok. O kayıtlar index.html'deki yeni collectionGroup sorgusuyla
+      // bulunamayacağı için, burada (admin panelini her açtığında) eksik olanları sessizce
+      // tamamlıyoruz — böylece üye bir sonraki girişinde/yenilemesinde firmayı görür.
+      await Promise.all(memberDocs.map(async (m) => {
+        if(!m.data.uid){
+          try{ await setDoc(doc(db, 'firmaAccounts', firmaId, 'members', m.id), { uid: m.id }, { merge: true }); }
+          catch(e){ /* sessizce geç */ }
+        }
+      }));
+
       const firmaAccessMap = {}; // { uid: { firmaId: true/false } }
       await Promise.all(memberDocs.map(async (m) => {
         firmaAccessMap[m.id] = {};
@@ -762,6 +774,10 @@
           try{
             const s = await getDoc(doc(db, 'firmaAccounts', f.id, 'members', m.id));
             firmaAccessMap[m.id][f.id] = s.exists();
+            // Diğer firmalardaki eski kayıtları da aynı şekilde tamamla.
+            if(s.exists() && !s.data().uid){
+              setDoc(doc(db, 'firmaAccounts', f.id, 'members', m.id), { uid: m.id }, { merge: true }).catch(()=>{});
+            }
           }catch(e){ firmaAccessMap[m.id][f.id] = false; }
         }));
       }));
@@ -890,21 +906,32 @@
   // kullanıcının o an düzenlediğimiz firmadaki adı/e-postası kopyalanır ve tüm yetkiler
   // varsayılan olarak açık verilir (admin dilerse sonradan o firmanın kendi panelinden
   // yetkileri daraltabilir).
+  //
+  // ÖNEMLİ (düzeltilen hata): Daha önce burada üyenin KENDİ "users/{uid}" belgesine
+  // "firmaIds" alanını admin tarafından yazmaya çalışıyorduk. Firestore güvenlik kuralları
+  // "users/{userId}" belgesine SADECE o kullanıcının kendisinin (request.auth.uid == userId)
+  // yazabileceğini söylüyor; admin başka bir kullanıcının belgesine yazamaz. Bu yüzden bu
+  // yazma işlemi sessizce (hatasız görünüp) başarısız oluyor, panelde "eklendi" gibi görünse
+  // de üye kendi tarafında yeni firmayı hiç göremiyordu. Çözüm: bu bilgiyi ayrıca üyenin kendi
+  // belgesine yazmaya ÇALIŞMIYORUZ; bunun yerine her üyelik kaydına bir "uid" alanı ekleyip
+  // (aşağıda), kullanıcının hangi firmalara üye olduğunu index.html tarafında bu "uid" alanına
+  // göre TÜM firmaAccounts/*/members koleksiyonlarında arama yaparak (collectionGroup) buluyoruz.
+  // Bu yazma zaten "firmaAccounts" koleksiyonunda olduğu için tüm giriş yapmış kullanıcılara açık
+  // ve admin tarafından sorunsuz yapılabiliyor.
   async function toggleMemberFirmaAccess(uid, targetFirmaId, shouldHaveAccess, memberData){
     try{
       if(shouldHaveAccess){
         const defaultPermissions = {};
         PERMISSION_MODULES.forEach(m => { defaultPermissions[m.key] = true; });
         await setDoc(doc(db, 'firmaAccounts', targetFirmaId, 'members', uid), {
+          uid: uid,
           username: memberData.username || '',
           email: memberData.email || '',
           permissions: defaultPermissions,
           addedAt: serverTimestamp()
         });
-        await setDoc(doc(db, 'users', uid), { firmaIds: arrayUnion(targetFirmaId) }, { merge: true });
       } else {
         await deleteDoc(doc(db, 'firmaAccounts', targetFirmaId, 'members', uid));
-        await setDoc(doc(db, 'users', uid), { firmaIds: arrayRemove(targetFirmaId) }, { merge: true });
       }
     } catch(e){ /* sessizce geç */ }
   }
@@ -948,7 +975,6 @@
     if(!confirm(LBL.confirmRemoveUser)) return;
     try{
       await deleteDoc(doc(db, 'firmaAccounts', firmaId, 'members', uid));
-      await setDoc(doc(db, 'users', uid), { firmaIds: arrayRemove(firmaId) }, { merge: true });
     } catch(e){ /* sessizce geç */ }
     await loadMembers();
   }

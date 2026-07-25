@@ -997,7 +997,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         try{
           for(const inv of memberInvites){
             await setDoc(doc(db, 'firmaAccounts', inv.data.firmaId, 'members', user.uid), {
-              email: user.email || '', username: (currentUserData && currentUserData.username) || '', permissions: inv.data.permissions || {}, addedAt: serverTimestamp()
+              uid: user.uid, email: user.email || '', username: (currentUserData && currentUserData.username) || '', permissions: inv.data.permissions || {}, addedAt: serverTimestamp()
             });
             await setDoc(doc(db, 'users', user.uid), { firmaIds: arrayUnion(inv.data.firmaId) }, { merge: true });
             await deleteDoc(doc(db, 'firmaInvites', inv.id, 'firmas', inv.firmaId));

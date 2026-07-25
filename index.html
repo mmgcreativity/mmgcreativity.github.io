@@ -1771,7 +1771,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     sendPasswordResetEmail, updatePassword, sendEmailVerification
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment,
+    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, runTransaction, serverTimestamp, increment,
     query, where, arrayUnion, arrayRemove, onSnapshot
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -2547,8 +2547,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     try{
       const snap = await getDoc(doc(db, 'users', uid));
       const data = snap.exists() ? snap.data() : {};
-      const memberIds = Array.isArray(data.firmaIds) ? data.firmaIds : [];
       const adminIds = Array.isArray(data.adminFirmaIds) ? data.adminFirmaIds : [];
+
+      // Üye olarak eklendiğimiz firmaları, kullanıcının kendi "users/{uid}.firmaIds" alanına
+      // değil, gerçek üyelik kayıtlarına (firmaAccounts/*/members/{uid}) bakarak buluyoruz.
+      // Neden: bir firma yöneticisi, KullaniciYonetimi panelinden bizi SONRADAN başka bir
+      // firmaya eklediğinde, kendi hesabından bizim "users/{uid}" belgemize yazamaz (Firestore
+      // güvenlik kuralları, bir belgeye sadece o belgenin sahibinin yazmasına izin verir).
+      // O yüzden "firmaIds" alanı admin tarafından yapılan eklemeleri hiç yansıtmaz — sadece
+      // ilk daveti kendimiz kabul ettiğimizde (kendi yazdığımız için) doğru kalır. Gerçek üyelik
+      // kaydı ise zaten "firmaAccounts" koleksiyonunda (herkese açık yazılabilir) tutulduğundan,
+      // en güvenilir kaynak odur.
+      let memberIds = [];
+      try{
+        const memSnap = await getDocs(query(collectionGroup(db, 'members'), where('uid', '==', uid)));
+        memSnap.forEach(d => {
+          const fid = d.ref.parent.parent ? d.ref.parent.parent.id : null;
+          if(fid) memberIds.push(fid);
+        });
+      }catch(e){
+        // Sorgu (örn. eksik bir Firestore index'i yüzünden) başarısız olursa, en azından
+        // ilk kabul ettiğimiz davetlerin yansıdığı eski "firmaIds" alanına geri dön.
+        memberIds = Array.isArray(data.firmaIds) ? data.firmaIds : [];
+      }
+
       const allIds = Array.from(new Set([...memberIds, ...adminIds]));
       for(const fid of allIds){
         try{
