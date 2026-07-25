@@ -102,26 +102,26 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .auth-submit:hover{ opacity:0.9; }
   .codes-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; margin-bottom:14px; }
   #mmgAdminMsg{ font-size:12.5px; margin-top:14px; }
-  #mmgAdminCodeList{ display:flex; flex-direction:column; gap:6px; max-height:520px; overflow-y:auto; }
+  #mmgAdminCodeList{ max-height:600px; overflow-y:auto; }
 
-  .code-row{
-    display:flex; align-items:center; gap:10px; height:38px; padding:0 12px;
-    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; font-size:12px;
-    white-space:nowrap;
+  #mmgAdminCodeList table{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
+  #mmgAdminCodeList thead th{
+    text-align:left; padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hairline); background:var(--surface-2);
+    position:sticky; top:0;
   }
-  .code-row .code-name{
-    font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:12.5px; flex:0 0 auto;
-    overflow:hidden; text-overflow:ellipsis; max-width:110px;
+  #mmgAdminCodeList tbody td{ padding:10px 12px; border-bottom:1px solid rgba(42,52,72,0.5); font-size:12.5px; vertical-align:middle; }
+  #mmgAdminCodeList tbody tr:last-child td{ border-bottom:none; }
+  #mmgAdminCodeList tbody tr:hover{ background:rgba(198,161,91,0.03); }
+  #mmgAdminCodeList .code-name{ font-family:'IBM Plex Mono',monospace; font-weight:700; }
+  #mmgAdminCodeList .code-benefit{ color:var(--muted); white-space:nowrap; }
+  #mmgAdminCodeList .code-usage{ color:var(--muted); white-space:nowrap; }
+  #mmgAdminCodeList .mmg-admin-edit{
+    background:none; border:none; color:var(--brass,#C6A15B); cursor:pointer; font-size:12px; padding:4px; font-weight:600;
   }
-  .code-row .code-benefit{ color:var(--muted); flex:0 0 auto; overflow:hidden; text-overflow:ellipsis; max-width:150px; }
-  .code-row .code-usage{ color:var(--muted); font-size:11px; margin-left:auto; flex:0 0 auto; }
-  .code-row .mmg-admin-edit{
-    background:none; border:none; color:var(--brass,#C6A15B); cursor:pointer; font-size:12px; flex:0 0 auto; padding:4px;
+  #mmgAdminCodeList .mmg-admin-del{
+    background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:12px; padding:4px; font-weight:600;
   }
-  .code-row .mmg-admin-del{
-    background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:12px; flex:0 0 auto; padding:4px;
-  }
-  .code-row .code-owner{ color:var(--brass); font-size:11px; flex:0 0 auto; overflow:hidden; text-overflow:ellipsis; max-width:130px; }
 
   .owner-code-card{
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:14px; margin-bottom:12px;
@@ -256,7 +256,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     ownerNotFound:'No user was found with this user code.', unassigned:'Unassigned', assignedTo:'Assigned to',
     noPermissionOwner:'This page is only available to admins, or to users who have a referral code assigned to them.<br><br>',
     myCodesLoadFailed:'Your codes could not be loaded.', noSignupsYet:'No one has signed up with this code yet.',
-    joinedLabel:'Joined', commissionLabel:'Commission'
+    joinedLabel:'Joined', commissionLabel:'Commission',
+    thCode:'Code', thType:'Type', thUsage:'Defined / Used', thEdit:'Edit', thDelete:'Delete'
   } : {
     freePremium:'Ücretsiz Premium', discountSuffix:' İndirim', used:' kullanıldı', usedUnlimited:' kullanıldı · Sınırsız',
     deleteBtn:'Sil', editBtn:'Düzenle', enterCode:'Lütfen bir kod girin.',
@@ -272,7 +273,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     ownerNotFound:'Bu kullanıcı koduna sahip bir kullanıcı bulunamadı.', unassigned:'Atanmamış', assignedTo:'Atandı',
     noPermissionOwner:'Bu sayfa yalnızca yöneticilere ya da kendisine bir referans kodu atanmış kullanıcılara açıktır.<br><br>',
     myCodesLoadFailed:'Kodlarınız yüklenemedi.', noSignupsYet:'Bu kodla henüz kimse katılmadı.',
-    joinedLabel:'Katılım', commissionLabel:'Komisyon'
+    joinedLabel:'Katılım', commissionLabel:'Komisyon',
+    thCode:'Referans Kodu', thType:'Türü', thUsage:'Tanımlı / Kullanılan', thEdit:'Düzenle', thDelete:'Sil'
   };
 
   function showState(html){
@@ -301,20 +303,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const refSnap = await getDocs(collection(db, 'referrals'));
         refSnap.forEach(d => { usageCounts[d.id] = (d.data().count || 0); });
       }catch(e){ /* istatistik okunamazsa 0 say */ }
-      listEl.innerHTML = codes.map(c => {
+      const rowsHtml = codes.map(c => {
         const benefitLabel = c.benefitType === 'free' ? LBL.freePremium : ('%' + (c.discountPercent||0) + LBL.discountSuffix);
         const used = usageCounts[c.id] || 0;
         const limitLabel = c.maxUses ? (used + '/' + c.maxUses + LBL.used) : (used + LBL.usedUnlimited);
         const ownerLabel = c.ownerCode ? ('👤 #' + c.ownerCode) : LBL.unassigned;
-        return '<div class="code-row" title="' + LBL.assignedTo + ': ' + ownerLabel + '">' +
-          '<span class="code-name" title="' + c.id + '">' + c.id + '</span>' +
-          '<span class="code-benefit" title="' + benefitLabel + '">' + benefitLabel + '</span>' +
-          '<span class="code-owner">' + ownerLabel + '</span>' +
-          '<span class="code-usage">' + limitLabel + '</span>' +
-          '<button type="button" class="mmg-admin-edit" data-code="' + c.id + '" data-benefit-type="' + (c.benefitType||'free') + '" data-discount="' + (c.discountPercent||0) + '" data-max-uses="' + (c.maxUses||'') + '" data-owner-code="' + (c.ownerCode||'') + '" data-commission="' + (c.commissionPercent||'') + '">' + LBL.editBtn + '</button>' +
-          '<button type="button" class="mmg-admin-del" data-code="' + c.id + '">' + LBL.deleteBtn + '</button>' +
-          '</div>';
+        return '<tr title="' + LBL.assignedTo + ': ' + ownerLabel + '">' +
+          '<td class="code-name">' + c.id + '</td>' +
+          '<td class="code-benefit">' + benefitLabel + '</td>' +
+          '<td class="code-usage">' + limitLabel + '</td>' +
+          '<td><button type="button" class="mmg-admin-edit" data-code="' + c.id + '" data-benefit-type="' + (c.benefitType||'free') + '" data-discount="' + (c.discountPercent||0) + '" data-max-uses="' + (c.maxUses||'') + '" data-owner-code="' + (c.ownerCode||'') + '" data-commission="' + (c.commissionPercent||'') + '">' + LBL.editBtn + '</button></td>' +
+          '<td><button type="button" class="mmg-admin-del" data-code="' + c.id + '">' + LBL.deleteBtn + '</button></td>' +
+          '</tr>';
       }).join('');
+      listEl.innerHTML =
+        '<table><thead><tr>' +
+          '<th>' + LBL.thCode + '</th>' +
+          '<th>' + LBL.thType + '</th>' +
+          '<th>' + LBL.thUsage + '</th>' +
+          '<th>' + LBL.thEdit + '</th>' +
+          '<th>' + LBL.thDelete + '</th>' +
+        '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
       listEl.querySelectorAll('.mmg-admin-edit').forEach(btn => {
         btn.addEventListener('click', () => {
           document.getElementById('mmgAdminCode').value = btn.dataset.code;
