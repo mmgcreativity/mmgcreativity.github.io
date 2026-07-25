@@ -753,11 +753,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   // MMGI18N.t() çağırdığında sözlük henüz hazır olmuyor, ham anahtar adı görünüyordu). ----
   MMGI18N.registerDict({
     tr: {
-      nav_home:'Ana Sayfa', nav_calc:'Hesaplamalar', nav_rotatif:'Rotatif Kredi Hesaplama', nav_ortalama:'Ortalama Vade Hesaplama',
+      nav_home:'Ana Sayfa', nav_calc:'Hesaplama', nav_rotatif:'Rotatif Kredi Hesaplama', nav_ortalama:'Ortalama Vade Hesaplama',
       nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması Hesaplama', nav_vadelimevduat:'Vadeli Mevduat Faizi Hesaplama',
       nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
-      nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları', nav_verigirisi:'Veri Girişi', nav_verigirisi_panel:'Veri Giriş Paneli', nav_label_araclar:'Araçlar',
-      nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Sosyal', nav_label_verigirisi:'Veri Girişi', nav_label_verianalizi:'Veri Analizi',
+      nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları', nav_verigirisi:'Veri Girişi', nav_verigirisi_panel:'Veri Giriş Paneli',
+      nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Sosyal', nav_label_verigirisi:'Veri Girişi',
       nav_talimatlar:'Talimatlar', nav_talimatlar_desc:'İşlemleri', nav_hazirmetin:'Hazır Metin Talimatları',
       nav_budget:'Bütçeleme', nav_budget_desc:'Araçları',
       hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
@@ -768,13 +768,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       card_expenses_desc:'Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlensin.',
       card_income_desc:'Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlensin.',
       card_instructions_desc:'Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.',
-      card_hazirmetin_desc:'Sık kullandığınız talimat metinlerini bir kez oluşturup kaydedin; sonraki seferlerde saniyeler içinde yeniden kullanın.',
-      card_verigirisi_desc:'Müşteri, tedarikçi, muhatap ve banka bilgilerinizi tek yerde toplayın; talimat ve mektup hazırlarken otomatik önerilsin.',
-      card_forum_desc:'Diğer kullanıcılarla sohbet edin, sorularınızı sorun ve deneyimlerinizi paylaşın.',
-      card_blog_desc:'Finans, bütçe ve kredi konularında güncel yazılarımızı okuyun.',
-      card_rehber_desc:'Kredi, faiz, taksit ve bütçe planlaması gibi konularda sade dilde, pratik rehberler.',
-      card_istatistikler_desc:'Kategori dağılımlarınızı ve zaman içindeki eğilimlerinizi tek bakışta görün.',
-      card_referans_desc:'Kendi referans kodunuzu paylaşın; kimlerin katıldığını ve komisyon oranınızı takip edin.',
       footer_follow_us:'Bizi Takip Edin', footer_powered_by:'Powered by', footer_download_now:'Hemen İndirin',
       footer_about:'Hakkında', footer_privacy:'Gizlilik Politikası', footer_terms:'Kullanım Şartları',
       close:'Kapat',
@@ -854,8 +847,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_home:'Home', nav_calc:'Calculators', nav_rotatif:'Revolving Loan Calculator', nav_ortalama:'Average Maturity Calculator',
       nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
       nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
-      nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools', nav_verigirisi:'Data Entry', nav_verigirisi_panel:'Data Entry Panel', nav_label_araclar:'Tools',
-      nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Social', nav_label_verigirisi:'Data Entry', nav_label_verianalizi:'Data Analysis',
+      nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools', nav_verigirisi:'Data Entry', nav_verigirisi_panel:'Data Entry Panel',
+      nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Social', nav_label_verigirisi:'Data Entry',
       nav_talimatlar:'Instructions', nav_talimatlar_desc:'Center', nav_hazirmetin:'Ready-made Text Instructions',
       nav_budget:'Budgeting', nav_budget_desc:'Tools',
       hero_title:'Digital Finance Assistant', hero_tagline:'Your digital partner for financial decisions',
@@ -866,13 +859,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       card_expenses_desc:'Record recurring expenses such as bills, credit cards, letters of guarantee, commissions, and rent; they\'ll be automatically posted to the Cash Flow Table when due.',
       card_income_desc:'Record your cash collections, check/note collections, POS collections, and interest income; they\'ll be automatically posted to the Cash Flow Table when due.',
       card_instructions_desc:'Prepare transfer, check, letter of guarantee, and free-text instructions to banks, customers, institutions, and individuals in seconds.',
-      card_hazirmetin_desc:'Create and save your frequently used instruction texts once; reuse them in seconds every time after that.',
-      card_verigirisi_desc:'Collect your customer, supplier, counterparty, and bank details in one place; they\'ll be suggested automatically when preparing instructions and letters.',
-      card_forum_desc:'Chat with other users, ask your questions, and share your experiences.',
-      card_blog_desc:'Read our latest articles on finance, budgeting, and loans.',
-      card_rehber_desc:'Practical, plain-language guides on loans, interest, installments, and budget planning.',
-      card_istatistikler_desc:'See your category breakdowns and trends over time at a glance.',
-      card_referans_desc:'Share your own referral code; track who joined and your commission rate.',
       footer_follow_us:'Follow Us', footer_powered_by:'Powered by', footer_download_now:'Download Now',
       footer_about:'About', footer_privacy:'Privacy Policy', footer_terms:'Terms of Use',
       close:'Close',
@@ -1133,13 +1119,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </span>
     </button>
 
-    <div class="nav-label" data-i18n="nav_label_araclar">Araçlar</div>
-
     <div class="nav-drawer-wrap">
     <button class="nav-item" id="hesaplamaAraclariToggle" data-drawer-toggle="true" data-title="Hesaplama Araçları" aria-expanded="false">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
-        <span class="nav-title" data-i18n="nav_calc">Hesaplamalar</span>
+        <span class="nav-title" data-i18n="nav_calc">Hesaplama</span>
+        <span class="nav-desc" data-i18n="nav_calc_desc">Araçları</span>
       </span>
       <span class="nav-drawer-chevron" id="hesaplamaChevron">›</span>
     </button>
@@ -1176,6 +1161,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Bütçeleme Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="nav_budget">Bütçeleme</span>
+        <span class="nav-desc" data-i18n="nav_budget_desc">Araçları</span>
       </span>
       <span class="nav-drawer-chevron" id="butcelemeChevron">›</span>
     </button>
@@ -1215,24 +1201,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     </div>
 
-    <div class="nav-label" data-i18n="nav_label_sosyal">Sosyal</div>
-
-    <button class="nav-item" data-target="Forum.html" data-title="Forum">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Forum.html" data-fav-title="Forum" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-      <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_forum">Forum</span></span>
+    <div class="nav-drawer-wrap">
+    <button class="nav-item" id="sosyalToggle" data-drawer-toggle="true" data-title="Sosyal" aria-expanded="false">
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Sosyal" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="nav-text-wrap">
+        <span class="nav-title" data-i18n="nav_label_sosyal">Sosyal</span>
+      </span>
+      <span class="nav-drawer-chevron" id="sosyalChevron">›</span>
     </button>
-
-    <button class="nav-item" data-target="Blog.html" data-title="Blog">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Blog.html" data-fav-title="Blog" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-      <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_blog">Blog</span></span>
-    </button>
-
-    <button class="nav-item" data-target="rehber.html" data-title="Rehber">
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-      <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_rehber">Rehber</span></span>
-    </button>
-
-    <div class="nav-label" data-i18n="nav_label_verianalizi">Veri Analizi</div>
+    <div class="nav-drawer" id="sosyalDrawer" hidden>
+      <button class="nav-item nav-subitem" data-target="rehber.html" data-title="Rehber">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_rehber">Rehber</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Blog.html" data-title="Blog">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Blog.html" data-fav-title="Blog" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_blog">Blog</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Forum.html" data-title="Forum">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Forum.html" data-fav-title="Forum" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_forum">Forum</span></span>
+      </button>
+    </div>
+    </div>
 
     <button class="nav-item" id="navKullaniciYonetimBtn" data-target="KullaniciYonetimi.html" data-title="Kullanıcı Yönetim Paneli" data-gated="true" style="display:none;">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="KullaniciYonetimi.html" data-fav-title="Kullanıcı Yönetim Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
@@ -1255,13 +1246,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </span>
     </button>
 
-    <button class="nav-item" id="navVeriGirisiBtn" data-target="VeriGirisPaneli.html" data-title="Veri Girişi">
+    <div class="nav-drawer-wrap">
+    <button class="nav-item" id="verigirisiToggle" data-drawer-toggle="true" data-title="Veri Girişi" aria-expanded="false">
       <span class="fav-star" role="button" tabindex="0" data-fav-target="VeriGirisPaneli.html" data-fav-title="Veri Girişi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-
       <span class="nav-text-wrap">
         <span class="nav-title" data-i18n="nav_label_verigirisi">Veri Girişi</span>
       </span>
+      <span class="nav-drawer-chevron" id="verigirisiChevron">›</span>
     </button>
+    <div class="nav-drawer" id="verigirisiDrawer" hidden>
+      <button class="nav-item nav-subitem" data-target="VeriGirisPaneli.html" data-title="Veri Giriş Paneli">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="VeriGirisPaneli.html" data-fav-title="Veri Giriş Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_verigirisi_panel">Veri Giriş Paneli</span></span>
+      </button>
+    </div>
+    </div>
   </nav>
 </aside>
 
@@ -1408,55 +1407,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <h3 data-i18n="nav_talimat_full">Talimat Hazırlama</h3>
           <p data-i18n="card_instructions_desc">Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.</p>
         </button>
-
-        <button class="app-card" data-target="HazirMetinTalimatlari.html" data-title="Hazır Metin Talimatları">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="HazirMetinTalimatlari.html" data-fav-title="Hazır Metin Talimatları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-          <span class="card-arrow">↗</span>
-          <h3 data-i18n="nav_hazirmetin">Hazır Metin Talimatları</h3>
-          <p data-i18n="card_hazirmetin_desc">Sık kullandığınız talimat metinlerini bir kez oluşturup kaydedin; sonraki seferlerde saniyeler içinde yeniden kullanın.</p>
-        </button>
-
-        <button class="app-card" data-target="VeriGirisPaneli.html" data-title="Veri Girişi">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="VeriGirisPaneli.html" data-fav-title="Veri Girişi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-          <span class="card-arrow">↗</span>
-          <h3 data-i18n="nav_label_verigirisi">Veri Girişi</h3>
-          <p data-i18n="card_verigirisi_desc">Müşteri, tedarikçi, muhatap ve banka bilgilerinizi tek yerde toplayın; talimat ve mektup hazırlarken otomatik önerilsin.</p>
-        </button>
-
-        <button class="app-card" id="cardIstatistiklerBtn" data-target="Istatistikler.html" data-title="İstatistikler" data-gated="true" style="display:none;">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Istatistikler.html" data-fav-title="İstatistikler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-          <span class="card-arrow">↗</span>
-          <h3 data-i18n="dropdown_stats">İstatistikler</h3>
-          <p data-i18n="card_istatistikler_desc">Kategori dağılımlarınızı ve zaman içindeki eğilimlerinizi tek bakışta görün.</p>
-        </button>
-
-        <button class="app-card" id="cardReferansPaneliBtn" data-target="ReferansKoduYonetimi.html" data-title="Referans Paneli" data-gated="true" style="display:none;">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="ReferansKoduYonetimi.html" data-fav-title="Referans Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-          <span class="card-arrow">↗</span>
-          <h3 data-i18n="dropdown_referral_admin">Referans Paneli</h3>
-          <p data-i18n="card_referans_desc">Kendi referans kodunuzu paylaşın; kimlerin katıldığını ve komisyon oranınızı takip edin.</p>
-        </button>
-
-        <button class="app-card" data-target="Forum.html" data-title="Forum">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Forum.html" data-fav-title="Forum" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-          <span class="card-arrow">↗</span>
-          <h3 data-i18n="nav_forum">Forum</h3>
-          <p data-i18n="card_forum_desc">Diğer kullanıcılarla sohbet edin, sorularınızı sorun ve deneyimlerinizi paylaşın.</p>
-        </button>
-
-        <button class="app-card" data-target="Blog.html" data-title="Blog">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Blog.html" data-fav-title="Blog" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-          <span class="card-arrow">↗</span>
-          <h3 data-i18n="nav_blog">Blog</h3>
-          <p data-i18n="card_blog_desc">Finans, bütçe ve kredi konularında güncel yazılarımızı okuyun.</p>
-        </button>
-
-        <button class="app-card" data-target="rehber.html" data-title="Rehber">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-          <span class="card-arrow">↗</span>
-          <h3 data-i18n="nav_rehber">Rehber</h3>
-          <p data-i18n="card_rehber_desc">Kredi, faiz, taksit ve bütçe planlaması gibi konularda sade dilde, pratik rehberler.</p>
-        </button>
       </div>
     </section>
 
@@ -1539,27 +1489,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.body.style.overflow = willOpen ? 'hidden' : '';
   });
 
-  // Bir çekmece başlığının (Hesaplama Araçları, Bütçeleme Araçları, Talimatlar gibi)
-  // "yanık" (active) görünmesi gereken iki durum var: (1) çekmece o an açıksa (kullanıcı
-  // az önce tıkladı), (2) çekmece kapalıyken bile içindeki bir alt sayfa hâlâ görüntüleniyorsa.
-  // Bu iki koşulu tek bir yerden hesaplayıp her yerde aynı şekilde uyguluyoruz.
-  function updateDrawerToggleActiveState(toggle){
-    if(!toggle) return;
-    const wrap = toggle.closest('.nav-drawer-wrap');
-    const drawer = wrap ? wrap.querySelector('.nav-drawer') : null;
-    const isOpen = !!(drawer && drawer.classList.contains('open'));
-    const hasActiveChild = !!(drawer && drawer.querySelector('.nav-item.active'));
-    toggle.classList.toggle('active', isOpen || hasActiveChild);
-  }
-
   function setActive(target){
     document.querySelectorAll('.nav-item').forEach(el=>{
       el.classList.toggle('active', el.dataset.target === target);
     });
-    // Aktif sayfa bir çekmece (drawer) içindeki alt ögeyse, üstteki başlık
-    // (Hesaplama Araçları, Bütçeleme Araçları, Talimatlar gibi) de aynı
-    // vurgulamayı (arka plan + renkli sol çizgi) alsın.
-    document.querySelectorAll('[data-drawer-toggle]').forEach(updateDrawerToggleActiveState);
   }
 
   // F5 ile sayfa yenilendiğinde kullanıcıyı ana sayfaya değil, en son açık olduğu
@@ -1633,13 +1566,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       requestAnimationFrame(()=>{
         requestAnimationFrame(()=> drawer.classList.add('open'));
       });
-      updateDrawerToggleActiveState(toggle);
     }
     function closeDrawer(){
       drawer.classList.remove('open');
       drawer.hidden = true;
       toggle.setAttribute('aria-expanded', 'false');
-      updateDrawerToggleActiveState(toggle);
     }
 
     toggle.addEventListener('click', () => {
@@ -1665,6 +1596,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   wireDrawerToggle('hesaplamaAraclariToggle', 'hesaplamaDrawer');
   wireDrawerToggle('butcelemeAraclariToggle', 'butcelemeDrawer');
   wireDrawerToggle('talimatlarAraclariToggle', 'talimatlarDrawer');
+  wireDrawerToggle('sosyalToggle', 'sosyalDrawer');
+  wireDrawerToggle('verigirisiToggle', 'verigirisiDrawer');
 
   // Flyout dışına tıklanınca ya da bir alt öge seçilince kapansın.
   document.addEventListener('click', (e) => {
@@ -1676,7 +1609,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           drawer.classList.remove('open');
           drawer.hidden = true;
           if(toggle) toggle.setAttribute('aria-expanded', 'false');
-          if(toggle) updateDrawerToggleActiveState(toggle);
         }
       }
     });
@@ -1846,7 +1778,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     sendPasswordResetEmail, updatePassword, sendEmailVerification
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, runTransaction, serverTimestamp, increment,
+    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction, serverTimestamp, increment,
     query, where, arrayUnion, arrayRemove, onSnapshot
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -1893,12 +1825,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const MMG_SESSION_UID_KEY = 'mmg_session_uid';
 
   // Bu sayfa bir native uygulama sarmalayıcısı (WebView) içinde açıldıysa, o sarmalayıcının
-  // sayfa yüklenmeden önce window.mmgIsNativeApp = true atamış olması beklenir. Böyle bir
-  // işaret yoksa (PWA olarak yüklenmiş/"standalone" modda açılmış olsa bile) varsayılan
-  // olarak "web" kabul edilir.
+  // sayfa yüklenmeden önce window.mmgIsNativeApp = true atamış olması beklenir. Ayrıca,
+  // Android TWA (Trusted Web Activity — Play Store'daki uygulamanın gerçek çalışma şekli)
+  // üzerinden açıldığında tarayıcı "document.referrer"ı "android-app://..." ile başlatır;
+  // bu da güvenilir, kendiliğinden çalışan bir tespit yöntemi (aynı kontrol, sayfanın en
+  // başındaki analytics kodunda "app_source" için zaten kullanılıyor). Böyle bir işaret de
+  // yoksa (PWA olarak yüklenmiş/"standalone" modda açılmış olsa bile) varsayılan olarak
+  // "web" kabul edilir.
   function mmgSessionPlatform(){
     try{
       if(window.mmgIsNativeApp === true) return 'app';
+      if(document.referrer && document.referrer.indexOf('android-app://') === 0) return 'app';
+      if(sessionStorage.getItem('mmg_app_source') === 'twa_app') return 'app';
     }catch(e){}
     return 'web';
   }
@@ -1920,6 +1858,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // iddia işlemlerini TEK bir sıraya (kuyruğa) alıp birbiri ardına, asla iç içe geçmeyecek
   // şekilde çalıştırıyoruz.
   let mmgSessionOpQueue = Promise.resolve();
+
+  // KRİTİK DÜZELTME 2 (paylaşılan localStorage sorunu): Aynı tarayıcının/gizli pencere
+  // grubunun TÜM sekmeleri localStorage'ı PAYLAŞIR. mmgEnsureSessionOwnership normalde
+  // "localStorage'da bu kullanıcıya ait bir oturum ID'si zaten varsa yeniden iddia etme"
+  // mantığıyla çalışıyor (sayfa yenilemesinde gereksiz yeniden-iddiayı önlemek için) — ama bu,
+  // BAŞKA bir sekmede AZ ÖNCE aynı hesapla GERÇEKTEN giriş yapıldığında da devreye girip,
+  // "zaten var" diyerek yeni oturumu iddia ETMEMESİNE, dolayısıyla eski sekmenin hiç
+  // kicklenmemesine (tek-oturum kısıtlamasının sessizce devre dışı kalmasına) sebep oluyordu.
+  // Çözüm: giriş/kayıt formu SADECE gerçekten submit edildiğinde bu bayrağı true yapıyoruz;
+  // mmgEnsureSessionOwnership bunu görünce, localStorage'da ne olursa olsun oturumu ZORLA
+  // yeniden iddia ediyor (böylece diğer sekmeler/cihazlar doğru şekilde kicklenir). Sıradan
+  // bir sayfa yenilemesinde bu bayrak false olduğu için mevcut davranış (gereksiz yeniden
+  // iddia etmeme) korunuyor.
+  let mmgJustAuthenticatedThisTab = false;
   function mmgQueueSessionOp(fn){
     mmgSessionOpQueue = mmgSessionOpQueue.then(fn, fn);
     return mmgSessionOpQueue;
@@ -1999,9 +1951,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // kullanıcıya aitse ya da hiç yoksa) bu cihaz için sıfırdan yeni bir oturum iddia ediyoruz.
   async function mmgEnsureSessionOwnership(uid){
     return mmgQueueSessionOp(async () => {
+      const forceClaim = mmgJustAuthenticatedThisTab;
+      mmgJustAuthenticatedThisTab = false; // bayrağı sadece bir kere kullan (tüket)
       const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
       const localSessionUid = localStorage.getItem(MMG_SESSION_UID_KEY);
-      if(!localSessionId || localSessionUid !== uid){
+      if(forceClaim || !localSessionId || localSessionUid !== uid){
         await mmgClaimSessionUnsafe(uid);
       }
       mmgWatchSession(uid);
@@ -2011,13 +1965,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   onAuthStateChanged(auth, async (user) => {
     const adminBtn = document.getElementById('navReferansPaneliBtn');
     const begenBtn = document.getElementById('navIstatistiklerBtn');
-    const adminCard = document.getElementById('cardReferansPaneliBtn');
-    const begenCard = document.getElementById('cardIstatistiklerBtn');
     if(!user){
       if(adminBtn) adminBtn.style.display = 'none';
       if(begenBtn) begenBtn.style.display = 'none';
-      if(adminCard) adminCard.style.display = 'none';
-      if(begenCard) begenCard.style.display = 'none';
       mmgStopWatchingSession();
       // Firma yöneticiliğine bağlı her şeyi sıfırla: aksi halde misafir moduna geçildiğinde
       // (ya da oturum tutarsızlığı düzeltilirken) önceki oturumdan kalma "Kullanıcı Yönetim
@@ -2054,20 +2004,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(adminBtn){
         if(data.isAdmin){
           adminBtn.style.display = 'flex';
-          if(adminCard) adminCard.style.display = '';
         } else {
           // Global admin olmasa da, kendisine bir referans kodu atanmış kullanıcılar
           // da "Referans Paneli"ni (salt kendi kodu/istatistikleri için) görebilmeli.
           try{
             const ownedCodesSnap = await getDocs(query(collection(db, 'referralCodes'), where('ownerUid', '==', user.uid)));
-            const shouldShow = !ownedCodesSnap.empty;
-            adminBtn.style.display = shouldShow ? 'flex' : 'none';
-            if(adminCard) adminCard.style.display = shouldShow ? '' : 'none';
-          }catch(e){ adminBtn.style.display = 'none'; if(adminCard) adminCard.style.display = 'none'; }
+            adminBtn.style.display = ownedCodesSnap.empty ? 'none' : 'flex';
+          }catch(e){ adminBtn.style.display = 'none'; }
         }
       }
       if(begenBtn) begenBtn.style.display = data.isAdmin ? 'flex' : 'none';
-      if(begenCard) begenCard.style.display = data.isAdmin ? '' : 'none';
       const verifyWrap = document.getElementById('mmgVerifyEmailWrap');
       if(verifyWrap) verifyWrap.style.display = (user.email && !user.emailVerified) ? 'block' : 'none';
       try{ gtag('set', 'user_properties', { user_type: data.isPremium ? 'premium' : 'member' }); }catch(e){}
@@ -2630,30 +2576,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     try{
       const snap = await getDoc(doc(db, 'users', uid));
       const data = snap.exists() ? snap.data() : {};
+      const memberIds = Array.isArray(data.firmaIds) ? data.firmaIds : [];
       const adminIds = Array.isArray(data.adminFirmaIds) ? data.adminFirmaIds : [];
-
-      // Üye olarak eklendiğimiz firmaları, kullanıcının kendi "users/{uid}.firmaIds" alanına
-      // değil, gerçek üyelik kayıtlarına (firmaAccounts/*/members/{uid}) bakarak buluyoruz.
-      // Neden: bir firma yöneticisi, KullaniciYonetimi panelinden bizi SONRADAN başka bir
-      // firmaya eklediğinde, kendi hesabından bizim "users/{uid}" belgemize yazamaz (Firestore
-      // güvenlik kuralları, bir belgeye sadece o belgenin sahibinin yazmasına izin verir).
-      // O yüzden "firmaIds" alanı admin tarafından yapılan eklemeleri hiç yansıtmaz — sadece
-      // ilk daveti kendimiz kabul ettiğimizde (kendi yazdığımız için) doğru kalır. Gerçek üyelik
-      // kaydı ise zaten "firmaAccounts" koleksiyonunda (herkese açık yazılabilir) tutulduğundan,
-      // en güvenilir kaynak odur.
-      let memberIds = [];
-      try{
-        const memSnap = await getDocs(query(collectionGroup(db, 'members'), where('uid', '==', uid)));
-        memSnap.forEach(d => {
-          const fid = d.ref.parent.parent ? d.ref.parent.parent.id : null;
-          if(fid) memberIds.push(fid);
-        });
-      }catch(e){
-        // Sorgu (örn. eksik bir Firestore index'i yüzünden) başarısız olursa, en azından
-        // ilk kabul ettiğimiz davetlerin yansıdığı eski "firmaIds" alanına geri dön.
-        memberIds = Array.isArray(data.firmaIds) ? data.firmaIds : [];
-      }
-
       const allIds = Array.from(new Set([...memberIds, ...adminIds]));
       for(const fid of allIds){
         try{
@@ -2770,6 +2694,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     googleBtn.disabled = true;
     const remember = document.getElementById('rememberMe').checked;
     try{
+      mmgJustAuthenticatedThisTab = true;
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       const email = user.email;
@@ -2807,8 +2732,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       localStorage.setItem('mmg_remember', remember ? '1' : '0');
       updateUserBadge(customerNumber, username);
       syncUserDirectory(user.uid, customerNumber, username, email);
-      await mmgClaimSession(user.uid);
-      mmgWatchSession(user.uid);
+      // NOT: Oturum iddiası (mmgClaimSession) burada BİLEREK çağrılmıyor. Bu satır önceden
+      // hem burada HEM DE onAuthStateChanged içindeki mmgEnsureSessionOwnership tarafından
+      // (neredeyse aynı anda) tetikleniyordu. İkisi ayrı kuyruğa alınmış olsa da, ilk claim'in
+      // Firestore dinleyicisinin (onSnapshot) GECİKMELİ ilk tetiklenmesi, ikinci claim'in
+      // localStorage'ı değiştirmesinden SONRA geliyor ve eski değerle karşılaştırıp kullanıcıyı
+      // GİRER GİRMEZ yanlışlıkla "başkası girdi" sanıp kicklemesine sebep oluyordu. Tek doğru
+      // çözüm: oturumu SADECE TEK BİR yerden iddia etmek. Bu iş artık sadece
+      // onAuthStateChanged → mmgEnsureSessionOwnership tarafından yapılıyor.
       await applyPendingInviteIfAny(user, username);
       await syncCompanyCache(user.uid);
       await loadAdminFirmas(user.uid);
@@ -2850,6 +2781,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           showAuthError(MMGI18N.t('auth_err_weak_password'));
           return;
         }
+        mmgJustAuthenticatedThisTab = true;
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         // Kullanıcı adı benzersizliği: "usernames/{kucukharfli-ad}" dokümanını
         // rezerve etmeye çalış. Doküman zaten varsa (başka biri bu adı önce
@@ -2944,8 +2876,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
         syncUserDirectory(cred.user.uid, customerNumber, username, email);
-        await mmgClaimSession(cred.user.uid);
-        mmgWatchSession(cred.user.uid);
+        // NOT: bkz. Google girişindeki aynı isimli not — oturum iddiası artık sadece
+        // onAuthStateChanged → mmgEnsureSessionOwnership tarafından yapılıyor, burada tekrar
+        // çağrılmıyor (öz-atma/self-kick yarış durumunu önlemek için).
         if(premiumBenefit){
           if(premiumBenefit.type === 'free'){
             alert('🎉 "' + premiumBenefit.code + '" ' + MMGI18N.t('referral_used_free'));
@@ -2964,6 +2897,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         closeAuthOverlay();
         await showWelcomeIfNeeded(cred.user.uid);
       } else {
+        mmgJustAuthenticatedThisTab = true;
         const cred = await signInWithEmailAndPassword(auth, email, password);
         let customerNumber = null;
         let username = null;
@@ -2985,8 +2919,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(profile) localStorage.setItem('mmg_profile', JSON.stringify(profile));
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
-        await mmgClaimSession(cred.user.uid);
-        mmgWatchSession(cred.user.uid);
+        // NOT: bkz. Google girişindeki aynı isimli not — oturum iddiası artık sadece
+        // onAuthStateChanged → mmgEnsureSessionOwnership tarafından yapılıyor, burada tekrar
+        // çağrılmıyor (öz-atma/self-kick yarış durumunu önlemek için).
         await applyPendingInviteIfAny(cred.user, username);
         await syncCompanyCache(cred.user.uid);
         await loadAdminFirmas(cred.user.uid);
