@@ -84,12 +84,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .state-box a{ color:var(--brass); }
 
   .panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:24px; }
-  .panel-sub{ color:var(--muted); font-size:13px; margin-bottom:22px; }
-  .auth-field{ margin-bottom:16px; }
-  .auth-field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; }
+  .panel-sub{ color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .auth-field{ margin-bottom:10px; }
+  .auth-field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:4px; }
   .auth-field select, .auth-field input{
     width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
-    padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
+    padding:9px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
     transition:border-color .15s ease;
   }
   .auth-field select:focus, .auth-field input:focus{ border-color:var(--brass-dim); }
@@ -136,11 +136,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   #mmgAdminCodeList .code-name{ font-family:'IBM Plex Mono',monospace; font-weight:700; }
   #mmgAdminCodeList .code-benefit{ color:var(--muted); white-space:nowrap; }
   #mmgAdminCodeList .code-usage{ color:var(--muted); white-space:nowrap; }
+  #mmgAdminCodeList .code-usage.text-center{ text-align:center; }
+  #mmgAdminCodeList thead th.text-center{ text-align:center; }
   #mmgAdminCodeList .mmg-admin-edit{
     background:none; border:none; color:var(--brass,#C6A15B); cursor:pointer; font-size:12px; padding:4px; font-weight:600;
   }
   #mmgAdminCodeList .mmg-admin-del{
     background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:12px; padding:4px; font-weight:600;
+  }
+  #mmgAdminCodeList .mmg-admin-assign{
+    background:none; border:none; color:var(--azure,#3E8FE0); cursor:pointer; font-size:12px; padding:4px; font-weight:600; white-space:nowrap;
   }
 
   .owner-code-card{
@@ -363,7 +368,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           '<td class="code-name">' + c.id + '</td>' +
           '<td class="code-benefit">' + benefitLabel + '</td>' +
           '<td class="code-usage">' + limitCell + '</td>' +
-          '<td class="code-usage">' + used + '</td>' +
+          '<td class="code-usage text-center">' + used + '</td>' +
           '<td>' + ownerLabel + '</td>' +
           '<td><button type="button" class="mmg-admin-assign" data-code="' + c.id + '" data-owner-code="' + (c.ownerCode||'') + '" data-commission="' + (c.commissionPercent||'') + '">' + LBL.assignBtn + '</button></td>' +
           '<td><button type="button" class="mmg-admin-edit" data-code="' + c.id + '" data-benefit-type="' + (c.benefitType||'free') + '" data-discount="' + (c.discountPercent||0) + '" data-max-uses="' + (c.maxUses||'') + '" data-owner-code="' + (c.ownerCode||'') + '" data-commission="' + (c.commissionPercent||'') + '">' + LBL.editBtn + '</button></td>' +
@@ -375,7 +380,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           '<th>' + LBL.thCode + '</th>' +
           '<th>' + LBL.thType + '</th>' +
           '<th>' + LBL.thLimit + '</th>' +
-          '<th>' + LBL.thUsedCount + '</th>' +
+          '<th class="text-center">' + LBL.thUsedCount + '</th>' +
           '<th>' + LBL.thAssigned + '</th>' +
           '<th></th>' +
           '<th>' + LBL.thEdit + '</th>' +
