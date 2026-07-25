@@ -135,10 +135,10 @@
       <div class="mini-label" style="margin-bottom:8px;" data-i18n="managed_firma">Yönettiğiniz Firma</div>
       <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;"></select>
     </div>
-    <div class="card">
-      <h2 data-i18n="my_users_title">Kullanıcılarım</h2>
-      <div class="card-sub" data-i18n="my_users_desc">Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.</div>
-      <div class="member-list" id="membersList"><div class="empty-note" data-i18n="loading">Yükleniyor…</div></div>
+    <div class="card" id="pendingInvitesCard" style="display:none;">
+      <h2 data-i18n="pending_invites_title">Bekleyen Davetler</h2>
+      <div class="card-sub" data-i18n="pending_invites_desc">Bu kişiler henüz giriş yapıp daveti kabul etmedi.</div>
+      <div id="pendingInvitesList"></div>
     </div>
   </div>
 
@@ -162,10 +162,10 @@
       <div class="auth-success" id="inviteSuccess"></div>
     </div>
 
-    <div class="card" id="pendingInvitesCard" style="display:none;">
-      <h2 data-i18n="pending_invites_title">Bekleyen Davetler</h2>
-      <div class="card-sub" data-i18n="pending_invites_desc">Bu kişiler henüz giriş yapıp daveti kabul etmedi.</div>
-      <div id="pendingInvitesList"></div>
+    <div class="card">
+      <h2 data-i18n="my_users_title">Kullanıcılarım</h2>
+      <div class="card-sub" data-i18n="my_users_desc">Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.</div>
+      <div class="member-list" id="membersList"><div class="empty-note" data-i18n="loading">Yükleniyor…</div></div>
     </div>
   </div>
   </div>
