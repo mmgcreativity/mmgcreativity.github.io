@@ -104,6 +104,26 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   #mmgAdminMsg{ font-size:12.5px; margin-top:14px; }
   #mmgAdminCodeList{ max-height:600px; overflow-y:auto; }
 
+  .mmg-assign-overlay{
+    display:none; position:fixed; inset:0; background:rgba(6,10,18,0.72); backdrop-filter:blur(3px);
+    z-index:1000; align-items:center; justify-content:center; padding:20px;
+  }
+  .mmg-assign-overlay.open{ display:flex; }
+  .mmg-assign-modal{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:24px;
+    width:100%; max-width:380px; box-shadow:0 20px 50px rgba(0,0,0,0.45);
+  }
+  .mmg-assign-modal .codes-title{ margin-bottom:6px; }
+  .mmg-assign-modal .panel-sub{ margin-bottom:18px; }
+  .mmg-assign-actions{ display:flex; gap:8px; margin-top:4px; }
+  .mmg-assign-actions .auth-submit{ margin-top:0; }
+  .mmg-assign-cancel{
+    flex:1; padding:13px; border-radius:9px; border:1px solid var(--hairline); background:transparent;
+    color:var(--muted); font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px; cursor:pointer;
+  }
+  .mmg-assign-note{ font-size:11.5px; color:var(--muted); margin-top:10px; line-height:1.5; }
+  #mmgAssignMsg{ font-size:12.5px; margin-top:12px; min-height:16px; }
+
   #mmgAdminCodeList table{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
   #mmgAdminCodeList thead th{
     text-align:left; padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.04em;
@@ -205,6 +225,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </main>
 
+<div class="mmg-assign-overlay" id="mmgAssignOverlay">
+  <div class="mmg-assign-modal">
+    <div class="codes-title" id="mmgAssignTitle">Referans Kodunu Ata</div>
+    <div class="panel-sub" id="mmgAssignDesc">Bu referans kodunun ait olacağı kişinin kullanıcı kodunu girin.</div>
+    <div class="auth-field">
+      <label id="mmgAssignUserCodeLabel">Kullanıcı Kodu</label>
+      <input type="text" id="mmgAssignUserCode" inputmode="numeric" placeholder="ör. 1018">
+    </div>
+    <div class="auth-field">
+      <label id="mmgAssignCommissionLabel">Komisyon Yüzdesi</label>
+      <input type="number" id="mmgAssignCommission" min="0" max="100" placeholder="ör. 10">
+    </div>
+    <div class="mmg-assign-actions">
+      <button type="button" class="mmg-assign-cancel" id="mmgAssignCancelBtn">İptal</button>
+      <button type="button" class="auth-submit" id="mmgAssignSaveBtn" style="flex:1;">Kaydet</button>
+    </div>
+    <div class="mmg-assign-note" id="mmgAssignNote">Atamayı kaldırmak için kullanıcı kodunu boş bırakıp kaydedin.</div>
+    <div id="mmgAssignMsg"></div>
+  </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
@@ -258,7 +299,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     noPermissionOwner:'This page is only available to admins, or to users who have a referral code assigned to them.<br><br>',
     myCodesLoadFailed:'Your codes could not be loaded.', noSignupsYet:'No one has signed up with this code yet.',
     joinedLabel:'Joined', commissionLabel:'Commission',
-    thCode:'Code', thType:'Type', thUsage:'Defined / Used', thEdit:'Edit', thDelete:'Delete'
+    thCode:'Code', thType:'Type', thLimit:'Limit', thUsedCount:'Used', thAssigned:'Assigned To', thEdit:'Edit', thDelete:'Delete',
+    unlimitedLabel:'Unlimited',
+    assignBtn:'Assign Person', assignModalTitle:'Assign Referral Code', assignModalDesc:'Enter the user code of the person this referral code belongs to.',
+    assignUserCodeLabel:'User Code', assignCommissionLabel:'Commission Percent', assignSaveBtn:'Save', assignCancelBtn:'Cancel',
+    assignClearNote:'Leave the user code empty and save to unassign this code.', assignSaved:'Assignment saved. ✓', assignSaveFailed:'Could not save, please try again.',
   } : {
     freePremium:'Ücretsiz Premium', discountSuffix:' İndirim', used:' kullanıldı', usedUnlimited:' kullanıldı · Sınırsız',
     deleteBtn:'Sil', editBtn:'Düzenle', enterCode:'Lütfen bir kod girin.',
@@ -276,7 +321,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     noPermissionOwner:'Bu sayfa yalnızca yöneticilere ya da kendisine bir referans kodu atanmış kullanıcılara açıktır.<br><br>',
     myCodesLoadFailed:'Kodlarınız yüklenemedi.', noSignupsYet:'Bu kodla henüz kimse katılmadı.',
     joinedLabel:'Katılım', commissionLabel:'Komisyon',
-    thCode:'Referans Kodu', thType:'Türü', thUsage:'Tanımlı / Kullanılan', thEdit:'Düzenle', thDelete:'Sil'
+    thCode:'Referans Kodu', thType:'Türü', thLimit:'Limit', thUsedCount:'Kullanılan', thAssigned:'Atanan Kişi', thEdit:'Düzenle', thDelete:'Sil',
+    unlimitedLabel:'Sınırsız',
+    assignBtn:'Kişi Ata', assignModalTitle:'Referans Kodunu Ata', assignModalDesc:'Bu referans kodunun ait olacağı kişinin kullanıcı kodunu girin.',
+    assignUserCodeLabel:'Kullanıcı Kodu', assignCommissionLabel:'Komisyon Yüzdesi', assignSaveBtn:'Kaydet', assignCancelBtn:'İptal',
+    assignClearNote:'Atamayı kaldırmak için kullanıcı kodunu boş bırakıp kaydedin.', assignSaved:'Atama kaydedildi. ✓', assignSaveFailed:'Kaydedilemedi, tekrar deneyin.',
   };
 
   function showState(html){
@@ -308,12 +357,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const rowsHtml = codes.map(c => {
         const benefitLabel = c.benefitType === 'free' ? LBL.freePremium : ('%' + (c.discountPercent||0) + LBL.discountSuffix);
         const used = usageCounts[c.id] || 0;
-        const limitLabel = c.maxUses ? (used + '/' + c.maxUses + LBL.used) : (used + LBL.usedUnlimited);
+        const limitCell = c.maxUses ? String(c.maxUses) : LBL.unlimitedLabel;
         const ownerLabel = c.ownerCode ? ('👤 #' + c.ownerCode) : LBL.unassigned;
-        return '<tr title="' + LBL.assignedTo + ': ' + ownerLabel + '">' +
+        return '<tr>' +
           '<td class="code-name">' + c.id + '</td>' +
           '<td class="code-benefit">' + benefitLabel + '</td>' +
-          '<td class="code-usage">' + limitLabel + '</td>' +
+          '<td class="code-usage">' + limitCell + '</td>' +
+          '<td class="code-usage">' + used + '</td>' +
+          '<td>' + ownerLabel + '</td>' +
+          '<td><button type="button" class="mmg-admin-assign" data-code="' + c.id + '" data-owner-code="' + (c.ownerCode||'') + '" data-commission="' + (c.commissionPercent||'') + '">' + LBL.assignBtn + '</button></td>' +
           '<td><button type="button" class="mmg-admin-edit" data-code="' + c.id + '" data-benefit-type="' + (c.benefitType||'free') + '" data-discount="' + (c.discountPercent||0) + '" data-max-uses="' + (c.maxUses||'') + '" data-owner-code="' + (c.ownerCode||'') + '" data-commission="' + (c.commissionPercent||'') + '">' + LBL.editBtn + '</button></td>' +
           '<td><button type="button" class="mmg-admin-del" data-code="' + c.id + '">' + LBL.deleteBtn + '</button></td>' +
           '</tr>';
@@ -322,10 +374,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         '<table><thead><tr>' +
           '<th>' + LBL.thCode + '</th>' +
           '<th>' + LBL.thType + '</th>' +
-          '<th>' + LBL.thUsage + '</th>' +
+          '<th>' + LBL.thLimit + '</th>' +
+          '<th>' + LBL.thUsedCount + '</th>' +
+          '<th>' + LBL.thAssigned + '</th>' +
+          '<th></th>' +
           '<th>' + LBL.thEdit + '</th>' +
           '<th>' + LBL.thDelete + '</th>' +
         '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
+      listEl.querySelectorAll('.mmg-admin-assign').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openAssignModal(btn.dataset.code, btn.dataset.ownerCode || '', btn.dataset.commission || '');
+        });
+      });
       listEl.querySelectorAll('.mmg-admin-edit').forEach(btn => {
         btn.addEventListener('click', () => {
           document.getElementById('mmgAdminCode').value = btn.dataset.code;
@@ -363,6 +423,85 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     mmgIsEditingCode = false;
   }
   document.getElementById('mmgAdminCancelEditBtn').addEventListener('click', mmgResetAdminForm);
+
+  // ---- Sağdaki tablodan hızlı "Kişi Ata" modalı ----
+  const mmgAssignOverlay = document.getElementById('mmgAssignOverlay');
+  const mmgAssignUserCode = document.getElementById('mmgAssignUserCode');
+  const mmgAssignCommission = document.getElementById('mmgAssignCommission');
+  const mmgAssignMsg = document.getElementById('mmgAssignMsg');
+  const mmgAssignSaveBtn = document.getElementById('mmgAssignSaveBtn');
+  let mmgAssignTargetCode = null;
+
+  // Modal metinlerini mevcut dile göre bir kere doldur (bu alanlar dinamik oluşturulduğu için data-i18n kullanmıyor)
+  document.getElementById('mmgAssignTitle').textContent = LBL.assignModalTitle;
+  document.getElementById('mmgAssignDesc').textContent = LBL.assignModalDesc;
+  document.getElementById('mmgAssignUserCodeLabel').textContent = LBL.assignUserCodeLabel;
+  document.getElementById('mmgAssignCommissionLabel').textContent = LBL.assignCommissionLabel;
+  document.getElementById('mmgAssignCancelBtn').textContent = LBL.assignCancelBtn;
+  mmgAssignSaveBtn.textContent = LBL.assignSaveBtn;
+  document.getElementById('mmgAssignNote').textContent = LBL.assignClearNote;
+
+  function openAssignModal(code, ownerCode, commission){
+    mmgAssignTargetCode = code;
+    mmgAssignUserCode.value = ownerCode || '';
+    mmgAssignCommission.value = commission || '';
+    mmgAssignMsg.textContent = '';
+    mmgAssignSaveBtn.disabled = false;
+    mmgAssignSaveBtn.textContent = LBL.assignSaveBtn;
+    mmgAssignOverlay.classList.add('open');
+    mmgAssignUserCode.focus();
+  }
+
+  function closeAssignModal(){
+    mmgAssignOverlay.classList.remove('open');
+    mmgAssignTargetCode = null;
+  }
+
+  document.getElementById('mmgAssignCancelBtn').addEventListener('click', closeAssignModal);
+  mmgAssignOverlay.addEventListener('click', (e) => { if(e.target === mmgAssignOverlay) closeAssignModal(); });
+
+  mmgAssignSaveBtn.addEventListener('click', async () => {
+    if(!mmgAssignTargetCode) return;
+    const ownerCodeRaw = mmgAssignUserCode.value.trim();
+    const commissionPercent = parseInt(mmgAssignCommission.value, 10) || 0;
+    mmgAssignSaveBtn.disabled = true;
+    mmgAssignSaveBtn.textContent = LBL.saving;
+    mmgAssignMsg.style.color = '';
+    try{
+      let ownerUid = null, ownerCode = null, ownerLabel = null;
+      if(ownerCodeRaw){
+        const ownerSnap = await getDocs(query(collection(db, 'users'), where('customerNumber', '==', parseInt(ownerCodeRaw, 10))));
+        if(ownerSnap.empty){
+          mmgAssignMsg.textContent = LBL.ownerNotFound;
+          mmgAssignMsg.style.color = 'var(--red,#e2544b)';
+          mmgAssignSaveBtn.disabled = false;
+          mmgAssignSaveBtn.textContent = LBL.assignSaveBtn;
+          return;
+        }
+        const ownerDoc = ownerSnap.docs[0];
+        ownerUid = ownerDoc.id;
+        ownerCode = ownerCodeRaw;
+        ownerLabel = ownerDoc.data().username || ownerDoc.data().email || ownerCodeRaw;
+      }
+      // merge:true sayesinde kodun diğer alanları (fayda türü, kullanım limiti vb.) korunur, sadece atama bilgisi güncellenir.
+      await setDoc(doc(db, 'referralCodes', mmgAssignTargetCode), {
+        ownerUid: ownerUid,
+        ownerCode: ownerCode,
+        ownerLabel: ownerLabel,
+        commissionPercent: commissionPercent
+      }, { merge: true });
+      mmgAssignMsg.textContent = LBL.assignSaved;
+      mmgAssignMsg.style.color = 'var(--teal,#3FB68A)';
+      mmgLoadAdminCodes();
+      setTimeout(closeAssignModal, 700);
+    } catch(err){
+      mmgAssignMsg.textContent = LBL.assignSaveFailed;
+      mmgAssignMsg.style.color = 'var(--red,#e2544b)';
+    } finally {
+      mmgAssignSaveBtn.disabled = false;
+      mmgAssignSaveBtn.textContent = LBL.assignSaveBtn;
+    }
+  });
 
   document.getElementById('mmgAdminForm').addEventListener('submit', async (e) => {
     e.preventDefault();
