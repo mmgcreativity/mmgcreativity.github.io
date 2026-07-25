@@ -1849,6 +1849,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // mmgEnsureSessionOwnership).
   async function mmgClaimSessionUnsafe(uid){
     const sessionId = mmgGenerateSessionId();
+    console.log('[MMG_DEBUG] mmgClaimSessionUnsafe BAŞLADI', {uid, newSessionId: sessionId, field: MMG_SESSION_FIELD, stack: (new Error()).stack});
     // ÖNEMLİ: localStorage'ı Firestore yazmasından ÖNCE güncelliyoruz. Firestore SDK'sı bir
     // yazmayı yerel önbelleğe hemen (sunucu onayını beklemeden) yansıtıp aktif onSnapshot
     // dinleyicilerini anında tetikleyebiliyor. localStorage güncellemesi bu yazmadan SONRA
@@ -1862,7 +1863,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         [MMG_SESSION_FIELD]: sessionId,
         activeSessionAt: serverTimestamp()
       }, { merge: true });
-    }catch(e){ /* Firestore'a yazılamazsa sessizce geç, kritik bir işlev değil */ }
+      console.log('[MMG_DEBUG] Firestore yazma BAŞARILI', {uid, sessionId});
+    }catch(e){
+      console.log('[MMG_DEBUG] Firestore yazma HATA VERDİ (YUTULDU)', {uid, sessionId, errorCode: e && e.code, errorMessage: e && e.message});
+    }
   }
 
   // Yeni bir oturum kimliği üretir, Firestore'a (bu platforma ait alana) yazar ve bu
@@ -1886,10 +1890,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function mmgWatchSession(uid){
     mmgStopWatchingSession();
     mmgSessionUnsub = onSnapshot(doc(db, 'users', uid), (snap) => {
-      if(!snap.exists()) return;
+      if(!snap.exists()){ console.log('[MMG_DEBUG] onSnapshot: doküman yok'); return; }
       const remoteSessionId = snap.data()[MMG_SESSION_FIELD];
       const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
+      console.log('[MMG_DEBUG] onSnapshot TETİKLENDİ', {
+        remoteSessionId, localSessionId, field: MMG_SESSION_FIELD,
+        fromCache: snap.metadata.fromCache, hasPendingWrites: snap.metadata.hasPendingWrites,
+        esitMi: remoteSessionId === localSessionId
+      });
       if(remoteSessionId && localSessionId && remoteSessionId !== localSessionId){
+        console.log('[MMG_DEBUG] >>> KICK TETİKLENDİ <<<', {remoteSessionId, localSessionId});
         mmgStopWatchingSession();
         localStorage.removeItem(MMG_SESSION_KEY);
         localStorage.removeItem(MMG_SESSION_UID_KEY);
@@ -1921,6 +1931,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return mmgQueueSessionOp(async () => {
       const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
       const localSessionUid = localStorage.getItem(MMG_SESSION_UID_KEY);
+      console.log('[MMG_DEBUG] mmgEnsureSessionOwnership ÇALIŞTI', {uid, localSessionId, localSessionUid, yenidenIddiaEdilecekMi: (!localSessionId || localSessionUid !== uid)});
       if(!localSessionId || localSessionUid !== uid){
         await mmgClaimSessionUnsafe(uid);
       }
@@ -2875,6 +2886,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(profile) localStorage.setItem('mmg_profile', JSON.stringify(profile));
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
+        console.log('[MMG_DEBUG] Form submit handler: mmgClaimSession çağrılıyor', {uid: cred.user.uid});
         await mmgClaimSession(cred.user.uid);
         mmgWatchSession(cred.user.uid);
         await applyPendingInviteIfAny(cred.user, username);
