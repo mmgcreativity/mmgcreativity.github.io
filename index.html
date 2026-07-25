@@ -1810,6 +1810,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // activeSessionId_web / activeSessionId_app. Bir platformda yeni giriş yapıldığında sadece
   // O platformun eski oturumu kapanır, diğer platform etkilenmez.
   const MMG_SESSION_KEY = 'mmg_session_id';
+  const MMG_SESSION_UID_KEY = 'mmg_session_uid';
 
   // Bu sayfa bir native uygulama sarmalayıcısı (WebView) içinde açıldıysa, o sarmalayıcının
   // sayfa yüklenmeden önce window.mmgIsNativeApp = true atamış olması beklenir. Böyle bir
@@ -1829,7 +1830,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   // Yeni bir oturum kimliği üretir, Firestore'a (bu platforma ait alana) yazar ve bu
-  // cihazda saklar. Sadece giriş/kayıt anında çağrılır ("bu cihaz artık bu platformun
+  // cihazda saklar (hangi kullanıcıya ait olduğuyla birlikte — bkz. mmgEnsureSessionOwnership
+  // içindeki açıklama). Sadece giriş/kayıt anında çağrılır ("bu cihaz artık bu platformun
   // aktif oturum sahibi").
   async function mmgClaimSession(uid){
     const sessionId = mmgGenerateSessionId();
@@ -1839,6 +1841,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         activeSessionAt: serverTimestamp()
       }, { merge: true });
       localStorage.setItem(MMG_SESSION_KEY, sessionId);
+      localStorage.setItem(MMG_SESSION_UID_KEY, uid);
     }catch(e){ /* oturum kimliği yazılamazsa sessizce geç, kritik bir işlev değil */ }
   }
 
@@ -1847,8 +1850,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   // Firestore'daki (SADECE bu platforma ait) oturum kimliğini gerçek zamanlı izler; bu
-  // cihazınkinden farklı bir değere değiştiğini görürse (aynı platformda başka bir yerden
-  // giriş yapıldı demektir) oturumu kapatır. Diğer platformun alanı değişse bile bu cihazı
+  // cihazınkinden farklı bir değere değiştiğini görürse (aynı platformda başka bir yerden —
+  // Cihan olsun, başka biri olsun, fark etmez — SONRADAN giriş yapıldı demektir) oturumu
+  // kapatır. "Son giriş" her zaman kazanır. Diğer platformun alanı değişse bile bu cihazı
   // etkilemez — böylece aynı hesap 1 web + 1 uygulamada aynı anda açık kalabilir.
   function mmgWatchSession(uid){
     mmgStopWatchingSession();
@@ -1859,11 +1863,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(remoteSessionId && localSessionId && remoteSessionId !== localSessionId){
         mmgStopWatchingSession();
         localStorage.removeItem(MMG_SESSION_KEY);
+        localStorage.removeItem(MMG_SESSION_UID_KEY);
         alert(MMGI18N.t('session_kicked_message'));
         // ÖNEMLİ: signOut() tamamlanmadan sayfa yenilenirse, Firebase Auth'un yerel
         // (IndexedDB) oturum kaydı yarım kalmış halde kalabiliyor ve bu da az sonra aynı
         // tarayıcıdan tekrar giriş yapmaya çalışıldığında başarısız olmasına sebep
-        // olabiliyordu. Bu yüzden artık signOut'un bitmesini BEKLEYİP öyle yeniliyoruz.
+        // olabiliyordu. Bu yüzden signOut'un bitmesini BEKLEYİP öyle yeniliyoruz.
         signOut(auth).catch(()=>{}).finally(() => {
           localStorage.setItem('mmg_auth_state', 'guest');
           window.location.reload();
@@ -1872,13 +1877,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }, () => { /* dinleme hatasında sessizce geç */ });
   }
 
-  // Sayfa yeniden yüklendiğinde (yeni bir giriş değil, mevcut oturumun devamı) çağrılır:
-  // bu cihazda daha önce hiç oturum kimliği kaydedilmemişse (ör. bu özellik yeni eklendiği
-  // için ya da localStorage temizlenmiş olabileceği için) yeni bir tane iddia eder;
-  // varsa sadece dinlemeye devam eder, mevcut sahipliği bozmaz.
+  // Sayfa yeniden yüklendiğinde (yeni bir giriş değil, mevcut oturumun devamı) çağrılır.
+  // KRİTİK DÜZELTME: eskiden burada sadece "localStorage'da BİR oturum kimliği var mı"
+  // diye bakılıyordu — bu YANLIŞTI, çünkü bu tarayıcıda daha önce BAŞKA bir hesap (ör.
+  // "Cihan") giriş yapıp çıkış yapmadan kapatmışsa, o eski oturum kimliği burada hâlâ
+  // duruyor olabiliyordu. Şimdi giriş yapan yeni kullanıcı geldiğinde, bu eski (başka
+  // kullanıcıya ait) kimlik "zaten var" sanılıp yeni bir oturum HİÇ İDDİA EDİLMİYORDU;
+  // sonra o yanlış/eski kimlik, YENİ kullanıcının Firestore kaydıyla karşılaştırılınca
+  // (doğal olarak) uyuşmuyor ve kullanıcı DAHA GİRER GİRMEZ yanlışlıkla atılıyordu — bu,
+  // "hiçbir hesapla giremiyorum" şikayetinin gerçek sebebiydi. Düzeltme: kaydedilen oturum
+  // kimliğinin GERÇEKTEN bu uid'e mi ait olduğunu da kontrol ediyoruz; değilse (farklı bir
+  // kullanıcıya aitse ya da hiç yoksa) bu cihaz için sıfırdan yeni bir oturum iddia ediyoruz.
   async function mmgEnsureSessionOwnership(uid){
     const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
-    if(!localSessionId){
+    const localSessionUid = localStorage.getItem(MMG_SESSION_UID_KEY);
+    if(!localSessionId || localSessionUid !== uid){
       await mmgClaimSession(uid);
     }
     mmgWatchSession(uid);
@@ -2850,6 +2863,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   async function performLogout(){
     mmgStopWatchingSession();
     localStorage.removeItem(MMG_SESSION_KEY);
+    localStorage.removeItem(MMG_SESSION_UID_KEY);
     try { await signOut(auth); } catch(err){ /* önemli değil */ }
     localStorage.removeItem('mmg_auth_state');
     localStorage.removeItem('mmg_remember');
