@@ -139,8 +139,14 @@ service cloud.firestore {
         allow read, write: if request.auth != null;
       }
     }
-    match /firmaInvites/{email} {
+    match /firmaInvites/{code} {
       allow read, write: if request.auth != null;
+      // Bir kullanıcı kodu aynı anda birden fazla firmaya kullanıcı olarak davet edilebilsin diye
+      // her firma davetini ayrı bir alt kayıt olarak tutuyoruz (KullaniciYonetimi.html'deki
+      // "birden fazla firmaya bir kerede davet gönder" özelliği için).
+      match /firmas/{firmaId} {
+        allow read, write: if request.auth != null;
+      }
     }
     match /firmaAdminInvites/{email} {
       allow read, write: if request.auth != null;

@@ -960,13 +960,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   async function loadPendingInvites(user){
     if(!user){ pendingInvitesCard.style.display = 'none'; return; }
     // Hem "kullanıcı" hem de "yönetici" davetleri artık e-posta değil, kişinin kendi
-    // kullanıcı koduyla eşleştirilir (bkz. KullaniciYonetimi.html).
+    // kullanıcı koduyla eşleştirilir (bkz. KullaniciYonetimi.html). Bir kod aynı anda birden
+    // fazla firmaya kullanıcı olarak davet edilebildiğinden, kullanıcı davetleri
+    // firmaInvites/{kod}/firmas altındaki tüm kayıtlardan okunur.
     const code = (currentUserData && currentUserData.customerNumber != null) ? String(currentUserData.customerNumber) : null;
     const invites = [];
     try{
       if(code){
-        const memberSnap = await getDoc(doc(db, 'firmaInvites', code));
-        if(memberSnap.exists()) invites.push({ kind:'member', id:code, data:memberSnap.data() });
+        const memberSnap = await getDocs(collection(db, 'firmaInvites', code, 'firmas'));
+        memberSnap.forEach(d => invites.push({ kind:'member', id:code, firmaId:d.id, data:d.data() }));
       }
     }catch(e){ /* sessizce geç */ }
     try{
@@ -984,6 +986,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const acceptBtn = document.getElementById('pendInvAccept_' + idx);
       const rejectBtn = document.getElementById('pendInvReject_' + idx);
       const msgEl = document.getElementById('pendInvMsg_' + idx);
+      const inviteRef = inv.kind === 'admin'
+        ? doc(db, 'firmaAdminInvites', inv.id)
+        : doc(db, 'firmaInvites', inv.id, 'firmas', inv.firmaId);
       if(acceptBtn) acceptBtn.onclick = async () => {
         acceptBtn.disabled = true; if(rejectBtn) rejectBtn.disabled = true;
         try{
@@ -996,7 +1001,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             });
             await setDoc(doc(db, 'users', user.uid), { firmaIds: arrayUnion(inv.data.firmaId) }, { merge: true });
           }
-          await deleteDoc(doc(db, inv.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', inv.id));
+          await deleteDoc(inviteRef);
           if(msgEl){ msgEl.style.color = 'var(--teal)'; msgEl.textContent = LBL.pendingInviteAccepted; }
           try{ await loadMyFirmas(user.uid); }catch(e){}
           setTimeout(() => loadPendingInvites(user), 900);
@@ -1008,7 +1013,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(rejectBtn) rejectBtn.onclick = async () => {
         acceptBtn.disabled = true; rejectBtn.disabled = true;
         try{
-          await deleteDoc(doc(db, inv.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', inv.id));
+          await deleteDoc(inviteRef);
           if(msgEl){ msgEl.style.color = 'var(--muted)'; msgEl.textContent = LBL.pendingInviteRejected; }
           setTimeout(() => loadPendingInvites(user), 700);
         }catch(e){

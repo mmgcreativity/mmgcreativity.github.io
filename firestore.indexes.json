@@ -1,0 +1,12 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "firmas",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "firmaId", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

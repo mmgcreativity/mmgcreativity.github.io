@@ -75,7 +75,8 @@ import {
   let groupInvitesMap = {};  // inviteId -> invite data
   let unsubGroups = null, unsubGroupInvites = null;
   let unsubFirmaMemberInvite = null, unsubFirmaAdminInvite = null;
-  let firmaMemberInvite = null, firmaAdminInvite = null; // {id, kind, data} | null
+  let firmaMemberInvites = []; // [{id, firmaId, kind, data}] — bir kod birden fazla firmaya davet edilebilir
+  let firmaAdminInvite = null; // {id, kind, data} | null
   let friendsSubView = 'list'; // 'list' | 'newGroup'
   let pendingGroupMembers = []; // [{uid, code}] grup oluşturma formunda eklenen kişiler
   let chatsMap = {};     // chatId -> chat data
@@ -754,6 +755,7 @@ import {
 
   // ---- Dinleyiciler ----
   let chatsFirstSnapshot = true, groupsFirstSnapshot = true;
+  let firmaMemberInvitesFirstSnapshot = true, firmaAdminInviteFirstSnapshot = true;
 
   function detectNewMessagesAndToast(newMap, oldMap, kind){
     Object.keys(newMap).forEach(id => {
@@ -821,6 +823,25 @@ import {
     });
   }
 
+  function showToastForFirmaInvite(inv){
+    const firmaName = (inv.data && inv.data.firmaName) || 'bir firma';
+    const title = '🏢 ' + firmaName;
+    const message = inv.kind === 'admin'
+      ? 'Yönetici olarak davet edildiniz. Görmek için tıklayın.'
+      : 'Kullanıcı olarak davet edildiniz. Görmek için tıklayın.';
+    notifyNewMessage(title, message);
+    showChatToast({
+      title, message, avatarLetter: '🏢',
+      onClick: () => {
+        els.panel.hidden = false;
+        positionPanelNearBubble();
+        activeTab = 'notifications';
+        [...els.tabs.children].forEach(t => t.classList.toggle('active', t.dataset.tab === 'notifications'));
+        renderTab();
+      }
+    });
+  }
+
   function startListeners(uid){
     unsubChats = onSnapshot(query(collection(db, 'chats'), where('participants', 'array-contains', uid)), (snap) => {
       const newChatsMap = {};
@@ -859,16 +880,26 @@ import {
 
     // ---- Firma Hesabı davetleri (YENİ): eskiden ayrı bir açılır bildirim kutusundaydı,
     // şimdi bu sohbet panelinin "Bildirimler" sekmesinde gösteriliyor ----
-    // Hem "kullanıcı" hem de "yönetici" daveti artık e-posta değil, kullanıcının kendi kodu
-    // (myChatCode / Kullanıcı Kodu) ile eşleşir.
+    // "Yönetici" daveti kullanıcının kendi kodu (myChatCode / Kullanıcı Kodu) ile eşleşen tek bir
+    // kayıt; "kullanıcı" daveti ise aynı kod birden fazla firmaya davet edilebildiğinden
+    // firmaInvites/{kod}/firmas altındaki tüm kayıtlardan oluşan bir liste.
     if(myChatCode){
-      unsubFirmaMemberInvite = onSnapshot(doc(db, 'firmaInvites', myChatCode), (snap) => {
-        firmaMemberInvite = snap.exists() ? { id: myChatCode, kind: 'member', data: snap.data() || {} } : null;
+      unsubFirmaMemberInvite = onSnapshot(collection(db, 'firmaInvites', myChatCode, 'firmas'), (snap) => {
+        const prevFirmaIds = new Set(firmaMemberInvites.map(inv => inv.firmaId));
+        firmaMemberInvites = [];
+        snap.forEach(d => firmaMemberInvites.push({ id: myChatCode, firmaId: d.id, kind: 'member', data: d.data() || {} }));
+        if(!firmaMemberInvitesFirstSnapshot){
+          firmaMemberInvites.forEach(inv => { if(!prevFirmaIds.has(inv.firmaId)) showToastForFirmaInvite(inv); });
+        }
+        firmaMemberInvitesFirstSnapshot = false;
         if(activeTab === 'notifications') renderTab();
         updateBadge();
       }, (err) => console.error('mmg-chat-widget firmaInvites onSnapshot:', err));
       unsubFirmaAdminInvite = onSnapshot(doc(db, 'firmaAdminInvites', myChatCode), (snap) => {
+        const hadBefore = !!firmaAdminInvite;
         firmaAdminInvite = snap.exists() ? { id: myChatCode, kind: 'admin', data: snap.data() || {} } : null;
+        if(!firmaAdminInviteFirstSnapshot && firmaAdminInvite && !hadBefore) showToastForFirmaInvite(firmaAdminInvite);
+        firmaAdminInviteFirstSnapshot = false;
         if(activeTab === 'notifications') renderTab();
         updateBadge();
       }, (err) => console.error('mmg-chat-widget firmaAdminInvites onSnapshot:', err));
@@ -878,7 +909,7 @@ import {
   function updateBadge(){
     const reqCount = Object.keys(requestsMap).length + Object.keys(groupInvitesMap).length;
     els.reqDot.hidden = reqCount === 0;
-    const firmaInviteCount = (firmaMemberInvite ? 1 : 0) + (firmaAdminInvite ? 1 : 0);
+    const firmaInviteCount = firmaMemberInvites.length + (firmaAdminInvite ? 1 : 0);
     if(els.notifDot) els.notifDot.hidden = firmaInviteCount === 0;
     let unread = 0;
     Object.keys(chatsMap).forEach(id => {
@@ -919,7 +950,7 @@ import {
   function renderNotificationsTab(){
     els.footer.hidden = true;
     const invites = [];
-    if(firmaMemberInvite) invites.push(firmaMemberInvite);
+    firmaMemberInvites.forEach(inv => invites.push(inv));
     if(firmaAdminInvite) invites.push(firmaAdminInvite);
     if(!invites.length){
       els.body.innerHTML = '<div class="mmg-chat-empty">Bekleyen bir bildiriminiz yok.</div>';
@@ -978,7 +1009,7 @@ import {
         });
         await setDoc(doc(db, 'users', currentUser.uid), { firmaIds: arrayUnion(invite.data.firmaId) }, { merge: true });
       }
-      await deleteDoc(doc(db, invite.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', invite.id));
+      await deleteDoc(invite.kind === 'admin' ? doc(db, 'firmaAdminInvites', invite.id) : doc(db, 'firmaInvites', invite.id, 'firmas', invite.firmaId));
       if(msgEl){ msgEl.style.color = 'var(--teal,#3FB68A)'; msgEl.textContent = 'Kabul edildi ✓'; }
       // Yeni bağlantı sayfada (ana kabuk) hemen yansısın diye bir yenileme sinyali gönder.
       try{ window.location.reload(); }catch(e){}
@@ -995,7 +1026,7 @@ import {
     if(acceptBtn) acceptBtn.disabled = true;
     if(rejectBtn) rejectBtn.disabled = true;
     try{
-      await deleteDoc(doc(db, invite.kind === 'admin' ? 'firmaAdminInvites' : 'firmaInvites', invite.id));
+      await deleteDoc(invite.kind === 'admin' ? doc(db, 'firmaAdminInvites', invite.id) : doc(db, 'firmaInvites', invite.id, 'firmas', invite.firmaId));
     }catch(e){
       if(acceptBtn) acceptBtn.disabled = false;
       if(rejectBtn) rejectBtn.disabled = false;
@@ -1620,8 +1651,12 @@ import {
     if(unsubMessages){ unsubMessages(); unsubMessages = null; }
     if(unsubGroups){ unsubGroups(); unsubGroups = null; }
     if(unsubGroupInvites){ unsubGroupInvites(); unsubGroupInvites = null; }
+    if(unsubFirmaMemberInvite){ unsubFirmaMemberInvite(); unsubFirmaMemberInvite = null; }
+    if(unsubFirmaAdminInvite){ unsubFirmaAdminInvite(); unsubFirmaAdminInvite = null; }
     chatsMap = {}; requestsMap = {}; groupsMap = {}; groupInvitesMap = {}; openChatId = null;
     chatsFirstSnapshot = true; groupsFirstSnapshot = true;
+    firmaMemberInvitesFirstSnapshot = true; firmaAdminInviteFirstSnapshot = true;
+    firmaMemberInvites = []; firmaAdminInvite = null;
   }
 
   onAuthStateChanged(auth, async (user) => {

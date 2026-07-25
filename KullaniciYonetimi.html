@@ -156,6 +156,10 @@
         <label data-i18n="user_code_label">Kullanıcının Kodu</label>
         <input type="text" id="inviteCode" inputmode="numeric" placeholder="ör. 1016" maxlength="12">
       </div>
+      <div class="auth-field" id="inviteFirmaMultiWrap" style="display:none;">
+        <label data-i18n="invite_firmas_label">Hangi Firma(lar)a Eklensin?</label>
+        <div class="perm-grid" id="inviteFirmaMultiGrid"></div>
+      </div>
       <div class="perm-select-all-row">
         <label class="perm-select-all-label">
           <input type="checkbox" id="inviteSelectAll">
@@ -171,11 +175,13 @@
     <div class="card">
       <h2 data-i18n="add_admin_title">Yönetici Ekle</h2>
       <div class="card-sub" data-i18n="add_admin_desc">Eklemek istediğiniz kişinin kullanıcı kodunu girin. Kişi bu kodla ilişkili hesabıyla giriş yaptığında bu firmaya yönetici olarak eklenecek ve bu paneli görebilecek.</div>
-      <div class="auth-field">
-        <label data-i18n="admin_code_label">Yöneticinin Kodu</label>
-        <input type="text" id="adminInviteCode" inputmode="numeric" placeholder="ör. 1016" maxlength="12">
+      <div style="display:flex; gap:8px; align-items:flex-end;">
+        <div class="auth-field" style="flex:1; min-width:0; margin-bottom:0;">
+          <label data-i18n="admin_code_label">Yöneticinin Kodu</label>
+          <input type="text" id="adminInviteCode" inputmode="numeric" placeholder="ör. 1016" maxlength="12">
+        </div>
+        <button type="button" class="auth-submit" id="adminInviteSubmitBtn" data-i18n="send_invite" style="flex:1; min-width:0; margin-top:0;">Davet Gönder</button>
       </div>
-      <button type="button" class="auth-submit" id="adminInviteSubmitBtn" data-i18n="send_invite">Davet Gönder</button>
       <div class="auth-error" id="adminInviteError"></div>
       <div class="auth-success" id="adminInviteSuccess"></div>
     </div>
@@ -198,7 +204,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, serverTimestamp, arrayUnion, arrayRemove
+    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, query, where, serverTimestamp, arrayUnion, arrayRemove
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -223,6 +229,7 @@
     notLoggedInTitle:'You are not signed in', notLoggedInSub:'You need to sign in to view this panel.',
     errorTitle:'An error occurred', errorSub:'The panel could not be loaded, please refresh the page and try again.',
     enterValidCode:'Please enter a valid user code.', sending:'Sending…',
+    codeNotFound:'No user was found with this user code. Please check the code and try again.',
     inviteSent:'Invitation sent. The person will be added automatically when they sign in with the account that has this code.',
     inviteFailed:'Invitation could not be sent, please try again.',
     cancelInvite:'Cancel', noUsersAdded:'No users added yet.', remove:'Remove', saved:'Saved ✓', selectAllPerms:'Select All', editPerms:'Edit permissions',
@@ -236,6 +243,7 @@
     notLoggedInTitle:'Giriş yapmadınız', notLoggedInSub:'Bu paneli görmek için giriş yapmanız gerekir.',
     errorTitle:'Bir hata oluştu', errorSub:'Panel yüklenemedi, lütfen sayfayı yenileyip tekrar deneyin.',
     enterValidCode:'Lütfen geçerli bir kullanıcı kodu girin.', sending:'Gönderiliyor…',
+    codeNotFound:'Bu kullanıcı koduna sahip bir kullanıcı bulunamadı. Kodu kontrol edip tekrar deneyin.',
     inviteSent:'Davet gönderildi. Kişi bu kodun ait olduğu hesapla giriş yaptığında otomatik olarak eklenecek.',
     inviteFailed:'Davet gönderilemedi, lütfen tekrar deneyin.',
     cancelInvite:'İptal Et', noUsersAdded:'Henüz eklenmiş kullanıcı yok.', remove:'Kaldır', saved:'Kaydedildi ✓', selectAllPerms:'Tümünü Seç', editPerms:'Yetkileri düzenle',
@@ -297,6 +305,19 @@
   let firmaId = null;
   let myAdminFirmas = []; // [{id, name}]
 
+  function inviteFirmaMultiGridHtml(){
+    return myAdminFirmas.map(f =>
+      '<label class="perm-check"><input type="checkbox" class="invite-firma-check" value="' + f.id + '"' +
+      (f.id === firmaId ? ' checked' : '') + '> ' + f.name + '</label>'
+    ).join('');
+  }
+  function getSelectedInviteFirmaIds(){
+    const wrap = document.getElementById('inviteFirmaMultiWrap');
+    if(wrap.style.display === 'none') return [firmaId];
+    const checked = Array.from(document.querySelectorAll('.invite-firma-check:checked')).map(c => c.value);
+    return checked.length ? checked : [firmaId];
+  }
+
   async function selectFirma(fid){
     firmaId = fid;
     const f = myAdminFirmas.find(x => x.id === fid);
@@ -304,6 +325,13 @@
       LBL.firmaSubPrefix + (f ? f.name : fid) + LBL.firmaSubSuffix;
     document.getElementById('invitePermGrid').innerHTML = permGridHtml('invite', null);
     wirePermSelectAll('invite');
+    const multiWrap = document.getElementById('inviteFirmaMultiWrap');
+    if(myAdminFirmas.length > 1){
+      multiWrap.style.display = 'block';
+      document.getElementById('inviteFirmaMultiGrid').innerHTML = inviteFirmaMultiGridHtml();
+    } else {
+      multiWrap.style.display = 'none';
+    }
     await loadMembers();
     await loadPendingInvites();
   }
@@ -377,15 +405,28 @@
     const original = btn.textContent;
     btn.textContent = LBL.sending;
     try{
-      const fSnap = await getDoc(doc(db, 'firmaAccounts', firmaId));
-      // Davet, kişinin e-postası yerine kullanıcı kodu ile eşleştirilir (bkz. firmaInvites/{kod}).
-      // Kişi kendi hesabıyla giriş yaptığında (Hesabim.html) kendi kodunu bu koleksiyonda arar.
-      await setDoc(doc(db, 'firmaInvites', code), {
-        firmaId: firmaId,
-        firmaName: fSnap.exists() ? (fSnap.data().name || '') : '',
-        permissions: readPermGrid('invite'),
-        createdAt: serverTimestamp()
-      });
+      // Kod gerçekten var olan bir kullanıcıya mı ait, önce onu doğruluyoruz.
+      const dirSnap = await getDoc(doc(db, 'userDirectory', code));
+      if(!dirSnap.exists()){
+        errEl.textContent = LBL.codeNotFound;
+        errEl.classList.add('show');
+        return;
+      }
+      const targetFirmaIds = getSelectedInviteFirmaIds();
+      const permissions = readPermGrid('invite');
+      // Davet, kişinin e-postası yerine kullanıcı kodu ile eşleştirilir (bkz. firmaInvites/{kod}/firmas/{firmaId}).
+      // Bir kod, aynı anda birden fazla firmaya davet edilebilsin diye firma başına ayrı bir alt
+      // kayıt tutuyoruz. Kişi kendi hesabıyla giriş yaptığında (Hesabim.html) kendi kodunun
+      // altındaki tüm bekleyen firma davetlerini listeler.
+      await Promise.all(targetFirmaIds.map(async (fid) => {
+        const fSnap = await getDoc(doc(db, 'firmaAccounts', fid));
+        await setDoc(doc(db, 'firmaInvites', code, 'firmas', fid), {
+          firmaId: fid,
+          firmaName: fSnap.exists() ? (fSnap.data().name || '') : '',
+          permissions: permissions,
+          createdAt: serverTimestamp()
+        });
+      }));
       okEl.textContent = LBL.inviteSent;
       okEl.classList.add('show');
       codeInput.value = '';
@@ -416,6 +457,13 @@
     const original = btn.textContent;
     btn.textContent = LBL.sending;
     try{
+      // Kod gerçekten var olan bir kullanıcıya mı ait, önce onu doğruluyoruz.
+      const dirSnap = await getDoc(doc(db, 'userDirectory', code));
+      if(!dirSnap.exists()){
+        errEl.textContent = LBL.codeNotFound;
+        errEl.classList.add('show');
+        return;
+      }
       const fSnap = await getDoc(doc(db, 'firmaAccounts', firmaId));
       // Yönetici daveti de kullanıcı kodu ile eşleştirilir (bkz. firmaAdminInvites/{kod}).
       await setDoc(doc(db, 'firmaAdminInvites', code), {
@@ -441,8 +489,11 @@
     const card = document.getElementById('pendingInvitesCard');
     const listEl = document.getElementById('pendingInvitesList');
     try{
+      // Kullanıcı davetleri artık firmaInvites/{kod}/firmas/{firmaId} altında (bir kod birden
+      // fazla firmaya davet edilebildiği için), o yüzden bu firmaya ait olanları bulmak için
+      // koleksiyonlar-arası (collection group) sorgu kullanıyoruz.
       const [memberSnap, adminSnap] = await Promise.all([
-        getDocs(query(collection(db, 'firmaInvites'), where('firmaId', '==', firmaId))),
+        getDocs(query(collectionGroup(db, 'firmas'), where('firmaId', '==', firmaId))),
         getDocs(query(collection(db, 'firmaAdminInvites'), where('firmaId', '==', firmaId)))
       ]);
       if(memberSnap.empty && adminSnap.empty){
@@ -451,8 +502,8 @@
       }
       card.style.display = 'block';
       const entries = [];
-      memberSnap.forEach(d => entries.push({ code: d.id, kind: 'member', coll: 'firmaInvites' }));
-      adminSnap.forEach(d => entries.push({ code: d.id, kind: 'admin', coll: 'firmaAdminInvites' }));
+      memberSnap.forEach(d => entries.push({ code: d.ref.parent.parent.id, kind: 'member', path: d.ref.path }));
+      adminSnap.forEach(d => entries.push({ code: d.id, kind: 'admin', path: 'firmaAdminInvites/' + d.id }));
 
       // Kod başına görünen adı bulmak için kullanıcı dizinine bakıyoruz (bulunamazsa koda düşer).
       await Promise.all(entries.map(async (inv) => {
@@ -462,17 +513,21 @@
         }catch(e){ inv.label = '#' + inv.code; }
       }));
 
-      const rows = entries.map(inv => {
+      const rows = entries.map((inv, idx) => {
         const kindLabel = inv.kind === 'admin' ? LBL.pendingKindAdmin : LBL.pendingKindUser;
-        return '<div class="invite-row" data-code="' + inv.code + '">' +
+        return '<div class="invite-row">' +
             '<span class="invite-email" title="' + inv.label + ' (#' + inv.code + ')">' + inv.label + ' &middot; ' + kindLabel + '</span>' +
-            '<button type="button" class="invite-cancel-btn" data-cancel="' + inv.code + '" data-coll="' + inv.coll + '">' + LBL.cancelInvite + '</button>' +
+            '<button type="button" class="invite-cancel-btn" data-cancel-idx="' + idx + '">' + LBL.cancelInvite + '</button>' +
           '</div>';
       });
       listEl.innerHTML = rows.join('');
-      listEl.querySelectorAll('[data-cancel]').forEach(btn => {
+      listEl.querySelectorAll('[data-cancel-idx]').forEach(btn => {
         btn.addEventListener('click', async () => {
-          try{ await deleteDoc(doc(db, btn.dataset.coll, btn.dataset.cancel)); }catch(e){}
+          const inv = entries[parseInt(btn.dataset.cancelIdx, 10)];
+          try{
+            const segs = inv.path.split('/');
+            await deleteDoc(doc(db, ...segs));
+          }catch(e){}
           await loadPendingInvites();
         });
       });
@@ -572,6 +627,7 @@
       add_user_title:'Kullanıcı Ekle', add_user_desc:'Eklemek istediğiniz kişinin kullanıcı kodunu girin (profil menüsünde "Kullanıcı Kodu: #..." olarak görünür). Kişi bu kodla ilişkili hesabıyla giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.',
       select_all_perms:'Tümünü Seç',
       user_code_label:'Kullanıcının Kodu', send_invite:'Davet Gönder',
+      invite_firmas_label:'Hangi Firma(lar)a Eklensin?',
       add_admin_title:'Yönetici Ekle', add_admin_desc:'Eklemek istediğiniz kişinin kullanıcı kodunu girin. Kişi bu kodla ilişkili hesabıyla giriş yaptığında bu firmaya yönetici olarak eklenecek ve bu paneli görebilecek.',
       admin_code_label:'Yöneticinin Kodu',
       pending_invites_title:'Bekleyen Davetler', pending_invites_desc:'Bu kişiler henüz giriş yapıp daveti kabul etmedi.',
@@ -586,6 +642,7 @@
       add_user_title:'Add User', add_user_desc:"Enter the user code of the person you want to add (shown in their profile menu as \"User Code: #...\"). The person will be automatically added as a user of your company when they sign in with the account that has this code.",
       select_all_perms:'Select All',
       user_code_label:"User's Code", send_invite:'Send Invite',
+      invite_firmas_label:'Add to Which Compan(y/ies)?',
       add_admin_title:'Add Admin', add_admin_desc:"Enter the user code of the person you want to add. The person will be added as an admin of this company (with access to this panel) when they sign in with the account that has this code.",
       admin_code_label:"Admin's Code",
       pending_invites_title:'Pending Invites', pending_invites_desc:'These people have not yet signed in and accepted the invite.',
