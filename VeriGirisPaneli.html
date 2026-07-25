@@ -146,6 +146,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     background:none; border:1px dashed var(--brass-dim); border-radius:7px; color:var(--brass);
     padding:7px 12px; font-size:12px; font-weight:600; cursor:pointer;
   }
+
+  .bankList-row{ display:grid; grid-template-columns: 1fr 32px; gap:8px; margin-bottom:8px; align-items:center; }
+  .bankList-row input{
+    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    padding:10px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
+    transition:border-color .15s ease;
+  }
+  .bankList-row input:focus{ border-color:var(--brass-dim); }
+  .bankList-row-remove{
+    background:none; border:1px solid var(--hairline); border-radius:7px; color:var(--muted); cursor:pointer;
+    width:32px; height:38px; flex-shrink:0; font-size:13px;
+  }
+  .bankList-row-remove:hover{ color:var(--red); border-color:var(--red); }
   .iban-add-btn:hover{ background:rgba(198,161,91,0.08); }
 
   .auth-submit{
@@ -240,7 +253,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       <div class="form-msg" id="groupMsg"></div>
     </div>
 
-    <div class="card">
+    <div class="card" id="bulkUploadCard">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px;">
         <h2 data-i18n="bulk_title" style="margin-bottom:0;">📥 Toplu Excel ile Yükle</h2>
         <div class="bulk-actions" style="flex-wrap:nowrap;">
@@ -640,6 +653,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       document.querySelectorAll('.veri-tab-panel').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      // "Toplu Excel ile Yükle" şablonu sadece Müşteri/Tedarikçi alanları için (Tip, Ünvan,
+      // TC/Vergi No, Banka, IBAN, Döviz) hazırlanmış — İBAN'larım, Çalıştığım Bankalar ve
+      // Muhataplar sekmelerinde bu şablon alakasız kalıyordu, o yüzden bu sekmelerde
+      // gizliyoruz.
+      const bulkCard = document.getElementById('bulkUploadCard');
+      if(bulkCard) bulkCard.style.display = (btn.dataset.tab === 'customers' || btn.dataset.tab === 'suppliers') ? '' : 'none';
     });
   });
 
@@ -681,9 +700,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     if(!editorEl) return;
     const names = currentBankNames();
     editorEl.innerHTML = names.map((name, idx) =>
-      '<div class="field-row" data-bank-idx="' + idx + '" style="align-items:center;">' +
-        '<input type="text" class="bankList-name-input" value="' + escapeHtml(name) + '" style="flex:1;">' +
-        '<button type="button" class="member-icon-btn member-icon-btn-danger" data-remove-bank-idx="' + idx + '" title="' + LBL.delete + '">✕</button>' +
+      '<div class="bankList-row" data-bank-idx="' + idx + '">' +
+        '<input type="text" class="bankList-name-input" value="' + escapeHtml(name) + '">' +
+        '<button type="button" class="bankList-row-remove" data-remove-bank-idx="' + idx + '" title="' + LBL.delete + '">✕</button>' +
       '</div>'
     ).join('');
     editorEl.querySelectorAll('[data-remove-bank-idx]').forEach(btn => {
