@@ -263,6 +263,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .avatar-wrap-lg{ width:52px; height:52px; }
   .avatar-wrap-lg svg{ width:26px; height:26px; }
 
+  .mmg-dropdown-backdrop{ position:fixed; inset:0; z-index:399; background:transparent; }
+  .mmg-dropdown-backdrop[hidden]{ display:none; }
   .account-dropdown{
     position:absolute; bottom:calc(100% + 12px); top:auto; left:0; right:auto; width:250px;
     background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
@@ -1221,6 +1223,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </aside>
 
 <div class="mmg-bottom-left-bar" id="mmgBottomLeftBar">
+<div id="accountDropdownBackdrop" class="mmg-dropdown-backdrop" hidden></div>
 <div class="top-right-badge" id="topRightBadge">
   <button type="button" class="account-trigger" id="accountTrigger">
     <span class="avatar-wrap" id="avatarWrap">
@@ -2033,12 +2036,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const changePhotoBtn = document.getElementById('changePhotoBtn');
   const dropdownLogoutBtn = document.getElementById('dropdownLogoutBtn');
 
+  const accountDropdownBackdrop = document.getElementById('accountDropdownBackdrop');
+
   function toggleAccountDropdown(forceState){
     const shouldShow = typeof forceState === 'boolean' ? forceState : accountDropdown.hidden;
     accountDropdown.hidden = !shouldShow;
+    // Menü açıkken, altındaki iframe içeriğine tıklanması menünün kapanmadan
+    // doğrudan iframe'e geçmesine (yani kapanmamasına) sebep oluyordu — bu görünmez
+    // katman tüm tıklamaları önce burada yakalayıp menüyü kapatıyor.
+    if(accountDropdownBackdrop) accountDropdownBackdrop.hidden = !shouldShow;
     if(shouldShow){
       renderCompanySwitchList();
     }
+  }
+  if(accountDropdownBackdrop){
+    accountDropdownBackdrop.addEventListener('click', () => toggleAccountDropdown(false));
   }
 
   // Not: Kişisel hesaplar artık tek tek (kişi başı tek kullanıcı) — çoklu kişisel
