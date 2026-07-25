@@ -964,43 +964,78 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // fazla firmaya kullanıcı olarak davet edilebildiğinden, kullanıcı davetleri
     // firmaInvites/{kod}/firmas altındaki tüm kayıtlardan okunur.
     const code = (currentUserData && currentUserData.customerNumber != null) ? String(currentUserData.customerNumber) : null;
-    const invites = [];
+    const memberInvites = [];
+    const otherInvites = [];
     try{
       if(code){
         const memberSnap = await getDocs(collection(db, 'firmaInvites', code, 'firmas'));
-        memberSnap.forEach(d => invites.push({ kind:'member', id:code, firmaId:d.id, data:d.data() }));
+        memberSnap.forEach(d => memberInvites.push({ kind:'member', id:code, firmaId:d.id, data:d.data() }));
       }
     }catch(e){ /* sessizce geç */ }
     try{
       if(code){
         const adminSnap = await getDoc(doc(db, 'firmaAdminInvites', code));
-        if(adminSnap.exists()) invites.push({ kind:'admin', id:code, data:adminSnap.data() });
+        if(adminSnap.exists()) otherInvites.push({ kind:'admin', id:code, data:adminSnap.data() });
       }
     }catch(e){ /* sessizce geç */ }
 
-    if(!invites.length){ pendingInvitesCard.style.display = 'none'; pendingInvitesList.innerHTML = ''; return; }
+    if(!memberInvites.length && !otherInvites.length){ pendingInvitesCard.style.display = 'none'; pendingInvitesList.innerHTML = ''; return; }
     pendingInvitesCard.style.display = 'block';
-    pendingInvitesList.innerHTML = invites.map((inv, idx) => renderPendingInviteRow(inv, idx)).join('');
 
-    invites.forEach((inv, idx) => {
-      const acceptBtn = document.getElementById('pendInvAccept_' + idx);
-      const rejectBtn = document.getElementById('pendInvReject_' + idx);
-      const msgEl = document.getElementById('pendInvMsg_' + idx);
-      const inviteRef = inv.kind === 'admin'
-        ? doc(db, 'firmaAdminInvites', inv.id)
-        : doc(db, 'firmaInvites', inv.id, 'firmas', inv.firmaId);
+    // Kullanıcı ("üye") davetlerinin hepsi TEK bir kartta, tek bir "Kabul Et" ile onaylanır
+    // (birden fazla firmaya aynı anda davet edilmiş olsa bile tek tek sorulmasın diye).
+    const groupHtml = memberInvites.length ? renderGroupedMemberInvites(memberInvites) : '';
+    const otherHtml = otherInvites.map((inv, idx) => renderPendingInviteRow(inv, 'other_' + idx)).join('');
+    pendingInvitesList.innerHTML = groupHtml + otherHtml;
+
+    if(memberInvites.length){
+      const acceptBtn = document.getElementById('pendInvGroupAccept');
+      const rejectBtn = document.getElementById('pendInvGroupReject');
+      const msgEl = document.getElementById('pendInvGroupMsg');
       if(acceptBtn) acceptBtn.onclick = async () => {
         acceptBtn.disabled = true; if(rejectBtn) rejectBtn.disabled = true;
         try{
-          if(inv.kind === 'admin'){
-            await setDoc(doc(db, 'firmaAccounts', inv.data.firmaId, 'admins', user.uid), { email: user.email || '', addedAt: serverTimestamp() });
-            await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayUnion(inv.data.firmaId) }, { merge: true });
-          } else {
+          for(const inv of memberInvites){
             await setDoc(doc(db, 'firmaAccounts', inv.data.firmaId, 'members', user.uid), {
               email: user.email || '', username: (currentUserData && currentUserData.username) || '', permissions: inv.data.permissions || {}, addedAt: serverTimestamp()
             });
             await setDoc(doc(db, 'users', user.uid), { firmaIds: arrayUnion(inv.data.firmaId) }, { merge: true });
+            await deleteDoc(doc(db, 'firmaInvites', inv.id, 'firmas', inv.firmaId));
           }
+          if(msgEl){ msgEl.style.color = 'var(--teal)'; msgEl.textContent = LBL.pendingInviteAccepted; }
+          try{ await loadMyFirmas(user.uid); }catch(e){}
+          setTimeout(() => loadPendingInvites(user), 900);
+        }catch(e){
+          if(msgEl){ msgEl.style.color = 'var(--red)'; msgEl.textContent = LBL.pendingInviteError; }
+          acceptBtn.disabled = false; if(rejectBtn) rejectBtn.disabled = false;
+        }
+      };
+      if(rejectBtn) rejectBtn.onclick = async () => {
+        acceptBtn.disabled = true; rejectBtn.disabled = true;
+        try{
+          for(const inv of memberInvites){
+            await deleteDoc(doc(db, 'firmaInvites', inv.id, 'firmas', inv.firmaId));
+          }
+          if(msgEl){ msgEl.style.color = 'var(--muted)'; msgEl.textContent = LBL.pendingInviteRejected; }
+          setTimeout(() => loadPendingInvites(user), 700);
+        }catch(e){
+          if(msgEl){ msgEl.style.color = 'var(--red)'; msgEl.textContent = LBL.pendingInviteError; }
+          acceptBtn.disabled = false; rejectBtn.disabled = false;
+        }
+      };
+    }
+
+    otherInvites.forEach((inv, idx) => {
+      const suffix = 'other_' + idx;
+      const acceptBtn = document.getElementById('pendInvAccept_' + suffix);
+      const rejectBtn = document.getElementById('pendInvReject_' + suffix);
+      const msgEl = document.getElementById('pendInvMsg_' + suffix);
+      const inviteRef = doc(db, 'firmaAdminInvites', inv.id);
+      if(acceptBtn) acceptBtn.onclick = async () => {
+        acceptBtn.disabled = true; if(rejectBtn) rejectBtn.disabled = true;
+        try{
+          await setDoc(doc(db, 'firmaAccounts', inv.data.firmaId, 'admins', user.uid), { email: user.email || '', addedAt: serverTimestamp() });
+          await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayUnion(inv.data.firmaId) }, { merge: true });
           await deleteDoc(inviteRef);
           if(msgEl){ msgEl.style.color = 'var(--teal)'; msgEl.textContent = LBL.pendingInviteAccepted; }
           try{ await loadMyFirmas(user.uid); }catch(e){}
@@ -1022,6 +1057,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
       };
     });
+  }
+
+  function renderGroupedMemberInvites(memberInvites){
+    const firmasHtml = memberInvites.map(inv => {
+      const firmaName = inv.data.firmaName || (MMG_LANG === 'en' ? 'a company' : 'bir firma');
+      const perms = inv.data.permissions || {};
+      const allowed = INVITE_PERM_MODULES.filter(m => perms[m.key] !== false).map(m => m.label);
+      return '<div style="padding:8px 0; border-bottom:1px solid var(--hairline);">' +
+        '<strong style="font-family:\'Space Grotesk\',sans-serif; font-size:13px;">🏢 ' + firmaName + '</strong>' +
+        '<div style="font-size:11.5px; color:var(--muted); margin-top:3px;">' +
+        (allowed.length ? allowed.join(', ') : LBL.pendingInviteNone) +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div style="border:1px solid var(--hairline); border-radius:10px; padding:14px; margin-bottom:10px; background:var(--surface-2);">' +
+      '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">' +
+        '<strong style="font-family:\'Space Grotesk\',sans-serif;">' + LBL.pendingInviteMemberBadge + '</strong>' +
+        (memberInvites.length > 1 ? '<span style="font-size:11px; padding:3px 8px; border-radius:999px; background:var(--surface); border:1px solid var(--hairline); color:var(--brass);">' + memberInvites.length + '</span>' : '') +
+      '</div>' +
+      '<p class="referral-note" style="margin-bottom:6px;">' + LBL.pendingInviteMemberSub + '</p>' +
+      '<div style="font-size:12px;">' + firmasHtml + '</div>' +
+      '<div style="display:flex; gap:8px; margin-top:10px;">' +
+        '<button type="button" id="pendInvGroupAccept" class="auth-submit" style="width:auto; padding:9px 16px; margin-top:0;">' + LBL.pendingInviteAccept + '</button>' +
+        '<button type="button" id="pendInvGroupReject" class="danger-btn" style="width:auto; padding:9px 16px;">' + LBL.pendingInviteReject + '</button>' +
+      '</div>' +
+      '<div id="pendInvGroupMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>' +
+    '</div>';
   }
 
   function renderPendingInviteRow(inv, idx){

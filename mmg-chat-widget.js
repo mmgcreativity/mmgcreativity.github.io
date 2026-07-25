@@ -949,20 +949,91 @@ import {
 
   function renderNotificationsTab(){
     els.footer.hidden = true;
-    const invites = [];
-    firmaMemberInvites.forEach(inv => invites.push(inv));
-    if(firmaAdminInvite) invites.push(firmaAdminInvite);
-    if(!invites.length){
+    if(!firmaMemberInvites.length && !firmaAdminInvite){
       els.body.innerHTML = '<div class="mmg-chat-empty">Bekleyen bir bildiriminiz yok.</div>';
       return;
     }
-    els.body.innerHTML = invites.map((inv, idx) => renderInviteCard(inv, idx)).join('');
-    invites.forEach((inv, idx) => {
-      const acceptBtn = document.getElementById('mmgNotifAccept_' + idx);
-      const rejectBtn = document.getElementById('mmgNotifReject_' + idx);
-      if(acceptBtn) acceptBtn.addEventListener('click', () => acceptFirmaInvite(inv, idx));
-      if(rejectBtn) rejectBtn.addEventListener('click', () => rejectFirmaInvite(inv, idx));
-    });
+    // Kullanıcı ("üye") davetlerinin hepsi TEK bir kartta, tek "Kabul Et" ile onaylanır —
+    // birden fazla firmaya aynı anda davet edilse bile tek tek sorulmasın diye.
+    let html = '';
+    if(firmaMemberInvites.length) html += renderGroupedMemberInviteCard(firmaMemberInvites);
+    if(firmaAdminInvite) html += renderInviteCard(firmaAdminInvite, 'admin');
+    els.body.innerHTML = html;
+
+    if(firmaMemberInvites.length){
+      const acceptBtn = document.getElementById('mmgNotifGroupAccept');
+      const rejectBtn = document.getElementById('mmgNotifGroupReject');
+      if(acceptBtn) acceptBtn.addEventListener('click', () => acceptGroupedMemberInvites(firmaMemberInvites));
+      if(rejectBtn) rejectBtn.addEventListener('click', () => rejectGroupedMemberInvites(firmaMemberInvites));
+    }
+    if(firmaAdminInvite){
+      const acceptBtn = document.getElementById('mmgNotifAccept_admin');
+      const rejectBtn = document.getElementById('mmgNotifReject_admin');
+      if(acceptBtn) acceptBtn.addEventListener('click', () => acceptFirmaInvite(firmaAdminInvite, 'admin'));
+      if(rejectBtn) rejectBtn.addEventListener('click', () => rejectFirmaInvite(firmaAdminInvite, 'admin'));
+    }
+  }
+
+  function renderGroupedMemberInviteCard(invites){
+    const firmasHtml = invites.map(inv => {
+      const firmaName = (inv.data && inv.data.firmaName) || 'bir firma';
+      const perms = (inv.data && inv.data.permissions) || {};
+      const allowed = NOTIF_PERM_MODULES.filter(m => perms[m.key] !== false).map(m => m.label);
+      return '<div style="padding:6px 0; border-bottom:1px solid var(--mmg-hairline, rgba(255,255,255,0.08));">' +
+        '<b>🏢 ' + esc(firmaName) + '</b>' +
+        '<div style="font-size:11.5px; opacity:0.75; margin-top:2px;">' +
+        (allowed.length ? esc(allowed.join(', ')) : 'Hiçbiri (yalnızca görüntüleme)') +
+        '</div></div>';
+    }).join('');
+    const title = invites.length > 1 ? ('👥 ' + invites.length + ' firmaya kullanıcı olarak davet edildiniz') : ('🏢 ' + ((invites[0].data && invites[0].data.firmaName) || 'bir firma'));
+    return '<div class="mmg-notif-card">' +
+      '<div class="mmg-notif-title">' + esc(title) + '</div>' +
+      '<div class="mmg-notif-sub">Kabul ederseniz, aşağıdaki firma(lar)ın belirtilen modüllerindeki veri girişleriniz size özel kalmak yerine o firmanın ortak veri havuzuna dahil olur.</div>' +
+      '<div class="mmg-notif-perms">' + firmasHtml + '</div>' +
+      '<div class="mmg-notif-actions">' +
+        '<button type="button" class="mmg-notif-accept" id="mmgNotifGroupAccept">✓ Tümünü Kabul Et</button>' +
+        '<button type="button" class="mmg-notif-reject" id="mmgNotifGroupReject">✕ Tümünü Reddet</button>' +
+      '</div>' +
+      '<div class="mmg-notif-msg" id="mmgNotifGroupMsg"></div>' +
+    '</div>';
+  }
+
+  async function acceptGroupedMemberInvites(invites){
+    const msgEl = document.getElementById('mmgNotifGroupMsg');
+    const acceptBtn = document.getElementById('mmgNotifGroupAccept');
+    const rejectBtn = document.getElementById('mmgNotifGroupReject');
+    if(acceptBtn) acceptBtn.disabled = true;
+    if(rejectBtn) rejectBtn.disabled = true;
+    try{
+      for(const invite of invites){
+        await setDoc(doc(db, 'firmaAccounts', invite.data.firmaId, 'members', currentUser.uid), {
+          email: currentUser.email || '', permissions: invite.data.permissions || {}, addedAt: serverTimestamp()
+        });
+        await setDoc(doc(db, 'users', currentUser.uid), { firmaIds: arrayUnion(invite.data.firmaId) }, { merge: true });
+        await deleteDoc(doc(db, 'firmaInvites', invite.id, 'firmas', invite.firmaId));
+      }
+      if(msgEl){ msgEl.style.color = 'var(--teal,#3FB68A)'; msgEl.textContent = 'Kabul edildi ✓'; }
+      try{ window.location.reload(); }catch(e){}
+    }catch(e){
+      if(msgEl){ msgEl.style.color = 'var(--red,#E2544B)'; msgEl.textContent = 'Bir şeyler ters gitti, lütfen tekrar deneyin.'; }
+      if(acceptBtn) acceptBtn.disabled = false;
+      if(rejectBtn) rejectBtn.disabled = false;
+    }
+  }
+
+  async function rejectGroupedMemberInvites(invites){
+    const acceptBtn = document.getElementById('mmgNotifGroupAccept');
+    const rejectBtn = document.getElementById('mmgNotifGroupReject');
+    if(acceptBtn) acceptBtn.disabled = true;
+    if(rejectBtn) rejectBtn.disabled = true;
+    try{
+      for(const invite of invites){
+        await deleteDoc(doc(db, 'firmaInvites', invite.id, 'firmas', invite.firmaId));
+      }
+    }catch(e){
+      if(acceptBtn) acceptBtn.disabled = false;
+      if(rejectBtn) rejectBtn.disabled = false;
+    }
   }
 
   function renderInviteCard(inv, idx){
