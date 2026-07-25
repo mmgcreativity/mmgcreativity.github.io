@@ -967,16 +967,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   ];
 
   async function loadPendingInvites(user){
-    if(!user || !user.email){ pendingInvitesCard.style.display = 'none'; return; }
-    const email = user.email.toLowerCase();
+    if(!user){ pendingInvitesCard.style.display = 'none'; return; }
+    const email = (user.email || '').toLowerCase();
+    // Kullanıcı ("üye") davetleri artık e-posta değil, kişinin kendi kullanıcı koduyla eşleştirilir.
+    const code = (currentUserData && currentUserData.customerNumber != null) ? String(currentUserData.customerNumber) : null;
     const invites = [];
     try{
-      const memberSnap = await getDoc(doc(db, 'firmaInvites', email));
-      if(memberSnap.exists()) invites.push({ kind:'member', id:email, data:memberSnap.data() });
+      if(code){
+        const memberSnap = await getDoc(doc(db, 'firmaInvites', code));
+        if(memberSnap.exists()) invites.push({ kind:'member', id:code, data:memberSnap.data() });
+      }
     }catch(e){ /* sessizce geç */ }
     try{
-      const adminSnap = await getDoc(doc(db, 'firmaAdminInvites', email));
-      if(adminSnap.exists()) invites.push({ kind:'admin', id:email, data:adminSnap.data() });
+      if(email){
+        const adminSnap = await getDoc(doc(db, 'firmaAdminInvites', email));
+        if(adminSnap.exists()) invites.push({ kind:'admin', id:email, data:adminSnap.data() });
+      }
     }catch(e){ /* sessizce geç */ }
 
     if(!invites.length){ pendingInvitesCard.style.display = 'none'; pendingInvitesList.innerHTML = ''; return; }

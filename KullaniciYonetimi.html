@@ -151,10 +151,10 @@
   <div style="display:flex; flex-direction:column; gap:16px; min-width:0;">
     <div class="card">
       <h2 data-i18n="add_user_title">Kullanıcı Ekle</h2>
-      <div class="card-sub" data-i18n="add_user_desc">Eklemek istediğiniz kişinin bu siteye kayıtlı e-posta adresini girin. Kişi az önce girdiğiniz e-postayla (veya henüz kaydı yoksa yeni kayıt olarak) giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.</div>
+      <div class="card-sub" data-i18n="add_user_desc">Eklemek istediğiniz kişinin kullanıcı kodunu girin (profil menüsünde "Kullanıcı Kodu: #..." olarak görünür). Kişi bu kodla ilişkili hesabıyla giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.</div>
       <div class="auth-field">
-        <label data-i18n="user_email_label">Kullanıcının E-postası</label>
-        <input type="email" id="inviteEmail" placeholder="ornek@eposta.com">
+        <label data-i18n="user_code_label">Kullanıcının Kodu</label>
+        <input type="text" id="inviteCode" inputmode="numeric" placeholder="ör. 1016" maxlength="12">
       </div>
       <div class="perm-select-all-row">
         <label class="perm-select-all-label">
@@ -210,10 +210,10 @@
     notAdminYetSub:'To see this panel, you can create a new company from the "My Account" page, or wait to be invited as an admin of an existing company.',
     notLoggedInTitle:'You are not signed in', notLoggedInSub:'You need to sign in to view this panel.',
     errorTitle:'An error occurred', errorSub:'The panel could not be loaded, please refresh the page and try again.',
-    enterValidEmail:'Please enter a valid email address.', sending:'Sending…',
-    inviteSent:'Invitation sent. The person will be added automatically when they sign in with this email.',
+    enterValidCode:'Please enter a valid user code.', sending:'Sending…',
+    inviteSent:'Invitation sent. The person will be added automatically when they sign in with the account that has this code.',
     inviteFailed:'Invitation could not be sent, please try again.',
-    cancelInvite:'Cancel Invite', noUsersAdded:'No users added yet.', remove:'Remove', saved:'Saved ✓', selectAllPerms:'Select All', editPerms:'Edit permissions',
+    cancelInvite:'Cancel', noUsersAdded:'No users added yet.', remove:'Remove', saved:'Saved ✓', selectAllPerms:'Select All', editPerms:'Edit permissions',
     confirmRemoveUser:'Are you sure you want to remove this user from the company?',
     usersLoadFailed:'Users could not be loaded.'
   } : {
@@ -222,10 +222,10 @@
     notAdminYetSub:'Bu paneli görmek için "Hesabım" sayfasından yeni bir firma oluşturabilir ya da mevcut bir firmanın yöneticisi olarak davet edilmeyi bekleyebilirsiniz.',
     notLoggedInTitle:'Giriş yapmadınız', notLoggedInSub:'Bu paneli görmek için giriş yapmanız gerekir.',
     errorTitle:'Bir hata oluştu', errorSub:'Panel yüklenemedi, lütfen sayfayı yenileyip tekrar deneyin.',
-    enterValidEmail:'Lütfen geçerli bir e-posta adresi girin.', sending:'Gönderiliyor…',
-    inviteSent:'Davet gönderildi. Kişi bu e-postayla giriş yaptığında otomatik olarak eklenecek.',
+    enterValidCode:'Lütfen geçerli bir kullanıcı kodu girin.', sending:'Gönderiliyor…',
+    inviteSent:'Davet gönderildi. Kişi bu kodun ait olduğu hesapla giriş yaptığında otomatik olarak eklenecek.',
     inviteFailed:'Davet gönderilemedi, lütfen tekrar deneyin.',
-    cancelInvite:'Daveti İptal Et', noUsersAdded:'Henüz eklenmiş kullanıcı yok.', remove:'Kaldır', saved:'Kaydedildi ✓', selectAllPerms:'Tümünü Seç', editPerms:'Yetkileri düzenle',
+    cancelInvite:'İptal Et', noUsersAdded:'Henüz eklenmiş kullanıcı yok.', remove:'Kaldır', saved:'Kaydedildi ✓', selectAllPerms:'Tümünü Seç', editPerms:'Yetkileri düzenle',
     confirmRemoveUser:'Bu kullanıcıyı firmadan kaldırmak istediğinize emin misiniz?',
     usersLoadFailed:'Kullanıcılar yüklenemedi.'
   };
@@ -351,10 +351,10 @@
     const errEl = document.getElementById('inviteError');
     const okEl = document.getElementById('inviteSuccess');
     errEl.classList.remove('show'); okEl.classList.remove('show');
-    const emailInput = document.getElementById('inviteEmail');
-    const email = emailInput.value.trim().toLowerCase();
-    if(!email || !email.includes('@')){
-      errEl.textContent = LBL.enterValidEmail;
+    const codeInput = document.getElementById('inviteCode');
+    const code = codeInput.value.trim();
+    if(!code || !/^[0-9]+$/.test(code)){
+      errEl.textContent = LBL.enterValidCode;
       errEl.classList.add('show');
       return;
     }
@@ -364,7 +364,9 @@
     btn.textContent = LBL.sending;
     try{
       const fSnap = await getDoc(doc(db, 'firmaAccounts', firmaId));
-      await setDoc(doc(db, 'firmaInvites', email), {
+      // Davet, kişinin e-postası yerine kullanıcı kodu ile eşleştirilir (bkz. firmaInvites/{kod}).
+      // Kişi kendi hesabıyla giriş yaptığında (Hesabim.html) kendi kodunu bu koleksiyonda arar.
+      await setDoc(doc(db, 'firmaInvites', code), {
         firmaId: firmaId,
         firmaName: fSnap.exists() ? (fSnap.data().name || '') : '',
         permissions: readPermGrid('invite'),
@@ -372,7 +374,7 @@
       });
       okEl.textContent = LBL.inviteSent;
       okEl.classList.add('show');
-      emailInput.value = '';
+      codeInput.value = '';
       await loadPendingInvites();
     } catch(e){
       errEl.textContent = LBL.inviteFailed;
@@ -398,8 +400,8 @@
       const rows = [];
       snap.forEach(d => {
         rows.push(
-          '<div class="invite-row" data-email="' + d.id + '">' +
-            '<span class="invite-email">' + d.id + '</span>' +
+          '<div class="invite-row" data-code="' + d.id + '">' +
+            '<span class="invite-email">#' + d.id + '</span>' +
             '<button type="button" class="invite-cancel-btn" data-cancel="' + d.id + '">' + LBL.cancelInvite + '</button>' +
           '</div>'
         );
@@ -504,9 +506,9 @@
     tr: {
       page_title:'👥 Kullanıcı Yönetim Paneli', page_sub_default:'Firma hesabınıza bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.',
       managed_firma:'Yönettiğiniz Firma',
-      add_user_title:'Kullanıcı Ekle', add_user_desc:'Eklemek istediğiniz kişinin bu siteye kayıtlı e-posta adresini girin. Kişi az önce girdiğiniz e-postayla (veya henüz kaydı yoksa yeni kayıt olarak) giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.',
+      add_user_title:'Kullanıcı Ekle', add_user_desc:'Eklemek istediğiniz kişinin kullanıcı kodunu girin (profil menüsünde "Kullanıcı Kodu: #..." olarak görünür). Kişi bu kodla ilişkili hesabıyla giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.',
       select_all_perms:'Tümünü Seç',
-      user_email_label:'Kullanıcının E-postası', send_invite:'Davet Gönder',
+      user_code_label:'Kullanıcının Kodu', send_invite:'Davet Gönder',
       pending_invites_title:'Bekleyen Davetler', pending_invites_desc:'Bu kişiler henüz giriş yapıp daveti kabul etmedi.',
       my_users_title:'Kullanıcılarım', my_users_desc:'Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.',
       loading:'Yükleniyor…',
@@ -516,9 +518,9 @@
     en: {
       page_title:'👥 User Management Panel', page_sub_default:'You can add and manage the users connected to your company account here.',
       managed_firma:'Company You Manage',
-      add_user_title:'Add User', add_user_desc:"Enter the email address the person you want to add has registered on this site with. The person will be automatically added as a user of your company when they sign in with the email you just entered (or register as a new user if they haven't yet).",
+      add_user_title:'Add User', add_user_desc:"Enter the user code of the person you want to add (shown in their profile menu as \"User Code: #...\"). The person will be automatically added as a user of your company when they sign in with the account that has this code.",
       select_all_perms:'Select All',
-      user_email_label:"User's Email", send_invite:'Send Invite',
+      user_code_label:"User's Code", send_invite:'Send Invite',
       pending_invites_title:'Pending Invites', pending_invites_desc:'These people have not yet signed in and accepted the invite.',
       my_users_title:'My Users', my_users_desc:'Permissions are saved automatically when you change them.',
       loading:'Loading…',
