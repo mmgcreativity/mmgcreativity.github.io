@@ -450,22 +450,24 @@
         return;
       }
       card.style.display = 'block';
-      const rows = [];
-      memberSnap.forEach(d => {
-        rows.push(
-          '<div class="invite-row" data-code="' + d.id + '">' +
-            '<span class="invite-email">#' + d.id + ' &middot; ' + LBL.pendingKindUser + '</span>' +
-            '<button type="button" class="invite-cancel-btn" data-cancel="' + d.id + '" data-coll="firmaInvites">' + LBL.cancelInvite + '</button>' +
-          '</div>'
-        );
-      });
-      adminSnap.forEach(d => {
-        rows.push(
-          '<div class="invite-row" data-code="' + d.id + '">' +
-            '<span class="invite-email">#' + d.id + ' &middot; ' + LBL.pendingKindAdmin + '</span>' +
-            '<button type="button" class="invite-cancel-btn" data-cancel="' + d.id + '" data-coll="firmaAdminInvites">' + LBL.cancelInvite + '</button>' +
-          '</div>'
-        );
+      const entries = [];
+      memberSnap.forEach(d => entries.push({ code: d.id, kind: 'member', coll: 'firmaInvites' }));
+      adminSnap.forEach(d => entries.push({ code: d.id, kind: 'admin', coll: 'firmaAdminInvites' }));
+
+      // Kod başına görünen adı bulmak için kullanıcı dizinine bakıyoruz (bulunamazsa koda düşer).
+      await Promise.all(entries.map(async (inv) => {
+        try{
+          const dirSnap = await getDoc(doc(db, 'userDirectory', inv.code));
+          inv.label = dirSnap.exists() ? (dirSnap.data().username || dirSnap.data().email || ('#' + inv.code)) : ('#' + inv.code);
+        }catch(e){ inv.label = '#' + inv.code; }
+      }));
+
+      const rows = entries.map(inv => {
+        const kindLabel = inv.kind === 'admin' ? LBL.pendingKindAdmin : LBL.pendingKindUser;
+        return '<div class="invite-row" data-code="' + inv.code + '">' +
+            '<span class="invite-email" title="' + inv.label + ' (#' + inv.code + ')">' + inv.label + ' &middot; ' + kindLabel + '</span>' +
+            '<button type="button" class="invite-cancel-btn" data-cancel="' + inv.code + '" data-coll="' + inv.coll + '">' + LBL.cancelInvite + '</button>' +
+          '</div>';
       });
       listEl.innerHTML = rows.join('');
       listEl.querySelectorAll('[data-cancel]').forEach(btn => {

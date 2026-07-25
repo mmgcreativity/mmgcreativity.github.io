@@ -1791,6 +1791,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           updateUserBadge(newNo, data.username);
         } catch(backfillErr){ /* kod atanamazsa sessizce geç, rozet ada/e-postaya düşer */ }
       }
+      syncUserDirectory(user.uid, data.customerNumber, data.username, user.email);
       if(adminBtn){
         if(data.isAdmin){
           adminBtn.style.display = 'flex';
@@ -2186,6 +2187,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return newNumber;
   }
 
+  // ---- Kullanıcı Kodu → görünen ad dizini ----
+  // Firma yöneticileri (Kullanıcı Yönetim Paneli) ve diğer araçlar, bir kullanıcının özel
+  // profiline erişemeden sadece kodundan görünen adını bulabilsin diye bu herkese açık
+  // (ama sadece kendince yazılabilen) dizini güncel tutuyoruz.
+  async function syncUserDirectory(uid, customerNumber, username, email){
+    if(!customerNumber) return;
+    try{
+      await setDoc(doc(db, 'userDirectory', String(customerNumber)), {
+        uid: uid, username: username || '', email: email || ''
+      });
+    }catch(e){ /* dizin güncellenemezse sessizce geç, kritik bir işlev değil */ }
+  }
+
   // ---- Firma / Ekip: yeni bir firma hesabı kurar, kuran kişi 'owner' (sahibi) olur ----
   async function createCompanyForUser(user, companyName, username){
     const trimmedName = (companyName || '').trim();
@@ -2496,6 +2510,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       setAvatar(avatar);
       localStorage.setItem('mmg_remember', remember ? '1' : '0');
       updateUserBadge(customerNumber, username);
+      syncUserDirectory(user.uid, customerNumber, username, email);
       await applyPendingInviteIfAny(user, username);
       await syncCompanyCache(user.uid);
       await loadAdminFirmas(user.uid);
@@ -2617,6 +2632,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         localStorage.setItem('mmg_username', username);
         localStorage.setItem('mmg_remember', remember ? '1' : '0');
         updateUserBadge(customerNumber, username);
+        syncUserDirectory(cred.user.uid, customerNumber, username, email);
         if(premiumBenefit){
           if(premiumBenefit.type === 'free'){
             alert('🎉 "' + premiumBenefit.code + '" ' + MMGI18N.t('referral_used_free'));
