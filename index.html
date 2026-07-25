@@ -1467,12 +1467,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   }
 
+  // F5 ile sayfa yenilendiğinde kullanıcıyı ana sayfaya değil, en son açık olduğu
+  // araç sayfasına geri döndürebilmek için, hangi sayfanın açık olduğunu burada takip ediyoruz.
+  const MMG_LAST_PAGE_KEY = 'mmg_last_open_page';
+
   function openTarget(target, title){
     closeMobileNav();
     if(target === 'home'){
       homeScreen.style.display = 'flex';
       frameWrap.style.display = 'none';
       setActive('home');
+      try{ localStorage.removeItem(MMG_LAST_PAGE_KEY); }catch(e){}
       return;
     }
     // Mobilde iframe içi kaydırma (touch-scroll) güvenilir çalışmadığı için
@@ -1485,6 +1490,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     frameWrap.style.display = 'block';
     iframe.src = target;
     setActive(target);
+    try{ localStorage.setItem(MMG_LAST_PAGE_KEY, target); }catch(e){}
   }
 
   navItems.forEach(el=>{
@@ -1586,7 +1592,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   });
 
-  openTarget('home', 'Ana Sayfa');
+  // F5/sayfa yenileme sonrası: masaüstünde iframe ile açılan bir araç sayfası varsa
+  // onu geri yükle; yoksa (ya da mobildeyse, çünkü orada zaten gerçek sayfa URL'i kullanılıyor)
+  // normal şekilde ana sayfayı göster.
+  let mmgRestoredLastPage = false;
+  if(window.innerWidth > 860){
+    try{
+      const lastPage = localStorage.getItem(MMG_LAST_PAGE_KEY);
+      if(lastPage){
+        openTarget(lastPage, '');
+        mmgRestoredLastPage = true;
+      }
+    }catch(e){}
+  }
+  if(!mmgRestoredLastPage){
+    openTarget('home', 'Ana Sayfa');
+  }
 
   // ---- PWA: Ana Ekrana Ekle desteği için service worker kaydı ----
   if('serviceWorker' in navigator){
