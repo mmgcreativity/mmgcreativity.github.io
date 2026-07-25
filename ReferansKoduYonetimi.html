@@ -83,25 +83,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .state-box .big{ font-size:28px; margin-bottom:10px; }
   .state-box a{ color:var(--brass); }
 
-  .panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:24px; }
-  .panel-sub{ color:var(--muted); font-size:13px; margin-bottom:16px; }
-  .auth-field{ margin-bottom:10px; }
-  .auth-field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:4px; }
+  .panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:18px; }
+  .panel-sub{ color:var(--muted); font-size:13px; margin-bottom:12px; }
+  .auth-field{ margin-bottom:7px; }
+  .auth-field label{ display:block; font-size:12.5px; color:var(--muted); margin-bottom:3px; }
   .auth-field select, .auth-field input{
     width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
-    padding:9px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
+    padding:7px 10px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
     transition:border-color .15s ease;
   }
   .auth-field select:focus, .auth-field input:focus{ border-color:var(--brass-dim); }
   .auth-submit{
-    width:100%; padding:13px; border-radius:9px; border:none; cursor:pointer;
+    width:100%; padding:11px; border-radius:9px; border:none; cursor:pointer;
     background:linear-gradient(120deg, var(--coral,#FF6B4A), var(--brass,#C6A15B) 75%); color:#fff;
     font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px;
-    margin-top:4px; transition:opacity .15s ease;
+    margin-top:2px; transition:opacity .15s ease;
   }
   .auth-submit:hover{ opacity:0.9; }
-  .codes-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; margin-bottom:14px; }
-  #mmgAdminMsg{ font-size:12.5px; margin-top:14px; }
+  .codes-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; margin-bottom:10px; }
+  #mmgAdminMsg{ font-size:12.5px; margin-top:10px; }
   #mmgAdminCodeList{ max-height:600px; overflow-y:auto; }
 
   .mmg-assign-overlay{
@@ -128,14 +128,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   #mmgAdminCodeList thead th{
     text-align:left; padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.04em;
     text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hairline); background:var(--surface-2);
-    position:sticky; top:0;
+    position:sticky; top:0; white-space:nowrap;
   }
   #mmgAdminCodeList tbody td{ padding:10px 12px; border-bottom:1px solid rgba(42,52,72,0.5); font-size:12.5px; vertical-align:middle; }
   #mmgAdminCodeList tbody tr:last-child td{ border-bottom:none; }
   #mmgAdminCodeList tbody tr:hover{ background:rgba(198,161,91,0.03); }
   #mmgAdminCodeList tbody tr{ cursor:pointer; }
   #mmgAdminCodeList tbody tr button{ cursor:pointer; }
-  #mmgAdminCodeList .code-name{ font-family:'IBM Plex Mono',monospace; font-weight:700; }
+  #mmgAdminCodeList .code-name{ font-family:'IBM Plex Mono',monospace; font-weight:700; white-space:nowrap; }
   #mmgAdminCodeList .code-benefit{ color:var(--muted); white-space:nowrap; }
   #mmgAdminCodeList .code-usage{ color:var(--muted); white-space:nowrap; }
   #mmgAdminCodeList .code-usage.text-center{ text-align:center; }
