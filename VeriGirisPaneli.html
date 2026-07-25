@@ -100,14 +100,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .scope-link-btn:hover{ border-color:var(--brass-dim); }
 
-  .group-panel{ margin-top:12px; padding-top:12px; border-top:1px solid var(--hairline); display:none; }
-  .group-panel.open{ display:block; }
-  .group-panel-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
-  .group-code-box{
-    font-family:'IBM Plex Mono',monospace; font-size:11.5px; background:var(--surface); border:1px solid var(--hairline);
-    border-radius:6px; padding:6px 10px; word-break:break-all; flex:1; min-width:160px;
-  }
-
   .veri-tabs{ display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; padding-bottom:2px; }
   .veri-tab-btn{
     padding:9px 16px; border-radius:9px; border:1px solid var(--hairline); background:var(--surface-2);
@@ -234,23 +226,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <div id="content" hidden>
     <div class="scope-banner">
       <div class="scope-banner-text" id="scopeBannerText"></div>
-      <button type="button" class="scope-link-btn" id="groupToggleBtn" style="display:none;">🔗 <span data-i18n="group_link_toggle">Grup Bağlantısı</span></button>
-    </div>
-    <div class="card group-panel" id="groupPanel">
-      <h2 data-i18n="group_link_title">🔗 Grup Firmaları Ortak Veri</h2>
-      <div class="card-sub" data-i18n="group_link_desc">Aynı grubun (holding) parçası olan başka bir firma ile bu paneldeki verileri (müşteri, tedarikçi, muhatap, banka) ortak kullanmak istersen, kendi firma kodunu diğer firmayla paylaş ya da onların kodunu buraya yapıştır.</div>
-      <div class="group-panel-row">
-        <label style="font-size:11.5px; color:var(--muted); white-space:nowrap;" data-i18n="group_my_code">Bu firmanın kodu:</label>
-        <span class="group-code-box" id="myFirmaCodeBox">—</span>
-        <button type="button" class="btn-secondary" id="copyFirmaCodeBtn" style="padding:6px 12px; font-size:11.5px;" data-i18n="copy_btn">Kopyala</button>
-      </div>
-      <div class="group-panel-row">
-        <input type="text" id="joinGroupInput" data-i18n-placeholder="group_join_ph" placeholder="Başka bir firmanın kodunu buraya yapıştır">
-        <button type="button" class="auth-submit" id="joinGroupBtn" style="margin-top:0; padding:9px 16px;" data-i18n="group_join_btn">Bağlan</button>
-      </div>
-      <div id="groupCurrentStatus" style="font-size:12px; color:var(--muted); margin-top:6px;"></div>
-      <button type="button" class="scope-link-btn" id="leaveGroupBtn" style="display:none; margin-top:8px; color:var(--red); border-color:var(--red);" data-i18n="group_leave_btn">Bağlantıyı Kaldır</button>
-      <div class="form-msg" id="groupMsg"></div>
     </div>
 
     <div class="card" id="bulkUploadCard">
@@ -387,7 +362,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, serverTimestamp
+    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -423,17 +398,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     errorTitle:'An error occurred', errorSub:'The page could not be loaded, please refresh and try again.',
     scopePersonal:'You are currently entering data for your <b>personal</b> account.',
     scopeFirma:'You are currently entering data for <b>{name}</b>.',
-    scopeGrouped:' (sharing data with a linked group company)',
+    scopeGroupedList:' The data entered here will be applied to: {names}.',
     enterValidName:'Please enter a name.', saved:'Saved. ✓', saveFailed:'Could not save, please try again.',
     deleted:'Deleted.', deleteFailed:'Could not delete, please try again.', confirmDelete:'Are you sure you want to delete this record?',
     noRecordsYet:'No records added yet.', edit:'Edit', delete:'Delete', unlimited:'',
     bankRequired:'Please add at least one bank before entering data.',
-    groupCopySuccess:'Copied.', groupJoinSuccess:'Linked. This firm now shares data with the entered firm.',
-    groupJoinFailed:'Could not link, please check the code and try again.', groupLeaveSuccess:'Link removed, this firm now uses its own data again.',
-    groupNotAdmin:'Only the firm admin can change the group link.',
-    groupStatusOwn:'This firm is currently using its own data (not linked to another firm).',
-    groupStatusLinked:'This firm is currently sharing data with another firm.',
-    enterGroupCode:'Please paste a code first.',
     bulkNoFile:'Please choose a file first.', bulkParseError:'The file could not be read, please check the format.',
     bulkNoRows:'No valid rows found in the file.', bulkTypeCol:'Type', bulkNameCol:'Name', bulkIdCol:'TC/Tax No',
     bulkBankCol:'Bank', bulkIbanCol:'IBAN', bulkCurrencyCol:'Currency', bulkSummaryText:'{n} rows found, grouped into {p} records.',
@@ -448,17 +417,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     errorTitle:'Bir hata oluştu', errorSub:'Sayfa yüklenemedi, lütfen yenileyip tekrar deneyin.',
     scopePersonal:'Şu anda <b>kişisel</b> hesabınız için veri giriyorsunuz.',
     scopeFirma:'Şu anda <b>{name}</b> için veri giriyorsunuz.',
-    scopeGrouped:' (bağlı grup firmasıyla ortak veri kullanılıyor)',
+    scopeGroupedList:' Burada girilen veriler şu firmalar için işlenecektir: {names}.',
     enterValidName:'Lütfen bir ad/ünvan girin.', saved:'Kaydedildi. ✓', saveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
     deleted:'Silindi.', deleteFailed:'Silinemedi, lütfen tekrar deneyin.', confirmDelete:'Bu kaydı silmek istediğinize emin misiniz?',
     noRecordsYet:'Henüz kayıt eklenmedi.', edit:'Düzenle', delete:'Sil', unlimited:'',
     bankRequired:'Veri girmeden önce en az bir banka eklemelisiniz.',
-    groupCopySuccess:'Kopyalandı.', groupJoinSuccess:'Bağlandı. Bu firma artık girilen firmayla veri paylaşıyor.',
-    groupJoinFailed:'Bağlanamadı, kodu kontrol edip tekrar deneyin.', groupLeaveSuccess:'Bağlantı kaldırıldı, bu firma yine kendi verisini kullanıyor.',
-    groupNotAdmin:'Grup bağlantısını sadece firma yöneticisi değiştirebilir.',
-    groupStatusOwn:'Bu firma şu anda kendi verisini kullanıyor (başka bir firmayla bağlı değil).',
-    groupStatusLinked:'Bu firma şu anda başka bir firmayla veri paylaşıyor.',
-    enterGroupCode:'Önce bir kod yapıştırmalısınız.',
     bulkNoFile:'Önce bir dosya seçmelisiniz.', bulkParseError:'Dosya okunamadı, formatını kontrol edin.',
     bulkNoRows:'Dosyada geçerli satır bulunamadı.', bulkTypeCol:'Tip', bulkNameCol:'Ünvan', bulkIdCol:'TC/Vergi No',
     bulkBankCol:'Banka', bulkIbanCol:'IBAN', bulkCurrencyCol:'Döviz', bulkSummaryText:'{n} satır bulundu, {p} kayıda gruplandı.',
@@ -474,9 +437,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       page_title:'🗂️ Veri Giriş Paneli',
       page_subtitle:'Müşteri, tedarikçi, muhatap ve banka bilgilerinizi burada tek yerde toplayın; talimat ve mektup hazırlarken otomatik kullanılsın.',
       back_home:'← Ana Sayfa',
-      group_link_toggle:'Grup Bağlantısı', group_link_title:'🔗 Grup Firmaları Ortak Veri',
-      group_link_desc:'Aynı grubun (holding) parçası olan başka bir firma ile bu paneldeki verileri (müşteri, tedarikçi, muhatap, banka) ortak kullanmak istersen, kendi firma kodunu diğer firmayla paylaş ya da onların kodunu buraya yapıştır.',
-      group_my_code:'Bu firmanın kodu:', copy_btn:'Kopyala', group_join_ph:'Başka bir firmanın kodunu buraya yapıştır', group_join_btn:'Bağlan', group_leave_btn:'Bağlantıyı Kaldır',
       bulk_title:'📥 Toplu Excel ile Yükle',
       bulk_desc:'Müşteri ve tedarikçilerinizi (banka, IBAN, döviz türü dahil) tek seferde yüklemek için şablonu indirin, doldurun ve tekrar yükleyin.',
       download_template_btn:'⬇️ Şablonu İndir', upload_excel_btn:'📤 Excel Yükle', bulk_confirm_btn:'Kaydet', bulk_cancel_btn:'İptal',
@@ -499,9 +459,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       page_title:'🗂️ Data Entry Panel',
       page_subtitle:'Collect your customer, supplier, counterparty and bank details in one place; they will be used automatically when preparing instructions and letters.',
       back_home:'← Home',
-      group_link_toggle:'Group Link', group_link_title:'🔗 Shared Data Across Group Companies',
-      group_link_desc:"If this firm is part of the same group (holding) as another firm and you want to share this panel's data (customers, suppliers, counterparties, banks), share this firm's code with the other one, or paste their code here.",
-      group_my_code:"This firm's code:", copy_btn:'Copy', group_join_ph:"Paste another firm's code here", group_join_btn:'Link', group_leave_btn:'Remove Link',
       bulk_title:'📥 Bulk Upload via Excel',
       bulk_desc:'Download the template, fill it in, and re-upload it to add your customers and suppliers (including bank, IBAN, currency) all at once.',
       download_template_btn:'⬇️ Download Template', upload_excel_btn:'📤 Upload Excel', bulk_confirm_btn:'Save', bulk_cancel_btn:'Cancel',
@@ -546,6 +503,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   let effectiveScopeId = null;
   let isFirmaAdmin = false;
   let currentUid = null;
+  let groupFirmaNames = []; // Aynı veri havuzunu (effectiveScopeId) paylaşan TÜM firmaların adları
 
   function colRef(name){ return collection(db, scopeCollection, effectiveScopeId, name); }
   function docRef(name, id){ return doc(db, scopeCollection, effectiveScopeId, name, id); }
@@ -572,6 +530,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     effectiveScopeId = scopeId;
     isFirmaAdmin = false;
+    groupFirmaNames = [];
 
     if(scopeCollection === 'firmaAccounts'){
       try{
@@ -586,6 +545,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         const adminIds = Array.isArray(uData.adminFirmaIds) ? uData.adminFirmaIds : [];
         isFirmaAdmin = adminIds.includes(scopeId);
       }catch(e){}
+
+      // Bu veri havuzunu (effectiveScopeId) paylaşan TÜM firmaların adlarını topla:
+      // ana firmanın kendisi + dataGroupId'si bu ana firmaya eşit olan diğer tüm firmalar.
+      // Bu gruplama artık SADECE Kullanıcı Yönetim Paneli'ndeki "Veri Paylaşım Grubu"
+      // üzerinden yönetiliyor; burada salt-okunur olarak gösteriyoruz.
+      try{
+        const hubSnap = await getDoc(doc(db, 'firmaAccounts', effectiveScopeId));
+        if(hubSnap.exists()) groupFirmaNames.push(hubSnap.data().name || effectiveScopeId);
+        const membersSnap = await getDocs(query(collection(db, 'firmaAccounts'), where('dataGroupId', '==', effectiveScopeId)));
+        membersSnap.forEach(d => groupFirmaNames.push(d.data().name || d.id));
+      }catch(e){ /* sessizce geç */ }
     }
 
     renderScopeBanner(firmaName);
@@ -593,59 +563,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   function renderScopeBanner(firmaName){
     const textEl = document.getElementById('scopeBannerText');
-    const toggleBtn = document.getElementById('groupToggleBtn');
     if(scopeCollection === 'firmaAccounts'){
       let html = fmt(LBL.scopeFirma, { name: escapeHtml(firmaName || scopeId) });
-      if(effectiveScopeId !== scopeId) html += '<span style="color:var(--brass);">' + LBL.scopeGrouped + '</span>';
-      textEl.innerHTML = html;
-      toggleBtn.style.display = isFirmaAdmin ? 'inline-block' : 'none';
-      document.getElementById('myFirmaCodeBox').textContent = scopeId;
-      const statusEl = document.getElementById('groupCurrentStatus');
-      const leaveBtn = document.getElementById('leaveGroupBtn');
-      if(effectiveScopeId !== scopeId){
-        statusEl.textContent = LBL.groupStatusLinked;
-        leaveBtn.style.display = 'inline-block';
-      } else {
-        statusEl.textContent = LBL.groupStatusOwn;
-        leaveBtn.style.display = 'none';
+      if(groupFirmaNames.length > 1){
+        html += fmt(LBL.scopeGroupedList, { names: '<b>' + groupFirmaNames.map(escapeHtml).join(', ') + '</b>' });
       }
+      textEl.innerHTML = html;
     } else {
       textEl.innerHTML = LBL.scopePersonal;
-      toggleBtn.style.display = 'none';
     }
   }
-
-  document.getElementById('groupToggleBtn').addEventListener('click', () => {
-    document.getElementById('groupPanel').classList.toggle('open');
-  });
-  document.getElementById('copyFirmaCodeBtn').addEventListener('click', () => {
-    const code = document.getElementById('myFirmaCodeBox').textContent;
-    navigator.clipboard.writeText(code).then(() => showMsg('groupMsg', LBL.groupCopySuccess, false)).catch(()=>{});
-  });
-  document.getElementById('joinGroupBtn').addEventListener('click', async () => {
-    if(!isFirmaAdmin){ showMsg('groupMsg', LBL.groupNotAdmin, true); return; }
-    const code = document.getElementById('joinGroupInput').value.trim();
-    if(!code){ showMsg('groupMsg', LBL.enterGroupCode, true); return; }
-    try{
-      await setDoc(doc(db, 'firmaAccounts', scopeId), { dataGroupId: code }, { merge: true });
-      showMsg('groupMsg', LBL.groupJoinSuccess, false);
-      await resolveScope({ uid: currentUid });
-      await loadAll();
-    }catch(e){
-      showMsg('groupMsg', LBL.groupJoinFailed, true);
-    }
-  });
-  document.getElementById('leaveGroupBtn').addEventListener('click', async () => {
-    if(!isFirmaAdmin){ showMsg('groupMsg', LBL.groupNotAdmin, true); return; }
-    try{
-      await setDoc(doc(db, 'firmaAccounts', scopeId), { dataGroupId: null }, { merge: true });
-      showMsg('groupMsg', LBL.groupLeaveSuccess, false);
-      await resolveScope({ uid: currentUid });
-      await loadAll();
-    }catch(e){
-      showMsg('groupMsg', LBL.groupJoinFailed, true);
-    }
-  });
 
   document.querySelectorAll('.veri-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
