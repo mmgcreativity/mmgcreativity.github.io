@@ -130,11 +130,76 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition:color .15s ease;
   }
   .forum-delete-btn:hover{ color:var(--red); }
+  .forum-edit-btn{
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:4px; flex-shrink:0;
+    transition:color .15s ease;
+  }
+  .forum-edit-btn:hover{ color:var(--brass); }
   .forum-post-text{
     margin-top:10px; font-size:14px; line-height:1.55; white-space:pre-wrap; word-break:break-word;
   }
+  .forum-edit-box{ margin-top:10px; }
+  .forum-edit-textarea{
+    width:100%; min-height:70px; resize:vertical; background:var(--surface-2); border:1px solid var(--hairline);
+    border-radius:8px; color:var(--text); font-family:inherit; font-size:14px; line-height:1.55; padding:10px; box-sizing:border-box;
+  }
+  .forum-edit-actions{ display:flex; gap:8px; margin-top:8px; }
+  .forum-edit-save{
+    background:var(--grad); color:#fff; font-weight:600; font-size:12.5px; border:none; border-radius:7px;
+    padding:7px 14px; cursor:pointer;
+  }
+  .forum-edit-cancel{
+    background:none; color:var(--muted); font-weight:600; font-size:12.5px; border:1px solid var(--hairline); border-radius:7px;
+    padding:7px 14px; cursor:pointer;
+  }
+  .forum-edit-cancel:hover{ color:var(--text); border-color:var(--muted); }
+  .forum-edit-error{ color:var(--red); font-size:12px; margin-top:6px; display:none; }
   .forum-empty-note{ text-align:center; color:var(--muted); font-size:13px; padding:36px 16px; }
   .forum-loading-note{ text-align:center; color:var(--muted); font-size:13px; padding:20px; }
+
+  /* ---- Aksiyon çubuğu (yanıtla / beğen) — Twitter tarzı ---- */
+  .forum-post-actions{ display:flex; align-items:center; gap:22px; margin-top:12px; }
+  .forum-action-btn{
+    background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:6px;
+    color:var(--muted); font-size:13px; font-family:'IBM Plex Mono',monospace; padding:4px 2px;
+    transition:color .15s ease, transform .1s ease;
+  }
+  .forum-action-btn:hover{ color:var(--azure); }
+  .forum-action-btn:active{ transform:scale(0.92); }
+  .forum-like-btn:hover{ color:var(--magenta); }
+  .forum-like-btn.liked{ color:var(--magenta); }
+  .forum-action-count{ font-size:12px; min-width:8px; }
+  .forum-reply-btn.replies-open{ color:var(--azure); }
+
+  .forum-replies{ margin-top:12px; padding-top:12px; border-top:1px solid var(--hairline); }
+  .forum-replies-list{ display:flex; flex-direction:column; gap:12px; margin-bottom:12px; }
+  .forum-reply-item{ display:flex; gap:10px; }
+  .forum-reply-item .avatar-circle{ width:28px; height:28px; font-size:11px; }
+  .forum-reply-meta{ display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; }
+  .forum-reply-name{ font-size:12.5px; font-weight:700; }
+  .forum-reply-time{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--muted); }
+  .forum-reply-text{ font-size:13px; line-height:1.5; margin-top:2px; white-space:pre-wrap; word-break:break-word; }
+  .forum-reply-delete{
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:11px; padding:2px; margin-left:auto;
+    flex-shrink:0; transition:color .15s ease;
+  }
+  .forum-reply-delete:hover{ color:var(--red); }
+  .forum-replies-empty{ color:var(--muted); font-size:12.5px; padding:4px 0 10px; }
+  .forum-replies-loading{ color:var(--muted); font-size:12.5px; padding:4px 0 10px; }
+  .forum-reply-composer{ display:flex; gap:10px; align-items:flex-start; }
+  .forum-reply-textarea{
+    flex:1; min-height:38px; max-height:120px; resize:vertical; background:var(--surface-2);
+    border:1px solid var(--hairline); border-radius:9px; padding:9px 12px; color:var(--text);
+    font-family:'Inter',sans-serif; font-size:13px; outline:none; transition:border-color .15s ease;
+  }
+  .forum-reply-textarea:focus{ border-color:var(--brass-dim); }
+  .forum-reply-send{
+    padding:8px 16px; border-radius:9px; border:none; cursor:pointer; background:var(--grad); color:#fff;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; white-space:nowrap; flex-shrink:0;
+    transition:opacity .15s ease;
+  }
+  .forum-reply-send:hover{ opacity:0.9; }
+  .forum-reply-send:disabled{ opacity:0.5; cursor:default; }
 </style>
 </head>
 <body>
@@ -171,7 +236,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, collection, addDoc, deleteDoc, query, orderBy, limit, onSnapshot, serverTimestamp
+    getFirestore, doc, getDoc, collection, addDoc, deleteDoc, updateDoc, query, orderBy, limit, onSnapshot, serverTimestamp,
+    arrayUnion, arrayRemove, increment
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -212,6 +278,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     loadingPosts:'Loading posts…', noPostsYet:'No posts yet. Be the first to share something!',
     postFailed:'Could not be posted, please try again.', emptyPostError:'Please write something first.',
     confirmDelete:'Are you sure you want to delete this post?', deleteFailed:'Could not be deleted, please try again.',
+    editSave:'Save', editCancel:'Cancel', editFailed:'Could not be saved, please try again.', emptyEditError:'Please write something first.',
+    loadingReplies:'Loading replies…', noRepliesYet:'No replies yet. Be the first to reply!',
     justNow:'just now', minutesAgo:'m ago', hoursAgo:'h ago', daysAgo:'d ago', anonymous:'Anonymous'
   } : {
     loginRequired:'Forumu görüntülemek için giriş yapmış olmanız gerekir.<br><br>',
@@ -221,6 +289,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     loadingPosts:'Gönderiler yükleniyor…', noPostsYet:'Henüz gönderi yok. İlk paylaşımı sen yap!',
     postFailed:'Gönderilemedi, lütfen tekrar deneyin.', emptyPostError:'Önce bir şeyler yazmalısın.',
     confirmDelete:'Bu gönderiyi silmek istediğinize emin misiniz?', deleteFailed:'Silinemedi, lütfen tekrar deneyin.',
+    editSave:'Kaydet', editCancel:'Vazgeç', editFailed:'Kaydedilemedi, lütfen tekrar deneyin.', emptyEditError:'Önce bir şeyler yazmalısın.',
+    loadingReplies:'Yanıtlar yükleniyor…', noRepliesYet:'Henüz yanıt yok. İlk yanıtı sen yaz!',
     justNow:'az önce', minutesAgo:'dk önce', hoursAgo:'sa önce', daysAgo:'g önce', anonymous:'İsimsiz'
   };
 
@@ -286,7 +356,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   let currentUid = null;
   let currentIsAdmin = false;
+  let currentUserName = '';
+  let currentUserAvatar = null;
   let unsubscribeFeed = null;
+  const openReplyPanels = new Set(); // Aynı akış (feed) HERHANGİ bir gönderi değiştiğinde tamamen yeniden çizildiği için (beğeni, yanıt sayısı vb.), o an açık olan yanıt panellerini burada takip edip yeniden çizimden sonra tekrar açıyoruz.
 
   function stopWatchingFeed(){
     if(unsubscribeFeed){ unsubscribeFeed(); unsubscribeFeed = null; }
@@ -302,7 +375,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const rows = [];
     snap.forEach(d => {
       const p = d.data();
-      const canDelete = currentIsAdmin || p.authorUid === currentUid;
+      const canManage = currentIsAdmin || p.authorUid === currentUid;
+      const likes = Array.isArray(p.likes) ? p.likes : [];
+      const iLiked = currentUid && likes.includes(currentUid);
+      const replyCount = typeof p.replyCount === 'number' ? p.replyCount : 0;
       rows.push(
         '<div class="forum-post" data-id="' + d.id + '">' +
           '<div class="forum-post-top">' +
@@ -311,13 +387,81 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               '<div class="forum-post-name">' + escapeHtml(p.authorName || LBL.anonymous) + '</div>' +
               '<div class="forum-post-time">' + fmtRelativeTime(p.createdAt) + '</div>' +
             '</div>' +
-            (canDelete ? '<button type="button" class="forum-delete-btn" data-delete-id="' + d.id + '" title="' + (MMG_LANG==='en'?'Delete':'Sil') + '">✕</button>' : '') +
+            (canManage ? '<button type="button" class="forum-edit-btn" data-edit-id="' + d.id + '" title="' + (MMG_LANG==='en'?'Edit':'Düzenle') + '">✎</button>' : '') +
+            (canManage ? '<button type="button" class="forum-delete-btn" data-delete-id="' + d.id + '" title="' + (MMG_LANG==='en'?'Delete':'Sil') + '">✕</button>' : '') +
           '</div>' +
-          '<div class="forum-post-text">' + escapeHtml(p.text) + '</div>' +
+          '<div class="forum-post-text" data-text-id="' + d.id + '">' + escapeHtml(p.text) + '</div>' +
+          (canManage ?
+            '<div class="forum-edit-box" data-editbox-id="' + d.id + '" hidden>' +
+              '<textarea class="forum-edit-textarea" data-editarea-id="' + d.id + '">' + escapeHtml(p.text) + '</textarea>' +
+              '<div class="forum-edit-error" data-editerr-id="' + d.id + '"></div>' +
+              '<div class="forum-edit-actions">' +
+                '<button type="button" class="forum-edit-save" data-savebtn-id="' + d.id + '">' + LBL.editSave + '</button>' +
+                '<button type="button" class="forum-edit-cancel" data-cancelbtn-id="' + d.id + '">' + LBL.editCancel + '</button>' +
+              '</div>' +
+            '</div>' : '') +
+          '<div class="forum-post-actions">' +
+            '<button type="button" class="forum-action-btn forum-reply-btn" data-reply-toggle="' + d.id + '">💬 <span class="forum-action-count" data-replycount-id="' + d.id + '">' + replyCount + '</span></button>' +
+            '<button type="button" class="forum-action-btn forum-like-btn' + (iLiked ? ' liked' : '') + '" data-like-id="' + d.id + '">' + (iLiked ? '❤️' : '🤍') + ' <span class="forum-action-count">' + likes.length + '</span></button>' +
+          '</div>' +
+          '<div class="forum-replies" data-replies-id="' + d.id + '" hidden>' +
+            '<div class="forum-replies-list" data-replieslist-id="' + d.id + '"></div>' +
+            '<div class="forum-reply-composer">' +
+              avatarHtml(currentUserName, currentUserAvatar, currentUid) +
+              '<textarea class="forum-reply-textarea" data-replytext-id="' + d.id + '" placeholder="' + (MMG_LANG==='en'?'Write a reply…':'Bir yanıt yaz…') + '"></textarea>' +
+              '<button type="button" class="forum-reply-send" data-replysend-id="' + d.id + '">' + (MMG_LANG==='en'?'Reply':'Yanıtla') + '</button>' +
+            '</div>' +
+          '</div>' +
         '</div>'
       );
     });
     feedEl.innerHTML = rows.join('');
+    feedEl.querySelectorAll('[data-edit-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.editId;
+        const textEl = feedEl.querySelector('[data-text-id="' + id + '"]');
+        const boxEl = feedEl.querySelector('[data-editbox-id="' + id + '"]');
+        if(textEl) textEl.hidden = true;
+        if(boxEl){
+          boxEl.hidden = false;
+          const ta = boxEl.querySelector('[data-editarea-id="' + id + '"]');
+          if(ta){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+        }
+      });
+    });
+    feedEl.querySelectorAll('[data-cancelbtn-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.cancelbtnId;
+        const textEl = feedEl.querySelector('[data-text-id="' + id + '"]');
+        const boxEl = feedEl.querySelector('[data-editbox-id="' + id + '"]');
+        const ta = feedEl.querySelector('[data-editarea-id="' + id + '"]');
+        const errEl = feedEl.querySelector('[data-editerr-id="' + id + '"]');
+        if(ta && textEl) ta.value = textEl.textContent;
+        if(errEl) errEl.style.display = 'none';
+        if(boxEl) boxEl.hidden = true;
+        if(textEl) textEl.hidden = false;
+      });
+    });
+    feedEl.querySelectorAll('[data-savebtn-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.savebtnId;
+        const ta = feedEl.querySelector('[data-editarea-id="' + id + '"]');
+        const errEl = feedEl.querySelector('[data-editerr-id="' + id + '"]');
+        const newText = ta ? ta.value.trim() : '';
+        if(!newText){
+          if(errEl){ errEl.textContent = LBL.emptyEditError; errEl.style.display = 'block'; }
+          return;
+        }
+        btn.disabled = true;
+        try{
+          await updateDoc(doc(db, 'forumPosts', id), { text: newText, editedAt: serverTimestamp() });
+          // onSnapshot dinleyicisi akışı otomatik olarak güncelleyip yeniden çizecek.
+        }catch(e){
+          if(errEl){ errEl.textContent = LBL.editFailed; errEl.style.display = 'block'; }
+          btn.disabled = false;
+        }
+      });
+    });
     feedEl.querySelectorAll('[data-delete-id]').forEach(btn => {
       btn.addEventListener('click', async () => {
         if(!confirm(LBL.confirmDelete)) return;
@@ -330,6 +474,128 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
       });
     });
+
+    // ---- Beğen (❤️) — kendi uid'imizi "likes" dizisine ekler/çıkarır ----
+    feedEl.querySelectorAll('[data-like-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!currentUid) return;
+        const id = btn.dataset.likeId;
+        const isLiked = btn.classList.contains('liked');
+        btn.disabled = true;
+        try{
+          await updateDoc(doc(db, 'forumPosts', id), {
+            likes: isLiked ? arrayRemove(currentUid) : arrayUnion(currentUid)
+          });
+          // onSnapshot dinleyicisi akışı otomatik olarak güncelleyip yeniden çizecek.
+        }catch(e){ /* sessizce geç */ }
+        finally{ btn.disabled = false; }
+      });
+    });
+
+    // ---- Yanıtla paneli: aç/kapa + ilk açılışta yanıtları yükle ----
+    feedEl.querySelectorAll('[data-reply-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.replyToggle;
+        const panel = feedEl.querySelector('[data-replies-id="' + id + '"]');
+        if(!panel) return;
+        const willOpen = panel.hidden;
+        panel.hidden = !willOpen;
+        btn.classList.toggle('replies-open', willOpen);
+        if(willOpen){
+          openReplyPanels.add(id);
+          if(!panel.dataset.loaded){ panel.dataset.loaded = '1'; loadReplies(id); }
+        } else {
+          openReplyPanels.delete(id);
+        }
+      });
+    });
+
+    // ---- Yanıt gönder ----
+    feedEl.querySelectorAll('[data-replysend-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.replysendId;
+        const ta = feedEl.querySelector('[data-replytext-id="' + id + '"]');
+        const text = ta ? ta.value.trim() : '';
+        if(!text || !currentUid) return;
+        btn.disabled = true;
+        try{
+          await addDoc(collection(db, 'forumPosts', id, 'replies'), {
+            authorUid: currentUid, authorName: currentUserName, authorAvatar: currentUserAvatar || null,
+            text: text, createdAt: serverTimestamp()
+          });
+          await updateDoc(doc(db, 'forumPosts', id), { replyCount: increment(1) });
+          if(ta) ta.value = '';
+          await loadReplies(id, true);
+        }catch(e){ /* sessizce geç */ }
+        finally{ btn.disabled = false; }
+      });
+    });
+  }
+
+  // Yeniden çizimden (örn. başka bir gönderiye beğeni gelmesi) sonra, kullanıcının
+  // önceden açtığı yanıt panellerini kapanmış gibi göstermemek için tekrar açıyoruz.
+  function restoreOpenReplyPanels(){
+    const feedEl = document.getElementById('forumFeed');
+    if(!feedEl) return;
+    openReplyPanels.forEach(id => {
+      const panel = feedEl.querySelector('[data-replies-id="' + id + '"]');
+      const toggleBtn = feedEl.querySelector('[data-reply-toggle="' + id + '"]');
+      if(!panel){ openReplyPanels.delete(id); return; }
+      panel.hidden = false;
+      if(toggleBtn) toggleBtn.classList.add('replies-open');
+      panel.dataset.loaded = '1';
+      loadReplies(id);
+    });
+  }
+
+  // Bir gönderinin yanıtlarını (en eskiden en yeniye) çeker ve listeler.
+  async function loadReplies(postId, forceReload){
+    const feedEl = document.getElementById('forumFeed');
+    const listEl = feedEl ? feedEl.querySelector('[data-replieslist-id="' + postId + '"]') : null;
+    if(!listEl) return;
+    listEl.innerHTML = '<div class="forum-replies-loading">' + LBL.loadingReplies + '</div>';
+    try{
+      const repliesSnap = await getDocs(query(collection(db, 'forumPosts', postId, 'replies'), orderBy('createdAt', 'asc'), limit(200)));
+      if(repliesSnap.empty){
+        listEl.innerHTML = '<div class="forum-replies-empty">' + LBL.noRepliesYet + '</div>';
+        return;
+      }
+      const items = [];
+      repliesSnap.forEach(rd => {
+        const r = rd.data();
+        const canDeleteReply = currentIsAdmin || r.authorUid === currentUid;
+        items.push(
+          '<div class="forum-reply-item" data-reply-row="' + rd.id + '">' +
+            avatarHtml(r.authorName, r.authorAvatar, r.authorUid) +
+            '<div class="forum-post-meta">' +
+              '<div class="forum-reply-meta">' +
+                '<span class="forum-reply-name">' + escapeHtml(r.authorName || LBL.anonymous) + '</span>' +
+                '<span class="forum-reply-time">' + fmtRelativeTime(r.createdAt) + '</span>' +
+                (canDeleteReply ? '<button type="button" class="forum-reply-delete" data-delete-reply-post="' + postId + '" data-delete-reply-id="' + rd.id + '" title="' + (MMG_LANG==='en'?'Delete':'Sil') + '">✕</button>' : '') +
+              '</div>' +
+              '<div class="forum-reply-text">' + escapeHtml(r.text) + '</div>' +
+            '</div>' +
+          '</div>'
+        );
+      });
+      listEl.innerHTML = items.join('');
+      listEl.querySelectorAll('[data-delete-reply-id]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if(!confirm(LBL.confirmDelete)) return;
+          btn.disabled = true;
+          try{
+            await deleteDoc(doc(db, 'forumPosts', btn.dataset.deleteReplyPost, 'replies', btn.dataset.deleteReplyId));
+            await updateDoc(doc(db, 'forumPosts', btn.dataset.deleteReplyPost), { replyCount: increment(-1) });
+            await loadReplies(btn.dataset.deleteReplyPost, true);
+          }catch(e){
+            alert(LBL.deleteFailed);
+            btn.disabled = false;
+          }
+        });
+      });
+    }catch(e){
+      listEl.innerHTML = '<div class="forum-replies-empty">' + LBL.errorSub + '</div>';
+    }
   }
 
   function watchFeed(){
@@ -339,6 +605,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const q = query(collection(db, 'forumPosts'), orderBy('createdAt', 'desc'), limit(150));
     unsubscribeFeed = onSnapshot(q, (snap) => {
       renderFeed(snap);
+      restoreOpenReplyPanels();
     }, () => {
       if(feedEl) feedEl.innerHTML = '<div class="forum-empty-note">' + LBL.errorSub + '</div>';
     });
@@ -402,10 +669,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const snap = await getDoc(doc(db, 'users', user.uid));
       const data = snap.exists() ? snap.data() : {};
       currentIsAdmin = data.isAdmin === true;
+      currentUserName = data.username || data.email || LBL.anonymous;
+      currentUserAvatar = data.avatarBase64 || null;
       const composerAvatar = document.getElementById('composerAvatar');
       if(composerAvatar){
-        const name = data.username || data.email || LBL.anonymous;
-        const html = avatarHtml(name, data.avatarBase64, user.uid).replace('<div class="avatar-circle"', '<div class="avatar-circle" id="composerAvatar"');
+        const name = currentUserName;
+        const html = avatarHtml(name, currentUserAvatar, user.uid).replace('<div class="avatar-circle"', '<div class="avatar-circle" id="composerAvatar"');
         composerAvatar.outerHTML = html;
       }
       stateArea.innerHTML = '';
