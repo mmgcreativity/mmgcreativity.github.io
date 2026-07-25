@@ -768,6 +768,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       card_expenses_desc:'Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlensin.',
       card_income_desc:'Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu\'na otomatik işlensin.',
       card_instructions_desc:'Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.',
+      card_hazirmetin_desc:'Sık kullandığınız talimat metinlerini bir kez oluşturup kaydedin; sonraki seferlerde saniyeler içinde yeniden kullanın.',
+      card_verigirisi_desc:'Müşteri, tedarikçi, muhatap ve banka bilgilerinizi tek yerde toplayın; talimat ve mektup hazırlarken otomatik önerilsin.',
+      card_forum_desc:'Diğer kullanıcılarla sohbet edin, sorularınızı sorun ve deneyimlerinizi paylaşın.',
+      card_blog_desc:'Finans, bütçe ve kredi konularında güncel yazılarımızı okuyun.',
+      card_rehber_desc:'Kredi, faiz, taksit ve bütçe planlaması gibi konularda sade dilde, pratik rehberler.',
+      card_istatistikler_desc:'Kategori dağılımlarınızı ve zaman içindeki eğilimlerinizi tek bakışta görün.',
+      card_referans_desc:'Kendi referans kodunuzu paylaşın; kimlerin katıldığını ve komisyon oranınızı takip edin.',
       footer_follow_us:'Bizi Takip Edin', footer_powered_by:'Powered by', footer_download_now:'Hemen İndirin',
       footer_about:'Hakkında', footer_privacy:'Gizlilik Politikası', footer_terms:'Kullanım Şartları',
       close:'Kapat',
@@ -859,6 +866,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       card_expenses_desc:'Record recurring expenses such as bills, credit cards, letters of guarantee, commissions, and rent; they\'ll be automatically posted to the Cash Flow Table when due.',
       card_income_desc:'Record your cash collections, check/note collections, POS collections, and interest income; they\'ll be automatically posted to the Cash Flow Table when due.',
       card_instructions_desc:'Prepare transfer, check, letter of guarantee, and free-text instructions to banks, customers, institutions, and individuals in seconds.',
+      card_hazirmetin_desc:'Create and save your frequently used instruction texts once; reuse them in seconds every time after that.',
+      card_verigirisi_desc:'Collect your customer, supplier, counterparty, and bank details in one place; they\'ll be suggested automatically when preparing instructions and letters.',
+      card_forum_desc:'Chat with other users, ask your questions, and share your experiences.',
+      card_blog_desc:'Read our latest articles on finance, budgeting, and loans.',
+      card_rehber_desc:'Practical, plain-language guides on loans, interest, installments, and budget planning.',
+      card_istatistikler_desc:'See your category breakdowns and trends over time at a glance.',
+      card_referans_desc:'Share your own referral code; track who joined and your commission rate.',
       footer_follow_us:'Follow Us', footer_powered_by:'Powered by', footer_download_now:'Download Now',
       footer_about:'About', footer_privacy:'Privacy Policy', footer_terms:'Terms of Use',
       close:'Close',
@@ -1393,6 +1407,55 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span class="card-arrow">↗</span>
           <h3 data-i18n="nav_talimat_full">Talimat Hazırlama</h3>
           <p data-i18n="card_instructions_desc">Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.</p>
+        </button>
+
+        <button class="app-card" data-target="HazirMetinTalimatlari.html" data-title="Hazır Metin Talimatları">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="HazirMetinTalimatlari.html" data-fav-title="Hazır Metin Talimatları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="nav_hazirmetin">Hazır Metin Talimatları</h3>
+          <p data-i18n="card_hazirmetin_desc">Sık kullandığınız talimat metinlerini bir kez oluşturup kaydedin; sonraki seferlerde saniyeler içinde yeniden kullanın.</p>
+        </button>
+
+        <button class="app-card" data-target="VeriGirisPaneli.html" data-title="Veri Girişi">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="VeriGirisPaneli.html" data-fav-title="Veri Girişi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="nav_label_verigirisi">Veri Girişi</h3>
+          <p data-i18n="card_verigirisi_desc">Müşteri, tedarikçi, muhatap ve banka bilgilerinizi tek yerde toplayın; talimat ve mektup hazırlarken otomatik önerilsin.</p>
+        </button>
+
+        <button class="app-card" id="cardIstatistiklerBtn" data-target="Istatistikler.html" data-title="İstatistikler" data-gated="true" style="display:none;">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Istatistikler.html" data-fav-title="İstatistikler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="dropdown_stats">İstatistikler</h3>
+          <p data-i18n="card_istatistikler_desc">Kategori dağılımlarınızı ve zaman içindeki eğilimlerinizi tek bakışta görün.</p>
+        </button>
+
+        <button class="app-card" id="cardReferansPaneliBtn" data-target="ReferansKoduYonetimi.html" data-title="Referans Paneli" data-gated="true" style="display:none;">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="ReferansKoduYonetimi.html" data-fav-title="Referans Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="dropdown_referral_admin">Referans Paneli</h3>
+          <p data-i18n="card_referans_desc">Kendi referans kodunuzu paylaşın; kimlerin katıldığını ve komisyon oranınızı takip edin.</p>
+        </button>
+
+        <button class="app-card" data-target="Forum.html" data-title="Forum">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Forum.html" data-fav-title="Forum" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="nav_forum">Forum</h3>
+          <p data-i18n="card_forum_desc">Diğer kullanıcılarla sohbet edin, sorularınızı sorun ve deneyimlerinizi paylaşın.</p>
+        </button>
+
+        <button class="app-card" data-target="Blog.html" data-title="Blog">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Blog.html" data-fav-title="Blog" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="nav_blog">Blog</h3>
+          <p data-i18n="card_blog_desc">Finans, bütçe ve kredi konularında güncel yazılarımızı okuyun.</p>
+        </button>
+
+        <button class="app-card" data-target="rehber.html" data-title="Rehber">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="nav_rehber">Rehber</h3>
+          <p data-i18n="card_rehber_desc">Kredi, faiz, taksit ve bütçe planlaması gibi konularda sade dilde, pratik rehberler.</p>
         </button>
       </div>
     </section>
@@ -1948,9 +2011,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   onAuthStateChanged(auth, async (user) => {
     const adminBtn = document.getElementById('navReferansPaneliBtn');
     const begenBtn = document.getElementById('navIstatistiklerBtn');
+    const adminCard = document.getElementById('cardReferansPaneliBtn');
+    const begenCard = document.getElementById('cardIstatistiklerBtn');
     if(!user){
       if(adminBtn) adminBtn.style.display = 'none';
       if(begenBtn) begenBtn.style.display = 'none';
+      if(adminCard) adminCard.style.display = 'none';
+      if(begenCard) begenCard.style.display = 'none';
       mmgStopWatchingSession();
       // Firma yöneticiliğine bağlı her şeyi sıfırla: aksi halde misafir moduna geçildiğinde
       // (ya da oturum tutarsızlığı düzeltilirken) önceki oturumdan kalma "Kullanıcı Yönetim
@@ -1987,16 +2054,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(adminBtn){
         if(data.isAdmin){
           adminBtn.style.display = 'flex';
+          if(adminCard) adminCard.style.display = '';
         } else {
           // Global admin olmasa da, kendisine bir referans kodu atanmış kullanıcılar
           // da "Referans Paneli"ni (salt kendi kodu/istatistikleri için) görebilmeli.
           try{
             const ownedCodesSnap = await getDocs(query(collection(db, 'referralCodes'), where('ownerUid', '==', user.uid)));
-            adminBtn.style.display = ownedCodesSnap.empty ? 'none' : 'flex';
-          }catch(e){ adminBtn.style.display = 'none'; }
+            const shouldShow = !ownedCodesSnap.empty;
+            adminBtn.style.display = shouldShow ? 'flex' : 'none';
+            if(adminCard) adminCard.style.display = shouldShow ? '' : 'none';
+          }catch(e){ adminBtn.style.display = 'none'; if(adminCard) adminCard.style.display = 'none'; }
         }
       }
       if(begenBtn) begenBtn.style.display = data.isAdmin ? 'flex' : 'none';
+      if(begenCard) begenCard.style.display = data.isAdmin ? '' : 'none';
       const verifyWrap = document.getElementById('mmgVerifyEmailWrap');
       if(verifyWrap) verifyWrap.style.display = (user.email && !user.emailVerified) ? 'block' : 'none';
       try{ gtag('set', 'user_properties', { user_type: data.isPremium ? 'premium' : 'member' }); }catch(e){}

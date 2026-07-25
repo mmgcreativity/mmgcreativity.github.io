@@ -296,6 +296,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="affiliateList"></div>
   </div>
 
+  <div class="card" id="myMembershipsCard" style="display:none;">
+    <h2 style="margin-bottom:6px;" data-i18n="my_memberships_title">Kullanıcısı Olduğum Firmalar</h2>
+    <p class="referral-note" style="margin-bottom:14px;" data-i18n="my_memberships_desc">Bir firma yöneticisi tarafından kullanıcı olarak eklendiğiniz firmalar burada listelenir. Buradan sadece hangi firmalara erişiminiz olduğunu görürsünüz; yetkilerinizi firmanın kendi yöneticisi düzenler.</p>
+    <div id="myMembershipsList"></div>
+  </div>
+
   <div class="card" id="companyCard">
     <h2 style="margin-bottom:10px;" data-i18n="firma_admin_title">Firma Yöneticiliği</h2>
     <p class="referral-note" style="margin-bottom:12px;" data-i18n="firma_admin_desc">
@@ -378,7 +384,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup, GoogleAuthProvider
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, deleteDoc, deleteField, collection, getDocs, increment, serverTimestamp,
+    getFirestore, doc, getDoc, setDoc, deleteDoc, deleteField, collection, collectionGroup, getDocs, increment, serverTimestamp,
     query, where, arrayUnion
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -447,6 +453,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     addAdmin:'Add Admin', adminEmailPh:'Admin email', addedOk:'Added ✓',
     validEmailPlease:'Please enter a valid email.', adminInviteFailed:'The invitation could not be sent, please try again.',
     noManagedFirmasYet:'You are not an admin of any company yet.', firmasLoadFailed:'Companies could not be loaded.',
+    memberRoleTag:'User',
     firmaNameLabel:'Company Name', addressLabel:'Address', phoneLabel:'Phone', taxIdLabel:'Tax ID',
     loadingTxt:'Loading...',
     pendingInviteAdminSub:'You have been invited as an admin. You can add and manage users; you will not enter your own financial data under this role.',
@@ -505,6 +512,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     addAdmin:'Yönetici Ekle', adminEmailPh:'Yönetici e-postası', addedOk:'Eklendi ✓',
     validEmailPlease:'Geçerli bir e-posta girin.', adminInviteFailed:'Davet gönderilemedi, tekrar deneyin.',
     noManagedFirmasYet:'Henüz yöneticisi olduğunuz bir firma yok.', firmasLoadFailed:'Firmalar yüklenemedi.',
+    memberRoleTag:'Kullanıcı',
     firmaNameLabel:'Firma Adı', addressLabel:'Adres', phoneLabel:'Telefon', taxIdLabel:'Vergi No',
     loadingTxt:'Yükleniyor...',
     pendingInviteAdminSub:'Yönetici olarak davet edildiniz. Kullanıcı ekleyip yetkilendirebilirsiniz; kendi mali verilerinizi bu rolde girmezsiniz.',
@@ -762,6 +770,55 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     renderSelectedFirma();
   });
 
+  // ================== Kullanıcısı Olduğum Firmalar (yönetici DEĞİL, üye olarak eklendiğim) ==================
+  // Bir firma yöneticisi, Kullanıcı Yönetim Paneli'nden bizi kendi firmasına (veya yönettiği
+  // başka firmalara) "kullanıcı" olarak eklediğinde, bu üyelik firmaAccounts/*/members/{uid}
+  // altında tutulur. Hangi firmalarda üye olduğumuzu bulmak için tüm firmaların "members"
+  // alt koleksiyonlarını "uid" alanına göre tarıyoruz (collectionGroup) — tıpkı index.html'in
+  // "Firmalarım" listesini oluştururken yaptığı gibi.
+  const myMembershipsCard = document.getElementById('myMembershipsCard');
+  const myMembershipsList = document.getElementById('myMembershipsList');
+
+  async function loadMyMemberships(uid){
+    if(!myMembershipsCard || !myMembershipsList) return;
+    try{
+      const memSnap = await getDocs(query(collectionGroup(db, 'members'), where('uid', '==', uid)));
+      if(memSnap.empty){
+        myMembershipsCard.style.display = 'none';
+        myMembershipsList.innerHTML = '';
+        return;
+      }
+      const esc0 = (s) => String(s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const rows = [];
+      for(const d of memSnap.docs){
+        const firmaId = d.ref.parent.parent ? d.ref.parent.parent.id : null;
+        if(!firmaId) continue;
+        let firmaName = firmaId;
+        try{
+          const fSnap = await getDoc(doc(db, 'firmaAccounts', firmaId));
+          if(fSnap.exists()) firmaName = fSnap.data().name || firmaId;
+        }catch(e){ /* sessizce geç */ }
+        rows.push(
+          '<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; margin-bottom:8px;">' +
+            '<span style="font-weight:700; font-size:13.5px;">' + esc0(firmaName) + '</span>' +
+            '<span style="font-family:\'IBM Plex Mono\',monospace; font-size:11px; color:var(--muted); white-space:nowrap;">' + LBL.memberRoleTag + '</span>' +
+          '</div>'
+        );
+      }
+      if(!rows.length){
+        myMembershipsCard.style.display = 'none';
+        myMembershipsList.innerHTML = '';
+        return;
+      }
+      myMembershipsCard.style.display = 'block';
+      myMembershipsList.innerHTML = rows.join('');
+    }catch(e){
+      // Sorgu (örn. eksik bir Firestore index'i yüzünden) başarısız olursa, kartı sessizce gizle;
+      // bu bilgi olmadan da sayfanın geri kalanı normal çalışmaya devam eder.
+      myMembershipsCard.style.display = 'none';
+    }
+  }
+
   function renderSelectedFirma(){
     const entry = myAdminFirmasArr.find(f => f.id === selectedFirmaId) || myAdminFirmasArr[0];
     if(!entry){
@@ -1004,6 +1061,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           }
           if(msgEl){ msgEl.style.color = 'var(--teal)'; msgEl.textContent = LBL.pendingInviteAccepted; }
           try{ await loadMyFirmas(user.uid); }catch(e){}
+          try{ await loadMyMemberships(user.uid); }catch(e){}
           setTimeout(() => loadPendingInvites(user), 900);
         }catch(e){
           if(msgEl){ msgEl.style.color = 'var(--red)'; msgEl.textContent = LBL.pendingInviteError; }
@@ -1146,6 +1204,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         legacyCompanyWrap.style.display = 'none';
       }
       await loadMyFirmas(user.uid);
+      await loadMyMemberships(user.uid);
       await loadPendingInvites(user);
       await loadAffiliateData(user);
     } catch(e){
@@ -1391,6 +1450,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       pending_invites_desc:'Bir firma tarafından kullanıcı ya da yönetici olarak davet edildiğinizde, karar verene kadar burada bekler.',
       affiliate_title:'Referans Ortaklığım',
       affiliate_desc:'Adınıza tanımlanmış referans kod(lar)ıyla kimlerin katıldığını ve komisyon oranınızı burada görebilirsiniz.',
+      my_memberships_title:'Kullanıcısı Olduğum Firmalar',
+      my_memberships_desc:'Bir firma yöneticisi tarafından kullanıcı olarak eklendiğiniz firmalar burada listelenir. Buradan sadece hangi firmalara erişiminiz olduğunu görürsünüz; yetkilerinizi firmanın kendi yöneticisi düzenler.',
       managed_firma:'Yönettiğiniz Firma'
     },
     en: {
@@ -1415,6 +1476,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       pending_invites_desc:'When a company invites you as a user or admin, it waits here until you decide.',
       affiliate_title:'My Referral Partnership',
       affiliate_desc:'See who joined using your referral code(s) and your commission rate here.',
+      my_memberships_title:'Companies I Have User Access To',
+      my_memberships_desc:'Companies where a company admin has added you as a user are listed here. This only shows which companies you can access; your permissions are managed by that company\'s own admin.',
       managed_firma:'Company You Manage'
     }
   });
