@@ -103,13 +103,13 @@
   .empty-note{ color:var(--muted); font-size:13px; padding:6px 2px; }
 
   .invite-row{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:10px 14px; margin-bottom:8px;
   }
-  .invite-row .invite-email{ font-size:13px; font-weight:600; }
+  .invite-row .invite-email{ font-size:13px; font-weight:600; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .invite-cancel-btn{
     background:transparent; border:1px solid var(--hairline); border-radius:6px; color:var(--muted);
-    font-size:11px; padding:5px 9px; cursor:pointer; flex-shrink:0;
+    font-size:11px; padding:5px 9px; cursor:pointer; flex-shrink:0; white-space:nowrap;
   }
   .invite-cancel-btn:hover{ color:var(--red); border-color:var(--red); }
 
@@ -130,7 +130,7 @@
   </div>
 
   <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
-  <div style="display:flex; flex-direction:column; gap:16px; flex:0 0 300px; min-width:240px;">
+  <div style="display:flex; flex-direction:column; gap:16px; flex:0 0 360px; min-width:300px;">
     <div class="card" id="firmaSelectorCard" style="display:none;">
       <div class="mini-label" style="margin-bottom:8px;" data-i18n="managed_firma">Yönettiğiniz Firma</div>
       <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;"></select>
@@ -142,7 +142,7 @@
     </div>
   </div>
 
-  <div style="display:flex; flex-direction:column; gap:16px; flex:1; min-width:280px;">
+  <div style="display:flex; flex-direction:column; gap:16px; flex:1; min-width:280px; max-width:640px;">
     <div class="card">
       <h2 data-i18n="add_user_title">Kullanıcı Ekle</h2>
       <div class="card-sub" data-i18n="add_user_desc">Eklemek istediğiniz kişinin bu siteye kayıtlı e-posta adresini girin. Kişi az önce girdiğiniz e-postayla (veya henüz kaydı yoksa yeni kayıt olarak) giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.</div>
