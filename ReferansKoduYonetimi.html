@@ -71,8 +71,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   @media (max-width:480px){
     .back-link{ top:64px; right:8px; }
   }
-  main{ max-width:1180px; margin:0 auto; padding:36px 24px 60px; }
-  .split-grid{ display:grid; grid-template-columns:1fr 1.2fr; gap:20px; align-items:start; }
+  main{ max-width:1440px; margin:0 auto; padding:36px 24px 60px; }
+  .split-grid{ display:grid; grid-template-columns:0.62fr 1.38fr; gap:16px; align-items:start; }
   .split-grid[hidden]{ display:none; }
   @media (max-width:820px){ .split-grid{ grid-template-columns:1fr; } }
 
@@ -126,31 +126,31 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   #mmgAdminCodeList table{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
   #mmgAdminCodeList thead th{
-    text-align:left; padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.04em;
+    text-align:center; padding:8px 8px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.03em;
     text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hairline); background:var(--surface-2);
     position:sticky; top:0; white-space:nowrap;
   }
-  #mmgAdminCodeList tbody td{ padding:10px 12px; border-bottom:1px solid rgba(42,52,72,0.5); font-size:12.5px; vertical-align:middle; }
+  #mmgAdminCodeList tbody td{ padding:8px 8px; border-bottom:1px solid rgba(42,52,72,0.5); font-size:12px; vertical-align:middle; }
   #mmgAdminCodeList tbody tr:last-child td{ border-bottom:none; }
   #mmgAdminCodeList tbody tr:hover{ background:rgba(198,161,91,0.03); }
   #mmgAdminCodeList tbody tr{ cursor:pointer; }
   #mmgAdminCodeList tbody tr button{ cursor:pointer; }
   #mmgAdminCodeList .code-name{ font-family:'IBM Plex Mono',monospace; font-weight:700; white-space:nowrap; }
-  #mmgAdminCodeList .code-benefit{ color:var(--muted); white-space:nowrap; }
-  #mmgAdminCodeList .code-usage{ color:var(--muted); white-space:nowrap; }
-  #mmgAdminCodeList .code-usage.text-center{ text-align:center; }
+  #mmgAdminCodeList .code-benefit{ color:var(--muted); white-space:nowrap; text-align:right; }
+  #mmgAdminCodeList .code-usage{ color:var(--muted); white-space:nowrap; text-align:right; }
   #mmgAdminCodeList thead th.text-center{ text-align:center; }
+  #mmgAdminCodeList tbody td.text-center{ text-align:center; }
   #mmgAdminCodeList .mmg-admin-edit{
-    background:none; border:none; color:var(--brass,#C6A15B); cursor:pointer; font-size:12px; padding:4px; font-weight:600;
+    background:none; border:none; color:var(--brass,#C6A15B); cursor:pointer; font-size:11px; padding:3px; font-weight:600; white-space:nowrap;
   }
   #mmgAdminCodeList .mmg-admin-del{
-    background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:12px; padding:4px; font-weight:600;
+    background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:11px; padding:3px; font-weight:600; white-space:nowrap;
   }
   #mmgAdminCodeList .mmg-admin-assign{
-    background:none; border:none; color:var(--azure,#3E8FE0); cursor:pointer; font-size:12px; padding:4px; font-weight:600; white-space:nowrap;
+    background:none; border:none; color:var(--azure,#3E8FE0); cursor:pointer; font-size:11px; padding:3px; font-weight:600; white-space:nowrap;
   }
   #mmgAdminCodeList .mmg-admin-unassign{
-    background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:12px; padding:4px; font-weight:600; white-space:nowrap;
+    background:none; border:none; color:var(--red,#e2544b); cursor:pointer; font-size:11px; padding:3px; font-weight:600; white-space:nowrap;
   }
 
   .owner-code-card{
@@ -208,7 +208,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="auth-field">
           <label data-i18n="assign_owner">Kullanıcıya Ata (Kullanıcı Kodu)</label>
-          <input type="text" id="mmgAdminOwnerCode" inputmode="numeric" placeholder="ör. 1018 — boş bırakılırsa kimseye atanmaz" data-i18n-placeholder="assign_owner_ph">
+          <input type="text" id="mmgAdminOwnerCode" inputmode="numeric" placeholder="ör. 1018" data-i18n-placeholder="assign_owner_ph">
         </div>
         <div class="auth-field">
           <label data-i18n="commission_percent">Komisyon Yüzdesi</label>
@@ -380,7 +380,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           '<td class="code-usage">' + limitCell + '</td>' +
           '<td class="code-usage text-center">' + used + '</td>' +
           '<td>' + ownerLabel + '</td>' +
-          '<td>' + assignBtnHtml + '</td>' +
+          '<td class="text-center">' + assignBtnHtml + '</td>' +
           '<td><button type="button" class="mmg-admin-edit" data-code="' + c.id + '" data-benefit-type="' + (c.benefitType||'free') + '" data-discount="' + (c.discountPercent||0) + '" data-max-uses="' + (c.maxUses||'') + '" data-owner-code="' + (c.ownerCode||'') + '" data-commission="' + (c.commissionPercent||'') + '">' + LBL.editBtn + '</button></td>' +
           '<td><button type="button" class="mmg-admin-del" data-code="' + c.id + '">' + LBL.deleteBtn + '</button></td>' +
           '</tr>';
@@ -717,7 +717,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       define_new_code:'Yeni Kod Tanımla', code_label:'Kod', benefit_type:'Fayda Türü',
       free_premium:'Ücretsiz Premium', discounted_premium:'İndirimli Premium', discount_percent:'İndirim Yüzdesi',
       usage_limit:'Kullanım Limiti', usage_limit_note:'(boş = sınırsız, örn. 1 = tek kişi)', unlimited_placeholder:'Sınırsız için boş bırakın',
-      assign_owner:'Kullanıcıya Ata (Kullanıcı Kodu)', assign_owner_ph:'ör. 1018 — boş bırakılırsa kimseye atanmaz',
+      assign_owner:'Kullanıcıya Ata (Kullanıcı Kodu)', assign_owner_ph:'ör. 1018',
       commission_percent:'Komisyon Yüzdesi', commission_percent_ph:'ör. 10',
       save_code:'Kodu Kaydet', defined_codes:'Tanımlı Kodlar', cancel_edit:'Düzenlemeyi İptal Et',
       my_codes_title:'Kodlarım', my_codes_desc:'Size atanmış referans kod(lar)ıyla kimlerin katıldığını burada görebilirsiniz.'
@@ -729,7 +729,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       define_new_code:'Define New Code', code_label:'Code', benefit_type:'Benefit Type',
       free_premium:'Free Premium', discounted_premium:'Discounted Premium', discount_percent:'Discount Percentage',
       usage_limit:'Usage Limit', usage_limit_note:'(blank = unlimited, e.g. 1 = single person)', unlimited_placeholder:'Leave blank for unlimited',
-      assign_owner:"Assign to User (User Code)", assign_owner_ph:'e.g. 1018 — leave blank to assign no one',
+      assign_owner:"Assign to User (User Code)", assign_owner_ph:'e.g. 1018',
       commission_percent:'Commission Percentage', commission_percent_ph:'e.g. 10',
       save_code:'Save Code', defined_codes:'Defined Codes', cancel_edit:'Cancel Editing',
       my_codes_title:'My Codes', my_codes_desc:'See who joined using the referral code(s) assigned to you here.'
