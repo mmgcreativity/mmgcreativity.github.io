@@ -1433,14 +1433,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
             <span id="desktopEditToggleLabel">Düzenle</span>
           </button>
-          <div class="desktop-add-wrap">
+          <div class="desktop-add-wrap" id="desktopAddWrap" hidden>
             <button type="button" class="desktop-edit-btn" id="desktopAddToggle" aria-pressed="false" aria-haspopup="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
               <span>Ekle</span>
             </button>
             <div class="desktop-add-menu" id="desktopAddMenu" hidden></div>
           </div>
-          <button type="button" class="desktop-edit-btn" id="desktopRemoveToggle" aria-pressed="false">
+          <button type="button" class="desktop-edit-btn" id="desktopRemoveToggle" aria-pressed="false" hidden>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
             <span id="desktopRemoveToggleLabel">Kaldır</span>
           </button>
@@ -2110,9 +2110,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var t; return function(){ var args = arguments, ctx = this; clearTimeout(t); t = setTimeout(function(){ fn.apply(ctx,args); }, ms); };
   }
 
-  // ---- Düzenle / Ekle / Kaldır: üç ayrı, birbirini dışlayan mod ----
+  // ---- Düzenle: tek ana düğme. Tıklanınca Ekle/Kaldır/Sıfırla ortaya çıkar ----
   var editBtn = document.getElementById('desktopEditToggle');
   var editLabel = document.getElementById('desktopEditToggleLabel');
+  var addWrap = document.getElementById('desktopAddWrap');
   var addBtn = document.getElementById('desktopAddToggle');
   var addMenu = document.getElementById('desktopAddMenu');
   var removeBtn = document.getElementById('desktopRemoveToggle');
@@ -2120,15 +2121,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var resetBtn = document.getElementById('desktopResetBtn');
 
   function updateResetVisibility(){
-    if(resetBtn) resetBtn.hidden = !(grid.classList.contains('edit-mode') || grid.classList.contains('remove-mode'));
+    if(resetBtn) resetBtn.hidden = !grid.classList.contains('edit-mode');
   }
 
   function setEditMode(on){
-    if(on) setRemoveMode(false, true);
     grid.classList.toggle('edit-mode', on);
     editBtn.classList.toggle('active', on);
     editBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
     editLabel.textContent = on ? 'Düzenlemeyi Bitir' : 'Düzenle';
+    if(addWrap) addWrap.hidden = !on;
+    if(removeBtn) removeBtn.hidden = !on;
+    if(!on){
+      setRemoveMode(false, true);
+      closeAddMenu();
+    }
     Array.prototype.forEach.call(grid.querySelectorAll('.app-card'), function(c){
       c.setAttribute('draggable', on ? 'true' : 'false');
     });
@@ -2141,14 +2147,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   function setRemoveMode(on, skipEditReset){
-    if(on && !skipEditReset) setEditMode(false);
     grid.classList.toggle('remove-mode', on);
     if(removeBtn){
       removeBtn.classList.toggle('active', on);
       removeBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
     if(removeLabel) removeLabel.textContent = on ? 'Kaldırmayı Bitir' : 'Kaldır';
-    updateResetVisibility();
   }
   if(removeBtn){
     removeBtn.addEventListener('click', function(){
