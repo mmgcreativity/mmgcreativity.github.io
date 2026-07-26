@@ -2612,6 +2612,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     try{
       const snap = await getDoc(doc(db, 'users', user.uid));
       let data = snap.exists() ? snap.data() : {};
+      console.log('[MMG_DEBUG] users/' + user.uid + ' okundu:', { exists: snap.exists(), isAdmin: data.isAdmin, customerNumber: data.customerNumber, username: data.username });
       mmgEnsureSessionOwnership(user.uid);
       // Eski/taşınmış hesaplarda müşteri kodu hiç atanmamış olabilir — bu durumda
       // şimdi bir tane atayıp kaydediyoruz, böylece rozet e-posta yerine kod gösterebilsin.
@@ -2678,7 +2679,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         await loadAdminFirmas(user.uid);
       }catch(firmaErr){ /* firma üyeliği yüklenemezse sessizce geç, geri kalan her şey çalışmaya devam etsin */ }
       // Zaten oturum açıkken gelen bekleyen davetleri de yakala (sadece giriş anında değil)
-    } catch(e){ /* sessizce geç */ }
+    } catch(e){ console.error('[MMG_DEBUG] onAuthStateChanged ana hata:', e); }
   });
 
   // ---- Karşılama / Üyelik Ekranı ----
