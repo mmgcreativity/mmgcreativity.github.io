@@ -242,10 +242,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <th class="sortable-th" data-sort-key="isPremium"><span data-i18n="th_status">Durum</span><span class="sort-arrow">▲▼</span></th>
             <th class="sortable-th" data-sort-key="referredBy"><span data-i18n="th_referral">Referans</span><span class="sort-arrow">▲▼</span></th>
             <th class="sortable-th" data-sort-key="createdAt"><span data-i18n="th_signup_date">Kayıt Tarihi</span><span class="sort-arrow">▲▼</span></th>
+            <th class="sortable-th" data-sort-key="usageTotal"><span data-i18n="th_usage">Kullanım</span><span class="sort-arrow">▲▼</span></th>
           </tr>
         </thead>
         <tbody id="tblUserDetailBody"></tbody>
       </table>
+    </div>
+
+    <h2 class="section-title" data-i18n="usage_title">📊 En Çok Kullanılan Uygulamalar</h2>
+    <div class="summary-card" style="padding:20px 24px;">
+      <div class="card-sub" data-i18n="usage_desc" style="margin-bottom:16px; color:var(--muted); font-size:12.5px;">Kullanıcıların hangi araçları ne sıklıkla açtığı — en çok açılan en üstte.</div>
+      <div id="usageAppList"></div>
     </div>
 
     <h2 class="section-title" data-i18n="feedback_title">💬 Beğenme Geri Bildirimleri</h2>
@@ -298,7 +305,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-  import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { getFirestore, collection, collectionGroup, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
@@ -491,6 +498,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       } else if(userSortKey === 'referredBy'){
         va = (a.referredBy || '').toString().toLowerCase();
         vb = (b.referredBy || '').toString().toLowerCase();
+      } else if(userSortKey === 'usageTotal'){
+        va = (window.mmgUserUsageTotals && window.mmgUserUsageTotals[a.id]) || 0;
+        vb = (window.mmgUserUsageTotals && window.mmgUserUsageTotals[b.id]) || 0;
       } else { // createdAt
         va = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
         vb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
@@ -543,9 +553,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         ? '<span class="badge-pill premium">★ Premium</span>'
         : '<span class="badge-pill member">Standart</span>';
       const refHtml = u.referredBy ? '<span class="code-tag">' + escapeHtml(u.referredBy) + '</span>' : '<span class="comment-empty">—</span>';
+      const usageTotal = (window.mmgUserUsageTotals && window.mmgUserUsageTotals[u.id]) || 0;
+      const usageBreakdown = (window.mmgUserUsageBreakdown && window.mmgUserUsageBreakdown[u.id]) || {};
+      const breakdownText = Object.keys(usageBreakdown)
+        .sort((a,b) => usageBreakdown[b] - usageBreakdown[a])
+        .map(k => (window.mmgUsageTitles && window.mmgUsageTitles[k] || k) + ': ' + usageBreakdown[k])
+        .join('\n');
+      const usageHtml = usageTotal
+        ? '<span class="badge-pill" title="' + escapeHtml(breakdownText) + '" style="cursor:help;">' + usageTotal + '</span>'
+        : '<span class="comment-empty">—</span>';
       return '<tr class="clickable-row" data-user-id="' + escapeHtml(u.id) + '"><td>' + escapeHtml(u.username) + '</td><td>#' + escapeHtml(String(u.customerNumber)) + '</td>' +
-        '<td>' + statusHtml + '</td><td>' + refHtml + '</td><td class="date-cell">' + fmtDate(u.createdAt) + '</td></tr>';
-    }).join('') : '<tr><td colspan="5" style="text-align:center; color:var(--muted); padding:24px;">Bu kategoride kullanıcı yok.</td></tr>';
+        '<td>' + statusHtml + '</td><td>' + refHtml + '</td><td class="date-cell">' + fmtDate(u.createdAt) + '</td><td>' + usageHtml + '</td></tr>';
+    }).join('') : '<tr><td colspan="6" style="text-align:center; color:var(--muted); padding:24px;">Bu kategoride kullanıcı yok.</td></tr>';
     userDetailWrap.hidden = false;
   }
 
@@ -645,10 +664,69 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     render();
   }
 
+  // ---------------- Kullanım İstatistikleri (en çok kullanılan uygulamalar + kullanıcı başına kullanım) ----------------
+  async function loadUsageStats(){
+    const listEl = document.getElementById('usageAppList');
+    try{
+      const openersSnap = await getDocs(collectionGroup(db, 'openers'));
+      const appTotals = {};      // { target: toplamSayı }
+      const userTotals = {};     // { uid: toplamSayı }
+      const userBreakdown = {};  // { uid: { target: sayı } }
+      openersSnap.forEach(d => {
+        const data = d.data();
+        const target = d.ref.parent.parent ? d.ref.parent.parent.id : null;
+        if(!target) return;
+        const count = data.count || 0;
+        const uid = data.uid || d.id;
+        appTotals[target] = (appTotals[target] || 0) + count;
+        userTotals[uid] = (userTotals[uid] || 0) + count;
+        if(!userBreakdown[uid]) userBreakdown[uid] = {};
+        userBreakdown[uid][target] = (userBreakdown[uid][target] || 0) + count;
+      });
+
+      // Uygulama başlıklarını (dosya adı yerine okunaklı ad) üst seviye "usageStats" belgelerinden al
+      const usageTitles = {};
+      try{
+        const statsSnap = await getDocs(collection(db, 'usageStats'));
+        statsSnap.forEach(d => { usageTitles[d.id] = d.data().title || d.id; });
+      }catch(e){ /* başlıklar okunamazsa dosya adlarıyla devam et */ }
+
+      window.mmgUserUsageTotals = userTotals;
+      window.mmgUserUsageBreakdown = userBreakdown;
+      window.mmgUsageTitles = usageTitles;
+
+      const ranked = Object.keys(appTotals).map(t => ({ target: t, title: usageTitles[t] || t, count: appTotals[t] }))
+        .sort((a,b) => b.count - a.count);
+
+      if(!ranked.length){
+        listEl.innerHTML = '<div class="comment-empty" style="padding:12px 0;">Henüz kullanım verisi yok.</div>';
+        return;
+      }
+      const maxCount = ranked[0].count || 1;
+      listEl.innerHTML = ranked.map((r, i) => {
+        const pct = Math.max(4, Math.round((r.count / maxCount) * 100));
+        return '<div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">' +
+          '<div style="width:22px; flex-shrink:0; color:var(--muted); font-size:12px;">' + (i+1) + '.</div>' +
+          '<div style="flex:1; min-width:0;">' +
+            '<div style="display:flex; justify-content:space-between; gap:8px; font-size:13px; margin-bottom:4px;">' +
+              '<span style="font-weight:600;">' + escapeHtml(r.title) + '</span>' +
+              '<span style="color:var(--brass,#C6A15B); font-weight:700;">' + r.count + '</span>' +
+            '</div>' +
+            '<div style="height:8px; border-radius:4px; background:var(--hairline); overflow:hidden;">' +
+              '<div style="height:100%; width:' + pct + '%; border-radius:4px; background:linear-gradient(90deg, var(--coral,#FF6B4A), var(--brass,#C6A15B));"></div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }catch(e){
+      listEl.innerHTML = '<div class="comment-empty" style="padding:12px 0;">Kullanım verisi okunamadı.</div>';
+    }
+  }
+
   async function loadAll(){
     showState('<div class="big">⏳</div>Yükleniyor…');
     try{
-      await Promise.all([loadUsersAndReferrals(), loadFeedback()]);
+      await Promise.all([loadUsersAndReferrals(), loadFeedback(), loadUsageStats()]);
       stateArea.innerHTML = '';
       content.hidden = false;
     } catch(e){

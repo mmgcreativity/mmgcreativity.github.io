@@ -1698,6 +1698,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       window.scrollTo(0, 0);
       return;
     }
+    // Kullanım istatistiği: hangi araç, hangi kullanıcı tarafından ne sıklıkla açılıyor —
+    // gerçek Firestore yazma işlemi (modül script'te, aşağıdaki olay dinleyicisinde) yapılıyor,
+    // burada sadece bilgi gönderiliyor (bu script Firebase fonksiyonlarına doğrudan erişemiyor).
+    try{ document.dispatchEvent(new CustomEvent('mmg-tool-opened', { detail: { target: target, title: title || target } })); }catch(e){}
     // Mobilde iframe içi kaydırma (touch-scroll) güvenilir çalışmadığı için
     // dar ekranlarda iframe yerine doğrudan tam sayfa geçişi yapılır.
     if(window.innerWidth <= 860){
@@ -2373,6 +2377,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const auth = getAuth(fbApp);
   const db = getFirestore(fbApp);
   const googleProvider = new GoogleAuthProvider();
+
+  // ---- Kullanım istatistiği: her araç açılışında sessizce sayaç güncelle ----
+  // "usageStats/{sayfaAdı}" belgesinde genel toplam, "usageStats/{sayfaAdı}/openers/{uid}"
+  // alt koleksiyonunda ise kullanıcı bazlı toplam tutuluyor. İstatistikler sayfası bunları
+  // toplu okuyup "en çok kullanılan uygulama" ve "kullanıcı başına kullanım" olarak gösteriyor.
+  // Misafir (giriş yapmamış) kullanıcılar sayılmıyor — sadece hesabı olan kullanıcılar.
+  document.addEventListener('mmg-tool-opened', (e) => {
+    try{
+      const user = auth.currentUser;
+      if(!user) return;
+      const target = e.detail && e.detail.target;
+      const title = (e.detail && e.detail.title) || target;
+      if(!target) return;
+      const username = localStorage.getItem('mmg_username') || user.email || '';
+      setDoc(doc(db, 'usageStats', target), {
+        title: title, totalCount: increment(1), lastUsedAt: new Date().toISOString()
+      }, { merge: true }).catch(()=>{});
+      setDoc(doc(db, 'usageStats', target, 'openers', user.uid), {
+        uid: user.uid, username: username, count: increment(1), lastUsedAt: new Date().toISOString()
+      }, { merge: true }).catch(()=>{});
+    }catch(err){ /* istatistik yazılamazsa sessizce geç, kullanıcıyı hiç etkilemesin */ }
+  });
 
   // ---- Yönetici kontrolü, premium/reklamsız durumu ----
   const mmgResendVerifyBtn = document.getElementById('mmgResendVerifyBtn');
