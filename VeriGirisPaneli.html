@@ -1565,7 +1565,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }
   });
 
-  onAuthStateChanged(auth, async (user) => {
+  // Auth örneği ana pencereden (window.parent.mmgAuth) gelmiş olabilir. Bu durumda
+  // realm-güvenli olması için önce instance metodunu (auth.onAuthStateChanged) kullan;
+  // yoksa modüler API'ye düş.
+  function watchAuthState(cb){
+    try{
+      if(auth && typeof auth.onAuthStateChanged === 'function'){
+        return auth.onAuthStateChanged(cb);
+      }
+    }catch(e){ /* instance metodu yoksa modülere düş */ }
+    return onAuthStateChanged(auth, cb);
+  }
+  watchAuthState(async (user) => {
     if(!user){
       showState('<div class="big">🔒</div>' + LBL.loginRequired + LBL.loginRequiredHint);
       return;

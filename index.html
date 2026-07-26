@@ -1616,6 +1616,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="https://tiktok.com/@mmgcreativity" target="_blank" rel="noopener" class="social-icon" style="background:#000;" title="TikTok" aria-label="TikTok">
               <svg viewBox="0 0 24 24" fill="#fff"><path d="M16.6 5.8c-.9-.9-1.4-2.1-1.4-3.4h-3.1v13.6c0 1.4-1.1 2.5-2.5 2.5s-2.5-1.1-2.5-2.5 1.1-2.5 2.5-2.5c.3 0 .5 0 .8.1V10.5c-.3 0-.5-.1-.8-.1-3.1 0-5.6 2.5-5.6 5.6S6.5 21.6 9.6 21.6s5.6-2.5 5.6-5.6V9.1c1.2.9 2.7 1.4 4.3 1.4V7.4c-1 0-1.9-.3-2.9-1.2z"/></svg>
             </a>
+            <a href="https://mmgcreativity.blogspot.com" target="_blank" rel="noopener" class="social-icon" style="background:#FF8000;" title="Blogger" aria-label="Blogger">
+              <svg viewBox="0 0 448 512" fill="#fff"><path d="M446.6 222.7c-1.8-45.5-3.4-83.3-59.5-83.3l-83-1c-9.8 0-14.7-6.9-14.7-14.7 0 0 .1-52.1-1-70.4C283.7 3.2 246.7 0 202.5 0 122.6 0 0 6.9 0 166.4v179.2C0 505.1 122.6 512 202.5 512s202.5-6.9 202.5-166.4c0 0 42.9 3.2 41.6-122.9zM155.5 108.9c22.6 0 40.9 18.3 40.9 40.9s-18.3 40.9-40.9 40.9-40.9-18.3-40.9-40.9 18.3-40.9 40.9-40.9zm137 294.2H155.5c-22.6 0-40.9-18.3-40.9-40.9s18.3-40.9 40.9-40.9h137c22.6 0 40.9 18.3 40.9 40.9s-18.3 40.9-40.9 40.9z"/></svg>
+            </a>
           </div>
           <a href="#" class="app-badge app-badge-small">
             <svg viewBox="0 0 24 24"><path d="M3.6 2.6a1 1 0 0 0-.6.9v17a1 1 0 0 0 .6.9l9.7-9.4-9.7-9.4z" fill="#00d2ff"/><path d="M13.3 12l3-2.9 3.9 2.2c.9.5.9 1.4 0 1.9l-3.9 2.2-3-2.4z" fill="#ffd200"/><path d="M13.3 12L3.6 2.6c.2 0 .5 0 .7.1l11 6.3-2 2.9z" fill="#00e676"/><path d="M13.3 12l2 2.9-11 6.3c-.2.1-.5.1-.7.1L13.3 12z" fill="#ff3d57"/></svg>
@@ -2376,6 +2379,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const fbApp = initializeApp(firebaseConfig);
   const auth = getAuth(fbApp);
   const db = getFirestore(fbApp);
+  // Alt sayfalar (iframe ile açılan araç sayfaları — ör. VeriGirisPaneli.html) ana
+  // penceredeki oturumu DOĞRUDAN kullansın diye auth/db'yi paylaşıyoruz. Bunlar
+  // ayarlanmadığı sürece alt sayfa kendi Firebase örneğini kuruyor ve giriş yapılmış
+  // olsa bile "Bu sayfayı görüntülemek için giriş yapmış olmanız gerekir" kilidine takılıyordu.
+  window.mmgAuth = auth;
+  window.mmgDb = db;
   const googleProvider = new GoogleAuthProvider();
 
   // ---- Kullanım istatistiği: her araç açılışında sessizce sayaç güncelle ----
