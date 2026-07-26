@@ -3920,27 +3920,33 @@ const auth = getApps().length ? getAuth(getApp()) : null;
 </div>
 <script>
 (function(){
-  // ==== Otomatik güncelleme bildirimi ====
-  // Bu sayfa (index.html) her yeni yüklendiğinde ve arada bir (60sn'de bir) sunucudaki
-  // "app-version.json" dosyasını (tarayıcı önbelleğini atlayarak) kontrol eder. Oradaki
-  // sürüm numarası, bu sayfanın kendi içine gömülü CURRENT_VERSION'dan farklıysa, kullanıcıya
-  // küçük bir "Yeni güncelleme var" bildirimi gösterir — DevTools ya da "Clear site data"
-  // gibi teknik adımlara hiç gerek kalmaz, kullanıcı sadece "Yenile"ye basar.
-  //
-  // ÖNEMLİ (bakım notu): Bu sitede her yeni index.html (ya da diğer sayfalar) yüklendiğinde,
-  // "app-version.json" dosyasındaki "version" değerini de MUTLAKA değiştirin (örn. bugünün
-  // tarihi + artan bir sayı). Aksi halde bu bildirim hiç tetiklenmez.
-  var CURRENT_VERSION = '2026-07-26-1';
+  // ==== Otomatik güncelleme bildirimi (TAMAMEN OTOMATİK — elle değiştirilecek bir dosya YOK) ====
+  // Sunucu, her dosya yüklemesinde bu sayfanın (index.html) "son değiştirilme zamanı"nı
+  // (Last-Modified / ETag başlığı) zaten kendisi otomatik günceller — bunun için bizim
+  // hiçbir şey yapmamıza gerek yok. Bu script, sayfa ilk açıldığında bu değeri hafızaya alır;
+  // sonra arada bir (60sn'de bir + sekmeye geri dönüldüğünde) sunucudaki GÜNCEL değerle
+  // karşılaştırır. Değer değiştiyse (yani siz yeni bir index.html yüklediyseniz) kullanıcıya
+  // küçük bir "Yeni güncelleme var" bildirimi gösterir. Sizin tek yapmanız gereken: normal
+  // şekilde index.html'i yükleyip unutmak. Başka hiçbir dosyaya dokunmanıza gerek yok.
   var banner = document.getElementById('mmgUpdateBanner');
   var reloadBtn = document.getElementById('mmgUpdateReloadBtn');
   var shown = false;
+  var knownStamp = null;
+
+  function stampFrom(headers){
+    return headers.get('ETag') || headers.get('Last-Modified') || null;
+  }
 
   function checkVersion(){
     if(shown) return;
-    fetch('app-version.json?_=' + Date.now(), { cache: 'no-store' })
-      .then(function(r){ return r.ok ? r.json() : null; })
-      .then(function(data){
-        if(data && data.version && data.version !== CURRENT_VERSION){
+    var url = window.location.pathname + window.location.search
+      + (window.location.search ? '&' : '?') + '_mmgcheck=' + Date.now();
+    fetch(url, { method: 'HEAD', cache: 'no-store' })
+      .then(function(res){
+        var stamp = stampFrom(res.headers);
+        if(!stamp) return; // sunucu bu başlıkları vermiyorsa sessizce vazgeç, rahatsız etme
+        if(knownStamp === null){ knownStamp = stamp; return; }
+        if(stamp !== knownStamp){
           shown = true;
           banner.classList.add('show');
         }
@@ -3954,8 +3960,8 @@ const auth = getApps().length ? getAuth(getApp()) : null;
     });
   }
 
-  // Sayfa ilk açıldığında bir kez, sonra her 60 saniyede bir, ayrıca kullanıcı sekmeye
-  // geri döndüğünde (uzun süre açık bıraktıysa) kontrol et.
+  // Sayfa ilk açıldığında bir kez (bu, sadece o anki damgayı hafızaya alır, bildirim
+  // göstermez), sonra her 60 saniyede bir, ayrıca kullanıcı sekmeye geri döndüğünde kontrol et.
   checkVersion();
   setInterval(checkVersion, 60000);
   document.addEventListener('visibilitychange', function(){
