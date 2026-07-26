@@ -875,7 +875,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       settings_notifications:'Bildirimler', settings_on:'Açık', settings_off:'Kapalı',
       settings_change_password:'Şifre Değiştir', settings_new_password:'Yeni şifre (en az 6 karakter)',
       settings_new_password_repeat:'Yeni şifre (tekrar)', settings_update_password:'Şifreyi Güncelle', settings_ok:'✓ Tamam',
-      settings_forgot_password:'Şifremi Unuttum', settings_cancel:'Vazgeç', settings_old_password:'Eski şifre',
+      settings_forgot_password:'Şifreyi Değiştir', settings_cancel:'Vazgeç', settings_old_password:'Eski şifre',
       pw_err_need_old:'Lütfen eski şifrenizi girin.', pw_updating:'Güncelleniyor…',
       guest:'Misafir', unknown:'bilinmiyor', please_wait:'Lütfen bekleyin...', sending:'Gönderiliyor...',
       dropdown_linked_companies:'Bağlı Firmalar', dropdown_my_accounts:'Hesaplarım', dropdown_add_account:'Başka Hesap Ekle',
@@ -973,7 +973,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       settings_notifications:'Notifications', settings_on:'On', settings_off:'Off',
       settings_change_password:'Change Password', settings_new_password:'New password (at least 6 characters)',
       settings_new_password_repeat:'New password (repeat)', settings_update_password:'Update Password', settings_ok:'✓ OK',
-      settings_forgot_password:'Forgot Password', settings_cancel:'Cancel', settings_old_password:'Current password',
+      settings_forgot_password:'Change Password', settings_cancel:'Cancel', settings_old_password:'Current password',
       pw_err_need_old:'Please enter your current password.', pw_updating:'Updating…',
       guest:'Guest', unknown:'unknown', please_wait:'Please wait...', sending:'Sending...',
       dropdown_linked_companies:'Linked Companies', dropdown_my_accounts:'My Accounts', dropdown_add_account:'Add Another Account',
@@ -3717,17 +3717,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <button type="button" class="mmg-lang-btn" data-lang="en">English</button>
     </div>
 
-    <div style="display:flex; gap:14px; margin-bottom:18px;">
-      <div style="flex:1;">
-        <div class="mmg-settings-label" data-i18n="settings_view_mode">Görünüm Modu</div>
-        <button type="button" class="mmg-lang-btn" id="mmgThemeDarkBtn" style="width:100%; margin-bottom:6px;"><span data-i18n="settings_dark_mode">☾ Koyu Mod</span></button>
-        <button type="button" class="mmg-lang-btn" id="mmgThemeLightBtn" style="width:100%;"><span data-i18n="settings_light_mode">☀ Açık Mod</span></button>
-      </div>
-      <div style="flex:1;">
-        <div class="mmg-settings-label" data-i18n="settings_fullscreen_mode">Tam Ekran Modu</div>
-        <button type="button" class="mmg-lang-btn" id="mmgFullscreenOnBtn" style="width:100%; margin-bottom:6px;"><span data-i18n="settings_fullscreen_on">⛶ Tam Ekran</span></button>
-        <button type="button" class="mmg-lang-btn" id="mmgFullscreenOffBtn" style="width:100%;" data-i18n="settings_window_mode">Pencere Modu</button>
-      </div>
+    <div class="mmg-settings-label" data-i18n="settings_view_mode">Görünüm Modu</div>
+    <div class="mmg-lang-row" style="margin-bottom:18px;">
+      <button type="button" class="mmg-lang-btn" id="mmgThemeDarkBtn"><span data-i18n="settings_dark_mode">☾ Koyu Mod</span></button>
+      <button type="button" class="mmg-lang-btn" id="mmgThemeLightBtn"><span data-i18n="settings_light_mode">☀ Açık Mod</span></button>
+    </div>
+
+    <div class="mmg-settings-label" data-i18n="settings_fullscreen_mode">Tam Ekran Modu</div>
+    <div class="mmg-lang-row" style="margin-bottom:18px;">
+      <button type="button" class="mmg-lang-btn" id="mmgFullscreenOnBtn"><span data-i18n="settings_fullscreen_on">⛶ Tam Ekran</span></button>
+      <button type="button" class="mmg-lang-btn" id="mmgFullscreenOffBtn" data-i18n="settings_window_mode">Pencere Modu</button>
     </div>
 
     <div class="mmg-settings-label" data-i18n="settings_notifications">Bildirimler</div>
@@ -3739,7 +3738,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="mmg-settings-label" data-i18n="settings_change_password">Şifre Değiştir</div>
     <button type="button" class="mmg-lang-btn" id="mmgForgotPasswordToggleBtn" style="width:100%; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:6px;">
       <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="15" r="4"/><path d="M10.5 12.5L20 3M20 3v4M20 3h-4"/></svg>
-      <span data-i18n="settings_forgot_password">Şifremi Unuttum</span>
+      <span data-i18n="settings_forgot_password">Şifreyi Değiştir</span>
     </button>
     <form id="mmgPasswordForm" style="margin-bottom:6px; display:none;">
       <input type="password" id="mmgOldPassword" placeholder="Eski şifre" data-i18n-placeholder="settings_old_password" autocomplete="current-password"
