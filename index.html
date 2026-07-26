@@ -398,7 +398,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .hero-top-text .hero-title{ margin-bottom:6px; }
   .hero-top-text .hero-tagline{ margin-bottom:0; }
 
-  .tools-section{ padding:40px 48px 60px; position:relative; overflow:hidden; }
+  .tools-section{ padding:40px 110px 60px 48px; position:relative; overflow:hidden; }
   .tools-deco{ position:absolute; inset:0; pointer-events:none; }
   .tools-label{
     font-size:10.5px; letter-spacing:.16em; color:var(--muted); text-transform:uppercase; margin-bottom:16px;
@@ -1957,12 +1957,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
 
   renderFavorites();
+</script>
 
-  // ---- Fare tekerleği ile kaydırmayı garantiye al ----
+<script>
+  // ---- Fare tekerleği ile kaydırmayı garantiye al (bilerek AYRI/izole bir script) ----
   // Bazı tarayıcı/durum kombinasyonlarında native "overflow-y:auto" üzerinde fare tekerleği
   // beklenildiği gibi çalışmayabiliyor (özellikle sürükle-bırak sonrası veya belirli
   // uzantı/ayar kombinasyonlarında). Tekerlek olayını burada yakalayıp doğrudan
-  // .home-scroll'un kendisini kaydırarak bunu garantiye alıyoruz.
+  // .home-scroll'un kendisini kaydırarak bunu garantiye alıyoruz. Bu, kasıtlı olarak KENDİ
+  // script etiketinde duruyor — sayfadaki başka bir script hata verse bile bu kod
+  // etkilenmeden, her zaman çalışır.
   (function(){
     var hs = document.getElementById('homeScroll');
     if(!hs) return;
