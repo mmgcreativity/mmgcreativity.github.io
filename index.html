@@ -2379,12 +2379,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const fbApp = initializeApp(firebaseConfig);
   const auth = getAuth(fbApp);
   const db = getFirestore(fbApp);
-  // Alt sayfalar (iframe ile açılan araç sayfaları — ör. VeriGirisPaneli.html) ana
-  // penceredeki oturumu DOĞRUDAN kullansın diye auth/db'yi paylaşıyoruz. Bunlar
-  // ayarlanmadığı sürece alt sayfa kendi Firebase örneğini kuruyor ve giriş yapılmış
-  // olsa bile "Bu sayfayı görüntülemek için giriş yapmış olmanız gerekir" kilidine takılıyordu.
-  window.mmgAuth = auth;
-  window.mmgDb = db;
   const googleProvider = new GoogleAuthProvider();
 
   // ---- Kullanım istatistiği: her araç açılışında sessizce sayaç güncelle ----

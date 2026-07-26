@@ -454,6 +454,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <label data-i18n="bank_cur_label">Döviz</label>
             <input type="text" id="bankCurInput" list="currencyDatalist" value="TRY">
           </div>
+          <div class="auth-field">
+            <label data-i18n="bank_note_label">Açıklama (ör. Yozgat şubesi)</label>
+            <input type="text" id="bankNoteInput" data-i18n-placeholder="bank_note_ph" placeholder="ör. Yozgat şubesi / merkez">
+          </div>
         </div>
         <div id="bank_firmaSelect"></div>
         <button type="button" class="auth-submit" id="addBankBtn" data-i18n="add_bank_btn">Ekle</button>
@@ -492,7 +496,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
@@ -506,17 +510,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
     measurementId: "G-X8HEZRNWWS"
   };
-  let auth, db;
+  // Bu sayfa index.html içinde bir iframe'de açılıyor. Kendi Firebase örneğini kullanır
+  // (böylece Firestore realm/uyumsuzluk hatası olmaz). Oturum, ana sayfada "beni hatırla"
+  // seçimine göre ya kalıcı (IndexedDB/local) ya da geçici (session) kalıcılıkta saklanıyor;
+  // bu yüzden auth'u HER İKİSİNDEN de okumayı deniyoruz — aksi halde giriş yapılmış olsa bile
+  // "giriş yapmanız gerekir" kilidine takılabiliyordu.
+  const fbApp = initializeApp(firebaseConfig);
+  const db = getFirestore(fbApp);
+  let auth;
   try{
-    if(window.parent && window.parent !== window && window.parent.mmgAuth && window.parent.mmgDb){
-      auth = window.parent.mmgAuth;
-      db = window.parent.mmgDb;
-    }
-  }catch(e){ /* farklı origin ihtimaline karşı sessizce geç */ }
-  if(!auth || !db){
-    const fbApp = initializeApp(firebaseConfig);
+    auth = initializeAuth(fbApp, { persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence] });
+  }catch(e){
     auth = getAuth(fbApp);
-    db = getFirestore(fbApp);
   }
 
   const stateArea = document.getElementById('stateArea');
@@ -541,7 +546,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     bankRequired:'Please add at least one bank before entering data.',
     bulkNoFile:'Please choose a file first.', bulkParseError:'The file could not be read, please check the format.',
     bulkNoRows:'No valid rows found in the file.', bulkTypeCol:'Type', bulkNameCol:'Name', bulkIdCol:'TC/Tax No',
-    bulkBankCol:'Bank', bulkIbanCol:'IBAN', bulkCurrencyCol:'Currency', bulkSummaryText:'{n} rows found, grouped into {p} records.',
+    bulkBankCol:'Bank', bulkIbanCol:'IBAN', bulkCurrencyCol:'Currency', bulkNoteCol:'Description', bulkSummaryText:'{n} rows found, grouped into {p} records.',
     bulkSaving:'Saving…', bulkDone:'{n} records saved successfully.', bulkTypeCustomer:'Customer', bulkTypeSupplier:'Supplier',
     templateDownloaded:'Template downloaded.', templateError:'Template could not be created.',
     bankListAdded:'Bank added.', bankListSaved:'Saved ✓', bankListSaveFailed:'Could not be saved, please try again.',
@@ -565,7 +570,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     bankRequired:'Veri girmeden önce en az bir banka eklemelisiniz.',
     bulkNoFile:'Önce bir dosya seçmelisiniz.', bulkParseError:'Dosya okunamadı, formatını kontrol edin.',
     bulkNoRows:'Dosyada geçerli satır bulunamadı.', bulkTypeCol:'Tip', bulkNameCol:'Ünvan', bulkIdCol:'TC/Vergi No',
-    bulkBankCol:'Banka', bulkIbanCol:'IBAN', bulkCurrencyCol:'Döviz', bulkSummaryText:'{n} satır bulundu, {p} kayıda gruplandı.',
+    bulkBankCol:'Banka', bulkIbanCol:'IBAN', bulkCurrencyCol:'Döviz', bulkNoteCol:'Açıklama', bulkSummaryText:'{n} satır bulundu, {p} kayıda gruplandı.',
     bulkSaving:'Kaydediliyor…', bulkDone:'{n} kayıt başarıyla kaydedildi.', bulkTypeCustomer:'Müşteri', bulkTypeSupplier:'Tedarikçi',
     templateDownloaded:'Şablon indirildi.', templateError:'Şablon oluşturulamadı.',
     bankListAdded:'Banka eklendi.', bankListSaved:'Kaydedildi ✓', bankListSaveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
@@ -901,7 +906,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   async function loadBanks(){
     const snap = await getDocs(colRef('banks'));
     banksList = [];
-    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '', iban: d.data().iban || '', currency: d.data().currency || '', appliesToFirmaIds: d.data().appliesToFirmaIds || null }));
+    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '', iban: d.data().iban || '', currency: d.data().currency || '', note: d.data().note || '', appliesToFirmaIds: d.data().appliesToFirmaIds || null }));
     banksList.sort((a,b) => a.name.localeCompare(b.name, 'tr'));
     renderBanks();
   }
@@ -909,7 +914,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const listEl = document.getElementById('banksChipList');
     const visibleBanks = banksList.filter(visibleForActiveFirma);
     listEl.innerHTML = visibleBanks.length ? visibleBanks.map(b =>
-      '<span class="bank-chip">' + escapeHtml(b.name) + (b.iban ? ' · ' + escapeHtml(b.iban) : '') + (b.currency ? ' · ' + escapeHtml(b.currency) : '') + scopeBadgeHtml(b) +
+      '<span class="bank-chip">' + escapeHtml(b.name) + (b.iban ? ' · ' + escapeHtml(b.iban) : '') + (b.currency ? ' · ' + escapeHtml(b.currency) : '') + (b.note ? ' · ' + escapeHtml(b.note) : '') + scopeBadgeHtml(b) +
       '<button type="button" data-remove-bank="' + b.id + '" title="' + LBL.delete + '">✕</button></span>'
     ).join('') : '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
     listEl.querySelectorAll('[data-remove-bank]').forEach(btn => {
@@ -934,14 +939,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const iban = ibanInput.value.trim().toUpperCase().replace(/\s+/g, '');
     const curInput = document.getElementById('bankCurInput');
     const currency = (curInput.value.trim().toUpperCase()) || 'TRY';
+    const noteInput = document.getElementById('bankNoteInput');
+    const note = noteInput.value.trim();
     if(!name){ showMsg('banks_msg', LBL.enterValidName, true); return; }
     const appliesTo = collectFirmaSelection('bank_firmaSelect');
     try{
       const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-      const docData = { name, iban, currency, createdAt: serverTimestamp() };
+      const docData = { name, iban, currency, note, createdAt: serverTimestamp() };
       if(appliesTo) docData.appliesToFirmaIds = appliesTo;
       await setDoc(docRef('banks', id), docData);
-      select.value = ''; ibanInput.value = ''; curInput.value = 'TRY';
+      select.value = ''; ibanInput.value = ''; curInput.value = 'TRY'; noteInput.value = '';
       resetFirmaSelect('bank_firmaSelect');
       showMsg('banks_msg', LBL.saved, false);
       await loadBanks();
@@ -1308,12 +1315,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   // çünkü IBAN'larım kaydı bir firma/kişi değil, kullanıcının kendi banka hesabıdır.
   document.getElementById('downloadBanksTemplateBtn').addEventListener('click', () => {
     try{
-      const header = [LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol];
-      const example1 = ['Ziraat Bankası', 'TR000000000000000000000000', 'TRY'];
-      const example2 = ['Ziraat Bankası', 'TR111111111111111111111111', 'USD'];
+      const header = [LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol, LBL.bulkNoteCol];
+      const example1 = ['Ziraat Bankası', 'TR000000000000000000000000', 'TRY', 'Yozgat şubesi'];
+      const example2 = ['Ziraat Bankası', 'TR111111111111111111111111', 'USD', 'Kars şubesi'];
       const rows = [header, example1, example2];
       const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols'] = [{wch:24},{wch:30},{wch:10}];
+      ws['!cols'] = [{wch:24},{wch:30},{wch:10},{wch:22}];
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, MMG_LANG==='en' ? 'Template' : 'Şablon');
       XLSX.writeFile(wb, 'iban-sablon.xlsx');
@@ -1340,8 +1347,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         const bank = String(row['Banka'] ?? row['Bank'] ?? '').trim();
         const iban = String(row['IBAN'] ?? '').trim().toUpperCase().replace(/\s+/g, '');
         const currency = String(row['Döviz'] ?? row['Doviz'] ?? row['Currency'] ?? '').trim().toUpperCase() || 'TRY';
+        const note = String(row['Açıklama'] ?? row['Aciklama'] ?? row['Note'] ?? row['Description'] ?? '').trim();
         if(!bank && !iban) continue;
-        rows.push({ bank, iban, currency });
+        rows.push({ bank, iban, currency, note });
       }
 
       if(!rows.length){ showMsg('banksBulkMsg', LBL.bulkNoRows, true); return; }
@@ -1356,8 +1364,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   function renderBanksBulkPreview(rows){
     const wrap = document.getElementById('banksBulkPreviewWrap');
     const table = document.getElementById('banksBulkPreviewTable');
-    const trs = rows.map(r => '<tr><td>' + escapeHtml(r.bank||'—') + '</td><td>' + escapeHtml(r.iban||'—') + '</td><td>' + escapeHtml(r.currency||'TRY') + '</td></tr>');
-    table.innerHTML = '<thead><tr><th>' + LBL.bulkBankCol + '</th><th>' + LBL.bulkIbanCol + '</th><th>' + LBL.bulkCurrencyCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
+    const trs = rows.map(r => '<tr><td>' + escapeHtml(r.bank||'—') + '</td><td>' + escapeHtml(r.iban||'—') + '</td><td>' + escapeHtml(r.currency||'TRY') + '</td><td>' + escapeHtml(r.note||'') + '</td></tr>');
+    table.innerHTML = '<thead><tr><th>' + LBL.bulkBankCol + '</th><th>' + LBL.bulkIbanCol + '</th><th>' + LBL.bulkCurrencyCol + '</th><th>' + LBL.bulkNoteCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
     document.getElementById('banksBulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: rows.length, p: rows.length });
     wrap.style.display = 'block';
   }
@@ -1377,7 +1385,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       let count = 0;
       for(const r of pendingBanksBulkRows){
         const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
-        await setDoc(docRef('banks', id), { name: r.bank, iban: r.iban, currency: r.currency || 'TRY', createdAt: serverTimestamp() });
+        await setDoc(docRef('banks', id), { name: r.bank, iban: r.iban, currency: r.currency || 'TRY', note: r.note || '', createdAt: serverTimestamp() });
         count++;
       }
       showMsg('banksBulkMsg', fmt(LBL.bulkDone, { n: count }), false);
