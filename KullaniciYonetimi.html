@@ -106,7 +106,14 @@
   }
   .member-icon-btn:hover{ color:var(--brass); border-color:var(--brass-dim,#8A7440); background:var(--surface); }
   .member-icon-btn-danger:hover{ color:var(--red); border-color:var(--red); }
-  .member-perm-panel{ margin-top:12px; padding-top:12px; border-top:1px solid var(--hairline); }
+  .member-perm-panel{ margin-top:12px; padding-top:12px; border-top:1px solid var(--hairline); display:flex; flex-direction:column; gap:10px; }
+  .member-sub-box{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:12px 14px;
+  }
+  .member-sub-box .perm-grid{ margin:0; }
+  .member-sub-box .perm-select-all-row{ margin-top:0; margin-bottom:10px; }
+  .member-sub-box .invite-firma-grid{ margin:0; }
+  .member-sub-box .mini-label{ margin-top:0; margin-bottom:8px; }
   .empty-note{ color:var(--muted); font-size:13px; padding:6px 2px; }
 
   .member-row-pending{ border-style:dashed; opacity:0.9; }
@@ -281,7 +288,7 @@
     dataGroupPickHub:'Please select a main company first.',
     dataGroupSaved:'Data sharing group saved ✓',
     dataGroupSaveFailed:'Could not be saved, please try again.',
-    memberFirmaAccessLabel:'Company Access',
+    memberFirmaAccessLabel:'Company Access', permsBoxTitle:'Permissions',
     currentFirmaTag:'currently viewing'
   } : {
     firmaSubPrefix:'"', firmaSubSuffix:'" firmasına bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.',
@@ -301,7 +308,7 @@
     dataGroupPickHub:'Lütfen önce bir ana firma seçin.',
     dataGroupSaved:'Veri paylaşım grubu kaydedildi ✓',
     dataGroupSaveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
-    memberFirmaAccessLabel:'Firma Erişimleri',
+    memberFirmaAccessLabel:'Firma Erişimleri', permsBoxTitle:'Yetkiler',
     currentFirmaTag:'şu an görüntülenen'
   };
 
@@ -794,14 +801,22 @@
       const rows = [];
       memberDocs.forEach(({ id, data: md, code }) => {
         const idPrefix = 'm_' + id;
-        const firmaAccessHtml = myAdminFirmas.length > 1
-          ? '<div class="mini-label" style="margin-top:12px;">' + LBL.memberFirmaAccessLabel + '</div>' +
-            '<div class="invite-firma-grid">' + myAdminFirmas.map(f =>
-              '<label class="perm-check"><input type="checkbox" class="member-firma-access-check" data-uid="' + id + '" data-firma="' + f.id + '"' +
-              (firmaAccessMap[id][f.id] ? ' checked' : '') + (f.id === firmaId ? ' disabled' : '') + '> ' + f.name +
-              (f.id === firmaId ? ' <span style="color:var(--muted); font-size:11px;">(' + LBL.currentFirmaTag + ')</span>' : '') + '</label>'
-            ).join('') + '</div>'
+        const firmaAccessBoxHtml = myAdminFirmas.length > 1
+          ? '<div class="member-sub-box">' +
+              '<div class="mini-label">' + LBL.memberFirmaAccessLabel + '</div>' +
+              '<div class="invite-firma-grid">' + myAdminFirmas.map(f =>
+                '<label class="perm-check"><input type="checkbox" class="member-firma-access-check" data-uid="' + id + '" data-firma="' + f.id + '"' +
+                (firmaAccessMap[id][f.id] ? ' checked' : '') + (f.id === firmaId ? ' disabled' : '') + '> ' + f.name +
+                (f.id === firmaId ? ' <span style="color:var(--muted); font-size:11px;">(' + LBL.currentFirmaTag + ')</span>' : '') + '</label>'
+              ).join('') + '</div>' +
+            '</div>'
           : '';
+        const permsBoxHtml =
+          '<div class="member-sub-box">' +
+            '<div class="mini-label">' + LBL.permsBoxTitle + '</div>' +
+            '<div class="perm-select-all-row"><label class="perm-select-all-label"><input type="checkbox" id="' + idPrefix + '_selectAll"> ' + LBL.selectAllPerms + '</label></div>' +
+            '<div class="perm-grid">' + permGridHtml(idPrefix, md.permissions || {}) + '<span class="save-hint" id="' + idPrefix + '_hint">' + LBL.saved + '</span></div>' +
+          '</div>';
         rows.push(
           '<div class="member-row" data-uid="' + id + '">' +
             '<div class="member-row-top">' +
@@ -815,9 +830,8 @@
               '</div>' +
             '</div>' +
             '<div class="member-perm-panel" id="' + idPrefix + '_panel" hidden>' +
-              '<div class="perm-select-all-row"><label class="perm-select-all-label"><input type="checkbox" id="' + idPrefix + '_selectAll"> ' + LBL.selectAllPerms + '</label></div>' +
-              '<div class="perm-grid">' + permGridHtml(idPrefix, md.permissions || {}) + '<span class="save-hint" id="' + idPrefix + '_hint">' + LBL.saved + '</span></div>' +
-              firmaAccessHtml +
+              permsBoxHtml +
+              firmaAccessBoxHtml +
             '</div>' +
           '</div>'
         );
@@ -840,8 +854,11 @@
               '</div>' +
             '</div>' +
             '<div class="member-perm-panel" id="' + idPrefix + '_panel" hidden>' +
-              '<div class="perm-select-all-row"><label class="perm-select-all-label"><input type="checkbox" id="' + idPrefix + '_selectAll"> ' + LBL.selectAllPerms + '</label></div>' +
-              '<div class="perm-grid">' + permGridHtml(idPrefix, inv.permissions) + '<span class="save-hint" id="' + idPrefix + '_hint">' + LBL.saved + '</span></div>' +
+              '<div class="member-sub-box">' +
+                '<div class="mini-label">' + LBL.permsBoxTitle + '</div>' +
+                '<div class="perm-select-all-row"><label class="perm-select-all-label"><input type="checkbox" id="' + idPrefix + '_selectAll"> ' + LBL.selectAllPerms + '</label></div>' +
+                '<div class="perm-grid">' + permGridHtml(idPrefix, inv.permissions) + '<span class="save-hint" id="' + idPrefix + '_hint">' + LBL.saved + '</span></div>' +
+              '</div>' +
             '</div>' +
           '</div>'
         );
