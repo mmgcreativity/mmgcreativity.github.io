@@ -348,7 +348,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .home footer{ margin-top:auto; }
 
   .hero{
-    position:relative; overflow:hidden; padding:32px 48px 28px;
+    position:relative; overflow:hidden; padding:32px 48px 28px; min-height:410px;
     background:
       radial-gradient(900px 460px at 78% -20%, rgba(255,107,74,0.16), transparent 60%),
       radial-gradient(700px 420px at 8% 110%, rgba(62,143,224,0.14), transparent 60%),
@@ -403,19 +403,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   .card-grid{ display:flex; flex-wrap:wrap; align-items:flex-start; gap:18px; max-width:1400px; position:relative; }
   .card-grid.drag-over{ outline:2px dashed var(--brass); outline-offset:8px; border-radius:16px; background:rgba(198,161,91,0.05); }
-  .desktop-toolbar{ display:flex; align-items:flex-start; justify-content:flex-end; gap:12px; flex-wrap:wrap; max-width:1400px; margin-bottom:16px; }
+  .desktop-toolbar{
+    position:absolute; top:216px; right:48px; z-index:5;
+    display:flex; align-items:flex-start; justify-content:flex-end; gap:12px; margin-bottom:0;
+  }
   .desktop-edit-btn{
-    display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:9px;
-    background:var(--surface); border:1px solid var(--hairline); color:var(--text);
+    display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:9px 16px; border-radius:9px;
+    background:var(--surface); border:1px solid var(--hairline); color:var(--text); box-sizing:border-box; width:100%;
     font-family:'Inter',sans-serif; font-size:13px; font-weight:400; cursor:pointer; transition:border-color .15s ease, color .15s ease;
   }
   .desktop-edit-btn:hover{ border-color:var(--brass); color:var(--brass); }
   .desktop-edit-btn.active{ background:var(--brass); border-color:var(--brass); color:#141220; }
-  .desktop-edit-btn svg{ width:15px; height:15px; }
-  .desktop-toolbar-actions{ display:flex; flex-direction:column; align-items:stretch; gap:8px; }
+  .desktop-edit-btn svg{ width:15px; height:15px; flex-shrink:0; }
+  .desktop-toolbar-actions{ display:flex; flex-direction:column; align-items:stretch; gap:8px; width:168px; }
   .desktop-reset-btn{ color:var(--muted); }
   .desktop-reset-btn:hover{ border-color:#e05d5d; color:#e05d5d; }
-  .desktop-add-wrap{ position:relative; }
+  .desktop-add-wrap{ position:relative; width:100%; }
   .desktop-add-menu{
     position:absolute; top:calc(100% + 8px); right:0; z-index:20; width:260px; max-height:320px; overflow:auto;
     background:var(--surface); border:1px solid var(--hairline); border-radius:10px; padding:6px;
@@ -572,7 +575,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     main{ height:auto; }
     .frame-wrap{ height:85vh; }
-    .hero{ padding:22px 20px 20px; }
+    .hero{ padding:22px 20px 20px; min-height:0; }
     .hero-app-icon{ width:48px; height:48px; border-radius:12px; }
     .hero-title{ font-size:22px; }
     .tools-section{ padding:28px 20px 40px; }
@@ -583,7 +586,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .app-card h3{ margin-bottom:0; }
     .card-grid.edit-mode .app-card.resizable{ resize:none; }
     .card-grid.edit-mode .app-card.resizable .card-resize-hint{ display:none; }
-    .desktop-toolbar{ align-items:flex-start; }
+    .desktop-toolbar{ position:static; justify-content:flex-start; margin-top:16px; }
+    .desktop-toolbar-actions{ width:100%; flex-direction:row; flex-wrap:wrap; }
+    .desktop-edit-btn{ width:auto; flex:1 1 auto; }
   }
 
   #authOverlay{
@@ -1422,16 +1427,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
       <p class="hero-desc" data-i18n="hero_desc">Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.</p>
-    </section>
-
-    <section class="tools-section">
-      <div class="tools-deco" aria-hidden="true">
-        <svg class="deco deco-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        <svg class="deco deco-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z" fill="currentColor" stroke="none"/></svg>
-        <svg class="deco deco-11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <svg class="deco deco-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2l2.4 6.8L21 11l-6.6 2.2L12 20l-2.4-6.8L3 11l6.6-2.2z"/></svg>
-        <svg class="deco deco-13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3.2"/><circle cx="7" cy="9" r=".6" fill="currentColor" stroke="none"/></svg>
-      </div>
       <div class="desktop-toolbar">
         <div class="desktop-toolbar-actions">
           <button type="button" class="desktop-edit-btn" id="desktopEditToggle" aria-pressed="false">
@@ -1454,6 +1449,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span data-i18n="desktop_reset">Sıfırla</span>
           </button>
         </div>
+      </div>
+    </section>
+
+    <section class="tools-section">
+      <div class="tools-deco" aria-hidden="true">
+        <svg class="deco deco-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <svg class="deco deco-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z" fill="currentColor" stroke="none"/></svg>
+        <svg class="deco deco-11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <svg class="deco deco-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2l2.4 6.8L21 11l-6.6 2.2L12 20l-2.4-6.8L3 11l6.6-2.2z"/></svg>
+        <svg class="deco deco-13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3.2"/><circle cx="7" cy="9" r=".6" fill="currentColor" stroke="none"/></svg>
       </div>
       <div class="card-grid" id="cardGrid">
         <button class="app-card" data-target="Hesaplama_Araclari.html" data-title="Hesaplama Araçları">
