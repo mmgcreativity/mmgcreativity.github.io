@@ -124,6 +124,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .scope-link-btn:hover{ border-color:var(--brass-dim); }
 
+  .firma-select-block{ margin:14px 0; }
+  .firma-select-label{ font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600; }
+  .firma-select-grid{ display:flex; flex-direction:column; gap:6px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:10px 12px; }
+  .firma-select-row{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--text); cursor:pointer; }
+  .firma-select-row input[type="checkbox"]{ width:15px; height:15px; flex-shrink:0; accent-color:var(--brass,#C6A15B); }
+  .party-scope-badge{
+    display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-family:'IBM Plex Mono',monospace;
+    color:var(--brass,#C6A15B); background:rgba(198,161,91,0.12); border:1px solid rgba(198,161,91,0.35);
+    padding:2px 8px; border-radius:999px; margin-top:6px;
+  }
+
   .veri-tabs{ display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
   .veri-tab-btn{
     padding:9px 14px; border-radius:9px; border:1px solid var(--hairline); background:var(--surface-2);
@@ -360,6 +371,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <div id="cust_ibanRows"></div>
           <button type="button" class="iban-add-btn" data-add-iban="customers" data-i18n="add_iban_btn">+ IBAN Ekle</button>
         </div>
+        <div id="cust_firmaSelect"></div>
         <button type="button" class="auth-submit" data-save="customers" data-i18n="save_party_btn">Müşteriyi Kaydet</button>
         <div class="form-msg" id="customers_msg"></div>
       </div>
@@ -378,6 +390,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <div id="supp_ibanRows"></div>
           <button type="button" class="iban-add-btn" data-add-iban="suppliers" data-i18n="add_iban_btn">+ IBAN Ekle</button>
         </div>
+        <div id="supp_firmaSelect"></div>
         <button type="button" class="auth-submit" data-save="suppliers" data-i18n="save_party_btn2">Tedarikçiyi Kaydet</button>
         <div class="form-msg" id="suppliers_msg"></div>
       </div>
@@ -396,6 +409,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <label data-i18n="notes_label">Not / Adres (opsiyonel)</label>
           <input type="text" id="cp_notes" data-i18n-placeholder="counterparty_notes_ph" placeholder="ör. Ankara, ihale no: 2025/123">
         </div>
+        <div id="cp_firmaSelect"></div>
         <button type="button" class="auth-submit" data-save="counterparties" data-i18n="save_counterparty_btn">Muhatabı Kaydet</button>
         <div class="form-msg" id="counterparties_msg"></div>
       </div>
@@ -416,6 +430,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <input type="text" id="bankIbanInput" data-i18n-placeholder="bank_iban_ph" placeholder="TR__ ____ ____ ____ ____ ____ __">
           </div>
         </div>
+        <div id="bank_firmaSelect"></div>
         <button type="button" class="auth-submit" id="addBankBtn" data-i18n="add_bank_btn">Ekle</button>
         <div class="bank-chip-list" id="banksChipList"></div>
         <div class="form-msg" id="banks_msg"></div>
@@ -494,6 +509,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     scopeGroupHubNote:'(main company — data is stored here)',
     scopeGroupConfirmRemove:'Removing a company will stop sharing this data pool with it going forward (its past data is not deleted). Continue?',
     scopeGroupSaving:'Saving…', scopeGroupSaved:'Group membership updated. ✓', scopeGroupSaveFailed:'Could not be saved, please try again.',
+    firmaSelectLabel:'Which companies does this apply to?', firmaScopeBadgeTpl:'🏢 {n} companies',
     enterValidName:'Please enter a name.', saved:'Saved. ✓', saveFailed:'Could not save, please try again.',
     deleted:'Deleted.', deleteFailed:'Could not delete, please try again.', confirmDelete:'Are you sure you want to delete this record?',
     noRecordsYet:'No records added yet.', edit:'Edit', delete:'Delete', unlimited:'',
@@ -517,6 +533,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     scopeGroupHubNote:'(ana firma — veri burada tutuluyor)',
     scopeGroupConfirmRemove:'Bir firmayı çıkarırsan, bundan sonra bu veri havuzunu onunla paylaşmayı durdurursun (geçmiş verisi silinmez). Devam edilsin mi?',
     scopeGroupSaving:'Kaydediliyor…', scopeGroupSaved:'Grup üyeliği güncellendi. ✓', scopeGroupSaveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
+    firmaSelectLabel:'Bu bilgi hangi firmalar için geçerli?', firmaScopeBadgeTpl:'🏢 {n} firma',
     enterValidName:'Lütfen bir ad/ünvan girin.', saved:'Kaydedildi. ✓', saveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
     deleted:'Silindi.', deleteFailed:'Silinemedi, lütfen tekrar deneyin.', confirmDelete:'Bu kaydı silmek istediğinize emin misiniz?',
     noRecordsYet:'Henüz kayıt eklenmedi.', edit:'Düzenle', delete:'Sil', unlimited:'',
@@ -678,6 +695,54 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     renderScopeBanner(firmaName);
     renderScopeGroupGrid();
+    renderAllFirmaSelects();
+  }
+
+  // Kayıt eklerken "bu bilgi hangi firmalar için geçerli?" checkbox listesi.
+  // Grup 2'den az firmadan oluşuyorsa (ya da hiç grup yoksa) bu blok hiç gösterilmez —
+  // o durumda zaten tek firma var, seçim anlamsız.
+  function firmaSelectRowsHtml(){
+    return groupFirmaMembers.map(m =>
+      '<label class="firma-select-row"><input type="checkbox" class="firma-select-check" value="' + m.id + '" checked> ' + escapeHtml(m.name) + '</label>'
+    ).join('');
+  }
+  function renderAllFirmaSelects(){
+    const containerIds = ['cust_firmaSelect', 'supp_firmaSelect', 'cp_firmaSelect', 'bank_firmaSelect'];
+    const show = scopeCollection === 'firmaAccounts' && groupFirmaMembers.length > 1;
+    containerIds.forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.innerHTML = show
+        ? ('<div class="firma-select-block"><div class="firma-select-label">' + LBL.firmaSelectLabel + '</div>' +
+           '<div class="firma-select-grid">' + firmaSelectRowsHtml() + '</div></div>')
+        : '';
+    });
+  }
+  // Seçili firma id'lerini döndürür; hiç kısıtlama yoksa (blok yok ya da hepsi işaretliyse)
+  // null döner — bu, kaydın TÜM firmalar (şimdiki + ileride eklenecekler) için geçerli
+  // olduğu anlamına gelir ve appliesToFirmaIds alanı hiç yazılmaz.
+  function collectFirmaSelection(containerId){
+    const container = document.getElementById(containerId);
+    if(!container) return null;
+    const boxes = container.querySelectorAll('.firma-select-check');
+    if(!boxes.length) return null;
+    const checked = Array.from(boxes).filter(b => b.checked).map(b => b.value);
+    if(checked.length === boxes.length) return null;
+    return checked;
+  }
+  function resetFirmaSelect(containerId){
+    const container = document.getElementById(containerId);
+    if(!container) return;
+    container.querySelectorAll('.firma-select-check').forEach(b => { b.checked = true; });
+  }
+  // Bir kaydın, o an aktif olan firmaya (scopeId) göre görünür olup olmadığını belirler.
+  function visibleForActiveFirma(record){
+    if(!Array.isArray(record.appliesToFirmaIds) || !record.appliesToFirmaIds.length) return true;
+    return record.appliesToFirmaIds.includes(scopeId);
+  }
+  function scopeBadgeHtml(record){
+    if(!Array.isArray(record.appliesToFirmaIds) || !record.appliesToFirmaIds.length) return '';
+    return '<div class="party-scope-badge">' + fmt(LBL.firmaScopeBadgeTpl, { n: record.appliesToFirmaIds.length }) + '</div>';
   }
 
   // Grup üyeliği checkbox listesi: ana firma her zaman işaretli ve kilitli görünür;
@@ -878,14 +943,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   async function loadBanks(){
     const snap = await getDocs(colRef('banks'));
     banksList = [];
-    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '', iban: d.data().iban || '' }));
+    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '', iban: d.data().iban || '', appliesToFirmaIds: d.data().appliesToFirmaIds || null }));
     banksList.sort((a,b) => a.name.localeCompare(b.name, 'tr'));
     renderBanks();
   }
   function renderBanks(){
     const listEl = document.getElementById('banksChipList');
-    listEl.innerHTML = banksList.length ? banksList.map(b =>
-      '<span class="bank-chip">' + escapeHtml(b.name) + (b.iban ? ' · ' + escapeHtml(b.iban) : '') + '<button type="button" data-remove-bank="' + b.id + '" title="' + LBL.delete + '">✕</button></span>'
+    const visibleBanks = banksList.filter(visibleForActiveFirma);
+    listEl.innerHTML = visibleBanks.length ? visibleBanks.map(b =>
+      '<span class="bank-chip">' + escapeHtml(b.name) + (b.iban ? ' · ' + escapeHtml(b.iban) : '') + scopeBadgeHtml(b) +
+      '<button type="button" data-remove-bank="' + b.id + '" title="' + LBL.delete + '">✕</button></span>'
     ).join('') : '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
     listEl.querySelectorAll('[data-remove-bank]').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -895,6 +962,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }catch(e){ showMsg('banks_msg', LBL.deleteFailed, true); }
       });
     });
+    // Öneri (datalist) her zaman TÜM firmaların banka listesinden beslenir — burada
+    // görünürlük filtrelemesi uygulanmaz, çünkü bu sadece bir yazım kolaylığı.
     const datalist = document.getElementById('banksDatalist');
     datalist.innerHTML = banksList.map(b => '<option value="' + escapeHtml(b.name) + '"></option>').join('');
   }
@@ -904,10 +973,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const name = select.value;
     const iban = ibanInput.value.trim().toUpperCase().replace(/\s+/g, '');
     if(!name){ showMsg('banks_msg', LBL.enterValidName, true); return; }
+    const appliesTo = collectFirmaSelection('bank_firmaSelect');
     try{
       const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-      await setDoc(docRef('banks', id), { name, iban, createdAt: serverTimestamp() });
+      const docData = { name, iban, createdAt: serverTimestamp() };
+      if(appliesTo) docData.appliesToFirmaIds = appliesTo;
+      await setDoc(docRef('banks', id), docData);
       select.value = ''; ibanInput.value = '';
+      resetFirmaSelect('bank_firmaSelect');
       showMsg('banks_msg', LBL.saved, false);
       await loadBanks();
     }catch(e){ showMsg('banks_msg', LBL.saveFailed, true); }
@@ -968,7 +1041,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   function renderParties(kind){
     const listEl = document.getElementById(PARTY_COLLECTIONS[kind]);
-    const list = partyCache[kind];
+    const list = partyCache[kind].filter(visibleForActiveFirma);
     if(!list.length){
       listEl.innerHTML = '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
       return;
@@ -988,6 +1061,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           '</div>' +
         '</div>' +
         (ibansHtml ? '<div class="iban-chip-wrap">' + ibansHtml + '</div>' : '') +
+        scopeBadgeHtml(p) +
       '</div>';
     }).join('');
     listEl.querySelectorAll('[data-del]').forEach(btn => {
@@ -1006,13 +1080,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const name = nameEl.value.trim();
     if(!name){ showMsg(kind + '_msg', LBL.enterValidName, true); return; }
     const ibans = readIbanRows(prefix);
+    const appliesTo = collectFirmaSelection(prefix + '_firmaSelect');
     try{
       const id = kind[0] + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-      await setDoc(docRef(kind, id), {
-        name, ibans, createdAt: serverTimestamp()
-      });
+      const docData = { name, ibans, createdAt: serverTimestamp() };
+      if(appliesTo) docData.appliesToFirmaIds = appliesTo;
+      await setDoc(docRef(kind, id), docData);
       nameEl.value = '';
       clearIbanRows(prefix);
+      resetFirmaSelect(prefix + '_firmaSelect');
       showMsg(kind + '_msg', LBL.saved, false);
       await loadParties(kind);
     }catch(e){ showMsg(kind + '_msg', LBL.saveFailed, true); }
@@ -1037,11 +1113,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   function renderCounterparties(){
     const listEl = document.getElementById('counterpartiesList');
-    if(!counterpartyCache.length){
+    const list = counterpartyCache.filter(visibleForActiveFirma);
+    if(!list.length){
       listEl.innerHTML = '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
       return;
     }
-    listEl.innerHTML = counterpartyCache.map(p =>
+    listEl.innerHTML = list.map(p =>
       '<div class="party-row" data-id="' + p.id + '">' +
         '<div class="party-row-top">' +
           '<div>' +
@@ -1053,6 +1130,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             '<button type="button" class="party-icon-btn danger" data-del-cp="' + p.id + '" title="' + LBL.delete + '">✕</button>' +
           '</div>' +
         '</div>' +
+        scopeBadgeHtml(p) +
       '</div>'
     ).join('');
     listEl.querySelectorAll('[data-del-cp]').forEach(btn => {
@@ -1070,12 +1148,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const notesEl = document.getElementById('cp_notes');
     const name = nameEl.value.trim();
     if(!name){ showMsg('counterparties_msg', LBL.enterValidName, true); return; }
+    const appliesTo = collectFirmaSelection('cp_firmaSelect');
     try{
       const id = 'cp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-      await setDoc(docRef('counterparties', id), {
-        name, notes: notesEl.value.trim(), createdAt: serverTimestamp()
-      });
+      const docData = { name, notes: notesEl.value.trim(), createdAt: serverTimestamp() };
+      if(appliesTo) docData.appliesToFirmaIds = appliesTo;
+      await setDoc(docRef('counterparties', id), docData);
       nameEl.value = ''; notesEl.value = '';
+      resetFirmaSelect('cp_firmaSelect');
       showMsg('counterparties_msg', LBL.saved, false);
       await loadCounterparties();
     }catch(e){ showMsg('counterparties_msg', LBL.saveFailed, true); }
