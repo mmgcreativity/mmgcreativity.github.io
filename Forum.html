@@ -211,6 +211,38 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     border:1px solid var(--hairline); border-radius:10px; padding:10px 12px; background:var(--surface-2); margin-top:10px; font-size:12.5px;
   }
   .forum-quote-composer-card .cancel{ float:right; background:none; border:none; color:var(--muted); cursor:pointer; }
+
+  /* ---- Profil (kullanıcı tıklama) ---- */
+  .profile-clickable{ cursor:pointer; }
+  .forum-post-name.profile-clickable:hover, .forum-reply-name.profile-clickable:hover{ text-decoration:underline; }
+  .profile-modal-overlay{
+    position:fixed; inset:0; z-index:970; background:rgba(5,8,14,0.85);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .profile-modal-overlay[hidden]{ display:none; }
+  .profile-modal-card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:16px; padding:26px 24px;
+    max-width:460px; width:100%; max-height:86vh; overflow-y:auto;
+  }
+  .profile-modal-close{
+    float:right; background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; line-height:1;
+  }
+  .profile-modal-close:hover{ color:var(--text); }
+  .profile-modal-head{ display:flex; align-items:center; gap:14px; margin-bottom:4px; }
+  .profile-modal-head .avatar-circle{ width:56px; height:56px; font-size:22px; flex-shrink:0; }
+  .profile-modal-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; }
+  .profile-modal-badge{
+    display:inline-block; font-size:10.5px; font-family:'IBM Plex Mono',monospace; letter-spacing:.04em;
+    color:var(--brass,#C6A15B); background:rgba(198,161,91,0.12); border:1px solid rgba(198,161,91,0.35);
+    padding:2px 8px; border-radius:999px; margin-top:4px;
+  }
+  .profile-modal-stats{ color:var(--muted); font-size:12.5px; margin:14px 0 4px; }
+  .profile-modal-posts{ margin-top:10px; border-top:1px solid var(--hairline); padding-top:12px; }
+  .profile-post-item{ padding:10px 0; border-bottom:1px solid var(--hairline); }
+  .profile-post-item:last-child{ border-bottom:none; }
+  .profile-post-time{ font-size:11px; color:var(--muted); margin-bottom:3px; }
+  .profile-post-text{ font-size:13px; white-space:pre-wrap; word-break:break-word; }
+  .profile-post-image{ max-width:100%; border-radius:8px; margin-top:6px; }
 </style>
 </head>
 <body>
@@ -257,11 +289,27 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   </div>
 </main>
 
+<div class="profile-modal-overlay" id="profileModalOverlay" hidden>
+  <div class="profile-modal-card">
+    <button type="button" class="profile-modal-close" id="profileModalCloseBtn" aria-label="Kapat">✕</button>
+    <div class="profile-modal-head">
+      <div id="profileModalAvatar"></div>
+      <div>
+        <div class="profile-modal-name" id="profileModalName">—</div>
+        <div class="profile-modal-badge" id="profileModalBadge" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="profile-modal-stats" id="profileModalStats"></div>
+    <div class="profile-modal-posts" id="profileModalPosts"></div>
+  </div>
+</div>
+
 <script type="module">
+
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, collection, addDoc, deleteDoc, updateDoc, query, orderBy, limit, onSnapshot, serverTimestamp,
+    getFirestore, doc, getDoc, collection, addDoc, deleteDoc, updateDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp,
     arrayUnion, arrayRemove, increment, getDocs
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -374,11 +422,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     return AVATAR_GRADIENTS[h % AVATAR_GRADIENTS.length];
   }
   function avatarHtml(name, avatarBase64, uid){
+    const nameAttr = ' data-profile-uid="' + escapeHtml(uid || '') + '" data-profile-name="' + escapeHtml(name || '') + '"';
     if(avatarBase64){
-      return '<div class="avatar-circle"><img src="' + avatarBase64 + '" alt=""></div>';
+      return '<div class="avatar-circle profile-clickable"' + nameAttr + '><img src="' + avatarBase64 + '" alt=""></div>';
     }
     const initial = (name || '?').trim().charAt(0).toUpperCase() || '?';
-    return '<div class="avatar-circle" style="background:' + avatarGradientFor(uid || name) + '">' + escapeHtml(initial) + '</div>';
+    return '<div class="avatar-circle profile-clickable" style="background:' + avatarGradientFor(uid || name) + '"' + nameAttr + '>' + escapeHtml(initial) + '</div>';
   }
 
   let currentUid = null;
@@ -419,7 +468,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           '<div class="forum-post-top">' +
             avatarHtml(p.authorName, (p.authorUid === currentUid ? currentUserAvatar : null) || p.authorAvatar, p.authorUid) +
             '<div class="forum-post-meta">' +
-              '<div class="forum-post-name">' + escapeHtml(p.authorName || LBL.anonymous) + '</div>' +
+              '<div class="forum-post-name profile-clickable" data-profile-uid="' + escapeHtml(p.authorUid || '') + '" data-profile-name="' + escapeHtml(p.authorName || '') + '">' + escapeHtml(p.authorName || LBL.anonymous) + '</div>' +
               '<div class="forum-post-time">' + fmtRelativeTime(p.createdAt) + '</div>' +
             '</div>' +
             (canDelete ? '<button type="button" class="forum-delete-btn" data-delete-id="' + d.id + '" title="' + (MMG_LANG==='en'?'Delete':'Sil') + '">✕</button>' : '') +
@@ -572,7 +621,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         rows.push(
           '<div class="forum-reply">' +
             avatarHtml(r.authorName, r.authorAvatar, r.authorUid) +
-            '<div><div class="forum-reply-name">' + escapeHtml(r.authorName || LBL.anonymous) + '</div>' +
+            '<div><div class="forum-reply-name profile-clickable" data-profile-uid="' + escapeHtml(r.authorUid || '') + '" data-profile-name="' + escapeHtml(r.authorName || '') + '">' + escapeHtml(r.authorName || LBL.anonymous) + '</div>' +
             '<div class="forum-reply-text">' + escapeHtml(r.text) + '</div></div>' +
           '</div>'
         );
@@ -595,6 +644,78 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { el.style.display = 'none'; }, 2500);
   }
+
+  // ================== Profil (avatar/isim tıklama) ==================
+  const profileModalOverlay = document.getElementById('profileModalOverlay');
+  const profileModalCloseBtn = document.getElementById('profileModalCloseBtn');
+  function closeProfileModal(){ if(profileModalOverlay) profileModalOverlay.hidden = true; }
+  if(profileModalCloseBtn) profileModalCloseBtn.addEventListener('click', closeProfileModal);
+  if(profileModalOverlay) profileModalOverlay.addEventListener('click', (e) => {
+    if(e.target === profileModalOverlay) closeProfileModal();
+  });
+
+  function profilePostRowHtml(p){
+    return '<div class="profile-post-item">' +
+      '<div class="profile-post-time">' + fmtRelativeTime(p.createdAt) + '</div>' +
+      '<div class="profile-post-text">' + escapeHtml(p.text || '') + '</div>' +
+      (p.imageBase64 ? '<img class="profile-post-image" src="' + p.imageBase64 + '" alt="">' : '') +
+    '</div>';
+  }
+
+  async function openProfileModal(uid, fallbackName){
+    if(!uid || !profileModalOverlay) return;
+    profileModalOverlay.hidden = false;
+    document.getElementById('profileModalAvatar').innerHTML = avatarHtml(fallbackName, null, uid).replace('profile-clickable ', '').replace(' profile-clickable', '');
+    document.getElementById('profileModalName').textContent = fallbackName || LBL.anonymous;
+    document.getElementById('profileModalBadge').style.display = 'none';
+    document.getElementById('profileModalStats').textContent = LBL.loadingPosts;
+    document.getElementById('profileModalPosts').innerHTML = '';
+
+    let name = fallbackName, avatar = null, isAdminUser = false, isFirma = false;
+    try{
+      const uSnap = await getDoc(doc(db, 'users', uid));
+      if(uSnap.exists()){
+        const d = uSnap.data();
+        name = d.username || d.email || fallbackName;
+        avatar = d.avatarBase64 || d.logoBase64 || null;
+        isAdminUser = d.isAdmin === true;
+        isFirma = !!d.logoBase64 && !d.avatarBase64;
+      }
+    }catch(e){ /* profil okunamazsa elimizdeki isimle devam */ }
+
+    document.getElementById('profileModalAvatar').innerHTML = avatarHtml(name, avatar, uid).replace('profile-clickable ', '').replace(' profile-clickable', '');
+    document.getElementById('profileModalName').textContent = name || LBL.anonymous;
+    const badgeEl = document.getElementById('profileModalBadge');
+    if(isAdminUser){ badgeEl.textContent = MMG_LANG === 'en' ? '🛡 Admin' : '🛡 Yönetici'; badgeEl.style.display = 'inline-block'; }
+    else if(isFirma){ badgeEl.textContent = MMG_LANG === 'en' ? '🏢 Company account' : '🏢 Firma hesabı'; badgeEl.style.display = 'inline-block'; }
+
+    try{
+      const q = query(collection(db, 'forumPosts'), where('authorUid', '==', uid), orderBy('createdAt', 'desc'), limit(30));
+      const snap = await getDocs(q);
+      document.getElementById('profileModalStats').textContent =
+        (MMG_LANG === 'en' ? snap.size + ' post(s)' : snap.size + ' gönderi');
+      if(snap.empty){
+        document.getElementById('profileModalPosts').innerHTML = '<div class="forum-empty-note">' + LBL.noPostsYet + '</div>';
+      } else {
+        const rows = [];
+        snap.forEach(d => rows.push(profilePostRowHtml(d.data())));
+        document.getElementById('profileModalPosts').innerHTML = rows.join('');
+      }
+    }catch(e){
+      document.getElementById('profileModalStats').textContent = '';
+      document.getElementById('profileModalPosts').innerHTML = '<div class="forum-empty-note">' + LBL.errorSub + '</div>';
+    }
+  }
+
+  // Tüm sayfada (ana akış + yanıtlar + repost/quote kartları) delegasyonla tek dinleyici.
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-profile-uid]');
+    if(!el) return;
+    const uid = el.dataset.profileUid;
+    if(!uid) return;
+    e.stopPropagation();
+    openProfileModal(uid, el.dataset.profileName);
+  });
 
   function watchFeed(){
     stopWatchingFeed();
