@@ -32,6 +32,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </script>
 
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>mmgcreativity — Dijital Finans Asistanı</title>
 <link rel="manifest" href="manifest.json">
@@ -1688,6 +1691,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       frameWrap.style.display = 'none';
       setActive('home');
       try{ localStorage.removeItem(MMG_LAST_PAGE_KEY); }catch(e){}
+      // "Ana Sayfa"ya her tıklandığında kaydırmayı en tepeye sıfırla — sürükle-bırak
+      // sırasında tarayıcının kendiliğinden kaydırması gibi durumlarda kullanıcının
+      // her zaman güvenilir bir "başa dön" yolu olsun diye.
+      var hs = document.getElementById('homeScroll');
+      if(hs) hs.scrollTop = 0;
       return;
     }
     // Mobilde iframe içi kaydırma (touch-scroll) güvenilir çalışmadığı için
@@ -1949,6 +1957,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
 
   renderFavorites();
+
+  // ---- Fare tekerleği ile kaydırmayı garantiye al ----
+  // Bazı tarayıcı/durum kombinasyonlarında native "overflow-y:auto" üzerinde fare tekerleği
+  // beklenildiği gibi çalışmayabiliyor (özellikle sürükle-bırak sonrası veya belirli
+  // uzantı/ayar kombinasyonlarında). Tekerlek olayını burada yakalayıp doğrudan
+  // .home-scroll'un kendisini kaydırarak bunu garantiye alıyoruz.
+  (function(){
+    var hs = document.getElementById('homeScroll');
+    if(!hs) return;
+    hs.addEventListener('wheel', function(e){
+      hs.scrollTop += e.deltaY;
+    }, { passive: true });
+  })();
 </script>
 
 <script>
@@ -3874,5 +3895,70 @@ const auth = getApps().length ? getAuth(getApp()) : null;
 <script src="mmg-feedback-widget.js"></script>
 
 <script type="module" src="mmg-chat-widget.js"></script>
+<style>
+  #mmgUpdateBanner{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(120%); z-index:3000;
+    display:flex; align-items:center; gap:14px; background:var(--surface,#141C2B);
+    border:1px solid var(--brass,#C6A15B); border-radius:14px; padding:14px 18px;
+    box-shadow:0 16px 40px rgba(0,0,0,0.5); font-family:'Inter',sans-serif;
+    transition:transform .3s ease; max-width:min(92vw, 420px);
+  }
+  #mmgUpdateBanner.show{ transform:translateX(-50%) translateY(0); }
+  #mmgUpdateBanner span{ color:var(--text,#EAEDF3); font-size:13.5px; }
+  #mmgUpdateBanner button{
+    flex-shrink:0; padding:9px 16px; border-radius:9px; border:none; cursor:pointer;
+    background:var(--grad); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px;
+  }
+</style>
+<div id="mmgUpdateBanner">
+  <span>🔄 Yeni bir güncelleme var.</span>
+  <button type="button" id="mmgUpdateReloadBtn">Yenile</button>
+</div>
+<script>
+(function(){
+  // ==== Otomatik güncelleme bildirimi ====
+  // Bu sayfa (index.html) her yeni yüklendiğinde ve arada bir (60sn'de bir) sunucudaki
+  // "app-version.json" dosyasını (tarayıcı önbelleğini atlayarak) kontrol eder. Oradaki
+  // sürüm numarası, bu sayfanın kendi içine gömülü CURRENT_VERSION'dan farklıysa, kullanıcıya
+  // küçük bir "Yeni güncelleme var" bildirimi gösterir — DevTools ya da "Clear site data"
+  // gibi teknik adımlara hiç gerek kalmaz, kullanıcı sadece "Yenile"ye basar.
+  //
+  // ÖNEMLİ (bakım notu): Bu sitede her yeni index.html (ya da diğer sayfalar) yüklendiğinde,
+  // "app-version.json" dosyasındaki "version" değerini de MUTLAKA değiştirin (örn. bugünün
+  // tarihi + artan bir sayı). Aksi halde bu bildirim hiç tetiklenmez.
+  var CURRENT_VERSION = '2026-07-26-1';
+  var banner = document.getElementById('mmgUpdateBanner');
+  var reloadBtn = document.getElementById('mmgUpdateReloadBtn');
+  var shown = false;
+
+  function checkVersion(){
+    if(shown) return;
+    fetch('app-version.json?_=' + Date.now(), { cache: 'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(data){
+        if(data && data.version && data.version !== CURRENT_VERSION){
+          shown = true;
+          banner.classList.add('show');
+        }
+      })
+      .catch(function(){ /* kontrol edilemezse sessizce geç, kullanıcıyı rahatsız etme */ });
+  }
+
+  if(reloadBtn){
+    reloadBtn.addEventListener('click', function(){
+      window.location.reload();
+    });
+  }
+
+  // Sayfa ilk açıldığında bir kez, sonra her 60 saniyede bir, ayrıca kullanıcı sekmeye
+  // geri döndüğünde (uzun süre açık bıraktıysa) kontrol et.
+  checkVersion();
+  setInterval(checkVersion, 60000);
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible') checkVersion();
+  });
+})();
+</script>
+
 </body>
 </html>
