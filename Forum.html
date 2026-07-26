@@ -702,6 +702,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         document.getElementById('profileModalPosts').innerHTML = rows.join('');
       }
     }catch(e){
+      console.error('[Profil gönderileri yüklenemedi]', e);
       document.getElementById('profileModalStats').textContent = '';
       document.getElementById('profileModalPosts').innerHTML = '<div class="forum-empty-note">' + LBL.errorSub + '</div>';
     }
