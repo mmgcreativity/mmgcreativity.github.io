@@ -3892,9 +3892,13 @@ const auth = getApps().length ? getAuth(getApp()) : null;
     display:flex; align-items:center; gap:14px; background:var(--surface,#141C2B);
     border:1px solid var(--brass,#C6A15B); border-radius:14px; padding:14px 18px;
     box-shadow:0 16px 40px rgba(0,0,0,0.5); font-family:'Inter',sans-serif;
-    transition:transform .3s ease; max-width:min(92vw, 420px);
+    transition:transform .3s ease, opacity .3s ease; max-width:min(92vw, 420px);
+    opacity:0; visibility:hidden; pointer-events:none;
   }
-  #mmgUpdateBanner.show{ transform:translateX(-50%) translateY(0); }
+  #mmgUpdateBanner.show{
+    transform:translateX(-50%) translateY(0);
+    opacity:1; visibility:visible; pointer-events:auto;
+  }
   #mmgUpdateBanner span{ color:var(--text,#EAEDF3); font-size:13.5px; }
   #mmgUpdateBanner button{
     flex-shrink:0; padding:9px 16px; border-radius:9px; border:none; cursor:pointer;
