@@ -943,7 +943,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   // ================== Kalıcılık (localStorage + Firestore) ==================
-  function localKey(mk){ return 'mmg_nat_' + mk; }
+  // ÖNEMLİ: localStorage anahtarı firma/scope bilgisini İÇERMELİDİR. Aksi halde aynı
+  // tarayıcıda birden fazla firma arasında geçiş yapıldığında (Kullanıcı Yönetimi'ndeki
+  // "Veri Kaynağı" seçici ile), bir firmanın tarayıcıdaki önbelleği diğer firmanın
+  // gerçek Firestore kaydına karışabiliyordu (bkz. migrateLocalGuestDataToCloud).
+  function scopeKeyPart(){
+    const cloud = window.mmgCloud || {};
+    return (cloud.scopeCollection || 'guest') + ':' + (cloud.scopeId || 'guest');
+  }
+  function localKey(mk){ return 'mmg_nat_scope_' + scopeKeyPart() + '_' + mk; }
   function saveLocal(mk){
     try{ localStorage.setItem(localKey(mk), JSON.stringify(monthData)); }catch(e){}
   }
@@ -1049,15 +1057,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(!isMember()) return false;
     const cloud = window.mmgCloud;
     const prefix = 'mmg_nat_';
+    const scopedPrefix = 'mmg_nat_scope_';
     let migratedAny = false;
+    const keysToRemove = [];
     for(let i=0; i<localStorage.length; i++){
       const key = localStorage.key(i);
       if(!key || key.indexOf(prefix) !== 0) continue;
+      if(key.indexOf(scopedPrefix) === 0) continue; // zaten scope'a özel kayıt, taşınmaya gerek yok
       const mk = key.slice(prefix.length);
       if(!/^\d{4}-\d{2}$/.test(mk)) continue; // 'archive' gibi ay formatında olmayan anahtarları atla
       let localData;
       try{ localData = JSON.parse(localStorage.getItem(key)); }catch(e){ continue; }
-      if(!localData || Object.keys(localData).length === 0) continue;
+      if(!localData || Object.keys(localData).length === 0){ keysToRemove.push(key); continue; }
       try{
         const snap = await cloud.getDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'cashflow', mk));
         if(snap.exists() && snap.data().data){
@@ -1083,8 +1094,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'cashflow', mk), { data: localData, updatedAt: new Date().toISOString() });
           migratedAny = true;
         }
-      }catch(err){ /* sessizce geç, bir sonraki aya devam et */ }
+        // Taşıma tamamlandı: bu eski, scope'suz anahtarı sil — aksi halde bir sonraki
+        // firma değişiminde AYNI veri başka bir firmanın kaydına da karışırdı.
+        keysToRemove.push(key);
+      }catch(err){ /* sessizce geç, bir sonraki aya devam et (silinmeden kalsın, tekrar denenir) */ }
     }
+    keysToRemove.forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
     return migratedAny;
   }
 
@@ -1679,7 +1694,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return scope === 'gunluk' ? NAT_TABS.daily : scope === 'haftalik' ? NAT_TABS.weekly : scope === 'yillik' ? NAT_TABS.yearly : NAT_TABS.monthly;
   }
 
-  function localArchiveKey(){ return 'mmg_nat_archive'; }
+  function localArchiveKey(){ return 'mmg_nat_archive_' + scopeKeyPart(); }
   function loadLocalArchive(){
     try{
       const raw = localStorage.getItem(localArchiveKey());
