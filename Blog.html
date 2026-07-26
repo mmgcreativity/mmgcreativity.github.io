@@ -151,6 +151,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .approve-btn:hover{ opacity:0.88; }
   .reject-btn{ background:none; border:1px solid var(--hairline); color:var(--red,#E2544B); }
   .reject-btn:hover{ background:rgba(226,84,75,0.1); }
+
+  .blog-tabs{ display:flex; gap:8px; margin-bottom:20px; }
+  .blog-tab-btn{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:7px;
+    padding:12px 14px; border-radius:11px; border:1px solid var(--hairline); cursor:pointer;
+    background:var(--surface); color:var(--muted); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px;
+    transition:border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .blog-tab-btn:hover{ border-color:var(--brass-dim); color:var(--text); }
+  .blog-tab-btn.active{ background:rgba(198,161,91,0.12); border-color:var(--brass,#C6A15B); color:var(--brass,#C6A15B); }
 </style>
 </head>
 <body>
@@ -165,37 +175,48 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <div id="stateArea"></div>
 
   <div id="content" hidden>
-    <div class="card" id="composerCard" style="display:none;">
-      <h2 id="composerHeading" data-i18n="composer_new_heading">✍️ Yeni Yazı</h2>
-      <div class="card-sub" id="composerDesc" data-i18n="composer_desc">Bu alan sadece sana (site yöneticisine) görünür.</div>
-      <div class="composer-field">
-        <label data-i18n="title_label">Başlık</label>
-        <input type="text" id="composerTitle" maxlength="140" data-i18n-placeholder="title_ph" placeholder="ör. Yeni bir hesaplama aracı yayında">
-      </div>
-      <div class="composer-field">
-        <label data-i18n="body_label">İçerik</label>
-        <textarea id="composerBody" rows="10" data-i18n-placeholder="body_ph" placeholder="Yazını buraya yaz..."></textarea>
-        <div class="composer-hint" data-i18n="body_hint">İpucu: Bir satırı "## " ile başlatırsan alt başlık olur, bir kelimeyi **iki yıldız** arasına alırsan kalın olur. Paragrafları ayırmak için aralarına boş bir satır bırak.</div>
-      </div>
-      <div class="composer-footer">
-        <button type="button" class="post-btn" id="composerSubmitBtn" data-i18n="publish_btn">Yayınla</button>
-        <button type="button" class="cancel-edit-btn" id="composerCancelBtn" style="display:none;" data-i18n="cancel_edit_btn">Vazgeç</button>
-      </div>
-      <div class="composer-hint" id="composerResubmitNote" style="display:none; color:var(--brass);"></div>
-      <div class="composer-error" id="composerError"></div>
+    <div class="blog-tabs" id="blogTabs">
+      <button type="button" class="blog-tab-btn active" data-tab="feed">📚 <span data-i18n="tab_published">Yayınlanmış Bloglar</span></button>
+      <button type="button" class="blog-tab-btn" data-tab="write">✍️ <span data-i18n="tab_write">Yeni Blog Yayınla</span></button>
     </div>
 
-    <div id="adminPendingSection" style="display:none;">
-      <div class="section-heading" id="adminPendingHeading"></div>
-      <div id="adminPendingFeed"></div>
+    <div id="writeTabPanel" style="display:none;">
+      <div class="card" id="composerCard" style="display:none;">
+        <h2 id="composerHeading" data-i18n="composer_new_heading">✍️ Yeni Yazı</h2>
+        <div class="card-sub" id="composerDesc" data-i18n="composer_desc">Bu alan sadece sana (site yöneticisine) görünür.</div>
+        <div class="composer-field">
+          <label data-i18n="title_label">Başlık</label>
+          <input type="text" id="composerTitle" maxlength="140" data-i18n-placeholder="title_ph" placeholder="ör. Yeni bir hesaplama aracı yayında">
+        </div>
+        <div class="composer-field">
+          <label data-i18n="body_label">İçerik</label>
+          <textarea id="composerBody" rows="10" data-i18n-placeholder="body_ph" placeholder="Yazını buraya yaz..."></textarea>
+          <div class="composer-hint" data-i18n="body_hint">İpucu: Bir satırı "## " ile başlatırsan alt başlık olur, bir kelimeyi **iki yıldız** arasına alırsan kalın olur. Paragrafları ayırmak için aralarına boş bir satır bırak.</div>
+        </div>
+        <div class="composer-footer">
+          <button type="button" class="post-btn" id="composerSubmitBtn" data-i18n="publish_btn">Yayınla</button>
+          <button type="button" class="cancel-edit-btn" id="composerCancelBtn" style="display:none;" data-i18n="cancel_edit_btn">Vazgeç</button>
+        </div>
+        <div class="composer-hint" id="composerResubmitNote" style="display:none; color:var(--brass);"></div>
+        <div class="composer-error" id="composerError"></div>
+      </div>
+
+      <div class="blog-empty-note" id="writeLoginNote" style="display:none;" data-i18n="write_login_note">Yazı ekleyebilmek için önce giriş yapmalısın.</div>
+
+      <div id="adminPendingSection" style="display:none;">
+        <div class="section-heading" id="adminPendingHeading"></div>
+        <div id="adminPendingFeed"></div>
+      </div>
+
+      <div id="myPendingSection" style="display:none;">
+        <div class="section-heading" id="myPendingHeading"></div>
+        <div id="myPendingFeed"></div>
+      </div>
     </div>
 
-    <div id="myPendingSection" style="display:none;">
-      <div class="section-heading" id="myPendingHeading"></div>
-      <div id="myPendingFeed"></div>
+    <div id="feedTabPanel">
+      <div id="blogFeed"></div>
     </div>
-
-    <div id="blogFeed"></div>
   </div>
 </main>
 
@@ -275,7 +296,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       pending_badge:'🕓 Onay bekliyor', my_pending_heading:'🕓 Gönderdiklerin (onay bekliyor)',
       admin_pending_heading:'📥 Onay Bekleyen Yazılar', noPendingAdmin:'Onay bekleyen yazı yok.',
       approve_btn:'Onayla ve Yayınla', reject_btn:'Reddet', confirmReject:'Bu yazıyı reddedip silmek istediğine emin misin?',
-      approveFailed:'Onaylanamadı, tekrar dene.', rejectFailed:'Reddedilemedi, tekrar dene.', by:'Gönderen:'
+      approveFailed:'Onaylanamadı, tekrar dene.', rejectFailed:'Reddedilemedi, tekrar dene.', by:'Gönderen:',
+      tab_published:'Yayınlanmış Bloglar', tab_write:'Yeni Blog Yayınla',
+      write_login_note:'Yazı ekleyebilmek için önce giriş yapmalısın.'
     },
     en: {
       page_title:'📰 Blog', page_subtitle:'Updates from the platform, observations from the world of finance, and notes on our product development process.',
@@ -292,7 +315,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       pending_badge:'🕓 Pending review', my_pending_heading:'🕓 Your submissions (pending review)',
       admin_pending_heading:'📥 Posts Awaiting Approval', noPendingAdmin:'No posts awaiting approval.',
       approve_btn:'Approve & Publish', reject_btn:'Reject', confirmReject:'Reject and delete this post?',
-      approveFailed:'Could not approve, please try again.', rejectFailed:'Could not reject, please try again.', by:'By:'
+      approveFailed:'Could not approve, please try again.', rejectFailed:'Could not reject, please try again.', by:'By:',
+      tab_published:'Published Posts', tab_write:'Publish New Post',
+      write_login_note:'You need to log in first to add a post.'
     }
   });
   MMGI18N.detectAndApplyDefaultLang();
@@ -468,6 +493,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         const p = sourceList.find(x => x.id === btn.dataset.editId);
         if(!p) return;
         startEditing(p);
+        setBlogTab('write');
         document.getElementById('composerCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
@@ -512,6 +538,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     if(showNote) noteEl.textContent = MMGI18N.t('resubmit_note');
   }
   MMGI18N.onChange(refreshComposerTexts);
+
+  // ================== Sekmeler: "Yayınlanmış Bloglar" / "Yeni Blog Yayınla" ==================
+  const blogTabsEl = document.getElementById('blogTabs');
+  const writeTabPanel = document.getElementById('writeTabPanel');
+  const feedTabPanel = document.getElementById('feedTabPanel');
+  function setBlogTab(tab){
+    writeTabPanel.style.display = tab === 'write' ? 'block' : 'none';
+    feedTabPanel.style.display = tab === 'feed' ? 'block' : 'none';
+    if(blogTabsEl) blogTabsEl.querySelectorAll('.blog-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  }
+  if(blogTabsEl){
+    blogTabsEl.querySelectorAll('.blog-tab-btn').forEach(b => {
+      b.addEventListener('click', () => setBlogTab(b.dataset.tab));
+    });
+  }
 
   function startEditing(p){
     editingPostId = p.id;
@@ -620,8 +661,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       }catch(e){ currentIsAdmin = false; }
     }
     // Composer artık girişli her kullanıcıya açık; sadece admin'in yazısı direkt yayınlanır,
-    // diğerlerininki onaya düşer.
+    // diğerlerininki onaya düşer. Giriş yapılmamışsa "Yeni Blog Yayınla" sekmesinde uyarı göster.
     composerCard.style.display = user ? 'block' : 'none';
+    document.getElementById('writeLoginNote').style.display = user ? 'none' : 'block';
     refreshComposerTexts();
     publishedPosts = []; adminPendingPosts = []; myPendingPosts = [];
     stateArea.innerHTML = '';
