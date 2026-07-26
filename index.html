@@ -1961,18 +1961,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
   // ---- Fare tekerleği ile kaydırmayı garantiye al (bilerek AYRI/izole bir script) ----
-  // Bazı tarayıcı/durum kombinasyonlarında native "overflow-y:auto" üzerinde fare tekerleği
-  // beklenildiği gibi çalışmayabiliyor (özellikle sürükle-bırak sonrası veya belirli
-  // uzantı/ayar kombinasyonlarında). Tekerlek olayını burada yakalayıp doğrudan
-  // .home-scroll'un kendisini kaydırarak bunu garantiye alıyoruz. Bu, kasıtlı olarak KENDİ
-  // script etiketinde duruyor — sayfadaki başka bir script hata verse bile bu kod
-  // etkilenmeden, her zaman çalışır.
+  // Önceki deneme (.home-scroll üzerine doğrudan dinleyici eklemek) yeterli olmadı — bu,
+  // muhtemelen tarayıcının kendi (native) tekerlek/overflow davranışıyla çakışıyordu ya da
+  // olay bir alt elemanda "yutuluyordu". Bu sefer olayı DOKÜMAN seviyesinde yakalıyoruz,
+  // tarayıcının varsayılan davranışını (preventDefault ile) tamamen iptal edip kaydırmayı
+  // baştan sona kendimiz yönetiyoruz — böylece hangi alt elemanın üzerinde olursa olsun,
+  // ana sayfa görünümündeyken tekerlek her zaman .home-scroll'u kaydırır.
   (function(){
-    var hs = document.getElementById('homeScroll');
-    if(!hs) return;
-    hs.addEventListener('wheel', function(e){
+    document.addEventListener('wheel', function(e){
+      var homeScreenEl = document.getElementById('home-screen');
+      var hs = document.getElementById('homeScroll');
+      if(!homeScreenEl || !hs) return;
+      if(homeScreenEl.style.display === 'none') return; // şu an bir araç sayfası (iframe) açıksa karışma
+      if(!hs.contains(e.target) && e.target !== hs) return; // sadece ana sayfa içeriğinin üzerindeyken devreye gir
+      e.preventDefault();
       hs.scrollTop += e.deltaY;
-    }, { passive: true });
+    }, { passive: false });
   })();
 </script>
 
