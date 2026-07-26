@@ -416,15 +416,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .desktop-toolbar-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .desktop-reset-btn{ color:var(--muted); }
   .desktop-reset-btn:hover{ border-color:#e05d5d; color:#e05d5d; }
-  .desktop-reset-btn[hidden]{ display:none; }
-  .desktop-hint{
-    display:flex; align-items:flex-start; gap:10px; max-width:1400px; margin-bottom:16px; padding:12px 14px;
-    background:var(--surface); border:1px solid var(--hairline); border-left:3px solid var(--brass);
-    border-radius:10px; font-size:12.5px; color:var(--muted); line-height:1.5;
+  .desktop-add-wrap{ position:relative; }
+  .desktop-add-menu{
+    position:absolute; top:calc(100% + 8px); right:0; z-index:20; width:260px; max-height:320px; overflow:auto;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:10px; padding:6px;
+    box-shadow:0 12px 28px rgba(0,0,0,.35);
   }
-  .desktop-hint svg{ width:16px; height:16px; flex-shrink:0; color:var(--brass); margin-top:1px; }
-  .desktop-hint button{ background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; line-height:1; padding:0 2px; margin-left:auto; flex-shrink:0; }
-  .desktop-hint button:hover{ color:var(--text); }
+  .desktop-add-menu[hidden]{ display:none; }
+  .desktop-add-menu-item{
+    display:block; width:100%; text-align:left; padding:8px 10px; border-radius:7px;
+    background:none; border:none; color:var(--text); font-size:13px; cursor:pointer;
+  }
+  .desktop-add-menu-item:hover{ background:rgba(198,161,91,0.12); color:var(--brass); }
+  .desktop-add-menu-empty{ padding:10px 8px; font-size:12.5px; color:var(--muted); }
+  .card-grid.remove-mode .app-card{ outline:1.5px dashed var(--red); cursor:default; }
+  .card-grid.remove-mode .card-remove-btn{ display:flex; }
+  .desktop-reset-btn[hidden]{ display:none; }
   .app-card{
     background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
     padding:24px; cursor:pointer; text-align:left; color:var(--text);
@@ -444,8 +451,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     color:var(--muted); font-size:14px; line-height:1; cursor:pointer; z-index:2;
   }
   .card-remove-btn:hover{ background:var(--red); border-color:var(--red); color:#fff; }
-  .card-grid.edit-mode .card-remove-btn{ display:flex; }
-  .card-grid.edit-mode .app-card .fav-star-card{ display:none; }
+  .card-grid.edit-mode .app-card .fav-star-card, .card-grid.remove-mode .app-card .fav-star-card{ display:none; }
   .card-resize-hint{
     display:none; position:absolute; right:4px; bottom:4px; width:14px; height:14px;
     color:var(--muted); pointer-events:none;
@@ -1432,18 +1438,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="desktop-toolbar-actions">
           <button type="button" class="desktop-edit-btn" id="desktopEditToggle" aria-pressed="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-            <span id="desktopEditToggleLabel" data-i18n="desktop_edit_start">Masaüstünü Düzenle</span>
+            <span id="desktopEditToggleLabel">Düzenle</span>
+          </button>
+          <div class="desktop-add-wrap">
+            <button type="button" class="desktop-edit-btn" id="desktopAddToggle" aria-pressed="false" aria-haspopup="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              <span>Ekle</span>
+            </button>
+            <div class="desktop-add-menu" id="desktopAddMenu" hidden></div>
+          </div>
+          <button type="button" class="desktop-edit-btn" id="desktopRemoveToggle" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+            <span id="desktopRemoveToggleLabel">Kaldır</span>
           </button>
           <button type="button" class="desktop-edit-btn desktop-reset-btn" id="desktopResetBtn" hidden>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
             <span data-i18n="desktop_reset">Sıfırla</span>
           </button>
         </div>
-      </div>
-      <div class="desktop-hint" id="desktopHint" hidden>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v.01"/><path d="M11 12h1v5h1"/></svg>
-        <span data-i18n="desktop_hint_text">Bu alan sizin masaüstünüz. Sol menüdeki bir aracı sürükleyip buraya bırakarak kısayol ekleyebilir; "Masaüstünü Düzenle" düğmesine basarak kartları sürükleyip yerini değiştirebilir, köşesinden tutup boyutlandırabilir veya (×) ile kaldırabilirsiniz.</span>
-        <button type="button" id="desktopHintClose" aria-label="Kapat">×</button>
       </div>
       <div class="card-grid" id="cardGrid">
         <button class="app-card" data-target="Hesaplama_Araclari.html" data-title="Hesaplama Araçları">
@@ -2095,19 +2107,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var t; return function(){ var args = arguments, ctx = this; clearTimeout(t); t = setTimeout(function(){ fn.apply(ctx,args); }, ms); };
   }
 
-  // ---- Düzenleme modu ----
+  // ---- Düzenle / Ekle / Kaldır: üç ayrı, birbirini dışlayan mod ----
   var editBtn = document.getElementById('desktopEditToggle');
   var editLabel = document.getElementById('desktopEditToggleLabel');
+  var addBtn = document.getElementById('desktopAddToggle');
+  var addMenu = document.getElementById('desktopAddMenu');
+  var removeBtn = document.getElementById('desktopRemoveToggle');
+  var removeLabel = document.getElementById('desktopRemoveToggleLabel');
   var resetBtn = document.getElementById('desktopResetBtn');
+
+  function updateResetVisibility(){
+    if(resetBtn) resetBtn.hidden = !(grid.classList.contains('edit-mode') || grid.classList.contains('remove-mode'));
+  }
+
   function setEditMode(on){
+    if(on) setRemoveMode(false, true);
     grid.classList.toggle('edit-mode', on);
     editBtn.classList.toggle('active', on);
     editBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    editLabel.textContent = on ? 'Düzenlemeyi Bitir' : 'Masaüstünü Düzenle';
-    if(resetBtn) resetBtn.hidden = !on;
+    editLabel.textContent = on ? 'Düzenlemeyi Bitir' : 'Düzenle';
     Array.prototype.forEach.call(grid.querySelectorAll('.app-card'), function(c){
       c.setAttribute('draggable', on ? 'true' : 'false');
     });
+    updateResetVisibility();
   }
   if(editBtn){
     editBtn.addEventListener('click', function(){
@@ -2115,7 +2137,71 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   }
 
-  // ---- Masaüstünü sıfırla (yalnızca düzenleme modunda görünür) ----
+  function setRemoveMode(on, skipEditReset){
+    if(on && !skipEditReset) setEditMode(false);
+    grid.classList.toggle('remove-mode', on);
+    if(removeBtn){
+      removeBtn.classList.toggle('active', on);
+      removeBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    if(removeLabel) removeLabel.textContent = on ? 'Kaldırmayı Bitir' : 'Kaldır';
+    updateResetVisibility();
+  }
+  if(removeBtn){
+    removeBtn.addEventListener('click', function(){
+      setRemoveMode(!grid.classList.contains('remove-mode'));
+    });
+  }
+
+  // ---- Ekle: masaüstünde henüz olmayan kısayolları listeleyen açılır menü ----
+  function closeAddMenu(){
+    if(addMenu) addMenu.hidden = true;
+    if(addBtn) addBtn.setAttribute('aria-pressed', 'false');
+  }
+  function buildAddMenu(){
+    if(!addMenu) return;
+    var onDesktop = {};
+    Array.prototype.forEach.call(grid.querySelectorAll('.app-card'), function(c){ onDesktop[c.dataset.target] = true; });
+    var candidates = [];
+    var seen = {};
+    Array.prototype.forEach.call(document.querySelectorAll('.nav-item[data-target]'), function(el){
+      var t = el.dataset.target;
+      if(!t || t === 'home' || onDesktop[t] || seen[t]) return;
+      if(el.offsetParent === null && el.style.display === 'none') return; // gizli/gated menü öğelerini atla
+      seen[t] = true;
+      candidates.push({ target: t, title: el.dataset.title || t });
+    });
+    if(!candidates.length){
+      addMenu.innerHTML = '<div class="desktop-add-menu-empty">Eklenebilecek başka kısayol yok — hepsi zaten masaüstünde.</div>';
+      return;
+    }
+    addMenu.innerHTML = candidates.map(function(c){
+      return '<button type="button" class="desktop-add-menu-item" data-add-target="' + c.target + '" data-add-title="' + c.title + '">' + c.title + '</button>';
+    }).join('');
+    Array.prototype.forEach.call(addMenu.querySelectorAll('[data-add-target]'), function(btn){
+      btn.addEventListener('click', function(){
+        addShortcutToDesktop(btn.dataset.addTarget, btn.dataset.addTitle);
+        closeAddMenu();
+      });
+    });
+  }
+  if(addBtn){
+    addBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = addMenu.hidden;
+      if(willOpen){ buildAddMenu(); }
+      addMenu.hidden = !willOpen;
+      addBtn.setAttribute('aria-pressed', willOpen ? 'true' : 'false');
+    });
+    document.addEventListener('click', function(e){
+      if(!addMenu.hidden && !e.target.closest('.desktop-add-wrap')) closeAddMenu();
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape') closeAddMenu();
+    });
+  }
+
+  // ---- Masaüstünü sıfırla (Düzenle ya da Kaldır modundayken görünür) ----
   if(resetBtn){
     resetBtn.addEventListener('click', function(){
       var ok = window.confirm('Masaüstü düzenini sıfırlamak istediğinize emin misiniz? Eklediğiniz kısayollar, kaldırdığınız kartlar ve yaptığınız boyut değişiklikleri geri alınacak ve varsayılan görünüme dönülecek.');
@@ -2171,19 +2257,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(data && data.target){ addShortcutToDesktop(data.target, data.title || data.target); }
     }catch(err){}
   });
-
-  // ---- Keşfedilebilirlik: ilk ziyarette ipucu banner'ı ----
-  var hint = document.getElementById('desktopHint');
-  var hintClose = document.getElementById('desktopHintClose');
-  if(hint && !readJSON(HINT_KEY, false)){
-    hint.hidden = false;
-  }
-  if(hintClose){
-    hintClose.addEventListener('click', function(){
-      hint.hidden = true;
-      writeJSON(HINT_KEY, true);
-    });
-  }
 
   // ---- Başlangıç ----
   applyStoredState();
