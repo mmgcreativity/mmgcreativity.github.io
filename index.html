@@ -80,7 +80,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   aside{
     width:var(--sidebar-w); flex-shrink:0; height:100vh;
     background:var(--surface); border-right:1px solid var(--hairline);
-    display:flex; flex-direction:column; overflow:hidden;
+    display:flex; flex-direction:column; overflow-y:auto;
   }
   .brand{
     padding:18px 20px 18px; border-bottom:1px solid var(--hairline); position:relative; overflow:hidden;
@@ -126,9 +126,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .nav-item[draggable="true"]:active{ cursor:grabbing; }
   .nav-item.nav-drag-ghost{ opacity:0.4; }
   .nav-drag-handle{
-    width:14px; height:14px; color:var(--muted); flex-shrink:0; opacity:0; transition:opacity .15s ease; margin-left:-4px;
+    display:none;
   }
-  .nav-item:hover .nav-drag-handle{ opacity:0.6; }
   .nav-item.active{
     background:linear-gradient(135deg, rgba(255,107,74,0.10), rgba(124,77,217,0.08));
     border-color:rgba(255,107,74,0.25);
@@ -2291,10 +2290,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(item.dataset.dragArmed === 'true') return;
       item.dataset.dragArmed = 'true';
       item.setAttribute('draggable', 'true');
-      var textWrap = item.querySelector('.nav-text-wrap');
-      if(textWrap && !item.querySelector('.nav-drag-handle')){
-        textWrap.insertAdjacentHTML('beforebegin', GRIP_SVG);
-      }
+      // Not: sürükleme ipucu (6 noktalı tutamaç) kasıtlı olarak eklenmiyor — alt menü açan
+      // başlıklarda (Hesaplamalar, Bütçeleme, Talimatlar gibi) sürüklenecek bir hedef olmadığı
+      // için tutamaç hiç çıkmıyordu, sadece bazı öğelerde görünmesi tutarsız duruyordu.
+      // Standart olsun diye (hepsinde ya da hiçbirinde) tutamağı tüm öğelerden kaldırdık;
+      // sürükleme özelliği görsel ipucu olmadan da normal şekilde çalışmaya devam ediyor.
       item.addEventListener('dragstart', function(e){
         e.dataTransfer.setData('text/mmg-add', JSON.stringify({target:item.dataset.target, title:item.dataset.title || item.dataset.favTitle || ''}));
         e.dataTransfer.effectAllowed = 'copy';
