@@ -2660,18 +2660,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         localStorage.removeItem('mmg_company_role');
         localStorage.removeItem('mmg_company_name');
       }
-      // Firma Hesabı (üyelik rozeti + yöneticilik yetkisi): her ikisini de yükle
-      await loadFirmaMemberships(user.uid);
-      await loadAdminFirmas(user.uid);
-      // Ekran adı bilgisini (localStorage 'mmg_auth_state') gerçek oturumla senkronize et.
-      // Aksi halde eskiden misafir moduna geçilmiş ya da bayrak başka bir sebeple eskimişse,
-      // gerçekten giriş yapılmış olsa bile üstte "Misafir" yazmaya devam edebiliyordu.
+      // ÖNEMLİ: rozet (kod/ isim) ve admin menü görünürlüğü, kullanıcının en temel bilgileri —
+      // firma üyeliği yüklemesi (aşağıda) daha az kritik ve bazen (izin/index sorunu gibi
+      // nedenlerle) hata verebiliyor. Önceden bu satır firma yüklemesinden SONRA çalıştığı için,
+      // firma yüklemesi hata verdiğinde rozet hiç güncellenmeden eski/önbellekteki değerde
+      // asılı kalıyordu. Şimdi rozeti ÖNCE, kesin olarak güncelliyoruz.
       if(user.email){
         localStorage.setItem('mmg_auth_state', 'user:' + user.email);
       }
       if(data.customerNumber) localStorage.setItem('mmg_customer_no', String(data.customerNumber));
       if(data.username) localStorage.setItem('mmg_username', data.username);
       updateUserBadge(data.customerNumber, data.username);
+      // Firma Hesabı (üyelik rozeti + yöneticilik yetkisi): her ikisini de yükle — kendi
+      // hata yakalamasıyla, olası bir sorun yukarıdaki temel güncellemeleri asla engellemesin.
+      try{
+        await loadFirmaMemberships(user.uid);
+        await loadAdminFirmas(user.uid);
+      }catch(firmaErr){ /* firma üyeliği yüklenemezse sessizce geç, geri kalan her şey çalışmaya devam etsin */ }
       // Zaten oturum açıkken gelen bekleyen davetleri de yakala (sadece giriş anında değil)
     } catch(e){ /* sessizce geç */ }
   });
