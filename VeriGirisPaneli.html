@@ -201,21 +201,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .party-row{ background:var(--surface); border-bottom:1px solid var(--hairline); }
   .party-row:last-child{ border-bottom:none; }
   .party-row-top{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
     padding:9px 14px; background:var(--surface-2);
   }
-  .party-row-top.is-toggle{ cursor:pointer; }
-  .party-row-top.is-toggle:hover{ background:var(--surface); }
-  .party-head{ display:flex; align-items:center; gap:8px; flex-shrink:0; max-width:42%; }
-  .party-chevron{ color:var(--muted); font-size:11px; transition:transform .18s ease; flex-shrink:0; display:inline-block; }
-  .party-row-top.open .party-chevron{ transform:rotate(180deg); color:var(--brass); }
-  .party-first-iban{ display:flex; align-items:center; gap:14px; flex:1; min-width:0; font-size:11.5px; }
-  .party-first-iban .pf-bank{ font-weight:700; color:var(--brass); white-space:nowrap; flex-shrink:0; }
-  .party-first-iban .pf-iban{ font-family:'IBM Plex Mono',monospace; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .party-first-iban .pf-cur{ color:var(--muted); text-align:right; white-space:nowrap; flex-shrink:0; }
-  .party-first-iban.copyable{ cursor:pointer; border-radius:6px; padding:2px 6px; margin:-2px -6px; transition:background .1s ease; }
-  .party-first-iban.copyable:hover{ background:rgba(198,161,91,0.10); }
-  .party-extra[hidden]{ display:none; }
   .party-name{ font-size:12.5px; font-weight:700; }
   .party-idnum{ font-size:11.5px; color:var(--muted); margin-top:2px; font-family:'IBM Plex Mono',monospace; }
   .party-idnum-inline{ font-size:10.5px; color:var(--muted); margin-left:8px; font-family:'IBM Plex Mono',monospace; }
@@ -227,13 +215,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .party-icon-btn:hover{ color:var(--brass); border-color:var(--brass-dim); }
   .party-icon-btn.danger:hover{ color:var(--red); border-color:var(--red); }
-  .iban-table{ width:100%; border-collapse:collapse; font-size:11.5px; }
-  .iban-table tr{ border-top:1px solid var(--hairline); cursor:pointer; transition:background .1s ease; }
-  .iban-table tr:hover{ background:rgba(198,161,91,0.08); }
-  .iban-table td{ padding:5px 14px; white-space:nowrap; }
-  .iban-table td.iban-bank-cell{ font-weight:700; color:var(--brass); }
-  .iban-table td.iban-num-cell{ font-family:'IBM Plex Mono',monospace; width:100%; }
-  .iban-table td.iban-cur-cell{ color:var(--muted); text-align:right; }
+  /* Müşteri/Tedarikçi listesi — kolonları hizalı tablo görünümü */
+  .party-table-wrap{ overflow-x:auto; }
+  .party-table{ width:100%; border-collapse:collapse; font-size:11.5px; }
+  .party-table td{ padding:9px 14px; border-top:1px solid var(--hairline); white-space:nowrap; vertical-align:middle; }
+  .party-table tr:first-child td{ border-top:none; }
+  .pt-main > td{ background:var(--surface-2); }
+  .pt-main.is-toggle{ cursor:pointer; }
+  .pt-main.is-toggle:hover > td{ background:var(--surface); }
+  .pt-extra[hidden]{ display:none; }
+  .pt-extra > td{ background:var(--surface); }
+  .pt-name{ white-space:normal; min-width:170px; max-width:340px; }
+  .pt-title{ display:flex; align-items:flex-start; gap:7px; }
+  .pt-chevron{ color:var(--muted); font-size:10px; flex-shrink:0; display:inline-block; margin-top:3px; transition:transform .18s ease; }
+  .pt-main.open .pt-chevron{ transform:rotate(180deg); color:var(--brass); }
+  .pt-bank{ font-weight:700; color:var(--brass); }
+  .pt-iban{ font-family:'IBM Plex Mono',monospace; width:100%; cursor:pointer; transition:color .1s ease; }
+  .pt-iban:hover{ color:var(--brass); }
+  .pt-cur{ color:var(--muted); text-align:right; }
+  .pt-del{ text-align:right; width:1%; }
   .empty-note{ color:var(--muted); font-size:13px; padding:16px 2px; text-align:center; }
 
   .bank-chip-list{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
@@ -992,52 +992,49 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       listEl.innerHTML = '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
       return;
     }
-    listEl.innerHTML = list.map(p => {
+    listEl.innerHTML = '<div class="party-table-wrap"><table class="party-table"><tbody>' + list.map(p => {
       const ibans = p.ibans || [];
       const first = ibans[0];
       const rest = ibans.slice(1);
       const hasExtra = rest.length > 0;
-      // Kapalı haldeyken firma adının yanında görünen ilk banka hesabı: banka | IBAN | para birimi
-      const firstIbanHtml = first
-        ? '<div class="party-first-iban copyable" data-copy-iban="' + escapeHtml((first.iban||'').replace(/\s+/g,'')) + '">' +
-            '<span class="pf-bank">' + escapeHtml(first.bank || '—') + '</span>' +
-            '<span class="pf-iban">' + escapeHtml(first.iban || '—') + '</span>' +
-            '<span class="pf-cur">' + escapeHtml(first.currency || 'TRY') + '</span>' +
-          '</div>'
-        : '';
-      // Firmaya tıklayınca alt alta açılan diğer banka hesapları
-      const restRowsHtml = rest.map(i =>
-        '<tr data-copy-iban="' + escapeHtml((i.iban||'').replace(/\s+/g,'')) + '">' +
-          '<td class="iban-bank-cell">' + escapeHtml(i.bank || '—') + '</td>' +
-          '<td class="iban-num-cell">' + escapeHtml(i.iban || '—') + '</td>' +
-          '<td class="iban-cur-cell">' + escapeHtml(i.currency || 'TRY') + '</td>' +
+      const idHtml = p.idNumber ? '<div class="party-idnum">' + escapeHtml(p.idNumber) + '</div>' : '';
+      // Ana satır: [ isim/unvan | banka | IBAN | para birimi | sil ] — tüm firmalarda kolonlar hizalı
+      const nameCell =
+        '<td class="pt-name">' +
+          '<div class="pt-title">' +
+            (hasExtra ? '<span class="pt-chevron">▾</span>' : '') +
+            '<span class="party-name">' + escapeHtml(p.name) + '</span>' +
+            scopeBadgeHtml(p) +
+          '</div>' + idHtml +
+        '</td>';
+      const mainRow =
+        '<tr class="pt-main' + (hasExtra ? ' is-toggle' : '') + '" data-party="' + p.id + '"' + (hasExtra ? ' data-toggle="1"' : '') + '>' +
+          nameCell +
+          '<td class="pt-bank">' + (first ? escapeHtml(first.bank || '—') : '') + '</td>' +
+          '<td class="pt-iban"' + (first ? ' data-copy-iban="' + escapeHtml((first.iban||'').replace(/\s+/g,'')) + '"' : '') + '>' + (first ? escapeHtml(first.iban || '—') : '') + '</td>' +
+          '<td class="pt-cur">' + (first ? escapeHtml(first.currency || 'TRY') : '') + '</td>' +
+          '<td class="pt-del"><button type="button" class="party-icon-btn danger" data-del="' + kind + '" data-id="' + p.id + '" title="' + LBL.delete + '">✕</button></td>' +
+        '</tr>';
+      // Firmaya tıklayınca aynı kolonlarda alt alta açılan diğer banka hesapları
+      const extraRows = rest.map(i =>
+        '<tr class="pt-extra" data-extra-of="' + p.id + '" hidden>' +
+          '<td class="pt-name"></td>' +
+          '<td class="pt-bank">' + escapeHtml(i.bank || '—') + '</td>' +
+          '<td class="pt-iban" data-copy-iban="' + escapeHtml((i.iban||'').replace(/\s+/g,'')) + '">' + escapeHtml(i.iban || '—') + '</td>' +
+          '<td class="pt-cur">' + escapeHtml(i.currency || 'TRY') + '</td>' +
+          '<td class="pt-del"></td>' +
         '</tr>'
       ).join('');
-      return '<div class="party-row" data-id="' + p.id + '">' +
-        '<div class="party-row-top' + (hasExtra ? ' is-toggle' : '') + '"' + (hasExtra ? ' data-toggle="1"' : '') + '>' +
-          '<div class="party-head">' +
-            (hasExtra ? '<span class="party-chevron">▾</span>' : '') +
-            '<span class="party-name">' + escapeHtml(p.name) + '</span>' +
-            (p.idNumber ? '<span class="party-idnum-inline">' + escapeHtml(p.idNumber) + '</span>' : '') +
-            scopeBadgeHtml(p) +
-          '</div>' +
-          firstIbanHtml +
-          '<div class="party-actions">' +
-            '<button type="button" class="party-icon-btn danger" data-del="' + kind + '" data-id="' + p.id + '" title="' + LBL.delete + '">✕</button>' +
-          '</div>' +
-        '</div>' +
-        (hasExtra ? '<div class="party-extra" hidden><table class="iban-table"><tbody>' + restRowsHtml + '</tbody></table></div>' : '') +
-      '</div>';
-    }).join('');
-    // Firma başlığına tıklayınca diğer banka hesaplarını aç/kapat
-    listEl.querySelectorAll('[data-toggle]').forEach(top => {
-      top.addEventListener('click', (e) => {
-        if(e.target.closest('.party-actions') || e.target.closest('.party-first-iban')) return;
-        const row = top.closest('.party-row');
-        const extra = row && row.querySelector('.party-extra');
-        if(!extra) return;
-        if(extra.hasAttribute('hidden')){ extra.removeAttribute('hidden'); top.classList.add('open'); }
-        else { extra.setAttribute('hidden',''); top.classList.remove('open'); }
+      return mainRow + extraRows;
+    }).join('') + '</tbody></table></div>';
+    // Firma satırına tıklayınca diğer banka hesaplarını aç/kapat
+    listEl.querySelectorAll('tr.pt-main[data-toggle]').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if(e.target.closest('.pt-del') || e.target.closest('.pt-iban')) return;
+        const pid = row.dataset.party;
+        const extras = listEl.querySelectorAll('tr.pt-extra[data-extra-of="' + pid + '"]');
+        const willOpen = row.classList.toggle('open');
+        extras.forEach(x => { if(willOpen){ x.removeAttribute('hidden'); } else { x.setAttribute('hidden',''); } });
       });
     });
     listEl.querySelectorAll('[data-del]').forEach(btn => {
