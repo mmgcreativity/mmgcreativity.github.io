@@ -208,7 +208,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .fav-star-card.is-fav svg{ fill:var(--brass); }
 
   /* ---------- Main ---------- */
-  main{ flex:1; height:100vh; display:flex; flex-direction:column; min-width:0; overflow-y:auto; }
+  main{ flex:1; height:100vh; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
   .topbar{
     height:56px; flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
     padding:0 26px; border-bottom:1px solid var(--hairline); background:rgba(20,28,43,0.5);
@@ -404,7 +404,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .card-grid{ display:flex; flex-wrap:wrap; align-items:flex-start; gap:18px; max-width:1400px; position:relative; }
   .card-grid.drag-over{ outline:2px dashed var(--brass); outline-offset:8px; border-radius:16px; background:rgba(198,161,91,0.05); }
   .desktop-toolbar{
-    position:absolute; top:20px; right:48px; z-index:15;
+    position:absolute; top:40px; right:48px; z-index:15;
     display:flex; align-items:flex-start; justify-content:flex-end; gap:12px; margin-bottom:0;
   }
   .desktop-edit-btn{
@@ -413,6 +413,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     font-family:'Inter',sans-serif; font-size:13px; font-weight:400; cursor:pointer; transition:border-color .15s ease, color .15s ease;
     white-space:nowrap; box-shadow:0 6px 18px rgba(0,0,0,0.25);
   }
+  .desktop-edit-btn[hidden]{ display:none; }
   .desktop-edit-btn:hover{ border-color:var(--brass); color:var(--brass); }
   .desktop-edit-btn.active{ background:var(--brass); border-color:var(--brass); color:#141220; }
   .desktop-edit-btn svg{ width:15px; height:15px; flex-shrink:0; }
@@ -444,7 +445,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
     padding:24px; cursor:pointer; text-align:left; color:var(--text);
     transition:border-color .15s ease, transform .15s ease; position:relative;
-    width:300px; max-width:100%; flex:0 0 auto; box-sizing:border-box;
+    width:300px; max-width:100%; min-height:190px; flex:0 0 auto; box-sizing:border-box;
+    display:flex; flex-direction:column;
   }
   .app-card.dynamic-shortcut{ display:flex; flex-direction:column; justify-content:center; min-height:70px; }
   .app-card.dynamic-shortcut p{ display:none; }
@@ -481,7 +483,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .app-card .card-icon{ width:24px; height:24px; color:var(--brass); transition:color .2s ease; }
   .app-card:hover .card-icon{ color:var(--coral); }
   .app-card h3{ font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600; margin-bottom:8px; padding-left:30px; }
-  .app-card p{ font-size:12.5px; color:var(--muted); line-height:1.55; }
+  .app-card p{
+    font-size:12.5px; color:var(--muted); line-height:1.55;
+    display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;
+  }
   .card-arrow{ position:absolute; top:22px; right:20px; color:var(--muted); font-size:16px; transition:transform .15s ease, color .15s ease; }
   .app-card:hover .card-arrow{ transform:translate(3px,-3px); color:var(--coral); }
 
@@ -494,9 +499,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     padding:3px 9px; border-radius:999px; margin-bottom:14px;
   }
 
-  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar{ width:10px; height:10px; }
   ::-webkit-scrollbar-track{ background:transparent; }
-  ::-webkit-scrollbar-thumb{ background:var(--hairline); border-radius:4px; }
+  ::-webkit-scrollbar-thumb{ background:var(--brass-dim,#8A7440); border-radius:5px; border:2px solid var(--surface); }
+  ::-webkit-scrollbar-thumb:hover{ background:var(--brass); }
+  aside, main, .home{ scrollbar-width:thin; scrollbar-color:var(--brass-dim,#8A7440) transparent; }
 
   footer{ padding:0 48px 18px; }
   .footer-powered-row{ padding:28px 0 14px; display:flex; justify-content:flex-end; }

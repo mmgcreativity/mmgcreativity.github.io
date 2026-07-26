@@ -325,6 +325,26 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     </div>
 
     <div class="veri-tab-panel" id="panel-banks">
+      <div class="card" id="banksBulkUploadCard" style="padding:12px 14px; margin-bottom:12px;">
+        <div style="margin-bottom:6px;">
+          <h2 data-i18n="bulk_title" style="margin-bottom:0; font-size:14px;">📥 Toplu Excel ile Yükle</h2>
+        </div>
+        <div class="bulk-actions bulk-actions-stacked" style="gap:6px;">
+          <button type="button" class="btn-secondary" id="downloadBanksTemplateBtn" data-i18n="download_template_btn" style="padding:8px 14px;">⬇️ Şablonu İndir</button>
+          <button type="button" class="btn-secondary" id="importBanksExcelBtn" data-i18n="upload_excel_btn" style="padding:8px 14px;">📤 Excel Yükle</button>
+          <input type="file" id="importBanksExcelInput" accept=".xlsx,.xls" style="display:none;">
+        </div>
+        <div id="banksBulkPreviewWrap" style="display:none;">
+          <div class="bulk-preview-wrap"><table class="bulk-preview-table" id="banksBulkPreviewTable"></table></div>
+          <div class="bulk-summary" id="banksBulkSummary"></div>
+          <div class="bulk-actions" style="margin-top:10px;">
+            <button type="button" class="auth-submit" id="banksBulkConfirmBtn" style="margin-top:0;" data-i18n="bulk_confirm_btn">Kaydet</button>
+            <button type="button" class="btn-secondary" id="banksBulkCancelBtn" data-i18n="bulk_cancel_btn">İptal</button>
+          </div>
+        </div>
+        <div class="form-msg" id="banksBulkMsg"></div>
+      </div>
+
       <div class="card">
         <h2 data-i18n="banks_title">IBAN'larım</h2>
         <div class="card-sub" data-i18n="banks_desc">Kendi banka hesaplarınızı (banka + IBAN) buraya kaydedin; müşteri/tedarikçi IBAN bilgisi girerken ve talimat hazırlarken öneri olarak çıkar.</div>
@@ -343,6 +363,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div class="form-msg" id="banks_msg"></div>
       </div>
     </div>
+
 
     <div class="veri-tab-panel" id="panel-bankList">
       <div class="card">
@@ -1008,6 +1029,94 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     await loadParties('suppliers');
     await loadCounterparties();
   }
+
+  // ---- IBAN'larım (banks) sekmesi için ayrı Excel şablonu/toplu yükleme ----
+  // Müşteri/Tedarikçi şablonundan farklı: burada sadece "Banka" ve "IBAN" sütunları var,
+  // çünkü IBAN'larım kaydı bir firma/kişi değil, kullanıcının kendi banka hesabıdır.
+  document.getElementById('downloadBanksTemplateBtn').addEventListener('click', () => {
+    try{
+      const header = [LBL.bulkBankCol, LBL.bulkIbanCol];
+      const example1 = ['Ziraat Bankası', 'TR000000000000000000000000'];
+      const example2 = ['İş Bankası', 'TR111111111111111111111111'];
+      const rows = [header, example1, example2];
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{wch:24},{wch:30}];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, MMG_LANG==='en' ? 'Template' : 'Şablon');
+      XLSX.writeFile(wb, 'iban-sablon.xlsx');
+      showMsg('banksBulkMsg', LBL.templateDownloaded, false);
+    } catch(e){ showMsg('banksBulkMsg', LBL.templateError, true); }
+  });
+
+  let pendingBanksBulkRows = null;
+  document.getElementById('importBanksExcelBtn').addEventListener('click', () => {
+    document.getElementById('importBanksExcelInput').click();
+  });
+  document.getElementById('importBanksExcelInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if(!file) return;
+    try{
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data, { type: 'array', cellDates: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+      const rows = [];
+      for(const row of json){
+        const bank = String(row['Banka'] ?? row['Bank'] ?? '').trim();
+        const iban = String(row['IBAN'] ?? '').trim().toUpperCase().replace(/\s+/g, '');
+        if(!bank && !iban) continue;
+        rows.push({ bank, iban });
+      }
+
+      if(!rows.length){ showMsg('banksBulkMsg', LBL.bulkNoRows, true); return; }
+
+      pendingBanksBulkRows = rows;
+      renderBanksBulkPreview(rows);
+    } catch(err){
+      showMsg('banksBulkMsg', LBL.bulkParseError, true);
+    }
+  });
+
+  function renderBanksBulkPreview(rows){
+    const wrap = document.getElementById('banksBulkPreviewWrap');
+    const table = document.getElementById('banksBulkPreviewTable');
+    const trs = rows.map(r => '<tr><td>' + escapeHtml(r.bank||'—') + '</td><td>' + escapeHtml(r.iban||'—') + '</td></tr>');
+    table.innerHTML = '<thead><tr><th>' + LBL.bulkBankCol + '</th><th>' + LBL.bulkIbanCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
+    document.getElementById('banksBulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: rows.length, p: rows.length });
+    wrap.style.display = 'block';
+  }
+
+  document.getElementById('banksBulkCancelBtn').addEventListener('click', () => {
+    pendingBanksBulkRows = null;
+    document.getElementById('banksBulkPreviewWrap').style.display = 'none';
+  });
+
+  document.getElementById('banksBulkConfirmBtn').addEventListener('click', async () => {
+    if(!pendingBanksBulkRows){ showMsg('banksBulkMsg', LBL.bulkNoFile, true); return; }
+    const btn = document.getElementById('banksBulkConfirmBtn');
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = LBL.bulkSaving;
+    try{
+      let count = 0;
+      for(const r of pendingBanksBulkRows){
+        const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
+        await setDoc(docRef('banks', id), { name: r.bank, iban: r.iban, createdAt: serverTimestamp() });
+        count++;
+      }
+      showMsg('banksBulkMsg', fmt(LBL.bulkDone, { n: count }), false);
+      pendingBanksBulkRows = null;
+      document.getElementById('banksBulkPreviewWrap').style.display = 'none';
+      await loadBanks();
+    } catch(e){
+      showMsg('banksBulkMsg', LBL.saveFailed, true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
 
   onAuthStateChanged(auth, async (user) => {
     if(!user){
