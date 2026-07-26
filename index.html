@@ -425,8 +425,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     position:absolute; top:calc(100% + 8px); right:0; z-index:20;
     display:flex; flex-direction:column; gap:8px;
   }
-  .desktop-icon-row{ display:flex; gap:8px; }
-  .desktop-icon-row[hidden]{ display:none; }
   .desktop-add-wrap{ position:relative; }
   .desktop-reset-btn{ color:var(--muted); }
   .desktop-reset-btn:hover{ border-color:#e05d5d; color:#e05d5d; }
@@ -613,7 +611,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .card-grid.edit-mode .app-card.resizable .card-resize-hint{ display:none; }
     .desktop-toolbar{ position:static; justify-content:flex-start; margin-top:16px; }
     .desktop-toolbar-actions{ width:auto; }
-    .desktop-menu-panel{ right:auto; left:0; width:200px; }
+    .desktop-menu-panel{ right:auto; left:0; width:auto; }
     .desktop-edit-btn{ width:auto; flex:1 1 auto; }
   }
 
@@ -1470,28 +1468,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
           </button>
           <div class="desktop-menu-panel" id="desktopMenuPanel">
-            <div class="desktop-icon-row">
-              <div class="desktop-add-wrap" id="desktopAddWrap" hidden>
-                <button type="button" class="desktop-edit-btn desktop-icon-btn" id="desktopAddToggle" aria-pressed="false" aria-haspopup="true" title="Kısayol ekle" aria-label="Kısayol ekle">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                </button>
-                <div class="desktop-add-menu" id="desktopAddMenu" hidden></div>
-              </div>
-              <button type="button" class="desktop-edit-btn desktop-icon-btn" id="desktopRemoveToggle" aria-pressed="false" hidden title="Kısayol kaldır" aria-label="Kısayol kaldır">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+            <div class="desktop-add-wrap" id="desktopAddWrap" hidden>
+              <button type="button" class="desktop-edit-btn desktop-icon-btn" id="desktopAddToggle" aria-pressed="false" aria-haspopup="true" title="Kısayol ekle" aria-label="Kısayol ekle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
               </button>
+              <div class="desktop-add-menu" id="desktopAddMenu" hidden></div>
             </div>
-            <div class="desktop-icon-row" id="desktopExtraRow" hidden>
-              <button type="button" class="desktop-edit-btn desktop-icon-btn desktop-reset-btn" id="desktopResetBtn" title="Sıfırla" aria-label="Sıfırla" data-i18n-title="desktop_reset" data-i18n-aria="desktop_reset">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
-              </button>
-              <button type="button" class="desktop-edit-btn desktop-icon-btn" id="desktopZoomOutBtn" title="Kutuları küçült" aria-label="Kutuları küçült">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6.5"/><path d="M15 15l5 5"/><path d="M7.5 10h5"/></svg>
-              </button>
-              <button type="button" class="desktop-edit-btn desktop-icon-btn" id="desktopZoomInBtn" title="Kutuları büyüt" aria-label="Kutuları büyüt">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6.5"/><path d="M15 15l5 5"/><path d="M10 7.5v5"/><path d="M7.5 10h5"/></svg>
-              </button>
-            </div>
+            <button type="button" class="desktop-edit-btn desktop-icon-btn" id="desktopRemoveToggle" aria-pressed="false" hidden title="Kısayol kaldır" aria-label="Kısayol kaldır">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+            </button>
+            <button type="button" class="desktop-edit-btn desktop-icon-btn" id="desktopZoomInBtn" hidden title="Kutuları büyüt" aria-label="Kutuları büyüt">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6.5"/><path d="M15 15l5 5"/><path d="M10 7.5v5"/><path d="M7.5 10h5"/></svg>
+            </button>
+            <button type="button" class="desktop-edit-btn desktop-icon-btn" id="desktopZoomOutBtn" hidden title="Kutuları küçült" aria-label="Kutuları küçült">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6.5"/><path d="M15 15l5 5"/><path d="M7.5 10h5"/></svg>
+            </button>
+            <button type="button" class="desktop-edit-btn desktop-icon-btn desktop-reset-btn" id="desktopResetBtn" hidden title="Sıfırla" aria-label="Sıfırla" data-i18n-title="desktop_reset" data-i18n-aria="desktop_reset">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -2035,6 +2029,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       writeJSON(LAYOUT_KEY, extra);
     }
     refreshEditAffordances();
+    if(typeof applyCardScale === 'function' && typeof getCardScale === 'function') applyCardScale(getCardScale());
   }
 
   function cssEscape(s){
@@ -2153,7 +2148,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var addMenu = document.getElementById('desktopAddMenu');
   var removeBtn = document.getElementById('desktopRemoveToggle');
   var resetBtn = document.getElementById('desktopResetBtn');
-  var extraRow = document.getElementById('desktopExtraRow');
+  var zoomInBtnRef = document.getElementById('desktopZoomInBtn');
+  var zoomOutBtnRef = document.getElementById('desktopZoomOutBtn');
 
   function setEditMode(on){
     grid.classList.toggle('edit-mode', on);
@@ -2161,7 +2157,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     editBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
     if(addWrap) addWrap.hidden = !on;
     if(removeBtn) removeBtn.hidden = !on;
-    if(extraRow) extraRow.hidden = !on;
+    if(resetBtn) resetBtn.hidden = !on;
+    if(zoomInBtnRef) zoomInBtnRef.hidden = !on;
+    if(zoomOutBtnRef) zoomOutBtnRef.hidden = !on;
     if(!on){
       setRemoveMode(false, true);
       closeAddMenu();
@@ -2187,6 +2185,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   function applyCardScale(w){
     document.documentElement.style.setProperty('--dfa-card-w', w + 'px');
+    var sizes = getSizes();
+    Array.prototype.forEach.call(document.querySelectorAll('.card-grid .app-card'), function(c){
+      var t = c.dataset.target;
+      if(sizes[t] && sizes[t].w) return; // elle boyutlandırılmış kart, dokunma
+      c.style.width = w + 'px';
+    });
   }
   function setCardScale(w){
     w = Math.max(CARD_MIN_W, Math.min(CARD_MAX_W, w));
@@ -3607,41 +3611,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   window.mmgApplyTheme = applyTheme;
   applyTheme(localStorage.getItem('mmg_theme') || 'dark');
-</script>
-
-<button id="mmgScrollDownBtn" title="Aşağı kaydır" aria-label="Aşağı kaydır" data-i18n-title="scroll_down" data-i18n-aria="scroll_down">↓</button>
-<style>
-  #mmgScrollDownBtn{
-    position:fixed; right:20px; bottom:20px; z-index:500;
-    width:44px; height:44px; border-radius:50%; border:1px solid var(--hairline,#2A3448);
-    background:var(--surface-2,#1B2536); color:var(--brass,#C6A15B);
-    font-size:20px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 8px 20px rgba(0,0,0,0.35); transition:opacity .2s ease, transform .2s ease;
-    opacity:0; pointer-events:none;
-  }
-  #mmgScrollDownBtn.show{ opacity:1; pointer-events:auto; }
-  #mmgScrollDownBtn:hover{ transform:translateY(2px); }
-</style>
-<script>
-(function(){
-  var btn = document.getElementById('mmgScrollDownBtn');
-  function nearBottom(){
-    return (window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 40);
-  }
-  function updateVisibility(){
-    if(document.body.scrollHeight <= window.innerHeight + 60 || nearBottom()){
-      btn.classList.remove('show');
-    } else {
-      btn.classList.add('show');
-    }
-  }
-  btn.addEventListener('click', function(){
-    window.scrollBy({ top: window.innerHeight * 0.85, behavior: 'smooth' });
-  });
-  window.addEventListener('scroll', updateVisibility);
-  window.addEventListener('resize', updateVisibility);
-  updateVisibility();
-})();
 </script>
 
 <script>
