@@ -88,21 +88,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .card h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15.5px; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
   .card .card-sub{ color:var(--muted); font-size:12.5px; margin-bottom:14px; line-height:1.5; }
 
-  .top-row{ display:flex; gap:16px; align-items:stretch; flex-wrap:wrap; margin-bottom:18px; }
-  .top-row > .scope-banner{ flex:1 1 320px; margin-bottom:0; }
-  .top-row > #bulkUploadCard{ flex:1 1 320px; margin-bottom:0; }
+  .top-row{ display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
+  .top-row > .scope-banner{ flex:1 1 300px; margin-bottom:0; }
+  .top-row > #bulkUploadCard{ flex:1 1 220px; margin-bottom:0; padding:14px 16px; }
+  .top-row > .veri-tabs{ flex:0 1 200px; margin-bottom:0; }
 
   .scope-banner{
     display:block; gap:12px;
-    background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px; padding:14px 16px; margin-bottom:18px;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px; padding:12px 16px; margin-bottom:18px;
   }
   .scope-banner-text{ font-size:12.5px; color:var(--muted); }
   .scope-banner-text b{ color:var(--text); }
-  .scope-firma-list{ list-style:none; margin-top:8px; padding:0; }
+  .scope-firma-list{ list-style:none; margin-top:6px; padding:0; }
   .scope-firma-list li{
-    font-size:12.5px; font-weight:700; color:var(--text); padding:6px 0; border-top:1px solid var(--hairline);
+    font-size:12.5px; font-weight:700; color:var(--text); padding:5px 0; border-top:1px solid var(--hairline);
   }
-  .scope-firma-list li:first-child{ border-top:none; padding-top:8px; }
+  .scope-firma-list li:first-child{ border-top:none; padding-top:6px; }
   .scope-link-btn{
     background:none; border:1px solid var(--hairline); border-radius:7px; padding:6px 12px; color:var(--brass);
     font-size:11.5px; font-weight:600; cursor:pointer; white-space:nowrap;
@@ -111,9 +112,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   .veri-tabs{ display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
   .veri-tab-btn{
-    padding:9px 16px; border-radius:9px; border:1px solid var(--hairline); background:var(--surface-2);
-    color:var(--muted); font-weight:700; font-size:12.5px; cursor:pointer; white-space:nowrap; text-align:left;
-    font-family:'Space Grotesk',sans-serif; transition:all .15s ease;
+    padding:9px 14px; border-radius:9px; border:1px solid var(--hairline); background:var(--surface-2);
+    color:var(--muted); font-weight:700; font-size:12.5px; cursor:pointer; white-space:normal; text-align:left;
+    font-family:'Space Grotesk',sans-serif; transition:all .15s ease; line-height:1.3;
   }
   .veri-tab-btn.active{ background:var(--grad); color:#fff; border-color:transparent; }
   .veri-tab-panel{ display:none; }
@@ -241,7 +242,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     </div>
 
     <div class="card" id="bulkUploadCard">
-      <div style="margin-bottom:12px;">
+      <div style="margin-bottom:8px;">
         <h2 data-i18n="bulk_title" style="margin-bottom:0;">📥 Toplu Excel ile Yükle</h2>
       </div>
       <div class="bulk-actions bulk-actions-stacked">
@@ -259,7 +260,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </div>
       <div class="form-msg" id="bulkMsg"></div>
     </div>
-    </div>
 
     <div class="veri-tabs" id="tabBar">
       <button type="button" class="veri-tab-btn" data-tab="banks" data-i18n="tab_banks">💳 IBAN'larım</button>
@@ -267,6 +267,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       <button type="button" class="veri-tab-btn active" data-tab="customers" data-i18n="tab_customers">👤 Müşteriler</button>
       <button type="button" class="veri-tab-btn" data-tab="suppliers" data-i18n="tab_suppliers">🚚 Tedarikçiler</button>
       <button type="button" class="veri-tab-btn" data-tab="counterparties" data-i18n="tab_counterparties">🏛️ Muhataplar</button>
+    </div>
     </div>
 
     <div class="veri-tab-panel active" id="panel-customers">
