@@ -201,9 +201,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .party-row{ background:var(--surface); border-bottom:1px solid var(--hairline); }
   .party-row:last-child{ border-bottom:none; }
   .party-row-top{
-    display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
     padding:9px 14px; background:var(--surface-2);
   }
+  .party-row-top.is-toggle{ cursor:pointer; }
+  .party-row-top.is-toggle:hover{ background:var(--surface); }
+  .party-head{ display:flex; align-items:center; gap:8px; flex-shrink:0; max-width:42%; }
+  .party-chevron{ color:var(--muted); font-size:11px; transition:transform .18s ease; flex-shrink:0; display:inline-block; }
+  .party-row-top.open .party-chevron{ transform:rotate(180deg); color:var(--brass); }
+  .party-first-iban{ display:flex; align-items:center; gap:14px; flex:1; min-width:0; font-size:11.5px; }
+  .party-first-iban .pf-bank{ font-weight:700; color:var(--brass); white-space:nowrap; flex-shrink:0; }
+  .party-first-iban .pf-iban{ font-family:'IBM Plex Mono',monospace; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .party-first-iban .pf-cur{ color:var(--muted); text-align:right; white-space:nowrap; flex-shrink:0; }
+  .party-first-iban.copyable{ cursor:pointer; border-radius:6px; padding:2px 6px; margin:-2px -6px; transition:background .1s ease; }
+  .party-first-iban.copyable:hover{ background:rgba(198,161,91,0.10); }
+  .party-extra[hidden]{ display:none; }
   .party-name{ font-size:12.5px; font-weight:700; }
   .party-idnum{ font-size:11.5px; color:var(--muted); margin-top:2px; font-family:'IBM Plex Mono',monospace; }
   .party-idnum-inline{ font-size:10.5px; color:var(--muted); margin-left:8px; font-family:'IBM Plex Mono',monospace; }
@@ -981,7 +993,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       return;
     }
     listEl.innerHTML = list.map(p => {
-      const ibanRowsHtml = (p.ibans || []).map(i =>
+      const ibans = p.ibans || [];
+      const first = ibans[0];
+      const rest = ibans.slice(1);
+      const hasExtra = rest.length > 0;
+      // Kapalı haldeyken firma adının yanında görünen ilk banka hesabı: banka | IBAN | para birimi
+      const firstIbanHtml = first
+        ? '<div class="party-first-iban copyable" data-copy-iban="' + escapeHtml((first.iban||'').replace(/\s+/g,'')) + '">' +
+            '<span class="pf-bank">' + escapeHtml(first.bank || '—') + '</span>' +
+            '<span class="pf-iban">' + escapeHtml(first.iban || '—') + '</span>' +
+            '<span class="pf-cur">' + escapeHtml(first.currency || 'TRY') + '</span>' +
+          '</div>'
+        : '';
+      // Firmaya tıklayınca alt alta açılan diğer banka hesapları
+      const restRowsHtml = rest.map(i =>
         '<tr data-copy-iban="' + escapeHtml((i.iban||'').replace(/\s+/g,'')) + '">' +
           '<td class="iban-bank-cell">' + escapeHtml(i.bank || '—') + '</td>' +
           '<td class="iban-num-cell">' + escapeHtml(i.iban || '—') + '</td>' +
@@ -989,19 +1014,32 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         '</tr>'
       ).join('');
       return '<div class="party-row" data-id="' + p.id + '">' +
-        '<div class="party-row-top">' +
-          '<div>' +
+        '<div class="party-row-top' + (hasExtra ? ' is-toggle' : '') + '"' + (hasExtra ? ' data-toggle="1"' : '') + '>' +
+          '<div class="party-head">' +
+            (hasExtra ? '<span class="party-chevron">▾</span>' : '') +
             '<span class="party-name">' + escapeHtml(p.name) + '</span>' +
             (p.idNumber ? '<span class="party-idnum-inline">' + escapeHtml(p.idNumber) + '</span>' : '') +
             scopeBadgeHtml(p) +
           '</div>' +
+          firstIbanHtml +
           '<div class="party-actions">' +
             '<button type="button" class="party-icon-btn danger" data-del="' + kind + '" data-id="' + p.id + '" title="' + LBL.delete + '">✕</button>' +
           '</div>' +
         '</div>' +
-        (ibanRowsHtml ? '<table class="iban-table"><tbody>' + ibanRowsHtml + '</tbody></table>' : '') +
+        (hasExtra ? '<div class="party-extra" hidden><table class="iban-table"><tbody>' + restRowsHtml + '</tbody></table></div>' : '') +
       '</div>';
     }).join('');
+    // Firma başlığına tıklayınca diğer banka hesaplarını aç/kapat
+    listEl.querySelectorAll('[data-toggle]').forEach(top => {
+      top.addEventListener('click', (e) => {
+        if(e.target.closest('.party-actions') || e.target.closest('.party-first-iban')) return;
+        const row = top.closest('.party-row');
+        const extra = row && row.querySelector('.party-extra');
+        if(!extra) return;
+        if(extra.hasAttribute('hidden')){ extra.removeAttribute('hidden'); top.classList.add('open'); }
+        else { extra.setAttribute('hidden',''); top.classList.remove('open'); }
+      });
+    });
     listEl.querySelectorAll('[data-del]').forEach(btn => {
       btn.addEventListener('click', async () => {
         if(!confirm(LBL.confirmDelete)) return;
@@ -1014,7 +1052,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     // Bir IBAN satırına tıklayınca panoya kopyalanır — talimat/mektup hazırlarken
     // hızlıca yapıştırabilmek için.
     listEl.querySelectorAll('[data-copy-iban]').forEach(row => {
-      row.addEventListener('click', () => {
+      row.addEventListener('click', (e) => {
+        e.stopPropagation();
         const iban = row.dataset.copyIban;
         if(!iban) return;
         if(navigator.clipboard && navigator.clipboard.writeText){
