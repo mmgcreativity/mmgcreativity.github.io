@@ -70,7 +70,7 @@ function mmgApplyTurkishFont(doc){
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
@@ -97,7 +97,7 @@ function mmgApplyTurkishFont(doc){
     db = getFirestore(fbApp);
   }
 
-  window.mmgCloud = { auth, db, doc, getDoc, setDoc, deleteDoc, collection, getDocs, currentUser: null, isPremium: false, isAdmin: false, scopeId: null, scopeCollection: 'users' };
+  window.mmgCloud = { auth, db, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, query, where, currentUser: null, isPremium: false, isAdmin: false, scopeId: null, scopeCollection: 'users' };
 
   onAuthStateChanged(auth, async (user) => {
     window.mmgCloud.currentUser = user;
@@ -1178,11 +1178,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const cloud = window.mmgCloud;
     if(!cloud || !cloud.currentUser){ section.style.display = 'none'; return; }
     try{
-      const uSnap = await cloud.getDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid));
-      const adminIds = (uSnap.exists() && Array.isArray(uSnap.data().adminFirmaIds)) ? uSnap.data().adminFirmaIds : [];
-      if(adminIds.length < 2){ section.style.display = 'none'; return; }
+      const uid = cloud.currentUser.uid;
+      const uSnap = await cloud.getDoc(cloud.doc(cloud.db, 'users', uid));
+      const data = uSnap.exists() ? uSnap.data() : {};
+      const adminIds = Array.isArray(data.adminFirmaIds) ? data.adminFirmaIds : [];
+      // Sadece yönettiğiniz (admin) değil, ÜYESİ olduğunuz firmaları da dahil ediyoruz —
+      // index.html'deki "Bağlı Firmalar" ile aynı mantık (bkz. loadFirmaMemberships).
+      let memberIds = [];
+      try{
+        const memSnap = await cloud.getDocs(cloud.query(cloud.collectionGroup(cloud.db, 'members'), cloud.where('uid', '==', uid)));
+        memSnap.forEach(d => {
+          const fid = d.ref.parent.parent ? d.ref.parent.parent.id : null;
+          if(fid) memberIds.push(fid);
+        });
+      }catch(e){ /* collectionGroup index eksikse sessizce geç, en azından admin firmaları gösterilir */ }
+      const allIds = Array.from(new Set([...adminIds, ...memberIds]));
+      if(allIds.length < 2){ section.style.display = 'none'; return; }
       consolidatedFirmas = [];
-      for(const fid of adminIds){
+      for(const fid of allIds){
         try{
           const fSnap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid));
           if(fSnap.exists()) consolidatedFirmas.push({ id: fid, name: fSnap.data().name || fid });
