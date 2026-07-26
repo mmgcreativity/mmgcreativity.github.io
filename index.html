@@ -404,7 +404,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     font-size:10.5px; letter-spacing:.16em; color:var(--muted); text-transform:uppercase; margin-bottom:16px;
   }
 
-  .card-grid{ display:flex; flex-wrap:wrap; align-items:flex-start; gap:18px; max-width:1400px; position:relative; }
+  .card-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(var(--dfa-card-w, 300px), 1fr)); align-items:start; gap:18px; max-width:1400px; position:relative; }
   .card-grid.drag-over{ outline:2px dashed var(--brass); outline-offset:8px; border-radius:16px; background:rgba(198,161,91,0.05); }
   .desktop-toolbar{
     position:absolute; top:40px; right:24px; z-index:15;
@@ -450,7 +450,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
     padding:24px; cursor:pointer; text-align:left; color:var(--text);
     transition:border-color .15s ease, transform .15s ease; position:relative;
-    width:var(--dfa-card-w, 300px); max-width:100%; min-height:190px; flex:0 0 auto; box-sizing:border-box;
+    width:100%; min-height:190px; box-sizing:border-box;
     display:flex; flex-direction:column;
   }
   .app-card.dynamic-shortcut{ display:flex; flex-direction:column; justify-content:center; min-height:70px; }
@@ -2194,9 +2194,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   }
 
-  // ---- Kutuları büyüt/küçült: tüm masaüstü kısayollarının varsayılan genişliğini
-  // birlikte ayarlar (tek tek kart köşesinden sürüklemenin daha kolay bir alternatifi).
-  // Elle boyutlandırılmış (SIZE_KEY'de kayıtlı) kartlar kendi genişliklerini korur.
+  // ---- Kutuları büyüt/küçült: artık kart alanı bir CSS grid, ve tüm sütunlar TEK bir
+  // paylaşılan CSS değişkeniyle (--dfa-card-w) boyutlanıyor. Bu yüzden büyüteçlere her
+  // basıldığında TÜM kutular istisnasız eşit boyuta geliyor — daha önce elle köşeden
+  // sürüklenerek boyutlandırılmış kartlar da dahil (aksi halde satırlar düzensiz diziliyordu).
   var CARD_SCALE_KEY = 'mmg_desktop_card_scale_v1';
   var CARD_MIN_W = 200, CARD_MAX_W = 420, CARD_STEP = 20, CARD_DEFAULT_W = 300;
   function getCardScale(){
@@ -2205,13 +2206,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   function applyCardScale(w){
     document.documentElement.style.setProperty('--dfa-card-w', w + 'px');
+    // Elle boyutlandırılmış kartların üzerindeki eski (satırları bozan) genişlik
+    // kaydını temizle; böylece hepsi gerçekten eşitlenir.
     var sizes = getSizes();
+    var changed = false;
     Array.prototype.forEach.call(document.querySelectorAll('.card-grid .app-card'), function(c){
+      c.style.width = '';
       var t = c.dataset.target;
-      if(sizes[t] && sizes[t].w) return; // elle boyutlandırılmış kart, dokunma
-      c._mmgZoomTriggered = true;
-      c.style.width = w + 'px';
+      if(sizes[t] && sizes[t].w){ delete sizes[t].w; changed = true; }
     });
+    if(changed) writeJSON(SIZE_KEY, sizes);
   }
   function setCardScale(w){
     w = Math.max(CARD_MIN_W, Math.min(CARD_MAX_W, w));
