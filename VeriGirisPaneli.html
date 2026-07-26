@@ -151,7 +151,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .iban-row{ display:grid; grid-template-columns: minmax(150px,1fr) minmax(230px,1.7fr) 84px auto; gap:8px; margin-bottom:8px; align-items:center; }
   @media (max-width:640px){ .iban-row{ grid-template-columns:1fr 1fr; } }
   .iban-row input{
-    width:100%; background:var(--surface); border:1px solid var(--hairline); border-radius:7px;
+    width:100%; min-width:0; background:var(--surface); border:1px solid var(--hairline); border-radius:7px;
     padding:8px 10px; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; outline:none;
   }
   .iban-row-remove{
@@ -823,6 +823,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   function fillBankSelect(){
     const sel = document.getElementById('bankNameSelect');
     if(sel) sel.innerHTML = '<option value="">Seçiniz</option>' + currentBankNames().map(b => `<option value="${b}">${b}</option>`).join('');
+    // Müşteri/Tedarikçi formundaki "Banka" alanının açılır listesi de ana banka listesinden beslensin
+    const dl = document.getElementById('banksDatalist');
+    if(dl) dl.innerHTML = currentBankNames().map(n => '<option value="' + escapeHtml(n) + '"></option>').join('');
   }
   fillBankSelect();
 
@@ -920,7 +923,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     // Öneri (datalist) her zaman TÜM firmaların banka listesinden beslenir — burada
     // görünürlük filtrelemesi uygulanmaz, çünkü bu sadece bir yazım kolaylığı.
     const datalist = document.getElementById('banksDatalist');
-    datalist.innerHTML = banksList.map(b => '<option value="' + escapeHtml(b.name) + '"></option>').join('');
+    const dlNames = currentBankNames().slice();
+    banksList.forEach(b => { if(b.name && dlNames.indexOf(b.name) === -1) dlNames.push(b.name); });
+    datalist.innerHTML = dlNames.map(n => '<option value="' + escapeHtml(n) + '"></option>').join('');
   }
   document.getElementById('addBankBtn').addEventListener('click', async () => {
     const select = document.getElementById('bankNameSelect');
@@ -965,6 +970,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const prefix = btn.dataset.addIban === 'customers' ? 'cust' : 'supp';
       addIbanRow(prefix);
     });
+  });
+  // IBAN alanı normalizasyonu: BÜYÜK harf, boşluk/işaret temizliği, baştaki tekrarlı "TR"
+  // (yapıştırma çakışması) teke iner ve TR IBAN uzunluğu olan 26 haneyle sınırlanır.
+  document.addEventListener('input', (e) => {
+    const t = e.target;
+    if(!t || !t.classList || !t.classList.contains('iban-num')) return;
+    let v = t.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    v = v.replace(/^(TR)+/, 'TR');
+    if(v.length > 26) v = v.slice(0, 26);
+    if(v !== t.value) t.value = v;
   });
   function readIbanRows(prefix){
     const wrap = document.getElementById(prefix + '_ibanRows');
