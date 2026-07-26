@@ -146,7 +146,7 @@
   <div class="two-col-grid">
   <div style="display:flex; flex-direction:column; gap:16px; min-width:0;">
     <div class="card" id="firmaSelectorCard" style="display:none;">
-      <div class="mini-label" style="margin-bottom:8px;" data-i18n="managed_firma">Firmalarım</div>
+      <h2 style="margin-bottom:8px;" data-i18n="managed_firma">Firmalarım</h2>
       <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:10px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;"></select>
     </div>
     <div class="card">
@@ -755,6 +755,15 @@
       const memberDocs = [];
       membersSnap.forEach(d => memberDocs.push({ id: d.id, data: d.data() }));
 
+      // Her üyenin kendi profilindeki kullanıcı kodunu (users/{uid}.customerNumber) çekiyoruz;
+      // listede e-posta yerine bu kodu ("#1001" gibi) göstermek için kullanılacak.
+      await Promise.all(memberDocs.map(async (m) => {
+        try{
+          const uSnap = await getDoc(doc(db, 'users', m.id));
+          m.code = uSnap.exists() ? uSnap.data().customerNumber : null;
+        }catch(e){ m.code = null; }
+      }));
+
       // ---- Geriye dönük uyumluluk: bu düzeltmeden ÖNCE oluşturulmuş üyelik kayıtlarında
       // "uid" alanı yok. O kayıtlar index.html'deki yeni collectionGroup sorgusuyla
       // bulunamayacağı için, burada (admin panelini her açtığında) eksik olanları sessizce
@@ -783,7 +792,7 @@
       }));
 
       const rows = [];
-      memberDocs.forEach(({ id, data: md }) => {
+      memberDocs.forEach(({ id, data: md, code }) => {
         const idPrefix = 'm_' + id;
         const firmaAccessHtml = myAdminFirmas.length > 1
           ? '<div class="mini-label" style="margin-top:12px;">' + LBL.memberFirmaAccessLabel + '</div>' +
@@ -798,7 +807,7 @@
             '<div class="member-row-top">' +
               '<div class="member-info">' +
                 '<div class="member-name">' + (md.username || md.email || id) + '</div>' +
-                '<div class="member-sub">' + (md.email || '') + '</div>' +
+                '<div class="member-sub">' + (code ? '#' + code : '') + '</div>' +
               '</div>' +
               '<div class="member-row-actions">' +
                 '<button type="button" class="member-icon-btn member-edit-btn" data-edit="' + id + '" title="' + LBL.editPerms + '" aria-label="' + LBL.editPerms + '">✏️</button>' +
