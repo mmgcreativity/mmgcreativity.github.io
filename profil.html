@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{
+    var mode = localStorage.getItem('mmg_theme') || 'dark';
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+  }catch(e){}
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.mmgTheme){
+      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
+      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
+    }
+  });
+})();
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<!-- End Google Tag Manager -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil — mmgcreativity</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --teal:#3FB68A; --azure:#3E8FE0; --coral:#FF6B4A;
+    --magenta:#D6407A; --violet:#7C4DD9;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; min-height:100vh; padding-bottom:60px;
+  }
+  .back-link{
+    position:fixed; top:16px; right:68px; z-index:800;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  @media (max-width:480px){ .back-link{ top:64px; right:8px; } }
+
+  main{ max-width:680px; margin:0 auto; padding:0 0 60px; }
+
+  .state-box{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:40px 24px;
+    text-align:center; color:var(--muted); font-size:13.5px; line-height:1.6; margin:24px;
+  }
+  .state-box .big{ font-size:28px; margin-bottom:10px; }
+  .state-box a{ color:var(--brass); }
+
+  /* ---- Kapak + avatar ---- */
+  .profile-shell{ animation:mmgFadeIn .3s ease; }
+  @keyframes mmgFadeIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+  .cover{
+    height:210px; width:100%; position:relative; overflow:hidden;
+    background:var(--grad); background-size:cover; background-position:center;
+    border-bottom:1px solid var(--hairline);
+  }
+  @media (max-width:480px){ .cover{ height:150px; } }
+  .cover::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(5,8,14,0) 40%, rgba(5,8,14,0.35));
+  }
+  .profile-head{ padding:0 24px; position:relative; }
+  .avatar-block{ display:flex; align-items:flex-end; justify-content:space-between; margin-top:-56px; }
+  .avatar-ring{
+    /* Story halkası — dolu ise gradyan çember gösterir (Faz 2'de gerçek hikâyelerle) */
+    width:120px; height:120px; border-radius:50%; padding:4px; flex-shrink:0;
+    background:var(--surface); position:relative;
+  }
+  .avatar-ring.has-story{ background:var(--grad); cursor:pointer; }
+  .avatar-inner{
+    width:100%; height:100%; border-radius:50%; overflow:hidden; border:4px solid var(--surface);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:44px; color:#fff;
+    background:var(--grad); box-shadow:0 6px 20px rgba(0,0,0,0.35);
+  }
+  .avatar-inner img{ width:100%; height:100%; object-fit:cover; }
+  @media (max-width:480px){
+    .avatar-ring{ width:96px; height:96px; }
+    .avatar-inner{ font-size:34px; }
+    .avatar-block{ margin-top:-46px; }
+  }
+  .edit-profile-btn{
+    padding:9px 18px; border-radius:10px; border:1px solid var(--hairline); cursor:pointer;
+    background:var(--surface-2); color:var(--text); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px;
+    white-space:nowrap; transition:border-color .15s ease, color .15s ease; margin-bottom:8px;
+  }
+  .edit-profile-btn:hover{ border-color:var(--brass); color:var(--brass); }
+
+  .identity{ margin-top:14px; }
+  .display-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:24px; letter-spacing:-0.01em; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .username{ color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:13.5px; margin-top:2px; }
+  .badge{
+    display:inline-block; font-size:10.5px; font-family:'IBM Plex Mono',monospace; letter-spacing:.04em;
+    color:var(--brass); background:rgba(198,161,91,0.12); border:1px solid rgba(198,161,91,0.35);
+    padding:3px 9px; border-radius:999px; vertical-align:middle;
+  }
+  .badge.private{ color:var(--muted); background:rgba(141,150,172,0.12); border-color:rgba(141,150,172,0.3); }
+  .bio{ margin-top:14px; font-size:14.5px; line-height:1.65; color:var(--text); opacity:0.9; white-space:pre-wrap; word-break:break-word; }
+
+  /* ---- İstatistik satırı ---- */
+  .stats-row{ display:flex; gap:26px; margin-top:18px; padding:16px 0; border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline); }
+  .stat b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:var(--text); }
+  .stat span{ color:var(--muted); font-size:13px; margin-left:5px; }
+
+  /* ---- İletişim ---- */
+  .section-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin:22px 0 12px; }
+  .contact-list{ display:flex; flex-direction:column; gap:10px; }
+  .contact-item{ display:flex; align-items:center; gap:10px; font-size:14px; color:var(--text); }
+  .contact-item a{ color:var(--azure); text-decoration:none; }
+  .contact-item a:hover{ text-decoration:underline; }
+  .contact-item .ic{ color:var(--muted); flex-shrink:0; display:flex; }
+  .contact-item .hidden-tag{ font-size:10.5px; color:var(--muted); font-family:'IBM Plex Mono',monospace; border:1px solid var(--hairline); border-radius:6px; padding:1px 6px; margin-left:4px; }
+
+  /* ---- Sosyal medya ikonları ---- */
+  .socials-row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:4px; }
+  .social-link{
+    width:44px; height:44px; border-radius:12px; border:1px solid var(--hairline); background:var(--surface-2);
+    display:flex; align-items:center; justify-content:center; color:var(--text);
+    transition:transform .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .social-link:hover{ transform:translateY(-2px); border-color:var(--brass); color:var(--brass); }
+  .social-link svg{ width:20px; height:20px; }
+
+  .profile-body{ padding:0 24px; }
+  .empty-note{ text-align:center; color:var(--muted); font-size:13px; padding:24px 16px; }
+
+  .private-box{
+    margin:26px 24px; background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
+    padding:32px 24px; text-align:center; color:var(--muted); font-size:14px; line-height:1.6;
+  }
+  .private-box .lock{ font-size:30px; margin-bottom:10px; }
+
+  /* ---- Düzenleme modalı ---- */
+  .modal-overlay{
+    position:fixed; inset:0; z-index:970; background:rgba(5,8,14,0.85);
+    display:flex; align-items:flex-start; justify-content:center; padding:24px; overflow-y:auto;
+  }
+  .modal-overlay[hidden]{ display:none; }
+  .modal-card{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:18px;
+    max-width:560px; width:100%; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.5); margin:auto;
+  }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .modal-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; }
+  .modal-close{ background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; padding:4px; }
+  .modal-close:hover{ color:var(--red); }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:5px; }
+  .field input[type=text], .field input[type=url], .field input[type=email], .field input[type=tel], .field textarea{
+    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px;
+    padding:11px 13px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
+    transition:border-color .15s ease;
+  }
+  .field input:focus, .field textarea:focus{ border-color:var(--brass-dim); }
+  .field textarea{ resize:vertical; min-height:88px; }
+  .field-hint{ font-size:11px; color:var(--muted); margin-top:5px; line-height:1.5; }
+  .field-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:480px){ .field-grid{ grid-template-columns:1fr; } }
+  .form-divider{ border:none; border-top:1px solid var(--hairline); margin:18px 0; }
+  .form-sub{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px; }
+  .check-row{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text); margin-top:6px; }
+  .check-row input{ width:16px; height:16px; accent-color:var(--brass); }
+
+  /* Açık/Gizli anahtarı */
+  .toggle-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:12px 14px; }
+  .toggle-row .lbl b{ font-size:13.5px; }
+  .toggle-row .lbl div{ font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .switch{ position:relative; width:46px; height:26px; flex-shrink:0; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch .track{ position:absolute; inset:0; background:var(--hairline); border-radius:999px; transition:background .15s ease; cursor:pointer; }
+  .switch .track::before{ content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .15s ease; }
+  .switch input:checked + .track{ background:var(--teal); }
+  .switch input:checked + .track::before{ transform:translateX(20px); }
+
+  .modal-footer{ display:flex; align-items:center; gap:10px; margin-top:20px; }
+  .save-btn{
+    padding:10px 22px; border-radius:10px; border:none; cursor:pointer;
+    background:var(--grad); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px;
+    transition:opacity .15s ease;
+  }
+  .save-btn:hover{ opacity:0.9; }
+  .save-btn:disabled{ opacity:0.5; cursor:default; }
+  .cancel-btn{ background:none; border:1px solid var(--hairline); color:var(--muted); cursor:pointer; padding:10px 16px; border-radius:10px; font-size:13px; }
+  .cancel-btn:hover{ color:var(--red); border-color:var(--red); }
+  .modal-error{ color:var(--red); font-size:12px; margin-top:10px; display:none; }
+  .modal-error.show{ display:block; }
+  .faz2-hint{ font-size:11px; color:var(--brass); margin-top:4px; font-family:'IBM Plex Mono',monospace; }
+</style>
+</head>
+<body>
+
+<a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
+
+<main>
+  <div id="stateArea"></div>
+  <div id="profileContent" hidden></div>
+</main>
+
+<!-- ================== Hikâye görüntüleyici — Faz 2 yer tutucu ==================
+     Faz 1'de yalnızca arayüz stub'ı; gerçek 24 saatlik hikâyeler (yükleme, süre
+     dolumu, görüntülenme) Faz 2'de eklenecek. Veri modeli fikri:
+     profiles/{uid}/stories/{storyId} = { mediaURL, createdAt, expiresAt (createdAt + 24s) } -->
+<div class="modal-overlay" id="storyViewer" hidden>
+  <div class="modal-card" style="max-width:420px; text-align:center;">
+    <div class="modal-head">
+      <div class="modal-title">📸 Hikâyeler</div>
+      <button type="button" class="modal-close" id="storyClose">✕</button>
+    </div>
+    <div style="padding:26px 8px; color:var(--muted); font-size:14px; line-height:1.6;">
+      <div style="font-size:30px; margin-bottom:10px;">🚧</div>
+      <b style="color:var(--text);">Yakında — Faz 2</b><br>
+      24 saatlik hikâye paylaşımı (yükleme, otomatik süre dolumu ve görüntüleyici)
+      bir sonraki fazda eklenecek.
+    </div>
+  </div>
+</div>
+
+<!-- ================== Profili Düzenle modalı (sadece profil sahibi) ================== -->
+<div class="modal-overlay" id="editModal" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title">Profili Düzenle</div>
+      <button type="button" class="modal-close" id="editClose">✕</button>
+    </div>
+
+    <div class="field">
+      <label>Görünen ad</label>
+      <input type="text" id="f_displayName" maxlength="60" placeholder="Adınız">
+    </div>
+    <div class="field">
+      <label>Hakkında (bio)</label>
+      <textarea id="f_bio" maxlength="500" placeholder="Kendinizden kısaca bahsedin..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Profil fotoğrafı bağlantısı (URL)</label>
+      <input type="url" id="f_photoURL" placeholder="https://...jpg">
+      <!-- FAZ 2 (TODO): Doğrudan görsel YÜKLEME için Firebase Storage gerekiyor.
+           Faz 1'de kullanıcı bir görsel bağlantısı yapıştırır. Storage yüklemesi
+           (uploadBytes + getDownloadURL) Faz 2'de eklenecek; şimdilik uygulanmıyor. -->
+      <div class="faz2-hint">Faz 2: doğrudan dosya yükleme (Firebase Storage) eklenecek.</div>
+    </div>
+    <div class="field">
+      <label>Kapak görseli bağlantısı (URL)</label>
+      <input type="url" id="f_coverURL" placeholder="https://...jpg">
+    </div>
+
+    <hr class="form-divider">
+    <div class="form-sub">İletişim</div>
+    <div class="field-grid">
+      <div class="field">
+        <label>E-posta</label>
+        <input type="email" id="f_email" placeholder="ornek@eposta.com">
+        <div class="check-row"><input type="checkbox" id="f_showEmail"><label for="f_showEmail" style="margin:0;">Herkese göster</label></div>
+      </div>
+      <div class="field">
+        <label>Telefon</label>
+        <input type="tel" id="f_phone" placeholder="+90 5xx xxx xx xx">
+        <div class="check-row"><input type="checkbox" id="f_showPhone"><label for="f_showPhone" style="margin:0;">Herkese göster</label></div>
+      </div>
+    </div>
+
+    <hr class="form-divider">
+    <div class="form-sub">Sosyal Medya (URL)</div>
+    <div class="field-grid">
+      <div class="field"><label>Facebook</label><input type="url" id="f_facebook" placeholder="https://facebook.com/..."></div>
+      <div class="field"><label>X (Twitter)</label><input type="url" id="f_x" placeholder="https://x.com/..."></div>
+      <div class="field"><label>Instagram</label><input type="url" id="f_instagram" placeholder="https://instagram.com/..."></div>
+      <div class="field"><label>LinkedIn</label><input type="url" id="f_linkedin" placeholder="https://linkedin.com/in/..."></div>
+      <div class="field"><label>WhatsApp</label><input type="url" id="f_whatsapp" placeholder="https://wa.me/90..."></div>
+      <div class="field"><label>TikTok</label><input type="url" id="f_tiktok" placeholder="https://tiktok.com/@..."></div>
+    </div>
+
+    <hr class="form-divider">
+    <div class="toggle-row">
+      <div class="lbl">
+        <b>Hesap görünürlüğü</b>
+        <div id="visibilityDesc">Açık — profiliniz giriş yapmış herkese görünür.</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="f_isPublic" checked>
+        <span class="track"></span>
+      </label>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="save-btn" id="saveProfileBtn">Kaydet</button>
+      <button type="button" class="cancel-btn" id="editCancel">Vazgeç</button>
+    </div>
+    <div class="modal-error" id="editError"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, collection, query, where, getCountFromServer
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
+    authDomain: "mmgcreativity-31263.firebaseapp.com",
+    projectId: "mmgcreativity-31263",
+    storageBucket: "mmgcreativity-31263.firebasestorage.app",
+    messagingSenderId: "243143536600",
+    appId: "1:243143536600:web:daa53a2614b42a2ccb8cad",
+    measurementId: "G-X8HEZRNWWS"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  // Blog.html/Forum.html ile aynı desen: üst pencere (index.html) zaten giriş yapmış
+  // kullanıcının auth/db örneğini paylaşıyorsa onu kullan, yoksa kendi örneğini kur.
+  let auth, db;
+  try{
+    if(window.parent && window.parent !== window && window.parent.mmgAuth && window.parent.mmgDb){
+      auth = window.parent.mmgAuth;
+      db = window.parent.mmgDb;
+    }
+  }catch(e){ /* farklı origin ihtimaline karşı sessizce geç */ }
+  if(!auth || !db){
+    auth = getAuth(fbApp);
+    db = getFirestore(fbApp);
+  }
+
+  const stateArea = document.getElementById('stateArea');
+  const profileContent = document.getElementById('profileContent');
+
+  let MMG_LANG = 'tr';
+  try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
+  const EN = MMG_LANG === 'en';
+
+  function escapeHtml(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // Görünen ada/uid'e göre sabit gradyan (Forum.html ile aynı mantık).
+  const AVATAR_GRADIENTS = [
+    'linear-gradient(120deg, #FF6B4A, #D6407A 60%)',
+    'linear-gradient(120deg, #7C4DD9, #3E8FE0 60%)',
+    'linear-gradient(120deg, #3FB68A, #3E8FE0 60%)',
+    'linear-gradient(120deg, #C6A15B, #FF6B4A 60%)',
+    'linear-gradient(120deg, #D6407A, #7C4DD9 60%)'
+  ];
+  function avatarGradientFor(seed){
+    let h = 0;
+    const str = String(seed || '');
+    for(let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+    return AVATAR_GRADIENTS[h % AVATAR_GRADIENTS.length];
+  }
+
+  // URL'de şema yoksa https:// ekle; WhatsApp için sadece rakam girildiyse wa.me linki üret.
+  function normalizeUrl(raw, kind){
+    let v = String(raw || '').trim();
+    if(!v) return '';
+    if(kind === 'whatsapp' && /^[+0-9()\s-]+$/.test(v)){
+      return 'https://wa.me/' + v.replace(/[^0-9]/g, '');
+    }
+    if(!/^https?:\/\//i.test(v)) v = 'https://' + v;
+    return v;
+  }
+
+  const SOCIAL_DEFS = [
+    { key:'facebook',  label:'Facebook',  svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.9 3.78-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.9h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94z"/></svg>' },
+    { key:'x',         label:'X',         svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.65l-5.21-6.82-5.96 6.82H.9l7.73-8.84L.05 2.25H6.9l4.71 6.23 5.63-6.23zm-1.16 17.52h1.83L7.02 4.13H5.05l12.03 15.64z"/></svg>' },
+    { key:'instagram', label:'Instagram', svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>' },
+    { key:'linkedin',  label:'LinkedIn',  svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.72C24 .77 23.2 0 22.22 0z"/></svg>' },
+    { key:'whatsapp',  label:'WhatsApp',  svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35zM12.04 2c-5.52 0-10 4.48-10 10 0 1.77.46 3.42 1.27 4.86L2 22l5.28-1.38A9.96 9.96 0 0 0 12.04 22c5.52 0 10-4.48 10-10s-4.48-10-10-10z"/></svg>' },
+    { key:'tiktok',    label:'TikTok',    svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.82a4.28 4.28 0 0 1-1.05-2.82h-3.3v12.9a2.59 2.59 0 0 1-2.59 2.5 2.59 2.59 0 0 1-.32-5.16v-3.36a5.92 5.92 0 1 0 6.21 5.9V8.9a7.57 7.57 0 0 0 4.34 1.36V6.96a4.28 4.28 0 0 1-3.24-1.14z"/></svg>' }
+  ];
+
+  const CONTACT_ICONS = {
+    email:'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+    phone:'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg>'
+  };
+
+  // ---- Durum ----
+  let viewerUid = null;
+  let viewerIsAdmin = false;
+  let profileUid = null;
+  let fallbackName = '';   // Forum/Blog'dan gelen ?name= (profiles dokümanı boşsa yedek).
+
+  try{
+    const params = new URLSearchParams(window.location.search);
+    profileUid = params.get('uid');
+    fallbackName = params.get('name') || '';
+  }catch(e){}
+
+  function showState(html){
+    profileContent.hidden = true;
+    stateArea.innerHTML = '<div class="state-box">' + html + '</div>';
+  }
+
+  function avatarInnerHtml(name, photoURL, seed){
+    if(photoURL){
+      return '<div class="avatar-inner"><img src="' + escapeHtml(photoURL) + '" alt=""></div>';
+    }
+    const initial = (name || '?').trim().charAt(0).toUpperCase() || '?';
+    return '<div class="avatar-inner" style="background:' + avatarGradientFor(seed || name) + '">' + escapeHtml(initial) + '</div>';
+  }
+
+  // blogPosts (published) + forumPosts sayımları. Sunucu tarafı sayım (getCountFromServer)
+  // ile dokümanları indirmeden say; mevcut indeksler (authorUid+status, authorUid+createdAt)
+  // eşitlik sorgularını karşılar.
+  async function loadStats(uid){
+    let blogCount = 0, forumCount = 0;
+    try{
+      const bq = query(collection(db, 'blogPosts'), where('authorUid', '==', uid), where('status', '==', 'published'));
+      blogCount = (await getCountFromServer(bq)).data().count;
+    }catch(e){ blogCount = null; }
+    try{
+      const fq = query(collection(db, 'forumPosts'), where('authorUid', '==', uid));
+      forumCount = (await getCountFromServer(fq)).data().count;
+    }catch(e){ forumCount = null; }
+    const blogLbl = EN ? (blogCount === 1 ? 'blog post' : 'blog posts') : 'blog yazısı';
+    const forumLbl = EN ? (forumCount === 1 ? 'forum post' : 'forum posts') : 'forum gönderisi';
+    const statsEl = document.getElementById('statBlog');
+    const statsEl2 = document.getElementById('statForum');
+    if(statsEl) statsEl.innerHTML = '<b>' + (blogCount == null ? '–' : blogCount) + '</b><span>' + blogLbl + '</span>';
+    if(statsEl2) statsEl2.innerHTML = '<b>' + (forumCount == null ? '–' : forumCount) + '</b><span>' + forumLbl + '</span>';
+  }
+
+  function renderPublicProfile(p, isOwner){
+    const displayName = p.displayName || p.username || fallbackName || (EN ? 'User' : 'Kullanıcı');
+    const username = p.username ? ('@' + p.username) : '';
+    const hasStory = false; // Faz 2'de gerçek hikâye varlığına göre true olacak.
+
+    // Sosyal ikonlar (sadece URL girilmiş olanlar).
+    const socials = p.socials || {};
+    const socialHtml = SOCIAL_DEFS.map(s => {
+      const url = normalizeUrl(socials[s.key], s.key);
+      if(!url) return '';
+      return '<a class="social-link" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" title="' + s.label + '" aria-label="' + s.label + '">' + s.svg + '</a>';
+    }).join('');
+
+    // İletişim (paylaşılmışsa; sahip her zaman kendi bilgisini görür, gizliyse etiketle).
+    const contact = p.contact || {};
+    const contactRows = [];
+    if(contact.email && (contact.showEmail || isOwner)){
+      const hiddenTag = (!contact.showEmail && isOwner) ? '<span class="hidden-tag">' + (EN ? 'private' : 'gizli') + '</span>' : '';
+      contactRows.push('<div class="contact-item"><span class="ic">' + CONTACT_ICONS.email + '</span><a href="mailto:' + escapeHtml(contact.email) + '">' + escapeHtml(contact.email) + '</a>' + hiddenTag + '</div>');
+    }
+    if(contact.phone && (contact.showPhone || isOwner)){
+      const hiddenTag = (!contact.showPhone && isOwner) ? '<span class="hidden-tag">' + (EN ? 'private' : 'gizli') + '</span>' : '';
+      contactRows.push('<div class="contact-item"><span class="ic">' + CONTACT_ICONS.phone + '</span><a href="tel:' + escapeHtml(String(contact.phone).replace(/\s/g,'')) + '">' + escapeHtml(contact.phone) + '</a>' + hiddenTag + '</div>');
+    }
+
+    const badges = [];
+    if(p.isPublic === false){ badges.push('<span class="badge private">' + (EN ? '🔒 Private' : '🔒 Gizli') + '</span>'); }
+
+    const coverStyle = p.coverURL ? (' style="background-image:url(' + "'" + escapeHtml(p.coverURL) + "'" + ')"') : '';
+
+    profileContent.innerHTML =
+      '<div class="profile-shell">' +
+        '<div class="cover"' + coverStyle + '></div>' +
+        '<div class="profile-head">' +
+          '<div class="avatar-block">' +
+            '<div class="avatar-ring' + (hasStory ? ' has-story' : '') + '" id="avatarRing" title="' + (EN ? 'Stories (coming soon)' : 'Hikâyeler (yakında)') + '">' +
+              avatarInnerHtml(displayName, p.photoURL, profileUid) +
+            '</div>' +
+            (isOwner ? '<button type="button" class="edit-profile-btn" id="openEditBtn">' + (EN ? 'Edit Profile' : 'Profili Düzenle') + '</button>' : '') +
+          '</div>' +
+          '<div class="identity">' +
+            '<div class="display-name">' + escapeHtml(displayName) + badges.join('') + '</div>' +
+            (username ? '<div class="username">' + escapeHtml(username) + '</div>' : '') +
+            (p.bio ? '<div class="bio">' + escapeHtml(p.bio) + '</div>' : '') +
+          '</div>' +
+          '<div class="stats-row">' +
+            '<div class="stat" id="statBlog"><b>–</b><span>' + (EN ? 'blog posts' : 'blog yazısı') + '</span></div>' +
+            '<div class="stat" id="statForum"><b>–</b><span>' + (EN ? 'forum posts' : 'forum gönderisi') + '</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="profile-body">' +
+          (contactRows.length ? ('<div class="section-title">' + (EN ? 'Contact' : 'İletişim') + '</div><div class="contact-list">' + contactRows.join('') + '</div>') : '') +
+          (socialHtml ? ('<div class="section-title">' + (EN ? 'Social' : 'Sosyal Medya') + '</div><div class="socials-row">' + socialHtml + '</div>') : '') +
+        '</div>' +
+      '</div>';
+
+    profileContent.hidden = false;
+    stateArea.innerHTML = '';
+
+    // Story halkası → Faz 2 stub görüntüleyici
+    const ring = document.getElementById('avatarRing');
+    if(ring) ring.addEventListener('click', () => { document.getElementById('storyViewer').hidden = false; });
+
+    if(isOwner){
+      const eb = document.getElementById('openEditBtn');
+      if(eb) eb.addEventListener('click', () => openEditModal(p));
+    }
+
+    loadStats(profileUid);
+  }
+
+  function renderPrivateProfile(p){
+    const displayName = p.displayName || p.username || fallbackName || (EN ? 'User' : 'Kullanıcı');
+    profileContent.innerHTML =
+      '<div class="profile-shell">' +
+        '<div class="cover"></div>' +
+        '<div class="profile-head">' +
+          '<div class="avatar-block">' +
+            '<div class="avatar-ring">' + avatarInnerHtml(displayName, p.photoURL, profileUid) + '</div>' +
+          '</div>' +
+          '<div class="identity">' +
+            '<div class="display-name">' + escapeHtml(displayName) + '<span class="badge private">' + (EN ? '🔒 Private' : '🔒 Gizli') + '</span></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="private-box"><div class="lock">🔒</div>' +
+        (EN ? 'This account is private.' : 'Bu hesap gizli.') + '<br>' +
+        (EN ? 'The profile details are only visible to the owner.' : 'Profil ayrıntıları yalnızca hesap sahibine görünür.') +
+      '</div>';
+    profileContent.hidden = false;
+    stateArea.innerHTML = '';
+  }
+
+  // ================== Düzenleme modalı ==================
+  const editModal = document.getElementById('editModal');
+  function openEditModal(p){
+    const c = p.contact || {}, s = p.socials || {};
+    document.getElementById('f_displayName').value = p.displayName || p.username || '';
+    document.getElementById('f_bio').value = p.bio || '';
+    document.getElementById('f_photoURL').value = p.photoURL || '';
+    document.getElementById('f_coverURL').value = p.coverURL || '';
+    document.getElementById('f_email').value = c.email || '';
+    document.getElementById('f_phone').value = c.phone || '';
+    document.getElementById('f_showEmail').checked = c.showEmail === true;
+    document.getElementById('f_showPhone').checked = c.showPhone === true;
+    document.getElementById('f_facebook').value = s.facebook || '';
+    document.getElementById('f_x').value = s.x || '';
+    document.getElementById('f_instagram').value = s.instagram || '';
+    document.getElementById('f_linkedin').value = s.linkedin || '';
+    document.getElementById('f_whatsapp').value = s.whatsapp || '';
+    document.getElementById('f_tiktok').value = s.tiktok || '';
+    document.getElementById('f_isPublic').checked = p.isPublic !== false;
+    updateVisibilityDesc();
+    document.getElementById('editError').classList.remove('show');
+    editModal.hidden = false;
+  }
+  function closeEditModal(){ editModal.hidden = true; }
+  document.getElementById('editClose').addEventListener('click', closeEditModal);
+  document.getElementById('editCancel').addEventListener('click', closeEditModal);
+  editModal.addEventListener('click', (e) => { if(e.target === editModal) closeEditModal(); });
+
+  const isPublicInput = document.getElementById('f_isPublic');
+  function updateVisibilityDesc(){
+    const on = isPublicInput.checked;
+    document.getElementById('visibilityDesc').textContent = on
+      ? (EN ? 'Public — visible to every signed-in user.' : 'Açık — profiliniz giriş yapmış herkese görünür.')
+      : (EN ? 'Private — only you (and admins) can see the details.' : 'Gizli — ayrıntıları yalnızca siz (ve yöneticiler) görebilir.');
+  }
+  isPublicInput.addEventListener('change', updateVisibilityDesc);
+
+  document.getElementById('storyClose').addEventListener('click', () => { document.getElementById('storyViewer').hidden = true; });
+  document.getElementById('storyViewer').addEventListener('click', (e) => { if(e.target.id === 'storyViewer') document.getElementById('storyViewer').hidden = true; });
+
+  document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+    if(!viewerUid || viewerUid !== profileUid) return;
+    const btn = document.getElementById('saveProfileBtn');
+    const errEl = document.getElementById('editError');
+    errEl.classList.remove('show');
+    const displayName = document.getElementById('f_displayName').value.trim();
+    if(!displayName){ errEl.textContent = EN ? 'Please enter a display name.' : 'Lütfen bir görünen ad girin.'; errEl.classList.add('show'); return; }
+
+    const profileObj = {
+      uid: viewerUid,
+      displayName: displayName,
+      bio: document.getElementById('f_bio').value.trim(),
+      photoURL: document.getElementById('f_photoURL').value.trim(),
+      coverURL: document.getElementById('f_coverURL').value.trim(),
+      isPublic: document.getElementById('f_isPublic').checked,
+      contact: {
+        email: document.getElementById('f_email').value.trim(),
+        phone: document.getElementById('f_phone').value.trim(),
+        showEmail: document.getElementById('f_showEmail').checked,
+        showPhone: document.getElementById('f_showPhone').checked
+      },
+      socials: {
+        facebook: document.getElementById('f_facebook').value.trim(),
+        x: document.getElementById('f_x').value.trim(),
+        instagram: document.getElementById('f_instagram').value.trim(),
+        linkedin: document.getElementById('f_linkedin').value.trim(),
+        whatsapp: document.getElementById('f_whatsapp').value.trim(),
+        tiktok: document.getElementById('f_tiktok').value.trim()
+      },
+      updatedAt: Date.now()
+    };
+    // username bilgisini de profiles dokümanında tut ki başka kullanıcılar
+    // (users/{uid}'i okuyamadıkları için) yine de kullanıcı adını görebilsin.
+    if(currentProfile && currentProfile.username) profileObj.username = currentProfile.username;
+
+    btn.disabled = true;
+    const orig = btn.textContent;
+    btn.textContent = EN ? 'Saving…' : 'Kaydediliyor…';
+    try{
+      // merge:true → profiles dokümanındaki başka olası alanları ezmeden yaz.
+      await setDoc(doc(db, 'profiles', viewerUid), profileObj, { merge: true });
+      currentProfile = Object.assign({}, currentProfile, profileObj);
+      closeEditModal();
+      renderPublicProfile(currentProfile, true);
+    }catch(e){
+      errEl.textContent = (EN ? 'Could not save, please try again.' : 'Kaydedilemedi, lütfen tekrar deneyin.') + (e && e.message ? ' (' + e.message + ')' : '');
+      errEl.classList.add('show');
+    }finally{
+      btn.disabled = false;
+      btn.textContent = orig;
+    }
+  });
+
+  // ================== Yükleme akışı ==================
+  let currentProfile = null;
+
+  async function loadProfile(){
+    if(!profileUid){
+      showState('<div class="big">⚠️</div>' + (EN ? 'No profile specified.' : 'Profil belirtilmedi.'));
+      return;
+    }
+    const isOwner = viewerUid === profileUid;
+
+    // profiles/{uid} — giriş yapmış herkes okuyabilir (kurallar), sadece sahibi yazabilir.
+    let p = null;
+    try{
+      const snap = await getDoc(doc(db, 'profiles', profileUid));
+      if(snap.exists()) p = snap.data();
+    }catch(e){ /* okunamazsa aşağıda yedeğe düş */ }
+
+    // Sahibi için: profiles henüz yoksa, users/{uid}'den username'i çekip görünen adı
+    // ve avatarı ön-doldur (sahibi kendi users dokümanını okuyabilir).
+    if(isOwner){
+      try{
+        const uSnap = await getDoc(doc(db, 'users', profileUid));
+        if(uSnap.exists()){
+          const ud = uSnap.data();
+          const uname = ud.username || (ud.email ? ud.email.split('@')[0] : '');
+          if(!p) p = {};
+          if(!p.username && uname) p.username = uname;
+          if(!p.displayName) p.displayName = ud.displayName || ud.username || fallbackName || uname || '';
+          if(!p.photoURL && (ud.avatarBase64 || ud.logoBase64)) p.photoURL = ud.avatarBase64 || ud.logoBase64;
+        }
+      }catch(e){ /* sessizce geç */ }
+    }
+
+    if(!p){
+      // profiles dokümanı yok ve sahibi de değiliz → elimizdeki yedek isimle minimal göster.
+      p = { displayName: fallbackName || (EN ? 'User' : 'Kullanıcı'), isPublic: true };
+    }
+    currentProfile = p;
+
+    const isPrivate = p.isPublic === false;
+    if(isPrivate && !isOwner && !viewerIsAdmin){
+      renderPrivateProfile(p);
+    } else {
+      renderPublicProfile(p, isOwner);
+    }
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if(!user){
+      showState('<div class="big">🔒</div>' +
+        (EN ? 'You must be signed in to view profiles.<br><br>Sign in from any module (e.g. <a href="index.html">Home</a>) and reopen this page.'
+            : 'Profilleri görüntülemek için giriş yapmış olmanız gerekir.<br><br>Herhangi bir modülden (örn. <a href="index.html">Ana Sayfa</a>) giriş yaptıktan sonra bu sayfayı yeniden açın.'));
+      return;
+    }
+    viewerUid = user.uid;
+    viewerIsAdmin = false;
+    try{
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      viewerIsAdmin = snap.exists() && snap.data().isAdmin === true;
+    }catch(e){ viewerIsAdmin = false; }
+    loadProfile();
+  });
+</script>
+</body>
+</html>

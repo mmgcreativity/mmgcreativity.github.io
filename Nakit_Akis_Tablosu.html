@@ -376,14 +376,33 @@ function mmgApplyTurkishFont(doc){
   .week-net.pos{ color:var(--teal); }
   .week-net.neg{ color:var(--red); }
 
+  /* ---- Genel toplam kutusu ---- */
+  .grand-total-card{
+    background:var(--surface); border:1px solid var(--brass-dim); border-radius:12px;
+    padding:16px 18px; margin-top:16px;
+  }
+  .grand-total-card .gt-title{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--brass); margin-bottom:12px;
+  }
+  .grand-total-card .gt-row{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:8px 0; border-bottom:1px solid var(--hairline);
+  }
+  .grand-total-card .gt-row:last-child{ border-bottom:none; }
+  .grand-total-card .gt-label{ font-size:13.5px; color:var(--text); }
+  .grand-total-card .gt-value{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:14.5px; }
+  .grand-total-card .gt-value.pos{ color:var(--teal); }
+  .grand-total-card .gt-value.neg{ color:var(--red); }
+  .grand-total-card .gt-net-row{ margin-top:4px; padding-top:12px; border-top:2px solid var(--hairline); border-bottom:none; }
+  .grand-total-card .gt-net-row .gt-label{ font-weight:700; }
+
   table.day-table{ width:100%; border-collapse:collapse; }
   table.day-table th{
     font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:var(--muted); text-transform:uppercase;
-    text-align:right; padding:7px 16px; border-bottom:1px solid var(--hairline);
+    text-align:center; padding:7px 16px; border-bottom:1px solid var(--hairline);
   }
-  table.day-table th:first-child{ text-align:left; }
   table.day-table td{ padding:7px 16px; border-bottom:1px solid var(--hairline); font-size:13.5px; text-align:right; vertical-align:middle; }
-  table.day-table td:first-child{ text-align:left; }
   table.day-table tr:last-child > td{ border-bottom:none; }
   table.day-table tr.drawer-row > td{ border-bottom:1px solid var(--hairline); }
   table.day-table tr.today-row td:first-child{ color:var(--brass); font-weight:700; }
@@ -875,7 +894,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     cashflowTableTitle:'Cash Flow Table — ', appFooterTag:'mmgcreativity.com · Digital Finance Assistant', createdAt:'Created: ',
     pdfDownloaded:'PDF file downloaded.', pdfError:'An error occurred while creating the PDF file.',
     thisYear:'this year', vsLastYear:'compared to last year', vsLastMonth:'compared to last month',
-    vsPrevWeek:'compared to the previous week', vsPrevDay:'compared to the previous day'
+    vsPrevWeek:'compared to the previous week', vsPrevDay:'compared to the previous day',
+    grandTotalTitle:'GRAND TOTAL (Monthly)', totalIncomeLabel:'Total Income', totalExpenseLabel:'Total Expense',
+    netPositiveLabel:'Net — Surplus this month', netNegativeLabel:'Net — Deficit this month'
   } : {
     expense:'Gider', income:'Gelir', net:'Net', desc:'Açıklama', optional:'(opsiyonel)',
     category:'Kategori', amount:'Tutar', addBtn:'+ Ekle', descPlaceholderExpense:'örn. Kira, Elektrik faturası...',
@@ -903,7 +924,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     cashflowTableTitle:'Nakit Akış Tablosu — ', appFooterTag:'mmgcreativity.com · Dijital Finans Asistanı', createdAt:'Oluşturulma: ',
     pdfDownloaded:'PDF dosyası indirildi.', pdfError:'PDF oluşturulurken hata oluştu.',
     thisYear:'bu yıl', vsLastYear:'geçen yıla göre', vsLastMonth:'geçen aya göre',
-    vsPrevWeek:'önceki haftaya göre', vsPrevDay:'bir önceki güne göre'
+    vsPrevWeek:'önceki haftaya göre', vsPrevDay:'bir önceki güne göre',
+    grandTotalTitle:'GENEL TOPLAM (Aylık)', totalIncomeLabel:'Toplam Gelir', totalExpenseLabel:'Toplam Gider',
+    netPositiveLabel:'Net — Bu ay artıdasınız', netNegativeLabel:'Net — Bu ay eksidesiniz'
   };
   function weekOrdinal(n){ return MMG_LANG === 'en' ? (NAT.weekLabel + ' ' + n) : (n + '. ' + NAT.weekLabel); }
   const NAT_TABS = MMG_LANG === 'en'
@@ -967,6 +990,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   let selMonth = today.getMonth(); // 0-11
   let monthData = {}; // { 'YYYY-MM-DD': { gider:[{id,desc,category,amount}], gelir:[...], expanded:{gider:false,gelir:false} } }
   let saveTimer = null;
+  // VERİ KAYBI KORUMASI: O ayın bulut kaydını en az bir kez OKUYANA kadar buluta YAZMA yapma.
+  // Aksi halde sayfa açılırken (bulut henüz yüklenmeden) tetiklenen bir otomatik-kayıt,
+  // Firestore'daki gerçek veriyi boş monthData ile ezip kalıcı veri kaybına yol açabiliyordu.
+  let monthCloudLoaded = false;
   let reportTab = 'gunluk'; // 'gunluk' | 'haftalik' | 'aylik' | 'yillik' | 'arsiv'
   let reportDay = today.getDate();
   let reportWeekIdx = 0;
@@ -1021,6 +1048,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   async function saveCloud(mk){
     if(!isMember()) return;
+    // VERİ KAYBI KORUMASI: Bu ayın bulut kaydı henüz okunmadıysa buluta yazma (aksi halde
+    // sayfa açılış anındaki boş monthData, Firestore'daki gerçek veriyi ezebilir).
+    if(!monthCloudLoaded) return;
     try{
       const cloud = window.mmgCloud;
       await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'cashflow', mk), {
@@ -1052,6 +1082,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   async function loadMonth(){
     const mk = monthKeyOf(selYear, selMonth);
+    monthCloudLoaded = false; // bu ayın bulutu okunana kadar buluta yazma bekletilir (veri kaybı koruması)
     if(mk !== clearedBackupKey){
       clearedBackup = null;
       clearedBackupKey = null;
@@ -1064,11 +1095,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     render();
     if(isMember()){
       const cloud = await loadCloud(mk);
-      if(cloud){
-        monthData = cloud;
-        render();
-        showCloudMsg(NAT.cloudLoaded);
+      // Beklerken kullanıcı başka aya geçmiş olabilir; yalnızca hâlâ aynı aydaysak uygula.
+      if(mk === monthKeyOf(selYear, selMonth)){
+        if(cloud){
+          monthData = cloud;
+          render();
+          showCloudMsg(NAT.cloudLoaded);
+        }
+        monthCloudLoaded = true; // bulut okundu (veri olsun ya da olmasın) → artık buluta yazmak güvenli
       }
+    } else {
+      monthCloudLoaded = true; // misafir: yalnızca yerel kayıt, bulut yazması zaten yapılmıyor
     }
   }
 
@@ -1528,7 +1565,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function formatDayKeyLabel(key){
     const parts = key.split('-').map(Number);
-    return parts[2] + ' ' + AY_ADLARI[parts[1]-1];
+    return (parts[2]<10?'0':'') + parts[2] + ' ' + AY_ADLARI[parts[1]-1];
   }
 
   function scopeDayKeysCurrent(){
@@ -1567,7 +1604,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const gelirOpen = day && day.expanded.gelir;
 
       rowsHtml += '<tr class="' + (isToday ? 'today-row' : '') + '">' +
-        '<td class="date-cell">' + d + ' ' + AY_ADLARI[selMonth] + '<span class="dow">' + dow + '</span></td>' +
+        '<td class="date-cell">' + (d<10?'0':'') + d + ' ' + AY_ADLARI[selMonth] + '</td>' +
         '<td><button type="button" class="amt-btn gider" data-action="toggle" data-day="'+key+'" data-type="gider">' + fmtMoney(gTot) + '<span class="caret">'+(giderOpen?'▲':'▼')+'</span></button></td>' +
         '<td><button type="button" class="amt-btn gelir" data-action="toggle" data-day="'+key+'" data-type="gelir">' + fmtMoney(iTot) + '<span class="caret">'+(gelirOpen?'▲':'▼')+'</span></button></td>' +
         '<td class="net-cell ' + netClass + '">' + (net>=0?'':'-') + fmtMoney(Math.abs(net)) + '</td>' +
@@ -1593,6 +1630,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     '</div>';
   }
 
+  // Ayın tamamı için genel toplam kutusu (toplam gelir / gider / net)
+  function buildGrandTotalHtml(weeks){
+    let totGider = 0, totGelir = 0;
+    weeks.forEach(week => week.forEach(d => {
+      const key = dayKey(selYear, selMonth, d);
+      totGider += dayTotal(key, 'gider');
+      totGelir += dayTotal(key, 'gelir');
+    }));
+    const net = totGelir - totGider;
+    const netClass = net >= 0 ? 'pos' : 'neg';
+    const netLabel = net >= 0 ? NAT.netPositiveLabel : NAT.netNegativeLabel;
+    return '<div class="grand-total-card">' +
+      '<div class="gt-title">' + NAT.grandTotalTitle + ' · ' + AY_ADLARI[selMonth] + ' ' + selYear + '</div>' +
+      '<div class="gt-row"><span class="gt-label">' + NAT.totalIncomeLabel + '</span><span class="gt-value pos">' + fmtMoney(totGelir) + '</span></div>' +
+      '<div class="gt-row"><span class="gt-label">' + NAT.totalExpenseLabel + '</span><span class="gt-value neg">' + fmtMoney(totGider) + '</span></div>' +
+      '<div class="gt-row gt-net-row"><span class="gt-label">' + netLabel + '</span><span class="gt-value ' + netClass + '">' + (net>=0?'+':'-') + fmtMoney(Math.abs(net)) + '</span></div>' +
+    '</div>';
+  }
+
   function buildDayDetailHtml(d){
     const key = dayKey(selYear, selMonth, d);
     ensureDay(key);
@@ -1600,7 +1656,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const dow = GUN_ADLARI[getWeekdayMon0(dateObj)];
     return '<div class="week-card">' +
       '<div class="week-header">' +
-        '<div class="week-header-left"><span class="week-title">' + d + ' ' + AY_ADLARI[selMonth] + ' ' + selYear + '</span><span class="week-range">' + dow + '</span></div>' +
+        '<div class="week-header-left"><span class="week-title">' + (d<10?'0':'') + d + ' ' + AY_ADLARI[selMonth] + ' ' + selYear + '</span><span class="week-range">' + dow + '</span></div>' +
       '</div>' +
       '<div class="scope-items-grid" style="padding:18px; margin-bottom:0;">' +
         '<div class="scope-items-col">' + renderItemsHtml(key,'gider') + '</div>' +
@@ -1658,6 +1714,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     } else {
       let mainHtml = '';
       weeks.forEach((week, wIdx) => { mainHtml += buildWeekCardHtml(week, wIdx); });
+      mainHtml += buildGrandTotalHtml(weeks);
       weeksContainer.innerHTML = mainHtml;
     }
 
@@ -2317,7 +2374,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // ================== Excel / PDF dışa aktarma ==================
   function buildExportRows(){
     const weeks = buildWeeks(selYear, selMonth);
-    const rows = [[NAT.weekLabel, NAT.date, NAT.colDay, NAT.expense, NAT.income, NAT.net, NAT.colWeeklyNet]];
+    const rows = [[NAT.weekLabel, NAT.date, NAT.expense, NAT.income, NAT.net, NAT.colWeeklyNet]];
     weeks.forEach((week, wIdx) => {
       let weekNet = 0;
       week.forEach(d => {
@@ -2327,13 +2384,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
       week.forEach((d, di) => {
         const key = dayKey(selYear, selMonth, d);
-        const dateObj = new Date(selYear, selMonth, d);
-        const dow = GUN_ADLARI[getWeekdayMon0(dateObj)];
         const g = dayTotal(key,'gider'), i = dayTotal(key,'gelir');
         rows.push([
           di === 0 ? weekOrdinal(wIdx+1) : '',
-          d + ' ' + AY_ADLARI[selMonth] + ' ' + selYear,
-          dow, g, i, i-g,
+          (d<10?'0':'') + d + ' ' + AY_ADLARI[selMonth] + ' ' + selYear,
+          g, i, i-g,
           di === 0 ? weekNet : ''
         ]);
       });
@@ -2355,7 +2410,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     try{
       const wb = XLSX.utils.book_new();
       const ws1 = XLSX.utils.aoa_to_sheet(buildExportRows());
-      ws1['!cols'] = [{wch:12},{wch:18},{wch:8},{wch:12},{wch:12},{wch:12},{wch:14}];
+      ws1['!cols'] = [{wch:12},{wch:18},{wch:12},{wch:12},{wch:12},{wch:14}];
       XLSX.utils.book_append_sheet(wb, ws1, NAT.cashflowFileName);
       const ws2 = XLSX.utils.aoa_to_sheet(buildItemRows());
       ws2['!cols'] = [{wch:12},{wch:8},{wch:22},{wch:28},{wch:12}];
@@ -2384,34 +2439,89 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       mmgApplyTurkishFont(doc);
-      const titleX = logoDataUrl ? 30 : 14;
-      if(logoDataUrl){
-        try{ doc.addImage(logoDataUrl, 'PNG', 14, 8, 14, 14); } catch(imgErr){}
-      }
-      doc.setFontSize(14);
-      doc.text(NAT.cashflowTableTitle + AY_ADLARI[selMonth] + ' ' + selYear, titleX, 16);
-      doc.setFontSize(10);
-      doc.text('mmgcreativity.com', titleX, 22);
-      const rows = buildExportRows();
-      doc.autoTable({
-        startY: 28,
-        head: [rows[0]],
-        body: rows.slice(1).map(r => r.map(v => typeof v === 'number' ? fmtMoney(v) : v)),
-        styles: { fontSize: 8, font: 'DejaVuSans' },
-        headStyles: { fillColor: [198,161,91], font: 'DejaVuSans' },
-        didDrawPage: function(data){
-          const pageHeight = doc.internal.pageSize.getHeight();
-          const pageWidth = doc.internal.pageSize.getWidth();
-          doc.setDrawColor(198,161,91);
-          doc.setLineWidth(0.3);
-          doc.line(14, pageHeight - 14, pageWidth - 14, pageHeight - 14);
-          doc.setFontSize(8);
-          doc.setTextColor(130,130,130);
-          doc.text(NAT.appFooterTag, 14, pageHeight - 9);
-          const dateStr = new Date().toLocaleString('tr-TR');
-          doc.text(NAT.createdAt + dateStr, pageWidth - 14, pageHeight - 9, { align: 'right' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      // Alt bilgi: sol tarafta logo + link, sağ tarafta oluşturulma tarihi
+      function drawFooter(){
+        doc.setDrawColor(198,161,91);
+        doc.setLineWidth(0.3);
+        doc.line(14, pageHeight - 14, pageWidth - 14, pageHeight - 14);
+        let linkX = 14;
+        if(logoDataUrl){
+          try{ doc.addImage(logoDataUrl, 'PNG', 14, pageHeight - 12.5, 8, 8); linkX = 25; } catch(imgErr){}
         }
+        doc.setFontSize(8);
+        doc.setTextColor(130,130,130);
+        doc.text(NAT.appFooterTag, linkX, pageHeight - 9);
+        const dateStr = new Date().toLocaleString('tr-TR');
+        doc.text(NAT.createdAt + dateStr, pageWidth - 14, pageHeight - 9, { align: 'right' });
+      }
+
+      // Başlık (üst kısımdaki logo + link kaldırıldı — yalnızca tablo başlığı)
+      doc.setFontSize(14);
+      doc.setTextColor(20,20,20);
+      doc.text(NAT.cashflowTableTitle + AY_ADLARI[selMonth] + ' ' + selYear, 14, 16);
+
+      const weeks = buildWeeks(selYear, selMonth);
+      let grandGider = 0, grandGelir = 0;
+      let startY = 24;
+
+      // Her hafta ayrı bir kutu/tablo olarak
+      weeks.forEach((week, wIdx) => {
+        let weekGider = 0, weekGelir = 0;
+        const body = week.map(d => {
+          const key = dayKey(selYear, selMonth, d);
+          const g = dayTotal(key,'gider'), i = dayTotal(key,'gelir');
+          weekGider += g; weekGelir += i;
+          const net = i - g;
+          return [
+            (d<10?'0':'') + d + ' ' + AY_ADLARI[selMonth],
+            fmtMoney(g), fmtMoney(i),
+            (net>=0?'':'-') + fmtMoney(Math.abs(net))
+          ];
+        });
+        grandGider += weekGider; grandGelir += weekGelir;
+        const weekNet = weekGelir - weekGider;
+
+        if(startY > pageHeight - 45){ doc.addPage(); startY = 24; }
+        doc.setFontSize(10);
+        doc.setTextColor(40,40,40);
+        const first = week[0], last = week[week.length-1];
+        doc.text(weekOrdinal(wIdx+1) + '  (' + (first<10?'0':'')+first + '-' + (last<10?'0':'')+last + ' ' + AY_ADLARI[selMonth] + ')', 14, startY);
+        doc.text(NAT.colWeeklyNet + ': ' + (weekNet>=0?'+':'-') + fmtMoney(Math.abs(weekNet)), pageWidth - 14, startY, { align: 'right' });
+
+        doc.autoTable({
+          startY: startY + 3,
+          head: [[NAT.date, NAT.expense, NAT.income, NAT.net]],
+          body: body,
+          styles: { fontSize: 8, font: 'DejaVuSans', halign: 'right' },
+          headStyles: { fillColor: [198,161,91], font: 'DejaVuSans', halign: 'center', textColor: 255 },
+          margin: { bottom: 20 },
+          didDrawPage: drawFooter
+        });
+        startY = doc.lastAutoTable.finalY + 9;
       });
+
+      // Genel toplam kutusu (aylık): toplam gelir / gider / net
+      const grandNet = grandGelir - grandGider;
+      const netLabel = grandNet >= 0 ? NAT.netPositiveLabel : NAT.netNegativeLabel;
+      if(startY > pageHeight - 45){ doc.addPage(); startY = 24; }
+      doc.autoTable({
+        startY: startY,
+        head: [[NAT.grandTotalTitle + ' · ' + AY_ADLARI[selMonth] + ' ' + selYear, '']],
+        body: [
+          [NAT.totalIncomeLabel, fmtMoney(grandGelir)],
+          [NAT.totalExpenseLabel, fmtMoney(grandGider)],
+          [netLabel, (grandNet>=0?'+':'-') + fmtMoney(Math.abs(grandNet))]
+        ],
+        styles: { fontSize: 9, font: 'DejaVuSans' },
+        headStyles: { fillColor: [30,30,40], font: 'DejaVuSans', halign: 'center', textColor: 255 },
+        columnStyles: { 0: { halign: 'left' }, 1: { halign: 'right' } },
+        margin: { bottom: 20 },
+        didDrawPage: drawFooter
+      });
+
       doc.save('nakit-akis-' + monthKeyOf(selYear, selMonth) + '.pdf');
       showIoMsg(NAT.pdfDownloaded);
     } catch(e){ showIoMsg(NAT.pdfError, true); }

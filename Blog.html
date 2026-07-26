@@ -127,7 +127,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition:color .15s ease;
   }
   .blog-icon-btn:hover{ color:var(--red); }
+  .blog-icon-btn.share:hover{ color:var(--coral); }
+  .blog-icon-btn.blogger:hover{ color:#FF8000; }
+  .blog-icon-btn svg{ width:15px; height:15px; vertical-align:middle; }
   .blog-post-meta{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); margin-top:6px; }
+  .blog-author-link{ color:var(--brass); text-decoration:none; font-weight:600; }
+  .blog-author-link:hover{ color:var(--coral); text-decoration:underline; }
   .blog-post-excerpt{ margin-top:12px; font-size:14.5px; line-height:1.65; color:var(--text); opacity:0.88; }
   .blog-read-more{ display:inline-block; margin-top:10px; font-size:13px; color:var(--coral); text-decoration:none; font-weight:600; }
   .blog-post-body{ margin-top:16px; font-size:15px; line-height:1.75; }
@@ -226,6 +231,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   import {
     getFirestore, doc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
@@ -248,6 +254,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     auth = getAuth(fbApp);
     db = getFirestore(fbApp);
   }
+  const functions = getFunctions(fbApp, 'us-central1');
 
   const stateArea = document.getElementById('stateArea');
   const content = document.getElementById('content');
@@ -265,7 +272,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     myPendingHeading:'🕓 Your submissions (pending review)', adminPendingHeading:'📥 Posts Awaiting Approval',
     noPendingAdmin:'No posts awaiting approval.', approveBtn:'Approve & Publish', rejectBtn:'Reject',
     confirmReject:'Reject and delete this post?', approveFailed:'Could not approve, please try again.',
-    rejectFailed:'Could not reject, please try again.', by:'By:'
+    rejectFailed:'Could not reject, please try again.', by:'By:', share:'Share', linkCopied:'Link copied ✓', bloggerPublish:'Publish on Blogger', bloggerPublishing:'Publishing to Blogger…', bloggerDone:'Published on Blogger', bloggerFailed:'Could not publish to Blogger'
   } : {
     errorSub:'Blog yüklenemedi, lütfen sayfayı yenileyip tekrar deneyin.',
     loadingPosts:'Yazılar yükleniyor…', noPostsYet:'Henüz yazı yok.',
@@ -277,7 +284,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     myPendingHeading:'🕓 Gönderdiklerin (onay bekliyor)', adminPendingHeading:'📥 Onay Bekleyen Yazılar',
     noPendingAdmin:'Onay bekleyen yazı yok.', approveBtn:'Onayla ve Yayınla', rejectBtn:'Reddet',
     confirmReject:'Bu yazıyı reddedip silmek istediğine emin misin?', approveFailed:'Onaylanamadı, tekrar dene.',
-    rejectFailed:'Reddedilemedi, tekrar dene.', by:'Gönderen:'
+    rejectFailed:'Reddedilemedi, tekrar dene.', by:'Gönderen:', share:'Paylaş', linkCopied:'Bağlantı kopyalandı ✓', bloggerPublish:'Blogger sitesinde yayınla', bloggerPublishing:'Blogger sitesine gönderiliyor…', bloggerDone:'Blogger sitesinde yayınlandı', bloggerFailed:'Blogger sitesine gönderilemedi'
   };
 
   MMGI18N.registerDict({
@@ -396,6 +403,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     renderListView(feedEl);
   }
 
+  const SHARE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"></circle><circle cx="6" cy="12" r="2.6"></circle><circle cx="18" cy="19" r="2.6"></circle><line x1="8.3" y1="10.9" x2="15.7" y2="6.1"></line><line x1="8.3" y1="13.1" x2="15.7" y2="17.9"></line></svg>';
+  const BLOGGER_SVG = '<svg viewBox="0 0 448 512" fill="currentColor"><path d="M446.6 222.7c-1.8-45.5-3.4-83.3-59.5-83.3l-83-1c-9.8 0-14.7-6.9-14.7-14.7 0 0 .1-52.1-1-70.4C283.7 3.2 246.7 0 202.5 0 122.6 0 0 6.9 0 166.4v179.2C0 505.1 122.6 512 202.5 512s202.5-6.9 202.5-166.4c0 0 42.9 3.2 41.6-122.9zM155.5 108.9c22.6 0 40.9 18.3 40.9 40.9s-18.3 40.9-40.9 40.9-40.9-18.3-40.9-40.9 18.3-40.9 40.9-40.9zm137 294.2H155.5c-22.6 0-40.9-18.3-40.9-40.9s18.3-40.9 40.9-40.9h137c22.6 0 40.9 18.3 40.9 40.9s-18.3 40.9-40.9 40.9z"></path></svg>';
+  let blogToastTimer = null;
+  function showBlogToast(text){
+    let el = document.getElementById('blogShareToast');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'blogShareToast';
+      el.style.cssText = 'position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--surface-2); border:1px solid var(--hairline); color:var(--text); padding:10px 18px; border-radius:10px; font-size:13px; z-index:3000; box-shadow:0 12px 30px rgba(0,0,0,0.4); max-width:90vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+      document.body.appendChild(el);
+    }
+    el.textContent = text;
+    el.style.display = 'block';
+    clearTimeout(blogToastTimer);
+    blogToastTimer = setTimeout(function(){ el.style.display = 'none'; }, 2600);
+  }
   function postRowHtml(p, opts){
     opts = opts || {};
     const canEdit = currentIsAdmin || p.authorUid === currentUid;
@@ -403,13 +426,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const titleHtml = opts.linkTitle
       ? '<a href="?post=' + encodeURIComponent(p.id) + '">' + escapeHtml(p.title) + '</a>'
       : escapeHtml(p.title);
+    const authorNameHtml = p.authorUid
+      ? '<a class="blog-author-link" href="profil.html?uid=' + encodeURIComponent(p.authorUid) + '&name=' + encodeURIComponent(p.authorName || '') + '">' + escapeHtml(p.authorName) + '</a>'
+      : escapeHtml(p.authorName);
     const byLine = (opts.showAuthor && p.authorName)
-      ? '<span style="margin-left:8px;">' + LBL.by + ' ' + escapeHtml(p.authorName) + '</span>' : '';
+      ? '<span style="margin-left:8px;">' + LBL.by + ' ' + authorNameHtml + '</span>' : '';
     return (
       '<div class="blog-post" data-id="' + p.id + '">' +
         '<div class="blog-post-top">' +
           '<div class="blog-post-title">' + titleHtml + (isPending ? '<span class="pending-badge">' + LBL.pendingBadge + '</span>' : '') + '</div>' +
           '<div class="blog-post-actions">' +
+            '<button type="button" class="blog-icon-btn share" data-share-id="' + p.id + '" title="' + LBL.share + '">' + SHARE_SVG + '</button>' +
+            ((currentIsAdmin && !isPending) ? '<button type="button" class="blog-icon-btn blogger" data-blogger-id="' + p.id + '" title="' + LBL.bloggerPublish + '">' + BLOGGER_SVG + '</button>' : '') +
             (opts.approveReject ? (
               '<button type="button" class="approve-btn" data-approve-id="' + p.id + '">' + LBL.approveBtn + '</button>' +
               '<button type="button" class="reject-btn" data-reject-id="' + p.id + '">' + LBL.rejectBtn + '</button>'
@@ -461,14 +489,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       feedEl.innerHTML = '<div class="blog-empty-note">' + LBL.noPostsYet + '</div>';
       return;
     }
-    feedEl.innerHTML = publishedPosts.map(p => postRowHtml(p, { linkTitle:true, fullBody:false })).join('');
+    feedEl.innerHTML = publishedPosts.map(p => postRowHtml(p, { linkTitle:true, fullBody:false, showAuthor:true })).join('');
     wireRowButtons(feedEl, publishedPosts);
   }
 
   function renderSinglePost(feedEl, p){
     feedEl.innerHTML =
       '<a href="Blog.html" class="blog-read-more" style="margin-bottom:14px; display:inline-block;">' + LBL.backToList + '</a>' +
-      postRowHtml(p, { linkTitle:false, fullBody:true, showAuthor: p.status === 'pending' });
+      postRowHtml(p, { linkTitle:false, fullBody:true, showAuthor: true });
     wireRowButtons(feedEl, [p]);
   }
 
@@ -516,6 +544,33 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           await deleteDoc(doc(db, 'blogPosts', btn.dataset.rejectId));
         }catch(e){
           alert(LBL.rejectFailed);
+          btn.disabled = false;
+        }
+      });
+    });
+    container.querySelectorAll('[data-share-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const p = sourceList.find(x => x.id === btn.dataset.shareId);
+        if(!p) return;
+        const url = location.origin + location.pathname + '?post=' + encodeURIComponent(p.id);
+        const title = p.title || 'MMG Creativity Blog';
+        try{ if(navigator.share){ await navigator.share({ title: title, text: title, url: url }); return; } }
+        catch(err){ if(err && err.name === 'AbortError') return; }
+        try{ await navigator.clipboard.writeText(url); showBlogToast(LBL.linkCopied); }
+        catch(e){ showBlogToast(url); }
+      });
+    });
+    container.querySelectorAll('[data-blogger-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        showBlogToast(LBL.bloggerPublishing);
+        try{
+          const fn = httpsCallable(functions, 'publishToBlogger');
+          const r = await fn({ postId: btn.dataset.bloggerId });
+          const u = r && r.data && r.data.url;
+          showBlogToast(u ? (LBL.bloggerDone + ': ' + u) : LBL.bloggerDone);
+        }catch(e){
+          showBlogToast(LBL.bloggerFailed + (e && e.message ? ': ' + e.message : ''));
           btn.disabled = false;
         }
       });
@@ -604,7 +659,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
         await addDoc(collection(db, 'blogPosts'), {
           title: title, content: bodyText,
-          authorUid: currentUid, authorName: data.username || data.email || 'MMG Creativity',
+          authorUid: currentUid, authorName: data.displayName || data.username || data.email || 'MMG Creativity',
           status: currentIsAdmin ? 'published' : 'pending',
           createdAt: serverTimestamp()
         });
@@ -629,7 +684,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       publishedPosts = [];
       snap.forEach(d => publishedPosts.push(Object.assign({ id: d.id }, d.data())));
       renderFeed();
-    }, () => {
+    }, (err) => {
+      console.error('[MMG_BLOG] feed hata:', err && err.code, err && err.message, 'auth uid=', auth && auth.currentUser && auth.currentUser.uid, 'iframe=', (window.parent && window.parent !== window));
       if(feedEl) feedEl.innerHTML = '<div class="blog-empty-note">' + LBL.errorSub + '</div>';
     });
 
@@ -651,6 +707,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
 
   onAuthStateChanged(auth, async (user) => {
+    console.log('[MMG_BLOG] onAuthStateChanged: user=', user ? user.uid : null, 'email=', user ? user.email : null, 'iframe=', (window.parent && window.parent !== window));
     currentUid = user ? user.uid : null;
     currentIsAdmin = false;
     const composerCard = document.getElementById('composerCard');

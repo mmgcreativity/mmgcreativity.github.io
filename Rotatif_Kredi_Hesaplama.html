@@ -187,6 +187,11 @@ function mmgApplyTurkishFont(doc){
     transition:border-color .15s ease, color .15s ease;
   }
   .reset-btn:hover{ color:var(--red); border-color:var(--red); }
+  .reset-btn.card-reset-btn{ position:absolute; top:14px; right:14px; z-index:3; box-shadow:none; }
+  @media (max-width:480px){
+    .reset-btn.card-reset-btn{ top:10px; right:10px; padding:6px 10px; font-size:11px; }
+  }
+  #resultCard{ position:relative; }
   @media (max-width:480px){
     .top-actions{ width:100%; }
   }
@@ -395,7 +400,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="subtitle" data-i18n-html="page_subtitle">Tutar, oran ve vade girin; bankaların rotatif kredi, KMH ve BCH kredilerinde, aylık veya üç aylık periyotlarla aldığı faizi anında hesaplayın.<br>Bu modül, gecelik işleyen faiz mantığındaki borçlarınızı hesaplamanızı kolaylaştırır.</div>
   </div>
   <div class="top-actions">
-    <button type="button" class="reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
     <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </header>
@@ -463,7 +467,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
 
-      <div class="result-card">
+      <div class="result-card" id="resultCard">
+        <button type="button" class="reset-btn card-reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
         <div class="result-hero">
           <div class="label" data-i18n="total_repayment">TOPLAM GERİ ÖDEME</div>
           <div class="value" id="rToplamGeri">—</div>
@@ -908,7 +913,7 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
     doc.setFontSize(14);
     const pageWidthHdr = doc.internal.pageSize.getWidth();
     doc.text(LBL.pdfTitle, pageWidthHdr / 2, 16, { align: 'center' });
-    try{ doc.addImage(MMG_APP_ICON_B64, 'PNG', pageWidthHdr - 14 - 12, 8, 12, 12); } catch(iconErr){ /* ikon eklenemezse sessizce geç */ }
+    // mmgcreativity: site logosu/ikonu artık üst başlıkta değil, alt bilgide (footer) gösteriliyor.
     const rows = buildTrancheRows();
     doc.autoTable({
       startY: 28,
@@ -925,9 +930,11 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
         doc.setDrawColor(198,161,91);
         doc.setLineWidth(0.3);
         doc.line(14, pageHeight - 14, pageWidth - 14, pageHeight - 14);
+        // mmgcreativity: site logosunu alt bilgide, çizginin başladığı noktaya hizala; bağlantı metnini logonun sağına kaydır.
+        try{ doc.addImage(MMG_APP_ICON_B64, 'PNG', 14, pageHeight - 12.5, 5, 5); } catch(fIconErr){ /* logo eklenemezse sessizce geç */ }
         doc.setFontSize(8);
         doc.setTextColor(130,130,130);
-        doc.text(LBL.footerTag, 14, pageHeight - 9);
+        doc.text(LBL.footerTag, 21, pageHeight - 9);
         const dateStr = new Date().toLocaleString('tr-TR');
         doc.text(LBL.createdAt + dateStr, pageWidth - 14, pageHeight - 9, { align: 'right' });
       }
@@ -1156,7 +1163,21 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
 <script>
   document.getElementById('resetPageBtn').addEventListener('click', function(){
     if(confirm(LBL.resetConfirm)){
-      window.location.reload();
+      // Sıfırla: tüm girişleri boşalt/0 yap; hiçbir demo/başlangıç değeri geri yükleme.
+      ['qTutar','qVade','qOran','qKomOran'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) el.value = '0';
+      });
+      ['gunBaslangic','gunBitis'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) el.value = '';
+      });
+      var gunSonuc = document.getElementById('gunSonuc');
+      if(gunSonuc) gunSonuc.textContent = '—';
+      // Çoklu çekim tablosunu tamamen temizle (demo satırları geri gelmez).
+      if(typeof trancheRows !== 'undefined'){ trancheRows.length = 0; }
+      if(typeof renderTranches === 'function'){ renderTranches(); }
+      if(typeof updateQuick === 'function'){ updateQuick(); }
     }
   });
 </script>

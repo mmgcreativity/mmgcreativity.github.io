@@ -115,7 +115,7 @@ function mmgApplyTurkishFont(doc){
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where, collectionGroup } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
@@ -142,7 +142,10 @@ function mmgApplyTurkishFont(doc){
     db = getFirestore(fbApp);
   }
 
-  window.mmgCloud = { auth, db, doc, getDoc, setDoc, currentUser: null, scopeId: null, scopeCollection: 'users' };
+  // Not: Kayıtlı müşteri/tedarikçi/firma verisini okuyan kod (aşağıdaki klasik <script>
+  // bloğu, modül kapsamına erişemez) için Firestore yardımcılarını da mmgCloud üzerinden
+  // paylaşıyoruz (collection/getDocs/query/where/collectionGroup).
+  window.mmgCloud = { auth, db, doc, getDoc, setDoc, collection, getDocs, query, where, collectionGroup, currentUser: null, scopeId: null, scopeCollection: 'users' };
 
   onAuthStateChanged(auth, async (user) => {
     window.mmgCloud.currentUser = user;
@@ -475,6 +478,31 @@ function mmgApplyTurkishFont(doc){
   }
   .alici-row-block{ margin-bottom:6px; padding-bottom:6px; }
   .alici-row-block + .alici-row-block{ border-top:2px solid var(--hairline); padding-top:14px; margin-top:6px; }
+
+  /* ---- Alıcı: Grup içi / Grup dışı seçici + isimden ara (autocomplete) ---- */
+  .alici-mode-toggle{ display:flex; gap:6px; padding:6px 8px 8px; }
+  .alici-mode-btn{
+    flex:1; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.02em;
+    padding:6px 8px; border-radius:6px; border:1px solid var(--hairline); background:var(--surface-2);
+    color:var(--muted); cursor:pointer; transition:background .12s ease, color .12s ease, border-color .12s ease;
+  }
+  .alici-mode-btn:hover{ color:var(--text); }
+  .alici-mode-btn.active{ background:rgba(198,161,91,0.14); color:var(--brass); border-color:var(--brass-dim); font-weight:600; }
+  .mmg-ac-wrap{ position:relative; display:block; width:100%; height:100%; }
+  .mmg-ac-list{
+    position:absolute; z-index:70; left:0; right:0; top:100%; margin-top:2px;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:8px;
+    max-height:240px; overflow-y:auto; box-shadow:0 12px 26px rgba(0,0,0,0.45); display:none;
+  }
+  .mmg-ac-list.open{ display:block; }
+  .mmg-ac-item{
+    padding:8px 12px; font-size:13px; color:var(--text); cursor:pointer;
+    display:flex; justify-content:space-between; gap:10px; align-items:center;
+  }
+  .mmg-ac-item + .mmg-ac-item{ border-top:1px solid var(--hairline); }
+  .mmg-ac-item:hover, .mmg-ac-item.active{ background:var(--surface-2); }
+  .mmg-ac-item .mmg-ac-meta{ font-size:10px; color:var(--muted); font-family:'IBM Plex Mono',monospace; flex-shrink:0; text-transform:uppercase; letter-spacing:.03em; }
+  .mmg-ac-empty{ padding:10px 12px; font-size:12px; color:var(--muted); }
   .xrow-save-btn{
     background:transparent; border:1px solid var(--brass-dim); color:var(--brass); border-radius:6px;
     padding:5px 10px; font-size:11.5px; cursor:pointer; font-family:'Inter',sans-serif; white-space:nowrap;
@@ -1308,13 +1336,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   let savedAliciFirms = [];     // [{ name }]
   let savedIbans = [];          // [{ label, banka, iban }]
 
+  // ---- YENİ: Kullanıcının kendi/grup firmaları (gönderici tarafı) ve Veri Giriş
+  // Paneli'nden gelen cari (müşteri+tedarikçi+muhatap) veritabanı (alıcı tarafı). ----
+  // myFirms:  [{ id, name, banka, iban }]  — kullanıcının yetkili olduğu firmalar.
+  // savedCari:[{ name, type, idNumber, ibans:[{bank,iban,currency}] }]  — kayıtlı cariler.
+  let myFirms = [];
+  let savedCari = [];
+
   function renderFirmaSelects(){
     const gonderenOpts = '<option value="">📋 Kayıtlı</option>' +
       savedGonderenFirms.map((f, i) => `<option value="${i}">${f.name}</option>`).join('');
-    const aliciOpts = '<option value="">📋 Kayıtlı</option>' +
-      savedAliciFirms.map((f, i) => `<option value="${i}">${f.name}</option>`).join('');
     document.getElementById('fGonderenFirmaSaved').innerHTML = gonderenOpts;
-    document.querySelectorAll('.alici-firma-saved').forEach(sel => { sel.innerHTML = aliciOpts; });
+    // Alıcı "📋 Kayıtlı" seçicileri, her satırın moduna (grup içi/dışı) göre doldurulur.
+    document.querySelectorAll('.alici-firma-saved').forEach(sel => { populateAliciFirmaSaved(sel); });
   }
 
   // Bir IBAN seçicisini, ilişkili firma/alıcı adı kutusundaki metne göre filtreleyip doldurur.
@@ -1471,13 +1505,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.getElementById('fGonderenFirma').value = f.name;
     if(f.logo) applyCompanyLogo(f.logo, (f.logoW && f.logoH) ? { w: f.logoW, h: f.logoH } : null);
     refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma');
+    // Kendi/grup firmasının kayıtlı banka/IBAN'ı biliniyorsa banka+IBAN'ı da otomatik doldur.
+    const mf = myFirms.find(x => x.name.trim().toLowerCase() === (f.name || '').trim().toLowerCase());
+    if(mf){
+      if(mf.banka) setBankSelectValue(document.getElementById('fGonderenBanka'), mf.banka);
+      if(mf.iban) document.getElementById('fGonderenIban').value = formatIbanValue(mf.iban);
+    }
     renderPreview();
   });
   document.getElementById('fGonderenIbanSaved').addEventListener('change', (e) => {
     if(e.target.value === '') return;
     const b = savedIbans[+e.target.value];
-    document.getElementById('fGonderenBanka').value = b.banka;
-    document.getElementById('fGonderenIban').value = b.iban;
+    setBankSelectValue(document.getElementById('fGonderenBanka'), b.banka);
+    document.getElementById('fGonderenIban').value = formatIbanValue(b.iban);
     renderPreview();
   });
 
@@ -1509,13 +1549,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const wrap = document.createElement('div');
     wrap.className = 'alici-row-block';
     wrap.dataset.idx = idx;
+    wrap.dataset.mode = 'disi'; // varsayılan: grup dışı (cari) — isimden aranır
     wrap.innerHTML = `
+      <div class="alici-mode-toggle" role="group" aria-label="Alıcı kaynağı">
+        <button type="button" class="alici-mode-btn active" data-mode="disi">Grup dışı (Cari)</button>
+        <button type="button" class="alici-mode-btn" data-mode="ici">Grup içi</button>
+      </div>
       <div class="xcell-group">
         <div class="xcell">
           <span class="xcell-label">ALICI</span>
-          <input type="text" id="fAliciAdi_${idx}" placeholder="Örn. Alıcı Firma / Kişi" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
+          <div class="mmg-ac-wrap">
+            <input type="text" id="fAliciAdi_${idx}" placeholder="İsim yazın (örn. ASTEL)…" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
+            <div class="mmg-ac-list" id="aliciAcList_${idx}"></div>
+          </div>
           <button type="button" class="xcell-savebtn" id="saveAliciFirmaBtn_${idx}" title="Firma bilgisini kaydet">💾</button>
-          <select class="xcell-mini alici-firma-saved" id="fAliciFirmaSaved_${idx}" title="Kayıtlı firmadan seç"><option value="">📋 Kayıtlı</option></select>
+          <select class="xcell-mini alici-firma-saved" id="fAliciFirmaSaved_${idx}" title="Kayıtlı listeden seç"><option value="">📋 Kayıtlı Cari</option></select>
         </div>
         <div class="xcell xcell-3col">
           <span class="xcell-label">BANKA</span>
@@ -1533,30 +1581,88 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     aliciRowsContainer.appendChild(wrap);
 
     fillBankOptions(document.getElementById(`fAliciBanka_${idx}`));
-    document.getElementById(`fAliciFirmaSaved_${idx}`).innerHTML =
-      '<option value="">📋 Kayıtlı</option>' + savedAliciFirms.map((f, i) => `<option value="${i}">${f.name}</option>`).join('');
+    populateAliciFirmaSaved(document.getElementById(`fAliciFirmaSaved_${idx}`));
     refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`);
 
     document.getElementById(`saveAliciFirmaBtn_${idx}`).addEventListener('click', () => saveFirmaName(`fAliciAdi_${idx}`, `saveAliciFirmaBtn_${idx}`, savedAliciFirms));
     document.getElementById(`saveAliciIbanBtn_${idx}`).addEventListener('click', () => saveIbanInfo(`fAliciBanka_${idx}`, `fAliciIban_${idx}`, `saveAliciIbanBtn_${idx}`, `fAliciAdi_${idx}`));
 
-    document.getElementById(`fAliciAdi_${idx}`).addEventListener('input', () => {
-      refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`);
+    const adiEl = document.getElementById(`fAliciAdi_${idx}`);
+    const listEl = document.getElementById(`aliciAcList_${idx}`);
+    let acActive = -1;
+
+    function acDataset(){ return getAliciDataset(wrap.dataset.mode); }
+    function closeList(){ listEl.classList.remove('open'); listEl.innerHTML = ''; acActive = -1; }
+    function renderList(){
+      const q = adiEl.value.trim().toLocaleLowerCase('tr');
+      let items = acDataset();
+      if(q) items = items.filter(p => p.name.toLocaleLowerCase('tr').includes(q));
+      items = items.slice(0, 12);
+      acActive = -1;
+      if(!items.length){
+        listEl.innerHTML = '<div class="mmg-ac-empty">' +
+          (wrap.dataset.mode === 'ici' ? 'Grup firması bulunamadı.' : 'Eşleşen kayıtlı cari yok.') + '</div>';
+        listEl.classList.add('open');
+        return;
+      }
+      listEl.innerHTML = items.map(p => {
+        const meta = (CARI_TUR_ETIKET[p.type] || '') + (p.ibans && p.ibans.length > 1 ? (' · ' + p.ibans.length + ' IBAN') : '');
+        return '<div class="mmg-ac-item" data-name="' + escapeHtmlMmg(p.name) + '"><span>' + escapeHtmlMmg(p.name) +
+          '</span><span class="mmg-ac-meta">' + escapeHtmlMmg(meta) + '</span></div>';
+      }).join('');
+      listEl.classList.add('open');
+      Array.from(listEl.querySelectorAll('.mmg-ac-item')).forEach(el => {
+        el.addEventListener('mousedown', (ev) => {
+          ev.preventDefault();
+          const name = el.getAttribute('data-name');
+          const party = acDataset().find(p => p.name === name);
+          if(party) fillAliciFromParty(idx, party);
+          closeList();
+        });
+      });
+    }
+
+    adiEl.addEventListener('focus', renderList);
+    adiEl.addEventListener('input', renderList);
+    adiEl.addEventListener('input', () => { refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`); });
+    adiEl.addEventListener('input', renderPreview);
+    adiEl.addEventListener('keydown', (ev) => {
+      const items = Array.from(listEl.querySelectorAll('.mmg-ac-item'));
+      if(!listEl.classList.contains('open') || !items.length) return;
+      if(ev.key === 'ArrowDown'){ ev.preventDefault(); acActive = Math.min(acActive + 1, items.length - 1); }
+      else if(ev.key === 'ArrowUp'){ ev.preventDefault(); acActive = Math.max(acActive - 1, 0); }
+      else if(ev.key === 'Enter'){ if(acActive >= 0){ ev.preventDefault(); items[acActive].dispatchEvent(new MouseEvent('mousedown')); return; } }
+      else if(ev.key === 'Escape'){ closeList(); return; }
+      else return;
+      items.forEach((el, i) => el.classList.toggle('active', i === acActive));
+      if(items[acActive]) items[acActive].scrollIntoView({ block: 'nearest' });
+    });
+    adiEl.addEventListener('blur', () => { setTimeout(closeList, 150); });
+
+    // Grup içi / Grup dışı geçişi
+    wrap.querySelectorAll('.alici-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(wrap.dataset.mode === btn.dataset.mode) return;
+        wrap.dataset.mode = btn.dataset.mode;
+        wrap.querySelectorAll('.alici-mode-btn').forEach(b => b.classList.toggle('active', b === btn));
+        populateAliciFirmaSaved(document.getElementById(`fAliciFirmaSaved_${idx}`));
+        adiEl.placeholder = btn.dataset.mode === 'ici' ? 'Grup firması seçin / yazın…' : 'İsim yazın (örn. ASTEL)…';
+        closeList();
+        if(document.activeElement === adiEl) renderList();
+      });
     });
 
     document.getElementById(`fAliciFirmaSaved_${idx}`).addEventListener('change', (e) => {
       if(e.target.value === '') return;
-      const f = savedAliciFirms[+e.target.value];
-      document.getElementById(`fAliciAdi_${idx}`).value = f.name;
-      if(f.logo) applyCompanyLogo(f.logo, (f.logoW && f.logoH) ? { w: f.logoW, h: f.logoH } : null);
-      refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`);
-      renderPreview();
+      const party = acDataset().find(p => p.name === e.target.value) || { name: e.target.value, ibans: [] };
+      fillAliciFromParty(idx, party);
+      e.target.value = '';
     });
     document.getElementById(`fAliciIbanSaved_${idx}`).addEventListener('change', (e) => {
       if(e.target.value === '') return;
       const b = savedIbans[+e.target.value];
-      document.getElementById(`fAliciBanka_${idx}`).value = b.banka;
-      document.getElementById(`fAliciIban_${idx}`).value = b.iban;
+      setBankSelectValue(document.getElementById(`fAliciBanka_${idx}`), b.banka);
+      document.getElementById(`fAliciIban_${idx}`).value = formatIbanValue(b.iban);
       renderPreview();
     });
 
@@ -1564,7 +1670,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     attachIbanFormatting(ibanEl);
     ibanEl.addEventListener('input', renderPreview);
 
-    document.getElementById(`fAliciAdi_${idx}`).addEventListener('input', renderPreview);
     document.getElementById(`fAliciBanka_${idx}`).addEventListener('change', renderPreview);
 
     document.getElementById(`removeAliciRowBtn_${idx}`).addEventListener('click', () => {
@@ -1583,7 +1688,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.addEventListener('mmg-scope-ready', (e) => {
     if(window.mmgCloud && window.mmgCloud.currentUser){
       const scopeId = e.detail.scopeId;
-      loadSavedData(scopeId).then(loadGrupMuhatapDb);
+      // Önce kullanıcının kendi kayıtlı listesi, sonra kendi/grup firmaları (gönderici)
+      // ve Veri Giriş Paneli cari veritabanı (alıcı arama) yüklenir.
+      loadSavedData(scopeId).then(() => { loadMyFirms(); loadCariDb(); });
       loadCompanyLogo(scopeId);
       loadStamp(scopeId);
       loadHistory(scopeId);
@@ -1597,46 +1704,204 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // isimde bir kayıt varsa tekrar eklenmez). Grup firmalarında (dataGroupId) ortak
   // havuzdan (effectiveScopeId) okunur; böylece grup içindeki hiçbir firma aynı
   // müşteri/tedarikçi/IBAN'ı tekrar tekrar girmek zorunda kalmaz.
-  async function loadGrupMuhatapDb(){
+  // Bir <select> içinde, verilen banka adına (büyük/küçük harf duyarsız) uyan seçeneği
+  // aktif eder; liste içinde yoksa geçici bir seçenek ekleyip onu seçer. Böylece kayıtlı
+  // firmadan/cariden gelen banka adı, banka listesinde olmasa bile alana yazılır.
+  function setBankSelectValue(sel, bankName){
+    if(!sel) return;
+    const val = (bankName || '').trim();
+    if(!val){ sel.value = ''; return; }
+    let opt = Array.from(sel.options).find(o => o.value.trim().toLocaleLowerCase('tr') === val.toLocaleLowerCase('tr'));
+    if(!opt){
+      opt = document.createElement('option');
+      opt.value = val; opt.textContent = val;
+      sel.appendChild(opt);
+    }
+    sel.value = opt.value;
+  }
+
+  // ---- YENİ: Kullanıcının kendi + grup firmalarını (gönderici tarafı) yükle ----
+  // Kaynaklar: (1) modül tarafında çözülmüş grup firmaları (mmgCloud.groupFirmalar),
+  // (2) users/{uid}.adminFirmaIds (yönettiği firmalar), (3) collectionGroup('members')
+  // ile üye olduğu firmalar, (4) aktif firmaAccounts kapsamının kendisi. Her firma için
+  // kayıtlı gönderen banka/IBAN bilgisi de çekilir; böylece firmayı seçince banka+IBAN
+  // otomatik dolar. Kullanıcı bu firmaları elle eklemez.
+  async function loadMyFirms(){
+    const cloud = window.mmgCloud;
+    if(!cloud) return;
+    const map = new Map(); // id -> { id, name }
+    (cloud.groupFirmalar || []).forEach(f => { if(f && f.id) map.set(f.id, { id: f.id, name: (f.name || f.id) }); });
+    const user = cloud.currentUser;
+    if(user){
+      // (2) Yönettiği firmalar
+      try{
+        const uSnap = await cloud.getDoc(cloud.doc(cloud.db, 'users', user.uid));
+        const ids = (uSnap.exists() && Array.isArray(uSnap.data().adminFirmaIds)) ? uSnap.data().adminFirmaIds : [];
+        for(const fid of ids){
+          if(!fid || map.has(fid)) continue;
+          try{
+            const fs = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid));
+            map.set(fid, { id: fid, name: (fs.exists() && fs.data().name) || fid });
+          }catch(e){ map.set(fid, { id: fid, name: fid }); }
+        }
+      }catch(e){ /* sessizce geç */ }
+      // (3) Üye olduğu firmalar (firmaAccounts/{id}/members/{uid} veya companies/{id}/members/{uid})
+      try{
+        const memSnap = await cloud.getDocs(cloud.query(cloud.collectionGroup(cloud.db, 'members'), cloud.where('uid', '==', user.uid)));
+        for(const d of memSnap.docs){
+          const segs = d.ref.path.split('/'); // [coll, id, 'members', uid]
+          if(segs.length < 2) continue;
+          const coll = segs[0]; const fid = segs[1];
+          if(coll !== 'firmaAccounts' && coll !== 'companies') continue;
+          if(map.has(fid)) continue;
+          try{
+            const fs = await cloud.getDoc(cloud.doc(cloud.db, coll, fid));
+            if(fs.exists()) map.set(fid, { id: fid, name: fs.data().name || fid });
+          }catch(e){ /* sessizce geç */ }
+        }
+      }catch(e){ /* index yoksa sessizce geç */ }
+    }
+    // (4) Aktif firmaAccounts kapsamının kendisi
+    if(cloud.scopeCollection === 'firmaAccounts' && cloud.scopeId && !map.has(cloud.scopeId)){
+      try{
+        const fs = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', cloud.scopeId));
+        map.set(cloud.scopeId, { id: cloud.scopeId, name: (fs.exists() && fs.data().name) || cloud.scopeId });
+      }catch(e){ /* sessizce geç */ }
+    }
+    myFirms = Array.from(map.values());
+
+    // Gönderen "📋 Kayıtlı" listesine ekle (elle eklemeye gerek kalmadan görünsün)
+    myFirms.forEach(f => {
+      const ad = (f.name || '').trim();
+      if(!ad) return;
+      if(!savedGonderenFirms.some(sf => sf.name.trim().toLowerCase() === ad.toLowerCase())){
+        savedGonderenFirms.push({ name: ad, logo: null, logoW: null, logoH: null, _db: true, _grup: true, id: f.id });
+      }
+    });
+
+    // Her firma için kayıtlı gönderen banka/IBAN bilgisini çek (firma seçilince otomatik dolsun)
+    for(const f of myFirms){
+      try{
+        const info = await fetchFirmaGonderenBilgisi(f.id);
+        f.banka = info.banka || '';
+        f.iban = info.iban || '';
+        if(info.iban && !savedIbans.some(b => b.iban === info.iban)){
+          savedIbans.push({ label: f.name + (info.banka ? (' — ' + info.banka) : ''), banka: info.banka || '', iban: info.iban, firma: f.name, _db: true });
+        }
+      }catch(e){ /* sessizce geç */ }
+    }
+
+    renderFirmaSelects();
+    renderIbanSelects();
+    renderGlFirmaSelects();
+  }
+
+  // ---- YENİ: Veri Giriş Paneli'ndeki cari (müşteri + tedarikçi + muhatap) veritabanı ----
+  // Kapsamdan bağımsız olarak ({scopeCollection}/{effectiveScopeId}/{kind}) okunur; böylece
+  // kişisel, firma ve grup kullanıcılarında da alıcı arama çalışır. appliesToFirmaIds ile
+  // sadece aktif firmaya görünür kayıtlar süzülür (VeriGirisPaneli ile aynı mantık). Çok
+  // IBAN'lı cariler desteklenir. Sonuçlar ayrıca eski "📋 Kayıtlı" alıcı/IBAN listelerine
+  // de eklenir (geriye dönük uyumluluk).
+  async function loadCariDb(){
     try{
       const cloud = window.mmgCloud;
-      if(cloud.scopeCollection !== 'firmaAccounts') return;
+      if(!cloud) return;
+      const coll = cloud.scopeCollection;
       const baseId = cloud.effectiveScopeId || cloud.scopeId;
-
-      // ---- Grup firmalarını "Gönderen Firma" kayıtlı listesine otomatik ekle ----
-      // Talimatı hazırlayan kişi genelde grubun kendi firmalarından birini "gönderen"
-      // olarak seçer (aynı holding/grubun başka bir firması adına talimat hazırlamak
-      // gibi); bu yüzden grup firmaları, müşteri/tedarikçi listesi gibi manuel
-      // kaydedilmeyi beklemeden doğrudan Gönderen Firma "📋 Kayıtlı" listesinde çıkar.
-      const grup = cloud.groupFirmalar || [];
-      grup.forEach(f => {
-        const ad = (f.name || '').trim();
-        if(!ad) return;
-        if(!savedGonderenFirms.some(sf => sf.name.trim().toLowerCase() === ad.toLowerCase())){
-          savedGonderenFirms.push({ name: ad, logo: null, logoW: null, logoH: null, _db: true, _grup: true });
-        }
-      });
-
+      if(!coll || !baseId) return;
+      const activeFirmaId = cloud.scopeId;
       const kinds = ['customers', 'suppliers', 'counterparties'];
+      const cariMap = new Map(); // ad(lowercase) -> party
       for(const kind of kinds){
-        const snap = await getDocs(collection(db, 'firmaAccounts', baseId, kind));
+        let snap;
+        try{ snap = await cloud.getDocs(cloud.collection(cloud.db, coll, baseId, kind)); }
+        catch(e){ continue; }
         snap.forEach(d => {
           const p = d.data();
           const ad = (p.name || '').trim();
           if(!ad) return;
-          if(!savedAliciFirms.some(f => f.name.trim().toLowerCase() === ad.toLowerCase())){
-            savedAliciFirms.push({ name: ad, logo: null, logoW: null, logoH: null, _db: true });
+          // Sadece aktif firmaya uygulanan kayıtları göster (dizi yoksa/boşsa herkese açık)
+          if(Array.isArray(p.appliesToFirmaIds) && p.appliesToFirmaIds.length && !p.appliesToFirmaIds.includes(activeFirmaId)) return;
+          const key = ad.toLocaleLowerCase('tr');
+          const ibans = (p.ibans || [])
+            .filter(ib => ib && ib.iban)
+            .map(ib => ({ bank: ib.bank || '', iban: ib.iban, currency: ib.currency || 'TRY' }));
+          if(cariMap.has(key)){
+            const ex = cariMap.get(key);
+            ibans.forEach(ib => { if(!ex.ibans.some(x => x.iban === ib.iban)) ex.ibans.push(ib); });
+            if(!ex.idNumber && p.idNumber) ex.idNumber = p.idNumber;
+          } else {
+            cariMap.set(key, { name: ad, type: kind, idNumber: p.idNumber || '', ibans });
           }
-          (p.ibans || []).forEach(ib => {
-            if(!ib.iban) return;
-            if(savedIbans.some(b => b.iban === ib.iban && b.firma.trim().toLowerCase() === ad.toLowerCase())) return;
-            savedIbans.push({ label: ad + (ib.bank ? ' — ' + ib.bank : ''), banka: ib.bank || '', iban: ib.iban, firma: ad, _db: true });
-          });
         });
       }
+      savedCari = Array.from(cariMap.values());
+
+      // Eski "📋 Kayıtlı" alıcı + IBAN listelerine de aktar
+      savedCari.forEach(p => {
+        if(!savedAliciFirms.some(f => f.name.trim().toLowerCase() === p.name.toLowerCase())){
+          savedAliciFirms.push({ name: p.name, logo: null, logoW: null, logoH: null, _db: true });
+        }
+        p.ibans.forEach(ib => {
+          if(savedIbans.some(b => b.iban === ib.iban && b.firma.trim().toLowerCase() === p.name.toLowerCase())) return;
+          savedIbans.push({ label: p.name + (ib.bank ? (' — ' + ib.bank) : ''), banka: ib.bank || '', iban: ib.iban, firma: p.name, _db: true });
+        });
+      });
+
       renderFirmaSelects();
       renderIbanSelects();
     }catch(e){ /* sessizce geç: veritabanı yoksa veya erişilemiyorsa sessizce atlanır */ }
+  }
+
+  // Alıcı satırının aktif moduna (grup içi / grup dışı) göre arama yapılacak veri kümesi.
+  // Dönen her öğe: { name, type, ibans:[{bank,iban}] }
+  function getAliciDataset(mode){
+    if(mode === 'ici'){
+      return myFirms.map(f => ({
+        name: f.name,
+        type: 'grup',
+        ibans: (f.iban ? [{ bank: f.banka || '', iban: f.iban }] : [])
+      }));
+    }
+    return savedCari.map(p => ({ name: p.name, type: p.type, ibans: p.ibans || [] }));
+  }
+
+  const CARI_TUR_ETIKET = { customers: 'Müşteri', suppliers: 'Tedarikçi', counterparties: 'Muhatap', grup: 'Grup Firması' };
+
+  // Bir alıcı satırının "📋 Kayıtlı" seçicisini, satırın moduna (grup içi/dışı) göre doldurur.
+  function populateAliciFirmaSaved(sel){
+    if(!sel) return;
+    const block = sel.closest('.alici-row-block');
+    const mode = (block && block.dataset.mode) || 'disi';
+    const ds = getAliciDataset(mode);
+    const cur = sel.value;
+    const label = mode === 'ici' ? '📋 Grup Firması' : '📋 Kayıtlı Cari';
+    sel.innerHTML = '<option value="">' + label + '</option>' +
+      ds.map(p => '<option value="' + escapeHtmlMmg(p.name) + '">' + escapeHtmlMmg(p.name) + '</option>').join('');
+    if(Array.from(sel.options).some(o => o.value === cur)) sel.value = cur;
+  }
+
+  // Seçilen bir alıcıyı (cari veya grup firması) satır alanlarına yazar. Tek IBAN'lıysa
+  // banka+IBAN doğrudan doldurulur; birden fazla IBAN varsa kullanıcının "📋 Kayıtlı IBAN"
+  // listesinden seçmesi için o liste süzülür (çok IBAN'lı cari desteği).
+  function fillAliciFromParty(idx, party){
+    const adiEl = document.getElementById('fAliciAdi_' + idx);
+    const bankaEl = document.getElementById('fAliciBanka_' + idx);
+    const ibanEl = document.getElementById('fAliciIban_' + idx);
+    if(!adiEl) return;
+    adiEl.value = party.name || '';
+    refreshIbanSelectForFirma('fAliciIbanSaved_' + idx, 'fAliciAdi_' + idx);
+    const ibans = party.ibans || [];
+    if(ibans.length === 1){
+      if(ibans[0].bank) setBankSelectValue(bankaEl, ibans[0].bank); else if(bankaEl) bankaEl.value = '';
+      if(ibanEl) ibanEl.value = formatIbanValue(ibans[0].iban);
+    } else if(ibans.length > 1){
+      // Birden fazla IBAN: kullanıcı seçsin. IBAN alanını boşalt, kayıtlı IBAN listesini aç.
+      if(ibanEl) ibanEl.value = '';
+      const ibSel = document.getElementById('fAliciIbanSaved_' + idx);
+      if(ibSel){ try{ ibSel.focus(); }catch(e){} }
+    }
+    renderPreview();
   }
 
   // ---- Grup Firmaları — Çoklu Talimat: aynı grubun parçası olan diğer firmalar
@@ -1672,13 +1937,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // gönderen banka+IBAN bilgisini getirir (kendi firmaProfili + kayitliMuhataplar
   // kayıtlarından); talimatı o firma adına hazırlarken kullanılır.
   async function fetchFirmaGonderenBilgisi(firmaId){
+    const cloud = window.mmgCloud;
     const out = { name: firmaId, banka: '', iban: '', logo: null, logoDims: null, stamp: null, stampDims: null };
     try{
-      const fSnap = await getDoc(doc(db, 'firmaAccounts', firmaId));
+      const fSnap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', firmaId));
       if(fSnap.exists()) out.name = fSnap.data().name || firmaId;
     }catch(e){}
     try{
-      const pSnap = await getDoc(doc(db, 'firmaAccounts', firmaId, 'talimat', 'firmaProfili'));
+      const pSnap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', firmaId, 'talimat', 'firmaProfili'));
       if(pSnap.exists()){
         const d = pSnap.data();
         if(d.logoBase64){ out.logo = d.logoBase64; out.logoDims = (d.logoW && d.logoH) ? { w:d.logoW, h:d.logoH } : null; }
@@ -1686,7 +1952,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
     }catch(e){}
     try{
-      const mSnap = await getDoc(doc(db, 'firmaAccounts', firmaId, 'talimat', 'kayitliMuhataplar'));
+      const mSnap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', firmaId, 'talimat', 'kayitliMuhataplar'));
       if(mSnap.exists()){
         const ibans = mSnap.data().ibans || [];
         const own = ibans.find(b => (b.firma||'').trim().toLowerCase() === out.name.trim().toLowerCase()) || ibans[0];
@@ -2899,6 +3165,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(f.type === 'tutar'){
         return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span><input type="text" inputmode="decimal" id="' + f.id + '" placeholder="0,00"></div>';
       }
+      // Gönderen/lehine firma alanı (glFirma): kullanıcının kendi + grup firmalarından
+      // seçilebilsin diye yanına "📋 Firmam" seçicisi eklenir; seçilince firma adı ve
+      // (biliniyorsa) banka otomatik dolar.
+      if(f.id === 'glFirma'){
+        return '<div class="xcell"><span class="xcell-label">' + f.label.toUpperCase() + '</span>' +
+          '<input type="text" id="' + f.id + '" placeholder="' + (f.placeholder||'') + '">' +
+          '<span></span>' +
+          '<select class="xcell-mini gl-firma-saved" id="glFirmaSaved" title="Kendi / grup firmanızdan seç"><option value="">📋 Firmam</option></select>' +
+          '</div>';
+      }
       return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span><input type="text" id="' + f.id + '" placeholder="' + (f.placeholder||'') + '"></div>';
     }
 
@@ -2948,7 +3224,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         el.addEventListener('change', renderGenericPreview);
       }
     });
+
+    // "📋 Firmam" seçicisini kendi/grup firmalarıyla doldur ve seçimi bağla.
+    renderGlFirmaSelects();
+    const gfs = document.getElementById('glFirmaSaved');
+    if(gfs){
+      gfs.addEventListener('change', () => {
+        if(gfs.value === '') return;
+        const f = myFirms.find(x => x.name === gfs.value);
+        if(f){
+          const firmaEl = document.getElementById('glFirma');
+          if(firmaEl) firmaEl.value = f.name;
+          const bankaEl = document.getElementById('glBanka');
+          if(bankaEl && f.banka) setBankSelectValue(bankaEl, f.banka);
+          // Gönderen/lehine taraf kullanıcının kendi firması olduğundan, o firmanın
+          // kayıtlı IBAN'ı biliniyorsa gönderen IBAN alanı da (varsa) otomatik dolsun
+          // (döviz alım/satım, nakit yatırma vb. talimat türleri). Alıcı IBAN'a dokunulmaz.
+          if(f.iban){
+            const senderIbanEl = document.getElementById('glGonderenIban') || document.getElementById('glIban');
+            if(senderIbanEl && !senderIbanEl.value.trim()) senderIbanEl.value = formatIbanValue(f.iban);
+          }
+        }
+        renderGenericPreview();
+      });
+    }
+
     renderGenericPreview();
+  }
+
+  // Tüm görünür "📋 Firmam" seçicilerini, kullanıcının kendi/grup firmalarıyla doldurur.
+  // myFirms sonradan (scope hazır olunca) yüklendiğinde de çağrılır.
+  function renderGlFirmaSelects(){
+    document.querySelectorAll('.gl-firma-saved').forEach(sel => {
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">📋 Firmam</option>' +
+        myFirms.map(f => '<option value="' + escapeHtmlMmg(f.name) + '">' + escapeHtmlMmg(f.name) + '</option>').join('');
+      if(Array.from(sel.options).some(o => o.value === cur)) sel.value = cur;
+    });
   }
 
   // ================== Teslim Alacak Kişi: çoklu kişi ekleme + kayıtlı kişi listesi ==================

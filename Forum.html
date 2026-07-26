@@ -85,7 +85,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     padding:18px; box-shadow:0 10px 30px rgba(0,0,0,0.2); margin-bottom:18px;
   }
 
-  /* ---- Yazı yazma (composer) alanı ---- */
+  /* ---- Yazı yazma (composer) alanı — Twitter tarzı modern kutu ---- */
+  .composer-card{ transition:border-color .15s ease, box-shadow .15s ease; }
+  .composer-card:focus-within{ border-color:var(--brass-dim); box-shadow:0 0 0 3px rgba(198,161,91,0.08); }
   .composer-row{ display:flex; gap:12px; align-items:flex-start; }
   .avatar-circle{
     width:40px; height:40px; border-radius:50%; flex-shrink:0; overflow:hidden;
@@ -96,20 +98,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .avatar-circle img{ width:100%; height:100%; object-fit:cover; }
   .composer-body{ flex:1; min-width:0; }
   #forumComposerText{
-    width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px;
-    padding:12px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; outline:none;
-    resize:vertical; min-height:56px; transition:border-color .15s ease;
+    width:100%; background:transparent; border:none; border-radius:0;
+    padding:6px 2px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:16px; line-height:1.5; outline:none;
+    resize:vertical; min-height:60px;
   }
-  #forumComposerText:focus{ border-color:var(--brass-dim); }
+  #forumComposerText::placeholder{ color:var(--muted); }
+  #forumComposerText:focus{ border:none; }
   .composer-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; gap:10px; }
   .char-count{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--muted); }
   .char-count.warn{ color:var(--coral); }
   .post-btn{
-    padding:9px 20px; border-radius:9px; border:none; cursor:pointer;
+    padding:9px 22px; border-radius:999px; border:none; cursor:pointer;
     background:var(--grad); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px;
-    transition:opacity .15s ease; white-space:nowrap;
+    transition:opacity .15s ease, transform .1s ease; white-space:nowrap;
   }
-  .post-btn:hover{ opacity:0.9; }
+  .post-btn:hover{ opacity:0.92; }
+  .post-btn:active{ transform:scale(0.97); }
   .post-btn:disabled{ opacity:0.5; cursor:default; }
   .composer-error{ color:var(--red); font-size:12px; margin-top:8px; display:none; }
   .composer-error.show{ display:block; }
@@ -136,15 +140,38 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .forum-empty-note{ text-align:center; color:var(--muted); font-size:13px; padding:36px 16px; }
   .forum-loading-note{ text-align:center; color:var(--muted); font-size:13px; padding:20px; }
 
-  /* ---- Composer araçları: emoji + görsel ekleme ---- */
-  .composer-tools{ display:flex; align-items:center; gap:6px; }
-  .composer-tool-btn{
-    background:none; border:1px solid var(--hairline); color:var(--muted); cursor:pointer;
-    width:34px; height:34px; border-radius:9px; font-size:16px; display:flex; align-items:center; justify-content:center;
-    transition:border-color .15s ease, color .15s ease;
+  /* ---- Composer araçları: emoji + görsel + GIF ---- */
+  .composer-toolbar{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin-top:8px; padding-top:10px; border-top:1px solid var(--hairline);
   }
-  .composer-tool-btn:hover{ border-color:var(--brass-dim); color:var(--text); }
-  .composer-footer-row{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; gap:10px; }
+  .composer-actions{ display:flex; align-items:center; gap:12px; }
+  .composer-tools{ display:flex; align-items:center; gap:4px; position:relative; }
+  .composer-tool-btn{
+    background:none; border:none; color:var(--brass); cursor:pointer;
+    width:34px; height:34px; border-radius:50%; font-size:17px; display:flex; align-items:center; justify-content:center;
+    transition:background .15s ease, color .15s ease;
+  }
+  .composer-tool-btn:hover{ background:rgba(198,161,91,0.14); color:var(--brass); }
+  .composer-tool-btn.gif-tool-btn{
+    font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:11px; letter-spacing:.02em;
+    width:auto; padding:0 9px; height:24px; border-radius:6px; border:1.5px solid var(--brass); color:var(--brass);
+  }
+  .composer-tool-btn.gif-tool-btn:hover{ background:rgba(198,161,91,0.14); }
+  /* GIF / görsel bağlantısı paneli */
+  .composer-gif-panel{ display:flex; gap:8px; margin-top:10px; }
+  .composer-gif-panel[hidden]{ display:none; }
+  .composer-gif-panel input{
+    flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:9px;
+    padding:9px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; outline:none;
+  }
+  .composer-gif-panel input:focus{ border-color:var(--brass-dim); }
+  .gif-add-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); color:var(--text); cursor:pointer;
+    padding:0 16px; border-radius:9px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px;
+    transition:border-color .15s ease;
+  }
+  .gif-add-btn:hover{ border-color:var(--brass-dim); }
   .emoji-picker{
     position:absolute; z-index:60; background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px;
     padding:10px; display:grid; grid-template-columns:repeat(8, 1fr); gap:4px; box-shadow:0 12px 30px rgba(0,0,0,0.4);
@@ -273,7 +300,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <div id="stateArea"></div>
 
   <div id="content" hidden>
-    <div class="card">
+    <div class="card composer-card">
       <div class="composer-row">
         <div class="avatar-circle" id="composerAvatar">?</div>
         <div class="composer-body">
@@ -283,18 +310,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <img id="composerImagePreviewImg" alt="">
             <button type="button" class="composer-image-remove" id="composerImageRemoveBtn">✕</button>
           </div>
-          <div class="composer-footer-row">
+          <div class="composer-gif-panel" id="composerGifPanel" hidden>
+            <input type="url" id="composerGifUrl" placeholder="GIF/görsel bağlantısı yapıştır (https://...)" data-i18n-placeholder="gif_url_placeholder">
+            <button type="button" class="gif-add-btn" id="composerGifAddBtn" data-i18n="gif_add">Ekle</button>
+          </div>
+          <div class="composer-toolbar">
             <div class="composer-tools">
-              <button type="button" class="composer-tool-btn" id="emojiBtn" title="Emoji ekle">🙂</button>
-              <button type="button" class="composer-tool-btn" id="imageAttachBtn" title="Görsel ekle">🖼️</button>
+              <button type="button" class="composer-tool-btn" id="emojiBtn" title="Emoji ekle" data-i18n-title="tool_emoji">🙂</button>
+              <button type="button" class="composer-tool-btn" id="imageAttachBtn" title="Görsel ekle" data-i18n-title="tool_image">🖼️</button>
+              <button type="button" class="composer-tool-btn gif-tool-btn" id="gifBtn" title="GIF ekle" data-i18n-title="tool_gif">GIF</button>
               <input type="file" id="composerImageInput" accept="image/*" hidden>
               <div class="emoji-picker" id="emojiPicker" hidden></div>
             </div>
-            <span class="char-count" id="forumCharCount">0 / 500</span>
-          </div>
-          <div class="composer-footer">
-            <span></span>
-            <button type="button" class="post-btn" id="forumPostBtn" data-i18n="post_btn">Paylaş</button>
+            <div class="composer-actions">
+              <span class="char-count" id="forumCharCount">0 / 500</span>
+              <button type="button" class="post-btn" id="forumPostBtn" data-i18n="post_btn">Paylaş</button>
+            </div>
           </div>
           <div class="composer-error" id="forumComposerError"></div>
         </div>
@@ -373,7 +404,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     justNow:'just now', minutesAgo:'m ago', hoursAgo:'h ago', daysAgo:'d ago', anonymous:'Anonymous',
     reply:'Reply', repost:'Repost', repostSimple:'Repost', quotePost:'Quote', like:'Like', share:'Share',
     replyPlaceholder:'Post your reply...', send:'Send', linkCopied:'Link copied.', quoting:'Quoting', cancel:'Cancel',
-    imageTooBig:'Image is too large, please choose a smaller one.'
+    imageTooBig:'Image is too large, please choose a smaller one.',
+    gifUrlInvalid:'Please paste a valid link starting with https://'
   } : {
     loginRequired:'Forumu görüntülemek için giriş yapmış olmanız gerekir.<br><br>',
     loginRequiredHint:'Herhangi bir modülden (örn. <a href="index.html">Ana Sayfa</a>) hesabınıza giriş yaptıktan sonra bu sayfayı yeniden açın.',
@@ -385,17 +417,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     justNow:'az önce', minutesAgo:'dk önce', hoursAgo:'sa önce', daysAgo:'g önce', anonymous:'İsimsiz',
     reply:'Yanıtla', repost:'Tekrarla', repostSimple:'Tekrarla', quotePost:'Alıntıla', like:'Beğen', share:'Paylaş',
     replyPlaceholder:'Yanıtını yaz...', send:'Gönder', linkCopied:'Bağlantı kopyalandı.', quoting:'Alıntılanıyor', cancel:'Vazgeç',
-    imageTooBig:'Görsel çok büyük, lütfen daha küçük bir görsel seçin.'
+    imageTooBig:'Görsel çok büyük, lütfen daha küçük bir görsel seçin.',
+    gifUrlInvalid:'Lütfen https:// ile başlayan geçerli bir bağlantı yapıştırın.'
   };
 
   MMGI18N.registerDict({
     tr: {
       page_title:'💬 Forum', page_subtitle:'Diğer kullanıcılarla sohbet edin, sorularınızı ve deneyimlerinizi paylaşın.',
-      back_home:'← Ana Sayfa', composer_placeholder:'Aklından geçeni paylaş...', post_btn:'Paylaş'
+      back_home:'← Ana Sayfa', composer_placeholder:'Aklından geçeni paylaş...', post_btn:'Paylaş',
+      tool_emoji:'Emoji ekle', tool_image:'Görsel ekle', tool_gif:'GIF ekle',
+      gif_add:'Ekle', gif_url_placeholder:'GIF/görsel bağlantısı yapıştır (https://...)'
     },
     en: {
       page_title:'💬 Forum', page_subtitle:'Chat with other users, share your questions and experiences.',
-      back_home:'← Home', composer_placeholder:"What's on your mind...", post_btn:'Post'
+      back_home:'← Home', composer_placeholder:"What's on your mind...", post_btn:'Post',
+      tool_emoji:'Add emoji', tool_image:'Add image', tool_gif:'Add GIF',
+      gif_add:'Add', gif_url_placeholder:'Paste a GIF/image link (https://...)'
     }
   });
   MMGI18N.detectAndApplyDefaultLang();
@@ -614,7 +651,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           const data = snap.exists() ? snap.data() : {};
           await addDoc(collection(db, 'forumPosts', id, 'replies'), {
             authorUid: currentUid,
-            authorName: data.username || data.email || LBL.anonymous,
+            authorName: data.displayName || data.username || data.email || LBL.anonymous,
             authorAvatar: data.avatarBase64 || data.logoBase64 || currentUserAvatar || null,
             text: text.slice(0, 300),
             createdAt: serverTimestamp()
@@ -692,12 +729,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     document.getElementById('profileModalPosts').innerHTML = '';
 
     let name = fallbackName, avatar = null, isAdminUser = false, isFirma = false;
+    // Önce herkese açık profil (profiles/{uid}) — giriş yapmış her kullanıcı okuyabilir.
+    try{
+      const pSnap = await getDoc(doc(db, 'profiles', uid));
+      if(pSnap.exists()){
+        const pd = pSnap.data();
+        name = pd.displayName || pd.name || pd.username || name;
+        if(pd.photoURL) avatar = pd.photoURL;
+      }
+    }catch(e){ /* profiles okunamazsa aşağıda users'a düş */ }
+    // Sonra users/{uid} — yalnızca sahibi/yönetici okuyabilir (kurallar); okunabiliyorsa
+    // eksik alanları tamamla.
     try{
       const uSnap = await getDoc(doc(db, 'users', uid));
       if(uSnap.exists()){
         const d = uSnap.data();
-        name = d.username || d.email || fallbackName;
-        avatar = d.avatarBase64 || d.logoBase64 || null;
+        if(!name || name === fallbackName) name = d.displayName || d.username || d.email || fallbackName;
+        if(!avatar) avatar = d.avatarBase64 || d.logoBase64 || null;
         isAdminUser = d.isAdmin === true;
         isFirma = !!d.logoBase64 && !d.avatarBase64;
       }
@@ -731,13 +779,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
 
   // Tüm sayfada (ana akış + yanıtlar + repost/quote kartları) delegasyonla tek dinleyici.
+  // Artık küçük kart yerine tam profil sayfasına (profil.html?uid=...) yönlendiriyoruz.
+  // (openProfileModal ve ilgili kart hâlâ tanımlı ama kullanılmıyor; ileride tekrar
+  //  hızlı önizleme istenirse diye korundu.)
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-profile-uid]');
     if(!el) return;
     const uid = el.dataset.profileUid;
     if(!uid) return;
     e.stopPropagation();
-    openProfileModal(uid, el.dataset.profileName);
+    window.location.href = 'profil.html?uid=' + encodeURIComponent(uid) + '&name=' + encodeURIComponent(el.dataset.profileName || '');
   });
 
   function watchFeed(){
@@ -747,7 +798,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const q = query(collection(db, 'forumPosts'), orderBy('createdAt', 'desc'), limit(150));
     unsubscribeFeed = onSnapshot(q, (snap) => {
       renderFeed(snap);
-    }, () => {
+    }, (err) => {
+      console.error('[MMG_FORUM] feed hata:', err && err.code, err && err.message, 'auth uid=', auth && auth.currentUser && auth.currentUser.uid, 'iframe=', (window.parent && window.parent !== window));
       if(feedEl) feedEl.innerHTML = '<div class="forum-empty-note">' + LBL.errorSub + '</div>';
     });
   }
@@ -827,6 +879,30 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     composerImagePreview.hidden = true;
   });
 
+  // ---- GIF / görsel bağlantısı ekleme (animasyonlu GIF'ler dosya olarak yüklenince canvas
+  //      JPEG'e çevirip animasyonu kaybettiği için, bağlantı ile eklemeyi sunuyoruz) ----
+  const gifBtn = document.getElementById('gifBtn');
+  const composerGifPanel = document.getElementById('composerGifPanel');
+  const composerGifUrl = document.getElementById('composerGifUrl');
+  const composerGifAddBtn = document.getElementById('composerGifAddBtn');
+  gifBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    composerGifPanel.hidden = !composerGifPanel.hidden;
+    if(!composerGifPanel.hidden) composerGifUrl.focus();
+  });
+  function addGifFromUrl(){
+    const url = (composerGifUrl.value || '').trim();
+    if(!url) return;
+    if(!/^https:\/\//i.test(url)){ alert(LBL.gifUrlInvalid); return; }
+    composerImageDataUrl = url;
+    composerImagePreviewImg.src = url;
+    composerImagePreview.hidden = false;
+    composerGifUrl.value = '';
+    composerGifPanel.hidden = true;
+  }
+  composerGifAddBtn.addEventListener('click', addGifFromUrl);
+  composerGifUrl.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); addGifFromUrl(); } });
+
   // ---- Alıntı (quote) durumu ----
   let pendingQuote = null;
   const quotePreviewCard = document.getElementById('quotePreviewCard');
@@ -859,7 +935,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const data = snap.exists() ? snap.data() : {};
       await addDoc(collection(db, 'forumPosts'), {
         authorUid: currentUid,
-        authorName: data.username || data.email || LBL.anonymous,
+        authorName: data.displayName || data.username || data.email || LBL.anonymous,
         authorAvatar: data.avatarBase64 || data.logoBase64 || currentUserAvatar || null,
         text: text.slice(0, MAX_LEN),
         imageBase64: composerImageDataUrl || null,
@@ -884,6 +960,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   });
 
   onAuthStateChanged(auth, async (user) => {
+    console.log('[MMG_FORUM] onAuthStateChanged: user=', user ? user.uid : null, 'email=', user ? user.email : null, 'iframe=', (window.parent && window.parent !== window));
     if(!user){
       currentUid = null;
       stopWatchingFeed();
@@ -895,7 +972,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const snap = await getDoc(doc(db, 'users', user.uid));
       const data = snap.exists() ? snap.data() : {};
       currentIsAdmin = data.isAdmin === true;
-      currentUserName = data.username || data.email || LBL.anonymous;
+      currentUserName = data.displayName || data.username || data.email || LBL.anonymous;
       currentUserAvatar = data.avatarBase64 || data.logoBase64 || user.photoURL || null;
       const composerAvatar = document.getElementById('composerAvatar');
       if(composerAvatar){

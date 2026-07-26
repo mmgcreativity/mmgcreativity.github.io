@@ -173,6 +173,11 @@ function mmgApplyTurkishFont(doc){
     transition:border-color .15s ease, color .15s ease;
   }
   .reset-btn:hover{ color:var(--red); border-color:var(--red); }
+  .reset-btn.card-reset-btn{ position:absolute; top:14px; right:14px; z-index:3; box-shadow:none; }
+  @media (max-width:480px){
+    .reset-btn.card-reset-btn{ top:10px; right:10px; padding:6px 10px; font-size:11px; }
+  }
+  #resultCard{ position:relative; }
   @media (max-width:480px){
     .top-actions{ width:100%; }
   }
@@ -305,7 +310,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="subtitle" data-i18n="page_subtitle">Komisyon veya müşteriye vade farkı yansıtma senaryoları için elinize geçmesini istediğiniz net tutardan yola çıkarak girmeniz/yansıtmanız gereken brüt tutarı hesaplayın</div>
   </div>
   <div class="top-actions">
-    <button type="button" class="reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
     <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </header>
@@ -345,7 +349,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
 
-      <div class="result-card">
+      <div class="result-card" id="resultCard">
+        <button type="button" class="reset-btn card-reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
         <div class="result-headline">
           <div class="label" data-i18n="amount_to_charge">Girmeniz/Yansıtmanız Gereken Tutar</div>
           <div class="value" id="revGross">0,00 TL</div>
@@ -720,14 +725,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape' });
       mmgApplyTurkishFont(doc);
-      const titleX = logoDataUrl ? 30 : 14;
-      if(logoDataUrl){
-        try{ doc.addImage(logoDataUrl, 'PNG', 14, 8, 14, 14); } catch(imgErr){ /* logo eklenemezse sessizce geç */ }
-      }
+      // mmgcreativity: site logosu ve bağlantısı üst başlıktan kaldırıldı; alt bilgide (footer) gösteriliyor.
       doc.setFontSize(14);
-      doc.text(LBL.pdfTitle, titleX, 16);
-      doc.setFontSize(10);
-      doc.text('mmgcreativity.com', titleX, 22);
+      doc.text(LBL.pdfTitle, 14, 16);
       const rows = buildTableRows();
       doc.autoTable({
         startY: 28,
@@ -741,9 +741,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           doc.setDrawColor(198,161,91);
           doc.setLineWidth(0.3);
           doc.line(14, pageHeight - 14, pageWidth - 14, pageHeight - 14);
+          // mmgcreativity: site logosunu alt bilgide çizginin başladığı noktaya hizala, bağlantı metnini sağa kaydır.
+          if(logoDataUrl){
+            try{ doc.addImage(logoDataUrl, 'PNG', 14, pageHeight - 12.5, 5, 5); } catch(fLogoErr){ /* logo eklenemezse sessizce geç */ }
+          }
           doc.setFontSize(8);
           doc.setTextColor(130,130,130);
-          doc.text(LBL.footerTag, 14, pageHeight - 9);
+          doc.text(LBL.footerTag, logoDataUrl ? 21 : 14, pageHeight - 9);
           const dateStr = new Date().toLocaleString('tr-TR');
           doc.text(LBL.createdAt + dateStr, pageWidth - 14, pageHeight - 9, { align: 'right' });
         }
@@ -1042,7 +1046,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script>
   document.getElementById('resetPageBtn').addEventListener('click', function(){
     if(confirm(LBL.resetConfirm)){
-      window.location.reload();
+      // Sıfırla: girilen tutarı 0'la ve sonuçları sıfırla; hiçbir demo/başlangıç değeri geri yükleme.
+      var netEl = document.getElementById('revNet');
+      if(netEl) netEl.value = '0';
+      // Kullanıcının değiştirmiş olabileceği oran tablosunu varsayılan referans değerlere döndür.
+      if(typeof RATE_SETS !== 'undefined' && typeof RATE_DEFAULTS !== 'undefined' && typeof BLOKAJ_KEYS !== 'undefined'){
+        for(var i=0;i<BLOKAJ_KEYS.length;i++){
+          var key = BLOKAJ_KEYS[i];
+          for(var k in RATE_DEFAULTS[key]){ RATE_SETS[key][k] = RATE_DEFAULTS[key][k]; }
+        }
+      }
+      if(typeof renderRatesTable === 'function') renderRatesTable();
+      if(typeof calculateReverse === 'function') calculateReverse();
     }
   });
 </script>

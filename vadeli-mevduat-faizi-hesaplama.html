@@ -100,6 +100,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition:border-color .15s ease, color .15s ease;
   }
   .reset-btn:hover{ color:var(--red); border-color:var(--red); }
+  .reset-btn.card-reset-btn{ position:absolute; top:14px; right:14px; z-index:3; box-shadow:none; }
+  @media (max-width:480px){
+    .reset-btn.card-reset-btn{ top:10px; right:10px; padding:6px 10px; font-size:11px; }
+  }
+  #resultCard{ position:relative; }
   @media (max-width:480px){
     .top-actions{ width:100%; }
   }
@@ -125,7 +130,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .stat .label{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:8px;}
   .stat .value{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--text);}
   .stat .value.gold{color:var(--gold);}
-  .stat .value.small{font-size:16px;}
+  /* Uniform stat value sizing: all tiles match the "Teklif sayısı" (.value) tile */
+  .stat .value.small{font-size:20px;font-weight:700;}
 
   .card{
     background:var(--card);border:1px solid var(--border);border-radius:16px;
@@ -262,7 +268,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .field label{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
 
   .result-table-wrap{ overflow-x:auto; }
-  table.result-table{ width:100%; border-collapse:collapse; font-size:11.5px; table-layout:fixed; }
+  table.result-table{ width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
   table.result-table thead th{
     text-align:left; padding:6px 4px; font-family:'JetBrains Mono',monospace; font-size:8.5px; line-height:1.3;
     letter-spacing:.01em; text-transform:uppercase; color:var(--text-dim); border-bottom:1px solid var(--border);
@@ -270,14 +276,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   table.result-table thead th.num{ text-align:right; }
   table.result-table tbody td{
-    padding:7px 4px; border-bottom:1px solid var(--border-soft); vertical-align:middle;
+    padding:10px 4px; border-bottom:1px solid var(--border-soft); vertical-align:middle;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   table.result-table tbody tr:last-child td{ border-bottom:none; }
   table.result-table tbody tr.best td{ background:var(--green-soft); }
   table.result-table tbody tr.best td:first-child{ border-radius:8px 0 0 8px; }
   table.result-table tbody tr.summary-row.best:last-of-type td:last-child{ border-radius:0 8px 8px 0; }
-  table.result-table td.name-cell{ font-weight:700; font-size:11.5px; display:flex; align-items:center; gap:5px; }
+  table.result-table td.name-cell{ font-weight:700; font-size:12px; display:flex; align-items:center; gap:5px; }
   table.result-table tr.best td.name-cell{ color:var(--green); }
   table.result-table td.name-cell .name-txt{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   table.result-table td.num{ text-align:right; font-family:'JetBrains Mono',monospace; }
@@ -311,7 +317,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="subtitle" data-i18n="page_subtitle">Bankaların vadeli mevduat tekliflerini gir; brüt faiz, stopaj ve net vade sonu bakiye otomatik hesaplansın, en yüksek getirili teklif otomatik öne çıksın.</div>
   </div>
   <div class="top-actions">
-    <button type="button" class="reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
     <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </header>
@@ -361,7 +366,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="resultCard">
+      <button type="button" class="reset-btn card-reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
       <div class="card-head">
         <h2><span class="star">&#9733;</span> <span data-i18n="ranking">Sıralama</span></h2>
       </div>
@@ -589,7 +595,12 @@ renderStats();
       ? 'All data you entered will be cleared and the page will return to its default state. Are you sure?'
       : 'Girdiğiniz tüm veriler silinip sayfa varsayılan haline döndürülecek. Emin misiniz?';
     if(confirm(msg)){
-      window.location.reload();
+      if(typeof offers !== 'undefined' && Array.isArray(offers)){
+        offers.forEach(function(o){ o.bank=''; o.amount=''; o.rate=''; o.days=''; });
+        if(typeof renderInputs === 'function') renderInputs();
+        if(typeof renderResults === 'function') renderResults();
+        if(typeof renderStats === 'function') renderStats();
+      }
     }
   });
 </script>

@@ -123,10 +123,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      tutar kutuları 99.999.999,00 gibi büyük tutarların kesilmeden sığması için genişletildi,
      her satır tek satıra sığacak şekilde ayarlandı. */
   .f-field.f-tarih-wrap{ flex:0 0 106px; }
-  .f-field.f-yontem-wrap{ flex:0 0 152px; }
-  .f-field.f-gun-wrap{ flex:0 0 56px; }
+  .f-field.f-yontem-wrap{ flex:0 0 172px; }
+  .f-field.f-gun-wrap{ flex:0 0 78px; }
   .f-field.f-tutar-wrap{ flex:1 1 132px; min-width:132px; }
   .f-field.f-due-wrap{ flex:0 0 92px; }
+  .f-field.f-del-wrap{ flex:0 0 auto; }
   .f-field.c-tarih-wrap{ flex:0 0 106px; }
   .f-field.c-tutar-wrap{ flex:1 1 140px; min-width:140px; }
 
@@ -155,8 +156,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .row-del{
     background:none; border:none; color:var(--muted); cursor:pointer; font-size:15px;
     padding:0 6px; line-height:1; border-radius:6px; transition:color .15s ease, background .15s ease;
-    flex:0 0 auto; align-self:center; height:34px; display:flex; align-items:center; justify-content:center;
+    flex:0 0 auto; align-self:center; width:30px; height:34px; display:flex; align-items:center; justify-content:center;
   }
+  .f-del-wrap .row-del{ align-self:auto; }
   .row-del:hover{ color:var(--red); background:rgba(226,84,75,0.1); }
 
 
@@ -177,7 +179,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   /* Bilgi paneli */
   .info-panel{
     margin-top:24px; background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
-    padding:28px; text-align:center;
+    padding:28px; text-align:center; position:relative;
+  }
+  .reset-btn.card-reset-btn{ position:absolute; top:14px; right:14px; z-index:3; box-shadow:none; }
+  @media (max-width:480px){
+    .reset-btn.card-reset-btn{ top:10px; right:10px; padding:6px 10px; font-size:11px; }
   }
   .info-panel .deviation-label{
     font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; color:var(--muted); text-transform:uppercase;
@@ -226,7 +232,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="subtitle" data-i18n="page_subtitle">Fatura vadeleriniz ile tahsil ettiğiniz çeklerin vadelerini karşılaştırın; ortalama kaç gün sapma olduğunu ve karşılama oranını görün.</div>
   </div>
   <div class="top-actions">
-    <button type="button" class="reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
     <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </header>
@@ -239,7 +244,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="panel-head">
         <div class="panel-title fatura" data-i18n="invoices_title">📄 Faturalar</div>
       </div>
-      <div class="panel-desc" data-i18n="invoices_desc">Fatura tarihi, çalışma koşulu ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.</div>
+      <div class="panel-desc" data-i18n-html="invoices_desc">Fatura tarihi, çalışma koşulu ve vade gün sayısını girin — vade tarihi otomatik hesaplanır. <b>Çalışma Şekli:</b> vadenin faturanın tarihine mi (<b>Fatura +</b>) yoksa ayının sonuna mı (<b>Ay sonu +</b>) ekleneceğini belirler.</div>
       <div class="row-table" id="faturaRows"></div>
       <button type="button" class="add-btn fatura" id="addFaturaBtn" data-i18n="add_invoice">+ Fatura Ekle</button>
       <div class="subtotal-line"><span data-i18n="total_invoice_amount">Toplam Fatura Tutarı</span><b id="faturaToplam" class="mono">0,00</b></div>
@@ -260,6 +265,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- BİLGİ PANELİ -->
   <div class="info-panel">
+    <button type="button" class="reset-btn card-reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
     <div class="deviation-label" data-i18n="deviation_label">Vade Sapması</div>
     <div class="deviation-value neutral" id="devValue">—</div>
     <div class="deviation-sub" id="devSub" data-i18n="deviation_sub">Hesaplamak için fatura ve çek bilgilerini girin</div>
@@ -463,15 +469,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     row.innerHTML =
       '<div class="f-field f-tarih-wrap"><label>Fatura Tarihi</label><div class="f-tarih-box"></div></div>' +
       '<div class="f-field f-yontem-wrap"><label>Çalışma Şekli</label>' +
-        '<select class="f-yontem">' +
-          '<option value="fatura">Fatura Tarihine Ekle</option>' +
-          '<option value="aysonu">Ay Sonuna Ekle</option>' +
+        '<select class="f-yontem" title="Vade, faturanın tarihine mi (Fatura +) yoksa ayının sonuna mı (Ay sonu +) eklenecek?">' +
+          '<option value="fatura">Fatura +</option>' +
+          '<option value="aysonu">Ay sonu +</option>' +
         '</select>' +
       '</div>' +
-      '<div class="f-field f-gun-wrap"><label>Vade (gün)</label><input type="text" inputmode="numeric" class="f-gun" value="' + faturaData[id].gun + '"></div>' +
+      '<div class="f-field f-gun-wrap"><label>Vade (Gün)</label><input type="text" inputmode="numeric" class="f-gun" value="' + faturaData[id].gun + '"></div>' +
       '<div class="f-field f-tutar-wrap"><label>Fatura Tutarı</label><input type="text" inputmode="decimal" class="f-tutar" value="0,00"></div>' +
       '<div class="f-field f-due-wrap"><label>Vade Tarihi</label><div class="due-badge f-due">—</div></div>' +
-      '<button type="button" class="row-del f-del" title="Satırı sil">✕</button>';
+      '<div class="f-field f-del-wrap"><label>&nbsp;</label><button type="button" class="row-del f-del" title="Satırı sil">✕</button></div>';
     faturaRowsEl.appendChild(row);
 
     wireDateBox(row.querySelector('.f-tarih-box'), faturaData[id].tarih, (val)=>{ faturaData[id].tarih = val; recalc(); });
@@ -666,7 +672,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       page_title:'Vade Sapma Hesaplama',
       page_subtitle:'Fatura vadeleriniz ile tahsil ettiğiniz çeklerin vadelerini karşılaştırın; ortalama kaç gün sapma olduğunu ve karşılama oranını görün.',
       reset_btn:'Sıfırla', back_home:'← Ana Sayfa',
-      invoices_title:'📄 Faturalar', invoices_desc:'Fatura tarihi, çalışma koşulu ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.',
+      invoices_title:'📄 Faturalar', invoices_desc:'Fatura tarihi, çalışma koşulu ve vade gün sayısını girin — vade tarihi otomatik hesaplanır. <b>Çalışma Şekli:</b> vadenin faturanın tarihine mi (<b>Fatura +</b>) yoksa ayının sonuna mı (<b>Ay sonu +</b>) ekleneceğini belirler.',
       add_invoice:'+ Fatura Ekle', total_invoice_amount:'Toplam Fatura Tutarı',
       checks_title:'🧾 Çekler', checks_desc:'Tahsil ettiğiniz / vadesi gelen çeklerin tarih ve tutarlarını girin.',
       add_check:'+ Çek Ekle', total_check_amount:'Toplam Çek Tutarı',
@@ -678,7 +684,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       page_title:'Maturity Deviation Calculator',
       page_subtitle:'Compare your invoice due dates against the checks you collect; see the average deviation in days and the coverage ratio.',
       reset_btn:'Reset', back_home:'← Home',
-      invoices_title:'📄 Invoices', invoices_desc:'Enter invoice date, terms, and number of due days — the due date is calculated automatically.',
+      invoices_title:'📄 Invoices', invoices_desc:'Enter invoice date, terms, and number of due days — the due date is calculated automatically. <b>Terms:</b> sets whether the term is added to the invoice date (<b>Invoice +</b>) or to the end of its month (<b>Month-end +</b>).',
       add_invoice:'+ Add Invoice', total_invoice_amount:'Total Invoice Amount',
       checks_title:'🧾 Checks', checks_desc:'Enter the date and amount of checks you collect / that are due.',
       add_check:'+ Add Check', total_check_amount:'Total Check Amount',

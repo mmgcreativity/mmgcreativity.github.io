@@ -1,6 +1,26 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<!-- Kabuk (index.html) yalnızca en üst pencerede çalışmalıdır. Kilitli/uyarı alt
+     sayfalarındaki bazı "Ana Sayfa" bağlantıları (ör. giriş gerekli uyarısındaki
+     <a href="index.html">) target="_top" taşımadığından, index.html yanlışlıkla
+     araç iframe'inin (app-frame) İÇİNE yüklenebiliyordu; bu da iç içe ikinci bir
+     kenar çubuğu/hamburger menüsü oluşturuyordu. Bu durumu daha kabuk render
+     edilmeden, en erken noktada yakalayıp en üst pencereyi ana sayfaya
+     yönlendiriyoruz — böylece her zaman tek bir kenar çubuğu/menü kalır. -->
+<script>
+(function(){
+  try{
+    if(window.top !== window.self){
+      // İç içe kabuk açıldı: son açık araç sayfasını temizle ki en üst pencere
+      // "Ana Sayfa"da (araç değil) açılsın, sonra en üste yönlendir.
+      try{ localStorage.removeItem('mmg_last_open_page'); }catch(e){}
+      try{ window.top.location.replace('index.html'); }
+      catch(e){ try{ window.top.location.href = 'index.html'; }catch(e2){ window.location.replace('index.html'); } }
+    }
+  }catch(e){ /* çerçeve erişimi engellenirse sessizce geç */ }
+})();
+</script>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -2284,14 +2304,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   // ---- Masaüstünü sıfırla (Düzenle ya da Kaldır modundayken görünür) ----
+  // ÖNEMLİ: Sıfırla artık fabrika ayarlarına dönmez. Kullanıcının o an masaüstünde
+  // bulundurduğu kart KÜMESİNİ aynen korur (kaldırdığı kartları geri EKLEMEZ, eklediği
+  // kısayolları KALDIRMAZ). Yalnızca kartların boyutlarını ve dizilişini varsayılan
+  // "temiz ızgara" görünümüne döndürür: elle yapılan boyut değişiklikleri ile büyüteç
+  // (yakınlaştırma) ayarı temizlenir; böylece sayfa yenilendiğinde sabit kartlar özgün
+  // HTML sırasında, sonradan eklenmiş kısayollar da onların ardında, hepsi eşit/varsayılan
+  // boyutta dizilir. Kart üyeliğini tutan LAYOUT_KEY ve REMOVED_KEY'e dokunulmaz.
   if(resetBtn){
     resetBtn.addEventListener('click', function(){
-      var ok = window.confirm('Masaüstü düzenini sıfırlamak istediğinize emin misiniz? Eklediğiniz kısayollar, kaldırdığınız kartlar ve yaptığınız boyut değişiklikleri geri alınacak ve varsayılan görünüme dönülecek.');
+      var ok = window.confirm('Kartların boyutlarını ve dizilişini varsayılan görünüme sıfırlamak istediğinize emin misiniz? Eklediğiniz ve kaldırdığınız kartlar aynen korunur; yalnızca boyut değişiklikleri ve sıralama varsayılana döner.');
       if(!ok) return;
       try{
-        localStorage.removeItem(LAYOUT_KEY);
+        // Kart kümesini koru: LAYOUT_KEY (eklenen kısayollar) ve REMOVED_KEY (kaldırılan
+        // kartlar) SİLİNMEZ. Sadece boyut/ölçek durumunu temizle.
         localStorage.removeItem(SIZE_KEY);
-        localStorage.removeItem(REMOVED_KEY);
         localStorage.removeItem(CARD_SCALE_KEY);
       }catch(e){}
       location.reload();
@@ -2530,18 +2557,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // Cihan olsun, başka biri olsun, fark etmez — SONRADAN giriş yapıldı demektir) oturumu
   // kapatır. "Son giriş" her zaman kazanır. Diğer platformun alanı değişse bile bu cihazı
   // etkilemez — böylece aynı hesap 1 web + 1 uygulamada aynı anda açık kalabilir.
-  function mmgWatchSession(uid){
-    console.log('[MMG_DEBUG] mmgWatchSession ÇAĞRILDI', {uid, localSessionId: localStorage.getItem(MMG_SESSION_KEY), platform: mmgSessionPlatform(), field: MMG_SESSION_FIELD});
+  function mmgWatchSession(uid, justClaimed){
+    console.log('[MMG_DEBUG] mmgWatchSession ÇAĞRILDI', {uid, justClaimed, localSessionId: localStorage.getItem(MMG_SESSION_KEY), platform: mmgSessionPlatform(), field: MMG_SESSION_FIELD});
     mmgStopWatchingSession();
+    // KRİTİK DÜZELTME (self-kick / "giriş yapar yapmaz kendini atma"):
+    //  1) Kendi henüz-onaylanmamış (pending) yazmalarımızı ve önbellekten (fromCache) gelen
+    //     eski değerleri kick kararında dikkate almıyoruz — sadece sunucudan onaylı değerler.
+    //  2) YENİ GİRİŞ yaptıysak (justClaimed), ürettiğimiz yeni oturum kimliğini sunucuda en az
+    //     bir kez görene kadar ASLA kick etmiyoruz. Aksi halde giriş anında sunucudaki eski/
+    //     gecikmeli değer local'imizle uyuşmadığı için watcher yeni giren oturumu yanlışlıkla
+    //     anında atıyordu (Alex'teki "başka bir yerden girildi" hatasının asıl sebebi).
+    //  3) Sayfa YENİDEN YÜKLENDİĞİNDE (justClaimed=false) ise sunucu değeri yetkilidir: local
+    //     ile uyuşmuyorsa gerçekten başka bir cihaz devralmıştır → hemen kick (tek-oturum korunur).
+    let mmgSessionConfirmed = false;
     mmgSessionUnsub = onSnapshot(doc(db, 'users', uid), (snap) => {
       if(!snap.exists()) return;
+      if(snap.metadata && snap.metadata.hasPendingWrites) return;
+      if(snap.metadata && snap.metadata.fromCache) return;
       const remoteSessionId = snap.data()[MMG_SESSION_FIELD];
       const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
       console.log('[MMG_DEBUG] onSnapshot TETİKLENDİ', {
         remoteSessionId, localSessionId, field: MMG_SESSION_FIELD,
         fromCache: snap.metadata.fromCache, hasPendingWrites: snap.metadata.hasPendingWrites,
-        esitMi: remoteSessionId === localSessionId
+        justClaimed, confirmed: mmgSessionConfirmed, esitMi: remoteSessionId === localSessionId
       });
+      // Sunucudaki oturum kimliği bizimkiyle eşleşiyorsa: oturumumuz doğrulandı, kick yok.
+      if(remoteSessionId && localSessionId && remoteSessionId === localSessionId){
+        mmgSessionConfirmed = true;
+        return;
+      }
+      // Yeni giriş yaptıysak: kendi kimliğimizi sunucuda görene kadar kick yok (self-kick koruması).
+      if(justClaimed && !mmgSessionConfirmed) return;
       if(remoteSessionId && localSessionId && remoteSessionId !== localSessionId){
         console.log('[MMG_DEBUG] >>> KICK TETİKLENDİ <<<', {remoteSessionId, localSessionId, field: MMG_SESSION_FIELD});
         mmgStopWatchingSession();
@@ -2578,10 +2624,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const localSessionId = localStorage.getItem(MMG_SESSION_KEY);
       const localSessionUid = localStorage.getItem(MMG_SESSION_UID_KEY);
       console.log('[MMG_DEBUG] mmgEnsureSessionOwnership ÇALIŞTI', {uid, localSessionId, localSessionUid, forceClaim, yenidenIddiaEdilecekMi: (forceClaim || !localSessionId || localSessionUid !== uid)});
-      if(forceClaim || !localSessionId || localSessionUid !== uid){
+      const didClaim = (forceClaim || !localSessionId || localSessionUid !== uid);
+      if(didClaim){
         await mmgClaimSessionUnsafe(uid);
       }
-      mmgWatchSession(uid);
+      mmgWatchSession(uid, didClaim);
     });
   }
 
@@ -2840,6 +2887,51 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const displayName = uname || email;
       nameEl.textContent = no ? ('#' + no) : displayName;
       dropdownName.textContent = displayName;
+      // Kod (müşteri numarası) henüz yoksa — ör. eski/taşınmış ya da bir giriş
+      // yolunda kodu hiç atanmamış hesaplar (rozet o an yalnızca adı gösteriyor) —
+      // arka planda güvenilir biçimde bir kod bul/oluştur ve rozeti yeniden çiz.
+      // Kodu zaten olan kullanıcılar bu daldan etkilenmez (no doğru olduğundan atlanır).
+      if(!no){ try{ mmgEnsureCustomerNumber(); }catch(e){ /* sessizce geç */ } }
+    }
+  }
+
+  // Rozetteki kullanıcı kodunun (müşteri numarası) her giriş yapan kullanıcıda
+  // görünmesini garanti eder: önce Firestore'daki profili okur, kod varsa onu
+  // kullanır; yoksa yeni bir kod üretip kullanıcı dokümanına yazar. İşlem oturum
+  // başına en fazla bir kez denenir (mmgCustomerNoBackfillTried) ki updateUserBadge
+  // tekrar tekrar çağrılsa bile sayaç boşa tüketilmesin veya döngü oluşmasın.
+  let mmgCustomerNoBackfillTried = false;
+  async function mmgEnsureCustomerNumber(){
+    if(mmgCustomerNoBackfillTried) return;
+    const state = localStorage.getItem('mmg_auth_state');
+    if(!state || !state.startsWith('user:')) return;      // sadece gerçek (giriş yapmış) kullanıcı
+    if(localStorage.getItem('mmg_customer_no')) return;    // kod zaten var
+    const user = auth.currentUser;
+    if(!user) return;                                      // henüz oturum hazır değil
+    mmgCustomerNoBackfillTried = true;
+    try{
+      let no = null, uname = null;
+      try{
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if(snap.exists()){
+          no = snap.data().customerNumber || null;
+          uname = snap.data().username || null;
+        }
+      }catch(readErr){ /* profil okunamazsa yine de üretmeyi dene */ }
+      if(!no){
+        no = await getNextCustomerNumber();
+        await setDoc(doc(db, 'users', user.uid), { customerNumber: no }, { merge: true });
+      }
+      if(no){
+        localStorage.setItem('mmg_customer_no', String(no));
+        if(uname) localStorage.setItem('mmg_username', uname);
+        updateUserBadge(no, uname || localStorage.getItem('mmg_username'));
+        try{ syncUserDirectory(user.uid, no, uname || localStorage.getItem('mmg_username'), user.email); }catch(e){}
+      }
+    }catch(e){
+      // Kod atanamazsa (ör. izin/ağ hatası) rozet ada düşmeye devam eder;
+      // bir sonraki oturumda tekrar denenebilsin diye kilidi geri açıyoruz.
+      mmgCustomerNoBackfillTried = false;
     }
   }
 

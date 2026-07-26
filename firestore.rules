@@ -9,15 +9,44 @@ service cloud.firestore {
     match /meta/counters {
       allow read, write: if request.auth != null;
     }
+    // ---- Kullanıcı Profili (sosyal profil sayfası — profil.html) ----
+    // users/{uid} dokümanını yalnızca sahibi/yönetici okuyabildiği için, başka
+    // kullanıcıların GÖREBİLECEĞİ herkese açık profil verisi ayrı bir üst düzey
+    // "profiles/{uid}" koleksiyonunda tutulur.
+    //  • read  : giriş yapmış her kullanıcı başka bir kullanıcının profilini okuyabilir.
+    //            (Açık/Gizli ayrımı istemci tarafında uygulanır; burada hassas kimlik
+    //             verisi tutulmaz — sadece kullanıcının kendi paylaştığı profil alanları.)
+    //  • write : yalnızca profilin sahibi (doküman ID'si == kendi uid'i) yazabilir.
+    match /profiles/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
     match /referralCodes/{code} {
       allow read: if request.auth != null;
       allow write: if request.auth != null &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
+    // Referans kullanım kaydı. Üst doküman yalnızca sayaç/son-kullanım tutar (kişisel veri YOK);
+    // kayıt (signup) sırasında maxUses kontrolü için okunması ve sayacın artırılması gerektiğinden
+    // giriş yapan kullanıcıya açık. HASSAS veri (katılanların e-posta/kullanıcı adı/müşteri no)
+    // alt koleksiyon "users" içinde tutulur ve GÜVENLİK DARALTMASI ile korunur:
+    //  • Katılan kişi yalnızca KENDİ kaydını oluşturabilir.
+    //  • Bu kayıtları yalnızca kişinin kendisi, kodun SAHİBİ (satış ortağı) veya yönetici okuyabilir
+    //    — böylece bir başkası senin referans girişlerinin e-postalarını toplayamaz.
     match /referrals/{code} {
-      allow read, write: if request.auth != null;
-      match /users/{uid} {
-        allow read, write: if request.auth != null;
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+      match /users/{memberUid} {
+        allow read: if request.auth != null && (
+          request.auth.uid == memberUid ||
+          get(/databases/$(database)/documents/referralCodes/$(code)).data.ownerUid == request.auth.uid ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+        );
+        allow create: if request.auth != null && request.auth.uid == memberUid;
+        allow update, delete: if request.auth != null && (
+          get(/databases/$(database)/documents/referralCodes/$(code)).data.ownerUid == request.auth.uid ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+        );
       }
     }
     // Bir referans koduyla kayıt olan yeni kullanıcıyı, o kodun sahibine (ownerUid) bildirmek
@@ -124,17 +153,43 @@ service cloud.firestore {
       }
     }
 
-    // ---- Firma / Ekip (Hesabım sayfasında zaten var olan özellik) ----
-    // Bu koleksiyonlara daha önce hiç kural tanımlanmamıştı; bu yüzden firma oluşturma,
-    // üye ekleme ve firmaları birbirine bağlama işlemleri sessizce başarısız oluyordu.
+    // ---- Firma / Ekip (index.html'deki "Firma/Ekip" özelliği hâlâ kullanıyor) ----
+    // GÜVENLİK DARALTMASI: Eskiden bu koleksiyon giriş yapan HERKESE tam okuma/yazma açıktı;
+    // bu, bir kullanıcının başka bir firmanın üye e-postalarını okuyup verisini değiştirebilmesi
+    // demekti. Artık:
+    //  • Şirket dokümanı (name/ownerUid/groupId — hassas değil) okunabilir kalıyor; çünkü firma
+    //    kurarken isim-tekrar kontrolü (where name==...) ve davetle katılım bunu gerektiriyor.
+    //  • Şirket dokümanına YAZMA yalnızca kuran/sahip (ownerUid) tarafından yapılabilir.
+    //  • Hassas kısım olan "members" (üye e-postaları) yalnızca o firmanın üyeleri/sahibi
+    //    tarafından okunabilir; üyeliği yalnızca kişinin kendisi oluşturabilir; silme kişinin
+    //    kendisi veya firma sahibi tarafından yapılabilir.
     match /companies/{companyId} {
-      allow read, write: if request.auth != null;
-      match /{document=**} {
-        allow read, write: if request.auth != null;
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if request.auth != null &&
+        resource.data.ownerUid == request.auth.uid;
+
+      match /members/{memberUid} {
+        allow read: if request.auth != null && (
+          request.auth.uid == memberUid ||
+          get(/databases/$(database)/documents/companies/$(companyId)).data.ownerUid == request.auth.uid ||
+          exists(/databases/$(database)/documents/companies/$(companyId)/members/$(request.auth.uid))
+        );
+        allow create: if request.auth != null && request.auth.uid == memberUid;
+        allow delete: if request.auth != null && (
+          request.auth.uid == memberUid ||
+          get(/databases/$(database)/documents/companies/$(companyId)).data.ownerUid == request.auth.uid
+        );
       }
     }
+    // ESKİ e-posta tabanlı davet (companies sistemi). Artık davetler KOD tabanlı yapılıyor
+    // (firmaInvites/{kod}, firmaAdminInvites/{kod}) ve bu koleksiyona hiçbir yer YAZMIYOR.
+    // Güvenlik: yazmayı tamamen kapatıyoruz (aksi halde biri sahte bir invites/{kurban-eposta}
+    // kaydı oluşturup, kurban giriş yaptığında onu kendi firmasına ekletebilirdi). Okuma da
+    // yalnızca kendi e-postasına ait kayıtla sınırlı — böylece e-posta adresleri sızmaz.
     match /invites/{email} {
-      allow read, write: if request.auth != null;
+      allow read: if request.auth != null && request.auth.token.email == email;
+      allow write: if false;
     }
     match /groups/{groupId} {
       allow read, write: if request.auth != null;

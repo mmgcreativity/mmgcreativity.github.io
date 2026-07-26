@@ -127,6 +127,29 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .stat .value.gold{color:var(--gold);}
   .stat .value.small{font-size:16px;}
 
+  /* Tutar + vade grubuna göre en uygun teklif özeti */
+  .best-groups-panel{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:16px 18px;margin-bottom:16px;position:relative;overflow:hidden;
+  }
+  .best-groups-panel::before{
+    content:"";position:absolute;top:0;left:0;width:3px;height:100%;
+    background:linear-gradient(180deg,var(--green),transparent);
+  }
+  .best-groups-panel > .label{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:4px;}
+  .best-groups-hint{font-size:11.5px;color:var(--text-dim);margin-bottom:12px;line-height:1.5;}
+  .best-groups-list{display:flex;flex-direction:column;gap:8px;}
+  .best-group-row{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:var(--green-soft);border:1px solid rgba(61,220,151,.22);border-radius:10px;
+    padding:9px 12px;font-family:'JetBrains Mono',monospace;font-size:13px;
+  }
+  .best-group-row .bg-cond{color:var(--text-dim);font-weight:600;}
+  .best-group-row .bg-arrow{color:var(--green);}
+  .best-group-row .bg-bank{color:var(--green);font-weight:700;flex:1 1 auto;}
+  .best-group-row .bg-total{color:var(--text);font-weight:700;}
+  .best-groups-list .bg-empty{font-family:'Inter',sans-serif;font-size:13px;color:var(--text-dim);}
+
   .card{
     background:var(--card);border:1px solid var(--border);border-radius:16px;
     padding:22px 22px 24px;margin-bottom:22px;
@@ -352,15 +375,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </header>
 <div class="wrap">
 
-  <div class="grid-top">
-    <div class="stat">
-      <div class="label" data-i18n="stat_best_offer">En uygun teklif</div>
-      <div class="value gold" id="statBestBank">—</div>
-    </div>
-    <div class="stat">
-      <div class="label" data-i18n="stat_best_total">En uygun toplam geri ödeme</div>
-      <div class="value" id="statBestTotal">—</div>
-    </div>
+  <div class="best-groups-panel">
+    <div class="label" data-i18n="best_by_group">Tutar + vade grubuna göre en uygun teklif</div>
+    <div class="best-groups-hint" data-i18n="best_by_group_hint">Yalnızca aynı kredi tutarı ve aynı vadeye sahip teklifler birbiriyle kıyaslanır; her grup için en düşük toplam geri ödemeli teklif gösterilir.</div>
+    <div id="bestGroupsList" class="best-groups-list"><span class="bg-empty" data-i18n="best_group_empty">Karşılaştırmak için teklif ekleyin.</span></div>
+  </div>
+
+  <div class="grid-top" style="grid-template-columns:repeat(2,1fr);">
     <div class="stat">
       <div class="label" data-i18n="stat_avg_installment">Ortalama aylık taksit</div>
       <div class="value small" id="statAvgInstallment">—</div>
@@ -446,6 +467,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 let MMG_LANG = 'tr';
 try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
 const KK_MONTH_WORD = MMG_LANG === 'en' ? 'Mo' : 'Ay';
+const LBL_BEST_GROUP_EMPTY = MMG_LANG === 'en' ? 'Add offers to compare.' : 'Karşılaştırmak için teklif ekleyin.';
 let offers = [
   {bank:"VAKIF KATILIM", amount:190043, monthlyRate:4.33, months:2, annualFeeRate:1.12},
   {bank:"KUVEYT TÜRK", amount:398478, monthlyRate:4.15, months:2, annualFeeRate:1.13},
@@ -561,8 +583,18 @@ function renderTable(){
   // (numaralar sabit kalıp sadece liste güncellenir — numaralar her zaman 1,2,3...).
   const sortedValid = [...valid].sort((a,b)=>(sortKey(a)-sortKey(b))*sortDir);
   const displayOrder = [...sortedValid, ...invalid];
-  // En iyi teklif (gerçek en düşük değer) her zaman yeşil vurgulanır, sıralama yönünden bağımsız.
-  const bestIdx = valid.length ? [...valid].sort((a,b)=>sortKey(a)-sortKey(b))[0].idx : null;
+  // En iyi teklif GRUP BAZLI belirlenir: yalnızca AYNI kredi tutarı VE aynı vade (ay) olan
+  // teklifler birbiriyle kıyaslanır; her grubun en düşük değerlisi yeşil vurgulanır. Farklı
+  // tutar/vadeli teklifler arasında tek bir "en iyi" seçmek yanıltıcı olurdu (küçük kredi hep
+  // kazanırdı), o yüzden gruplara ayırıyoruz.
+  const bestIdxByGroup = {};
+  valid.forEach(x=>{
+    const gk = x.offer.amount + '|' + x.offer.months;
+    if(!(gk in bestIdxByGroup) || sortKey(x) < bestIdxByGroup[gk].k){
+      bestIdxByGroup[gk] = { idx:x.idx, k:sortKey(x) };
+    }
+  });
+  const bestIdxSet = new Set(Object.keys(bestIdxByGroup).map(gk=>bestIdxByGroup[gk].idx));
 
   const filterLower = bankFilter.trim().toLowerCase();
 
@@ -570,7 +602,7 @@ function renderTable(){
     const tr = document.createElement('tr');
     const matchesFilter = !filterLower || (o.bank||'').toLowerCase().includes(filterLower);
     if(!matchesFilter) tr.style.display = 'none';
-    const isBest = idx === bestIdx;
+    const isBest = bestIdxSet.has(idx);
     if(isBest) tr.className = 'best-row';
     const rank = pos + 1;
     const rankBadgeClass = rank===1?'rank-1':rank===2?'rank-2':rank===3?'rank-3':'rank-n';
@@ -653,22 +685,47 @@ function renderTable(){
   });
 }
 
-function renderStats(){
-  const computed = offers.map(o=>calc(o)).filter(Boolean);
-  document.getElementById('statCount').textContent = computed.length;
+function kkEscapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
-  if(computed.length===0){
-    document.getElementById('statBestBank').textContent = '—';
-    document.getElementById('statBestTotal').textContent = '—';
+function renderStats(){
+  const withBank = offers.map(o=>({o, r:calc(o)})).filter(x=>x.r);
+  document.getElementById('statCount').textContent = withBank.length;
+  const listEl = document.getElementById('bestGroupsList');
+
+  if(withBank.length===0){
+    if(listEl) listEl.innerHTML = '<span class="bg-empty">' + (LBL_BEST_GROUP_EMPTY) + '</span>';
     document.getElementById('statAvgInstallment').textContent = '—';
     return;
   }
-  const withBank = offers.map(o=>({o,r:calc(o)})).filter(x=>x.r);
-  withBank.sort((a,b)=>a.r.total-b.r.total);
-  document.getElementById('statBestBank').textContent = withBank[0].o.bank || '—';
-  document.getElementById('statBestTotal').textContent = fmt(withBank[0].r.total);
 
-  const avgInstallment = computed.reduce((s,r)=>s+r.installment,0)/computed.length;
+  // Grupla: anahtar = tutar + '|' + vade(ay). Her grup için en düşük TOPLAM geri ödemeli teklif.
+  const groups = {};
+  withBank.forEach(x=>{
+    const key = x.o.amount + '|' + x.o.months;
+    if(!groups[key] || x.r.total < groups[key].r.total) groups[key] = x;
+  });
+  // Görüntü sırası: önce tutara, sonra vadeye göre artan.
+  const keys = Object.keys(groups).sort((a,b)=>{
+    const [aa,am]=a.split('|').map(Number), [ba,bm]=b.split('|').map(Number);
+    return aa-ba || am-bm;
+  });
+  if(listEl){
+    listEl.innerHTML = keys.map(key=>{
+      const g = groups[key];
+      const [amount, months] = key.split('|');
+      const cond = formatTRThousands(amount) + ' ₺ / ' + months + ' ' + KK_MONTH_WORD;
+      return '<div class="best-group-row">' +
+               '<span class="bg-cond">' + kkEscapeHtml(cond) + '</span>' +
+               '<span class="bg-arrow">→</span>' +
+               '<span class="bg-bank">' + kkEscapeHtml(g.o.bank || '—') + '</span>' +
+               '<span class="bg-total">' + fmt(g.r.total) + '</span>' +
+             '</div>';
+    }).join('');
+  }
+
+  const avgInstallment = withBank.reduce((s,x)=>s+x.r.installment,0)/withBank.length;
   document.getElementById('statAvgInstallment').textContent = fmt(avgInstallment);
 }
 
@@ -736,10 +793,16 @@ renderStats();
 <script>
   document.getElementById('resetPageBtn').addEventListener('click', function(){
     const msg = MMG_LANG === 'en'
-      ? 'All data you entered will be cleared and the page will return to its default state. Are you sure?'
-      : 'Girdiğiniz tüm veriler silinip sayfa varsayılan haline döndürülecek. Emin misiniz?';
+      ? 'All data you entered will be cleared. Are you sure?'
+      : 'Girdiğiniz tüm veriler silinecek. Emin misiniz?';
     if(confirm(msg)){
-      window.location.reload();
+      // Sıfırla: tüm girilen teklifleri temizle, hiçbir demo/başlangıç değeri yükleme
+      offers.length = 0;
+      bankFilter = '';
+      const bf = document.getElementById('bankFilterInput');
+      if(bf) bf.value = '';
+      renderTable();
+      renderStats();
     }
   });
 </script>
@@ -751,6 +814,7 @@ renderStats();
       page_subtitle:'Bankaların ihtiyaç kredisi tekliflerini gir; taksit tutarı, faiz, BSMV ve toplam geri ödeme otomatik hesaplansın, en uygun teklif otomatik öne çıksın.',
       reset_btn:'Sıfırla', back_home:'← Ana Sayfa',
       stat_best_offer:'En uygun teklif', stat_best_total:'En uygun toplam geri ödeme', stat_avg_installment:'Ortalama aylık taksit', stat_count:'Teklif sayısı',
+      best_by_group:'Tutar + vade grubuna göre en uygun teklif', best_by_group_hint:'Yalnızca aynı kredi tutarı ve aynı vadeye sahip teklifler birbiriyle kıyaslanır; her grup için en düşük toplam geri ödemeli teklif gösterilir.', best_group_empty:'Karşılaştırmak için teklif ekleyin.',
       compare_table_title:'Teklif Karşılaştırma Tablosu', calc_method:'Hesaplama Yöntemi',
       mode_simple:'Basit Faiz (Vade Sonu)', mode_compound:'Bileşik Faiz (Periyodik Reeskont)',
       period_label:'Periyot', period_nightly:'Gecelik (1 gün)', period_weekly:'Haftalık (7 gün)', period_monthly:'Aylık (30 gün)',
@@ -766,6 +830,7 @@ renderStats();
       page_subtitle:"Enter banks' personal loan offers; installment amount, interest, tax, and total repayment are calculated automatically, with the best offer highlighted.",
       reset_btn:'Reset', back_home:'← Home',
       stat_best_offer:'Best offer', stat_best_total:'Best total repayment', stat_avg_installment:'Average monthly installment', stat_count:'Number of offers',
+      best_by_group:'Best offer by amount + term group', best_by_group_hint:'Only offers with the same loan amount and the same term are compared with each other; the offer with the lowest total repayment is shown for each group.', best_group_empty:'Add offers to compare.',
       compare_table_title:'Offer Comparison Table', calc_method:'Calculation Method',
       mode_simple:'Simple Interest (At Maturity)', mode_compound:'Compound Interest (Periodic Rediscount)',
       period_label:'Period', period_nightly:'Overnight (1 day)', period_weekly:'Weekly (7 days)', period_monthly:'Monthly (30 days)',
