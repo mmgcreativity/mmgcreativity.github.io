@@ -212,7 +212,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .forum-quote-composer-card .cancel{ float:right; background:none; border:none; color:var(--muted); cursor:pointer; }
 
-  /* ---- Profil (kullanıcı tıklama) ---- */
+  /* ---- Profil (kullanıcı tıklama) — Twitter/X tarzı büyük kart ---- */
   .profile-clickable{ cursor:pointer; }
   .forum-post-name.profile-clickable:hover, .forum-reply-name.profile-clickable:hover{ text-decoration:underline; }
   .profile-modal-overlay{
@@ -221,28 +221,44 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .profile-modal-overlay[hidden]{ display:none; }
   .profile-modal-card{
-    background:var(--surface); border:1px solid var(--hairline); border-radius:16px; padding:26px 24px;
-    max-width:460px; width:100%; max-height:86vh; overflow-y:auto;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:18px;
+    max-width:560px; width:100%; max-height:90vh; overflow-y:auto; padding:0;
+  }
+  .profile-modal-banner{
+    height:120px; border-radius:18px 18px 0 0; position:relative;
+    background:var(--grad, linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure)));
   }
   .profile-modal-close{
-    float:right; background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; line-height:1;
+    position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%;
+    background:rgba(5,8,14,0.45); border:none; color:#fff; font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px);
   }
-  .profile-modal-close:hover{ color:var(--text); }
-  .profile-modal-head{ display:flex; align-items:center; gap:14px; margin-bottom:4px; }
-  .profile-modal-head .avatar-circle{ width:56px; height:56px; font-size:22px; flex-shrink:0; }
-  .profile-modal-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; }
+  .profile-modal-close:hover{ background:rgba(5,8,14,0.7); }
+  .profile-modal-body{ padding:0 26px 26px; }
+  .profile-modal-avatar-wrap{ margin-top:-44px; margin-bottom:12px; display:inline-block; }
+  .profile-modal-avatar-wrap .avatar-circle{
+    width:88px; height:88px; font-size:32px; border:4px solid var(--surface); box-shadow:0 2px 10px rgba(0,0,0,0.3);
+  }
+  .profile-modal-name-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .profile-modal-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; }
   .profile-modal-badge{
     display:inline-block; font-size:10.5px; font-family:'IBM Plex Mono',monospace; letter-spacing:.04em;
     color:var(--brass,#C6A15B); background:rgba(198,161,91,0.12); border:1px solid rgba(198,161,91,0.35);
-    padding:2px 8px; border-radius:999px; margin-top:4px;
+    padding:3px 9px; border-radius:999px;
   }
-  .profile-modal-stats{ color:var(--muted); font-size:12.5px; margin:14px 0 4px; }
-  .profile-modal-posts{ margin-top:10px; border-top:1px solid var(--hairline); padding-top:12px; }
-  .profile-post-item{ padding:10px 0; border-bottom:1px solid var(--hairline); }
+  .profile-modal-stats{ display:flex; gap:20px; margin:14px 0 4px; font-size:13.5px; }
+  .profile-modal-stats b{ color:var(--text); font-weight:700; }
+  .profile-modal-stats span{ color:var(--muted); margin-left:4px; }
+  .profile-modal-posts-heading{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px; color:var(--muted);
+    text-transform:uppercase; letter-spacing:.04em; margin-top:18px; padding-top:14px; border-top:1px solid var(--hairline);
+  }
+  .profile-modal-posts{ margin-top:8px; }
+  .profile-post-item{ padding:12px 0; border-bottom:1px solid var(--hairline); }
   .profile-post-item:last-child{ border-bottom:none; }
   .profile-post-time{ font-size:11px; color:var(--muted); margin-bottom:3px; }
-  .profile-post-text{ font-size:13px; white-space:pre-wrap; word-break:break-word; }
-  .profile-post-image{ max-width:100%; border-radius:8px; margin-top:6px; }
+  .profile-post-text{ font-size:13.5px; white-space:pre-wrap; word-break:break-word; }
+  .profile-post-image{ max-width:100%; border-radius:10px; margin-top:8px; }
 </style>
 </head>
 <body>
@@ -291,16 +307,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="profile-modal-overlay" id="profileModalOverlay" hidden>
   <div class="profile-modal-card">
-    <button type="button" class="profile-modal-close" id="profileModalCloseBtn" aria-label="Kapat">✕</button>
-    <div class="profile-modal-head">
-      <div id="profileModalAvatar"></div>
-      <div>
+    <div class="profile-modal-banner">
+      <button type="button" class="profile-modal-close" id="profileModalCloseBtn" aria-label="Kapat">✕</button>
+    </div>
+    <div class="profile-modal-body">
+      <div class="profile-modal-avatar-wrap" id="profileModalAvatar"></div>
+      <div class="profile-modal-name-row">
         <div class="profile-modal-name" id="profileModalName">—</div>
         <div class="profile-modal-badge" id="profileModalBadge" style="display:none;"></div>
       </div>
+      <div class="profile-modal-stats" id="profileModalStats"></div>
+      <div class="profile-modal-posts-heading" id="profileModalPostsHeading"></div>
+      <div class="profile-modal-posts" id="profileModalPosts"></div>
     </div>
-    <div class="profile-modal-stats" id="profileModalStats"></div>
-    <div class="profile-modal-posts" id="profileModalPosts"></div>
   </div>
 </div>
 
@@ -668,7 +687,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     document.getElementById('profileModalAvatar').innerHTML = avatarHtml(fallbackName, null, uid).replace('profile-clickable ', '').replace(' profile-clickable', '');
     document.getElementById('profileModalName').textContent = fallbackName || LBL.anonymous;
     document.getElementById('profileModalBadge').style.display = 'none';
-    document.getElementById('profileModalStats').textContent = LBL.loadingPosts;
+    document.getElementById('profileModalStats').innerHTML = '<span>' + LBL.loadingPosts + '</span>';
+    document.getElementById('profileModalPostsHeading').textContent = '';
     document.getElementById('profileModalPosts').innerHTML = '';
 
     let name = fallbackName, avatar = null, isAdminUser = false, isFirma = false;
@@ -692,8 +712,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     try{
       const q = query(collection(db, 'forumPosts'), where('authorUid', '==', uid), orderBy('createdAt', 'desc'), limit(30));
       const snap = await getDocs(q);
-      document.getElementById('profileModalStats').textContent =
-        (MMG_LANG === 'en' ? snap.size + ' post(s)' : snap.size + ' gönderi');
+      document.getElementById('profileModalStats').innerHTML =
+        '<div><b>' + snap.size + '</b><span>' + (MMG_LANG === 'en' ? ' post' + (snap.size === 1 ? '' : 's') : ' gönderi') + '</span></div>';
+      document.getElementById('profileModalPostsHeading').textContent = MMG_LANG === 'en' ? 'Posts' : 'Gönderiler';
       if(snap.empty){
         document.getElementById('profileModalPosts').innerHTML = '<div class="forum-empty-note">' + LBL.noPostsYet + '</div>';
       } else {
@@ -703,7 +724,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       }
     }catch(e){
       console.error('[Profil gönderileri yüklenemedi]', e);
-      document.getElementById('profileModalStats').textContent = '';
+      document.getElementById('profileModalStats').innerHTML = '';
+      document.getElementById('profileModalPostsHeading').textContent = '';
       document.getElementById('profileModalPosts').innerHTML = '<div class="forum-empty-note">' + LBL.errorSub + '</div>';
     }
   }
