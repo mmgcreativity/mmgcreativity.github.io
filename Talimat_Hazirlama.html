@@ -1602,6 +1602,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const cloud = window.mmgCloud;
       if(cloud.scopeCollection !== 'firmaAccounts') return;
       const baseId = cloud.effectiveScopeId || cloud.scopeId;
+
+      // ---- Grup firmalarını "Gönderen Firma" kayıtlı listesine otomatik ekle ----
+      // Talimatı hazırlayan kişi genelde grubun kendi firmalarından birini "gönderen"
+      // olarak seçer (aynı holding/grubun başka bir firması adına talimat hazırlamak
+      // gibi); bu yüzden grup firmaları, müşteri/tedarikçi listesi gibi manuel
+      // kaydedilmeyi beklemeden doğrudan Gönderen Firma "📋 Kayıtlı" listesinde çıkar.
+      const grup = cloud.groupFirmalar || [];
+      grup.forEach(f => {
+        const ad = (f.name || '').trim();
+        if(!ad) return;
+        if(!savedGonderenFirms.some(sf => sf.name.trim().toLowerCase() === ad.toLowerCase())){
+          savedGonderenFirms.push({ name: ad, logo: null, logoW: null, logoH: null, _db: true, _grup: true });
+        }
+      });
+
       const kinds = ['customers', 'suppliers', 'counterparties'];
       for(const kind of kinds){
         const snap = await getDocs(collection(db, 'firmaAccounts', baseId, kind));
