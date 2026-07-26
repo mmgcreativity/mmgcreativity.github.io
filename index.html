@@ -1969,6 +1969,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // ana sayfa görünümündeyken tekerlek her zaman .home-scroll'u kaydırır.
   (function(){
     document.addEventListener('wheel', function(e){
+      // ÖNEMLİ: 860px altında (mobil CSS moduna geçildiğinde — DevTools açıldığında pencere
+      // daralıp bu moda geçebilir) sayfa TAMAMEN FARKLI kayar (iç kutu değil, body'nin kendisi).
+      // Orada karışmıyoruz; aksi halde zaten çalışan native body-kaymasını preventDefault ile
+      // bozmuş oluruz. Bu düzeltme sadece masaüstü genişliğinde (>860px), gerçekten
+      // .home-scroll'un kendisinin kaydığı düzende devreye giriyor.
+      if(window.innerWidth <= 860) return;
       var homeScreenEl = document.getElementById('home-screen');
       var hs = document.getElementById('homeScroll');
       if(!homeScreenEl || !hs) return;
