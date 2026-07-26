@@ -225,7 +225,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .pt-main.is-toggle:hover > td{ background:var(--surface); }
   .pt-extra[hidden]{ display:none; }
   .pt-extra > td{ background:var(--surface); }
-  .pt-name{ white-space:normal; min-width:170px; max-width:340px; }
+  .pt-name{ white-space:normal; width:300px; max-width:300px; overflow-wrap:anywhere; word-break:break-word; }
   .pt-title{ display:flex; align-items:flex-start; gap:7px; }
   .pt-chevron{ color:var(--muted); font-size:10px; flex-shrink:0; display:inline-block; margin-top:3px; transition:transform .18s ease; }
   .pt-main.open .pt-chevron{ transform:rotate(180deg); color:var(--brass); }
@@ -444,6 +444,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <div class="auth-field">
             <label data-i18n="bank_iban_label">IBAN (opsiyonel)</label>
             <input type="text" id="bankIbanInput" data-i18n-placeholder="bank_iban_ph" placeholder="TR__ ____ ____ ____ ____ ____ __">
+          </div>
+          <div class="auth-field">
+            <label data-i18n="bank_cur_label">Döviz</label>
+            <input type="text" id="bankCurInput" list="currencyDatalist" value="TRY">
           </div>
         </div>
         <div id="bank_firmaSelect"></div>
@@ -889,7 +893,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   async function loadBanks(){
     const snap = await getDocs(colRef('banks'));
     banksList = [];
-    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '', iban: d.data().iban || '', appliesToFirmaIds: d.data().appliesToFirmaIds || null }));
+    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '', iban: d.data().iban || '', currency: d.data().currency || '', appliesToFirmaIds: d.data().appliesToFirmaIds || null }));
     banksList.sort((a,b) => a.name.localeCompare(b.name, 'tr'));
     renderBanks();
   }
@@ -897,7 +901,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const listEl = document.getElementById('banksChipList');
     const visibleBanks = banksList.filter(visibleForActiveFirma);
     listEl.innerHTML = visibleBanks.length ? visibleBanks.map(b =>
-      '<span class="bank-chip">' + escapeHtml(b.name) + (b.iban ? ' · ' + escapeHtml(b.iban) : '') + scopeBadgeHtml(b) +
+      '<span class="bank-chip">' + escapeHtml(b.name) + (b.iban ? ' · ' + escapeHtml(b.iban) : '') + (b.currency ? ' · ' + escapeHtml(b.currency) : '') + scopeBadgeHtml(b) +
       '<button type="button" data-remove-bank="' + b.id + '" title="' + LBL.delete + '">✕</button></span>'
     ).join('') : '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
     listEl.querySelectorAll('[data-remove-bank]').forEach(btn => {
@@ -918,14 +922,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const ibanInput = document.getElementById('bankIbanInput');
     const name = select.value;
     const iban = ibanInput.value.trim().toUpperCase().replace(/\s+/g, '');
+    const curInput = document.getElementById('bankCurInput');
+    const currency = (curInput.value.trim().toUpperCase()) || 'TRY';
     if(!name){ showMsg('banks_msg', LBL.enterValidName, true); return; }
     const appliesTo = collectFirmaSelection('bank_firmaSelect');
     try{
       const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-      const docData = { name, iban, createdAt: serverTimestamp() };
+      const docData = { name, iban, currency, createdAt: serverTimestamp() };
       if(appliesTo) docData.appliesToFirmaIds = appliesTo;
       await setDoc(docRef('banks', id), docData);
-      select.value = ''; ibanInput.value = '';
+      select.value = ''; ibanInput.value = ''; curInput.value = 'TRY';
       resetFirmaSelect('bank_firmaSelect');
       showMsg('banks_msg', LBL.saved, false);
       await loadBanks();
@@ -997,7 +1003,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const first = ibans[0];
       const rest = ibans.slice(1);
       const hasExtra = rest.length > 0;
-      const idHtml = p.idNumber ? '<div class="party-idnum">' + escapeHtml(p.idNumber) + '</div>' : '';
       // Ana satır: [ isim/unvan | banka | IBAN | para birimi | sil ] — tüm firmalarda kolonlar hizalı
       const nameCell =
         '<td class="pt-name">' +
@@ -1005,7 +1010,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             (hasExtra ? '<span class="pt-chevron">▾</span>' : '') +
             '<span class="party-name">' + escapeHtml(p.name) + '</span>' +
             scopeBadgeHtml(p) +
-          '</div>' + idHtml +
+          '</div>' +
         '</td>';
       const mainRow =
         '<tr class="pt-main' + (hasExtra ? ' is-toggle' : '') + '" data-party="' + p.id + '"' + (hasExtra ? ' data-toggle="1"' : '') + '>' +
@@ -1167,9 +1172,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     try{
       const header = [LBL.bulkTypeCol, LBL.bulkNameCol, LBL.bulkIdCol, LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol];
       const example1 = [LBL.bulkTypeCustomer, 'ABC İnşaat A.Ş.', '1234567890', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY'];
-      const example2 = [LBL.bulkTypeCustomer, 'ABC İnşaat A.Ş.', '1234567890', 'İş Bankası', 'TR111111111111111111111111', 'USD'];
-      const example3 = [LBL.bulkTypeSupplier, 'XYZ Ticaret Ltd.', '9876543210', 'Garanti BBVA', 'TR222222222222222222222222', 'TRY'];
-      const note = [MMG_LANG==='en' ? 'Type must be exactly "Customer" or "Supplier". A party with multiple IBANs should repeat on multiple rows with the same Name.' : '"Tip" sütunu tam olarak "Müşteri" ya da "Tedarikçi" olmalı. Birden fazla IBAN\'ı olan bir firma için aynı Ünvan\'ı birden fazla satırda tekrar edin.'];
+      const example2 = [LBL.bulkTypeCustomer, 'ABC İnşaat A.Ş.', '1234567890', 'Ziraat Bankası', 'TR111111111111111111111111', 'USD'];
+      const example3 = [LBL.bulkTypeSupplier, 'XYZ Ticaret Ltd.', '9876543210', 'Garanti BBVA', 'TR222222222222222222222222', 'EUR'];
+      const note = [MMG_LANG==='en' ? 'Type must be exactly "Customer" or "Supplier". A party with multiple accounts repeats on several rows with the same Name — even the SAME bank can appear on multiple rows with different IBANs / currencies (TRY, USD, EUR…).' : '"Tip" sütunu tam olarak "Müşteri" ya da "Tedarikçi" olmalı. Birden fazla hesabı olan firma için aynı Ünvan\'ı alt alta tekrar edin — AYNI banka bile farklı IBAN / döviz (TRY, USD, EUR…) ile birden çok satırda yer alabilir.'];
       const rows = [header, example1, example2, example3, [], note];
       const ws = XLSX.utils.aoa_to_sheet(rows);
       ws['!cols'] = [{wch:12},{wch:28},{wch:16},{wch:20},{wch:30},{wch:10}];
@@ -1283,12 +1288,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   // çünkü IBAN'larım kaydı bir firma/kişi değil, kullanıcının kendi banka hesabıdır.
   document.getElementById('downloadBanksTemplateBtn').addEventListener('click', () => {
     try{
-      const header = [LBL.bulkBankCol, LBL.bulkIbanCol];
-      const example1 = ['Ziraat Bankası', 'TR000000000000000000000000'];
-      const example2 = ['İş Bankası', 'TR111111111111111111111111'];
+      const header = [LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol];
+      const example1 = ['Ziraat Bankası', 'TR000000000000000000000000', 'TRY'];
+      const example2 = ['Ziraat Bankası', 'TR111111111111111111111111', 'USD'];
       const rows = [header, example1, example2];
       const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols'] = [{wch:24},{wch:30}];
+      ws['!cols'] = [{wch:24},{wch:30},{wch:10}];
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, MMG_LANG==='en' ? 'Template' : 'Şablon');
       XLSX.writeFile(wb, 'iban-sablon.xlsx');
@@ -1314,8 +1319,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       for(const row of json){
         const bank = String(row['Banka'] ?? row['Bank'] ?? '').trim();
         const iban = String(row['IBAN'] ?? '').trim().toUpperCase().replace(/\s+/g, '');
+        const currency = String(row['Döviz'] ?? row['Doviz'] ?? row['Currency'] ?? '').trim().toUpperCase() || 'TRY';
         if(!bank && !iban) continue;
-        rows.push({ bank, iban });
+        rows.push({ bank, iban, currency });
       }
 
       if(!rows.length){ showMsg('banksBulkMsg', LBL.bulkNoRows, true); return; }
@@ -1330,8 +1336,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   function renderBanksBulkPreview(rows){
     const wrap = document.getElementById('banksBulkPreviewWrap');
     const table = document.getElementById('banksBulkPreviewTable');
-    const trs = rows.map(r => '<tr><td>' + escapeHtml(r.bank||'—') + '</td><td>' + escapeHtml(r.iban||'—') + '</td></tr>');
-    table.innerHTML = '<thead><tr><th>' + LBL.bulkBankCol + '</th><th>' + LBL.bulkIbanCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
+    const trs = rows.map(r => '<tr><td>' + escapeHtml(r.bank||'—') + '</td><td>' + escapeHtml(r.iban||'—') + '</td><td>' + escapeHtml(r.currency||'TRY') + '</td></tr>');
+    table.innerHTML = '<thead><tr><th>' + LBL.bulkBankCol + '</th><th>' + LBL.bulkIbanCol + '</th><th>' + LBL.bulkCurrencyCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
     document.getElementById('banksBulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: rows.length, p: rows.length });
     wrap.style.display = 'block';
   }
@@ -1351,7 +1357,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       let count = 0;
       for(const r of pendingBanksBulkRows){
         const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
-        await setDoc(docRef('banks', id), { name: r.bank, iban: r.iban, createdAt: serverTimestamp() });
+        await setDoc(docRef('banks', id), { name: r.bank, iban: r.iban, currency: r.currency || 'TRY', createdAt: serverTimestamp() });
         count++;
       }
       showMsg('banksBulkMsg', fmt(LBL.bulkDone, { n: count }), false);
