@@ -736,6 +736,54 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
 
+    <section class="reports-section" id="consolidatedSection" style="display:none;">
+      <div class="reports-title-row">
+        <div class="section-title" style="margin-bottom:0;">🏢 Konsolide Nakit Akış</div>
+        <button type="button" class="ghost-btn" id="consolidatedToggleBtn">Firma Seç</button>
+      </div>
+      <div class="card-sub" style="color:var(--muted); font-size:12.5px; margin:6px 0 12px;">
+        Yönettiğiniz firmalardan istediklerinizi seçip, şu an ekranda seçili olan döneme (Günlük/Haftalık/Aylık/Yıllık) göre gelir ve giderlerinin toplu (konsolide) halini görün.
+      </div>
+      <div id="consolidatedPicker" style="display:none; margin-bottom:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
+          <label style="font-size:12.5px; color:var(--muted); font-weight:600;">Konsolide Edilecek Firmalar</label>
+          <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--brass,#C6A15B); cursor:pointer;">
+            <input type="checkbox" id="consolidatedSelectAll"> Tümünü Seç
+          </label>
+        </div>
+        <div id="consolidatedFirmaGrid" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;"></div>
+        <button type="button" class="archive-save-btn" id="consolidatedRunBtn">📊 Konsolide Et</button>
+        <div class="io-msg" id="consolidatedMsg" style="margin-top:8px;"></div>
+      </div>
+      <div id="consolidatedResults" style="display:none;">
+        <div class="summary-cards" style="margin-bottom:14px;">
+          <div class="summary-card sc-gelir">
+            <div class="summary-label"><span class="summary-label-icon">▲</span><span>Toplam Gelir</span></div>
+            <div class="summary-value pos" id="consGelir">0,00 TL</div>
+          </div>
+          <div class="summary-card sc-gider">
+            <div class="summary-label"><span class="summary-label-icon">▼</span><span>Toplam Gider</span></div>
+            <div class="summary-value neg" id="consGider">0,00 TL</div>
+          </div>
+          <div class="summary-card sc-net">
+            <div class="summary-label"><span class="summary-label-icon">◆</span><span>Net Durum</span></div>
+            <div class="summary-value" id="consNet">0,00 TL</div>
+          </div>
+        </div>
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="text-align:left; color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;">
+              <th style="padding:6px 8px;">Firma</th>
+              <th style="padding:6px 8px;">Gelir</th>
+              <th style="padding:6px 8px;">Gider</th>
+              <th style="padding:6px 8px;">Net</th>
+            </tr>
+          </thead>
+          <tbody id="consolidatedFirmaTable"></tbody>
+        </table>
+      </div>
+    </section>
+
     <section class="reports-section" id="reportsSection">
       <div class="reports-title-row">
         <div class="section-title" style="margin-bottom:0;">Raporlar</div>
@@ -1115,7 +1163,143 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(migrated) showCloudMsg(NAT.guestDataMigrated);
     }
     loadMonth();
+    loadConsolidationFirmas();
   });
+
+  // ================== Konsolide Nakit Akış ==================
+  // Kullanıcının yönettiği (adminFirmaIds) birden fazla firma varsa, seçtiği
+  // firmaların gelir/gider toplamlarını, o an ekranda seçili olan döneme
+  // (Günlük/Haftalık/Aylık/Yıllık) göre birleştirip gösterir.
+  let consolidatedFirmas = []; // [{id, name}]
+
+  async function loadConsolidationFirmas(){
+    const section = document.getElementById('consolidatedSection');
+    if(!section) return;
+    const cloud = window.mmgCloud;
+    if(!cloud || !cloud.currentUser){ section.style.display = 'none'; return; }
+    try{
+      const uSnap = await cloud.getDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid));
+      const adminIds = (uSnap.exists() && Array.isArray(uSnap.data().adminFirmaIds)) ? uSnap.data().adminFirmaIds : [];
+      if(adminIds.length < 2){ section.style.display = 'none'; return; }
+      consolidatedFirmas = [];
+      for(const fid of adminIds){
+        try{
+          const fSnap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid));
+          if(fSnap.exists()) consolidatedFirmas.push({ id: fid, name: fSnap.data().name || fid });
+        }catch(e){ /* tek bir firma okunamazsa listeyi bozmadan devam et */ }
+      }
+      if(consolidatedFirmas.length < 2){ section.style.display = 'none'; return; }
+      section.style.display = 'block';
+      renderConsolidatedFirmaGrid();
+    }catch(e){ section.style.display = 'none'; }
+  }
+
+  function renderConsolidatedFirmaGrid(){
+    const grid = document.getElementById('consolidatedFirmaGrid');
+    if(!grid) return;
+    const cloud = window.mmgCloud;
+    const activeId = (cloud && cloud.scopeCollection === 'firmaAccounts') ? cloud.scopeId : null;
+    grid.innerHTML = consolidatedFirmas.map(f =>
+      '<label style="display:flex; align-items:center; gap:8px; font-size:13.5px; cursor:pointer;">' +
+        '<input type="checkbox" class="consolidated-firma-check" value="' + f.id + '"' + (f.id === activeId ? ' checked' : '') + '>' +
+        '<span>' + escapeHtml(f.name) + '</span>' +
+      '</label>'
+    ).join('');
+    const selectAllEl = document.getElementById('consolidatedSelectAll');
+    const getChecks = () => Array.from(document.querySelectorAll('.consolidated-firma-check'));
+    selectAllEl.checked = getChecks().every(c => c.checked);
+    selectAllEl.onchange = () => { getChecks().forEach(c => { c.checked = selectAllEl.checked; }); };
+    getChecks().forEach(c => c.addEventListener('change', () => {
+      selectAllEl.checked = getChecks().every(x => x.checked);
+    }));
+  }
+
+  const consolidatedToggleBtn = document.getElementById('consolidatedToggleBtn');
+  if(consolidatedToggleBtn){
+    consolidatedToggleBtn.addEventListener('click', () => {
+      const picker = document.getElementById('consolidatedPicker');
+      picker.style.display = (picker.style.display === 'none') ? 'block' : 'none';
+    });
+  }
+
+  // O an ekranda seçili olan döneme göre hangi ay belge(ler)inin (YYYY-MM) çekilmesi gerektiğini belirler.
+  function consolidatedNeededMonthKeys(){
+    if(reportTab === 'yillik'){
+      const keys = [];
+      for(let m=0; m<12; m++) keys.push(monthKeyOf(selYear, m));
+      return keys;
+    }
+    const keys = new Set();
+    scopeDayKeysCurrent().forEach(k => keys.add(k.slice(0,7)));
+    return Array.from(keys);
+  }
+  // Yıllıkta tüm günler dahil edilir (filtre yok); diğer dönemlerde sadece o dönemin gün anahtarları sayılır.
+  function consolidatedNeededDayKeys(){
+    if(reportTab === 'yillik') return null;
+    return new Set(scopeDayKeysCurrent());
+  }
+
+  const consolidatedRunBtn = document.getElementById('consolidatedRunBtn');
+  if(consolidatedRunBtn){
+    consolidatedRunBtn.addEventListener('click', async () => {
+      const checked = Array.from(document.querySelectorAll('.consolidated-firma-check:checked')).map(c => c.value);
+      const msgEl = document.getElementById('consolidatedMsg');
+      msgEl.className = 'io-msg';
+      if(!checked.length){ msgEl.textContent = 'Lütfen en az bir firma seçin.'; msgEl.className = 'io-msg err'; return; }
+      const cloud = window.mmgCloud;
+      const btn = consolidatedRunBtn;
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = 'Hesaplanıyor…';
+      msgEl.textContent = '';
+      try{
+        const monthKeys = consolidatedNeededMonthKeys();
+        const dayFilter = consolidatedNeededDayKeys();
+        let grandGelir = 0, grandGider = 0;
+        const rows = [];
+        for(const fid of checked){
+          const firma = consolidatedFirmas.find(f => f.id === fid);
+          let fGelir = 0, fGider = 0;
+          for(const mk of monthKeys){
+            try{
+              const snap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'cashflow', mk));
+              if(!snap.exists()) continue;
+              const data = snap.data().data || {};
+              Object.keys(data).forEach(dk => {
+                if(dayFilter && !dayFilter.has(dk)) return;
+                const day = data[dk] || {};
+                (day.gider||[]).forEach(it => { fGider += (it.amount||0); });
+                (day.gelir||[]).forEach(it => { fGelir += (it.amount||0); });
+              });
+            }catch(e){ /* bu firma/ay okunamazsa sessizce geç, diğerleriyle devam */ }
+          }
+          grandGelir += fGelir; grandGider += fGider;
+          rows.push({ name: firma ? firma.name : fid, gelir: fGelir, gider: fGider, net: fGelir - fGider });
+        }
+        const grandNet = grandGelir - grandGider;
+        document.getElementById('consGelir').textContent = fmtMoney(grandGelir);
+        document.getElementById('consGider').textContent = fmtMoney(grandGider);
+        const netEl = document.getElementById('consNet');
+        netEl.textContent = (grandNet>=0?'':'-') + fmtMoney(Math.abs(grandNet));
+        netEl.className = 'summary-value ' + (grandNet >= 0 ? 'pos' : 'neg');
+        document.getElementById('consolidatedFirmaTable').innerHTML = rows.map(r =>
+          '<tr style="border-top:1px solid var(--hairline);">' +
+            '<td style="padding:7px 8px; font-weight:600;">' + escapeHtml(r.name) + '</td>' +
+            '<td style="padding:7px 8px; color:var(--teal);">' + fmtMoney(r.gelir) + '</td>' +
+            '<td style="padding:7px 8px; color:var(--red);">' + fmtMoney(r.gider) + '</td>' +
+            '<td style="padding:7px 8px; font-weight:700;">' + (r.net>=0?'':'-') + fmtMoney(Math.abs(r.net)) + '</td>' +
+          '</tr>'
+        ).join('');
+        document.getElementById('consolidatedResults').style.display = 'block';
+      }catch(e){
+        msgEl.textContent = 'Konsolide edilirken bir hata oluştu.';
+        msgEl.className = 'io-msg err';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    });
+  }
 
   // ================== Gün / Ay / Yıl seçiciler ==================
   const daySelectEl = document.getElementById('daySelect');
