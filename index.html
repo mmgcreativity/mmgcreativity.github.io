@@ -404,18 +404,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .card-grid{ display:flex; flex-wrap:wrap; align-items:flex-start; gap:18px; max-width:1400px; position:relative; }
   .card-grid.drag-over{ outline:2px dashed var(--brass); outline-offset:8px; border-radius:16px; background:rgba(198,161,91,0.05); }
   .desktop-toolbar{
-    position:absolute; top:216px; right:48px; z-index:5;
-    display:flex; align-items:flex-start; justify-content:flex-end; gap:12px; margin-bottom:0;
+    position:absolute; bottom:18px; right:48px; z-index:15;
+    display:flex; align-items:flex-end; justify-content:flex-end; gap:12px; margin-bottom:0;
   }
   .desktop-edit-btn{
     display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:9px 16px; border-radius:9px;
-    background:var(--surface); border:1px solid var(--hairline); color:var(--text); box-sizing:border-box; width:100%;
+    background:var(--surface); border:1px solid var(--hairline); color:var(--text); box-sizing:border-box;
     font-family:'Inter',sans-serif; font-size:13px; font-weight:400; cursor:pointer; transition:border-color .15s ease, color .15s ease;
+    white-space:nowrap; box-shadow:0 6px 18px rgba(0,0,0,0.25);
   }
   .desktop-edit-btn:hover{ border-color:var(--brass); color:var(--brass); }
   .desktop-edit-btn.active{ background:var(--brass); border-color:var(--brass); color:#141220; }
   .desktop-edit-btn svg{ width:15px; height:15px; flex-shrink:0; }
-  .desktop-toolbar-actions{ display:flex; flex-direction:column; align-items:stretch; gap:8px; width:168px; }
+  .desktop-toolbar-actions{ position:relative; display:inline-flex; }
+  .desktop-menu-panel{
+    position:absolute; top:calc(100% + 8px); right:0; z-index:20; width:190px;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .desktop-menu-panel .desktop-edit-btn{ width:100%; }
   .desktop-reset-btn{ color:var(--muted); }
   .desktop-reset-btn:hover{ border-color:#e05d5d; color:#e05d5d; }
   .desktop-add-wrap{ position:relative; width:100%; }
@@ -587,7 +593,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .card-grid.edit-mode .app-card.resizable{ resize:none; }
     .card-grid.edit-mode .app-card.resizable .card-resize-hint{ display:none; }
     .desktop-toolbar{ position:static; justify-content:flex-start; margin-top:16px; }
-    .desktop-toolbar-actions{ width:100%; flex-direction:row; flex-wrap:wrap; }
+    .desktop-toolbar-actions{ width:auto; }
+    .desktop-menu-panel{ right:auto; left:0; width:200px; }
     .desktop-edit-btn{ width:auto; flex:1 1 auto; }
   }
 
@@ -1429,25 +1436,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p class="hero-desc" data-i18n="hero_desc">Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.</p>
       <div class="desktop-toolbar">
         <div class="desktop-toolbar-actions">
-          <button type="button" class="desktop-edit-btn" id="desktopEditToggle" aria-pressed="false">
+          <button type="button" class="desktop-edit-btn" id="desktopEditToggle" aria-pressed="false" aria-haspopup="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
             <span id="desktopEditToggleLabel">Düzenle</span>
           </button>
-          <div class="desktop-add-wrap" id="desktopAddWrap" hidden>
-            <button type="button" class="desktop-edit-btn" id="desktopAddToggle" aria-pressed="false" aria-haspopup="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-              <span>Ekle</span>
+          <div class="desktop-menu-panel" id="desktopMenuPanel">
+            <div class="desktop-add-wrap" id="desktopAddWrap" hidden>
+              <button type="button" class="desktop-edit-btn" id="desktopAddToggle" aria-pressed="false" aria-haspopup="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                <span>Ekle</span>
+              </button>
+              <div class="desktop-add-menu" id="desktopAddMenu" hidden></div>
+            </div>
+            <button type="button" class="desktop-edit-btn" id="desktopRemoveToggle" aria-pressed="false" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+              <span id="desktopRemoveToggleLabel">Kaldır</span>
             </button>
-            <div class="desktop-add-menu" id="desktopAddMenu" hidden></div>
+            <button type="button" class="desktop-edit-btn desktop-reset-btn" id="desktopResetBtn" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+              <span data-i18n="desktop_reset">Sıfırla</span>
+            </button>
           </div>
-          <button type="button" class="desktop-edit-btn" id="desktopRemoveToggle" aria-pressed="false" hidden>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
-            <span id="desktopRemoveToggleLabel">Kaldır</span>
-          </button>
-          <button type="button" class="desktop-edit-btn desktop-reset-btn" id="desktopResetBtn" hidden>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
-            <span data-i18n="desktop_reset">Sıfırla</span>
-          </button>
         </div>
       </div>
     </section>
