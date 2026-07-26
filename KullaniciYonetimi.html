@@ -52,14 +52,14 @@
 
   .card{
     background:var(--surface); border:1px solid var(--hairline); border-radius:16px;
-    padding:14px; box-shadow:0 10px 30px rgba(0,0,0,0.25); margin-bottom:12px;
+    padding:12px; box-shadow:0 10px 30px rgba(0,0,0,0.25); margin-bottom:10px;
   }
   .two-col-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; align-items:start; }
   @media (max-width:760px){ .two-col-grid{ grid-template-columns:1fr; } }
-  .card h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; margin-bottom:4px; }
-  .card .card-sub{ color:var(--muted); font-size:12.5px; margin-bottom:8px; line-height:1.4; }
+  .card h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; margin-bottom:2px; }
+  .card .card-sub{ color:var(--muted); font-size:12.5px; margin-bottom:6px; line-height:1.4; }
 
-  .auth-field{ margin-bottom:12px; }
+  .auth-field{ margin-bottom:8px; }
   .auth-field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:5px; }
   .auth-field input{
     width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
@@ -79,8 +79,8 @@
   .auth-success{ color:var(--teal); font-size:12.5px; margin:8px 0 0; display:none; }
   .auth-success.show{ display:block; }
 
-  .perm-grid{ display:flex; flex-wrap:wrap; gap:10px 18px; margin:12px 0 16px; }
-  .invite-firma-grid{ display:flex; flex-direction:column; gap:10px; margin:10px 0 16px; }
+  .perm-grid{ display:flex; flex-wrap:wrap; gap:8px 16px; margin:8px 0 10px; }
+  .invite-firma-grid{ display:flex; flex-direction:column; gap:7px; margin:7px 0 10px; }
   .perm-check{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text); cursor:pointer; }
   .perm-select-all-row{ margin-top:10px; }
   .perm-select-all-label{
@@ -90,9 +90,9 @@
   .member-row .perm-select-all-row{ margin-top:0; margin-bottom:8px; }
   .perm-check input{ accent-color: var(--brass); width:15px; height:15px; cursor:pointer; }
 
-  .member-list{ display:flex; flex-direction:column; gap:6px; margin-top:2px; }
+  .member-list{ display:flex; flex-direction:column; gap:5px; margin-top:0; }
   .member-row{
-    background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px; padding:10px 12px;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px; padding:8px 10px;
   }
   .member-row-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .member-info{ min-width:0; }
@@ -106,9 +106,9 @@
   }
   .member-icon-btn:hover{ color:var(--brass); border-color:var(--brass-dim,#8A7440); background:var(--surface); }
   .member-icon-btn-danger:hover{ color:var(--red); border-color:var(--red); }
-  .member-perm-panel{ margin-top:12px; padding-top:12px; border-top:1px solid var(--hairline); display:flex; flex-direction:column; gap:10px; }
+  .member-perm-panel{ margin-top:8px; padding-top:8px; border-top:1px solid var(--hairline); display:flex; flex-direction:column; gap:7px; }
   .member-sub-box{
-    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:12px 14px;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:9px 11px;
   }
   .member-sub-box .perm-grid{ margin:0; }
   .member-sub-box .perm-select-all-row{ margin-top:0; margin-bottom:10px; }
@@ -157,8 +157,7 @@
       <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;"></select>
     </div>
     <div class="card">
-      <h2 data-i18n="my_users_title">Kullanıcılarım</h2>
-      <div class="card-sub" data-i18n="my_users_desc">Yetkileri değiştirdiğinizde otomatik olarak kaydedilir.</div>
+      <h2 data-i18n="my_users_title" style="margin-bottom:8px;">Kullanıcılarım</h2>
       <div class="member-list" id="membersList"><div class="empty-note" data-i18n="loading">Yükleniyor…</div></div>
     </div>
 
@@ -196,7 +195,7 @@
     </div>
   </div>
 
-  <div style="display:flex; flex-direction:column; gap:16px; min-width:0;">
+  <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
     <div class="card">
       <h2 data-i18n="add_user_title">Kullanıcı Ekle</h2>
       <div class="card-sub" data-i18n="add_user_desc">Eklemek istediğiniz kişinin kullanıcı kodunu girin (profil menüsünde "Kullanıcı Kodu: #..." olarak görünür). Kişi bu kodla ilişkili hesabıyla giriş yaptığında otomatik olarak firmanıza kullanıcı olarak eklenecek.</div>
@@ -204,23 +203,27 @@
         <label data-i18n="user_code_label">Kullanıcının Kodu</label>
         <input type="text" id="inviteCode" inputmode="numeric" placeholder="ör. 1016" maxlength="12">
       </div>
-      <div class="auth-field" id="inviteFirmaMultiWrap" style="display:none;">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-          <label style="margin-bottom:0;" data-i18n="invite_firmas_label">Hangi Firma(lar)a Eklensin?</label>
-          <label class="perm-select-all-label" style="margin:0;">
-            <input type="checkbox" id="inviteFirmaSelectAll">
+      <div class="auth-field" id="inviteFirmaMultiWrap" style="display:none; margin-bottom:8px;">
+        <div class="member-sub-box">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+            <label style="margin-bottom:0;" data-i18n="invite_firmas_label">Hangi Firma(lar)a Eklensin?</label>
+            <label class="perm-select-all-label" style="margin:0;">
+              <input type="checkbox" id="inviteFirmaSelectAll">
+              <span data-i18n="select_all_perms">Tümünü Seç</span>
+            </label>
+          </div>
+          <div class="invite-firma-grid" id="inviteFirmaMultiGrid"></div>
+        </div>
+      </div>
+      <div class="member-sub-box" style="margin-bottom:8px;">
+        <div class="perm-select-all-row">
+          <label class="perm-select-all-label">
+            <input type="checkbox" id="invite_selectAll">
             <span data-i18n="select_all_perms">Tümünü Seç</span>
           </label>
         </div>
-        <div class="invite-firma-grid" id="inviteFirmaMultiGrid"></div>
+        <div class="perm-grid" id="invitePermGrid"></div>
       </div>
-      <div class="perm-select-all-row">
-        <label class="perm-select-all-label">
-          <input type="checkbox" id="invite_selectAll">
-          <span data-i18n="select_all_perms">Tümünü Seç</span>
-        </label>
-      </div>
-      <div class="perm-grid" id="invitePermGrid"></div>
       <button type="button" class="auth-submit" id="inviteSubmitBtn" data-i18n="send_invite">Davet Gönder</button>
       <div class="auth-error" id="inviteError"></div>
       <div class="auth-success" id="inviteSuccess"></div>
