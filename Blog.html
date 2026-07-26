@@ -136,6 +136,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .blog-post-body strong{ color:var(--text); }
   .blog-empty-note{ text-align:center; color:var(--muted); font-size:13px; padding:36px 16px; }
   .blog-loading-note{ text-align:center; color:var(--muted); font-size:13px; padding:20px; }
+
+  .section-heading{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; margin:26px 0 10px; display:flex; align-items:center; gap:8px; }
+  .pending-badge{
+    display:inline-flex; align-items:center; gap:4px; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+    letter-spacing:.03em; color:var(--brass); background:rgba(198,161,91,0.12); border:1px solid rgba(198,161,91,0.35);
+    padding:2px 8px; border-radius:999px; margin-left:8px; vertical-align:middle; white-space:nowrap;
+  }
+  .approve-btn, .reject-btn{
+    border:none; cursor:pointer; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px;
+    padding:7px 14px; border-radius:8px;
+  }
+  .approve-btn{ background:var(--teal,#3FB68A); color:#08281c; }
+  .approve-btn:hover{ opacity:0.88; }
+  .reject-btn{ background:none; border:1px solid var(--hairline); color:var(--red,#E2544B); }
+  .reject-btn:hover{ background:rgba(226,84,75,0.1); }
 </style>
 </head>
 <body>
@@ -152,7 +167,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <div id="content" hidden>
     <div class="card" id="composerCard" style="display:none;">
       <h2 id="composerHeading" data-i18n="composer_new_heading">✍️ Yeni Yazı</h2>
-      <div class="card-sub" data-i18n="composer_desc">Bu alan sadece sana (site yöneticisine) görünür.</div>
+      <div class="card-sub" id="composerDesc" data-i18n="composer_desc">Bu alan sadece sana (site yöneticisine) görünür.</div>
       <div class="composer-field">
         <label data-i18n="title_label">Başlık</label>
         <input type="text" id="composerTitle" maxlength="140" data-i18n-placeholder="title_ph" placeholder="ör. Yeni bir hesaplama aracı yayında">
@@ -166,7 +181,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <button type="button" class="post-btn" id="composerSubmitBtn" data-i18n="publish_btn">Yayınla</button>
         <button type="button" class="cancel-edit-btn" id="composerCancelBtn" style="display:none;" data-i18n="cancel_edit_btn">Vazgeç</button>
       </div>
+      <div class="composer-hint" id="composerResubmitNote" style="display:none; color:var(--brass);"></div>
       <div class="composer-error" id="composerError"></div>
+    </div>
+
+    <div id="adminPendingSection" style="display:none;">
+      <div class="section-heading" id="adminPendingHeading"></div>
+      <div id="adminPendingFeed"></div>
+    </div>
+
+    <div id="myPendingSection" style="display:none;">
+      <div class="section-heading" id="myPendingHeading"></div>
+      <div id="myPendingFeed"></div>
     </div>
 
     <div id="blogFeed"></div>
@@ -177,7 +203,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, orderBy, limit, onSnapshot, serverTimestamp
+    getFirestore, doc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -213,14 +239,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     postFailed:'Could not be published, please try again.', emptyTitleError:'Please enter a title.', emptyBodyError:'Please write some content.',
     confirmDelete:'Are you sure you want to delete this post?', deleteFailed:'Could not be deleted, please try again.',
     readMore:'Continue reading →', backToList:'← Back to all posts',
-    editedNote:'(edited)', publishing:'Publishing…', saving:'Saving…'
+    editedNote:'(edited)', publishing:'Publishing…', saving:'Saving…',
+    submitting:'Submitting…', pendingBadge:'🕓 Pending review',
+    myPendingHeading:'🕓 Your submissions (pending review)', adminPendingHeading:'📥 Posts Awaiting Approval',
+    noPendingAdmin:'No posts awaiting approval.', approveBtn:'Approve & Publish', rejectBtn:'Reject',
+    confirmReject:'Reject and delete this post?', approveFailed:'Could not approve, please try again.',
+    rejectFailed:'Could not reject, please try again.', by:'By:'
   } : {
     errorSub:'Blog yüklenemedi, lütfen sayfayı yenileyip tekrar deneyin.',
     loadingPosts:'Yazılar yükleniyor…', noPostsYet:'Henüz yazı yok.',
     postFailed:'Yayınlanamadı, lütfen tekrar deneyin.', emptyTitleError:'Lütfen bir başlık girin.', emptyBodyError:'Lütfen bir içerik yaz.',
     confirmDelete:'Bu yazıyı silmek istediğinize emin misiniz?', deleteFailed:'Silinemedi, lütfen tekrar deneyin.',
     readMore:'Devamını oku →', backToList:'← Tüm yazılara dön',
-    editedNote:'(düzenlendi)', publishing:'Yayınlanıyor…', saving:'Kaydediliyor…'
+    editedNote:'(düzenlendi)', publishing:'Yayınlanıyor…', saving:'Kaydediliyor…',
+    submitting:'Gönderiliyor…', pendingBadge:'🕓 Onay bekliyor',
+    myPendingHeading:'🕓 Gönderdiklerin (onay bekliyor)', adminPendingHeading:'📥 Onay Bekleyen Yazılar',
+    noPendingAdmin:'Onay bekleyen yazı yok.', approveBtn:'Onayla ve Yayınla', rejectBtn:'Reddet',
+    confirmReject:'Bu yazıyı reddedip silmek istediğine emin misin?', approveFailed:'Onaylanamadı, tekrar dene.',
+    rejectFailed:'Reddedilemedi, tekrar dene.', by:'Gönderen:'
   };
 
   MMGI18N.registerDict({
@@ -229,20 +265,34 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       back_home:'← Ana Sayfa',
       composer_new_heading:'✍️ Yeni Yazı', composer_edit_heading:'✏️ Yazıyı Düzenle',
       composer_desc:'Bu alan sadece sana (site yöneticisine) görünür.',
+      composer_desc_admin:'Yazın hemen yayınlanır (site yöneticisisin).',
+      composer_desc_user:'Yazını gönder, admin onayladıktan sonra Blog\'da herkese görünür olur.',
       title_label:'Başlık', title_ph:'ör. Yeni bir hesaplama aracı yayında',
       body_label:'İçerik', body_ph:'Yazını buraya yaz...',
       body_hint:'İpucu: Bir satırı "## " ile başlatırsan alt başlık olur, bir kelimeyi **iki yıldız** arasına alırsan kalın olur. Paragrafları ayırmak için aralarına boş bir satır bırak.',
-      publish_btn:'Yayınla', update_btn:'Güncelle', cancel_edit_btn:'Vazgeç'
+      publish_btn:'Yayınla', update_btn:'Güncelle', cancel_edit_btn:'Vazgeç',
+      submit_btn_user:'Onaya Gönder', resubmit_note:'Not: Yayınlanmış bir yazıyı düzenlersen, tekrar admin onayına düşer.',
+      pending_badge:'🕓 Onay bekliyor', my_pending_heading:'🕓 Gönderdiklerin (onay bekliyor)',
+      admin_pending_heading:'📥 Onay Bekleyen Yazılar', noPendingAdmin:'Onay bekleyen yazı yok.',
+      approve_btn:'Onayla ve Yayınla', reject_btn:'Reddet', confirmReject:'Bu yazıyı reddedip silmek istediğine emin misin?',
+      approveFailed:'Onaylanamadı, tekrar dene.', rejectFailed:'Reddedilemedi, tekrar dene.', by:'Gönderen:'
     },
     en: {
       page_title:'📰 Blog', page_subtitle:'Updates from the platform, observations from the world of finance, and notes on our product development process.',
       back_home:'← Home',
       composer_new_heading:'✍️ New Post', composer_edit_heading:'✏️ Edit Post',
       composer_desc:'This section is only visible to you (the site admin).',
+      composer_desc_admin:'Your post publishes immediately (you\'re the site admin).',
+      composer_desc_user:'Submit your post — it becomes visible to everyone on the Blog once an admin approves it.',
       title_label:'Title', title_ph:'e.g. A new calculation tool is live',
       body_label:'Content', body_ph:'Write your post here...',
       body_hint:'Tip: start a line with "## " to make it a subheading, wrap a word in **double asterisks** to make it bold. Leave a blank line between paragraphs.',
-      publish_btn:'Publish', update_btn:'Update', cancel_edit_btn:'Cancel'
+      publish_btn:'Publish', update_btn:'Update', cancel_edit_btn:'Cancel',
+      submit_btn_user:'Submit for Review', resubmit_note:'Note: editing a published post sends it back for admin approval.',
+      pending_badge:'🕓 Pending review', my_pending_heading:'🕓 Your submissions (pending review)',
+      admin_pending_heading:'📥 Posts Awaiting Approval', noPendingAdmin:'No posts awaiting approval.',
+      approve_btn:'Approve & Publish', reject_btn:'Reject', confirmReject:'Reject and delete this post?',
+      approveFailed:'Could not approve, please try again.', rejectFailed:'Could not reject, please try again.', by:'By:'
     }
   });
   MMGI18N.detectAndApplyDefaultLang();
@@ -283,12 +333,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   let currentUid = null;
   let currentIsAdmin = false;
-  let unsubscribeFeed = null;
-  let allPosts = [];
+  let unsubPublished = null, unsubAdminPending = null, unsubMyPending = null;
+  let publishedPosts = [], adminPendingPosts = [], myPendingPosts = [];
   let editingPostId = null;
+  let editingPostWasPublished = false;
 
   function stopWatchingFeed(){
-    if(unsubscribeFeed){ unsubscribeFeed(); unsubscribeFeed = null; }
+    if(unsubPublished){ unsubPublished(); unsubPublished = null; }
+    if(unsubAdminPending){ unsubAdminPending(); unsubAdminPending = null; }
+    if(unsubMyPending){ unsubMyPending(); unsubMyPending = null; }
   }
 
   function currentOpenPostId(){
@@ -298,67 +351,104 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }catch(e){ return null; }
   }
 
+  // Tekil yazı görünümü için tüm listelerde arama yapar (yayınlanmış + bekleyenler).
+  function findAnyPost(id){
+    return publishedPosts.find(x => x.id === id) ||
+      adminPendingPosts.find(x => x.id === id) ||
+      myPendingPosts.find(x => x.id === id) || null;
+  }
+
   function renderFeed(){
     const feedEl = document.getElementById('blogFeed');
     if(!feedEl) return;
-    if(!allPosts.length){
-      feedEl.innerHTML = '<div class="blog-empty-note">' + LBL.noPostsYet + '</div>';
-      return;
-    }
     const openId = currentOpenPostId();
     if(openId){
-      const p = allPosts.find(x => x.id === openId);
+      const p = findAnyPost(openId);
       if(p){ renderSinglePost(feedEl, p); return; }
     }
+    renderAdminPendingSection();
+    renderMyPendingSection();
     renderListView(feedEl);
   }
 
-  function renderListView(feedEl){
-    const rows = allPosts.map(p => {
-      const canEdit = currentIsAdmin || p.authorUid === currentUid;
-      return (
-        '<div class="blog-post" data-id="' + p.id + '">' +
-          '<div class="blog-post-top">' +
-            '<div class="blog-post-title"><a href="?post=' + encodeURIComponent(p.id) + '">' + escapeHtml(p.title) + '</a></div>' +
+  function postRowHtml(p, opts){
+    opts = opts || {};
+    const canEdit = currentIsAdmin || p.authorUid === currentUid;
+    const isPending = p.status === 'pending';
+    const titleHtml = opts.linkTitle
+      ? '<a href="?post=' + encodeURIComponent(p.id) + '">' + escapeHtml(p.title) + '</a>'
+      : escapeHtml(p.title);
+    const byLine = (opts.showAuthor && p.authorName)
+      ? '<span style="margin-left:8px;">' + LBL.by + ' ' + escapeHtml(p.authorName) + '</span>' : '';
+    return (
+      '<div class="blog-post" data-id="' + p.id + '">' +
+        '<div class="blog-post-top">' +
+          '<div class="blog-post-title">' + titleHtml + (isPending ? '<span class="pending-badge">' + LBL.pendingBadge + '</span>' : '') + '</div>' +
+          '<div class="blog-post-actions">' +
+            (opts.approveReject ? (
+              '<button type="button" class="approve-btn" data-approve-id="' + p.id + '">' + LBL.approveBtn + '</button>' +
+              '<button type="button" class="reject-btn" data-reject-id="' + p.id + '">' + LBL.rejectBtn + '</button>'
+            ) : '') +
             (canEdit ? (
-              '<div class="blog-post-actions">' +
-                '<button type="button" class="blog-icon-btn" data-edit-id="' + p.id + '" title="' + (MMG_LANG==='en'?'Edit':'Düzenle') + '">✏️</button>' +
-                '<button type="button" class="blog-icon-btn" data-delete-id="' + p.id + '" title="' + (MMG_LANG==='en'?'Delete':'Sil') + '">✕</button>' +
-              '</div>'
+              '<button type="button" class="blog-icon-btn" data-edit-id="' + p.id + '" title="' + (MMG_LANG==='en'?'Edit':'Düzenle') + '">✏️</button>' +
+              '<button type="button" class="blog-icon-btn" data-delete-id="' + p.id + '" title="' + (MMG_LANG==='en'?'Delete':'Sil') + '">✕</button>'
             ) : '') +
           '</div>' +
-          '<div class="blog-post-meta">' + fmtFullDateTime(p.createdAt) + (p.updatedAt ? ' · ' + LBL.editedNote : '') + '</div>' +
-          '<div class="blog-post-excerpt">' + escapeHtml(plainExcerpt(p.content, 220)) + '</div>' +
-          '<a href="?post=' + encodeURIComponent(p.id) + '" class="blog-read-more">' + LBL.readMore + '</a>' +
-        '</div>'
-      );
-    });
-    feedEl.innerHTML = rows.join('');
-    wireFeedButtons(feedEl);
+        '</div>' +
+        '<div class="blog-post-meta">' + fmtFullDateTime(p.createdAt) + (p.updatedAt ? ' · ' + LBL.editedNote : '') + byLine + '</div>' +
+        (opts.fullBody
+          ? '<div class="blog-post-body">' + renderBlogBody(p.content) + '</div>'
+          : (
+            '<div class="blog-post-excerpt">' + escapeHtml(plainExcerpt(p.content, 220)) + '</div>' +
+            '<a href="?post=' + encodeURIComponent(p.id) + '" class="blog-read-more">' + LBL.readMore + '</a>'
+          )
+        ) +
+      '</div>'
+    );
+  }
+
+  function renderAdminPendingSection(){
+    const section = document.getElementById('adminPendingSection');
+    if(!currentIsAdmin){ section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    document.getElementById('adminPendingHeading').textContent = LBL.adminPendingHeading;
+    const el = document.getElementById('adminPendingFeed');
+    if(!adminPendingPosts.length){
+      el.innerHTML = '<div class="blog-empty-note">' + LBL.noPendingAdmin + '</div>';
+    } else {
+      el.innerHTML = adminPendingPosts.map(p => postRowHtml(p, { linkTitle:false, fullBody:true, approveReject:true, showAuthor:true })).join('');
+    }
+    wireRowButtons(el, adminPendingPosts);
+  }
+
+  function renderMyPendingSection(){
+    const section = document.getElementById('myPendingSection');
+    if(currentIsAdmin || !myPendingPosts.length){ section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    document.getElementById('myPendingHeading').textContent = LBL.myPendingHeading;
+    const el = document.getElementById('myPendingFeed');
+    el.innerHTML = myPendingPosts.map(p => postRowHtml(p, { linkTitle:false, fullBody:true })).join('');
+    wireRowButtons(el, myPendingPosts);
+  }
+
+  function renderListView(feedEl){
+    if(!publishedPosts.length){
+      feedEl.innerHTML = '<div class="blog-empty-note">' + LBL.noPostsYet + '</div>';
+      return;
+    }
+    feedEl.innerHTML = publishedPosts.map(p => postRowHtml(p, { linkTitle:true, fullBody:false })).join('');
+    wireRowButtons(feedEl, publishedPosts);
   }
 
   function renderSinglePost(feedEl, p){
-    const canEdit = currentIsAdmin || p.authorUid === currentUid;
     feedEl.innerHTML =
       '<a href="Blog.html" class="blog-read-more" style="margin-bottom:14px; display:inline-block;">' + LBL.backToList + '</a>' +
-      '<div class="blog-post" data-id="' + p.id + '">' +
-        '<div class="blog-post-top">' +
-          '<div class="blog-post-title">' + escapeHtml(p.title) + '</div>' +
-          (canEdit ? (
-            '<div class="blog-post-actions">' +
-              '<button type="button" class="blog-icon-btn" data-edit-id="' + p.id + '" title="' + (MMG_LANG==='en'?'Edit':'Düzenle') + '">✏️</button>' +
-              '<button type="button" class="blog-icon-btn" data-delete-id="' + p.id + '" title="' + (MMG_LANG==='en'?'Delete':'Sil') + '">✕</button>' +
-            '</div>'
-          ) : '') +
-        '</div>' +
-        '<div class="blog-post-meta">' + fmtFullDateTime(p.createdAt) + (p.updatedAt ? ' · ' + LBL.editedNote : '') + '</div>' +
-        '<div class="blog-post-body">' + renderBlogBody(p.content) + '</div>' +
-      '</div>';
-    wireFeedButtons(feedEl);
+      postRowHtml(p, { linkTitle:false, fullBody:true, showAuthor: p.status === 'pending' });
+    wireRowButtons(feedEl, [p]);
   }
 
-  function wireFeedButtons(feedEl){
-    feedEl.querySelectorAll('[data-delete-id]').forEach(btn => {
+  function wireRowButtons(container, sourceList){
+    container.querySelectorAll('[data-delete-id]').forEach(btn => {
       btn.addEventListener('click', async () => {
         if(!confirm(LBL.confirmDelete)) return;
         btn.disabled = true;
@@ -373,33 +463,73 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
       });
     });
-    feedEl.querySelectorAll('[data-edit-id]').forEach(btn => {
+    container.querySelectorAll('[data-edit-id]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const p = allPosts.find(x => x.id === btn.dataset.editId);
+        const p = sourceList.find(x => x.id === btn.dataset.editId);
         if(!p) return;
         startEditing(p);
         document.getElementById('composerCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
+    container.querySelectorAll('[data-approve-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try{
+          await updateDoc(doc(db, 'blogPosts', btn.dataset.approveId), { status: 'published' });
+        }catch(e){
+          alert(LBL.approveFailed);
+          btn.disabled = false;
+        }
+      });
+    });
+    container.querySelectorAll('[data-reject-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm(LBL.confirmReject)) return;
+        btn.disabled = true;
+        try{
+          await deleteDoc(doc(db, 'blogPosts', btn.dataset.rejectId));
+        }catch(e){
+          alert(LBL.rejectFailed);
+          btn.disabled = false;
+        }
+      });
+    });
   }
+
+  // Dil değişince (postMessage/storage event) i18n-core.js data-i18n metinlerini
+  // otomatik yeniden uyguluyor; bu, admin/kullanıcı rolüne göre elle set ettiğimiz
+  // composer metinlerini eski haline döndürebileceğinden, her dil değişiminde
+  // (ve rol/durum değiştiğinde) bu metinleri kendimiz yeniden hesaplıyoruz.
+  function refreshComposerTexts(){
+    document.getElementById('composerDesc').textContent = currentIsAdmin ? MMGI18N.t('composer_desc_admin') : MMGI18N.t('composer_desc_user');
+    document.getElementById('composerHeading').textContent = editingPostId ? MMGI18N.t('composer_edit_heading') : MMGI18N.t('composer_new_heading');
+    document.getElementById('composerSubmitBtn').textContent = editingPostId
+      ? MMGI18N.t('update_btn')
+      : (currentIsAdmin ? MMGI18N.t('publish_btn') : MMGI18N.t('submit_btn_user'));
+    const noteEl = document.getElementById('composerResubmitNote');
+    const showNote = !currentIsAdmin && editingPostId && editingPostWasPublished;
+    noteEl.style.display = showNote ? 'block' : 'none';
+    if(showNote) noteEl.textContent = MMGI18N.t('resubmit_note');
+  }
+  MMGI18N.onChange(refreshComposerTexts);
 
   function startEditing(p){
     editingPostId = p.id;
-    document.getElementById('composerHeading').textContent = MMGI18N.t('composer_edit_heading');
+    editingPostWasPublished = p.status === 'published';
     document.getElementById('composerTitle').value = p.title;
     document.getElementById('composerBody').value = p.content;
-    document.getElementById('composerSubmitBtn').textContent = MMGI18N.t('update_btn');
     document.getElementById('composerCancelBtn').style.display = 'inline-block';
+    refreshComposerTexts();
   }
 
   function resetComposer(){
     editingPostId = null;
-    document.getElementById('composerHeading').textContent = MMGI18N.t('composer_new_heading');
+    editingPostWasPublished = false;
     document.getElementById('composerTitle').value = '';
     document.getElementById('composerBody').value = '';
-    document.getElementById('composerSubmitBtn').textContent = MMGI18N.t('publish_btn');
     document.getElementById('composerCancelBtn').style.display = 'none';
     document.getElementById('composerError').classList.remove('show');
+    refreshComposerTexts();
   }
   document.getElementById('composerCancelBtn').addEventListener('click', resetComposer);
 
@@ -417,16 +547,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     try{
       if(editingPostId){
         btn.textContent = LBL.saving;
-        await updateDoc(doc(db, 'blogPosts', editingPostId), {
-          title: title, content: bodyText, updatedAt: serverTimestamp()
-        });
+        // Admin olmayan biri kendi yazısını düzenlerse (yayınlanmış olsa bile),
+        // değişiklik tekrar admin onayına düşer. Admin'in yaptığı düzenlemeler
+        // mevcut durumu (yayında/beklemede) değiştirmez.
+        const patch = { title: title, content: bodyText, updatedAt: serverTimestamp() };
+        if(!currentIsAdmin){ patch.status = 'pending'; }
+        await updateDoc(doc(db, 'blogPosts', editingPostId), patch);
       } else {
-        btn.textContent = LBL.publishing;
         const snap = await getDoc(doc(db, 'users', currentUid));
         const data = snap.exists() ? snap.data() : {};
+        if(currentIsAdmin){
+          btn.textContent = LBL.publishing;
+        } else {
+          btn.textContent = LBL.submitting;
+        }
         await addDoc(collection(db, 'blogPosts'), {
           title: title, content: bodyText,
           authorUid: currentUid, authorName: data.username || data.email || 'MMG Creativity',
+          status: currentIsAdmin ? 'published' : 'pending',
           createdAt: serverTimestamp()
         });
       }
@@ -444,14 +582,31 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     stopWatchingFeed();
     const feedEl = document.getElementById('blogFeed');
     if(feedEl) feedEl.innerHTML = '<div class="blog-loading-note">' + LBL.loadingPosts + '</div>';
-    const q = query(collection(db, 'blogPosts'), orderBy('createdAt', 'desc'), limit(100));
-    unsubscribeFeed = onSnapshot(q, (snap) => {
-      allPosts = [];
-      snap.forEach(d => allPosts.push(Object.assign({ id: d.id }, d.data())));
+
+    const publishedQ = query(collection(db, 'blogPosts'), where('status', '==', 'published'), orderBy('createdAt', 'desc'), limit(100));
+    unsubPublished = onSnapshot(publishedQ, (snap) => {
+      publishedPosts = [];
+      snap.forEach(d => publishedPosts.push(Object.assign({ id: d.id }, d.data())));
       renderFeed();
     }, () => {
       if(feedEl) feedEl.innerHTML = '<div class="blog-empty-note">' + LBL.errorSub + '</div>';
     });
+
+    if(currentIsAdmin){
+      const pendingQ = query(collection(db, 'blogPosts'), where('status', '==', 'pending'), orderBy('createdAt', 'desc'), limit(100));
+      unsubAdminPending = onSnapshot(pendingQ, (snap) => {
+        adminPendingPosts = [];
+        snap.forEach(d => adminPendingPosts.push(Object.assign({ id: d.id }, d.data())));
+        renderFeed();
+      });
+    } else if(currentUid){
+      const myQ = query(collection(db, 'blogPosts'), where('authorUid', '==', currentUid), where('status', '==', 'pending'), orderBy('createdAt', 'desc'), limit(50));
+      unsubMyPending = onSnapshot(myQ, (snap) => {
+        myPendingPosts = [];
+        snap.forEach(d => myPendingPosts.push(Object.assign({ id: d.id }, d.data())));
+        renderFeed();
+      });
+    }
   }
 
   onAuthStateChanged(auth, async (user) => {
@@ -464,7 +619,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         currentIsAdmin = snap.exists() && snap.data().isAdmin === true;
       }catch(e){ currentIsAdmin = false; }
     }
-    composerCard.style.display = currentIsAdmin ? 'block' : 'none';
+    // Composer artık girişli her kullanıcıya açık; sadece admin'in yazısı direkt yayınlanır,
+    // diğerlerininki onaya düşer.
+    composerCard.style.display = user ? 'block' : 'none';
+    refreshComposerTexts();
+    publishedPosts = []; adminPendingPosts = []; myPendingPosts = [];
     stateArea.innerHTML = '';
     content.hidden = false;
     watchFeed();

@@ -1,4 +1,4 @@
-rules_version = '2'; 
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId}/{document=**} {
@@ -161,6 +161,36 @@ service cloud.firestore {
     match /firmaAdminInvites/{email} {
       allow read, write: if request.auth != null;
     }
+    // ---- Blog (adminin yazıları direkt yayında; diğer kullanıcılarınki admin onayına düşer) ----
+    // status: 'published' (herkese görünür) | 'pending' (sadece yazan kişi + admin görebilir).
+    match /blogPosts/{postId} {
+      allow read: if request.auth != null && (
+        resource.data.status == 'published' ||
+        resource.data.authorUid == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+      );
+      allow create: if request.auth != null &&
+        request.resource.data.authorUid == request.auth.uid &&
+        (
+          (request.resource.data.status == 'published' &&
+            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true) ||
+          (request.resource.data.status == 'pending' &&
+            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin != true)
+        );
+      allow update: if request.auth != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true ||
+        (
+          resource.data.authorUid == request.auth.uid &&
+          request.resource.data.authorUid == resource.data.authorUid &&
+          request.resource.data.status == 'pending'
+        )
+      );
+      allow delete: if request.auth != null && (
+        resource.data.authorUid == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+      );
+    }
+
     // ---- Forum (basit akış: herkes mesaj atar, alt alta sıralanır) ----
     match /forumPosts/{postId} {
       allow read: if request.auth != null;
@@ -186,18 +216,6 @@ service cloud.firestore {
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
         );
       }
-    }
-
-    // ---- Blog (Blog.html buradan okuyup yazıyor; bu kural daha önce eksikti,
-    // bu yüzden "Blog yüklenemedi" hatası alınıyordu) ----
-    match /blogPosts/{postId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && request.resource.data.authorUid == request.auth.uid &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
-      allow update, delete: if request.auth != null && (
-        resource.data.authorUid == request.auth.uid ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
-      );
     }
   }
 }
