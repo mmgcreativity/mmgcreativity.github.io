@@ -2,6 +2,7 @@
 <html lang="tr">
 <head>
 <script src="i18n-core.js"></script>
+<script src="mmg-odemeler-sync.js"></script>
 <script>
 (function(){
   try{
@@ -193,6 +194,16 @@ function mmgApplyTurkishFont(doc){
   .guide-btn:hover{ color:var(--coral); border-color:var(--coral); }
 
   .io-toolbar{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  /* Kutu solda dar, Excel butonları sağında alt alta */
+  .add-io-row{ display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:32px; }
+  .add-io-row .add-payment-card{ flex:1 1 440px; min-width:0; margin-bottom:0; }
+  .add-io-row .io-toolbar{ flex:0 0 auto; width:210px; flex-direction:column; align-items:stretch; flex-wrap:nowrap; margin-bottom:0; }
+  .add-io-row .io-toolbar .io-btn{ width:100%; justify-content:flex-start; }
+  @media (max-width:820px){
+    .add-io-row{ flex-direction:column; }
+    .add-io-row .io-toolbar{ width:auto; flex-direction:row; flex-wrap:wrap; }
+    .add-io-row .io-toolbar .io-btn{ width:auto; }
+  }
   .io-btn{
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
     color:var(--text); font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;
@@ -398,6 +409,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div class="content-grid">
     <div class="content-main">
+      <div class="add-io-row">
       <div class="add-payment-card">
         <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:24px;">
           <div style="flex:1; min-width:220px;">
@@ -456,6 +468,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <button type="button" class="io-btn" id="importExcelBtn">⬆ <span data-i18n="import_excel">Excel'den Yükle</span></button>
         <button type="button" class="io-btn" id="downloadTemplateBtn">⬇ <span data-i18n="download_template">Şablon İndir</span></button>
         <input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none;">
+      </div>
       </div>
       <div class="io-msg" id="ioMsg"></div>
 
@@ -896,7 +909,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(isFuture){
       return { label: 'Bekliyor', cls: 'warn' };
     }
-    if(item.lastTransferredDate === item.dueDate){
+    // En son vadesi gelmiş tarih (tekrarlı kayıtlarda son periyot). Aktarım bu tarihi
+    // kapsıyorsa "Aktarıldı"; aksi halde henüz aktarılmamış ("Aktarılıyor…").
+    const latestDue = (window.mmgLatestDueOccurrence ? window.mmgLatestDueOccurrence(item) : item.dueDate);
+    if(latestDue && item.lastTransferredDate && item.lastTransferredDate >= latestDue){
       return { label: LBL.synced, cls: 'good' };
     }
     return { label: LBL.syncing, cls: 'info' };

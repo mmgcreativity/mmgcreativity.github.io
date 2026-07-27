@@ -615,15 +615,32 @@
       // Bir kod, aynı anda birden fazla firmaya davet edilebilsin diye firma başına ayrı bir alt
       // kayıt tutuyoruz. Kişi kendi hesabıyla giriş yaptığında (Hesabim.html) kendi kodunun
       // altındaki tüm bekleyen firma davetlerini listeler.
-      await Promise.all(targetFirmaIds.map(async (fid) => {
+      const firmaNames = await Promise.all(targetFirmaIds.map(async (fid) => {
         const fSnap = await getDoc(doc(db, 'firmaAccounts', fid));
+        const fname = fSnap.exists() ? (fSnap.data().name || '') : '';
         await setDoc(doc(db, 'firmaInvites', code, 'firmas', fid), {
           firmaId: fid,
-          firmaName: fSnap.exists() ? (fSnap.data().name || '') : '',
+          firmaName: fname,
           permissions: permissions,
           createdAt: serverTimestamp()
         });
+        return fname || 'Bir firma';
       }));
+      // Davet edilen kişiye kalıcı çan/badge bildirimi bırak ("{Firma} sizi ekledi").
+      try{
+        let inviteeUid = (dirSnap.data() && dirSnap.data().uid) || null;
+        if(!inviteeUid){ try{ const cc = await getDoc(doc(db, 'chatCodes', code)); if(cc.exists()) inviteeUid = cc.data().uid || null; }catch(_e){} }
+        if(inviteeUid && auth.currentUser){
+          const bodyTxt = firmaNames.length === 1
+            ? (firmaNames[0] + ' sizi ekledi. Onaylamak için Bildirimler sekmesine bakın.')
+            : (firmaNames.length + ' firmaya davet edildiniz. Onaylamak için Bildirimler sekmesine bakın.');
+          await setDoc(doc(collection(db, 'notifications')), {
+            toUid: inviteeUid, fromUid: auth.currentUser.uid,
+            type: 'invite', title: '🏢 Firma daveti', body: bodyTxt,
+            read: false, createdAt: serverTimestamp()
+          });
+        }
+      }catch(nErr){ /* bildirim yazılamazsa daveti engellemesin */ }
       okEl.textContent = LBL.inviteSent;
       okEl.classList.add('show');
       codeInput.value = '';
@@ -669,6 +686,19 @@
         firmaName: fSnap.exists() ? (fSnap.data().name || '') : '',
         createdAt: serverTimestamp()
       });
+      // Davet edilen kişiye kalıcı çan/badge bildirimi bırak (yönetici daveti).
+      try{
+        let inviteeUid = (dirSnap.data() && dirSnap.data().uid) || null;
+        if(!inviteeUid){ try{ const cc = await getDoc(doc(db, 'chatCodes', code)); if(cc.exists()) inviteeUid = cc.data().uid || null; }catch(_e){} }
+        if(inviteeUid && auth.currentUser){
+          await setDoc(doc(collection(db, 'notifications')), {
+            toUid: inviteeUid, fromUid: auth.currentUser.uid,
+            type: 'invite', title: '🏢 Yönetici daveti',
+            body: (fSnap.exists() ? (fSnap.data().name || 'Bir firma') : 'Bir firma') + ' sizi yönetici olarak ekledi. Onaylamak için Bildirimler sekmesine bakın.',
+            read: false, createdAt: serverTimestamp()
+          });
+        }
+      }catch(nErr){ /* bildirim yazılamazsa daveti engellemesin */ }
       okEl.textContent = LBL.inviteSent;
       okEl.classList.add('show');
       codeInput.value = '';
@@ -708,6 +738,7 @@
         const kindLabel = inv.kind === 'admin' ? LBL.pendingKindAdmin : LBL.pendingKindUser;
         return '<div class="invite-row">' +
             '<span class="invite-email" title="' + inv.label + ' (#' + inv.code + ')">' + inv.label + ' &middot; ' + kindLabel + '</span>' +
+            '<button type="button" class="invite-remind-btn" data-remind-idx="' + idx + '" style="background:none;border:1px solid var(--hairline,#2A3448);color:var(--brass,#C6A15B);border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">🔔 Hatırlat</button>' +
             '<button type="button" class="invite-cancel-btn" data-cancel-idx="' + idx + '">' + LBL.cancelInvite + '</button>' +
           '</div>';
       });
@@ -720,6 +751,38 @@
             await deleteDoc(doc(db, ...segs));
           }catch(e){}
           await loadPendingInvites();
+        });
+      });
+      // "Hatırlat": davet edilene yeni bir hatırlatma bildirimi gönderir (günde 1 ile sınırlı).
+      listEl.querySelectorAll('[data-remind-idx]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const inv = entries[parseInt(btn.dataset.remindIdx, 10)];
+          btn.disabled = true;
+          try{
+            const segs = inv.path.split('/');
+            const invRef = doc(db, ...segs);
+            const invDoc = await getDoc(invRef);
+            const lastTs = invDoc.exists() && invDoc.data().lastRemindedAt && invDoc.data().lastRemindedAt.toMillis ? invDoc.data().lastRemindedAt.toMillis() : 0;
+            if(Date.now() - lastTs < 24 * 60 * 60 * 1000){
+              btn.textContent = 'Bugün gönderildi';
+              return;
+            }
+            let inviteeUid = null;
+            try{ const cc = await getDoc(doc(db, 'chatCodes', inv.code)); if(cc.exists()) inviteeUid = cc.data().uid || null; }catch(_e){}
+            if(!inviteeUid){ try{ const ds = await getDoc(doc(db, 'userDirectory', inv.code)); if(ds.exists()) inviteeUid = ds.data().uid || null; }catch(_e){} }
+            if(inviteeUid && auth.currentUser){
+              await setDoc(doc(collection(db, 'notifications')), {
+                toUid: inviteeUid, fromUid: auth.currentUser.uid,
+                type: 'reminder', title: '⏰ Davet hatırlatması',
+                body: 'Bekleyen bir firma davetiniz var. Onaylamak için Bildirimler sekmesine bakın.',
+                read: false, createdAt: serverTimestamp()
+              });
+              await setDoc(invRef, { lastRemindedAt: serverTimestamp() }, { merge: true });
+              btn.textContent = '✓ Hatırlatıldı';
+            } else {
+              btn.textContent = 'Kullanıcı bulunamadı';
+            }
+          }catch(e){ btn.disabled = false; }
         });
       });
     } catch(e){ card.style.display = 'none'; }

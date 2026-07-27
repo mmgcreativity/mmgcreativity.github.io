@@ -486,6 +486,46 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     return '<div class="avatar-circle profile-clickable" style="background:' + avatarGradientFor(uid || name) + '"' + nameAttr + '>' + escapeHtml(initial) + '</div>';
   }
 
+  // ---- "İsimsiz" düzeltmesi: gönderi/yanıt kaydında adı boş kalmış kullanıcıların adını,
+  // görüntüleme anında hesaptan (profiles/{uid} yoksa users/{uid}) çekip yamar. ----
+  const _forumNameCache = {};
+  async function resolveForumName(uid){
+    if(!uid) return null;
+    if(uid in _forumNameCache) return _forumNameCache[uid];
+    let name = null;
+    try{
+      const p = await getDoc(doc(db, 'profiles', uid));
+      if(p.exists()){ const d = p.data(); name = d.displayName || d.name || d.username || null; }
+    }catch(e){ /* profiles okunamazsa users'a düş */ }
+    if(!name){
+      try{
+        const u = await getDoc(doc(db, 'users', uid));
+        if(u.exists()){ const d = u.data(); name = d.displayName || d.username || (d.email ? d.email.split('@')[0] : null) || null; }
+      }catch(e){ /* okunamazsa null kalır */ }
+    }
+    _forumNameCache[uid] = name;
+    return name;
+  }
+  async function patchAnonymousNames(container){
+    if(!container) return;
+    const els = container.querySelectorAll('.forum-post-name, .forum-reply-name, .forum-quote-name');
+    for(const el of els){
+      const uid = el.getAttribute('data-profile-uid');
+      const cur = (el.textContent || '').trim();
+      if(!uid || (cur && cur !== LBL.anonymous)) continue; // sadece boş/İsimsiz olanları düzelt
+      const name = await resolveForumName(uid);
+      if(!name) continue;
+      el.textContent = name;
+      el.setAttribute('data-profile-name', name);
+      const wrap = el.closest('.forum-post-top') || el.closest('.forum-reply') || el.parentElement;
+      const av = wrap ? wrap.querySelector('.avatar-circle') : null;
+      if(av && !av.querySelector('img')){
+        av.textContent = (name.trim().charAt(0).toUpperCase() || '?');
+        av.setAttribute('data-profile-name', name);
+      }
+    }
+  }
+
   let currentUid = null;
   let currentIsAdmin = false;
   let currentUserName = '';
@@ -569,6 +609,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       });
     });
     wireFeedActions(feedEl);
+    patchAnonymousNames(feedEl); // adı boş kaydolmuş gönderileri hesaptan çekip düzelt
   }
 
   // ---- Beğen / Tekrarla / Yanıtla / Paylaş etkileşimleri ----
@@ -683,6 +724,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         );
       });
       listEl.innerHTML = rows.join('');
+      patchAnonymousNames(listEl); // adı boş kaydolmuş yanıtları hesaptan çekip düzelt
     }catch(e){ listEl.innerHTML = ''; }
   }
 
@@ -894,11 +936,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const url = (composerGifUrl.value || '').trim();
     if(!url) return;
     if(!/^https:\/\//i.test(url)){ alert(LBL.gifUrlInvalid); return; }
-    composerImageDataUrl = url;
-    composerImagePreviewImg.src = url;
-    composerImagePreview.hidden = false;
-    composerGifUrl.value = '';
-    composerGifPanel.hidden = true;
+    // Bağlantı gerçekten bir görsele çözülüyorsa önizle; aksi halde boş/bozuk bir
+    // önizleme (tek başına ✕) göstermeyelim.
+    const test = new Image();
+    test.onload = () => {
+      composerImageDataUrl = url;
+      composerImagePreviewImg.src = url;
+      composerImagePreview.hidden = false;
+      composerGifUrl.value = '';
+      composerGifPanel.hidden = true;
+    };
+    test.onerror = () => { alert(LBL.gifUrlInvalid); };
+    test.src = url;
+  }
+  // Önizleme görseli herhangi bir sebeple yüklenemezse önizlemeyi (ve ✕'i) gizle.
+  if(composerImagePreviewImg){
+    composerImagePreviewImg.addEventListener('error', () => {
+      composerImageDataUrl = null;
+      composerImagePreview.hidden = true;
+    });
   }
   composerGifAddBtn.addEventListener('click', addGifFromUrl);
   composerGifUrl.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); addGifFromUrl(); } });

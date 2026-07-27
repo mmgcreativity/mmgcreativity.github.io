@@ -1,174 +1,185 @@
 /*
-  mmgcreativity — Ödemeler <-> Nakit Akış Tablosu paylaşımlı senkronizasyon mantığı.
-  Bu dosya hem Odemeler.html hem de Nakit_Akis_Tablosu.html tarafından <script src="mmg-odemeler-sync.js">
-  ile yüklenir. Amaç: vadesi gelen ödeme kalemlerini otomatik olarak Nakit Akış Tablosu'nun
-  localStorage veri yapısına ("mmg_nat_YYYY-MM") gider kalemi olarak işlemek.
-*/
-(function(){
-  function pad2(n){ return n < 10 ? '0'+n : ''+n; }
-  function toKey(y,m,d){ return y + '-' + pad2(m+1) + '-' + pad2(d); }
-  function monthKeyOf(y,m){ return y + '-' + pad2(m+1); }
+ * MMG Creativity — Ödeme (Gider) → Nakit Akış Senkron Motoru
+ * ----------------------------------------------------------
+ * Bu dosya EKSİKTİ: Giderler.html ve Nakit_Akis_Tablosu.html şu fonksiyonları çağırıyordu
+ * ama hiçbir yerde tanımlı değildi; bu yüzden girilen giderler Nakit Akış'a HİÇ aktarılmıyordu
+ * ("Aktarılıyor…" durumunda takılı kalıyordu). Bu motor eksikliği giderir.
+ *
+ * Sağladığı global'ler:
+ *   window.mmgLocalPaymentsAPI            — { load(), save(list) }  (localStorage: mmg_odemeler_list)
+ *   window.mmgRunPaymentSync()            — MİSAFİR/yerel: vadesi gelen (ve tekrarlı) giderleri
+ *                                           yerel Nakit Akış önbelleğine işler.
+ *   window.mmgMergeCloudPaymentsAndSync() — ÜYE/bulut: {scope}/odemeler kayıtlarını okuyup vadesi
+ *                                           gelenleri {scope}/cashflow/{ay} dokümanına işler.
+ *   window.mmgLatestDueOccurrence(item)   — bir kaydın bugüne kadarki en son vadesi gelen tarihi
+ *                                           (durum rozeti "Aktarıldı" mı hesaplamak için).
+ *
+ * Not: Nakit Akış verisi { 'YYYY-MM-DD': { gider:[{id,desc,category,amount}], gelir:[...],
+ * expanded:{gider,gelir} } } yapısındadır ve bulutta {scope}/cashflow/{YYYY-MM} = { data: ... }
+ * olarak, yerelde 'mmg_nat_scope_<koleksiyon>:<id>_<YYYY-MM>' anahtarında JSON olarak tutulur.
+ */
+(function () {
+  "use strict";
 
-  const PAYMENTS_KEY = 'mmg_odemeler';
-  const CASHFLOW_PREFIX = 'mmg_nat_';
-
-  window.MMG_PAYMENT_CATEGORIES = [
-    { id:'fatura',           label:'Faturalar',        icon:'🧾', cashflowCat:'Fatura' },
-    { id:'kredi_karti',      label:'Kredi Kartları',   icon:'💳', cashflowCat:'Kredi Kartı' },
-    { id:'teminat_mektubu',  label:'Teminat Mektubu',  icon:'📜', cashflowCat:'Teminat Mektubu' },
-    { id:'komisyon',         label:'Komisyonlar',      icon:'📊', cashflowCat:'Komisyon' },
-    { id:'kira',             label:'Kiralar',          icon:'🏠', cashflowCat:'Kira' },
-    { id:'diger',            label:'Diğer',            icon:'📦', cashflowCat:'Diğer Gider' }
-  ];
-
-  function loadPaymentsLocal(){
-    try{ const raw = localStorage.getItem(PAYMENTS_KEY); return raw ? JSON.parse(raw) : []; }
-    catch(e){ return []; }
+  function pad2(n) { return String(n).padStart(2, "0"); }
+  function todayKey() {
+    var d = new Date();
+    return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
   }
-  function savePaymentsLocal(list){
-    try{ localStorage.setItem(PAYMENTS_KEY, JSON.stringify(list)); }catch(e){}
-  }
-  function loadCashflowMonthLocal(mk){
-    try{ const raw = localStorage.getItem(CASHFLOW_PREFIX+mk); return raw ? JSON.parse(raw) : {}; }
-    catch(e){ return {}; }
-  }
-  function saveCashflowMonthLocal(mk, data){
-    try{ localStorage.setItem(CASHFLOW_PREFIX+mk, JSON.stringify(data)); }catch(e){}
+  // Ay uzunluğuna göre günü kırparak 'YYYY-MM-DD' üretir (ör. 31 → Şubat'ta 28/29).
+  function ymd(y, m, d) {
+    var dim = new Date(y, m, 0).getDate(); // m: 1-12 → new Date(y, m, 0) = o ayın son günü
+    var dd = Math.min(d, dim);
+    return y + "-" + pad2(m) + "-" + pad2(dd);
   }
 
-  function advanceDate(dateStr, recurrence){
-    const p = dateStr.split('-').map(Number);
-    const dt = new Date(p[0], p[1]-1, p[2]);
-    if(recurrence === 'haftalik') dt.setDate(dt.getDate()+7);
-    else if(recurrence === 'aylik') dt.setMonth(dt.getMonth()+1);
-    else if(recurrence === 'yillik') dt.setFullYear(dt.getFullYear()+1);
-    return dt.getFullYear() + '-' + pad2(dt.getMonth()+1) + '-' + pad2(dt.getDate());
-  }
-
-  function catLabel(item){
-    if(item && item.subCategory && String(item.subCategory).trim()){
-      return String(item.subCategory).trim();
-    }
-    const catId = item && item.category;
-    const found = window.MMG_PAYMENT_CATEGORIES.find(c => c.id === catId);
-    return found ? found.cashflowCat : 'Diğer Gider';
-  }
-
-  // Yerelde bekleyen ödemeleri kontrol eder, vadesi gelmiş (bugün veya öncesi) ve henüz
-  // aktarılmamış olanları Nakit Akış Tablosu'nun ilgili gününe gider kalemi olarak işler.
-  // Tekrarlı ödemelerde bir sonraki vadeyi otomatik hesaplar. Dönüş: { count, months }
-  window.mmgRunPaymentSync = function(){
-    const t = new Date();
-    const todayStr = toKey(t.getFullYear(), t.getMonth(), t.getDate());
-
-    const payments = loadPaymentsLocal();
-    if(!payments.length) return { count:0, months:[] };
-
-    let transferredCount = 0;
-    const touchedMonths = {};
-
-    payments.forEach(item => {
-      if(!item.dueDate || item.paused) return;
-      let guard = 0;
-      while(item.dueDate <= todayStr && item.lastTransferredDate !== item.dueDate && guard < 36){
-        guard++;
-        const p = item.dueDate.split('-').map(Number);
-        const mk = monthKeyOf(p[0], p[1]-1);
-        if(!touchedMonths[mk]) touchedMonths[mk] = loadCashflowMonthLocal(mk);
-        const monthData = touchedMonths[mk];
-        if(!monthData[item.dueDate]) monthData[item.dueDate] = { gider:[], gelir:[], expanded:{gider:false, gelir:false} };
-        monthData[item.dueDate].gider.push({
-          id: 'pay_' + item.id + '_' + item.dueDate,
-          desc: item.desc,
-          category: catLabel(item),
-          amount: item.amount,
-          sourceId: item.id
-        });
-        transferredCount++;
-        item.lastTransferredDate = item.dueDate;
-
-        if(item.recurrence && item.recurrence !== 'yok'){
-          item.dueDate = advanceDate(item.dueDate, item.recurrence);
-        } else {
-          break; // tek seferlik ödeme, döngüden çık
-        }
+  // dueDate'ten bugüne kadar, tekrar kuralına göre vadesi gelmiş TÜM tarihleri döndürür.
+  // Gelecek tarihli tek seferlikler boş döner. Tekrarlılar her periyot için bir tarih üretir.
+  function occurrencesUpTo(dueDate, recurrence, today) {
+    var out = [];
+    if (!dueDate) return out;
+    if (dueDate > today) return out; // henüz vadesi gelmemiş (ilk tarih gelecekte)
+    var parts = dueDate.split("-");
+    var y = +parts[0], m = +parts[1], d = +parts[2];
+    var guard = 0;
+    while (guard++ < 800) {
+      var occ = ymd(y, m, d);
+      if (occ > today) break;
+      out.push(occ);
+      if (recurrence === "aylik") { m++; if (m > 12) { m = 1; y++; } }
+      else if (recurrence === "haftalik") {
+        var dt = new Date(y, m - 1, Math.min(d, new Date(y, m, 0).getDate()));
+        dt.setDate(dt.getDate() + 7);
+        y = dt.getFullYear(); m = dt.getMonth() + 1; d = dt.getDate();
       }
+      else if (recurrence === "yillik") { y++; }
+      else break; // 'yok' → tek sefer
+    }
+    return out;
+  }
+
+  window.mmgLatestDueOccurrence = function (item) {
+    if (!item || !item.dueDate) return null;
+    var occ = occurrencesUpTo(item.dueDate, item.recurrence, todayKey());
+    return occ.length ? occ[occ.length - 1] : null;
+  };
+
+  // ---- Yerel ödeme listesi API'si ----
+  window.mmgLocalPaymentsAPI = window.mmgLocalPaymentsAPI || {
+    load: function () {
+      try { var raw = localStorage.getItem("mmg_odemeler_list"); return raw ? JSON.parse(raw) : []; }
+      catch (e) { return []; }
+    },
+    save: function (list) {
+      try { localStorage.setItem("mmg_odemeler_list", JSON.stringify(list || [])); } catch (e) {}
+    }
+  };
+
+  // Bir gider kaydını, verilen ay-veri nesnesine (monthData) belirtilen günde ekler.
+  // Aynı kayıt+tarih için sabit bir id kullanır; böylece tekrar tekrar çağrılsa da MÜKERRER olmaz.
+  function applyItemToMonthData(monthData, occ, item, kind, prefix) {
+    kind = kind || "gider"; prefix = prefix || "sync_";
+    if (!monthData[occ]) monthData[occ] = { gider: [], gelir: [], expanded: { gider: false, gelir: false } };
+    if (!Array.isArray(monthData[occ][kind])) monthData[occ][kind] = [];
+    var entryId = prefix + item.id + "_" + occ;
+    for (var i = 0; i < monthData[occ][kind].length; i++) {
+      if (monthData[occ][kind][i].id === entryId) return false; // zaten var
+    }
+    monthData[occ][kind].push({
+      id: entryId,
+      desc: item.desc || "",
+      category: item.category || "",
+      amount: item.amount,
+      fromPayment: item.id
+    });
+    return true;
+  }
+
+  // Ortak bulut senkron çekirdeği: {scope}/<colName> kayıtlarını okuyup vadesi gelenleri
+  // {scope}/cashflow/{ay} dokümanına (kind: 'gider'|'gelir') işler. Gider ve Gelir ikisi de kullanır.
+  async function mergeCloudGeneric(colName, kind, prefix) {
+    var cloud = window.mmgCloud;
+    if (!cloud || !cloud.currentUser || !cloud.scopeId || !cloud.db) return { count: 0 };
+    var db = cloud.db, doc = cloud.doc, getDoc = cloud.getDoc, setDoc = cloud.setDoc,
+        collection = cloud.collection, getDocs = cloud.getDocs,
+        col = cloud.scopeCollection, sid = cloud.scopeId;
+    var today = todayKey();
+    var count = 0, items = [];
+    try {
+      var snap = await getDocs(collection(db, col, sid, colName));
+      snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+    } catch (e) { return { count: 0 }; }
+
+    var monthCache = {}, itemUpdates = [];
+    for (var k = 0; k < items.length; k++) {
+      var item = items[k];
+      if (!item || item.paused || !item.dueDate || !item.amount) continue;
+      var occ = occurrencesUpTo(item.dueDate, item.recurrence, today);
+      var latest = item.lastTransferredDate || null;
+      for (var j = 0; j < occ.length; j++) {
+        var o = occ[j], mk = o.slice(0, 7);
+        if (!monthCache[mk]) {
+          try {
+            var cs = await getDoc(doc(db, col, sid, "cashflow", mk));
+            monthCache[mk] = { data: (cs.exists() && cs.data().data) ? cs.data().data : {}, dirty: false };
+          } catch (e2) { monthCache[mk] = { data: {}, dirty: false }; }
+        }
+        if (applyItemToMonthData(monthCache[mk].data, o, item, kind, prefix)) { monthCache[mk].dirty = true; count++; }
+        if (!latest || o > latest) latest = o;
+      }
+      if (latest && latest !== item.lastTransferredDate) itemUpdates.push({ id: item.id, d: latest });
+    }
+    var mks = Object.keys(monthCache);
+    for (var a = 0; a < mks.length; a++) {
+      if (monthCache[mks[a]].dirty) {
+        try { await setDoc(doc(db, col, sid, "cashflow", mks[a]), { data: monthCache[mks[a]].data, updatedAt: new Date().toISOString() }, { merge: true }); } catch (e3) {}
+      }
+    }
+    for (var b = 0; b < itemUpdates.length; b++) {
+      try { await setDoc(doc(db, col, sid, colName, itemUpdates[b].id), { lastTransferredDate: itemUpdates[b].d }, { merge: true }); } catch (e4) {}
+    }
+    return { count: count };
+  }
+
+  // ---- MİSAFİR / yerel senkron ----
+  function scopeKeyPart() {
+    var c = window.mmgCloud || {};
+    return (c.scopeCollection || "guest") + ":" + (c.scopeId || "guest");
+  }
+  function localCashflowKey(mk) { return "mmg_nat_scope_" + scopeKeyPart() + "_" + mk; }
+
+  window.mmgRunPaymentSync = function () {
+    var today = todayKey();
+    var list = window.mmgLocalPaymentsAPI.load();
+    var monthCache = {}; // mk -> monthData
+    var changedMonths = {};
+    var count = 0, listDirty = false;
+
+    list.forEach(function (item) {
+      if (!item || item.paused || !item.dueDate || !item.amount) return;
+      var occ = occurrencesUpTo(item.dueDate, item.recurrence, today);
+      var latest = item.lastTransferredDate || null;
+      occ.forEach(function (o) {
+        var mk = o.slice(0, 7);
+        if (!monthCache[mk]) {
+          try { monthCache[mk] = JSON.parse(localStorage.getItem(localCashflowKey(mk)) || "{}") || {}; }
+          catch (e) { monthCache[mk] = {}; }
+        }
+        if (applyItemToMonthData(monthCache[mk], o, item)) { changedMonths[mk] = true; count++; }
+        if (!latest || o > latest) latest = o;
+      });
+      if (latest && latest !== item.lastTransferredDate) { item.lastTransferredDate = latest; listDirty = true; }
     });
 
-    const months = Object.keys(touchedMonths);
-    if(transferredCount > 0){
-      months.forEach(mk => saveCashflowMonthLocal(mk, touchedMonths[mk]));
-      savePaymentsLocal(payments);
-    }
-    return { count: transferredCount, months: months };
+    Object.keys(changedMonths).forEach(function (mk) {
+      try { localStorage.setItem(localCashflowKey(mk), JSON.stringify(monthCache[mk])); } catch (e) {}
+    });
+    if (listDirty) window.mmgLocalPaymentsAPI.save(list);
+    return { count: count, months: Object.keys(changedMonths) };
   };
 
-  // ---- Bulut yardımcıları (üye girişi yapılmışsa, en iyi çaba prensibiyle) ----
-  window.mmgSyncPaymentsToCloud = async function(){
-    if(!(window.mmgCloud && window.mmgCloud.currentUser)) return;
-    try{
-      const cloud = window.mmgCloud;
-      const payments = loadPaymentsLocal();
-      for(const item of payments){
-        await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'odemeler', item.id), item);
-      }
-    }catch(e){ /* sessizce geç */ }
-  };
-
-  window.mmgLoadPaymentsFromCloud = async function(){
-    if(!(window.mmgCloud && window.mmgCloud.currentUser)) return null;
-    try{
-      const cloud = window.mmgCloud;
-      const snaps = await cloud.getDocs(cloud.collection(cloud.db, 'users', cloud.currentUser.uid, 'odemeler'));
-      const list = [];
-      snaps.forEach(d => list.push(d.data()));
-      return list;
-    }catch(e){ return null; }
-  };
-
-  window.mmgDeletePaymentCloud = async function(id){
-    if(!(window.mmgCloud && window.mmgCloud.currentUser)) return;
-    try{
-      const cloud = window.mmgCloud;
-      await cloud.deleteDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'odemeler', id));
-    }catch(e){ /* sessizce geç */ }
-  };
-
-  window.mmgSaveCashflowMonthCloud = async function(mk, data){
-    if(!(window.mmgCloud && window.mmgCloud.currentUser)) return;
-    try{
-      const cloud = window.mmgCloud;
-      await cloud.setDoc(cloud.doc(cloud.db, 'users', cloud.currentUser.uid, 'cashflow', mk), { data, updatedAt: new Date().toISOString() });
-    }catch(e){ /* sessizce geç */ }
-  };
-
-  // Üye girişliyse: buluttaki ödeme listesini yerelle birleştirir (bulut güncel kabul edilir),
-  // ardından senkronizasyonu tekrar çalıştırır ve sonucu buluta yazar.
-  window.mmgMergeCloudPaymentsAndSync = async function(){
-    if(!(window.mmgCloud && window.mmgCloud.currentUser)) return window.mmgRunPaymentSync();
-    const cloudList = await window.mmgLoadPaymentsFromCloud();
-    if(cloudList){
-      const local = loadPaymentsLocal();
-      const map = {};
-      local.forEach(p => { map[p.id] = p; });
-      cloudList.forEach(p => { map[p.id] = p; });
-      savePaymentsLocal(Object.values(map));
-    }
-    const result = window.mmgRunPaymentSync();
-    await window.mmgSyncPaymentsToCloud();
-    for(const mk of result.months){
-      await window.mmgSaveCashflowMonthCloud(mk, loadCashflowMonthLocal(mk));
-    }
-    return result;
-  };
-
-  window.mmgLocalPaymentsAPI = {
-    load: loadPaymentsLocal,
-    save: savePaymentsLocal,
-    loadMonth: loadCashflowMonthLocal,
-    saveMonth: saveCashflowMonthLocal,
-    advanceDate: advanceDate,
-    catLabel: catLabel,
-    todayKey: function(){ const t=new Date(); return toKey(t.getFullYear(), t.getMonth(), t.getDate()); }
-  };
+  // ---- ÜYE / bulut senkron ----
+  // Gider: {scope}/odemeler → cashflow.gider   |   Gelir: {scope}/gelirler → cashflow.gelir
+  window.mmgMergeCloudPaymentsAndSync = function () { return mergeCloudGeneric("odemeler", "gider", "sync_"); };
+  window.mmgMergeCloudGelirAndSync = function () { return mergeCloudGeneric("gelirler", "gelir", "glsync_"); };
 })();

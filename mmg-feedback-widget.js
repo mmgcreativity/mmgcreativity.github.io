@@ -137,10 +137,10 @@
     const commentBox = document.getElementById('mmgRateComment');
     const submitBtn = document.getElementById('mmgRateSubmitBtn');
 
-    // Beğeni kutusu: ayın 1'inde bir kez otomatik gösterilir, o ay için tekrar gösterilmez.
-    const MMG_RATE_THIS_MONTH = new Date().toISOString().slice(0,7);
+    // Beğeni kutusu: son gösterimden en az 3 gün geçtiyse bir kez otomatik gösterilir.
+    const MMG_RATE_INTERVAL_DAYS = 3;
     function markShownToday(){
-      try{ localStorage.setItem('mmg_rate_btn_interacted_date', MMG_RATE_THIS_MONTH); }catch(e){}
+      try{ localStorage.setItem('mmg_rate_btn_interacted_date', new Date().toISOString()); }catch(e){}
     }
 
     let likedValue = null;
@@ -205,10 +205,18 @@
     skipBtn.addEventListener('click', closeOverlay);
     overlay.addEventListener('click', (e) => { if(e.target === overlay) closeOverlay(); });
 
-    // Sadece ayın 1'inde, o ay için henüz gösterilmediyse kutuyu otomatik aç.
+    // Son gösterimden 3+ gün geçtiyse (veya hiç gösterilmediyse) kutuyu otomatik aç.
     try{
-      const isFirstOfMonth = new Date().getDate() === 1;
-      if(isFirstOfMonth && localStorage.getItem('mmg_rate_btn_interacted_date') !== MMG_RATE_THIS_MONTH){
+      let shouldShowRate = true;
+      const lastRateShown = localStorage.getItem('mmg_rate_btn_interacted_date');
+      if(lastRateShown){
+        const lastMs = Date.parse(lastRateShown);
+        if(!isNaN(lastMs)){
+          const daysSince = (Date.now() - lastMs) / (1000 * 60 * 60 * 24);
+          shouldShowRate = daysSince >= MMG_RATE_INTERVAL_DAYS;
+        }
+      }
+      if(shouldShowRate){
         setTimeout(openOverlay, 1500);
       }
     }catch(e){}

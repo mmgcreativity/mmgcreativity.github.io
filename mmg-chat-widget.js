@@ -70,7 +70,7 @@ import {
   let myIsAdmin = false;
   let myBlockedUids = [];
   let unsubChats = null, unsubRequests = null, unsubMessages = null;
-  let openChatId = null, openChatInfo = null, openChatOtherUid = null, openChatCollection = 'chats';
+  let openChatId = null, openChatInfo = null, openChatOtherUid = null, openChatCollection = 'chats', openChatCode = null;
   let groupsMap = {};        // groupId -> group data
   let groupInvitesMap = {};  // inviteId -> invite data
   let unsubGroups = null, unsubGroupInvites = null;
@@ -81,7 +81,18 @@ import {
   let pendingGroupMembers = []; // [{uid, code}] grup oluşturma formunda eklenen kişiler
   let chatsMap = {};     // chatId -> chat data
   let requestsMap = {};  // reqId -> request data
+  let notificationsMap = {};  // notifId -> genel bildirim (davet/referans/hatırlatma) verisi
+  let unsubNotifications = null;
+  let notificationsFirstSnapshot = true;
   let activeTab = 'friends'; // friends | requests | add | admin
+
+  // ---- Kullanıcı Kodu -> görünen ad önbelleği ----
+  // userDirectory/{kod} = {uid, username} herkese açık okunur; sohbet başlığında/listesinde/
+  // bildiriminde "Kod: 1002" yerine kullanıcının adını göstermek için. Ad bulunana kadar koda düşülür.
+  let nameByCode = {};
+  let pendingNameFetches = {};
+  let openMsgsById = {};   // açık sohbetteki mesajlar: id -> {id, text, mine, senderLabel}
+  let replyingTo = null;   // cevaplanan mesaj: {text, senderLabel} | null
 
   const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -104,6 +115,34 @@ import {
       if(sameDay) return d.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
       return d.toLocaleDateString('tr-TR', {day:'2-digit', month:'2-digit'}) + ' ' + d.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
     }catch(e){ return ''; }
+  }
+
+  // ---- Kod -> ad çözümü (userDirectory herkese açık okunur) ----
+  // Ad bulunana kadar "Kod: X" gösterilir; ad gelince ilgili görünüm/başlık tazelenir.
+  function labelForCode(code){
+    if(!code) return 'Kullanıcı';
+    const cached = nameByCode[code];
+    if(cached) return cached;                     // ad bulundu
+    if(cached === undefined) prefetchName(code);  // henüz çözülmedi -> arka planda çöz
+    return 'Kod: ' + code;                        // ad yok / gelene kadar koda düş
+  }
+  async function prefetchName(code){
+    if(!code || nameByCode[code] !== undefined || pendingNameFetches[code]) return;
+    pendingNameFetches[code] = true;
+    try{
+      const snap = await getDoc(doc(db, 'userDirectory', String(code)));
+      nameByCode[code] = snap.exists() ? String(snap.data().username || '').trim() : '';
+    }catch(e){ nameByCode[code] = ''; }
+    delete pendingNameFetches[code];
+    try{
+      if(openChatId) refreshOpenChatTitle();
+      else if(activeTab === 'friends') renderTab();
+    }catch(e){}
+  }
+  function refreshOpenChatTitle(){
+    if(!openChatId || openChatCollection !== 'chats' || !openChatCode) return;
+    const nm = nameByCode[openChatCode];
+    if(nm) els.title.textContent = nm;
   }
 
   const CSS = `
@@ -298,6 +337,47 @@ import {
   }
   .mmg-chat-reaction-pill.mine{ border-color:var(--brass,#C6A15B); background:rgba(198,161,91,0.14); }
   .mmg-chat-reaction-pill:hover{ border-color:var(--brass-dim,#8A7440); }
+  .mmg-chat-bubble{ cursor:pointer; }
+  .mmg-chat-msg-actions{
+    position:fixed; z-index:930; background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448);
+    border-radius:12px; padding:5px; box-shadow:0 14px 34px rgba(0,0,0,0.5); min-width:156px;
+  }
+  .mmg-chat-msg-actions[hidden]{ display:none; }
+  .mmg-chat-msg-actions button{
+    display:flex; align-items:center; gap:9px; width:100%; background:none; border:none; color:var(--text,#EAEDF3);
+    cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; padding:9px 11px; border-radius:8px; text-align:left;
+  }
+  .mmg-chat-msg-actions button:hover{ background:var(--surface-2,#1B2536); }
+  .mmg-chat-msg-actions button.danger{ color:var(--red,#E2544B); }
+  .mmg-chat-quote{
+    border-left:3px solid var(--brass,#C6A15B); background:rgba(198,161,91,0.10); border-radius:6px;
+    padding:4px 8px; margin-bottom:5px; font-size:11.5px; max-width:100%; overflow:hidden;
+  }
+  .mmg-chat-msg.me .mmg-chat-quote{ background:rgba(255,255,255,0.14); border-left-color:rgba(255,255,255,0.7); }
+  .mmg-chat-quote .qn{ color:var(--brass,#C6A15B); font-weight:600; display:block; font-size:10.5px; }
+  .mmg-chat-msg.me .mmg-chat-quote .qn{ color:rgba(255,255,255,0.9); }
+  .mmg-chat-quote .qt{ display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0.85; }
+  .mmg-chat-reply-bar{
+    flex:0 0 auto; display:flex; align-items:center; gap:8px; padding:7px 12px; border-top:1px solid var(--hairline,#2A3448);
+    background:var(--surface-2,#1B2536);
+  }
+  .mmg-chat-reply-bar[hidden]{ display:none; }
+  .mmg-chat-reply-bar .rb-main{ flex:1; min-width:0; border-left:3px solid var(--brass,#C6A15B); padding-left:8px; }
+  .mmg-chat-reply-bar .rb-name{ color:var(--brass,#C6A15B); font-weight:600; font-size:11px; }
+  .mmg-chat-reply-bar .rb-text{ font-size:12px; color:var(--muted,#8D96AC); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mmg-chat-reply-bar button{ background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:15px; padding:2px 4px; flex:0 0 auto; }
+  .mmg-chat-reply-bar button:hover{ color:var(--text,#EAEDF3); }
+  .mmg-chat-fwd-sheet{
+    position:fixed; z-index:940; background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448);
+    border-radius:14px; box-shadow:0 20px 50px rgba(0,0,0,0.55); width:260px; max-width:calc(100vw - 24px);
+    max-height:min(340px, calc(100vh - 40px)); overflow-y:auto; padding:8px;
+  }
+  .mmg-chat-fwd-sheet[hidden]{ display:none; }
+  .mmg-chat-fwd-sheet .fwd-title{ font-size:12.5px; font-weight:700; color:var(--text,#EAEDF3); padding:6px 8px 8px; }
+  .mmg-chat-fwd-item{
+    display:flex; align-items:center; gap:9px; padding:8px 9px; border-radius:8px; cursor:pointer; font-size:13px; color:var(--text,#EAEDF3);
+  }
+  .mmg-chat-fwd-item:hover{ background:var(--surface-2,#1B2536); }
   .mmg-chat-msg-row{ display:flex; align-items:flex-start; gap:4px; min-width:0; }
   .mmg-chat-msg.me .mmg-chat-msg-row{ flex-direction:row-reverse; }
   .mmg-chat-footer textarea{
@@ -373,12 +453,13 @@ import {
     <div id="mmgChatCodeBox" class="mmg-chat-code-box"></div>
     <div class="mmg-chat-tabs" id="mmgChatTabs">
       <div class="mmg-chat-tab active" data-tab="friends">Sohbetler</div>
-      <div class="mmg-chat-tab" data-tab="notifications">Bildirimler<span class="mmg-chat-dot" id="mmgChatNotifDot" hidden></span></div>
+      <div class="mmg-chat-tab" data-tab="notifications">Davetler<span class="mmg-chat-dot" id="mmgChatNotifDot" hidden></span></div>
       <div class="mmg-chat-tab" data-tab="requests">İstekler<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
-      <div class="mmg-chat-tab" data-tab="add">Kod ile Ekle</div>
-      <div class="mmg-chat-tab" data-tab="admin">Yöneticiniz</div>
+      <div class="mmg-chat-tab" data-tab="add">Ekle</div>
+      <div class="mmg-chat-tab" data-tab="admin">Admin</div>
     </div>
     <div class="mmg-chat-body" id="mmgChatBody"></div>
+    <div class="mmg-chat-reply-bar" id="mmgChatReplyBar" hidden></div>
     <div class="mmg-chat-footer" id="mmgChatFooter" hidden>
       <div style="position:relative;">
         <button type="button" class="mmg-chat-emoji-btn" id="mmgChatEmojiBtn" aria-label="Emoji ekle">🙂</button>
@@ -393,6 +474,8 @@ import {
 
   const TOAST_HTML = `<div id="mmgChatToastContainer" aria-live="polite"></div>`;
   const REACT_PICKER_HTML = `<div class="mmg-chat-react-picker" id="mmgChatReactPicker" hidden></div>`;
+  const MSG_ACTIONS_HTML = `<div class="mmg-chat-msg-actions" id="mmgChatMsgActions" hidden></div>`;
+  const FWD_SHEET_HTML = `<div class="mmg-chat-fwd-sheet" id="mmgChatFwdSheet" hidden></div>`;
 
   function inject(){
     const styleTag = document.createElement('style');
@@ -408,6 +491,12 @@ import {
     const reactWrap = document.createElement('div');
     reactWrap.innerHTML = REACT_PICKER_HTML;
     document.body.appendChild(reactWrap.firstElementChild);
+    const actionsWrap = document.createElement('div');
+    actionsWrap.innerHTML = MSG_ACTIONS_HTML;
+    document.body.appendChild(actionsWrap.firstElementChild);
+    const fwdWrap = document.createElement('div');
+    fwdWrap.innerHTML = FWD_SHEET_HTML;
+    document.body.appendChild(fwdWrap.firstElementChild);
     wireUp();
   }
 
@@ -437,6 +526,9 @@ import {
     els.emojiBtn = document.getElementById('mmgChatEmojiBtn');
     els.emojiPicker = document.getElementById('mmgChatEmojiPicker');
     els.reactPicker = document.getElementById('mmgChatReactPicker');
+    els.msgActions = document.getElementById('mmgChatMsgActions');
+    els.fwdSheet = document.getElementById('mmgChatFwdSheet');
+    els.replyBar = document.getElementById('mmgChatReplyBar');
 
     els.bubble.addEventListener('pointerdown', onBubblePointerDown);
     els.closeBtn.addEventListener('click', () => { els.panel.hidden = true; });
@@ -507,6 +599,12 @@ import {
     document.addEventListener('pointerdown', (e) => {
       if(els.panel.hidden) return;
       if(els.panel.contains(e.target) || els.bubble.contains(e.target)) return;
+      // Panel dışında konumlanan kendi açılır menülerimiz (mesaj aksiyonları, emoji/tepki seçici,
+      // ilet sayfası, toast) "dış tık" sayılmamalı — yoksa menüye basınca panel de kapanır.
+      if((els.msgActions && !els.msgActions.hidden && els.msgActions.contains(e.target)) ||
+         (els.reactPicker && !els.reactPicker.hidden && els.reactPicker.contains(e.target)) ||
+         (els.fwdSheet && !els.fwdSheet.hidden && els.fwdSheet.contains(e.target)) ||
+         (els.toastContainer && els.toastContainer.contains(e.target))) return;
       els.panel.hidden = true;
     }, true);
   }
@@ -701,7 +799,9 @@ import {
 
   function closeOpenChat(rerender){
     if(unsubMessages){ unsubMessages(); unsubMessages = null; }
-    openChatId = null; openChatInfo = null; openChatOtherUid = null; openChatCollection = 'chats';
+    openChatId = null; openChatInfo = null; openChatOtherUid = null; openChatCollection = 'chats'; openChatCode = null;
+    openMsgsById = {};
+    try{ cancelReply(); closeMsgActionMenu(); closeForwardSheet(); closeReactPicker(); }catch(e){}
     els.backBtn.hidden = true;
     els.footer.hidden = true;
     if(els.leaveGroupBtn) els.leaveGroupBtn.hidden = true;
@@ -809,10 +909,10 @@ import {
     // kind === 'chats', normal 1:1
     const otherUid = (c.participants || []).find(u => u !== currentUser.uid);
     const info = (c.participantInfo && c.participantInfo[otherUid]) || {};
-    const label = info.code ? ('Kod: ' + info.code) : 'Kullanıcı';
+    const label = labelForCode(info.code);
     notifyNewMessage(label, c.lastMessage || 'Yeni mesaj');
     showChatToast({
-      title: label, message: c.lastMessage || 'Yeni mesaj', avatarLetter: (info.code || '?').slice(0, 1),
+      title: label, message: c.lastMessage || 'Yeni mesaj', avatarLetter: label.replace('Kod: ', '').slice(0, 1),
       onClick: () => {
         els.panel.hidden = false;
         positionPanelNearBubble();
@@ -878,6 +978,38 @@ import {
       updateBadge();
     }, (err) => console.error('mmg-chat-widget groupInvites onSnapshot:', err));
 
+    // ---- Genel bildirimler (çan/badge): davet gönderildi, referans kullanıldı, hatırlatma ----
+    unsubNotifications = onSnapshot(query(collection(db, 'notifications'), where('toUid', '==', uid)), (snap) => {
+      const prev = notificationsMap;
+      notificationsMap = {};
+      snap.forEach(d => { notificationsMap[d.id] = d.data(); });
+      if(!notificationsFirstSnapshot){
+        Object.keys(notificationsMap).forEach(id => {
+          const n = notificationsMap[id];
+          if(!prev[id] && !n.read){
+            try{
+              notifyNewMessage(n.title || 'Yeni bildirim', n.body || '');
+              showChatToast({
+                title: n.title || 'Yeni bildirim',
+                message: n.body || '',
+                avatarLetter: '🔔',
+                onClick: () => {
+                  els.panel.hidden = false;
+                  positionPanelNearBubble();
+                  activeTab = 'notifications';
+                  [...els.tabs.children].forEach(t => t.classList.toggle('active', t.dataset.tab === 'notifications'));
+                  renderTab();
+                }
+              });
+            }catch(e){}
+          }
+        });
+      }
+      notificationsFirstSnapshot = false;
+      if(activeTab === 'notifications') renderTab();
+      updateBadge();
+    }, (err) => console.error('mmg-chat-widget notifications onSnapshot:', err));
+
     // ---- Firma Hesabı davetleri (YENİ): eskiden ayrı bir açılır bildirim kutusundaydı,
     // şimdi bu sohbet panelinin "Bildirimler" sekmesinde gösteriliyor ----
     // "Yönetici" daveti kullanıcının kendi kodu (myChatCode / Kullanıcı Kodu) ile eşleşen tek bir
@@ -910,7 +1042,8 @@ import {
     const reqCount = Object.keys(requestsMap).length + Object.keys(groupInvitesMap).length;
     els.reqDot.hidden = reqCount === 0;
     const firmaInviteCount = firmaMemberInvites.length + (firmaAdminInvite ? 1 : 0);
-    if(els.notifDot) els.notifDot.hidden = firmaInviteCount === 0;
+    const notifUnread = Object.keys(notificationsMap).filter(id => !notificationsMap[id].read).length;
+    if(els.notifDot) els.notifDot.hidden = (firmaInviteCount + notifUnread) === 0;
     let unread = 0;
     Object.keys(chatsMap).forEach(id => {
       const c = chatsMap[id];
@@ -924,7 +1057,7 @@ import {
       const readAt = c['lastRead_' + currentUser.uid] && c['lastRead_' + currentUser.uid].toMillis ? c['lastRead_' + currentUser.uid].toMillis() : 0;
       if(lastAt > readAt && c.lastSenderUid !== currentUser.uid) unread++;
     });
-    setBadge(unread + reqCount + firmaInviteCount);
+    setBadge(unread + reqCount + firmaInviteCount + notifUnread);
   }
 
   function updateOpenChatHeaderIfNeeded(){ /* şu an ekstra bir şey gerekmiyor */ }
@@ -949,7 +1082,13 @@ import {
 
   function renderNotificationsTab(){
     els.footer.hidden = true;
-    if(!firmaMemberInvites.length && !firmaAdminInvite){
+    const notifList = Object.keys(notificationsMap).map(id => Object.assign({ _id: id }, notificationsMap[id]))
+      .sort((a, b) => {
+        const am = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+        const bm = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+        return bm - am;
+      });
+    if(!firmaMemberInvites.length && !firmaAdminInvite && !notifList.length){
       els.body.innerHTML = '<div class="mmg-chat-empty">Bekleyen bir bildiriminiz yok.</div>';
       return;
     }
@@ -958,7 +1097,15 @@ import {
     let html = '';
     if(firmaMemberInvites.length) html += renderGroupedMemberInviteCard(firmaMemberInvites);
     if(firmaAdminInvite) html += renderInviteCard(firmaAdminInvite, 'admin');
+    html += notifList.map(renderNotifItem).join('');
     els.body.innerHTML = html;
+
+    notifList.forEach(n => {
+      const delBtn = document.getElementById('mmgNotifDel_' + n._id);
+      if(delBtn) delBtn.addEventListener('click', () => deleteNotification(n._id));
+    });
+    const unreadIds = notifList.filter(n => !n.read).map(n => n._id);
+    if(unreadIds.length) markNotificationsRead(unreadIds);
 
     if(firmaMemberInvites.length){
       const acceptBtn = document.getElementById('mmgNotifGroupAccept');
@@ -973,6 +1120,54 @@ import {
       if(rejectBtn) rejectBtn.addEventListener('click', () => rejectFirmaInvite(firmaAdminInvite, 'admin'));
     }
   }
+
+  function mmgNotifEsc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function fmtNotifTime(ts){
+    try{
+      if(!ts || !ts.toMillis) return '';
+      const d = new Date(ts.toMillis());
+      return d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' });
+    }catch(e){ return ''; }
+  }
+  function renderNotifItem(n){
+    const icon = n.type === 'invite' ? '🏢' : (n.type === 'referral' ? '🎁' : (n.type === 'reminder' ? '⏰' : '🔔'));
+    const when = fmtNotifTime(n.createdAt);
+    return '<div style="display:flex; gap:10px; align-items:flex-start; padding:12px; border:1px solid #2A3448; border-radius:12px; margin-bottom:8px; background:' + (n.read ? 'transparent' : 'rgba(198,161,91,0.08)') + ';">' +
+        '<div style="font-size:18px; line-height:1;">' + icon + '</div>' +
+        '<div style="flex:1; min-width:0;">' +
+          '<div style="font-weight:600; font-size:13.5px;">' + mmgNotifEsc(n.title || 'Bildirim') + '</div>' +
+          (n.body ? '<div style="font-size:12.5px; opacity:0.75; margin-top:2px;">' + mmgNotifEsc(n.body) + '</div>' : '') +
+          (when ? '<div style="font-size:11px; opacity:0.6; margin-top:4px;">' + mmgNotifEsc(when) + '</div>' : '') +
+        '</div>' +
+        '<button type="button" id="mmgNotifDel_' + mmgNotifEsc(n._id) + '" title="Sil" style="background:none; border:none; color:#8D96AC; cursor:pointer; font-size:15px; line-height:1;">✕</button>' +
+      '</div>';
+  }
+  async function markNotificationsRead(ids){
+    for(const id of ids){ try{ await updateDoc(doc(db, 'notifications', id), { read: true }); }catch(e){} }
+  }
+  async function deleteNotification(id){
+    try{ await deleteDoc(doc(db, 'notifications', id)); }catch(e){}
+  }
+  // Global yardımcı: başka sayfalar (KullaniciYonetimi, kayıt akışı) buradan bildirim yazabilir.
+  window.mmgNotify = async function(toUid, data){
+    try{
+      if(!toUid || !currentUser) return false;
+      await addDoc(collection(db, 'notifications'), {
+        toUid: toUid,
+        fromUid: currentUser.uid,
+        fromCode: (typeof myChatCode !== 'undefined' && myChatCode) ? myChatCode : null,
+        type: (data && data.type) || 'info',
+        title: (data && data.title) || 'Bildirim',
+        body: (data && data.body) || '',
+        link: (data && data.link) || null,
+        read: false,
+        createdAt: serverTimestamp()
+      });
+      return true;
+    }catch(e){ console.error('mmgNotify:', e); return false; }
+  };
 
   function renderGroupedMemberInviteCard(invites){
     const firmasHtml = invites.map(inv => {
@@ -1163,13 +1358,13 @@ import {
       const c = chatsMap[id];
       const otherUid = (c.participants || []).find(u => u !== currentUser.uid);
       const info = (c.participantInfo && c.participantInfo[otherUid]) || {};
-      const label = info.code ? ('Kod: ' + info.code) : 'Kullanıcı';
+      const label = labelForCode(info.code);
       const lastAt = c.lastMessageAt && c.lastMessageAt.toMillis ? c.lastMessageAt.toMillis() : 0;
       const readAt = c['lastRead_' + currentUser.uid] && c['lastRead_' + currentUser.uid].toMillis ? c['lastRead_' + currentUser.uid].toMillis() : 0;
       rows.push({
         id, kind: 'chat', label, sub: c.lastMessage || 'Henüz mesaj yok', lastAt,
         unread: lastAt > readAt && c.lastSenderUid !== currentUser.uid,
-        avatarLetter: (info.code || '?').slice(0, 1), otherUid
+        avatarLetter: label.replace('Kod: ', '').slice(0, 1), otherUid
       });
     });
     groupIds.forEach(id => {
@@ -1557,6 +1752,13 @@ import {
     els.leaveGroupBtn.hidden = openChatCollection !== 'chatGroups';
     els.deleteBtn.hidden = openChatCollection !== 'chats'; // gruplarda "gruptan ayrıl" kullanılır
     els.title.textContent = info && info.title ? info.title : 'Sohbet';
+    // 1:1 sohbette başlığı koda değil kullanıcının adına çöz (ad gelene kadar koda düşer).
+    openChatCode = null;
+    if(openChatCollection === 'chats' && openChatOtherUid){
+      const c0 = chatsMap[chatId] || {};
+      const pinfo = (c0.participantInfo && c0.participantInfo[openChatOtherUid]) || {};
+      if(pinfo.code){ openChatCode = pinfo.code; els.title.textContent = labelForCode(pinfo.code); }
+    }
     els.body.innerHTML = `<div class="mmg-chat-empty">Yükleniyor…</div>`;
 
     // okundu bilgisini güncelle
@@ -1583,13 +1785,19 @@ import {
     }
     const isGroup = openChatCollection === 'chatGroups';
     const groupInfo = isGroup ? (groupsMap[openChatId] || {}) : null;
+    openMsgsById = {};
     els.body.innerHTML = msgs.map(m => {
       const mine = m.senderUid === currentUser.uid;
+      let senderLabelText = mine ? 'Siz' : (isGroup ? 'Üye' : (els.title.textContent || 'Kullanıcı'));
       let senderLabel = '';
       if(isGroup && !mine){
         const info = (groupInfo.memberInfo && groupInfo.memberInfo[m.senderUid]) || {};
-        senderLabel = `<div style="font-size:10.5px; color:var(--brass,#C6A15B); margin-bottom:2px; font-family:'IBM Plex Mono',monospace;">${esc(info.code || 'Üye')}</div>`;
+        if(info.code && nameByCode[info.code] === undefined) prefetchName(info.code);
+        const memLabel = info.code ? (nameByCode[info.code] || info.code) : 'Üye';
+        senderLabelText = memLabel;
+        senderLabel = `<div style="font-size:10.5px; color:var(--brass,#C6A15B); margin-bottom:2px; font-family:'IBM Plex Mono',monospace;">${esc(memLabel)}</div>`;
       }
+      openMsgsById[m.id] = { id: m.id, text: m.text, mine, senderLabel: senderLabelText };
       const reactions = m.reactions || {};
       const counts = {};
       Object.keys(reactions).forEach(uid => {
@@ -1602,30 +1810,28 @@ import {
             `<span class="mmg-chat-reaction-pill${reactions[currentUser.uid] === emo ? ' mine' : ''}" data-msg-id="${esc(m.id)}" data-emoji="${esc(emo)}">${emo} ${counts[emo]}</span>`
           ).join('')}</div>`
         : '';
+      const quoteHtml = m.replyTo
+        ? `<div class="mmg-chat-quote"><span class="qn">${esc(m.replyTo.senderLabel || '')}</span><span class="qt">${esc(m.replyTo.text || '')}</span></div>`
+        : '';
+      const fwdHtml = m.forwarded
+        ? `<div style="font-size:10px; opacity:0.6; margin-bottom:2px; font-style:italic;">↪ İletildi</div>`
+        : '';
       return `<div class="mmg-chat-msg ${mine ? 'me' : ''}">
         <div>
           ${senderLabel}
           <div class="mmg-chat-msg-row">
-            <div class="mmg-chat-bubble">${esc(m.text)}</div>
-            <button type="button" class="mmg-chat-react-btn" data-msg-id="${esc(m.id)}" title="Emoji ile tepki ver">🙂+</button>
-            ${mine ? `<button type="button" class="mmg-chat-msg-delete" data-msg-id="${esc(m.id)}" title="Mesajı sil">🗑</button>` : ''}
+            <div class="mmg-chat-bubble" data-msg-id="${esc(m.id)}" title="Seçenekler için tıklayın">${quoteHtml}${fwdHtml}${esc(m.text)}</div>
           </div>
           ${reactionsHtml}
           <div class="mmg-chat-msg-time">${fmtTime(m.createdAt)}</div>
         </div>
       </div>`;
     }).join('');
-    els.body.querySelectorAll('.mmg-chat-msg-delete').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    els.body.querySelectorAll('.mmg-chat-bubble[data-msg-id]').forEach(bub => {
+      bub.addEventListener('click', (e) => {
         e.stopPropagation();
-        const msgId = btn.dataset.msgId;
-        if(confirm('Bu mesajı silmek istediğinize emin misiniz?')) deleteMessage(msgId);
-      });
-    });
-    els.body.querySelectorAll('.mmg-chat-react-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openReactPicker(btn, btn.dataset.msgId);
+        const msg = openMsgsById[bub.dataset.msgId];
+        if(msg) openMsgActionMenu(bub, msg);
       });
     });
     els.body.querySelectorAll('.mmg-chat-reaction-pill').forEach(pill => {
@@ -1670,6 +1876,113 @@ import {
     if(els.reactPicker && !els.reactPicker.hidden && !els.reactPicker.contains(e.target)) closeReactPicker();
   });
 
+  // ---- Mesaj aksiyon menüsü: Cevapla / İlet / Emoji / Sil ----
+  function openMsgActionMenu(anchor, msg){
+    if(!els.msgActions) return;
+    closeReactPicker();
+    els.msgActions.innerHTML =
+      `<button type="button" data-act="reply">↩️ Cevapla</button>` +
+      `<button type="button" data-act="forward">➡️ İlet</button>` +
+      `<button type="button" data-act="react">🙂 Emoji ile tepki</button>` +
+      (msg.mine ? `<button type="button" data-act="delete" class="danger">🗑 Sil</button>` : '');
+    els.msgActions.hidden = false;
+    const rect = anchor.getBoundingClientRect();
+    const menuW = 160, menuH = els.msgActions.offsetHeight || 190;
+    let left = msg.mine ? (rect.right - menuW) : rect.left;
+    left = Math.min(Math.max(8, left), window.innerWidth - menuW - 8);
+    let top = rect.bottom + 4;
+    if(top + menuH > window.innerHeight - 8) top = Math.max(8, rect.top - menuH - 4);
+    els.msgActions.style.left = left + 'px';
+    els.msgActions.style.top = top + 'px';
+    els.msgActions.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const act = b.dataset.act;
+        closeMsgActionMenu();
+        if(act === 'reply') startReply(msg);
+        else if(act === 'forward') openForwardSheet(msg);
+        else if(act === 'react') openReactPicker(anchor, msg.id);
+        else if(act === 'delete'){ if(confirm('Bu mesajı silmek istediğinize emin misiniz?')) deleteMessage(msg.id); }
+      });
+    });
+  }
+  function closeMsgActionMenu(){ if(els.msgActions) els.msgActions.hidden = true; }
+  document.addEventListener('click', (e) => {
+    if(els.msgActions && !els.msgActions.hidden && !els.msgActions.contains(e.target)) closeMsgActionMenu();
+  });
+
+  // ---- Cevapla ----
+  function startReply(msg){
+    replyingTo = { text: msg.text || '', senderLabel: msg.senderLabel || '' };
+    if(!els.replyBar) return;
+    els.replyBar.innerHTML =
+      `<div class="rb-main"><div class="rb-name">${esc(msg.senderLabel || '')} kişisine cevap</div>` +
+      `<div class="rb-text">${esc(msg.text || '')}</div></div>` +
+      `<button type="button" id="mmgChatReplyCancel" aria-label="Cevabı iptal et">✕</button>`;
+    els.replyBar.hidden = false;
+    const cancel = document.getElementById('mmgChatReplyCancel');
+    if(cancel) cancel.addEventListener('click', cancelReply);
+    if(els.input) els.input.focus();
+  }
+  function cancelReply(){
+    replyingTo = null;
+    if(els.replyBar){ els.replyBar.hidden = true; els.replyBar.innerHTML = ''; }
+  }
+
+  // ---- İlet (forward) ----
+  function openForwardSheet(msg){
+    if(!els.fwdSheet) return;
+    const items = [];
+    Object.keys(chatsMap).forEach(id => {
+      const c = chatsMap[id];
+      if(c.isAdminChat) return;
+      const other = (c.participants || []).find(u => u !== currentUser.uid);
+      if(myBlockedUids.includes(other)) return;
+      const info = (c.participantInfo && c.participantInfo[other]) || {};
+      const label = labelForCode(info.code);
+      items.push({ id, coll: 'chats', label, av: label.replace('Kod: ', '').slice(0, 1) });
+    });
+    Object.keys(groupsMap).forEach(id => {
+      const g = groupsMap[id];
+      items.push({ id, coll: 'chatGroups', label: (g.name || 'Grup'), av: '👥' });
+    });
+    els.fwdSheet.innerHTML = `<div class="fwd-title">İletilecek sohbeti seçin</div>` +
+      (items.length ? items.map(it =>
+        `<div class="mmg-chat-fwd-item" data-id="${esc(it.id)}" data-coll="${it.coll}">` +
+          `<div class="mmg-chat-toast-avatar" style="width:28px; height:28px; font-size:12px;">${esc(it.av)}</div>` +
+          `<div style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(it.label)}</div>` +
+        `</div>`).join('')
+        : `<div style="padding:10px; color:var(--muted,#8D96AC); font-size:12px;">İletilecek başka sohbet yok.</div>`);
+    els.fwdSheet.hidden = false;
+    els.fwdSheet.style.left = Math.max(8, (window.innerWidth - 260) / 2) + 'px';
+    els.fwdSheet.style.top = Math.max(8, (window.innerHeight - 320) / 2) + 'px';
+    els.fwdSheet.querySelectorAll('.mmg-chat-fwd-item').forEach(it => {
+      it.addEventListener('click', (e) => {
+        e.stopPropagation();
+        forwardMessageTo(it.dataset.coll, it.dataset.id, msg.text);
+        closeForwardSheet();
+      });
+    });
+  }
+  function closeForwardSheet(){ if(els.fwdSheet) els.fwdSheet.hidden = true; }
+  document.addEventListener('click', (e) => {
+    if(els.fwdSheet && !els.fwdSheet.hidden && !els.fwdSheet.contains(e.target)) closeForwardSheet();
+  });
+  async function forwardMessageTo(coll, chatId, text){
+    if(!text || !chatId || !currentUser) return;
+    const uid = currentUser.uid;
+    try{
+      await addDoc(collection(db, coll, chatId, 'messages'), {
+        senderUid: uid, senderIsAdmin: !!myIsAdmin, text: String(text).slice(0, 2000),
+        forwarded: true, createdAt: serverTimestamp()
+      });
+      await setDoc(doc(db, coll, chatId), {
+        lastMessage: String(text).slice(0, 140), lastMessageAt: serverTimestamp(),
+        lastSenderUid: uid, ['lastRead_' + uid]: serverTimestamp()
+      }, { merge: true });
+    }catch(e){ console.error('mmg-chat-widget: mesaj iletilemedi', e); }
+  }
+
   async function reactToMessage(msgId, emoji){
     if(!msgId || !openChatId || !currentUser) return;
     try{
@@ -1698,13 +2011,21 @@ import {
     if(!text || !openChatId) return;
     els.input.value = '';
     const uid = currentUser.uid;
+    const msgData = {
+      senderUid: uid,
+      senderIsAdmin: !!myIsAdmin,
+      text: text.slice(0, 2000),
+      createdAt: serverTimestamp()
+    };
+    if(replyingTo){
+      msgData.replyTo = {
+        text: String(replyingTo.text || '').slice(0, 140),
+        senderLabel: String(replyingTo.senderLabel || '').slice(0, 40)
+      };
+      cancelReply();
+    }
     try{
-      await addDoc(collection(db, openChatCollection, openChatId, 'messages'), {
-        senderUid: uid,
-        senderIsAdmin: !!myIsAdmin,
-        text: text.slice(0, 2000),
-        createdAt: serverTimestamp()
-      });
+      await addDoc(collection(db, openChatCollection, openChatId, 'messages'), msgData);
       await setDoc(doc(db, openChatCollection, openChatId), {
         lastMessage: text.slice(0, 140),
         lastMessageAt: serverTimestamp(),
@@ -1724,7 +2045,9 @@ import {
     if(unsubGroupInvites){ unsubGroupInvites(); unsubGroupInvites = null; }
     if(unsubFirmaMemberInvite){ unsubFirmaMemberInvite(); unsubFirmaMemberInvite = null; }
     if(unsubFirmaAdminInvite){ unsubFirmaAdminInvite(); unsubFirmaAdminInvite = null; }
+    if(unsubNotifications){ unsubNotifications(); unsubNotifications = null; }
     chatsMap = {}; requestsMap = {}; groupsMap = {}; groupInvitesMap = {}; openChatId = null;
+    notificationsMap = {}; notificationsFirstSnapshot = true;
     chatsFirstSnapshot = true; groupsFirstSnapshot = true;
     firmaMemberInvitesFirstSnapshot = true; firmaAdminInviteFirstSnapshot = true;
     firmaMemberInvites = []; firmaAdminInvite = null;

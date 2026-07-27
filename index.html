@@ -88,6 +88,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   html{background:var(--bg);}
 
   html,body{height:100%;}
+  /* Yatay taşmayı kes: bir öğe ekrandan taşarsa mobil tarayıcı layout viewport'u genişletip
+     @media (max-width:860px) kuralını devre dışı bırakabiliyor; bu da masaüstü düzeninin (sidebar
+     solda + main margin-left) mobilde kalmasına ve içeriğin sağa kaymasına yol açıyordu. */
+  html,body{ overflow-x:hidden; max-width:100%; }
   body{
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
@@ -262,6 +266,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     flex-shrink:0; display:flex; align-items:center; gap:10px;
     padding:14px 16px; border-top:1px solid var(--hairline); background:var(--surface);
   }
+  /* Her zaman görünür "aktif firma" çubuğu (hesap rozetinin hemen üstünde) */
+  .mmg-active-firma-bar{
+    flex-shrink:0; display:flex; align-items:center; gap:8px; cursor:pointer;
+    padding:9px 16px; border-top:1px solid var(--hairline); background:var(--surface-2);
+    transition:background .15s ease;
+  }
+  .mmg-active-firma-bar:hover{ background:var(--surface); }
+  .mmg-active-firma-bar .maf-dot{ width:7px; height:7px; border-radius:50%; background:var(--teal); box-shadow:0 0 6px var(--teal); flex-shrink:0; }
+  .mmg-active-firma-bar .maf-name{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700; color:var(--text);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1 1 auto; min-width:0;
+  }
+  .mmg-active-firma-bar .maf-caret{ color:var(--muted); font-size:11px; flex-shrink:0; }
   .top-right-badge{
     position:relative;
     display:flex; align-items:center; gap:10px;
@@ -465,16 +482,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .desktop-add-menu-item:hover{ background:rgba(198,161,91,0.12); color:var(--brass); }
   .desktop-add-menu-empty{ padding:10px 8px; font-size:12.5px; color:var(--muted); }
   .card-grid.remove-mode .app-card{ outline:1.5px dashed var(--red); cursor:default; }
-  .card-grid.remove-mode .card-remove-btn{ display:flex; }
+  .card-grid.remove-mode .card-remove-btn, .card-grid.edit-mode .card-remove-btn{ display:flex; }
   .desktop-reset-btn[hidden]{ display:none; }
   .app-card{
     background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
     padding:24px; cursor:pointer; text-align:left; color:var(--text);
     transition:border-color .15s ease, transform .15s ease; position:relative;
-    width:100%; min-height:190px; box-sizing:border-box;
+    width:100%; min-height:var(--dfa-card-h, 190px); box-sizing:border-box;
     display:flex; flex-direction:column;
   }
-  .app-card.dynamic-shortcut{ display:flex; flex-direction:column; justify-content:center; min-height:70px; }
+  .app-card.dynamic-shortcut{ display:flex; flex-direction:column; justify-content:center; min-height:max(56px, calc(var(--dfa-card-h, 190px) * 0.37)); }
   .app-card.dynamic-shortcut p{ display:none; }
   .card-grid.edit-mode .app-card{ cursor:grab; outline:1.5px dashed var(--hairline); }
   .card-grid.edit-mode .app-card:active{ cursor:grabbing; }
@@ -619,7 +636,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .nav-item.active::before{ left:-12px; right:auto; top:10px; bottom:10px; width:3px; height:auto; }
     .nav-desc{ display:inline; }
 
-    main{ height:auto; }
+    main{ height:auto; margin-left:0 !important; width:100%; min-width:0; }
     .frame-wrap{ height:85vh; }
     .hero{ padding:22px 20px 20px; min-height:0; }
     .hero-app-icon{ width:48px; height:48px; border-radius:12px; }
@@ -872,7 +889,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_talimatlar:'Talimatlar', nav_talimatlar_desc:'İşlemleri', nav_hazirmetin:'Hazır Metin Talimatları',
       nav_budget:'Bütçeleme', nav_budget_desc:'Araçları',
       hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
-      hero_desc:'Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.',
+      hero_desc:'Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise pratik bir dijital asistandır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.',
       card_calc_desc:'Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.',
       card_cashflow_title:'Nakit Akış Tablosu',
       card_cashflow_desc:'Ay ay, gün gün gelir ve giderlerinizi girin; haftalık ve aylık durumunuzu, kategori dağılımınızı ve otomatik uyarılarınızı anında görün.',
@@ -903,6 +920,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       dropdown_stats:'İstatistikler', dropdown_logout:'Oturumu Kapat', dropdown_login:'Oturum Aç',
       dropdown_user_management:'Kullanıcı Yönetim Paneli', firma_badge_default:'Firma', group_companies:'Grup Firmaları',
       data_scope_label:'Veri Kaynağı', data_scope_personal:'👤 Kendi Verilerim',
+      active_firma_hint:'İşlem yaptığınız firma — değiştirmek için tıklayın',
       verify_email_notice:'✉️ E-posta adresiniz henüz doğrulanmadı.',
       verify_email_resend:'Doğrulama E-postasını Tekrar Gönder', verify_email_sent:'Gönderildi ✓',
       nav_user_mgmt_1:'Kullanıcı', nav_user_mgmt_2:'Yönetim Paneli',
@@ -970,7 +988,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_talimatlar:'Instructions', nav_talimatlar_desc:'Center', nav_hazirmetin:'Ready-made Text Instructions',
       nav_budget:'Budgeting', nav_budget_desc:'Tools',
       hero_title:'Digital Finance Assistant', hero_tagline:'Your digital partner for financial decisions',
-      hero_desc:'It helps your company with financial matters, and acts as a financial advisor for individual users. It performs the calculations you need in seconds and makes your budget planning easier.',
+      hero_desc:'It helps your company with financial matters, and works as a practical digital assistant for individual users. It performs the calculations you need in seconds and makes your budget planning easier.',
       card_calc_desc:'Revolving Loan, Credit Card Late Fee, and Average Maturity calculators, all on one page, switching between tabs.',
       card_cashflow_title:'Cash Flow Table',
       card_cashflow_desc:'Enter your income and expenses month by month, day by day; instantly see your weekly and monthly status, category breakdown, and automatic alerts.',
@@ -1001,6 +1019,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       dropdown_stats:'Statistics', dropdown_logout:'Sign Out', dropdown_login:'Sign In',
       dropdown_user_management:'User Management Panel', firma_badge_default:'Company', group_companies:'Group Companies',
       data_scope_label:'Data Source', data_scope_personal:'👤 My Own Data',
+      active_firma_hint:'The company you are working in — click to switch',
       verify_email_notice:'✉️ Your email address is not verified yet.',
       verify_email_resend:'Resend Verification Email', verify_email_sent:'Sent ✓',
       nav_user_mgmt_1:'User', nav_user_mgmt_2:'Management Panel',
@@ -1375,6 +1394,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </button>
   </nav>
 
+<div class="mmg-active-firma-bar" id="mmgActiveFirmaBar" hidden data-i18n-title="active_firma_hint" title="İşlem yaptığınız firma — değiştirmek için tıklayın">
+  <span class="maf-dot"></span>
+  <span class="maf-name" id="mmgActiveFirmaName">🏢 —</span>
+  <span class="maf-caret">▾</span>
+</div>
 <div class="mmg-bottom-left-bar" id="mmgBottomLeftBar">
 <div id="accountDropdownBackdrop" class="mmg-dropdown-backdrop" hidden></div>
 <div class="top-right-badge" id="topRightBadge">
@@ -1472,7 +1496,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <p class="hero-tagline" data-i18n="hero_tagline">Finansal kararlarınızın dijital iş ortağı</p>
         </div>
       </div>
-      <p class="hero-desc" data-i18n="hero_desc">Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise bir finansal danışman gibi çalışır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.</p>
+      <p class="hero-desc" data-i18n="hero_desc">Firmanızın finans işlerinde yardımcı, bireysel kullanıcılar için ise pratik bir dijital asistandır. İhtiyacınız olan hesaplamaları saniyeler içinde yapar, bütçe planlamanızı kolaylaştırır.</p>
     </section>
 
     <div class="home-scroll" id="homeScroll">
@@ -1891,22 +1915,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function renderFavStarStates(){
     const favs = getFavorites();
+    // Favorilenen öğe artık menüde GİZLENMİYOR — yerinde kalıyor ve yıldızı (is-fav) yanıyor.
+    // Üstteki "FAVORİLER" listesi ayrıca hızlı erişim için gösterilmeye devam eder.
     document.querySelectorAll('.fav-star, .fav-star-card').forEach(star=>{
       star.classList.toggle('is-fav', favs.includes(star.dataset.favTarget));
-    });
-    // Nav'daki orijinal öğeyi favorilendiyse gizle (üstteki pinned listede zaten gösteriliyor), değilse geri göster.
-    // "data-gated" işaretli öğeler (Kullanıcı Yönetim Paneli, Referans Paneli, İstatistikler gibi
-    // yetkiye bağlı menü öğeleri) burada asla açılmaz — onların görünürlüğünü tamamen yetki
-    // kontrolü belirler; aksi halde yetki kontrolü sonuçlanmadan önce bir anlığına herkese görünürlerdi.
-    document.querySelectorAll('.fav-star[data-fav-target]').forEach(star=>{
-      if(star.closest('#navFavPinned')) return; // pinned listedeki kopyaları hariç tut
-      const item = star.closest('.nav-item');
-      if(!item) return;
-      if(favs.includes(star.dataset.favTarget)){
-        item.style.display = 'none';
-      } else if(item.dataset.gated !== 'true'){
-        item.style.display = '';
-      }
     });
   }
 
@@ -1963,9 +1975,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   function renderFavorites(){
+    // Menü (nav) scroll konumunu koru: favorileme DOM'u değiştirdiğinde sayfa yukarı ZIPLAMASIN.
+    const navEl = document.querySelector('nav');
+    const savedScroll = navEl ? navEl.scrollTop : 0;
     renderFavStarStates();
     renderNavFavPinned();
     sortCardGrid();
+    if(navEl) navEl.scrollTop = savedScroll;
   }
 
   // Mevcut (statik) yıldızlara olay dinleyicisi ekle
@@ -2082,6 +2098,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(removed.indexOf(t) === -1){ removed.push(t); writeJSON(REMOVED_KEY, removed); }
     }
     card.remove();
+    checkDesktopEmpty();
   }
 
   // ---- Kart için: kaldır düğmesi, boyutlandırma köşesi, sürükle-yeniden-sırala ----
@@ -2186,11 +2203,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var zoomOutBtnRef = document.getElementById('desktopZoomOutBtn');
 
   function setEditMode(on){
+    if(on) refreshEditAffordances(); // düzenlemeye basar basmaz tüm kartların ✕ ve boyut tutamaçları hazır olsun
     grid.classList.toggle('edit-mode', on);
     editBtn.classList.toggle('active', on);
     editBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
     if(addWrap) addWrap.hidden = !on;
-    if(removeBtn) removeBtn.hidden = !on;
+    // Ayrı "Kaldır" modu kaldırıldı: Düzenle'ye basıldığı anda tüm kutuların ✕'i çıkıyor
+    // (aşağıdaki CSS: .card-grid.edit-mode .card-remove-btn), böylece ayrı bir adım gerekmiyor.
+    if(removeBtn) removeBtn.hidden = true;
     if(resetBtn) resetBtn.hidden = !on;
     if(zoomInBtnRef) zoomInBtnRef.hidden = !on;
     if(zoomOutBtnRef) zoomOutBtnRef.hidden = !on;
@@ -2220,6 +2240,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   function applyCardScale(w){
     document.documentElement.style.setProperty('--dfa-card-w', w + 'px');
+    // Kutular ENİYLE ORANTILI büyüyüp küçülsün diye yüksekliği de aynı oranda ölçekle
+    // (varsayılan 300px genişlik ↔ 190px yükseklik oranı korunur).
+    document.documentElement.style.setProperty('--dfa-card-h', Math.round(w * 190 / 300) + 'px');
     // Elle boyutlandırılmış kartların üzerindeki eski (satırları bozan) genişlik
     // kaydını temizle; böylece hepsi gerçekten eşitlenir.
     var sizes = getSizes();
@@ -2327,6 +2350,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function refreshEditAffordances(){
     Array.prototype.forEach.call(grid.querySelectorAll('.app-card'), wireCard);
+    checkDesktopEmpty();
+  }
+
+  // Masaüstünde hiç kısayol kalmadıysa (kullanıcı hepsini ✕ ile kaldırdıysa) bir boş-durum
+  // kutusu göster: "Varsayılan Kısayolları Geri Yükle". Böylece kısayollar kalıcı kaybolmaz.
+  function checkDesktopEmpty(){
+    var existing = document.getElementById('desktopEmptyState');
+    // GÖRÜNÜR kart var mı? (admin/gated kartlar DOM'da display:none olarak durabiliyor; onları
+    // "kart var" saymamalıyız — yoksa tüm görünür kutular silinince "Geri Yükle" kutusu hiç çıkmıyordu.)
+    var hasVisibleCard = false;
+    var allCards = grid.querySelectorAll('.app-card');
+    for(var i = 0; i < allCards.length; i++){
+      var c = allCards[i];
+      if(!c.hidden && c.style.display !== 'none' && c.offsetParent !== null){ hasVisibleCard = true; break; }
+    }
+    if(hasVisibleCard){
+      if(existing) existing.remove();
+      return;
+    }
+    if(existing) return;
+    var box = document.createElement('div');
+    box.id = 'desktopEmptyState';
+    box.style.cssText = 'grid-column:1 / -1; text-align:center; padding:40px 20px; color:var(--muted);';
+    box.innerHTML = '<div style="font-size:14px; margin-bottom:14px;">Masaüstünüzde hiç kısayol kalmadı.</div>' +
+      '<button type="button" id="desktopRestoreDefaultsBtn" style="padding:10px 18px; border-radius:9px; border:1px solid var(--brass); background:var(--surface-2); color:var(--brass); font-weight:600; cursor:pointer;">↺ Varsayılan Kısayolları Geri Yükle</button>';
+    grid.appendChild(box);
+    var rb = document.getElementById('desktopRestoreDefaultsBtn');
+    if(rb) rb.addEventListener('click', function(){
+      try{
+        localStorage.removeItem(REMOVED_KEY);
+        localStorage.removeItem(LAYOUT_KEY);
+        localStorage.removeItem(SIZE_KEY);
+        localStorage.removeItem(CARD_SCALE_KEY);
+      }catch(e){}
+      location.reload();
+    });
   }
 
   // ---- Sol menüden masaüstüne sürükleme ----
@@ -2393,6 +2452,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, runTransaction, serverTimestamp, increment,
     query, where, arrayUnion, arrayRemove, onSnapshot
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
+  import { getMessaging, getToken, onMessage, isSupported as isMessagingSupported } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-messaging.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU",
@@ -2406,7 +2467,59 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const fbApp = initializeApp(firebaseConfig);
   const auth = getAuth(fbApp);
   const db = getFirestore(fbApp);
+  const functions = getFunctions(fbApp, 'us-central1');
   const googleProvider = new GoogleAuthProvider();
+
+  // ================= #16 Mobil push (FCM): uygulama kapalıyken bildirim =================
+  // VAPID public key: Firebase Console → Proje Ayarları → Cloud Messaging → "Web Push
+  // certificates" → anahtar çiftini oluştur ve buraya yapıştır. BOŞ bırakılırsa push tamamen
+  // devre dışıdır; mevcut uygulama-içi çan/badge ve tarayıcı bildirimi bundan HİÇ etkilenmez.
+  const MMG_VAPID_KEY = ""; // <-- Firebase Web Push sertifika anahtarını buraya yapıştır
+  let mmgMessaging = null;
+  async function mmgInitMessaging(){
+    if(mmgMessaging) return mmgMessaging;
+    try{
+      if(!MMG_VAPID_KEY) return null;                       // anahtar yoksa hiç başlama
+      if(!('serviceWorker' in navigator) || !('Notification' in window)) return null;
+      if(!(await isMessagingSupported())) return null;      // tarayıcı desteklemiyorsa geç
+      mmgMessaging = getMessaging(fbApp);
+      // Uygulama AÇIKKEN gelen push'u da göster (çan zaten Firestore'dan güncelleniyor).
+      onMessage(mmgMessaging, (payload) => {
+        try{
+          const n = (payload && (payload.data || payload.notification)) || {};
+          if(Notification.permission === 'granted' && n.title){
+            new Notification(n.title, { body: n.body || '', icon: '/icon-192.png' });
+          }
+        }catch(e){}
+      });
+      return mmgMessaging;
+    }catch(e){ console.warn('FCM init atlandı:', e); return null; }
+  }
+  async function mmgRegisterPushToken(user){
+    try{
+      if(!user) return;
+      const messaging = await mmgInitMessaging();
+      if(!messaging) return;
+      if(Notification.permission !== 'granted') return;     // izin yoksa sessizce geç (mmgEnablePush ile istenir)
+      const swReg = await navigator.serviceWorker.register('firebase-messaging-service-worker.js');
+      const token = await getToken(messaging, { vapidKey: MMG_VAPID_KEY, serviceWorkerRegistration: swReg });
+      if(!token) return;
+      await setDoc(doc(db, 'users', user.uid, 'fcmTokens', token), {
+        token: token, uid: user.uid, ua: navigator.userAgent || '', updatedAt: new Date().toISOString()
+      }, { merge: true });
+    }catch(e){ console.warn('FCM token kaydı atlandı:', e); }
+  }
+  // Bir butondan çağrılabilir: bildirim iznini ister, verilirse token'ı kaydeder. Örn:
+  //   <button onclick="mmgEnablePush()">Telefon bildirimlerini aç</button>
+  window.mmgEnablePush = async function(){
+    try{
+      if(!('Notification' in window)) return false;
+      const perm = await Notification.requestPermission();
+      if(perm !== 'granted') return false;
+      await mmgRegisterPushToken(auth.currentUser);
+      return true;
+    }catch(e){ return false; }
+  };
 
   // ---- Kullanım istatistiği: her araç açılışında sessizce sayaç güncelle ----
   // "usageStats/{sayfaAdı}" belgesinde genel toplam, "usageStats/{sayfaAdı}/openers/{uid}"
@@ -2728,6 +2841,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         await loadFirmaMemberships(user.uid);
         await loadAdminFirmas(user.uid);
       }catch(firmaErr){ /* firma üyeliği yüklenemezse sessizce geç, geri kalan her şey çalışmaya devam etsin */ }
+      // #16 Mobil push: izin daha önce verilmişse token'ı sessizce tazele/kaydet (VAPID boşsa no-op).
+      mmgRegisterPushToken(user);
       // Zaten oturum açıkken gelen bekleyen davetleri de yakala (sadece giriş anında değil)
     } catch(e){ console.error('[MMG_DEBUG] onAuthStateChanged ana hata:', e); }
   });
@@ -2831,8 +2946,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const originalText = forgotPasswordBtn.textContent;
     forgotPasswordBtn.textContent = MMGI18N.t('sending');
     try{
-      await sendPasswordResetEmail(auth, email);
-      showAuthSuccess(MMGI18N.t('auth_reset_sent_prefix') + email + MMGI18N.t('auth_reset_sent_suffix'));
+      // Kendi alan adımızdan (Resend) markalı Türkçe mail gönderen Cloud Function'ı çağır;
+      // fonksiyon henüz deploy edilmemişse Firebase'in varsayılan sıfırlama mailine düş.
+      try{
+        await httpsCallable(functions, 'sendPasswordResetMail')({ email: email });
+      }catch(fnErr){
+        await sendPasswordResetEmail(auth, email);
+      }
+      showAuthSuccess(MMGI18N.t('auth_reset_maybe_sent'));
     } catch(err){
       if(err.code === 'auth/invalid-email'){
         showAuthError(MMGI18N.t('auth_err_invalid_email'));
@@ -3381,9 +3502,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const wrap = document.getElementById('mmgDataScopeWrap');
     const listEl = document.getElementById('mmgDataScopeList');
     const currentEl = document.getElementById('mmgDataScopeCurrent');
+    const firmaBar = document.getElementById('mmgActiveFirmaBar');
+    const firmaBarName = document.getElementById('mmgActiveFirmaName');
     if(!wrap) return;
     if(!mmgFirmaMemberships.length){
-      wrap.style.display = 'none';
+      wrap.style.display = 'none'; // değiştirilecek firma yok → geçiş menüsü gizli
+      // Firması olmayan kullanıcıda da sol-alt çubuk hangi kapsamda çalışıldığını göstersin:
+      // artık gizlemiyoruz, "Kendi Hesabım" (kişisel veri) olarak etiketliyoruz.
+      if(firmaBar && firmaBarName){
+        firmaBarName.textContent = '👤 Kendi Hesabım';
+        firmaBar.hidden = false;
+      }
       return;
     }
     wrap.style.display = 'block';
@@ -3397,6 +3526,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     const activeFirma = mmgFirmaMemberships.find(f => f.id === activeScope);
     if(currentEl) currentEl.textContent = '🏢 ' + (activeFirma ? activeFirma.name : '');
+    // Her zaman görünür sol-alt çubuk: hangi firmada işlem yapıldığını sürekli göster.
+    if(firmaBar && firmaBarName){
+      firmaBarName.textContent = '🏢 ' + (activeFirma ? activeFirma.name : '');
+      firmaBar.hidden = false;
+    }
     // Listede sadece DİĞER firmalar görünür (o an aktif olan zaten üstte, canlı
     // renkli gösteriliyor) — kalabalık olmasın diye herkes tekrar listelenmez.
     if(listEl){
@@ -3423,6 +3557,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       e.stopPropagation();
       const listEl = document.getElementById('mmgDataScopeList');
       if(listEl) listEl.style.display = (listEl.style.display === 'none') ? 'block' : 'none';
+    });
+  }
+  // Her zaman görünür "aktif firma" çubuğuna tıklanınca hesap menüsünü açıp firma
+  // değiştirme listesini genişlet — kullanıcı tek tıkla firmalar arası geçebilsin.
+  const mmgActiveFirmaBarEl = document.getElementById('mmgActiveFirmaBar');
+  if(mmgActiveFirmaBarEl){
+    mmgActiveFirmaBarEl.addEventListener('click', () => {
+      toggleAccountDropdown(true);
+      const listEl = document.getElementById('mmgDataScopeList');
+      if(listEl) listEl.style.display = 'block';
     });
   }
 
@@ -3629,6 +3773,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                   newUserUid: cred.user.uid, newUserName: username, newUserEmail: email,
                   joinedAt: serverTimestamp()
                 });
+                // Kod sahibine çan/badge bildirimi de bırak (Bildirimler sekmesinde görünür).
+                try{
+                  await setDoc(doc(collection(db, 'notifications')), {
+                    toUid: referralOwnerUid,
+                    fromUid: cred.user.uid,
+                    type: 'referral',
+                    title: '🎁 Referansınız kullanıldı',
+                    body: (username || 'Bir kullanıcı') + ' — referans kodunuz ile kayıt yapılmıştır.',
+                    read: false,
+                    createdAt: serverTimestamp()
+                  });
+                }catch(nErr){ /* bildirim yazılamazsa kaydı engellemesin */ }
               }catch(notifErr){ /* bildirim yazılamazsa kaydı engellemesin */ }
             }
             try{ gtag('event', 'signup_with_referral', { referral_code: referralCode }); }catch(gtagErr){}

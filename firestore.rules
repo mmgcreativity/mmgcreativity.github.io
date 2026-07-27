@@ -65,6 +65,43 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
 
+    // ---- Kullanım istatistikleri (hangi araç ne sıklıkla açılıyor) ----
+    // EKSİKTİ: Bu koleksiyon için hiç kural olmadığından varsayılan olarak REDDEDİLİYORDU;
+    // bu yüzden araç açılışları bir haftadır hiç kaydedilmiyor ("Kullanım verisi okunamadı").
+    //  • write: giriş yapmış her kullanıcı kendi açılışını sayabilsin (totalCount +1).
+    //  • read : yalnızca yönetici (İstatistikler paneli) okuyabilsin.
+    match /usageStats/{target} {
+      allow write: if request.auth != null;
+      allow read: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      match /openers/{uid} {
+        allow write: if request.auth != null && request.auth.uid == uid;
+        allow read: if request.auth != null &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      }
+    }
+    // İstatistikler paneli usageStats verisini collectionGroup('openers') ile okur.
+    // KRİTİK: Koleksiyon-grubu sorguları, yukarıdaki nested (usageStats/{target}/openers/{uid})
+    // kuralıyla YETKİLENDİRİLMEZ — Firestore bunun için recursive wildcard kuralı ister.
+    // Bu kural olmadan yönetici olsa bile sorgu REDDEDİLİP "Kullanım verisi okunamadı" veriyordu.
+    match /{path=**}/openers/{uid} {
+      allow read: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // ---- Bildirimler (çan/badge) ----
+    // Davet gönderme, referans kullanımı, hatırlatma vb. olaylarda alıcıya (toUid) bir bildirim
+    // yazılır. Alıcı kendi bildirimlerini okuyabilir/okundu işaretleyebilir/silebilir; giriş
+    // yapmış herhangi bir kullanıcı başka bir kullanıcıya bildirim OLUŞTURABİLİR (davet eden
+    // kişi, referans sahibine bildirim yazan yeni kullanıcı vb.). fromUid, oluşturanın kimliği.
+    match /notifications/{notifId} {
+      allow create: if request.auth != null && request.resource.data.fromUid == request.auth.uid;
+      allow read, update, delete: if request.auth != null && (
+        resource.data.toUid == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+      );
+    }
+
     // ---- Sohbet Widget'ı ----
     match /chatCodes/{code} {
       allow read: if request.auth != null;

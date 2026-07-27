@@ -132,6 +132,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     background:var(--card);border:1px solid var(--border);border-radius:14px;
     padding:16px 18px;margin-bottom:16px;position:relative;overflow:hidden;
   }
+  .reset-btn.card-reset-btn{ position:absolute; top:14px; right:14px; z-index:3; box-shadow:none; }
+  @media (max-width:480px){ .reset-btn.card-reset-btn{ top:10px; right:10px; padding:6px 10px; font-size:11px; } }
   .best-groups-panel::before{
     content:"";position:absolute;top:0;left:0;width:3px;height:100%;
     background:linear-gradient(180deg,var(--green),transparent);
@@ -369,13 +371,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="subtitle" data-i18n="page_subtitle">Bankaların ihtiyaç kredisi tekliflerini gir; taksit tutarı, faiz, BSMV ve toplam geri ödeme otomatik hesaplansın, en uygun teklif otomatik öne çıksın.</div>
   </div>
   <div class="top-actions">
-    <button type="button" class="reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
     <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </header>
 <div class="wrap">
 
   <div class="best-groups-panel">
+    <button type="button" class="reset-btn card-reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
     <div class="label" data-i18n="best_by_group">Tutar + vade grubuna göre en uygun teklif</div>
     <div class="best-groups-hint" data-i18n="best_by_group_hint">Yalnızca aynı kredi tutarı ve aynı vadeye sahip teklifler birbiriyle kıyaslanır; her grup için en düşük toplam geri ödemeli teklif gösterilir.</div>
     <div id="bestGroupsList" class="best-groups-list"><span class="bg-empty" data-i18n="best_group_empty">Karşılaştırmak için teklif ekleyin.</span></div>

@@ -2,6 +2,7 @@
 <html lang="tr">
 <head>
 <script src="i18n-core.js"></script>
+<script src="mmg-odemeler-sync.js"></script>
 <script>
 (function(){
   try{
@@ -327,6 +328,25 @@ function mmgApplyTurkishFont(doc){
   }
   .ghost-btn:hover{ border-color:var(--brass-dim); background:var(--surface); }
   .controls-spacer{ flex:1; }
+  /* Konsolide: üstteki tetik kartı + modal */
+  .consolidate-open-card{
+    display:flex; align-items:center; gap:10px; width:100%; cursor:pointer;
+    background:linear-gradient(135deg, rgba(198,161,91,0.18), rgba(198,161,91,0.05));
+    border:1px solid rgba(198,161,91,0.45); border-radius:14px; padding:14px 16px; margin-bottom:14px;
+    color:var(--text); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .consolidate-open-card:hover{ border-color:var(--brass,#C6A15B); }
+  .consolidate-open-card .coc-icon{ font-size:16px; }
+  .consolidate-open-card .coc-text{ flex:1 1 auto; text-align:left; }
+  .consolidate-open-card .coc-caret{ color:var(--muted); }
+  .cons-modal-overlay{ position:fixed; inset:0; z-index:1000; background:rgba(5,8,14,0.72); display:flex; align-items:flex-start; justify-content:center; padding:44px 16px; overflow-y:auto; }
+  .cons-modal-overlay[hidden]{ display:none; }
+  .cons-modal-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:16px; padding:22px 24px; width:100%; max-width:560px; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+  .cons-modal-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px; }
+  .cons-modal-close{ background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; padding:4px 8px; border-radius:8px; line-height:1; }
+  .cons-modal-close:hover{ color:var(--red); background:rgba(226,84,75,0.1); }
+
   .top-combined-row{ display:flex; flex-wrap:nowrap; align-items:center; gap:8px; overflow-x:auto; padding-bottom:2px; }
   .top-combined-row::-webkit-scrollbar{ height:0; }
   .top-combined-row .report-tabs{ flex-shrink:0; }
@@ -713,6 +733,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <button type="button" class="nav-arrow-btn" id="nextMonthBtn" title="Sonraki" data-i18n-title="next">▶</button>
               </div>
               <button type="button" class="ghost-btn" id="gotoTodayBtn">📍 <span data-i18n="goto_today">Bugün</span></button>
+              <button type="button" class="ghost-btn" id="refreshSyncBtn" data-i18n-title="refresh_sync_hint" title="Gelir/Giderlerden vadesi gelen aktarımları çek">🔄 <span data-i18n="refresh_btn">Yenile</span></button>
               <button type="button" class="ghost-btn" id="manualSaveBtn">💾 <span data-i18n="save_btn">Kaydet</span></button>
               <button type="button" class="ghost-btn" id="clearMonthBtn">🗑 <span data-i18n="clear_btn">Temizle</span></button>
               <button type="button" class="ghost-btn" id="undoClearBtn" style="display:none;">↩ <span data-i18n="undo_btn">Geri Al</span></button>
@@ -731,6 +752,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
       <div class="content-side" id="contentSide">
+        <button type="button" class="consolidate-open-card" id="consolidatedOpenCard" style="display:none;">
+          <span class="coc-icon">🏢</span>
+          <span class="coc-text" data-i18n="consolidate_open">KONSOLİDE GÖSTER</span>
+          <span class="coc-caret">▾</span>
+        </button>
         <div class="summary-cards" id="summaryCardsSection">
           <div class="summary-card sc-gelir">
             <div class="summary-label"><span class="summary-label-icon">▲</span><span id="sumGelirLabel">Gelir</span></div>
@@ -755,15 +781,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
 
-    <section class="reports-section" id="consolidatedSection" style="display:none;">
-      <div class="reports-title-row">
+    <div class="cons-modal-overlay" id="consolidatedModal" hidden>
+     <div class="cons-modal-card">
+      <div class="cons-modal-head">
         <div class="section-title" style="margin-bottom:0;">🏢 Konsolide Nakit Akış</div>
-        <button type="button" class="ghost-btn" id="consolidatedToggleBtn">Firma Seç</button>
+        <button type="button" class="cons-modal-close" id="consolidatedCloseBtn" aria-label="Kapat">✕</button>
       </div>
-      <div class="card-sub" style="color:var(--muted); font-size:12.5px; margin:6px 0 12px;">
-        Yönettiğiniz firmalardan istediklerinizi seçip, şu an ekranda seçili olan döneme (Günlük/Haftalık/Aylık/Yıllık) göre gelir ve giderlerinin toplu (konsolide) halini görün.
+      <div class="card-sub" style="color:var(--muted); font-size:12.5px; margin:6px 0 14px;">
+        Konsolide görmek istediğiniz firmaları seçin; şu an ekranda seçili olan döneme (Günlük/Haftalık/Aylık/Yıllık) göre gelir, gider ve net durumları toplu (konsolide) gösterilir.
       </div>
-      <div id="consolidatedPicker" style="display:none; margin-bottom:14px;">
+      <div id="consolidatedPicker" style="margin-bottom:14px;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
           <label style="font-size:12.5px; color:var(--muted); font-weight:600;">Konsolide Edilecek Firmalar</label>
           <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--brass,#C6A15B); cursor:pointer;">
@@ -771,7 +798,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </label>
         </div>
         <div id="consolidatedFirmaGrid" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;"></div>
-        <button type="button" class="archive-save-btn" id="consolidatedRunBtn">📊 Konsolide Et</button>
+        <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-bottom:8px;">
+          <div style="flex:1 1 140px;">
+            <label style="display:block; font-size:11.5px; color:var(--muted); margin-bottom:4px;" data-i18n="cons_from">Başlangıç (ops.)</label>
+            <input type="date" id="consFrom" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 10px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12.5px; outline:none;">
+          </div>
+          <div style="flex:1 1 140px;">
+            <label style="display:block; font-size:11.5px; color:var(--muted); margin-bottom:4px;" data-i18n="cons_to">Bitiş (ops.)</label>
+            <input type="date" id="consTo" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 10px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12.5px; outline:none;">
+          </div>
+        </div>
+        <div style="font-size:11px; color:var(--muted); margin-bottom:12px;" data-i18n="cons_range_hint">Tarih aralığı boş bırakılırsa, ekranda seçili döneme (Günlük/Haftalık/Aylık/Yıllık) göre hesaplanır.</div>
+        <button type="button" class="archive-save-btn" id="consolidatedRunBtn">📊 Konsolide Göster</button>
         <div class="io-msg" id="consolidatedMsg" style="margin-top:8px;"></div>
       </div>
       <div id="consolidatedResults" style="display:none;">
@@ -801,7 +839,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <tbody id="consolidatedFirmaTable"></tbody>
         </table>
       </div>
-    </section>
+     </div>
+    </div>
 
     <section class="reports-section" id="reportsSection">
       <div class="reports-title-row">
@@ -875,6 +914,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     janToDec:'January - December · click a month to open it',
     archiveEmpty:'You have no archived reports yet. You can save your reports here by clicking the "🗄 Archive This Report" button in the Daily, Weekly, Monthly, or Yearly tabs.',
     saved:'Saved ✓', cloudLoaded:'Your cloud data has been loaded.',
+    syncing:'Refreshing…', refreshed:'Transfers updated.',
     memberRequired:'You need to sign in as a member to use this feature (not available in guest mode).',
     guestDataMigrated:'The data you entered as a guest has been transferred to your account ✓',
     savedInBrowser:'Saved (in this browser).', savedInBrowser2:'Saved ✓ (stored in this browser).',
@@ -905,6 +945,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     janToDec:'Ocak - Aralık · bir aya tıklayarak o ayı açabilirsiniz',
     archiveEmpty:'Henüz arşivlenmiş bir raporunuz yok. Günlük, Haftalık, Aylık veya Yıllık sekmelerinde "🗄 Bu Raporu Arşivle" butonuna basarak raporlarınızı buraya kaydedebilirsiniz.',
     saved:'Kaydedildi ✓', cloudLoaded:'Bulut verileriniz yüklendi.',
+    syncing:'Yenileniyor…', refreshed:'Aktarımlar güncellendi.',
     memberRequired:'Bu özelliği kullanmak için üye girişi yapmanız gerekiyor (misafir modunda kullanılamaz).',
     guestDataMigrated:'Misafir modunda girdiğiniz veriler hesabınıza aktarıldı ✓',
     savedInBrowser:'Kaydedildi (bu tarayıcıda).', savedInBrowser2:'Kaydedildi ✓ (bu tarayıcıda saklanıyor).',
@@ -994,6 +1035,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // Aksi halde sayfa açılırken (bulut henüz yüklenmeden) tetiklenen bir otomatik-kayıt,
   // Firestore'daki gerçek veriyi boş monthData ile ezip kalıcı veri kaybına yol açabiliyordu.
   let monthCloudLoaded = false;
+  let lastCloudUpdatedAt = null; // en son okunan bulut kaydının updatedAt değeri (yerel/bulut tazelik kıyası için)
   let reportTab = 'gunluk'; // 'gunluk' | 'haftalik' | 'aylik' | 'yillik' | 'arsiv'
   let reportDay = today.getDate();
   let reportWeekIdx = 0;
@@ -1028,7 +1070,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   function localKey(mk){ return 'mmg_nat_scope_' + scopeKeyPart() + '_' + mk; }
   function saveLocal(mk){
-    try{ localStorage.setItem(localKey(mk), JSON.stringify(monthData)); }catch(e){}
+    try{
+      localStorage.setItem(localKey(mk), JSON.stringify(monthData));
+      // Yerel kaydın zaman damgası: bir sonraki açılışta buluttaki kayıtla kıyaslanır.
+      localStorage.setItem(localKey(mk) + '_ts', new Date().toISOString());
+    }catch(e){}
+  }
+  function loadLocalTs(mk){
+    try{ return localStorage.getItem(localKey(mk) + '_ts'); }catch(e){ return null; }
   }
   function loadLocal(mk){
     try{
@@ -1061,11 +1110,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   async function loadCloud(mk){
+    lastCloudUpdatedAt = null;
     if(!isMember()) return null;
     try{
       const cloud = window.mmgCloud;
       const snap = await cloud.getDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'cashflow', mk));
-      if(snap.exists()) return snap.data().data || null;
+      if(snap.exists()){
+        const d = snap.data();
+        lastCloudUpdatedAt = d.updatedAt || null;
+        return d.data || null;
+      }
     }catch(err){ /* sessizce geç */ }
     return null;
   }
@@ -1097,16 +1151,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const cloud = await loadCloud(mk);
       // Beklerken kullanıcı başka aya geçmiş olabilir; yalnızca hâlâ aynı aydaysak uygula.
       if(mk === monthKeyOf(selYear, selMonth)){
-        if(cloud){
+        const localTs = loadLocalTs(mk);
+        const localHasData = local && Object.keys(local).length > 0;
+        // TAZELİK KIYASI: Yerel kayıt buluttan daha yeniyse (ör. son oturumda 900ms'lik bulut
+        // yazması tamamlanamadan sekme kapandıysa) yerel veriyi KORU ve buluta geri yaz; böylece
+        // buluttaki eski kayıt yeni girilen veriyi ezmez. Aksi halde bulut kaydını uygula.
+        const localIsNewer = !!(localHasData && localTs && lastCloudUpdatedAt && localTs > lastCloudUpdatedAt);
+        if(cloud && !localIsNewer){
           monthData = cloud;
           render();
           showCloudMsg(NAT.cloudLoaded);
+        } else if(localIsNewer){
+          monthCloudLoaded = true; // yerel daha güncel → buluta yazmaya izin ver
+          saveCloud(mk);           // yereldeki güncel veriyi buluta geri yaz
         }
-        monthCloudLoaded = true; // bulut okundu (veri olsun ya da olmasın) → artık buluta yazmak güvenli
+        monthCloudLoaded = true; // bulut okundu → artık buluta yazmak güvenli
       }
-    } else {
-      monthCloudLoaded = true; // misafir: yalnızca yerel kayıt, bulut yazması zaten yapılmıyor
     }
+    // NOT: Misafir dalında monthCloudLoaded'ı TRUE YAPMIYORUZ. Aksi halde sayfa açılışındaki
+    // (henüz giriş yapılmamış) loadMonth çağrısı bayrağı erkenden true yapıp, giriş sonrası
+    // scope-ready senkron fonksiyonlarının boş monthData'yı gerçek Firestore kaydının üzerine
+    // yazmasına (kalıcı veri kaybı) yol açıyordu. Misafir zaten saveCloud'a giremez (isMember
+    // kontrolü var), o yüzden bayrağı true yapmaya gerek yok.
   }
 
   function showCloudMsg(msg){
@@ -1193,7 +1259,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
   document.addEventListener('mmg-scope-ready', async () => {
     if(isMember() && window.mmgMergeCloudPaymentsAndSync){
-      await window.mmgMergeCloudPaymentsAndSync(); // bulut ödemelerini kontrol et, vadesi gelenleri işle
+      await window.mmgMergeCloudPaymentsAndSync(); // bulut GİDER ödemelerini vadesi gelenleri işle
+    }
+    if(isMember() && window.mmgMergeCloudGelirAndSync){
+      await window.mmgMergeCloudGelirAndSync(); // bulut GELİR kayıtlarını da işle
     }
     if(isMember()){
       const migrated = await migrateLocalGuestDataToCloud();
@@ -1208,12 +1277,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // firmaların gelir/gider toplamlarını, o an ekranda seçili olan döneme
   // (Günlük/Haftalık/Aylık/Yıllık) göre birleştirip gösterir.
   let consolidatedFirmas = []; // [{id, name}]
+  let consolidatedMode = false;      // konsolide görünüm açık mı (ana tablo seçili firmaların toplamını gösterir)
+  let consolidatedActiveIds = [];    // konsolide edilen firma id'leri
 
   async function loadConsolidationFirmas(){
-    const section = document.getElementById('consolidatedSection');
-    if(!section) return;
+    const openCard = document.getElementById('consolidatedOpenCard');
+    if(!openCard) return;
     const cloud = window.mmgCloud;
-    if(!cloud || !cloud.currentUser){ section.style.display = 'none'; return; }
+    if(!cloud || !cloud.currentUser){ openCard.style.display = 'none'; return; }
     try{
       const uid = cloud.currentUser.uid;
       const uSnap = await cloud.getDoc(cloud.doc(cloud.db, 'users', uid));
@@ -1230,7 +1301,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
       }catch(e){ /* collectionGroup index eksikse sessizce geç, en azından admin firmaları gösterilir */ }
       const allIds = Array.from(new Set([...adminIds, ...memberIds]));
-      if(allIds.length < 2){ section.style.display = 'none'; return; }
+      if(allIds.length < 2){ openCard.style.display = 'none'; return; }
       consolidatedFirmas = [];
       for(const fid of allIds){
         try{
@@ -1238,10 +1309,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           if(fSnap.exists()) consolidatedFirmas.push({ id: fid, name: fSnap.data().name || fid });
         }catch(e){ /* tek bir firma okunamazsa listeyi bozmadan devam et */ }
       }
-      if(consolidatedFirmas.length < 2){ section.style.display = 'none'; return; }
-      section.style.display = 'block';
+      if(consolidatedFirmas.length < 2){ openCard.style.display = 'none'; return; }
+      openCard.style.display = 'flex';
       renderConsolidatedFirmaGrid();
-    }catch(e){ section.style.display = 'none'; }
+    }catch(e){ openCard.style.display = 'none'; }
   }
 
   function renderConsolidatedFirmaGrid(){
@@ -1264,16 +1335,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }));
   }
 
-  const consolidatedToggleBtn = document.getElementById('consolidatedToggleBtn');
-  if(consolidatedToggleBtn){
-    consolidatedToggleBtn.addEventListener('click', () => {
-      const picker = document.getElementById('consolidatedPicker');
-      picker.style.display = (picker.style.display === 'none') ? 'block' : 'none';
+  // Üstteki "Konsolide Sonuç Gör" kartı → modalı aç; kapatma butonu / dış tıklama → kapat.
+  const consolidatedOpenCard = document.getElementById('consolidatedOpenCard');
+  const consolidatedModal = document.getElementById('consolidatedModal');
+  const consolidatedCloseBtn = document.getElementById('consolidatedCloseBtn');
+  if(consolidatedOpenCard && consolidatedModal){
+    consolidatedOpenCard.addEventListener('click', () => {
+      renderConsolidatedFirmaGrid();
+      consolidatedModal.hidden = false;
     });
   }
+  if(consolidatedCloseBtn && consolidatedModal){
+    consolidatedCloseBtn.addEventListener('click', () => { consolidatedModal.hidden = true; });
+  }
+  if(consolidatedModal){
+    consolidatedModal.addEventListener('click', (e) => { if(e.target === consolidatedModal) consolidatedModal.hidden = true; });
+  }
 
-  // O an ekranda seçili olan döneme göre hangi ay belge(ler)inin (YYYY-MM) çekilmesi gerektiğini belirler.
+  // Serbest tarih aralığı seçili mi? (İki tarih de doluysa geçerli.)
+  function consRangeActive(){
+    const f = document.getElementById('consFrom'), t = document.getElementById('consTo');
+    if(f && t && f.value && t.value){
+      let from = f.value, to = t.value;
+      if(from > to){ const tmp = from; from = to; to = tmp; } // ters girilmişse düzelt
+      return { from, to };
+    }
+    return null;
+  }
+  // [from, to] arasındaki tüm gün ve ay anahtarlarını üretir.
+  function consRangeKeys(from, to){
+    const days = new Set(), months = new Set();
+    let d = new Date(from + 'T00:00:00'), end = new Date(to + 'T00:00:00'), guard = 0;
+    while(d <= end && guard++ < 4000){
+      const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      days.add(key); months.add(key.slice(0,7));
+      d.setDate(d.getDate()+1);
+    }
+    return { days, months: Array.from(months) };
+  }
+  // O an ekranda seçili olan döneme (veya serbest tarih aralığına) göre hangi ay belge(ler)inin çekileceği.
   function consolidatedNeededMonthKeys(){
+    const r = consRangeActive();
+    if(r) return consRangeKeys(r.from, r.to).months;
     if(reportTab === 'yillik'){
       const keys = [];
       for(let m=0; m<12; m++) keys.push(monthKeyOf(selYear, m));
@@ -1283,72 +1386,147 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     scopeDayKeysCurrent().forEach(k => keys.add(k.slice(0,7)));
     return Array.from(keys);
   }
-  // Yıllıkta tüm günler dahil edilir (filtre yok); diğer dönemlerde sadece o dönemin gün anahtarları sayılır.
+  // Serbest aralık varsa o günler; yoksa yıllıkta tüm günler (filtre yok), diğerlerinde dönemin günleri.
   function consolidatedNeededDayKeys(){
+    const r = consRangeActive();
+    if(r) return consRangeKeys(r.from, r.to).days;
     if(reportTab === 'yillik') return null;
     return new Set(scopeDayKeysCurrent());
   }
 
+  // Seçili firmaların, o an ekranda seçili döneme (veya serbest tarih aralığına) göre
+  // konsolide Gelir/Gider/Net toplamlarını ve firma kırılımını hesaplar.
+  async function computeConsolidatedTotals(checked){
+    const cloud = window.mmgCloud;
+    const monthKeys = consolidatedNeededMonthKeys();
+    const dayFilter = consolidatedNeededDayKeys();
+    let grandGelir = 0, grandGider = 0;
+    const rows = [];
+    for(const fid of checked){
+      const firma = consolidatedFirmas.find(f => f.id === fid);
+      let fGelir = 0, fGider = 0;
+      for(const mk of monthKeys){
+        try{
+          const snap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'cashflow', mk));
+          if(!snap.exists()) continue;
+          const data = snap.data().data || {};
+          Object.keys(data).forEach(dk => {
+            if(dayFilter && !dayFilter.has(dk)) return;
+            const day = data[dk] || {};
+            (day.gider||[]).forEach(it => { fGider += (it.amount||0); });
+            (day.gelir||[]).forEach(it => { fGelir += (it.amount||0); });
+          });
+        }catch(e){ /* bu firma/ay okunamazsa sessizce geç, diğerleriyle devam */ }
+      }
+      grandGelir += fGelir; grandGider += fGider;
+      rows.push({ name: firma ? firma.name : fid, gelir: fGelir, gider: fGider, net: fGelir - fGider });
+    }
+    return { grandGelir, grandGider, grandNet: grandGelir - grandGider, rows };
+  }
+
+  // "Konsolide Göster" → konsolide moda geç: sonuç modal yerine ANA Nakit Akış tablosuna yansır
+  // ve dönem sekmeleri (Günlük/Haftalık/Aylık/Yıllık) ile tarih aralığına göre canlı güncellenir.
   const consolidatedRunBtn = document.getElementById('consolidatedRunBtn');
   if(consolidatedRunBtn){
-    consolidatedRunBtn.addEventListener('click', async () => {
+    consolidatedRunBtn.addEventListener('click', () => {
       const checked = Array.from(document.querySelectorAll('.consolidated-firma-check:checked')).map(c => c.value);
       const msgEl = document.getElementById('consolidatedMsg');
       msgEl.className = 'io-msg';
       if(!checked.length){ msgEl.textContent = 'Lütfen en az bir firma seçin.'; msgEl.className = 'io-msg err'; return; }
-      const cloud = window.mmgCloud;
-      const btn = consolidatedRunBtn;
-      btn.disabled = true;
-      const original = btn.textContent;
-      btn.textContent = 'Hesaplanıyor…';
-      msgEl.textContent = '';
-      try{
-        const monthKeys = consolidatedNeededMonthKeys();
-        const dayFilter = consolidatedNeededDayKeys();
-        let grandGelir = 0, grandGider = 0;
-        const rows = [];
-        for(const fid of checked){
-          const firma = consolidatedFirmas.find(f => f.id === fid);
-          let fGelir = 0, fGider = 0;
-          for(const mk of monthKeys){
-            try{
-              const snap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'cashflow', mk));
-              if(!snap.exists()) continue;
-              const data = snap.data().data || {};
-              Object.keys(data).forEach(dk => {
-                if(dayFilter && !dayFilter.has(dk)) return;
-                const day = data[dk] || {};
-                (day.gider||[]).forEach(it => { fGider += (it.amount||0); });
-                (day.gelir||[]).forEach(it => { fGelir += (it.amount||0); });
-              });
-            }catch(e){ /* bu firma/ay okunamazsa sessizce geç, diğerleriyle devam */ }
-          }
-          grandGelir += fGelir; grandGider += fGider;
-          rows.push({ name: firma ? firma.name : fid, gelir: fGelir, gider: fGider, net: fGelir - fGider });
-        }
-        const grandNet = grandGelir - grandGider;
-        document.getElementById('consGelir').textContent = fmtMoney(grandGelir);
-        document.getElementById('consGider').textContent = fmtMoney(grandGider);
-        const netEl = document.getElementById('consNet');
-        netEl.textContent = (grandNet>=0?'':'-') + fmtMoney(Math.abs(grandNet));
-        netEl.className = 'summary-value ' + (grandNet >= 0 ? 'pos' : 'neg');
-        document.getElementById('consolidatedFirmaTable').innerHTML = rows.map(r =>
-          '<tr style="border-top:1px solid var(--hairline);">' +
-            '<td style="padding:7px 8px; font-weight:600;">' + escapeHtml(r.name) + '</td>' +
-            '<td style="padding:7px 8px; color:var(--teal);">' + fmtMoney(r.gelir) + '</td>' +
-            '<td style="padding:7px 8px; color:var(--red);">' + fmtMoney(r.gider) + '</td>' +
-            '<td style="padding:7px 8px; font-weight:700;">' + (r.net>=0?'':'-') + fmtMoney(Math.abs(r.net)) + '</td>' +
-          '</tr>'
-        ).join('');
-        document.getElementById('consolidatedResults').style.display = 'block';
-      }catch(e){
-        msgEl.textContent = 'Konsolide edilirken bir hata oluştu.';
-        msgEl.className = 'io-msg err';
-      } finally {
-        btn.disabled = false;
-        btn.textContent = original;
-      }
+      consolidatedActiveIds = checked;
+      consolidatedMode = true;
+      if(consolidatedModal) consolidatedModal.hidden = true;
+      updateConsolidatedModeUI();
+      render(); // render() konsolide moddayken renderConsolidatedMain'e yönlenir
     });
+  }
+
+  // Konsolide moddayken üst araç çubuğundaki veri-değiştiren butonları kilitle + çıkış butonu göster.
+  function updateConsolidatedModeUI(){
+    const on = consolidatedMode;
+    ['manualSaveBtn','clearMonthBtn','archiveSaveBtn','refreshSyncBtn'].forEach(id => {
+      const b = document.getElementById(id);
+      if(b){ b.disabled = on; b.style.opacity = on ? '0.4' : ''; b.style.pointerEvents = on ? 'none' : ''; }
+    });
+    const card = document.getElementById('consolidatedOpenCard');
+    let exitBtn = document.getElementById('consolidatedExitBtn');
+    if(on){
+      if(!exitBtn && card && card.parentNode){
+        exitBtn = document.createElement('button');
+        exitBtn.type = 'button';
+        exitBtn.id = 'consolidatedExitBtn';
+        exitBtn.className = 'consolidate-open-card';
+        exitBtn.style.borderColor = 'var(--red,#e2544b)';
+        exitBtn.innerHTML = '<span class="coc-icon">✕</span><span class="coc-text">Konsolide Moddan Çık</span>';
+        exitBtn.addEventListener('click', exitConsolidatedMode);
+        card.parentNode.insertBefore(exitBtn, card.nextSibling);
+      }
+      if(card) card.style.display = 'none';
+      if(exitBtn) exitBtn.style.display = 'flex';
+    } else {
+      if(exitBtn) exitBtn.style.display = 'none';
+      if(card && consolidatedFirmas.length >= 2) card.style.display = 'flex';
+    }
+  }
+
+  function exitConsolidatedMode(){
+    consolidatedMode = false;
+    consolidatedActiveIds = [];
+    updateConsolidatedModeUI();
+    loadMonth(); // kendi verine geri dön
+  }
+
+  // Konsolide görünümü ANA alana boya: özet kartları + firma kırılım tablosu (dönem/tarih duyarlı).
+  async function renderConsolidatedMain(){
+    const weeksC = document.getElementById('weeksContainer');
+    const picker = document.getElementById('reportPicker');
+    if(picker) picker.innerHTML = '';
+    if(weeksC) weeksC.innerHTML = '<div class="reports-empty">Konsolide veriler hesaplanıyor…</div>';
+    const r = consRangeActive();
+    let periodTag;
+    if(r) periodTag = r.from + ' → ' + r.to;
+    else if(reportTab === 'yillik') periodTag = String(selYear);
+    else if(reportTab === 'gunluk') periodTag = String(reportDay).padStart(2,'0') + '.' + String(selMonth+1).padStart(2,'0') + '.' + selYear;
+    else if(reportTab === 'haftalik') periodTag = 'Hafta · ' + String(selMonth+1).padStart(2,'0') + '.' + selYear;
+    else periodTag = String(selMonth+1).padStart(2,'0') + '.' + selYear;
+    let res;
+    try{ res = await computeConsolidatedTotals(consolidatedActiveIds); }
+    catch(e){ if(weeksC) weeksC.innerHTML = '<div class="reports-empty">Konsolide edilirken bir hata oluştu.</div>'; return; }
+    if(!consolidatedMode) return; // arada çıkış yapıldıysa boyama
+    document.getElementById('sumGelirLabel').textContent = NAT.income + ' · Konsolide';
+    document.getElementById('sumGiderLabel').textContent = NAT.expense + ' · Konsolide';
+    document.getElementById('sumNetLabel').textContent = NAT.net + ' · Konsolide';
+    document.getElementById('sumGelir').textContent = fmtMoney(res.grandGelir);
+    document.getElementById('sumGider').textContent = fmtMoney(res.grandGider);
+    const netEl = document.getElementById('sumNet');
+    netEl.textContent = (res.grandNet>=0?'':'-') + fmtMoney(Math.abs(res.grandNet));
+    netEl.className = 'summary-value ' + (res.grandNet>=0?'pos':'neg');
+    document.getElementById('sumGelirSub').textContent = periodTag;
+    document.getElementById('sumGiderSub').textContent = periodTag;
+    document.getElementById('sumNetSub').textContent = consolidatedActiveIds.length + ' firma';
+    let html = '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">' +
+      '<span style="font-weight:700;font-size:15px;">🏢 Konsolide Görünüm</span>' +
+      '<span style="color:var(--muted);font-size:12.5px;">' + escapeHtml(periodTag) + ' · ' + consolidatedActiveIds.length + ' firma</span></div>';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:13.5px;">' +
+      '<thead><tr style="text-align:left;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;">' +
+      '<th style="padding:8px;">Firma</th><th style="padding:8px;">Gelir</th><th style="padding:8px;">Gider</th><th style="padding:8px;">Net</th></tr></thead><tbody>';
+    res.rows.forEach(row => {
+      html += '<tr style="border-top:1px solid var(--hairline);">' +
+        '<td style="padding:8px;font-weight:600;">' + escapeHtml(row.name) + '</td>' +
+        '<td style="padding:8px;color:var(--teal);">' + fmtMoney(row.gelir) + '</td>' +
+        '<td style="padding:8px;color:var(--red);">' + fmtMoney(row.gider) + '</td>' +
+        '<td style="padding:8px;font-weight:700;">' + (row.net>=0?'':'-') + fmtMoney(Math.abs(row.net)) + '</td></tr>';
+    });
+    html += '<tr style="border-top:2px solid var(--hairline);font-weight:800;">' +
+      '<td style="padding:8px;">TOPLAM</td>' +
+      '<td style="padding:8px;color:var(--teal);">' + fmtMoney(res.grandGelir) + '</td>' +
+      '<td style="padding:8px;color:var(--red);">' + fmtMoney(res.grandGider) + '</td>' +
+      '<td style="padding:8px;">' + (res.grandNet>=0?'':'-') + fmtMoney(Math.abs(res.grandNet)) + '</td></tr>';
+    html += '</tbody></table>';
+    if(weeksC) weeksC.innerHTML = html;
+    const rl = document.getElementById('reportsList'); if(rl) rl.innerHTML = '';
+    const bw = document.getElementById('breakdownWrap'); if(bw) bw.style.display = 'none';
+    alignSummaryCardsTop();
   }
 
   // ================== Gün / Ay / Yıl seçiciler ==================
@@ -1431,6 +1609,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     selYear = today.getFullYear(); selMonth = today.getMonth();
     refreshSelectUI(); loadMonth();
   });
+
+  // "Yenile": Gelir/Giderlerden vadesi gelen (ve tekrarlı) kayıtları elle Nakit Akış'a çeker.
+  const refreshSyncBtn = document.getElementById('refreshSyncBtn');
+  if(refreshSyncBtn){
+    refreshSyncBtn.addEventListener('click', async ()=>{
+      const original = refreshSyncBtn.innerHTML;
+      refreshSyncBtn.disabled = true;
+      refreshSyncBtn.innerHTML = '⏳ ' + (NAT.syncing || 'Yenileniyor…');
+      try{
+        if(isMember() && window.mmgMergeCloudPaymentsAndSync){ await window.mmgMergeCloudPaymentsAndSync(); }
+        if(isMember() && window.mmgMergeCloudGelirAndSync){ await window.mmgMergeCloudGelirAndSync(); }
+        if(window.mmgRunPaymentSync){ window.mmgRunPaymentSync(); }
+      }catch(e){ /* sessizce geç */ }
+      await loadMonth();
+      refreshSyncBtn.disabled = false;
+      refreshSyncBtn.innerHTML = original;
+      showCloudMsg(NAT.refreshed || 'Aktarımlar güncellendi.');
+    });
+  }
 
   document.getElementById('prevMonthBtn').addEventListener('click', async ()=>{
     if(reportTab === 'yillik'){ selYear -= 1; refreshSelectUI(); loadMonth(); return; }
@@ -1690,6 +1887,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function render(){
     renderTabsUI();
+    if(consolidatedMode){ renderConsolidatedMain(); return; }
     updateModeVisibility();
 
     if(reportTab === 'arsiv'){
@@ -2755,6 +2953,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       nav_guide:'Rehber', nav_expenses:'Giderler', nav_income:'Gelirler', back_home:'← Ana Sayfa',
       tab_daily:'Günlük', tab_weekly:'Haftalık', tab_monthly:'Aylık', tab_yearly:'Yıllık',
       goto_today:'Bugün', save_btn:'Kaydet', clear_btn:'Temizle', undo_btn:'Geri Al',
+      refresh_btn:'Yenile', refresh_sync_hint:'Gelir/Giderlerden vadesi gelen aktarımları çek',
+      consolidate_open:'KONSOLİDE GÖSTER',
+      cons_from:'Başlangıç (ops.)', cons_to:'Bitiş (ops.)', cons_range_hint:'Tarih aralığı boş bırakılırsa, ekranda seçili döneme (Günlük/Haftalık/Aylık/Yıllık) göre hesaplanır.',
       trial_over_title:'Ücretsiz Deneme Süreniz Sona Erdi',
       trial_over_desc:'Nakit Akış Tablosu premium üyelere aittir. 90 günlük ücretsiz deneme sürenizi tamamladınız — kullanmaya devam etmek için premium üyeliğe geçmeniz gerekiyor.',
       trial_over_cta:'Premium Üyelik Hakkında Bilgi Al',
@@ -2766,6 +2967,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       nav_guide:'Guide', nav_expenses:'Expenses', nav_income:'Income', back_home:'← Home',
       tab_daily:'Daily', tab_weekly:'Weekly', tab_monthly:'Monthly', tab_yearly:'Yearly',
       goto_today:'Today', save_btn:'Save', clear_btn:'Clear', undo_btn:'Undo',
+      refresh_btn:'Refresh', refresh_sync_hint:'Pull due transfers from Income/Expenses',
+      consolidate_open:'SHOW CONSOLIDATED',
+      cons_from:'Start (opt.)', cons_to:'End (opt.)', cons_range_hint:'If the date range is left empty, the currently selected period (Daily/Weekly/Monthly/Yearly) is used.',
       trial_over_title:'Your Free Trial Has Ended',
       trial_over_desc:'The Cash Flow Table is for premium members. You have completed your 90-day free trial — you need to upgrade to premium to keep using it.',
       trial_over_cta:'Learn About Premium Membership',

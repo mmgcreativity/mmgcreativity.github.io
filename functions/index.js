@@ -13,6 +13,7 @@
  *   BLOGGER_BLOG_ID         — Blogger blogunun numeric blogId'si
  */
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 
@@ -307,3 +308,126 @@ exports.firmaRemoveMember = onCall(CALL_OPTS, async (request) => {
   ).catch(() => {});
   return { ok: true };
 });
+
+// ============ Şifre Sıfırlama (kendi alan adından, markalı Türkçe e-posta) ============
+// Firebase'in varsayılan reset maili spam'e düşüyor + İngilizce/kimliksiz görünüyor. Bunun yerine:
+// Admin SDK ile bir şifre sıfırlama bağlantısı üretilir ve Resend üzerinden DOĞRULANMIŞ bir alan
+// adından (SPF/DKIM/DMARC) Türkçe, markalı bir e-posta gönderilir. Böylece spam'e düşmez.
+//
+// Gerekli secret (bir kez):  firebase functions:secrets:set RESEND_API_KEY
+// Gerekli DNS: Resend'in gönderen alan adı için verdiği SPF + DKIM kayıtları (DMARC önerilir).
+const RESEND_API_KEY = defineSecret("RESEND_API_KEY");
+const RESET_FROM = "MMG Creativity <noreply@mmgcreativity.com>"; // Resend'de DOĞRULANMIŞ alan adı
+const RESET_CONTINUE_URL = "https://mmgcreativity-31263.web.app/index.html"; // sıfırlama sonrası dönülecek adres
+
+function resetEmailHtml(link) {
+  return '<!DOCTYPE html><html lang="tr"><body style="margin:0;background:#0D1420;font-family:Arial,Helvetica,sans-serif;color:#EAEDF3;">' +
+    '<div style="max-width:520px;margin:0 auto;padding:32px 24px;">' +
+      '<div style="text-align:center;margin-bottom:24px;"><span style="font-size:22px;font-weight:700;color:#C6A15B;">MMG Creativity</span></div>' +
+      '<div style="background:#141C2B;border:1px solid #2A3448;border-radius:14px;padding:28px 26px;">' +
+        '<h1 style="font-size:19px;margin:0 0 14px;color:#EAEDF3;">Şifrenizi sıfırlayın</h1>' +
+        '<p style="font-size:14px;line-height:1.6;color:#D3D8E2;margin:0 0 20px;">Hesabınız için bir şifre sıfırlama talebi aldık. Yeni şifrenizi belirlemek için aşağıdaki butona tıklayın. Bu talebi siz yapmadıysanız bu e-postayı yok sayabilirsiniz.</p>' +
+        '<div style="text-align:center;margin:24px 0;"><a href="' + link + '" style="display:inline-block;background:#D6407A;color:#fff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 28px;border-radius:10px;">Şifremi Sıfırla</a></div>' +
+        '<p style="font-size:12px;line-height:1.6;color:#8D96AC;margin:16px 0 0;">Buton çalışmazsa bu bağlantıyı tarayıcınıza yapıştırın:<br><a href="' + link + '" style="color:#3E8FE0;word-break:break-all;">' + link + '</a></p>' +
+      '</div>' +
+      '<p style="text-align:center;font-size:11px;color:#8D96AC;margin-top:20px;">© 2026 MMG Creativity · Bu e-posta şifre sıfırlama talebiniz üzerine gönderildi.</p>' +
+    '</div></body></html>';
+}
+
+exports.sendPasswordResetMail = onCall(
+  { region: "us-central1", secrets: [RESEND_API_KEY] },
+  async (request) => {
+    const email = request.data && String(request.data.email || "").trim().toLowerCase();
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      throw new HttpsError("invalid-argument", "Geçerli bir e-posta adresi girin.");
+    }
+    // Sıfırlama bağlantısını üret. Kullanıcı yoksa, hesabın var olup olmadığını sızdırmamak için
+    // yine de başarılı gibi dönüyoruz (güvenlik: e-posta numaralandırma saldırısını engelle).
+    let link;
+    try {
+      link = await admin.auth().generatePasswordResetLink(email, { url: RESET_CONTINUE_URL });
+    } catch (e) {
+      if (e && (e.code === "auth/user-not-found" || e.code === "auth/email-not-found")) {
+        return { ok: true };
+      }
+      console.error("generatePasswordResetLink hata:", e);
+      throw new HttpsError("internal", "Sıfırlama bağlantısı üretilemedi.");
+    }
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + RESEND_API_KEY.value(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: RESET_FROM,
+        to: [email],
+        subject: "MMG Creativity — Şifre Sıfırlama",
+        html: resetEmailHtml(link),
+      }),
+    });
+    if (!res.ok) {
+      const info = await res.text().catch(() => "");
+      console.error("Resend gönderim hatası:", res.status, info);
+      throw new HttpsError("internal", "E-posta gönderilemedi.");
+    }
+    return { ok: true };
+  }
+);
+
+// ============ #16 Mobil Push (FCM) — uygulama kapalıyken telefona/masaüstüne bildirim ============
+// `notifications` koleksiyonuna yeni belge yazıldığında (window.mmgNotify), alıcının kayıtlı FCM
+// token'larına DATA-ONLY push gönderir. Böylece uygulama KAPALIYKEN de bildirim düşer. Uygulama-içi
+// çan/badge zaten Firestore onSnapshot ile çalışıyor; bu yalnızca ek "kapalıyken push" katmanıdır.
+//
+// Gereksinim: Blaze planı (functions). Token'lar users/{uid}/fcmTokens/{token} altında; istemci
+// (index.html mmgRegisterPushToken) yazar. Bu fonksiyon Admin SDK ile okur (kurallardan bağımsız).
+// Data-only gönderilir; bildirimi service worker (firebase-messaging-service-worker.js) gösterir.
+exports.pushOnNotification = onDocumentCreated(
+  { region: "us-central1", document: "notifications/{notifId}" },
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+    const n = snap.data() || {};
+    const toUid = n.toUid;
+    if (!toUid) return;
+
+    const tokensSnap = await db().collection("users/" + toUid + "/fcmTokens").get();
+    if (tokensSnap.empty) return;
+    const tokens = tokensSnap.docs.map((d) => (d.data() && d.data().token) || d.id).filter(Boolean);
+    if (!tokens.length) return;
+
+    const message = {
+      tokens: tokens,
+      data: {
+        title: String(n.title || "MMG Creativity"),
+        body: String(n.body || ""),
+        type: String(n.type || ""),
+        notifId: String(event.params.notifId || ""),
+      },
+    };
+
+    let resp;
+    try {
+      resp = await admin.messaging().sendEachForMulticast(message);
+    } catch (e) {
+      console.error("pushOnNotification gönderim hatası:", e);
+      return;
+    }
+
+    // Geçersiz / süresi dolmuş token'ları temizle.
+    const cleanups = [];
+    resp.responses.forEach((r, i) => {
+      if (r.success) return;
+      const code = r.error && r.error.code;
+      if (
+        code === "messaging/registration-token-not-registered" ||
+        code === "messaging/invalid-registration-token" ||
+        code === "messaging/invalid-argument"
+      ) {
+        cleanups.push(tokensSnap.docs[i].ref.delete().catch(() => {}));
+      }
+    });
+    await Promise.all(cleanups);
+  }
+);
