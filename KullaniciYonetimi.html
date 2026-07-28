@@ -537,7 +537,10 @@
     const f = myAdminFirmas.find(x => x.id === fid);
     document.getElementById('firmaHeaderSub').textContent =
       LBL.firmaSubPrefix + (f ? f.name : fid) + LBL.firmaSubSuffix;
-    document.getElementById('invitePermGrid').innerHTML = permGridHtml('invite', null);
+    // Kullanıcı isteği: davet formunda yetkiler VARSAYILAN olarak TÜMÜ İŞARETLİ gelsin (üye tam
+    // erişimle başlasın; admin istemediğini kaldırır). null yerine {} verince permGridHtml tümünü
+    // işaretli üretir ("false değilse işaretli" mantığı). Önceki null → hepsi işaretsiz → üye yetkisiz kalıyordu.
+    document.getElementById('invitePermGrid').innerHTML = permGridHtml('invite', {});
     wirePermSelectAll('invite');
     const multiWrap = document.getElementById('inviteFirmaMultiWrap');
     if(myAdminFirmas.length > 1){
