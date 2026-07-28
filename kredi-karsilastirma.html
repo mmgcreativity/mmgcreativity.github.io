@@ -359,6 +359,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     padding:1px 6px;border-radius:5px;margin-left:6px;text-transform:uppercase;letter-spacing:.03em;
   }
 
+  /* ---- Sonuçlar: yan yana responsive kart ızgarası ---- */
+  .result-cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;}
+  .result-cards-grid .result-card{margin-bottom:0;}
+  .best-badge{
+    display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
+    font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--green);background:var(--green-soft);border:1px solid rgba(61,220,151,.35);
+    padding:2px 8px;border-radius:6px;
+  }
+  .results-hint{font-size:12.5px;color:var(--text-faint);}
+
   /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
   @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
@@ -449,11 +460,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <th class="num" style="width:58px;" data-i18n-html="th_monthly_rate">Aylık<br>Faiz %</th>
             <th class="num" style="width:58px;" data-i18n-html="th_annual_fee">Yıllık<br>Kom. %</th>
             <th class="num col-divider" style="width:56px;" data-i18n-html="th_annual_rate">Oran<br>(Yıllık)</th>
-            <th class="num" style="width:78px;" data-i18n-html="th_installment">Taksit<br>Tutarı</th>
-            <th class="num" style="width:70px;">BSMV</th>
-            <th class="num" style="width:70px;" data-i18n="th_commission">Komisyon</th>
-            <th class="num" style="width:84px;" data-i18n-html="th_loan_repay">Kredi Geri<br>Ödeme</th>
-            <th class="num" style="width:92px;" data-i18n-html="th_total_repay">Toplam Geri<br>Ödeme</th>
             <th style="width:26px;"></th>
           </tr>
         </thead>
@@ -464,6 +470,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div style="margin-top:10px;">
       <button class="btn" id="addRowBtn" data-i18n="add_offer">+ Teklif Ekle</button>
     </div>
+  </div>
+
+  <div class="card" id="resultsCard">
+    <div class="card-head">
+      <h2><span class="star">&#9733;</span> <span data-i18n="results_title">Sonuçlar</span></h2>
+      <span class="results-hint" data-i18n="results_hint">Her teklif ayrı kutuda; en düşük toplam geri ödemeli teklif başta ve "En Uygun" olarak vurgulanır.</span>
+    </div>
+    <div id="resultCards" class="result-cards-grid"></div>
   </div>
 
 </div>
@@ -623,11 +637,6 @@ function renderTable(){
       <td><input type="number" step="0.01" value="${o.monthlyRate}" data-idx="${idx}" data-field="monthlyRate" placeholder="4.33"></td>
       <td><input type="number" step="0.01" value="${o.annualFeeRate}" data-idx="${idx}" data-field="annualFeeRate" placeholder="1.12"></td>
       <td class="col-divider"><input type="number" step="0.01" value="${r ? (r.annualRate*100).toFixed(2) : ''}" data-idx="${idx}" data-field="annualRatePct" placeholder="51.96" class="annual-rate-input"></td>
-      <td class="num result-cell" data-idx="${idx}" data-cell="installment">${r ? fmt(r.installment) : '—'}</td>
-      <td class="num result-cell" data-idx="${idx}" data-cell="bsmv">${r ? fmt(r.bsmv) : '—'}</td>
-      <td class="num result-cell" data-idx="${idx}" data-cell="feeAmount">${r ? fmt(r.feeAmount) : '—'}</td>
-      <td class="num result-cell" data-idx="${idx}" data-cell="loanRepay">${r ? fmt(r.loanRepay) : '—'}</td>
-      <td class="num result-cell total-result" data-idx="${idx}" data-cell="total">${r ? fmt(r.total) : '—'}</td>
       <td class="del-cell"><button class="rm-btn-table" data-idx="${idx}" title="Kaldır">&times;</button></td>
     `;
     body.appendChild(tr);
@@ -694,7 +703,47 @@ function kkEscapeHtml(s){
   return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+// Sonuçları yan yana kartlar (kutular) halinde göster: en düşük toplam geri
+// ödemeli teklif en başta ve "En Uygun" rozetiyle + yeşil kenarlıkla vurgulanır.
+function renderResultCards(){
+  const wrap = document.getElementById('resultCards');
+  if(!wrap) return;
+  const computed = offers.map((o,idx)=>({o, idx, r:calc(o)})).filter(x=>x.r);
+  const L = MMG_LANG === 'en'
+    ? {best:'Best', installment:'Monthly Installment', term:'Term', interest:'Total Interest + Tax',
+       cost:'Total Cost (interest+fee+tax)', total:'Total Repayment', diff:'more than best', empty:'Add an offer to see the comparison.'}
+    : {best:'En Uygun', installment:'Aylık Taksit', term:'Vade', interest:'Toplam Faiz + BSMV',
+       cost:'Toplam Maliyet', total:'Toplam Geri Ödeme', diff:'en uygundan fazla', empty:'Karşılaştırmayı görmek için teklif ekleyin.'};
+  if(computed.length === 0){
+    wrap.innerHTML = '<div class="empty">' + L.empty + '</div>';
+    return;
+  }
+  // En düşük toplam geri ödemeye göre sırala (en uygun başta)
+  const sorted = [...computed].sort((a,b)=>a.r.total - b.r.total);
+  const bestTotal = sorted[0].r.total;
+  wrap.innerHTML = sorted.map((x,pos)=>{
+    const {o, r} = x;
+    const isBest = pos === 0;
+    const cost = r.interest + r.feeAmount + r.bsmv;   // Toplam maliyet (anapara hariç)
+    const diff = r.total - bestTotal;
+    const badge = isBest ? '<span class="best-badge">&#9733; ' + L.best + '</span>' : '';
+    const diffLine = (!isBest && diff > 0) ? '<div class="result-diff">+' + fmt(diff) + ' ' + L.diff + '</div>' : '';
+    return '<div class="result-card' + (isBest ? ' best' : '') + '">' +
+             '<div class="result-card-head"><span class="name">' + kkEscapeHtml(o.bank || '—') + '</span>' + badge + '</div>' +
+             '<div class="result-grid">' +
+               '<div class="result-item"><div class="k">' + L.installment + '</div><div class="v">' + fmt(r.installment) + '</div></div>' +
+               '<div class="result-item"><div class="k">' + L.term + '</div><div class="v">' + o.months + ' ' + KK_MONTH_WORD + '</div></div>' +
+               '<div class="result-item"><div class="k">' + L.interest + '</div><div class="v">' + fmt(r.interest + r.bsmv) + '</div></div>' +
+               '<div class="result-item"><div class="k">' + L.cost + '</div><div class="v">' + fmt(cost) + '</div></div>' +
+             '</div>' +
+             '<div class="result-total"><span class="k">' + L.total + '</span><span class="v">' + fmt(r.total) + '</span></div>' +
+             diffLine +
+           '</div>';
+  }).join('');
+}
+
 function renderStats(){
+  renderResultCards();
   const withBank = offers.map(o=>({o, r:calc(o)})).filter(x=>x.r);
   document.getElementById('statCount').textContent = withBank.length;
   const listEl = document.getElementById('bestGroupsList');
@@ -828,7 +877,8 @@ renderStats();
       filter_label:'Filtrele', filter_placeholder:'Banka adına göre ara...',
       th_bank:'Banka', th_amount:'Kredi Tutarı', th_term:'Vade', th_monthly_rate:'Aylık<br>Faiz %', th_annual_fee:'Yıllık<br>Kom. %',
       th_annual_rate:'Oran<br>(Yıllık)', th_installment:'Taksit<br>Tutarı', th_commission:'Komisyon', th_loan_repay:'Kredi Geri<br>Ödeme', th_total_repay:'Toplam Geri<br>Ödeme',
-      empty_state:'Henüz teklif eklenmedi. Aşağıdan bir teklif ekleyerek başla.', add_offer:'+ Teklif Ekle'
+      empty_state:'Henüz teklif eklenmedi. Aşağıdan bir teklif ekleyerek başla.', add_offer:'+ Teklif Ekle',
+      results_title:'Sonuçlar', results_hint:'Her teklif ayrı kutuda; en düşük toplam geri ödemeli teklif başta ve "En Uygun" olarak vurgulanır.'
     },
     en: {
       page_title:'Compare Loan Offers',
@@ -844,7 +894,8 @@ renderStats();
       filter_label:'Filter', filter_placeholder:'Search by bank name...',
       th_bank:'Bank', th_amount:'Loan Amount', th_term:'Term', th_monthly_rate:'Monthly<br>Rate %', th_annual_fee:'Annual<br>Fee %',
       th_annual_rate:'Rate<br>(Annual)', th_installment:'Installment<br>Amount', th_commission:'Commission', th_loan_repay:'Loan<br>Repayment', th_total_repay:'Total<br>Repayment',
-      empty_state:'No offer added yet. Start by adding one below.', add_offer:'+ Add Offer'
+      empty_state:'No offer added yet. Start by adding one below.', add_offer:'+ Add Offer',
+      results_title:'Results', results_hint:'Each offer in its own box; the one with the lowest total repayment is shown first and highlighted as "Best".'
     }
   });
 

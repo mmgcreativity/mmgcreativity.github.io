@@ -747,6 +747,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <button type="button" class="xcell-savebtn" id="saveGonderenIbanBtn" title="IBAN bilgisini kaydet">💾</button>
             <select class="xcell-mini" id="fGonderenIbanSaved" title="Kayıtlı IBAN'dan seç"><option value="">📋 Kayıtlı</option></select>
           </div>
+          <div id="fGonderenIbanHint" style="display:none; grid-column:1/-1; margin:2px 0 0; padding:7px 10px; border-radius:8px; background:rgba(226,84,75,0.10); border:1px solid rgba(226,84,75,0.35); color:var(--red); font-size:11.5px; font-weight:700;">⚠️ ÇOK ÖNEMLİ: Bu firma/banka için birden fazla IBAN kayıtlı. Lütfen yukarıdaki "📋 Kayıtlı" listesinden doğru IBAN'ı seçin.</div>
           <div class="xcell xcell-3col">
             <span class="xcell-label">TUTAR</span>
             <div style="position:relative; display:flex; align-items:center; border-left:1px solid var(--hairline);">
@@ -794,7 +795,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
             Tam Ekrandan Çık
           </button>
-          <iframe id="docPreviewFrame" title="Talimat Önizleme" style="width:794px; height:1123px; border:none; display:block; background:#fff; transform-origin:top left; position:absolute; top:0; left:0;"></iframe>
+          <iframe id="docPreviewFrame" title="Talimat Önizleme" style="width:1588px; height:2246px; border:none; display:block; background:#fff; transform-origin:top left; position:absolute; top:0; left:0;"></iframe>
           <div style="display:none;">
           <div class="doc-head">
             <div class="doc-logo-slot">
@@ -857,7 +858,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <div class="io-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; margin-top:16px;">
         <div class="form-card" style="margin-top:0; margin-bottom:0; display:flex; flex-direction:column; height:100%; box-sizing:border-box;">
-          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
+          <div style="display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px;">
             <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Firma Logonuz</span>
             <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
               <div class="mmg-logo-preview-wrap" style="width:76px; height:38px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
@@ -873,7 +874,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <div class="form-card" style="margin-top:0; margin-bottom:0; display:flex; flex-direction:column; height:100%; box-sizing:border-box;">
-          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
+          <div style="display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px;">
             <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Kaşe / İmza</span>
             <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
               <div class="mmg-stamp-preview-wrap" style="width:76px; height:38px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
@@ -937,7 +938,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="io-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; margin-top:14px;">
         <div class="form-card" style="margin-top:0; margin-bottom:0; display:flex; flex-direction:column; height:100%; box-sizing:border-box;">
-          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
+          <div style="display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px;">
             <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Firma Logonuz</span>
             <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
               <div class="mmg-logo-preview-wrap" style="width:76px; height:38px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
@@ -951,7 +952,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <p style="font-size:11.5px; color:var(--muted); text-align:justify; margin-top:auto;">Yüklediğiniz logo, hesabınıza kaydedilir ve hazırladığınız tüm talimat belgelerinin üst kısmında otomatik olarak görünür.</p>
         </div>
         <div class="form-card" style="margin-top:0; margin-bottom:0; display:flex; flex-direction:column; height:100%; box-sizing:border-box;">
-          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
+          <div style="display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px;">
             <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Kaşe / İmza</span>
             <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
               <div class="mmg-stamp-preview-wrap" style="width:76px; height:38px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
@@ -1044,7 +1045,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="io-msg" id="ioMsgSm"></div>
         <div class="io-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; margin-top:14px;">
         <div class="form-card" style="margin-top:0; margin-bottom:0; display:flex; flex-direction:column; height:100%; box-sizing:border-box;">
-          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
+          <div style="display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px;">
             <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Firma Logonuz</span>
             <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
               <div class="mmg-logo-preview-wrap" style="width:76px; height:38px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
@@ -1058,7 +1059,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <p style="font-size:11.5px; color:var(--muted); text-align:justify; margin-top:auto;">Yüklediğiniz logo, hesabınıza kaydedilir ve hazırladığınız tüm talimat belgelerinin üst kısmında otomatik olarak görünür.</p>
         </div>
         <div class="form-card" style="margin-top:0; margin-bottom:0; display:flex; flex-direction:column; height:100%; box-sizing:border-box;">
-          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:6px;">
+          <div style="display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px;">
             <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--brass); flex-shrink:0;">Kaşe / İmza</span>
             <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%;">
               <div class="mmg-stamp-preview-wrap" style="width:76px; height:38px; border-radius:8px; border:1px dashed var(--hairline); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:var(--surface-2);">
@@ -1513,8 +1514,45 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     renderPreview();
   });
 
+  // Gönderen IBAN otomatik dolum (kullanıcı isteği — ÇOK ÖNEMLİ):
+  // Firma + banka belli → tek IBAN varsa otomatik doldur; aynı firma+banka için
+  // birden fazla IBAN kayıtlıysa IBAN'ı boş bırak, listeye getir ve uyarı göster.
+  function autoFillGonderenIban(){
+    const firmaEl = document.getElementById('fGonderenFirma');
+    const bankaEl = document.getElementById('fGonderenBanka');
+    const ibanEl  = document.getElementById('fGonderenIban');
+    const hintEl  = document.getElementById('fGonderenIbanHint');
+    const hide = () => { if(hintEl) hintEl.style.display = 'none'; };
+    if(!firmaEl || !ibanEl) return;
+    const firma = firmaEl.value.trim().toLowerCase();
+    const banka = ((bankaEl && bankaEl.value) || '').trim().toLowerCase();
+    if(!firma){ hide(); return; }
+    const firmaMatches = savedIbans.map((b, i) => ({ ...b, i }))
+      .filter(b => b.firma && b.firma.trim().toLowerCase() === firma);
+    if(!firmaMatches.length){ hide(); return; }
+    const byBank = banka ? firmaMatches.filter(b => (b.banka || '').trim().toLowerCase() === banka) : firmaMatches;
+    const pool = byBank.length ? byBank : firmaMatches;
+    if(pool.length === 1){
+      const m = pool[0];
+      if(m.banka && bankaEl && !banka) setBankSelectValue(bankaEl, m.banka);
+      ibanEl.value = formatIbanValue(m.iban);
+      const sel = document.getElementById('fGonderenIbanSaved');
+      if(sel) sel.value = String(m.i);
+      hide();
+    } else {
+      // Birden fazla IBAN → kullanıcı seçsin.
+      if(hintEl) hintEl.style.display = 'block';
+    }
+    if(typeof renderPreview === 'function') renderPreview();
+  }
+
   document.getElementById('fGonderenFirma').addEventListener('input', () => {
     refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma');
+    autoFillGonderenIban();
+  });
+  document.getElementById('fGonderenBanka').addEventListener('change', autoFillGonderenIban);
+  document.getElementById('fGonderenIban').addEventListener('input', () => {
+    const h = document.getElementById('fGonderenIbanHint'); if(h) h.style.display = 'none';
   });
 
   document.getElementById('fGonderenFirmaSaved').addEventListener('change', (e) => {
@@ -1529,6 +1567,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(mf.banka) setBankSelectValue(document.getElementById('fGonderenBanka'), mf.banka);
       if(mf.iban) document.getElementById('fGonderenIban').value = formatIbanValue(mf.iban);
     }
+    autoFillGonderenIban();
     renderPreview();
   });
   document.getElementById('fGonderenIbanSaved').addEventListener('change', (e) => {
@@ -1833,6 +1872,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           if(auto.iban && ibanEl) ibanEl.value = formatIbanValue(auto.iban);
         }
       }
+      // Çoklu IBAN uyarısı/otomatik seçim mantığını uygula.
+      if(typeof autoFillGonderenIban === 'function') autoFillGonderenIban();
     }catch(e){ /* otomatik doldurma başarısızsa sessizce geç */ }
 
     renderFirmaSelects();
@@ -2422,7 +2463,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // A4 boyutunda) render ediyoruz, kutuya oturtmayı ise kendi hesapladığımız
       // CSS transform:scale ile yapıyoruz. Bu, tarayıcı tahminine bağlı olmadığı için
       // kesin ve öngörülebilir.
-      frame.src = newBlobUrl + '#toolbar=0&navpanes=0&zoom=100';
+      // Netlik (kullanıcı: "önizleme çok bulanık"): PDF'i 2× çözünürlükte (zoom=200,
+      // iframe 2× piksel boyutunda) render edip CSS ile küçültüyoruz — küçültme keskin
+      // olduğu için (supersampling) yazılar net görünüyor.
+      frame.style.width  = (IFRAME_NATIVE_WIDTH * PREVIEW_SS) + 'px';
+      frame.style.height = (IFRAME_NATIVE_HEIGHT * PREVIEW_SS) + 'px';
+      frame.src = newBlobUrl + '#toolbar=0&navpanes=0&zoom=' + (100 * PREVIEW_SS);
       if(livePdfPreviewBlobUrl){
         const oldUrl = livePdfPreviewBlobUrl;
         setTimeout(() => { try{ URL.revokeObjectURL(oldUrl); }catch(e){} }, 2000);
@@ -2462,6 +2508,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // ile yapılıyor. Böylece tarayıcının kendi "sığdır" tahminine hiç ihtiyaç yok —
   // matematiksel olarak kesin ve anında (PDF'i yeniden yüklemeden) çalışıyor.
   const IFRAME_NATIVE_WIDTH = 794;
+  const IFRAME_NATIVE_HEIGHT = 1123;
+  const PREVIEW_SS = 2; // supersampling katsayısı — netlik için 2× render, CSS ile küçültme
   const mmgPreviewUserZoom = {}; // 1 = ek yakınlaştırma yok (sadece kutuya sığdırılmış)
   function mmgApplyPreviewScale(frame){
     if(!frame) return;
@@ -2473,7 +2521,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // sığdırırken bilerek küçük bir güvenlik payı bırakıyoruz (%97) — gözle fark
     // edilmeyecek kadar az ama her koşulda taşmayı kesin olarak önlüyor.
     const FIT_SAFETY_MARGIN = 0.97;
-    const fitScale = (containerWidth / IFRAME_NATIVE_WIDTH) * FIT_SAFETY_MARGIN;
+    // Iframe artık 2× (PREVIEW_SS) piksel boyutunda render ediliyor; kutuya sığdırmak için
+    // gerçek piksel genişliğine (IFRAME_NATIVE_WIDTH*PREVIEW_SS) göre ölçekliyoruz.
+    const fitScale = (containerWidth / (IFRAME_NATIVE_WIDTH * PREVIEW_SS)) * FIT_SAFETY_MARGIN;
     const userZoom = mmgPreviewUserZoom[frame.id] || 1;
     frame.style.transform = 'scale(' + (fitScale * userZoom) + ')';
     // İlk açılışta ve sıfırlandığında (userZoom <= 1, yani "kutuya sığdırılmış"

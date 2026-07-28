@@ -346,6 +346,15 @@ function mmgApplyTurkishFont(doc){
   .cons-modal-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px; }
   .cons-modal-close{ background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; padding:4px 8px; border-radius:8px; line-height:1; }
   .cons-modal-close:hover{ color:var(--red); background:rgba(226,84,75,0.1); }
+  /* Konsolide sonuç kartları: alt alta yerine yan yana responsive kutular */
+  #consolidatedResults .summary-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .cons-table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  @media (max-width:760px){
+    .cons-modal-overlay{ padding:24px 10px; }
+    .cons-modal-card{ padding:18px 14px; }
+    #consolidatedResults .summary-cards{ grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); }
+    .cons-table-scroll table{ min-width:420px; }
+  }
 
   .top-combined-row{ display:flex; flex-wrap:nowrap; align-items:center; gap:8px; overflow-x:auto; padding-bottom:2px; }
   .top-combined-row::-webkit-scrollbar{ height:0; }
@@ -832,6 +841,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="summary-value" id="consNet">0,00 TL</div>
           </div>
         </div>
+        <div class="cons-table-scroll">
         <table style="width:100%; border-collapse:collapse; font-size:13px;">
           <thead>
             <tr style="text-align:left; color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;">
@@ -843,6 +853,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </thead>
           <tbody id="consolidatedFirmaTable"></tbody>
         </table>
+        </div>
       </div>
      </div>
     </div>

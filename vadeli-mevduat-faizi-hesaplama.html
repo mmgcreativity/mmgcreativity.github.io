@@ -307,6 +307,46 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
   @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
+
+  /* ---- Ortak girdi alanlari (anapara + vade) ---- */
+  .common-fields{ margin-bottom:14px; }
+  .common-fields input[type=text], .common-fields input[type=number]{ height:34px; }
+  table.offer-table tbody td select{
+    width:100%; height:32px; background:var(--card-2); border:1px solid var(--border); border-radius:6px;
+    padding:0 6px; color:var(--text); font-family:'Inter',sans-serif; font-size:12px; outline:none;
+    box-sizing:border-box; transition:border-color .15s; cursor:pointer;
+  }
+  table.offer-table tbody td select:focus{ border-color:var(--gold); box-shadow:0 0 0 3px var(--gold-soft); }
+  table.offer-table tbody td input.bank-other{ margin-top:5px; }
+
+  /* ---- Sonuc kutulari: yan yana kartlar (adil siralama) ---- */
+  .result-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+  .rc{
+    position:relative; background:var(--card-2); border:1px solid var(--border); border-radius:14px;
+    padding:16px 15px 14px; display:flex; flex-direction:column; gap:10px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .rc.best{ border-color:var(--green); box-shadow:inset 0 0 0 1px var(--green), 0 8px 22px rgba(61,220,151,.14); }
+  .rc-badge{
+    position:absolute; top:-10px; left:14px; background:var(--green); color:#062017;
+    font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:700; letter-spacing:.03em;
+    padding:3px 9px; border-radius:20px; text-transform:uppercase; white-space:nowrap;
+  }
+  .rc-head{ display:flex; align-items:center; gap:8px; min-width:0; }
+  .rc-bank{ font-family:'Sora',sans-serif; font-weight:700; font-size:15px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rc.best .rc-bank{ color:var(--green); }
+  .rc-rate{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--gold); font-weight:600; }
+  .rc-lines{ display:flex; flex-direction:column; gap:6px; }
+  .rc-line{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:11.5px; }
+  .rc-line .k{ color:var(--text-dim); display:flex; align-items:center; gap:5px; }
+  .rc-line .v{ font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--text); white-space:nowrap; }
+  .rc-total{
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:18px; color:var(--text);
+    border-top:1px solid var(--border-soft); padding-top:10px;
+  }
+  .rc.best .rc-total{ color:var(--green); }
+  .rc-total .rc-total-lbl{ display:block; font-family:'Inter',sans-serif; font-size:9.5px; font-weight:600; color:var(--text-faint); text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+  .rc-diff{ display:block; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:400; color:var(--text-faint); margin-top:3px; }
 </style>
 </head>
 <body>
@@ -317,7 +357,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <header class="masthead">
   <div>
     <h1 class="title" data-i18n="page_title">Vadeli Mevduat Faizi Hesaplama</h1>
-    <div class="subtitle" data-i18n="page_subtitle">Bankaların vadeli mevduat tekliflerini gir; brüt faiz, stopaj ve net vade sonu bakiye otomatik hesaplansın, en yüksek getirili teklif otomatik öne çıksın.</div>
+    <div class="subtitle" data-i18n="page_subtitle">Anaparayı ve vadeyi bir kez girin, her banka için yıllık faiz oranını ekleyin; aynı tutar ve vade üzerinden net getiri hesaplanıp en avantajlı banka öne çıksın.</div>
   </div>
   <div class="top-actions">
     <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
@@ -349,15 +389,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="card-head">
         <h2><span class="star">&#9733;</span> <span data-i18n="offer_entry">Teklif Girişi</span></h2>
       </div>
+      <div class="common-fields field-row2">
+        <div class="field">
+          <label data-i18n="th_principal">Anapara</label>
+          <input type="text" inputmode="numeric" id="commonAmount" placeholder="100.000">
+        </div>
+        <div class="field">
+          <label data-i18n="lbl_term_days">Vade (Gün)</label>
+          <input type="number" id="commonDays" placeholder="32">
+        </div>
+      </div>
       <div class="offer-table-wrap">
         <table class="offer-table">
           <thead>
             <tr>
               <th style="width:20px;">#</th>
-              <th style="width:110px;" data-i18n="th_bank">Banka</th>
-              <th class="num" style="width:66px;" data-i18n="th_principal">Anapara</th>
-              <th class="num" style="width:40px;" data-i18n-html="th_term_days">Vade<br>(Gün)</th>
-              <th class="num" style="width:46px;" data-i18n-html="th_annual_rate">Yıllık<br>Oran %</th>
+              <th data-i18n="th_bank">Banka</th>
+              <th class="num" style="width:66px;" data-i18n-html="th_annual_rate">Yıllık<br>Oran %</th>
               <th style="width:26px;"></th>
             </tr>
           </thead>
@@ -365,7 +413,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </table>
       </div>
       <div style="margin-top:10px;">
-        <button class="btn" id="addRowBtn" data-i18n="add_offer">+ Teklif Ekle</button>
+        <button class="btn" id="addRowBtn" data-i18n="add_offer">+ Banka Ekle</button>
       </div>
     </div>
 
@@ -374,22 +422,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="card-head">
         <h2><span class="star">&#9733;</span> <span data-i18n="ranking">Sıralama</span></h2>
       </div>
-      <div class="result-table-wrap">
-        <table class="result-table">
-          <thead>
-            <tr>
-              <th style="width:18px;"></th>
-              <th data-i18n="th_bank">Banka</th>
-              <th class="num" style="width:52px;" data-i18n-html="th_term_days">Vade<br>(Gün)</th>
-              <th class="num" style="width:96px;" data-i18n-html="th_final_balance">Vade Sonu<br>Bakiye</th>
-            </tr>
-          </thead>
-          <tbody id="resultBody"></tbody>
-        </table>
-      </div>
+      <div class="result-cards" id="resultBody"></div>
       <div class="empty" id="emptyState" data-i18n="empty_state">Henüz teklif eklenmedi. Soldan bir teklif ekleyerek başla.</div>
 
       <div class="assump" data-i18n-html="assumption_note">
+        <b>Adil karşılaştırma:</b> Tüm bankalar aynı anapara ve aynı vade üzerinden değerlendirilir; sıralama net getiriye göre yapılır.
         <b>Yöntem:</b> Brüt Faiz, TL vadeli mevduatta kullanılan basit faiz (Actual/365) yöntemiyle hesaplanır:
         <code>Brüt Faiz = Anapara × Yıllık Oran × Vade(Gün) / 365</code>. Stopaj oranı, 09.07.2025 tarihli 2025/66 sayılı
         Cumhurbaşkanı Kararı'na göre vade gününe göre otomatik uygulanır: 183 güne kadar <b>%17,5</b>, 366 güne kadar <b>%15</b>,
@@ -402,12 +439,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <script>
+// Banka listesi — uygulamanın diğer sayfalarıyla (Veri Giriş Paneli vb.) tutarlı.
+const BANKS = ['AKBANK','ALBARAKA','ANADOLUBANK','BURGAN BANK','DENİZBANK','EMLAK KATILIM','ENPARA','FİBABANKA','GARANTİ BBVA','HALKBANK','HSBC','ICBC','ING','İŞ BANKASI','KUVEYT TÜRK','ODEA BANK','QNB','ŞEKERBANK','TEB','TÜRKİYE FİNANS','VAKIF KATILIM','VAKIFBANK','YAPI KREDİ','ZİRAAT BANKASI','ZİRAAT KATILIM'];
+const OTHER_VAL = '__other__';
+
+// Adil karşılaştırma: tüm bankalar AYNI anapara ve AYNI vade üzerinden değerlendirilir.
+let common = { amount:100000, days:32 };
 let offers = [
-  {bank:"ANADOLUBANK", amount:100000, rate:46.0, days:32},
-  {bank:"VAKIFBANK", amount:100000, rate:45.0, days:32},
-  {bank:"QNB", amount:100000, rate:48.0, days:32},
-  {bank:"AKBANK", amount:100000, rate:44.0, days:92},
+  {bank:"ANADOLUBANK", rate:46.0},
+  {bank:"VAKIFBANK", rate:45.0},
+  {bank:"QNB", rate:48.0},
+  {bank:"AKBANK", rate:44.0},
 ];
+
+function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function fmt(n){
   if(n===null||n===undefined||isNaN(n)) return "—";
@@ -452,7 +497,7 @@ function stopajTag(days){
 }
 
 function calc(offer){
-  const {amount, rate, days} = offer;
+  const amount = common.amount, days = common.days, rate = offer.rate;
   if(!amount || !rate || !days) return null;
   const gross = amount * (rate/100) * days / 365;
   const sRate = stopajRate(days);
@@ -462,31 +507,83 @@ function calc(offer){
   return {gross, sRate, stopaj, net, total};
 }
 
+function bankOptionsHtml(selected){
+  const isOther = !!selected && BANKS.indexOf(selected) === -1;
+  let html = '<option value="" '+(selected?'':'selected')+'>Banka seçin…</option>';
+  BANKS.forEach(function(b){
+    html += '<option value="'+b+'"'+(selected===b?' selected':'')+'>'+b+'</option>';
+  });
+  html += '<option value="'+OTHER_VAL+'"'+(isOther?' selected':'')+'>Diğer / Elle Gir</option>';
+  return html;
+}
+
+// Ortak alanlar (anapara + vade) tek sefer bağlanır; her render'da tekrar dinleyici eklenmez.
+function initCommon(){
+  const amtEl = document.getElementById('commonAmount');
+  const daysEl = document.getElementById('commonDays');
+  attachTRAmountInput(amtEl);
+  amtEl.addEventListener('input', function(){
+    common.amount = parseTRAmount(amtEl.value);
+    renderResults(); renderStats();
+  });
+  daysEl.addEventListener('input', function(){
+    common.days = parseFloat(String(daysEl.value).replace(',', '.'));
+    renderResults(); renderStats();
+  });
+}
+
 function renderInputs(){
+  const amtEl = document.getElementById('commonAmount');
+  const daysEl = document.getElementById('commonDays');
+  amtEl.value = (common.amount==='' || common.amount==null || isNaN(common.amount)) ? '' : formatTRThousands(String(common.amount));
+  daysEl.value = (common.days==='' || common.days==null || isNaN(common.days)) ? '' : common.days;
+
   const body = document.getElementById('inputBody');
   body.innerHTML = '';
   offers.forEach((o, idx)=>{
+    const isOther = !!o.bank && BANKS.indexOf(o.bank) === -1;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx-cell">${idx+1}</td>
-      <td><input type="text" value="${o.bank}" data-idx="${idx}" data-field="bank" placeholder="Banka adı"></td>
-      <td><input type="text" inputmode="numeric" value="${formatTRThousands(String(o.amount))}" data-idx="${idx}" data-field="amount" placeholder="100.000"></td>
-      <td><input type="number" value="${o.days}" data-idx="${idx}" data-field="days" placeholder="32"></td>
+      <td>
+        <select data-idx="${idx}" data-field="bank" class="bank-select">${bankOptionsHtml(o.bank)}</select>
+        <input type="text" class="bank-other" data-idx="${idx}" data-field="bankOther" placeholder="Banka adı" value="${isOther?escAttr(o.bank):''}" ${isOther?'':'hidden'}>
+      </td>
       <td><input type="number" step="0.01" value="${o.rate}" data-idx="${idx}" data-field="rate" placeholder="46.00"></td>
       <td class="del-cell"><button class="rm-btn-table" data-idx="${idx}" title="Kaldır">&times;</button></td>
     `;
     body.appendChild(tr);
   });
 
-  body.querySelectorAll('input').forEach(inp=>{
-    if(inp.dataset.field === 'amount') attachTRAmountInput(inp);
+  body.querySelectorAll('select.bank-select').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      const idx = +e.target.dataset.idx;
+      const val = e.target.value;
+      const otherInput = e.target.parentNode.querySelector('.bank-other');
+      if(val === OTHER_VAL){
+        otherInput.hidden = false;
+        offers[idx].bank = otherInput.value.trim();
+        otherInput.focus();
+      } else {
+        otherInput.hidden = true;
+        offers[idx].bank = val;
+      }
+      renderResults();
+      renderStats();
+    });
+  });
+  body.querySelectorAll('input.bank-other').forEach(inp=>{
     inp.addEventListener('input', e=>{
       const idx = +e.target.dataset.idx;
-      const field = e.target.dataset.field;
-      let val = e.target.value;
-      if(field === 'amount') val = parseTRAmount(val);
-      else if(field !== 'bank') val = parseFloat(val.replace(',', '.'));
-      offers[idx][field] = val;
+      offers[idx].bank = e.target.value.trim();
+      renderResults();
+      renderStats();
+    });
+  });
+  body.querySelectorAll('input[data-field="rate"]').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const idx = +e.target.dataset.idx;
+      offers[idx].rate = parseFloat(String(e.target.value).replace(',', '.'));
       renderResults();
       renderStats();
     });
@@ -514,51 +611,40 @@ function renderResults(){
   }
   empty.style.display = 'none';
 
-  computed.sort((a,b)=>b.r.total-a.r.total);
-  const bestTotal = computed[0].r.total;
+  // Adil sıralama: aynı anapara + aynı vade → net getiriye göre.
+  computed.sort((a,b)=>b.r.net-a.r.net);
+  const bestNet = computed[0].r.net;
+  const tag = stopajTag(common.days);
 
   computed.forEach((x,rank)=>{
     const {offer,r} = x;
     const isBest = rank === 0;
     const rankClass = rank===0?'rank-1':rank===1?'rank-2':rank===2?'rank-3':'rank-n';
-    const diff = r.total - bestTotal;
-    const tag = stopajTag(offer.days);
+    const diff = r.net - bestNet;
+    const bankName = escAttr(offer.bank || '—');
 
-    const summaryTr = document.createElement('tr');
-    summaryTr.className = 'summary-row' + (isBest ? ' best' : '');
-    summaryTr.innerHTML = `
-      <td class="expand-cell"><span class="expand-chevron">▸</span></td>
-      <td class="name-cell"><span class="rank-badge ${rankClass}">${rank+1}</span><span class="name-txt" title="${offer.bank || '—'}">${offer.bank || '—'}</span></td>
-      <td class="num">${offer.days}</td>
-      <td class="num total-cell">${fmt(r.total)}${isBest ? '' : '<span class="diff">-' + fmt(Math.abs(diff)) + '</span>'}</td>
+    const card = document.createElement('div');
+    card.className = 'rc' + (isBest ? ' best' : '');
+    card.innerHTML = `
+      ${isBest ? '<div class="rc-badge">★ En Avantajlı</div>' : ''}
+      <div class="rc-head">
+        <span class="rank-badge ${rankClass}">${rank+1}</span>
+        <span class="rc-bank" title="${bankName}">${bankName}</span>
+      </div>
+      <div class="rc-rate">${fmtPct(offer.rate)} yıllık</div>
+      <div class="rc-lines">
+        <div class="rc-line"><span class="k">Brüt Faiz</span><span class="v">${fmt(r.gross)}</span></div>
+        <div class="rc-line"><span class="k">Stopaj <span class="tag ${tag.cls}">${tag.label}</span></span><span class="v">${fmt(r.stopaj)}</span></div>
+        <div class="rc-line"><span class="k">Net Getiri</span><span class="v">${fmt(r.net)}</span></div>
+      </div>
+      <div class="rc-total"><span class="rc-total-lbl">Vade Sonu Bakiye</span>${fmt(r.total)}${isBest ? '' : `<span class="rc-diff">− ${fmt(Math.abs(diff))} net fark</span>`}</div>
     `;
-
-    const detailTr = document.createElement('tr');
-    detailTr.className = 'detail-row';
-    detailTr.hidden = true;
-    detailTr.innerHTML = `
-      <td colspan="4">
-        <div class="detail-grid">
-          <div class="detail-item"><div class="k">Brüt Faiz</div><div class="v">${fmt(r.gross)}</div></div>
-          <div class="detail-item"><div class="k">Stopaj <span class="tag ${tag.cls}">${tag.label}</span></div><div class="v">${fmt(r.stopaj)}</div></div>
-          <div class="detail-item"><div class="k">Net Kazanç</div><div class="v">${fmt(r.net)}</div></div>
-        </div>
-      </td>
-    `;
-
-    summaryTr.addEventListener('click', () => {
-      const willOpen = detailTr.hidden;
-      detailTr.hidden = !willOpen;
-      summaryTr.classList.toggle('open', willOpen);
-    });
-
-    body.appendChild(summaryTr);
-    body.appendChild(detailTr);
+    body.appendChild(card);
   });
 }
 
 function renderStats(){
-  const computed = offers.map(o=>calc(o)).filter(Boolean);
+  const computed = offers.map(o=>({o, r:calc(o)})).filter(x=>x.r);
   document.getElementById('statCount').textContent = computed.length;
 
   if(computed.length===0){
@@ -567,23 +653,23 @@ function renderStats(){
     document.getElementById('statAvgRate').textContent = '—';
     return;
   }
-  const withBank = offers.map(o=>({o,r:calc(o)})).filter(x=>x.r);
-  withBank.sort((a,b)=>b.r.total-a.r.total);
-  document.getElementById('statBestBank').textContent = withBank[0].o.bank || '—';
-  document.getElementById('statBestTotal').textContent = fmt(withBank[0].r.total);
+  computed.sort((a,b)=>b.r.net-a.r.net);
+  document.getElementById('statBestBank').textContent = computed[0].o.bank || '—';
+  document.getElementById('statBestTotal').textContent = fmt(computed[0].r.total);
 
-  const rates = offers.map(o=>o.rate).filter(r=>!isNaN(r));
-  const avgRate = rates.reduce((s,r)=>s+r,0)/rates.length;
+  const rates = offers.map(o=>o.rate).filter(r=>r!=='' && r!=null && !isNaN(r));
+  const avgRate = rates.length ? rates.reduce((s,r)=>s+r,0)/rates.length : NaN;
   document.getElementById('statAvgRate').textContent = fmtPct(avgRate);
 }
 
 document.getElementById('addRowBtn').addEventListener('click', ()=>{
-  offers.push({bank:"", amount:100000, rate:45, days:32});
+  offers.push({bank:"", rate:45});
   renderInputs();
   renderResults();
   renderStats();
 });
 
+initCommon();
 renderInputs();
 renderResults();
 renderStats();
@@ -599,7 +685,8 @@ renderStats();
       : 'Girdiğiniz tüm veriler silinip sayfa varsayılan haline döndürülecek. Emin misiniz?';
     if(confirm(msg)){
       if(typeof offers !== 'undefined' && Array.isArray(offers)){
-        offers.forEach(function(o){ o.bank=''; o.amount=''; o.rate=''; o.days=''; });
+        if(typeof common !== 'undefined' && common){ common.amount=''; common.days=''; }
+        offers.forEach(function(o){ o.bank=''; o.rate=''; });
         if(typeof renderInputs === 'function') renderInputs();
         if(typeof renderResults === 'function') renderResults();
         if(typeof renderStats === 'function') renderStats();
@@ -612,23 +699,23 @@ renderStats();
   MMGI18N.registerDict({
     tr: {
       page_title:'Vadeli Mevduat Faizi Hesaplama',
-      page_subtitle:'Bankaların vadeli mevduat tekliflerini gir; brüt faiz, stopaj ve net vade sonu bakiye otomatik hesaplansın, en yüksek getirili teklif otomatik öne çıksın.',
+      page_subtitle:'Anaparayı ve vadeyi bir kez girin, her banka için yıllık faiz oranını ekleyin; aynı tutar ve vade üzerinden net getiri hesaplanıp en avantajlı banka öne çıksın.',
       reset_btn:'Sıfırla', back_home:'← Ana Sayfa',
       stat_best_offer:'En iyi teklif', stat_best_balance:'En iyi vade sonu bakiye', stat_avg_rate:'Ortalama yıllık oran', stat_count:'Teklif sayısı',
-      offer_entry:'Teklif Girişi', th_bank:'Banka', th_principal:'Anapara', th_term_days:'Vade<br>(Gün)', th_annual_rate:'Yıllık<br>Oran %',
-      add_offer:'+ Teklif Ekle', ranking:'Sıralama', th_final_balance:'Vade Sonu<br>Bakiye',
+      offer_entry:'Teklif Girişi', th_bank:'Banka', th_principal:'Anapara', th_term_days:'Vade<br>(Gün)', lbl_term_days:'Vade (Gün)', th_annual_rate:'Yıllık<br>Oran %',
+      add_offer:'+ Banka Ekle', ranking:'Sıralama', th_final_balance:'Vade Sonu<br>Bakiye',
       empty_state:'Henüz teklif eklenmedi. Soldan bir teklif ekleyerek başla.',
-      assumption_note:'<b>Yöntem:</b> Brüt Faiz, TL vadeli mevduatta kullanılan basit faiz (Actual/365) yöntemiyle hesaplanır: <code>Brüt Faiz = Anapara × Yıllık Oran × Vade(Gün) / 365</code>. Stopaj oranı, 09.07.2025 tarihli 2025/66 sayılı Cumhurbaşkanı Kararı\'na göre vade gününe göre otomatik uygulanır: 183 güne kadar <b>%17,5</b>, 366 güne kadar <b>%15</b>, 1 yıldan uzun vadelerde <b>%10</b>. Net Kazanç = Brüt Faiz − Stopaj; Vade Sonu Bakiye = Anapara + Net Kazanç. Bu araç bilgilendirme amaçlıdır, bağlayıcı bir mevduat teklifi değildir.'
+      assumption_note:'<b>Adil karşılaştırma:</b> Tüm bankalar aynı anapara ve aynı vade üzerinden değerlendirilir; sıralama net getiriye göre yapılır. <b>Yöntem:</b> Brüt Faiz, TL vadeli mevduatta kullanılan basit faiz (Actual/365) yöntemiyle hesaplanır: <code>Brüt Faiz = Anapara × Yıllık Oran × Vade(Gün) / 365</code>. Stopaj oranı, 09.07.2025 tarihli 2025/66 sayılı Cumhurbaşkanı Kararı\'na göre vade gününe göre otomatik uygulanır: 183 güne kadar <b>%17,5</b>, 366 güne kadar <b>%15</b>, 1 yıldan uzun vadelerde <b>%10</b>. Net Kazanç = Brüt Faiz − Stopaj; Vade Sonu Bakiye = Anapara + Net Kazanç. Bu araç bilgilendirme amaçlıdır, bağlayıcı bir mevduat teklifi değildir.'
     },
     en: {
       page_title:'Time Deposit Interest Calculator',
-      page_subtitle:"Enter banks' time deposit offers; gross interest, withholding tax, and net maturity balance are calculated automatically, with the highest-yield offer highlighted.",
+      page_subtitle:"Enter the principal and term once, then add each bank's annual rate; net return is computed on the same amount and term, and the most advantageous bank is highlighted.",
       reset_btn:'Reset', back_home:'← Home',
       stat_best_offer:'Best offer', stat_best_balance:'Best final balance', stat_avg_rate:'Average annual rate', stat_count:'Number of offers',
-      offer_entry:'Offer Entry', th_bank:'Bank', th_principal:'Principal', th_term_days:'Term<br>(Days)', th_annual_rate:'Annual<br>Rate %',
-      add_offer:'+ Add Offer', ranking:'Ranking', th_final_balance:'Final<br>Balance',
+      offer_entry:'Offer Entry', th_bank:'Bank', th_principal:'Principal', th_term_days:'Term<br>(Days)', lbl_term_days:'Term (Days)', th_annual_rate:'Annual<br>Rate %',
+      add_offer:'+ Add Bank', ranking:'Ranking', th_final_balance:'Final<br>Balance',
       empty_state:'No offer added yet. Start by adding one on the left.',
-      assumption_note:'<b>Method:</b> Gross interest is calculated using the simple interest (Actual/365) method used for TL time deposits: <code>Gross Interest = Principal × Annual Rate × Term(Days) / 365</code>. The withholding tax rate is applied automatically based on the term per Presidential Decree 2025/66 dated 09.07.2025: <b>17.5%</b> up to 183 days, <b>15%</b> up to 366 days, and <b>10%</b> for terms over 1 year. Net Gain = Gross Interest − Withholding; Final Balance = Principal + Net Gain. This tool is for information only and is not a binding deposit offer.'
+      assumption_note:'<b>Fair comparison:</b> All banks are evaluated using the same principal and the same term; the ranking is based on net return. <b>Method:</b> Gross interest is calculated using the simple interest (Actual/365) method used for TL time deposits: <code>Gross Interest = Principal × Annual Rate × Term(Days) / 365</code>. The withholding tax rate is applied automatically based on the term per Presidential Decree 2025/66 dated 09.07.2025: <b>17.5%</b> up to 183 days, <b>15%</b> up to 366 days, and <b>10%</b> for terms over 1 year. Net Gain = Gross Interest − Withholding; Final Balance = Principal + Net Gain. This tool is for information only and is not a binding deposit offer.'
     }
   });
   MMGI18N.detectAndApplyDefaultLang();

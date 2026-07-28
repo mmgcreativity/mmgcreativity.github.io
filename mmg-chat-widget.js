@@ -1536,7 +1536,7 @@ import {
             '<div style="flex:1; min-width:0; font-size:12.5px;">' +
               '<b>' + esc(inv.groupName || 'Grup') + '</b> → <b>' + esc(inv.toCode || inv.toUid || '?') + '</b> koduna davet' +
             '</div>' +
-            '<button type="button" class="mmg-chat-btn" data-cancel-invite="' + esc(inv._id) + '" style="flex:0 0 auto;">Geri Çek</button>' +
+            '<button type="button" class="mmg-chat-btn decline" data-cancel-invite="' + esc(inv._id) + '" style="flex:0 0 auto; background:transparent; border:1px solid rgba(226,84,75,0.55); color:#E2544B; font-weight:600;">Geri Çek</button>' +
           '</div>'
         ).join('') + '</div>';
     }
@@ -1719,9 +1719,9 @@ import {
       }
       const sentHtml = sentIds.map(id => {
         const s = sentRequestsMap[id];
-        return `<div class="mmg-chat-req-row" data-sent-id="${esc(id)}">
-          <div class="who"><b>${esc(s.toCode || s.toUid || '???')}</b> koduna gönderdiğiniz istek — <span style="color:#F5A524; font-weight:600;">Bekliyor</span></div>
-          <div class="mmg-chat-req-actions">
+        return `<div class="mmg-chat-req-row" data-sent-id="${esc(id)}" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:nowrap;">
+          <div class="who" style="flex:1; min-width:0;"><b>${esc(s.toCode || s.toUid || '???')}</b> koduna gönderdiğiniz istek — <span style="color:#F5A524; font-weight:600;">Bekliyor</span></div>
+          <div class="mmg-chat-req-actions" style="margin:0; flex-shrink:0;">
             <button type="button" class="mmg-chat-btn decline cancel-sent">Geri Çek</button>
           </div>
         </div>`;
