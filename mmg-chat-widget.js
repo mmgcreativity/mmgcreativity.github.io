@@ -678,6 +678,7 @@ import {
       if(ae && els.panel.contains(ae)) return;
       els.panel.hidden = true;
     });
+  }
 
   function setBadge(n){
     if(n > 0){
