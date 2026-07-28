@@ -207,6 +207,9 @@ import {
     display:flex; align-items:center; justify-content:center;
   }
   .mmg-chat-iconbtn:hover{ color:var(--text,#EAEDF3); background:var(--surface-2,#1B2536); }
+  /* Bu buton .mmg-chat-iconbtn'da display:flex olduğu için hidden özniteliği kendiliğinden
+     gizlemiyordu; açıkça gizliyoruz (1:1 sohbette 'gruptan ayrıl' butonu görünme hatası). */
+  .mmg-chat-iconbtn[hidden]{ display:none !important; }
   .mmg-chat-tabs{ display:flex; gap:4px; padding:0 10px 10px; flex:0 0 auto; }
   .mmg-chat-tab{
     flex:1; text-align:center; font-size:11.5px; font-weight:600; padding:7px 4px; border-radius:8px;
@@ -462,6 +465,7 @@ import {
       <button type="button" class="mmg-chat-iconbtn" id="mmgChatBlockBtn" hidden aria-label="Engelle" title="Bu kullanıcıyı engelle">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/></svg>
       </button>
+      <button type="button" class="mmg-chat-iconbtn" id="mmgChatNudgeBtn" hidden aria-label="Dürt" title="Dürt — karşı tarafa bildirim gönder" style="font-size:16px;">👉</button>
       <button type="button" class="mmg-chat-iconbtn" id="mmgChatLeaveGroupBtn" hidden aria-label="Gruptan ayrıl" title="Gruptan ayrıl">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
       </button>
@@ -536,6 +540,7 @@ import {
     els.blockBtn = document.getElementById('mmgChatBlockBtn');
     els.deleteBtn = document.getElementById('mmgChatDeleteBtn');
     els.leaveGroupBtn = document.getElementById('mmgChatLeaveGroupBtn');
+    els.nudgeBtn = document.getElementById('mmgChatNudgeBtn');
     els.closeBtn = document.getElementById('mmgChatCloseBtn');
     els.codeBox = document.getElementById('mmgChatCodeBox');
     els.tabs = document.getElementById('mmgChatTabs');
@@ -607,6 +612,16 @@ import {
           activeTab = 'friends'; friendsSubView = 'list';
         }
         renderTab();
+      });
+    }
+    // Dürt: karşı tarafa "dürtme" bildirimi gönder (uygulama-içi; kapalı-uygulama push'u Blaze ister)
+    if(els.nudgeBtn){
+      els.nudgeBtn.addEventListener('click', async () => {
+        if(!openChatOtherUid) return;
+        const who = myChatCode ? ('#' + myChatCode) : 'Bir kullanıcı';
+        try{ await window.mmgNotify(openChatOtherUid, { type:'nudge', title:'👉 Dürtüldünüz', body: who + ' sizi dürttü' }); }catch(e){}
+        els.nudgeBtn.textContent = '✅';
+        setTimeout(() => { els.nudgeBtn.textContent = '👉'; }, 1200);
       });
     }
     els.sendBtn.addEventListener('click', sendCurrentMessage);
@@ -852,6 +867,9 @@ import {
     if(els.leaveGroupBtn) els.leaveGroupBtn.hidden = true;
     if(els.blockBtn) els.blockBtn.hidden = true;
     if(els.deleteBtn) els.deleteBtn.hidden = true;
+    if(els.nudgeBtn) els.nudgeBtn.hidden = true;
+    // Kod kutusunu kendi kullanıcı koduna geri döndür (sohbet açıkken karşı tarafın kodunu gösteriyordu).
+    if(els.codeBox) els.codeBox.innerHTML = myChatCode ? ('Sizin Kullanıcı Kodunuz: <b>' + esc(myChatCode) + '</b>') : '';
     if(rerender !== false) renderTab();
   }
 
@@ -1843,6 +1861,7 @@ import {
     els.backBtn.hidden = false;
     els.footer.hidden = false;
     els.blockBtn.hidden = !openChatOtherUid; // gruplarda gösterilmez, sadece 1:1 sohbette
+    if(els.nudgeBtn) els.nudgeBtn.hidden = !openChatOtherUid; // dürtme yalnızca 1:1'de
     els.leaveGroupBtn.hidden = openChatCollection !== 'chatGroups';
     els.deleteBtn.hidden = openChatCollection !== 'chats'; // gruplarda "gruptan ayrıl" kullanılır
     els.title.textContent = info && info.title ? info.title : 'Sohbet';
@@ -1852,6 +1871,12 @@ import {
       const c0 = chatsMap[chatId] || {};
       const pinfo = (c0.participantInfo && c0.participantInfo[openChatOtherUid]) || {};
       if(pinfo.code){ openChatCode = pinfo.code; els.title.textContent = labelForCode(pinfo.code); }
+    }
+    // Açık 1:1 sohbette üstteki kod kutusunda KARŞI TARAFIN kodunu göster (listeye dönünce kendi kodu geri gelir).
+    if(els.codeBox){
+      els.codeBox.innerHTML = openChatCode
+        ? ('Karşı taraf kodu: <b>' + esc(openChatCode) + '</b>')
+        : (myChatCode ? ('Sizin Kullanıcı Kodunuz: <b>' + esc(myChatCode) + '</b>') : '');
     }
     els.body.innerHTML = `<div class="mmg-chat-empty">Yükleniyor…</div>`;
 
@@ -2126,6 +2151,17 @@ import {
         lastSenderUid: uid,
         ['lastRead_' + uid]: serverTimestamp()
       }, { merge: true });
+      // Karşı tarafa bildirim düşür (uygulama-içi çan/badge; kapalı-uygulama push'u Blaze+functions ister).
+      try{
+        const preview = text.slice(0, 80);
+        const who = myChatCode ? ('#' + myChatCode) : 'Bir kullanıcı';
+        if(openChatCollection === 'chats' && openChatOtherUid){
+          window.mmgNotify(openChatOtherUid, { type:'chat', title:'💬 Yeni mesaj', body: who + ': ' + preview });
+        } else if(openChatCollection === 'chatGroups'){
+          const g = groupsMap[openChatId] || {};
+          (g.members || []).forEach(m => { if(m && m !== uid) window.mmgNotify(m, { type:'chat', title:'💬 Yeni grup mesajı', body: who + ': ' + preview }); });
+        }
+      }catch(e){}
     }catch(e){ console.error(e); }
   }
 
