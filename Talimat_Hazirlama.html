@@ -1663,6 +1663,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         populateAliciFirmaSaved(document.getElementById(`fAliciFirmaSaved_${idx}`));
         adiEl.placeholder = btn.dataset.mode === 'ici' ? 'Grup firması seçin / yazın…' : 'İsim yazın (örn. ASTEL)…';
         closeList();
+        // Kullanıcı isteği: işlem "Grup içi" seçilince ALICI IBAN'ı da otomatik gelsin.
+        // Alıcı adı boşsa: gönderici firma DIŞINDAKİ, IBAN'ı olan ilk grup firmasını otomatik doldur
+        // (tek grup firması varsa onu). Kullanıcı isterse yine listeden başka firma seçebilir.
+        if(btn.dataset.mode === 'ici' && !adiEl.value.trim()){
+          try{
+            const senderName = (document.getElementById('fGonderenFirma').value || '').trim().toLowerCase();
+            const ds = getAliciDataset('ici').filter(p => p.ibans && p.ibans.length);
+            const pick = ds.find(p => p.name.trim().toLowerCase() !== senderName) || ds[0];
+            if(pick) fillAliciFromParty(idx, pick);
+          }catch(e){ /* otomatik doldurma başarısızsa sessizce geç */ }
+        }
         if(document.activeElement === adiEl) renderList();
       });
     });
