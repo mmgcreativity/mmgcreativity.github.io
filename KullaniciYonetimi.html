@@ -45,7 +45,7 @@
     color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
     -webkit-font-smoothing:antialiased; min-height:100vh;
   }
-  .page-wrap{ max-width:860px; margin:0 auto; padding:28px 24px 48px; }
+  .page-wrap{ max-width:1500px; margin:0 auto; padding:28px 32px 48px; }
   .page-header{ margin-bottom:22px; }
   .page-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:26px; letter-spacing:-0.01em; margin-bottom:6px; display:flex; align-items:center; gap:10px; }
   .page-sub{ color:var(--muted); font-size:13.5px; line-height:1.5; }
@@ -80,6 +80,10 @@
   .auth-success.show{ display:block; }
 
   .perm-grid{ display:flex; flex-wrap:wrap; gap:8px 16px; margin:8px 0 10px; }
+  /* Davet formunda firma/yetki detay listeleri varsayılan kapalı; "seç" ile açılır çekmece. */
+  .perm-grid[hidden], .invite-firma-grid[hidden]{ display:none !important; }
+  .mmg-invite-collapse-toggle{ background:none; border:1px solid var(--hairline); color:var(--muted); font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:8px; cursor:pointer; }
+  .mmg-invite-collapse-toggle:hover{ color:var(--text); border-color:var(--brass-dim,#8A7440); }
   .invite-firma-grid{ display:flex; flex-direction:column; gap:7px; margin:7px 0 10px; }
   .perm-check{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text); cursor:pointer; }
   .perm-select-all-row{ margin-top:10px; }
@@ -209,23 +213,24 @@
       <div class="auth-field" id="inviteFirmaMultiWrap" style="display:none; margin-bottom:8px;">
         <div class="member-sub-box">
           <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-            <label style="margin-bottom:0;" data-i18n="invite_firmas_label">Hangi Firma(lar)a Eklensin?</label>
             <label class="perm-select-all-label" style="margin:0;">
               <input type="checkbox" id="inviteFirmaSelectAll">
-              <span data-i18n="select_all_perms">Tümünü Seç</span>
+              <span data-i18n="invite_firmas_label">Tüm firmalar</span>
             </label>
+            <button type="button" class="mmg-invite-collapse-toggle" id="inviteFirmaToggle">Firma seç ▾</button>
           </div>
-          <div class="invite-firma-grid" id="inviteFirmaMultiGrid"></div>
+          <div class="invite-firma-grid" id="inviteFirmaMultiGrid" hidden></div>
         </div>
       </div>
       <div class="member-sub-box" style="margin-bottom:8px;">
-        <div class="perm-select-all-row">
-          <label class="perm-select-all-label">
-            <input type="checkbox" id="invite_selectAll">
-            <span data-i18n="select_all_perms">Tümünü Seç</span>
+        <div class="perm-select-all-row" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <label class="perm-select-all-label" style="margin:0;">
+            <input type="checkbox" id="invite_selectAll" checked>
+            <span>Tüm yetkiler</span>
           </label>
+          <button type="button" class="mmg-invite-collapse-toggle" id="invitePermToggle">Yetki seç ▾</button>
         </div>
-        <div class="perm-grid" id="invitePermGrid"></div>
+        <div class="perm-grid" id="invitePermGrid" hidden></div>
       </div>
       <button type="button" class="auth-submit" id="inviteSubmitBtn" data-i18n="send_invite">Davet Gönder</button>
       <div class="auth-error" id="inviteError"></div>
@@ -542,14 +547,31 @@
     // işaretli üretir ("false değilse işaretli" mantığı). Önceki null → hepsi işaretsiz → üye yetkisiz kalıyordu.
     document.getElementById('invitePermGrid').innerHTML = permGridHtml('invite', {});
     wirePermSelectAll('invite');
+    // Yetki detay listesi varsayılan KAPALI; "Tüm yetkiler" işaretli (permGrid zaten tümü işaretli).
+    document.getElementById('invitePermGrid').hidden = true;
+    const permSelAll = document.getElementById('invite_selectAll'); if(permSelAll) permSelAll.checked = true;
     const multiWrap = document.getElementById('inviteFirmaMultiWrap');
     if(myAdminFirmas.length > 1){
       multiWrap.style.display = 'block';
       document.getElementById('inviteFirmaMultiGrid').innerHTML = inviteFirmaMultiGridHtml();
       wireInviteFirmaSelectAll();
+      document.getElementById('inviteFirmaMultiGrid').hidden = true; // firma detay listesi varsayılan KAPALI
     } else {
       multiWrap.style.display = 'none';
     }
+    // Açılır çekmece toggle'ları (bir kez bağla): "Firma seç" / "Yetki seç" → detay listesini aç/kapa
+    [['inviteFirmaToggle','inviteFirmaMultiGrid'],['invitePermToggle','invitePermGrid']].forEach(pair => {
+      const t = document.getElementById(pair[0]);
+      if(t && !t.dataset.wired){
+        t.dataset.wired = '1';
+        t.addEventListener('click', () => {
+          const g = document.getElementById(pair[1]);
+          if(!g) return;
+          g.hidden = !g.hidden;
+          t.textContent = t.textContent.replace(/[▾▴]/, g.hidden ? '▾' : '▴');
+        });
+      }
+    });
     await loadUserLimit();
     await loadMembers();
     await loadPendingInvites();
