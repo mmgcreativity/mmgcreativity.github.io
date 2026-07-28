@@ -1872,9 +1872,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(!toggle) return;
     const wrap = toggle.closest('.nav-drawer-wrap');
     const drawer = wrap ? wrap.querySelector('.nav-drawer') : null;
-    const isOpen = !!(drawer && drawer.classList.contains('open'));
     const hasActiveChild = !!(drawer && drawer.querySelector('.nav-item.active'));
-    toggle.classList.toggle('active', isOpen || hasActiveChild);
+    // Yalnızca AÇIK olan (gerçekten görüntülenen) sayfanın başlığı aktif görünsün;
+    // bir çekmecenin sadece hover ile açılması onu "aktif sayfa" yapmaz — aksi halde
+    // iki başlık aynı anda vurgulanmış görünüyordu.
+    toggle.classList.toggle('active', hasActiveChild);
   }
 
   function setActive(target){
