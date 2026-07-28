@@ -355,6 +355,10 @@
       fields:[F.banka, F.firma],
       body:function(v){ return v.firma + " Firmamıza ait tüm aktif HGS'lerin ödemelerinin kredi kartına tanımlanması rica olunur."; },
       muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } },
+    { cat:'Kredi Kartı', title:'Kredi Kartı Taahhütnamesi',
+      fields:[F.firma, F.isim, F.kartSon4],
+      body:function(v){ return v.firma + '\n\nTAAHHÜTNAME\n\n         Borçlu ' + v.isim + '’nın şirketinize olan borcuna karşılık aşağıda ayrıntılı dökümü belirtilen KREDİ KARTI ile ilgili yaptığım ödemenin, borçlu adına yapılmış sayılmasının kabulünü bu KREDİ KARTI ile ' + v.isim + '‘nin borcuna karşılık yapacağım ödeme ile ilgili olarak, şirketinize karşı bedelsizlik v.s. nedenlerle, şirketinize karşı hiçbir hak ve alacak talebinde bulunmayacağımı gayri kabili rücü olmak kaydıyla beyan ve taahhüt ederim.\n\nTAAHHÜT EDENİN\n\nADI SOYADI     : ' + v.isim + '\nADRESİ         : \nKREDİ KARTI NO : ' + v.kartSon4 + '\nSON KULLANMA   : /\nCVV            : \nİMZA           : '; },
+      muhatap:function(v){ return v.firma; }, firma:function(v){ return v.firma; } },
 
     { cat:'Kredi', title:'Rotatif Kredi Kullandırım Talimatı',
       fields:[F.banka, F.firma, F.oran, F.tutar],
