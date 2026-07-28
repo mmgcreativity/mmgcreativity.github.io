@@ -676,7 +676,7 @@ function updateQuick(){
   const gbFaiz = num('qGunBaziFaiz'), gbKom = num('qGunBaziKom');
   const r = hesapla(tutar, vade, oran, komOran, bsmv, gbFaiz, gbKom);
   document.getElementById('rToplamGeri').textContent = fmtTL(r.toplamGeri);
-  document.getElementById('rToplamGeriSub').textContent = fmtTL(tutar) + ' TL · ' + (vade||0).toLocaleString('tr-TR') + (MMG_LANG==='en'?' mo':' ay');
+  document.getElementById('rToplamGeriSub').textContent = fmtTL(tutar) + ' · ' + (vade||0).toLocaleString('tr-TR') + (MMG_LANG==='en'?' mo':' ay');
   document.getElementById('rFaiz').textContent = fmtTL(r.faiz);
   document.getElementById('rFaizBsmv').textContent = fmtTL(r.faizBsmv);
   document.getElementById('rKomisyon').textContent = fmtTL(r.komisyon);
@@ -1231,7 +1231,7 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
       reset_btn:'Sıfırla', back_home:'← Ana Sayfa',
       label_amount:'Kredi Tutarı', label_term:'Vade', unit_days:'gün', unit_months:'ay', label_annual_rate:'Aylık Faiz Oranı', label_commission_rate:'Komisyon Oranı',
       adv_settings:'Gelişmiş ayarlar (BSMV oranı, gün bazı, tarihten vade hesaplama)',
-      adv_flag:'⚠ BSMV oranı ve gün bazları "Gelişmiş ayarlar"dan güncellenebilir; mevzuat değişirse buradan ayarlayın.',
+      adv_flag:'⚠ Aylık taksit; aylık faize KKDF %15 + BSMV %15 eklenerek eşit taksit (annüite) yöntemiyle hesaplanır. Sonuçlar bilgilendirme amaçlıdır.',
       label_bsmv:'Vergi Oranı (BSMV)', label_bsmv_note:'(faiz ve komisyon üzerinden alınan vergi)',
       label_interest_daybase:'Faiz Gün Bazı', label_commission_daybase:'Komisyon Gün Bazı',
       days_between_title:'İki Tarih Arasındaki Gün Sayısı', label_start_date:'Kullanım Tarihi', label_due_date:'Vade Tarihi',
@@ -1253,7 +1253,7 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
       reset_btn:'Reset', back_home:'← Home',
       label_amount:'Loan Amount', label_term:'Term', unit_days:'days', unit_months:'mo', label_annual_rate:'Monthly Interest Rate', label_commission_rate:'Commission Rate',
       adv_settings:'Advanced settings (tax rate, day base, calculate term from dates)',
-      adv_flag:'⚠ The tax rate and day bases can be updated from "Advanced settings"; adjust here if regulations change.',
+      adv_flag:'⚠ The monthly installment is computed with the annuity method by adding KKDF 15% + BSMV 15% to the monthly rate. Results are for information only.',
       label_bsmv:'Tax Rate (BSMV)', label_bsmv_note:'(tax charged on interest and commission)',
       label_interest_daybase:'Interest Day Base', label_commission_daybase:'Commission Day Base',
       days_between_title:'Days Between Two Dates', label_start_date:'Usage Date', label_due_date:'Due Date',
