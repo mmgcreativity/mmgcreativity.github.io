@@ -1297,6 +1297,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <nav>
 
+    <div class="home-search-wrap">
+      <div class="home-search-box" id="homeSearchBox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="homeSearchInput" placeholder="Ara" autocomplete="off" spellcheck="false">
+        <button type="button" id="homeSearchClear" hidden aria-label="Temizle">✕</button>
+      </div>
+      <div class="home-search-results" id="homeSearchResults" hidden></div>
+    </div>
+
     <div class="nav-fav-pinned" id="navFavPinned" hidden>
       <div class="nav-fav-label">★ Favoriler</div>
       <div id="navFavList"></div>
@@ -1588,35 +1597,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <div class="home-search-wrap">
-      <div class="home-search-box" id="homeSearchBox">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="text" id="homeSearchInput" placeholder="Ara" autocomplete="off" spellcheck="false">
-        <button type="button" id="homeSearchClear" hidden aria-label="Temizle">✕</button>
-      </div>
-      <div class="home-search-results" id="homeSearchResults" hidden></div>
-    </div>
     <style>
-      .home-search-wrap{ order:-1; position:relative; margin:14px 0 4px; padding:0 48px; }
-      .home-search-box{ display:flex; align-items:center; gap:8px; height:24px; width:100%; max-width:var(--dfa-card-w,300px); background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:0 12px; transition:border-color .15s ease, box-shadow .15s ease; }
+      .home-search-wrap{ position:relative; margin:0 0 12px; }
+      .home-search-box{ display:flex; align-items:center; gap:8px; height:34px; width:100%; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:9px; padding:0 12px; transition:border-color .15s ease, box-shadow .15s ease; }
       .home-search-box:focus-within{ border-color:var(--brass,#C6A15B); box-shadow:0 0 0 3px rgba(198,161,91,0.12); }
-      .home-search-box > svg{ width:14px; height:14px; color:var(--muted,#8D96AC); flex:none; }
-      #homeSearchInput{ flex:1; min-width:0; background:none; border:none; outline:none; color:var(--text,#EAEDF3); font-size:12.5px; font-family:inherit; padding:0; height:100%; }
+      .home-search-box > svg{ width:15px; height:15px; color:var(--muted,#8D96AC); flex:none; }
+      #homeSearchInput{ flex:1; min-width:0; background:none; border:none; outline:none; color:var(--text,#EAEDF3); font-size:13px; font-family:inherit; padding:0; height:100%; }
       #homeSearchInput::placeholder{ color:var(--muted,#8D96AC); }
       #homeSearchClear{ background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:14px; padding:2px 6px; flex:none; }
       #homeSearchClear:hover{ color:var(--text,#EAEDF3); }
-      .home-search-results{ position:absolute; left:48px; right:auto; width:var(--dfa-card-w,300px); top:calc(100% + 6px); z-index:60; background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448); border-radius:14px; box-shadow:0 24px 60px rgba(0,0,0,0.5); max-height:360px; overflow-y:auto; }
+      .home-search-results{ position:absolute; left:0; right:0; width:auto; top:calc(100% + 4px); z-index:60; background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448); border-radius:12px; box-shadow:0 24px 60px rgba(0,0,0,0.5); max-height:360px; overflow-y:auto; }
       .home-search-item{ display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; border-bottom:1px solid var(--hairline,#2A3448); }
       .home-search-item:last-child{ border-bottom:none; }
       .home-search-item:hover{ background:var(--surface-2,#1B2536); }
       .home-search-item .hsi-title{ color:var(--text,#EAEDF3); font-size:13.5px; font-weight:600; }
       .home-search-item .hsi-go{ margin-left:auto; color:var(--brass,#C6A15B); font-size:12px; }
       .home-search-empty{ padding:16px; color:var(--muted,#8D96AC); font-size:13px; text-align:center; }
-      @media (max-width:860px){
-        .home-search-wrap{ order:-1; padding:0 16px; margin:20px 0 14px; }
-        .home-search-box{ max-width:none; }
-        .home-search-results{ left:16px; right:16px; width:auto; }
-      }
     </style>
     <script>
     (function(){
