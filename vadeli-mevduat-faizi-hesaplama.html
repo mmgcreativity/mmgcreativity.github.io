@@ -422,6 +422,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="card-head">
         <h2><span class="star">&#9733;</span> <span data-i18n="ranking">Sıralama</span></h2>
       </div>
+      <div class="export-actions" id="exportActions" style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:14px;">
+        <button type="button" class="btn" id="exportExcelBtn">⬇ <span data-i18n="export_excel">Excel</span></button>
+        <button type="button" class="btn" id="exportPdfBtn">⬇ <span data-i18n="export_pdf">PDF</span></button>
+      </div>
       <div class="result-cards" id="resultBody"></div>
       <div class="empty" id="emptyState" data-i18n="empty_state">Henüz teklif eklenmedi. Soldan bir teklif ekleyerek başla.</div>
 
@@ -674,6 +678,122 @@ renderInputs();
 renderResults();
 renderStats();
 </script>
+<script>
+/* ---- Çıktı alma: Excel (.xlsx) + PDF ---- */
+(function(){
+  function loadScript(src){
+    return new Promise(function(resolve,reject){
+      var existing = document.querySelector('script[data-dyn="'+src+'"]');
+      if(existing){
+        if(existing.dataset.loaded==='1'){ resolve(); return; }
+        existing.addEventListener('load', function(){ resolve(); });
+        existing.addEventListener('error', function(){ reject(new Error('Yüklenemedi: '+src)); });
+        return;
+      }
+      var s = document.createElement('script');
+      s.src = src; s.async = true; s.dataset.dyn = src;
+      s.onload = function(){ s.dataset.loaded='1'; resolve(); };
+      s.onerror = function(){ reject(new Error('Yüklenemedi: '+src)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  // Mevcut hesaplama mantığını kullan: offers + calc() ile net getiriye göre sıralı liste
+  // (renderResults ile birebir aynı yöntem — yeniden hesaplama yazılmıyor).
+  function getSortedResults(){
+    if(typeof offers==='undefined' || typeof calc!=='function') return [];
+    return offers.map(function(o){ return {offer:o, r:calc(o)}; })
+                 .filter(function(x){ return x.r; })
+                 .sort(function(a,b){ return b.r.net - a.r.net; });
+  }
+  function round2(n){
+    var v = Number(n);
+    if(isNaN(v)) return '';
+    return Math.round((v + Number.EPSILON) * 100) / 100;
+  }
+  function warnEmpty(){
+    var lang = 'tr';
+    try{ lang = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
+    alert(lang==='en' ? 'Please calculate first.' : 'Önce hesaplama yapın');
+  }
+
+  var COLS = ['Sıra','Banka','Yıllık Oran (%)','Brüt Faiz','Stopaj','Net Getiri','Vade Sonu Bakiye'];
+
+  function exportExcel(){
+    var list = getSortedResults();
+    if(!list.length){ warnEmpty(); return; }
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js').then(function(){
+      var amount = common.amount, days = common.days;
+      var aoa = [];
+      aoa.push(['Vadeli Mevduat Karşılaştırması']);
+      aoa.push(['Anapara', round2(amount), '', 'Vade (gün)', days]);
+      aoa.push([]);
+      aoa.push(COLS.slice());
+      list.forEach(function(x, i){
+        aoa.push([ i+1, x.offer.bank || '—', round2(x.offer.rate), round2(x.r.gross), round2(x.r.stopaj), round2(x.r.net), round2(x.r.total) ]);
+      });
+      var ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws['!cols'] = [{wch:6},{wch:22},{wch:14},{wch:15},{wch:15},{wch:15},{wch:17}];
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Karşılaştırma');
+      XLSX.writeFile(wb, 'vadeli-mevduat-karsilastirma.xlsx');
+    }).catch(function(err){ alert('Excel kütüphanesi yüklenemedi: ' + err.message); });
+  }
+
+  function exportPdf(){
+    var list = getSortedResults();
+    if(!list.length){ warnEmpty(); return; }
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+      .then(function(){ return loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js'); })
+      .then(function(){
+        var amount = common.amount, days = common.days;
+        var Ctor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+        var doc = new Ctor({ orientation:'landscape', unit:'pt', format:'a4' });
+
+        doc.setFontSize(16);
+        doc.text('Vadeli Mevduat Karşılaştırması', 40, 42);
+        doc.setFontSize(10);
+        doc.setTextColor(60);
+        doc.text('Anapara: ' + fmt(amount) + '     Vade: ' + days + ' gün', 40, 62);
+
+        var head = [ COLS.slice() ];
+        var bodyRows = list.map(function(x, i){
+          return [ String(i+1), x.offer.bank || '—', fmtPct(x.offer.rate), fmt(x.r.gross), fmt(x.r.stopaj), fmt(x.r.net), fmt(x.r.total) ];
+        });
+
+        doc.autoTable({
+          head: head,
+          body: bodyRows,
+          startY: 78,
+          styles: { fontSize: 9, cellPadding: 5, textColor: [30,34,48] },
+          headStyles: { fillColor: [18,23,41], textColor: [244,245,249], fontStyle: 'bold' },
+          columnStyles: {
+            0: { halign:'center' },
+            2: { halign:'right' }, 3: { halign:'right' }, 4: { halign:'right' },
+            5: { halign:'right' }, 6: { halign:'right' }
+          },
+          didParseCell: function(data){
+            if(data.section === 'body' && data.row.index === 0){
+              data.cell.styles.fontStyle = 'bold';
+              data.cell.styles.fillColor = [224,247,238];
+            }
+          }
+        });
+
+        var y = (doc.lastAutoTable ? doc.lastAutoTable.finalY : 78) + 22;
+        doc.setFontSize(8);
+        doc.setTextColor(120);
+        doc.text('Bilgilendirme amaçlıdır, bağlayıcı teklif değildir.', 40, y);
+        doc.save('vadeli-mevduat-karsilastirma.pdf');
+      }).catch(function(err){ alert('PDF kütüphanesi yüklenemedi: ' + err.message); });
+  }
+
+  var exBtn = document.getElementById('exportExcelBtn');
+  var pdfBtn = document.getElementById('exportPdfBtn');
+  if(exBtn) exBtn.addEventListener('click', exportExcel);
+  if(pdfBtn) pdfBtn.addEventListener('click', exportPdf);
+})();
+</script>
 <script src="mmg-feedback-widget.js"></script>
 
 <script>
@@ -704,6 +824,7 @@ renderStats();
       stat_best_offer:'En iyi teklif', stat_best_balance:'En iyi vade sonu bakiye', stat_avg_rate:'Ortalama yıllık oran', stat_count:'Teklif sayısı',
       offer_entry:'Teklif Girişi', th_bank:'Banka', th_principal:'Anapara', th_term_days:'Vade<br>(Gün)', lbl_term_days:'Vade (Gün)', th_annual_rate:'Yıllık<br>Oran %',
       add_offer:'+ Banka Ekle', ranking:'Sıralama', th_final_balance:'Vade Sonu<br>Bakiye',
+      export_excel:'Excel', export_pdf:'PDF',
       empty_state:'Henüz teklif eklenmedi. Soldan bir teklif ekleyerek başla.',
       assumption_note:'<b>Adil karşılaştırma:</b> Tüm bankalar aynı anapara ve aynı vade üzerinden değerlendirilir; sıralama net getiriye göre yapılır. <b>Yöntem:</b> Brüt Faiz, TL vadeli mevduatta kullanılan basit faiz (Actual/365) yöntemiyle hesaplanır: <code>Brüt Faiz = Anapara × Yıllık Oran × Vade(Gün) / 365</code>. Stopaj oranı, 09.07.2025 tarihli 2025/66 sayılı Cumhurbaşkanı Kararı\'na göre vade gününe göre otomatik uygulanır: 183 güne kadar <b>%17,5</b>, 366 güne kadar <b>%15</b>, 1 yıldan uzun vadelerde <b>%10</b>. Net Kazanç = Brüt Faiz − Stopaj; Vade Sonu Bakiye = Anapara + Net Kazanç. Bu araç bilgilendirme amaçlıdır, bağlayıcı bir mevduat teklifi değildir.'
     },
@@ -714,6 +835,7 @@ renderStats();
       stat_best_offer:'Best offer', stat_best_balance:'Best final balance', stat_avg_rate:'Average annual rate', stat_count:'Number of offers',
       offer_entry:'Offer Entry', th_bank:'Bank', th_principal:'Principal', th_term_days:'Term<br>(Days)', lbl_term_days:'Term (Days)', th_annual_rate:'Annual<br>Rate %',
       add_offer:'+ Add Bank', ranking:'Ranking', th_final_balance:'Final<br>Balance',
+      export_excel:'Excel', export_pdf:'PDF',
       empty_state:'No offer added yet. Start by adding one on the left.',
       assumption_note:'<b>Fair comparison:</b> All banks are evaluated using the same principal and the same term; the ranking is based on net return. <b>Method:</b> Gross interest is calculated using the simple interest (Actual/365) method used for TL time deposits: <code>Gross Interest = Principal × Annual Rate × Term(Days) / 365</code>. The withholding tax rate is applied automatically based on the term per Presidential Decree 2025/66 dated 09.07.2025: <b>17.5%</b> up to 183 days, <b>15%</b> up to 366 days, and <b>10%</b> for terms over 1 year. Net Gain = Gross Interest − Withholding; Final Balance = Principal + Net Gain. This tool is for information only and is not a binding deposit offer.'
     }

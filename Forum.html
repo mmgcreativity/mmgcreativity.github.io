@@ -488,6 +488,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const initial = (name || '?').trim().charAt(0).toUpperCase() || '?';
     return '<div class="avatar-circle profile-clickable" style="background:' + avatarGradientFor(uid || name) + '"' + nameAttr + '>' + escapeHtml(initial) + '</div>';
   }
+  // Kullanıcı logosu/avatarı users(veya profiles) dokümanında farklı alan adlarıyla
+  // saklanmış olabilir; profil.html ile tutarlı olacak şekilde ilk dolu olanı seç.
+  function pickUserAvatar(d){
+    if(!d) return null;
+    return d.avatarBase64 || d.logoBase64 || d.photoURL || d.avatarURL || d.logoURL ||
+           d.avatar || d.logo || d.profilResmi || d.logoDataUrl || d.kaseBase64 || null;
+  }
 
   // ---- "İsimsiz" düzeltmesi: gönderi/yanıt kaydında adı boş kalmış kullanıcıların adını,
   // görüntüleme anında hesaptan (profiles/{uid} yoksa users/{uid}) çekip yamar. ----
@@ -526,6 +533,42 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         av.textContent = (name.trim().charAt(0).toUpperCase() || '?');
         av.setAttribute('data-profile-name', name);
       }
+    }
+  }
+
+  // ---- Logo/avatar düzeltmesi: gönderi/yanıtta authorAvatar boş kalmış (baş harfe düşen)
+  // yazarların logosunu, görüntüleme anında hesaptan (profiles/{uid} → users/{uid}) çekip
+  // geniş alan fallback'i ile yamar. ----
+  const _forumAvatarCache = {};
+  async function resolveForumAvatar(uid){
+    if(!uid) return null;
+    if(uid in _forumAvatarCache) return _forumAvatarCache[uid];
+    let avatar = null;
+    try{
+      const p = await getDoc(doc(db, 'profiles', uid));
+      if(p.exists()) avatar = pickUserAvatar(p.data());
+    }catch(e){ /* profiles okunamazsa users'a düş */ }
+    if(!avatar){
+      try{
+        const u = await getDoc(doc(db, 'users', uid));
+        if(u.exists()) avatar = pickUserAvatar(u.data());
+      }catch(e){ /* okunamazsa null kalır */ }
+    }
+    _forumAvatarCache[uid] = avatar;
+    return avatar;
+  }
+  async function patchMissingAvatars(container){
+    if(!container) return;
+    const els = container.querySelectorAll('.avatar-circle');
+    for(const el of els){
+      if(el.querySelector('img')) continue;           // zaten logo var
+      const uid = el.getAttribute('data-profile-uid');
+      if(!uid) continue;
+      let avatar = (uid === currentUid) ? currentUserAvatar : null;
+      if(!avatar) avatar = await resolveForumAvatar(uid);
+      if(!avatar) continue;
+      // <img> yüklenemezse (onerror) mevcut baş harf davranışına geri dön.
+      el.innerHTML = '<img src="' + avatar + '" alt="" onerror="var p=this.parentNode; p.removeChild(this); p.textContent=(p.getAttribute(\'data-profile-name\')||\'?\').trim().charAt(0).toUpperCase()||\'?\';">';
     }
   }
 
@@ -599,6 +642,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       );
     });
     feedEl.innerHTML = rows.join('');
+    patchMissingAvatars(feedEl); // authorAvatar boş kaydolmuş gönderilerin logosunu hesaptan çekip düzelt
     feedEl.querySelectorAll('[data-delete-id]').forEach(btn => {
       btn.addEventListener('click', async () => {
         if(!confirm(LBL.confirmDelete)) return;
@@ -696,7 +740,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           await addDoc(collection(db, 'forumPosts', id, 'replies'), {
             authorUid: currentUid,
             authorName: data.displayName || data.username || data.email || LBL.anonymous,
-            authorAvatar: data.avatarBase64 || data.logoBase64 || currentUserAvatar || null,
+            authorAvatar: pickUserAvatar(data) || currentUserAvatar || null,
             text: text.slice(0, 300),
             createdAt: serverTimestamp()
           });
@@ -728,6 +772,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       });
       listEl.innerHTML = rows.join('');
       patchAnonymousNames(listEl); // adı boş kaydolmuş yanıtları hesaptan çekip düzelt
+      patchMissingAvatars(listEl); // authorAvatar boş kaydolmuş yanıtların logosunu hesaptan çekip düzelt
     }catch(e){ listEl.innerHTML = ''; }
   }
 
@@ -780,7 +825,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       if(pSnap.exists()){
         const pd = pSnap.data();
         name = pd.displayName || pd.name || pd.username || name;
-        if(pd.photoURL) avatar = pd.photoURL;
+        const pa = pickUserAvatar(pd); if(pa) avatar = pa;
       }
     }catch(e){ /* profiles okunamazsa aşağıda users'a düş */ }
     // Sonra users/{uid} — yalnızca sahibi/yönetici okuyabilir (kurallar); okunabiliyorsa
@@ -790,7 +835,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       if(uSnap.exists()){
         const d = uSnap.data();
         if(!name || name === fallbackName) name = d.displayName || d.username || d.email || fallbackName;
-        if(!avatar) avatar = d.avatarBase64 || d.logoBase64 || null;
+        if(!avatar) avatar = pickUserAvatar(d);
         isAdminUser = d.isAdmin === true;
         isFirma = !!d.logoBase64 && !d.avatarBase64;
       }
@@ -995,7 +1040,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       await addDoc(collection(db, 'forumPosts'), {
         authorUid: currentUid,
         authorName: data.displayName || data.username || data.email || LBL.anonymous,
-        authorAvatar: data.avatarBase64 || data.logoBase64 || currentUserAvatar || null,
+        authorAvatar: pickUserAvatar(data) || currentUserAvatar || null,
         text: text.slice(0, MAX_LEN),
         imageBase64: composerImageDataUrl || null,
         quoteOf: pendingQuote || null,
@@ -1032,7 +1077,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const data = snap.exists() ? snap.data() : {};
       currentIsAdmin = data.isAdmin === true;
       currentUserName = data.displayName || data.username || data.email || LBL.anonymous;
-      currentUserAvatar = data.avatarBase64 || data.logoBase64 || user.photoURL || null;
+      currentUserAvatar = pickUserAvatar(data) || user.photoURL || null;
       const composerAvatar = document.getElementById('composerAvatar');
       if(composerAvatar){
         const html = avatarHtml(currentUserName, currentUserAvatar, user.uid).replace('<div class="avatar-circle"', '<div class="avatar-circle" id="composerAvatar"');
@@ -1047,5 +1092,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   });
 </script>
 
+<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>
