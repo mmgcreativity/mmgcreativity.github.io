@@ -128,6 +128,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- ExcelJS: şablonda Kategori/Tekrar sütunlarına gerçek Excel veri doğrulama (açılır liste) eklemek için. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script>
 // mmgcreativity: jsPDF varsayılan fontları Türkçe karakterleri (ş,ğ,ı,İ,ç,ö,ü vb.)
 // doğru gösteremediği için, Türkçe karakter setini destekleyen bir font gömüp PDF'lerde onu kullanıyoruz.
@@ -290,9 +292,11 @@ function mmgApplyTurkishFont(doc){
     cursor:pointer; background:none; border:none;
   }
   .change-type-link:hover{ color:var(--coral); }
-  .add-payment-grid{ display:grid; grid-template-columns:1.6fr 0.8fr 1fr 1fr auto; gap:12px; align-items:end; }
+  /* Tutar sütunu 0.8fr iken büyük rakamlar (ör. 1.000.000,00) sığmıyordu; sütunlar
+     yeniden dengelendi ve tüm alanlara min-width:0 verildi ki input taşmadan daralabilsin. */
+  .add-payment-grid{ display:grid; grid-template-columns:1.5fr 1fr 1.1fr 1fr auto; gap:12px; align-items:end; }
   @media (max-width:900px){ .add-payment-grid{ grid-template-columns:1fr 1fr; } }
-  .field{ margin-bottom:0; }
+  .field{ margin-bottom:0; min-width:0; }
   .field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:8px; }
   .field input, .field select{
     width:100%; height:42px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
@@ -301,7 +305,7 @@ function mmgApplyTurkishFont(doc){
   }
   .field input:focus, .field select:focus{ border-color:var(--brass-dim); }
   .field select{ cursor:pointer; }
-  #newAmount{ font-family:'JetBrains Mono',monospace; font-weight:600; font-size:15px; }
+  #newAmount{ font-family:'JetBrains Mono',monospace; font-weight:600; font-size:14px; letter-spacing:-0.2px; }
   .add-payment-btn{
     background:var(--grad); border:none; color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700;
     font-size:13.5px; height:42px; padding:0 20px; border-radius:8px; cursor:pointer; transition:opacity .15s ease; white-space:nowrap;
@@ -1134,21 +1138,59 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     } catch(e){ showIoMsg(LBL.excelError, true); }
   });
 
-  document.getElementById('exportPdfBtn').addEventListener('click', () => {
+  // Nakit Akış Tablosu ile aynı PDF alt bilgisi için logoyu dataURL olarak getir.
+  function mmgGetLogoDataUrl(){
+    return fetch('logo.png')
+      .then(r => r.blob())
+      .then(blob => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      }))
+      .catch(() => null);
+  }
+
+  document.getElementById('exportPdfBtn').addEventListener('click', async () => {
     try{
       const rows = buildGiderRowsForExport();
       if(rows.length <= 1){ showIoMsg(LBL.noExpenseToExport, true); return; }
+      const isEn = (typeof MMG_LANG !== 'undefined' && MMG_LANG === 'en');
+      const logoDataUrl = await mmgGetLogoDataUrl();
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape' });
       mmgApplyTurkishFont(doc);
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      // Alt bilgi: sol tarafta logo + link, sağ tarafta oluşturulma tarihi (Nakit Akış ile birebir).
+      const footerTag = isEn ? 'mmgcreativity.com · Digital Finance Assistant' : 'mmgcreativity.com · Dijital Finans Asistanı';
+      const createdLabel = isEn ? 'Created: ' : 'Oluşturulma: ';
+      function drawFooter(){
+        doc.setDrawColor(198,161,91);
+        doc.setLineWidth(0.3);
+        doc.line(14, pageHeight - 14, pageWidth - 14, pageHeight - 14);
+        let linkX = 14;
+        if(logoDataUrl){
+          try{ doc.addImage(logoDataUrl, 'PNG', 14, pageHeight - 12.5, 8, 8); linkX = 25; } catch(imgErr){}
+        }
+        doc.setFontSize(8);
+        doc.setTextColor(130,130,130);
+        doc.text(footerTag, linkX, pageHeight - 9);
+        doc.text(createdLabel + new Date().toLocaleString(isEn ? 'en-GB' : 'tr-TR'), pageWidth - 14, pageHeight - 9, { align: 'right' });
+      }
+
       doc.setFontSize(14);
-      doc.text('Giderler', 14, 16);
+      doc.setTextColor(20,20,20);
+      doc.text(isEn ? 'Expenses' : 'Giderler', 14, 16);
       doc.autoTable({
         startY: 24,
         head: [rows[0]],
         body: rows.slice(1).map(r => [r[0], r[1], Number(r[2]).toLocaleString('tr-TR',{minimumFractionDigits:2}) + ' TL', r[3], r[4]]),
         styles: { fontSize: 9, font: 'DejaVuSans' },
-        headStyles: { fillColor: [198,161,91], font: 'DejaVuSans' }
+        headStyles: { fillColor: [198,161,91], font: 'DejaVuSans' },
+        margin: { bottom: 20 },
+        didDrawPage: drawFooter
       });
       doc.save('giderler.pdf');
       showIoMsg(LBL.pdfDownloaded);
@@ -1159,11 +1201,45 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.getElementById('importExcelInput').click();
   });
 
-  document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
+  document.getElementById('downloadTemplateBtn').addEventListener('click', async () => {
     try{
       const header = [LBL.descriptionCol, MMGI18N.t('category_col'), MMGI18N.t('amount_col'), MMGI18N.t('due_date_col'), MMGI18N.t('recurrence_col')];
       const example = [LBL.descPlaceholderTemplate, CATS[0].label, 1000, todayKey(), LBL.doNotRepeat];
-      const catNote = [LBL.validCategories, CATS.map(c => c.label).join(' / ')];
+      const catList = CATS.map(c => c.label);
+      const recList = String(LBL.recurrenceOptionsList || '').split('/').map(s => s.trim()).filter(Boolean);
+
+      // Tercih: ExcelJS ile gerçek açılır liste (veri doğrulama). Kategori ve Tekrar
+      // sütunlarına, gizli bir "Listeler" sayfasındaki değerlere referanslı liste eklenir.
+      if(window.ExcelJS){
+        const wb = new ExcelJS.Workbook();
+        const ws = wb.addWorksheet(LBL.templateName);
+        ws.addRow(header);
+        ws.addRow(example);
+        ws.columns = [{width:30},{width:22},{width:14},{width:16},{width:20}];
+        ws.getRow(1).font = { bold:true };
+        ws.getRow(1).eachCell(c => { c.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFC6A15B'} }; c.font = { bold:true, color:{argb:'FF141220'} }; });
+
+        const wsL = wb.addWorksheet('Listeler');
+        catList.forEach((v,i) => { wsL.getCell('A' + (i+1)).value = v; });
+        recList.forEach((v,i) => { wsL.getCell('B' + (i+1)).value = v; });
+        wsL.state = 'veryHidden';
+
+        const catRef = 'Listeler!$A$1:$A$' + Math.max(1, catList.length);
+        const recRef = 'Listeler!$B$1:$B$' + Math.max(1, recList.length);
+        for(let r=2; r<=300; r++){
+          ws.getCell('B' + r).dataValidation = { type:'list', allowBlank:true, formulae:[catRef], showErrorMessage:true, errorStyle:'warning', errorTitle:LBL.validCategories, error:catList.join(' / ') };
+          ws.getCell('E' + r).dataValidation = { type:'list', allowBlank:true, formulae:[recRef], showErrorMessage:true, errorStyle:'warning', errorTitle:LBL.validRecurrenceValues, error:recList.join(' / ') };
+        }
+        const buf = await wb.xlsx.writeBuffer();
+        const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'giderler-sablon.xlsx'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        showIoMsg(LBL.templateDownloaded);
+        return;
+      }
+
+      // Yedek (ExcelJS yüklenemezse): eski SheetJS metin-notlu şablon.
+      const catNote = [LBL.validCategories, catList.join(' / ')];
       const recNote = [LBL.validRecurrenceValues, LBL.recurrenceOptionsList];
       const rows = [header, example, [], catNote, recNote];
       const ws = XLSX.utils.aoa_to_sheet(rows);

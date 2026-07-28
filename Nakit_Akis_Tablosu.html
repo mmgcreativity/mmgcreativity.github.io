@@ -777,6 +777,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="archive-btn-group">
           <button type="button" class="archive-save-btn" id="archiveSaveBtn">🗄 <span data-i18n="archive_save_btn">Bu Raporu Arşivle</span></button>
           <button type="button" class="archive-save-btn" id="viewArchiveBtn">📁 <span data-i18n="archive_view_btn">Arşiv</span></button>
+          <button type="button" class="archive-save-btn" id="exportExcelBtn"><svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg><span data-i18n="export_excel_btn">Excel'e Aktar</span></button>
+          <button type="button" class="archive-save-btn" id="exportPdfBtn"><svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg><span data-i18n="export_pdf_btn">PDF'e Aktar</span></button>
         </div>
       </div>
     </div>
@@ -860,10 +862,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <div class="io-toolbar">
-      <button type="button" class="io-btn" id="exportExcelBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
-      <button type="button" class="io-btn" id="exportPdfBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
-    </div>
     <div class="io-msg" id="memberNotice" style="color:var(--muted);">🔒 Excel/PDF dışa aktarma ve cihazlar arası bulut senkronizasyonu şimdilik yalnızca üye girişi yapan kullanıcılar için aktiftir. Misafir modunda verileriniz yalnızca bu tarayıcıda saklanır.</div>
     <div class="io-msg" id="ioMsg"></div>
     <div class="io-msg" id="cloudMsg" style="color:var(--muted);"></div>
@@ -1036,6 +1034,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // Firestore'daki gerçek veriyi boş monthData ile ezip kalıcı veri kaybına yol açabiliyordu.
   let monthCloudLoaded = false;
   let lastCloudUpdatedAt = null; // en son okunan bulut kaydının updatedAt değeri (yerel/bulut tazelik kıyası için)
+  let cloudDirty = false; // buluta yazılmayı bekleyen (kaydedilmemiş) değişiklik var mı — veri kaybı koruması
   let reportTab = 'gunluk'; // 'gunluk' | 'haftalik' | 'aylik' | 'yillik' | 'arsiv'
   let reportDay = today.getDate();
   let reportWeekIdx = 0;
@@ -1089,25 +1088,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function scheduleSave(){
     saveLocal(monthKeyOf(selYear, selMonth));
+    cloudDirty = true; // kaydedilmemiş değişiklik var
     clearTimeout(saveTimer);
     saveTimer = setTimeout(()=>{
       if(isMember()) saveCloud(monthKeyOf(selYear, selMonth));
     }, 900);
   }
 
-  async function saveCloud(mk){
+  async function saveCloud(mk, attempt){
     if(!isMember()) return;
     // VERİ KAYBI KORUMASI: Bu ayın bulut kaydı henüz okunmadıysa buluta yazma (aksi halde
     // sayfa açılış anındaki boş monthData, Firestore'daki gerçek veriyi ezebilir).
     if(!monthCloudLoaded) return;
+    attempt = attempt || 0;
     try{
       const cloud = window.mmgCloud;
       await cloud.setDoc(cloud.doc(cloud.db, cloud.scopeCollection, cloud.scopeId, 'cashflow', mk), {
         data: monthData, updatedAt: new Date().toISOString()
       });
+      cloudDirty = false;
       showCloudMsg(NAT.saved);
-    }catch(err){ /* sessizce geç */ }
+    }catch(err){
+      // VERİ KAYBI KORUMASI: hatayı SESSİZCE GEÇME. Yerel kayıt güvende; buluta birkaç kez yeniden
+      // dene, yine olmazsa kullanıcıyı AÇIKÇA uyar (kaydedilmediğini fark etsin).
+      if(attempt < 4){
+        setTimeout(()=>{ saveCloud(mk, attempt + 1); }, 1500 * (attempt + 1));
+      } else {
+        cloudDirty = true;
+        showCloudMsg('⚠ Buluta kaydedilemedi! Verileriniz bu cihazda duruyor; internetiniz gelince tekrar denenecek.');
+      }
+    }
   }
+
+  // VERİ KAYBI KORUMASI: sayfa gizlenince (sekme değişimi/uygulama kapatma) veya kapanınca, 900ms'lik
+  // gecikmeyi BEKLEMEDEN kaydedilmemiş veriyi HEMEN buluta yaz. Böylece veri girip hemen ayrılınca ya da
+  // başka bilgisayara geçince kayıp olmaz.
+  function flushCloudSaveNow(){
+    if(cloudDirty && isMember() && monthCloudLoaded){
+      clearTimeout(saveTimer);
+      saveCloud(monthKeyOf(selYear, selMonth));
+    }
+  }
+  document.addEventListener('visibilitychange', () => { if(document.hidden) flushCloudSaveNow(); });
+  window.addEventListener('pagehide', flushCloudSaveNow);
+  window.addEventListener('beforeunload', flushCloudSaveNow);
 
   async function loadCloud(mk){
     lastCloudUpdatedAt = null;
@@ -1726,15 +1750,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     let html = '<div class="drawer-inner">';
     html += '<div class="drawer-header-row">';
     html += '<div class="drawer-title">' + (type==='gider' ? NAT.expense : NAT.income) + '</div>';
-    html += '<div class="add-item-form" data-day="'+key+'" data-type="'+type+'">' +
-      '<div class="field"><label>' + NAT.desc + ' <span style="color:var(--muted); font-weight:400;">' + NAT.optional + '</span></label>' +
-        '<input type="text" class="desc-in" placeholder="' + (type==='gider' ? NAT.descPlaceholderExpense : NAT.descPlaceholderIncome) + '"></div>' +
-      '<div class="field"><label>' + NAT.category + '</label>' +
-        '<select class="cat-in">' + cats.map(c=>'<option value="'+escapeHtml(c)+'">'+escapeHtml(catLabel(c))+'</option>').join('') + '</select></div>' +
-      '<div class="field"><label>' + NAT.amount + '</label>' +
-        '<input type="text" inputmode="decimal" class="amount-in" placeholder="0,00" data-decimals="2"></div>' +
-      '<button type="button" class="add-btn" data-action="add-item" data-day="'+key+'" data-type="'+type+'">' + NAT.addBtn + '</button>' +
-    '</div>';
     html += '</div>';
     if(items && items.length > 0){
       html += '<div class="item-list">';
@@ -2960,6 +2975,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       trial_over_desc:'Nakit Akış Tablosu premium üyelere aittir. 90 günlük ücretsiz deneme sürenizi tamamladınız — kullanmaya devam etmek için premium üyeliğe geçmeniz gerekiyor.',
       trial_over_cta:'Premium Üyelik Hakkında Bilgi Al',
       archived_reports_title:'Arşivlenmiş Raporlarım', archive_save_btn:'Bu Raporu Arşivle', archive_view_btn:'Arşiv',
+      export_excel_btn:'Excel\'e Aktar', export_pdf_btn:'PDF\'e Aktar',
       prev:'Önceki', next:'Sonraki'
     },
     en: {
@@ -2974,6 +2990,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       trial_over_desc:'The Cash Flow Table is for premium members. You have completed your 90-day free trial — you need to upgrade to premium to keep using it.',
       trial_over_cta:'Learn About Premium Membership',
       archived_reports_title:'My Archived Reports', archive_save_btn:'Archive This Report', archive_view_btn:'Archive',
+      export_excel_btn:'Export to Excel', export_pdf_btn:'Export to PDF',
       prev:'Previous', next:'Next'
     }
   });

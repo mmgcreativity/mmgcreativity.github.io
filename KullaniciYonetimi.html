@@ -230,17 +230,18 @@
     </div>
 
     <div class="card">
-      <h2 data-i18n="add_admin_title">Yönetici Ekle</h2>
-      <div class="card-sub" data-i18n="add_admin_desc">Eklemek istediğiniz kişinin kullanıcı kodunu girin. Kişi bu kodla ilişkili hesabıyla giriş yaptığında bu firmaya yönetici olarak eklenecek ve bu paneli görebilecek.</div>
+      <h2 id="userLimitTitleEl">Kullanıcı Limiti</h2>
+      <div class="card-sub" id="userLimitDescEl">Bu firmaya en fazla kaç kullanıcı eklenebileceğini belirleyin. Limit dolduğunda yeni davet gönderilemez; bu, istenmeyen/sahte kullanıcı eklenmesini önler.</div>
       <div style="display:flex; gap:8px; align-items:flex-end;">
         <div class="auth-field" style="flex:1; min-width:0; margin-bottom:0;">
-          <label data-i18n="admin_code_label">Yöneticinin Kodu</label>
-          <input type="text" id="adminInviteCode" inputmode="numeric" placeholder="ör. 1016" maxlength="12">
+          <label id="userLimitLabelEl">Maksimum kullanıcı sayısı</label>
+          <input type="number" id="userLimitInput" inputmode="numeric" min="1" max="100" step="1" placeholder="ör. 5">
         </div>
-        <button type="button" class="auth-submit" id="adminInviteSubmitBtn" data-i18n="send_invite" style="flex:1; min-width:0; margin-top:0;">Davet Gönder</button>
+        <button type="button" class="auth-submit" id="userLimitSaveBtn" style="flex:0 0 auto; min-width:0; margin-top:0;">Kaydet</button>
       </div>
-      <div class="auth-error" id="adminInviteError"></div>
-      <div class="auth-success" id="adminInviteSuccess"></div>
+      <div class="card-sub" id="userLimitCurrent" style="margin-top:8px;"></div>
+      <div class="auth-error" id="userLimitError"></div>
+      <div class="auth-success" id="userLimitSuccess"></div>
     </div>
   </div>
   </div>
@@ -292,7 +293,13 @@
     dataGroupSaved:'Data sharing group saved ✓',
     dataGroupSaveFailed:'Could not be saved, please try again.',
     memberFirmaAccessLabel:'Company Access', permsBoxTitle:'Permissions',
-    currentFirmaTag:'currently viewing'
+    currentFirmaTag:'currently viewing',
+    userLimitTitle:'User Limit', userLimitDesc:'Set the maximum number of users that can be added to this company. When the limit is reached, no new invitations can be sent — this prevents unwanted/fake users from being added.',
+    userLimitLabel:'Maximum number of users', userLimitSaveBtn:'Save',
+    userLimitInvalid:'Please enter a number between 1 and 100.',
+    userLimitSaved:'User limit saved ✓', userLimitSaveFailed:'Could not be saved, please try again.',
+    userLimitReached:'User limit reached. Increase the limit or remove a user before inviting a new one.',
+    userLimitCurrentPrefix:'Current limit: ', userLimitNone:'No limit set yet.'
   } : {
     firmaSubPrefix:'"', firmaSubSuffix:'" firmasına bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.',
     notAdminYetTitle:'Henüz bir firmanın yöneticisi değilsiniz',
@@ -312,7 +319,13 @@
     dataGroupSaved:'Veri paylaşım grubu kaydedildi ✓',
     dataGroupSaveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
     memberFirmaAccessLabel:'Firma Erişimleri', permsBoxTitle:'Yetkiler',
-    currentFirmaTag:'şu an görüntülenen'
+    currentFirmaTag:'şu an görüntülenen',
+    userLimitTitle:'Kullanıcı Limiti', userLimitDesc:'Bu firmaya en fazla kaç kullanıcı eklenebileceğini belirleyin. Limit dolduğunda yeni davet gönderilemez; bu, istenmeyen/sahte kullanıcı eklenmesini önler.',
+    userLimitLabel:'Maksimum kullanıcı sayısı', userLimitSaveBtn:'Kaydet',
+    userLimitInvalid:'Lütfen 1 ile 100 arasında bir sayı girin.',
+    userLimitSaved:'Kullanıcı limiti kaydedildi ✓', userLimitSaveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
+    userLimitReached:'Kullanıcı limiti doldu. Yeni davet için limiti artırın ya da bir kullanıcıyı kaldırın.',
+    userLimitCurrentPrefix:'Mevcut limit: ', userLimitNone:'Henüz limit belirlenmedi.'
   };
 
   // Bu panelde yönetilebilen yetki modülleri (sol menüdeki araç sayfalarıyla eşleşir).
@@ -368,6 +381,9 @@
   }
 
   let firmaId = null;
+  let maxUsersCurrent = 0;   // seçili firmanın kullanıcı limiti (0 = limit yok)
+  let lastMemberCount = 0;   // seçili firmadaki aktif üye sayısı (loadMembers doldurur)
+  let lastPendingCount = 0;  // seçili firmadaki bekleyen davet sayısı (loadMembers doldurur)
   let myAdminFirmas = []; // [{id, name}]
 
   function inviteFirmaMultiGridHtml(){
@@ -528,6 +544,7 @@
     } else {
       multiWrap.style.display = 'none';
     }
+    await loadUserLimit();
     await loadMembers();
     await loadPendingInvites();
   }
@@ -610,6 +627,12 @@
         return;
       }
       const targetFirmaIds = getSelectedInviteFirmaIds();
+      // Kullanıcı limiti: seçili firma hedefteyse ve limit doluysa yeni davet engellenir.
+      if(maxUsersCurrent && targetFirmaIds.indexOf(firmaId) !== -1 && (lastMemberCount + lastPendingCount) >= maxUsersCurrent){
+        errEl.textContent = LBL.userLimitReached;
+        errEl.classList.add('show');
+        return;
+      }
       const permissions = readPermGrid('invite');
       // Davet, kişinin e-postası yerine kullanıcı kodu ile eşleştirilir (bkz. firmaInvites/{kod}/firmas/{firmaId}).
       // Bir kod, aynı anda birden fazla firmaya davet edilebilsin diye firma başına ayrı bir alt
@@ -655,56 +678,47 @@
     }
   });
 
-  // ---- Yönetici Ekle (davet) ----
-  document.getElementById('adminInviteSubmitBtn').addEventListener('click', async () => {
-    const errEl = document.getElementById('adminInviteError');
-    const okEl = document.getElementById('adminInviteSuccess');
+  // ---- Kullanıcı Limiti (firma başına en fazla kullanıcı) ----
+  // Güvenlik: "Yönetici Ekle" tamamen kaldırıldı (ikinci admin oluşturulamaz; her firmada
+  // yalnızca firmayı oluşturan admin kalır). Onun yerine admin, firmaya eklenebilecek
+  // maksimum kullanıcı sayısını belirler; limit dolunca yeni davet gönderilemez. Böylece
+  // istenmeyen/sahte kullanıcı eklenmesi (bu firmaya) sınırlanır.
+  async function loadUserLimit(){
+    const input = document.getElementById('userLimitInput');
+    const cur = document.getElementById('userLimitCurrent');
+    try{
+      const fSnap = await getDoc(doc(db, 'firmaAccounts', firmaId));
+      const mu = (fSnap.exists() && Number(fSnap.data().maxUsers) > 0) ? Number(fSnap.data().maxUsers) : 0;
+      maxUsersCurrent = mu;
+      if(input) input.value = mu ? String(mu) : '';
+      if(cur) cur.textContent = mu ? (LBL.userLimitCurrentPrefix + mu) : LBL.userLimitNone;
+    }catch(e){ maxUsersCurrent = 0; }
+  }
+
+  document.getElementById('userLimitSaveBtn').addEventListener('click', async () => {
+    const errEl = document.getElementById('userLimitError');
+    const okEl = document.getElementById('userLimitSuccess');
     errEl.classList.remove('show'); okEl.classList.remove('show');
-    const codeInput = document.getElementById('adminInviteCode');
-    const code = codeInput.value.trim();
-    if(!code || !/^[0-9]+$/.test(code)){
-      errEl.textContent = LBL.enterValidCode;
+    const input = document.getElementById('userLimitInput');
+    const val = parseInt(input.value, 10);
+    if(!val || val < 1 || val > 100){
+      errEl.textContent = LBL.userLimitInvalid;
       errEl.classList.add('show');
       return;
     }
-    const btn = document.getElementById('adminInviteSubmitBtn');
+    const btn = document.getElementById('userLimitSaveBtn');
     btn.disabled = true;
     const original = btn.textContent;
     btn.textContent = LBL.sending;
     try{
-      // Kod gerçekten var olan bir kullanıcıya mı ait, önce onu doğruluyoruz.
-      const dirSnap = await getDoc(doc(db, 'userDirectory', code));
-      if(!dirSnap.exists()){
-        errEl.textContent = LBL.codeNotFound;
-        errEl.classList.add('show');
-        return;
-      }
-      const fSnap = await getDoc(doc(db, 'firmaAccounts', firmaId));
-      // Yönetici daveti de kullanıcı kodu ile eşleştirilir (bkz. firmaAdminInvites/{kod}).
-      await setDoc(doc(db, 'firmaAdminInvites', code), {
-        firmaId: firmaId,
-        firmaName: fSnap.exists() ? (fSnap.data().name || '') : '',
-        createdAt: serverTimestamp()
-      });
-      // Davet edilen kişiye kalıcı çan/badge bildirimi bırak (yönetici daveti).
-      try{
-        let inviteeUid = (dirSnap.data() && dirSnap.data().uid) || null;
-        if(!inviteeUid){ try{ const cc = await getDoc(doc(db, 'chatCodes', code)); if(cc.exists()) inviteeUid = cc.data().uid || null; }catch(_e){} }
-        if(inviteeUid && auth.currentUser){
-          await setDoc(doc(collection(db, 'notifications')), {
-            toUid: inviteeUid, fromUid: auth.currentUser.uid,
-            type: 'invite', title: '🏢 Yönetici daveti',
-            body: (fSnap.exists() ? (fSnap.data().name || 'Bir firma') : 'Bir firma') + ' sizi yönetici olarak ekledi. Onaylamak için Bildirimler sekmesine bakın.',
-            read: false, createdAt: serverTimestamp()
-          });
-        }
-      }catch(nErr){ /* bildirim yazılamazsa daveti engellemesin */ }
-      okEl.textContent = LBL.inviteSent;
+      await setDoc(doc(db, 'firmaAccounts', firmaId), { maxUsers: val }, { merge: true });
+      maxUsersCurrent = val;
+      okEl.textContent = LBL.userLimitSaved;
       okEl.classList.add('show');
-      codeInput.value = '';
-      await loadPendingInvites();
+      const cur = document.getElementById('userLimitCurrent');
+      if(cur) cur.textContent = LBL.userLimitCurrentPrefix + val;
     } catch(e){
-      errEl.textContent = LBL.inviteFailed;
+      errEl.textContent = LBL.userLimitSaveFailed;
       errEl.classList.add('show');
     } finally {
       btn.disabled = false;
@@ -712,7 +726,16 @@
     }
   });
 
-  // ---- Bekleyen davetler (sadece Yönetici davetleri; kullanıcı davetleri artık Kullanıcılarım listesinde gösteriliyor) ----
+  // Kullanıcı Limiti kartı etiketlerini seçili dile göre ayarla.
+  (function initUserLimitLabels(){
+    const set = (id, txt) => { const el = document.getElementById(id); if(el) el.textContent = txt; };
+    set('userLimitTitleEl', LBL.userLimitTitle);
+    set('userLimitDescEl', LBL.userLimitDesc);
+    set('userLimitLabelEl', LBL.userLimitLabel);
+    set('userLimitSaveBtn', LBL.userLimitSaveBtn);
+  })();
+
+  // ---- Bekleyen davetler (yalnızca eski/bekleyen yönetici davetlerini temizlemek için; artık yeni yönetici daveti oluşturulamaz) ----
   async function loadPendingInvites(){
     const card = document.getElementById('pendingInvitesCard');
     const listEl = document.getElementById('pendingInvitesList');
@@ -811,6 +834,10 @@
         console.warn('Bekleyen davetler yüklenemedi (muhtemelen Firestore index eksik):', inviteErr);
         pendingInvites = [];
       }
+
+      // Kullanıcı limiti kontrolü için güncel sayıları sakla.
+      lastMemberCount = membersSnap.size;
+      lastPendingCount = pendingInvites.length;
 
       if(membersSnap.empty && !pendingInvites.length){
         listEl.innerHTML = '<div class="empty-note">' + LBL.noUsersAdded + '</div>';
@@ -953,6 +980,15 @@
       listEl.querySelectorAll('[data-edit-invite]').forEach(btn => {
         btn.addEventListener('click', () => {
           const panel = document.getElementById('p_' + btn.dataset.editInvite + '_panel');
+          if(panel) panel.hidden = !panel.hidden;
+        });
+      });
+      // İsme (satır başlığına) tıklayınca da Yetkiler panelini aç/kapa (toggle).
+      listEl.querySelectorAll('.member-info').forEach(info => {
+        info.style.cursor = 'pointer';
+        info.addEventListener('click', () => {
+          const row = info.closest('.member-row');
+          const panel = row && row.querySelector('.member-perm-panel');
           if(panel) panel.hidden = !panel.hidden;
         });
       });

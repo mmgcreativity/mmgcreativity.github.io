@@ -436,7 +436,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .hero-top-text .hero-title{ margin-bottom:6px; }
   .hero-top-text .hero-tagline{ margin-bottom:0; }
 
-  .tools-section{ padding:40px 110px 60px 48px; position:relative; overflow:hidden; }
+  /* min-height: masaüstü boşken (tüm kartlar silininde) sağdaki dikey düzenleme çubuğunun
+     (kalem + ekle + büyüteçler + sıfırla) alt butonları overflow:hidden ile kırpılmasın diye
+     bölüme yeterli yükseklik veriyoruz. Kartlar varken bölüm zaten daha uzun, etkisi olmaz. */
+  .tools-section{ padding:40px 110px 60px 48px; position:relative; overflow:hidden; min-height:380px; }
   .tools-deco{ position:absolute; inset:0; pointer-events:none; }
   .tools-label{
     font-size:10.5px; letter-spacing:.16em; color:var(--muted); text-transform:uppercase; margin-bottom:16px;
@@ -488,11 +491,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     background:var(--surface); border:1px solid var(--hairline); border-radius:12px;
     padding:24px; cursor:pointer; text-align:left; color:var(--text);
     transition:border-color .15s ease, transform .15s ease; position:relative;
-    width:100%; min-height:var(--dfa-card-h, 190px); box-sizing:border-box;
+    width:100%; height:var(--dfa-card-h, 190px); overflow:hidden; box-sizing:border-box;
     display:flex; flex-direction:column;
   }
-  .app-card.dynamic-shortcut{ display:flex; flex-direction:column; justify-content:center; min-height:max(56px, calc(var(--dfa-card-h, 190px) * 0.37)); }
-  .app-card.dynamic-shortcut p{ display:none; }
+  /* Açıklaması olmayan dinamik kısayol kartları kısa/ortalanmış kalır; açıklaması olanlar
+     (has-desc) ana kartlarla birebir aynı görünür (tam boy + açıklama metni). */
+  .app-card.dynamic-shortcut:not(.has-desc){ justify-content:center; min-height:max(56px, calc(var(--dfa-card-h, 190px) * 0.37)); }
+  .app-card.dynamic-shortcut:not(.has-desc) p{ display:none; }
   .card-grid.edit-mode .app-card{ cursor:grab; outline:1.5px dashed var(--hairline); }
   .card-grid.edit-mode .app-card:active{ cursor:grabbing; }
   .card-grid.edit-mode .app-card.resizable{ resize:both; overflow:auto; min-width:180px; min-height:70px; }
@@ -641,12 +646,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .hero{ padding:22px 20px 20px; min-height:0; }
     .hero-app-icon{ width:48px; height:48px; border-radius:12px; }
     .hero-title{ font-size:22px; }
-    .tools-section{ padding:28px 20px 40px; }
+    .tools-section{ padding:28px 20px 40px; min-height:0; }
     .deco{ display:none; }
     .card-grid{ gap:10px; }
-    .app-card{ padding:16px; width:100%; }
-    .app-card p{ display:none; }
-    .app-card h3{ margin-bottom:0; }
+    .app-card{ padding:16px; width:100%; height:auto; }
+    .app-card p{ display:block; font-size:12.5px; line-height:1.5; margin-top:6px; }
+    .app-card h3{ margin-bottom:4px; }
     .card-grid.edit-mode .app-card.resizable{ resize:none; }
     .card-grid.edit-mode .app-card.resizable .card-resize-hint{ display:none; }
     .desktop-toolbar{ position:static; justify-content:flex-start; margin-top:16px; }
@@ -903,6 +908,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       card_rehber_desc:'Kredi, faiz, taksit ve bütçe planlaması gibi konularda sade dilde, pratik rehberler.',
       card_istatistikler_desc:'Kategori dağılımlarınızı ve zaman içindeki eğilimlerinizi tek bakışta görün.',
       card_referans_desc:'Kendi referans kodunuzu paylaşın; kimlerin katıldığını ve komisyon oranınızı takip edin.',
+      sc_desc_rotatif:'Rotatif (spot) kredinizin faizini ve maliyetini gün bazında hesaplayın.',
+      sc_desc_kkvf:'Kredi kartı borcunuzun vade farkını ve taksit maliyetini hesaplayın.',
+      sc_desc_ortalama:'Birden çok ödemenin ortalama vadesini tek işlemde bulun.',
+      sc_desc_vadesapma:'Ödemelerin planlanan vadeden sapmasını ve maliyetini ölçün.',
+      sc_desc_vadelimevduat:'Vadeli mevduatınızın getirisini faiz ve stopaj sonrası hesaplayın.',
+      sc_desc_krediteklif:'Farklı bankaların kredi tekliflerini yan yana karşılaştırın.',
+      sc_desc_kullanici:'Firmanıza bağlı kullanıcıları ekleyin ve yetkilerini yönetin.',
       footer_follow_us:'Bizi Takip Edin', footer_powered_by:'Powered by', footer_download_now:'Hemen İndirin',
       footer_about:'Hakkında', footer_privacy:'Gizlilik Politikası', footer_terms:'Kullanım Şartları',
       close:'Kapat',
@@ -1002,6 +1014,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       card_rehber_desc:'Practical, plain-language guides on loans, interest, installments, and budget planning.',
       card_istatistikler_desc:'See your category breakdowns and trends over time at a glance.',
       card_referans_desc:'Share your own referral code; track who joined and your commission rate.',
+      sc_desc_rotatif:'Calculate the interest and cost of your revolving (spot) loan on a daily basis.',
+      sc_desc_kkvf:'Calculate the late-payment interest and installment cost of your credit card debt.',
+      sc_desc_ortalama:'Find the average maturity of multiple payments in a single step.',
+      sc_desc_vadesapma:'Measure how far payments deviate from their planned maturity, and the cost.',
+      sc_desc_vadelimevduat:'Calculate your time-deposit return after interest and withholding tax.',
+      sc_desc_krediteklif:'Compare loan offers from different banks side by side.',
+      sc_desc_kullanici:'Add users linked to your company and manage their permissions.',
       footer_follow_us:'Follow Us', footer_powered_by:'Powered by', footer_download_now:'Download Now',
       footer_about:'About', footer_privacy:'Privacy Policy', footer_terms:'Terms of Use',
       close:'Close',
@@ -2041,18 +2060,52 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   }
 
+  // ---- Dinamik kısayol kartları için açıklama haritası ----
+  // Masaüstüne eklenen (Ekle menüsü / sürükle) kısayollar eskiden açıklamasız, kısa ve
+  // ana kartlardan farklı görünüyordu (ör. "Rotatif Kredi Hesaplama" boş geliyordu). Artık
+  // her bilinen hedefe bir i18n açıklama anahtarı eşliyoruz; kart ana kartlarla aynı görünür.
+  var SC_DESC_KEY = {
+    'Hesaplama_Araclari.html':'card_calc_desc',
+    'Nakit_Akis_Tablosu.html':'card_cashflow_desc',
+    'Giderler.html':'card_expenses_desc',
+    'Gelirler.html':'card_income_desc',
+    'Talimat_Hazirlama.html':'card_instructions_desc',
+    'HazirMetinTalimatlari.html':'card_hazirmetin_desc',
+    'VeriGirisPaneli.html':'card_verigirisi_desc',
+    'Istatistikler.html':'card_istatistikler_desc',
+    'ReferansKoduYonetimi.html':'card_referans_desc',
+    'Forum.html':'card_forum_desc',
+    'Blog.html':'card_blog_desc',
+    'rehber.html':'card_rehber_desc',
+    'Rotatif_Kredi_Hesaplama.html':'sc_desc_rotatif',
+    'Kredi_Karti_Vade_Farki_Hesaplama.html':'sc_desc_kkvf',
+    'Ortalama_Vade_Hesaplama.html':'sc_desc_ortalama',
+    'Vade_Sapma_Hesaplama.html':'sc_desc_vadesapma',
+    'vadeli-mevduat-faizi-hesaplama.html':'sc_desc_vadelimevduat',
+    'kredi-karsilastirma.html':'sc_desc_krediteklif',
+    'KullaniciYonetimi.html':'sc_desc_kullanici'
+  };
+  function escHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
   // ---- Yeni (dinamik) kısayol kartı oluşturma ----
   function buildDynamicCard(target, title){
     var btn = document.createElement('button');
     btn.className = 'app-card dynamic-shortcut';
     btn.dataset.target = target;
     btn.dataset.title = title;
+    var descKey = SC_DESC_KEY[target];
+    var descHtml = '<p></p>';
+    if(descKey){
+      btn.className += ' has-desc';
+      var descText = (typeof MMGI18N !== 'undefined' && MMGI18N.t) ? MMGI18N.t(descKey) : '';
+      descHtml = '<p data-i18n="'+descKey+'">'+escHtml(descText)+'</p>';
+    }
     btn.innerHTML =
-      '<span class="fav-star-card" role="button" tabindex="0" data-fav-target="'+target+'" data-fav-title="'+title+'" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar">'+
+      '<span class="fav-star-card" role="button" tabindex="0" data-fav-target="'+escHtml(target)+'" data-fav-title="'+escHtml(title)+'" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar">'+
       '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>'+
       '<span class="card-arrow">↗</span>'+
-      '<h3>'+title+'</h3>'+
-      '<p></p>';
+      '<h3>'+escHtml(title)+'</h3>'+
+      descHtml;
     return btn;
   }
 
@@ -2373,9 +2426,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var box = document.createElement('div');
     box.id = 'desktopEmptyState';
     box.style.cssText = 'grid-column:1 / -1; text-align:center; padding:40px 20px; color:var(--muted);';
-    box.innerHTML = '<div style="font-size:14px; margin-bottom:14px;">Masaüstünüzde hiç kısayol kalmadı.</div>' +
-      '<button type="button" id="desktopRestoreDefaultsBtn" style="padding:10px 18px; border-radius:9px; border:1px solid var(--brass); background:var(--surface-2); color:var(--brass); font-weight:600; cursor:pointer;">↺ Varsayılan Kısayolları Geri Yükle</button>';
+    box.innerHTML = '<div style="font-size:14px; margin-bottom:16px;">Masaüstünüzde hiç kısayol kalmadı.</div>' +
+      '<button type="button" id="desktopEmptyAddBtn" style="padding:11px 20px; border-radius:9px; border:none; background:var(--brass); color:#141220; font-weight:700; cursor:pointer;">+ Kısayol Ekle</button>' +
+      '<div style="margin-top:14px;"><button type="button" id="desktopRestoreDefaultsBtn" style="background:none; border:none; color:var(--muted); font-size:12px; cursor:pointer; text-decoration:underline;">↺ Varsayılan kısayolların tümünü geri yükle</button></div>';
     grid.appendChild(box);
+    // "+ Kısayol Ekle": düzenleme modunu açar ve Ekle menüsünü gösterir; kullanıcı istediği kısayolları seçer.
+    var eab = document.getElementById('desktopEmptyAddBtn');
+    if(eab) eab.addEventListener('click', function(){
+      setEditMode(true);
+      buildAddMenu();
+      if(addMenu) addMenu.hidden = false;
+      if(addBtn) addBtn.setAttribute('aria-pressed', 'true');
+    });
+    // Küçük ikincil bağlantı: gerçekten hepsini varsayılana döndürmek isteyen için.
     var rb = document.getElementById('desktopRestoreDefaultsBtn');
     if(rb) rb.addEventListener('click', function(){
       try{
@@ -3183,7 +3246,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   accountTrigger.addEventListener('click', (e) => {
     e.stopPropagation();
-    toggleAccountDropdown();
+    // Ana başlığa (hesap tetikleyici) her tıklamada menü AÇILSIN; toggle ile kapanmasın.
+    // Kapatmak için menü dışına tıklama ve arka plan (backdrop) katmanı zaten var.
+    toggleAccountDropdown(true);
   });
 
   document.addEventListener('click', (e) => {
@@ -3555,8 +3620,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   if(mmgDataScopeToggleBtn){
     mmgDataScopeToggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      // Aktif firma başlığına her tıklamada firma listesi AÇILSIN (toggle ile kapanmasın).
       const listEl = document.getElementById('mmgDataScopeList');
-      if(listEl) listEl.style.display = (listEl.style.display === 'none') ? 'block' : 'none';
+      if(listEl) listEl.style.display = 'block';
     });
   }
   // Her zaman görünür "aktif firma" çubuğuna tıklanınca hesap menüsünü açıp firma

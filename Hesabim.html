@@ -1029,12 +1029,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         memberSnap.forEach(d => memberInvites.push({ kind:'member', id:code, firmaId:d.id, data:d.data() }));
       }
     }catch(e){ /* sessizce geç */ }
-    try{
-      if(code){
-        const adminSnap = await getDoc(doc(db, 'firmaAdminInvites', code));
-        if(adminSnap.exists()) otherInvites.push({ kind:'admin', id:code, data:adminSnap.data() });
-      }
-    }catch(e){ /* sessizce geç */ }
+    // Güvenlik: "Yönetici Ekle" özelliği kaldırıldı — her firmada tek admin (firmayı oluşturan)
+    // kuralı. Yönetici davetleri artık burada GÖSTERİLMEZ ve KABUL EDİLMEZ; eski/bekleyen
+    // firmaAdminInvites kayıtları yok sayılır (yeni admin oluşturulamaz).
 
     if(!memberInvites.length && !otherInvites.length){ pendingInvitesCard.style.display = 'none'; pendingInvitesList.innerHTML = ''; return; }
     pendingInvitesCard.style.display = 'block';
