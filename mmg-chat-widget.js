@@ -74,11 +74,6 @@ import {
   let groupsMap = {};        // groupId -> group data
   let groupInvitesMap = {};  // inviteId -> invite data
   let unsubGroups = null, unsubGroupInvites = null;
-  let sentGroupInvitesMap = {};  // gönderdiğim bekleyen grup davetleri (geri çekmek için)
-  let sentRequestsMap = {};      // gönderdiğim bekleyen sohbet istekleri (geri çekmek için)
-  let unsubSentRequests = null;
-  let requestsSubView = 'incoming'; // incoming | sent
-  let unsubSentGroupInvites = null;
   let unsubFirmaMemberInvite = null, unsubFirmaAdminInvite = null;
   let firmaMemberInvites = []; // [{id, firmaId, kind, data}] — bir kod birden fazla firmaya davet edilebilir
   let firmaAdminInvite = null; // {id, kind, data} | null
@@ -90,8 +85,7 @@ import {
   let notificationsMap = {};  // notifId -> genel bildirim (davet/referans/hatırlatma) verisi
   let unsubNotifications = null;
   let notificationsFirstSnapshot = true;
-  let activeTab = 'friends'; // friends | requests | groups | admin | notifications
-  let mainView = 'sohbet';   // sohbet | bildirim  (üstteki iki ana başlık)
+  let activeTab = 'friends'; // friends | requests | add | admin
 
   // ---- Kullanıcı Kodu -> görünen ad önbelleği ----
   // userDirectory/{kod} = {uid, username} herkese açık okunur; sohbet başlığında/listesinde/
@@ -212,9 +206,6 @@ import {
     display:flex; align-items:center; justify-content:center;
   }
   .mmg-chat-iconbtn:hover{ color:var(--text,#EAEDF3); background:var(--surface-2,#1B2536); }
-  /* Bu buton .mmg-chat-iconbtn'da display:flex olduğu için hidden özniteliği kendiliğinden
-     gizlemiyordu; açıkça gizliyoruz (1:1 sohbette 'gruptan ayrıl' butonu görünme hatası). */
-  .mmg-chat-iconbtn[hidden]{ display:none !important; }
   .mmg-chat-tabs{ display:flex; gap:4px; padding:0 10px 10px; flex:0 0 auto; }
   .mmg-chat-tab{
     flex:1; text-align:center; font-size:11.5px; font-weight:600; padding:7px 4px; border-radius:8px;
@@ -224,23 +215,6 @@ import {
   .mmg-chat-tab.active{ color:var(--text,#EAEDF3); border-color:var(--brass-dim,#8A7440); background:rgba(198,161,91,0.12); }
   .mmg-chat-tab .mmg-chat-dot{
     position:absolute; top:3px; right:6px; width:7px; height:7px; border-radius:50%; background:var(--red,#E2544B);
-  }
-  /* Bildirim zili (sağ üstte): bekleyen bildirim varken kırmızı nokta + titreme (shake) */
-  .mmg-chat-bell.active{ color:var(--brass,#C6A15B); }
-  .mmg-chat-bell-dot{
-    position:absolute; top:3px; right:3px; width:8px; height:8px; border-radius:50%;
-    background:var(--red,#E2544B); box-shadow:0 0 0 2px var(--surface,#141C2B);
-  }
-  .mmg-chat-bell-dot[hidden]{ display:none; }
-  .mmg-chat-bell.mmg-chat-bell-shake{ animation:mmgBellShake 1.1s ease-in-out infinite; transform-origin:top center; }
-  @keyframes mmgBellShake{
-    0%,60%,100%{ transform:rotate(0); }
-    5%{ transform:rotate(14deg); } 10%{ transform:rotate(-12deg); } 15%{ transform:rotate(10deg); }
-    20%{ transform:rotate(-8deg); } 25%{ transform:rotate(6deg); } 30%{ transform:rotate(-3deg); } 35%{ transform:rotate(0); }
-  }
-  @keyframes mmgNotifBlink{
-    0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(226,84,75,0.75); }
-    50%{ opacity:0.3; box-shadow:0 0 0 5px rgba(226,84,75,0); }
   }
   .mmg-chat-body{ flex:1 1 auto; overflow-y:auto; padding:10px 12px; }
   .mmg-chat-body::-webkit-scrollbar{ width:6px; }
@@ -470,13 +444,8 @@ import {
       <button type="button" class="mmg-chat-iconbtn" id="mmgChatBlockBtn" hidden aria-label="Engelle" title="Bu kullanıcıyı engelle">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/></svg>
       </button>
-      <button type="button" class="mmg-chat-iconbtn" id="mmgChatNudgeBtn" hidden aria-label="Dürt" title="Dürt — karşı tarafa bildirim gönder" style="font-size:16px;">👉</button>
       <button type="button" class="mmg-chat-iconbtn" id="mmgChatLeaveGroupBtn" hidden aria-label="Gruptan ayrıl" title="Gruptan ayrıl">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-      </button>
-      <button type="button" class="mmg-chat-iconbtn mmg-chat-bell" id="mmgChatBellBtn" aria-label="Bildirimler" title="Bildirimler" style="position:relative;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="mmg-chat-bell-dot" id="mmgChatNotifDot" hidden></span>
       </button>
       <button type="button" class="mmg-chat-iconbtn" id="mmgChatCloseBtn" aria-label="Kapat">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -484,9 +453,11 @@ import {
     </div>
     <div id="mmgChatCodeBox" class="mmg-chat-code-box"></div>
     <div class="mmg-chat-tabs" id="mmgChatTabs">
-      <div class="mmg-chat-tab active" data-tab="friends">Kişilerim</div>
-      <div class="mmg-chat-tab" data-tab="requests">İstek<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
-      <div class="mmg-chat-tab" data-tab="groups">Grup</div>
+      <div class="mmg-chat-tab active" data-tab="friends">Sohbetler</div>
+      <div class="mmg-chat-tab" data-tab="requests">İstekler<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
+      <div class="mmg-chat-tab" data-tab="groups">Gruplar</div>
+      <div class="mmg-chat-tab" data-tab="notifications">Davetler<span class="mmg-chat-dot" id="mmgChatNotifDot" hidden></span></div>
+      <div class="mmg-chat-tab" data-tab="admin">Admin</div>
     </div>
     <div class="mmg-chat-body" id="mmgChatBody"></div>
     <div class="mmg-chat-reply-bar" id="mmgChatReplyBar" hidden></div>
@@ -543,11 +514,9 @@ import {
     els.blockBtn = document.getElementById('mmgChatBlockBtn');
     els.deleteBtn = document.getElementById('mmgChatDeleteBtn');
     els.leaveGroupBtn = document.getElementById('mmgChatLeaveGroupBtn');
-    els.nudgeBtn = document.getElementById('mmgChatNudgeBtn');
     els.closeBtn = document.getElementById('mmgChatCloseBtn');
     els.codeBox = document.getElementById('mmgChatCodeBox');
     els.tabs = document.getElementById('mmgChatTabs');
-    els.bellBtn = document.getElementById('mmgChatBellBtn');
     els.reqDot = document.getElementById('mmgChatReqDot');
     els.notifDot = document.getElementById('mmgChatNotifDot');
     els.body = document.getElementById('mmgChatBody');
@@ -590,39 +559,13 @@ import {
     els.tabs.addEventListener('click', (e) => {
       const tab = e.target.closest('.mmg-chat-tab');
       if(!tab) return;
-      const t = tab.dataset.tab;
-      if(t === 'add'){
-        // "Ekle" alt sekmesi: Sohbetler'in kod-ile-ekle görünümünü aç
-        activeTab = 'friends'; friendsSubView = 'add';
-      } else {
-        activeTab = t; friendsSubView = 'list';
-      }
+      activeTab = tab.dataset.tab;
+      if(activeTab !== 'friends') friendsSubView = 'list';
       if(activeTab !== 'groups') groupsSubView = 'list';
+      [...els.tabs.children].forEach(c => c.classList.toggle('active', c === tab));
       closeOpenChat(false);
       renderTab();
     });
-    // Sağ üstteki BİLDİRİM ZİLİ: tıklayınca bildirimler görünümüne geç / geri dön (ana başlık barı kaldırıldı).
-    if(els.bellBtn){
-      els.bellBtn.addEventListener('click', () => {
-        closeOpenChat(false);
-        if(activeTab === 'notifications'){
-          activeTab = 'friends'; friendsSubView = 'list';
-        } else {
-          activeTab = 'notifications';
-        }
-        renderTab();
-      });
-    }
-    // Dürt: karşı tarafa "dürtme" bildirimi gönder (uygulama-içi; kapalı-uygulama push'u Blaze ister)
-    if(els.nudgeBtn){
-      els.nudgeBtn.addEventListener('click', async () => {
-        if(!openChatOtherUid) return;
-        const who = myChatCode ? ('#' + myChatCode) : 'Bir kullanıcı';
-        try{ await window.mmgNotify(openChatOtherUid, { type:'nudge', title:'👉 Dürtüldünüz', body: who + ' sizi dürttü' }); }catch(e){}
-        els.nudgeBtn.textContent = '✅';
-        setTimeout(() => { els.nudgeBtn.textContent = '👉'; }, 1200);
-      });
-    }
     els.sendBtn.addEventListener('click', sendCurrentMessage);
     els.input.addEventListener('keydown', (e) => {
       if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendCurrentMessage(); }
@@ -666,18 +609,6 @@ import {
          (els.toastContainer && els.toastContainer.contains(e.target))) return;
       els.panel.hidden = true;
     }, true);
-
-    // Sayfa içeriği çoğunlukla bir <iframe> (araç sayfası) olduğundan, iframe'e tıklandığında
-    // yukarıdaki 'pointerdown' dış-tık dinleyicisi TETİKLENMEZ — olaylar iframe sınırını geçmez.
-    // Böyle durumlarda pencere odağı iframe'e geçer ve 'blur' olur; paneli o zaman da kapatıyoruz.
-    // (Kullanıcı defalarca "dışarı tıklayınca kapanmıyor" dedi — kök neden buydu.)
-    window.addEventListener('blur', () => {
-      if(!els.panel || els.panel.hidden) return;
-      // Baloncuk/panel içi bir etkileşimden dolayı blur olduysa kapatma.
-      const ae = document.activeElement;
-      if(ae && els.panel.contains(ae)) return;
-      els.panel.hidden = true;
-    });
   }
 
   function setBadge(n){
@@ -878,9 +809,6 @@ import {
     if(els.leaveGroupBtn) els.leaveGroupBtn.hidden = true;
     if(els.blockBtn) els.blockBtn.hidden = true;
     if(els.deleteBtn) els.deleteBtn.hidden = true;
-    if(els.nudgeBtn) els.nudgeBtn.hidden = true;
-    // Kod kutusunu kendi kullanıcı koduna geri döndür (sohbet açıkken karşı tarafın kodunu gösteriyordu).
-    if(els.codeBox) els.codeBox.innerHTML = myChatCode ? ('Sizin Kullanıcı Kodunuz: <b>' + esc(myChatCode) + '</b>') : '';
     if(rerender !== false) renderTab();
   }
 
@@ -930,6 +858,7 @@ import {
   // ---- Dinleyiciler ----
   let chatsFirstSnapshot = true, groupsFirstSnapshot = true;
   let firmaMemberInvitesFirstSnapshot = true, firmaAdminInviteFirstSnapshot = true;
+  let requestsFirstSnapshot = true, groupInvitesFirstSnapshot = true;
 
   function detectNewMessagesAndToast(newMap, oldMap, kind){
     Object.keys(newMap).forEach(id => {
@@ -997,6 +926,43 @@ import {
     });
   }
 
+  // Yeni sohbet isteği (istek) geldiğinde toast + tarayıcı bildirimi
+  function showToastForRequest(r){
+    const label = labelForCode(r.fromCode);
+    const title = '👋 Yeni sohbet isteği';
+    const message = label + ' size sohbet isteği gönderdi. Onaylamak için dokunun.';
+    notifyNewMessage(title, message);
+    showChatToast({
+      title, message, avatarLetter: '👋',
+      onClick: () => {
+        els.panel.hidden = false;
+        positionPanelNearBubble();
+        activeTab = 'requests';
+        [...els.tabs.children].forEach(t => t.classList.toggle('active', t.dataset.tab === 'requests'));
+        renderTab();
+      }
+    });
+  }
+
+  // Yeni grup daveti geldiğinde toast + tarayıcı bildirimi
+  function showToastForGroupInvite(inv){
+    const label = labelForCode(inv.fromCode);
+    const gname = inv.groupName || 'bir grup';
+    const title = '👥 Grup daveti';
+    const message = label + ' sizi "' + gname + '" grubuna davet etti.';
+    notifyNewMessage(title, message);
+    showChatToast({
+      title, message, avatarLetter: '👥',
+      onClick: () => {
+        els.panel.hidden = false;
+        positionPanelNearBubble();
+        activeTab = 'requests';
+        [...els.tabs.children].forEach(t => t.classList.toggle('active', t.dataset.tab === 'requests'));
+        renderTab();
+      }
+    });
+  }
+
   function showToastForFirmaInvite(inv){
     const firmaName = (inv.data && inv.data.firmaName) || 'bir firma';
     const title = '🏢 ' + firmaName;
@@ -1029,18 +995,19 @@ import {
     }, (err) => console.error('mmg-chat-widget chats onSnapshot:', err));
 
     unsubRequests = onSnapshot(query(collection(db, 'chatRequests'), where('toUid', '==', uid), where('status', '==', 'pending')), (snap) => {
+      const prevReq = requestsMap;
       requestsMap = {};
       snap.forEach(d => { requestsMap[d.id] = d.data(); });
+      if(!requestsFirstSnapshot){
+        Object.keys(requestsMap).forEach(id => {
+          const r = requestsMap[id];
+          if(!prevReq[id] && !myBlockedUids.includes(r.fromUid)){ try{ showToastForRequest(r); }catch(e){} }
+        });
+      }
+      requestsFirstSnapshot = false;
       if(activeTab === 'requests') renderTab();
       updateBadge();
     }, (err) => console.error('mmg-chat-widget requests onSnapshot:', err));
-
-    // GÖNDERDİĞİM bekleyen sohbet istekleri (geri çekebilmek + durum görebilmek için) — kullanıcı isteği.
-    unsubSentRequests = onSnapshot(query(collection(db, 'chatRequests'), where('fromUid', '==', uid), where('status', '==', 'pending')), (snap) => {
-      sentRequestsMap = {};
-      snap.forEach(d => { sentRequestsMap[d.id] = Object.assign({ _id: d.id }, d.data()); });
-      if(activeTab === 'requests') renderTab();
-    }, (err) => console.error('mmg-chat-widget sentRequests onSnapshot:', err));
 
     unsubGroups = onSnapshot(query(collection(db, 'chatGroups'), where('members', 'array-contains', uid)), (snap) => {
       const newGroupsMap = {};
@@ -1053,18 +1020,19 @@ import {
     }, (err) => console.error('mmg-chat-widget groups onSnapshot:', err));
 
     unsubGroupInvites = onSnapshot(query(collection(db, 'chatGroupInvites'), where('toUid', '==', uid), where('status', '==', 'pending')), (snap) => {
+      const prevInv = groupInvitesMap;
       groupInvitesMap = {};
       snap.forEach(d => { groupInvitesMap[d.id] = d.data(); });
+      if(!groupInvitesFirstSnapshot){
+        Object.keys(groupInvitesMap).forEach(id => {
+          const inv = groupInvitesMap[id];
+          if(!prevInv[id] && !myBlockedUids.includes(inv.fromUid)){ try{ showToastForGroupInvite(inv); }catch(e){} }
+        });
+      }
+      groupInvitesFirstSnapshot = false;
       if(activeTab === 'requests') renderTab();
       updateBadge();
     }, (err) => console.error('mmg-chat-widget groupInvites onSnapshot:', err));
-
-    // GÖNDERDİĞİM bekleyen grup davetleri (geri çekebilmek için) — kullanıcı isteği.
-    unsubSentGroupInvites = onSnapshot(query(collection(db, 'chatGroupInvites'), where('fromUid', '==', uid), where('status', '==', 'pending')), (snap) => {
-      sentGroupInvitesMap = {};
-      snap.forEach(d => { sentGroupInvitesMap[d.id] = Object.assign({ _id: d.id }, d.data()); });
-      if(activeTab === 'groups') renderTab();
-    }, (err) => console.error('mmg-chat-widget sentGroupInvites onSnapshot:', err));
 
     // ---- Genel bildirimler (çan/badge): davet gönderildi, referans kullanıldı, hatırlatma ----
     unsubNotifications = onSnapshot(query(collection(db, 'notifications'), where('toUid', '==', uid)), (snap) => {
@@ -1131,10 +1099,7 @@ import {
     els.reqDot.hidden = reqCount === 0;
     const firmaInviteCount = firmaMemberInvites.length + (firmaAdminInvite ? 1 : 0);
     const notifUnread = Object.keys(notificationsMap).filter(id => !notificationsMap[id].read).length;
-    const bellPending = firmaInviteCount + notifUnread;
-    if(els.notifDot) els.notifDot.hidden = bellPending === 0;
-    // Bildirim zili: bekleyen varken titresin (shake), yoksa dursun.
-    if(els.bellBtn) els.bellBtn.classList.toggle('mmg-chat-bell-shake', bellPending > 0);
+    if(els.notifDot) els.notifDot.hidden = (firmaInviteCount + notifUnread) === 0;
     let unread = 0;
     Object.keys(chatsMap).forEach(id => {
       const c = chatsMap[id];
@@ -1154,24 +1119,8 @@ import {
   function updateOpenChatHeaderIfNeeded(){ /* şu an ekstra bir şey gerekmiyor */ }
 
   // ---- Sekme render ----
-  // Ana başlık barı kaldırıldı. Bildirimler artık sağ üstteki zil ile açılıyor. Bu fonksiyon,
-  // bildirimler görünümündeyken alt sekme çubuğunu gizler; diğer her durumda gösterir + aktif
-  // sekmeyi vurgular. Ayrıca zil, bildirimler görünümündeyken vurgulanır.
-  function syncMainView(){
-    const isNotif = (activeTab === 'notifications');
-    if(els.bellBtn) els.bellBtn.classList.toggle('active', isNotif);
-    if(els.tabs){
-      els.tabs.hidden = isNotif;   // bildirimler görünümünde alt sekmeler gizli
-      if(!isNotif){
-        const activeSub = (activeTab === 'friends' && friendsSubView === 'add') ? 'add' : activeTab;
-        [...els.tabs.children].forEach(c => c.classList.toggle('active', c.dataset.tab === activeSub));
-      }
-    }
-  }
-
   function renderTab(){
     if(openChatId) return; // bir sohbet açıkken sekme gövdesi değişmesin
-    syncMainView();
     if(activeTab === 'admin') return renderAdminTab();
     if(activeTab === 'friends') return renderFriendsTab();
     if(activeTab === 'groups') return renderGroupsTab();
@@ -1484,11 +1433,18 @@ import {
         </div>
         <button type="button" class="mmg-chat-list-delete" data-delete-chat-id="${esc(r.id)}" data-delete-label="${esc(r.label)}" title="Kişiyi sil" aria-label="Kişiyi sil">🗑</button>
       </div>`).join('')
-      : `<div class="mmg-chat-empty">Henüz bir sohbetiniz yok.<br><b>İstek → Gönderilen</b> sekmesindeki "+ Kişi Ekle" ile kullanıcı kodu girerek istek gönderebilirsiniz.</div>`;
+      : `<div class="mmg-chat-empty">Henüz bir sohbetiniz yok.<br>"+ Kişi Ekle" ile bir kullanıcı kodu girerek istek gönderebilirsiniz.</div>`;
 
-    // Kullanıcı isteği: "+ Kişi Ekle" Kişilerim'den KALDIRILDI; artık İstek > Gönderilen altında.
-    els.body.innerHTML = listHtml;
+    els.body.innerHTML = `
+      <div class="mmg-chat-list-item" id="mmgAddPersonBtn" style="justify-content:center; font-weight:700; color:var(--brass,#C6A15B);">
+        + Kişi Ekle
+      </div>
+      ${listHtml}`;
 
+    document.getElementById('mmgAddPersonBtn').addEventListener('click', () => {
+      friendsSubView = 'add';
+      renderTab();
+    });
     els.body.querySelectorAll('.mmg-chat-list-delete').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1530,28 +1486,11 @@ import {
       </div>`).join('')
       : `<div class="mmg-chat-empty">Henüz bir grubunuz yok.<br>"+ Grup Oluştur" ile yeni bir grup kurabilirsiniz.</div>`;
 
-    // Gönderdiğim bekleyen grup davetleri (geri çekilebilir) — kullanıcı isteği.
-    const sentInv = Object.keys(sentGroupInvitesMap).map(id => sentGroupInvitesMap[id]);
-    let sentHtml = '';
-    if(sentInv.length){
-      sentHtml = '<div style="margin-top:14px; padding-top:10px; border-top:1px solid var(--hairline,#2A3448);">' +
-        '<div style="font-size:11.5px; color:var(--muted,#8D96AC); font-weight:600; margin:0 2px 8px;">Gönderdiğim bekleyen davetler</div>' +
-        sentInv.map(inv =>
-          '<div style="display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--hairline,#2A3448); border-radius:10px; margin-bottom:6px;">' +
-            '<div style="flex:1; min-width:0; font-size:12.5px;">' +
-              '<b>' + esc(inv.groupName || 'Grup') + '</b> → <b>' + esc(inv.toCode || inv.toUid || '?') + '</b> koduna davet' +
-            '</div>' +
-            '<button type="button" class="mmg-chat-btn decline" data-cancel-invite="' + esc(inv._id) + '" style="flex:0 0 auto; background:transparent; border:1px solid rgba(226,84,75,0.55); color:#E2544B; font-weight:600;">Geri Çek</button>' +
-          '</div>'
-        ).join('') + '</div>';
-    }
-
     els.body.innerHTML = `
       <div class="mmg-chat-list-item" id="mmgNewGroupBtn" style="justify-content:center; font-weight:700; color:var(--brass,#C6A15B);">
         + Grup Oluştur
       </div>
-      ${listHtml}
-      ${sentHtml}`;
+      ${listHtml}`;
 
     document.getElementById('mmgNewGroupBtn').addEventListener('click', () => {
       groupsSubView = 'newGroup';
@@ -1564,15 +1503,6 @@ import {
         openChat(row.dataset.groupId, { title: (g.name || 'Grup'), isAdminChat: false, collection: 'chatGroups' });
       });
     });
-    els.body.querySelectorAll('[data-cancel-invite]').forEach(btn => {
-      btn.addEventListener('click', () => cancelSentGroupInvite(btn.dataset.cancelInvite));
-    });
-  }
-
-  // Gönderdiğim bir grup davetini geri çek (sil).
-  async function cancelSentGroupInvite(inviteId){
-    try{ await deleteDoc(doc(db, 'chatGroupInvites', inviteId)); }
-    catch(e){ console.error('cancelSentGroupInvite:', e); }
   }
 
   function renderNewGroupForm(){
@@ -1694,59 +1624,8 @@ import {
     els.title.textContent = 'Sohbet İstekleri';
     const reqIds = Object.keys(requestsMap).filter(id => !myBlockedUids.includes(requestsMap[id].fromUid));
     const invIds = Object.keys(groupInvitesMap).filter(id => !myBlockedUids.includes(groupInvitesMap[id].fromUid));
-    const sentIds = Object.keys(sentRequestsMap);
-    const incomingCount = reqIds.length + invIds.length;
-
-    // İki alt başlık: Gelen İstekler / Gönderilen İstekler — kullanıcı isteği.
-    const subBar = `<div class="mmg-chat-subtabs" style="display:flex; gap:6px; margin:0 0 12px;">
-        <button type="button" class="mmg-chat-subtab${requestsSubView==='incoming'?' active':''}" data-rsub="incoming"
-          style="flex:1; padding:8px 6px; border-radius:9px; border:1px solid var(--line,#232B3E); cursor:pointer; font-size:12.5px; font-weight:600;
-          background:${requestsSubView==='incoming'?'var(--accent,#3B82F6)':'transparent'}; color:${requestsSubView==='incoming'?'#fff':'var(--muted,#8D96AC)'};">
-          Gelen${incomingCount?` (${incomingCount})`:''}</button>
-        <button type="button" class="mmg-chat-subtab${requestsSubView==='sent'?' active':''}" data-rsub="sent"
-          style="flex:1; padding:8px 6px; border-radius:9px; border:1px solid var(--line,#232B3E); cursor:pointer; font-size:12.5px; font-weight:600;
-          background:${requestsSubView==='sent'?'var(--accent,#3B82F6)':'transparent'}; color:${requestsSubView==='sent'?'#fff':'var(--muted,#8D96AC)'};">
-          Gönderilen${sentIds.length?` (${sentIds.length})`:''}</button>
-      </div>`;
-
-    function wireSubBar(){
-      els.body.querySelectorAll('.mmg-chat-subtab').forEach(b => {
-        b.addEventListener('click', () => { requestsSubView = b.dataset.rsub; renderTab(); });
-      });
-    }
-
-    // ---- GÖNDERİLEN görünümü ----
-    if(requestsSubView === 'sent'){
-      // "+ Kişi Ekle" artık burada (kullanıcı isteği: Ekle'yi İstek > Gönderilen'e taşı).
-      const addBtnHtml = `<div class="mmg-chat-list-item" id="mmgAddPersonBtn" style="justify-content:center; font-weight:700; color:var(--brass,#C6A15B); margin-bottom:10px;">+ Kişi Ekle</div>`;
-      function wireAddBtn(){
-        const b = document.getElementById('mmgAddPersonBtn');
-        if(b) b.addEventListener('click', () => { activeTab = 'friends'; friendsSubView = 'add'; renderTab(); });
-      }
-      if(!sentIds.length){
-        els.body.innerHTML = subBar + addBtnHtml + `<div class="mmg-chat-empty">Gönderdiğiniz bekleyen istek yok.</div>`;
-        wireSubBar(); wireAddBtn();
-        return;
-      }
-      const sentHtml = sentIds.map(id => {
-        const s = sentRequestsMap[id];
-        return `<div data-sent-id="${esc(id)}" style="display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--hairline,#2A3448); border-radius:10px; margin-bottom:6px;">
-          <div style="flex:1; min-width:0; font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>${esc(s.toCode || s.toUid || '???')}</b> koduna istek</div>
-          <button type="button" class="mmg-chat-btn decline cancel-sent" style="flex:0 0 auto; background:transparent; border:1px solid rgba(226,84,75,0.55); color:#E2544B; font-weight:600;">Geri Çek</button>
-        </div>`;
-      }).join('');
-      els.body.innerHTML = subBar + addBtnHtml + sentHtml;
-      wireSubBar(); wireAddBtn();
-      els.body.querySelectorAll('[data-sent-id]').forEach(row => {
-        row.querySelector('.cancel-sent').addEventListener('click', () => cancelSentRequest(row.dataset.sentId));
-      });
-      return;
-    }
-
-    // ---- GELEN görünümü ----
     if(!reqIds.length && !invIds.length){
-      els.body.innerHTML = subBar + `<div class="mmg-chat-empty">Bekleyen bir isteğiniz yok.</div>`;
-      wireSubBar();
+      els.body.innerHTML = `<div class="mmg-chat-empty">Bekleyen bir isteğiniz yok.</div>`;
       return;
     }
     const reqHtml = reqIds.map(id => {
@@ -1771,8 +1650,7 @@ import {
         </div>
       </div>`;
     }).join('');
-    els.body.innerHTML = subBar + reqHtml + invHtml;
-    wireSubBar();
+    els.body.innerHTML = reqHtml + invHtml;
 
     els.body.querySelectorAll('.mmg-chat-req-row[data-kind="chat"]').forEach(row => {
       const reqId = row.dataset.reqId, fromUid = row.dataset.fromUid, fromCode = row.dataset.fromCode;
@@ -1796,15 +1674,6 @@ import {
         }
       });
     });
-  }
-
-  // Gönderdiğim bekleyen sohbet isteğini geri çek (sil) — kullanıcı isteği.
-  async function cancelSentRequest(reqId){
-    try{
-      await deleteDoc(doc(db, 'chatRequests', reqId));
-      delete sentRequestsMap[reqId];
-      if(activeTab === 'requests') renderTab();
-    }catch(e){ console.error('cancelSentRequest:', e); alert('İstek geri çekilemedi. Lütfen tekrar deneyin.'); }
   }
 
   async function acceptGroupInvite(inviteId, groupId){
@@ -1890,13 +1759,6 @@ import {
         status: 'pending',
         createdAt: serverTimestamp()
       });
-      // Karşı tarafa bildirim düş (çan/badge) — kullanıcı isteği: "isteklere bildirim gitmiyor".
-      try{ await window.mmgNotify(targetUid, {
-        type: 'chatRequest',
-        title: 'Yeni sohbet isteği',
-        body: (myChatCode ? (myChatCode + ' kodlu kullanıcı') : 'Bir kullanıcı') + ' sizinle sohbet etmek istiyor.',
-        link: null
-      }); }catch(_e){}
       msgEl.className = 'mmg-chat-msg-ok';
       msgEl.textContent = 'İsteğiniz gönderildi. Karşı taraf onayladığında sohbet açılacak.';
       inputEl.value = '';
@@ -1928,13 +1790,6 @@ import {
         lastMessageAt: null,
         lastSenderUid: null
       }, { merge: true });
-      // İsteği gönderene "kabul edildi" bildirimi düş.
-      try{ await window.mmgNotify(fromUid, {
-        type: 'chatAccepted',
-        title: 'Sohbet isteğiniz kabul edildi',
-        body: (myChatCode ? (myChatCode + ' kodlu kullanıcı') : 'Kullanıcı') + ' isteğinizi kabul etti, artık sohbet edebilirsiniz.',
-        link: null
-      }); }catch(_e){}
       if(msgEl){ msgEl.className = 'mmg-chat-msg-ok'; msgEl.textContent = 'İstek kabul edildi, sohbet açıldı.'; }
     }catch(e){ console.error(e); }
   }
@@ -1979,7 +1834,6 @@ import {
     els.backBtn.hidden = false;
     els.footer.hidden = false;
     els.blockBtn.hidden = !openChatOtherUid; // gruplarda gösterilmez, sadece 1:1 sohbette
-    if(els.nudgeBtn) els.nudgeBtn.hidden = !openChatOtherUid; // dürtme yalnızca 1:1'de
     els.leaveGroupBtn.hidden = openChatCollection !== 'chatGroups';
     els.deleteBtn.hidden = openChatCollection !== 'chats'; // gruplarda "gruptan ayrıl" kullanılır
     els.title.textContent = info && info.title ? info.title : 'Sohbet';
@@ -1989,12 +1843,6 @@ import {
       const c0 = chatsMap[chatId] || {};
       const pinfo = (c0.participantInfo && c0.participantInfo[openChatOtherUid]) || {};
       if(pinfo.code){ openChatCode = pinfo.code; els.title.textContent = labelForCode(pinfo.code); }
-    }
-    // Açık 1:1 sohbette üstteki kod kutusunda KARŞI TARAFIN kodunu göster (listeye dönünce kendi kodu geri gelir).
-    if(els.codeBox){
-      els.codeBox.innerHTML = openChatCode
-        ? ('Karşı taraf kodu: <b>' + esc(openChatCode) + '</b>')
-        : (myChatCode ? ('Sizin Kullanıcı Kodunuz: <b>' + esc(myChatCode) + '</b>') : '');
     }
     els.body.innerHTML = `<div class="mmg-chat-empty">Yükleniyor…</div>`;
 
@@ -2269,17 +2117,6 @@ import {
         lastSenderUid: uid,
         ['lastRead_' + uid]: serverTimestamp()
       }, { merge: true });
-      // Karşı tarafa bildirim düşür (uygulama-içi çan/badge; kapalı-uygulama push'u Blaze+functions ister).
-      try{
-        const preview = text.slice(0, 80);
-        const who = myChatCode ? ('#' + myChatCode) : 'Bir kullanıcı';
-        if(openChatCollection === 'chats' && openChatOtherUid){
-          window.mmgNotify(openChatOtherUid, { type:'chat', title:'💬 Yeni mesaj', body: who + ': ' + preview });
-        } else if(openChatCollection === 'chatGroups'){
-          const g = groupsMap[openChatId] || {};
-          (g.members || []).forEach(m => { if(m && m !== uid) window.mmgNotify(m, { type:'chat', title:'💬 Yeni grup mesajı', body: who + ': ' + preview }); });
-        }
-      }catch(e){}
     }catch(e){ console.error(e); }
   }
 
@@ -2288,11 +2125,9 @@ import {
   function stopAll(){
     if(unsubChats){ unsubChats(); unsubChats = null; }
     if(unsubRequests){ unsubRequests(); unsubRequests = null; }
-    if(unsubSentRequests){ unsubSentRequests(); unsubSentRequests = null; }
     if(unsubMessages){ unsubMessages(); unsubMessages = null; }
     if(unsubGroups){ unsubGroups(); unsubGroups = null; }
     if(unsubGroupInvites){ unsubGroupInvites(); unsubGroupInvites = null; }
-    if(unsubSentGroupInvites){ unsubSentGroupInvites(); unsubSentGroupInvites = null; }
     if(unsubFirmaMemberInvite){ unsubFirmaMemberInvite(); unsubFirmaMemberInvite = null; }
     if(unsubFirmaAdminInvite){ unsubFirmaAdminInvite(); unsubFirmaAdminInvite = null; }
     if(unsubNotifications){ unsubNotifications(); unsubNotifications = null; }
@@ -2300,6 +2135,7 @@ import {
     notificationsMap = {}; notificationsFirstSnapshot = true;
     chatsFirstSnapshot = true; groupsFirstSnapshot = true;
     firmaMemberInvitesFirstSnapshot = true; firmaAdminInviteFirstSnapshot = true;
+    requestsFirstSnapshot = true; groupInvitesFirstSnapshot = true;
     firmaMemberInvites = []; firmaAdminInvite = null;
   }
 
