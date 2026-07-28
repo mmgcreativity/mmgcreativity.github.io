@@ -1487,6 +1487,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <button type="button" id="mmgLinkSubmitBtn" style="flex:1; padding:7px 10px; font-size:12.5px; font-weight:700; color:#0D1420; background:var(--brass,#C6A15B); border:none; border-radius:6px; cursor:pointer;">Bağla</button>
           <button type="button" id="mmgLinkCancelBtn" style="flex:0 0 auto; padding:7px 12px; font-size:12.5px; color:var(--muted); background:transparent; border:1px solid var(--hairline); border-radius:6px; cursor:pointer;">Vazgeç</button>
         </div>
+        <button type="button" id="mmgLinkGoogleBtn" style="width:100%; box-sizing:border-box; margin-top:6px; padding:7px 10px; font-size:12.5px; font-weight:600; color:var(--text); background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06L5.84 9.9C6.71 7.3 9.14 5.38 12 5.38z"/></svg>Google ile Bağla</button>
+        <button type="button" id="mmgLinkForgotBtn" style="width:100%; margin-top:6px; padding:4px; font-size:11.5px; color:var(--brass,#C6A15B); background:none; border:none; cursor:pointer; text-decoration:underline;">Şifremi unuttum?</button>
         <div id="mmgLinkMsg" style="display:none; margin-top:6px; font-size:11.5px;"></div>
       </div>
       <div class="account-dropdown-divider"></div>
@@ -2519,7 +2521,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var allCards = grid.querySelectorAll('.app-card');
     for(var i = 0; i < allCards.length; i++){
       var c = allCards[i];
-      if(!c.hidden && c.style.display !== 'none' && c.offsetParent !== null){ hasVisibleCard = true; break; }
+      // NOT: offsetParent kullanmıyoruz — sayfa ilk açılırken (bölüm henüz yerleşmeden)
+      // offsetParent null olabiliyor ve kartlar varken bile "boş" sanılıp düzen bozuluyordu.
+      // getComputedStyle, kartın KENDİ display:none'ını (admin/gated kartlar) yakalar ama
+      // üst öğe geç yerleştiğinde yanılmaz.
+      if(c.hidden) continue;
+      var disp = '';
+      try{ disp = window.getComputedStyle(c).display; }catch(e){ disp = c.style.display; }
+      if(disp !== 'none'){ hasVisibleCard = true; break; }
     }
     if(hasVisibleCard){
       if(existing) existing.remove();
@@ -3601,9 +3610,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
     });
   }
+  // Google ile Bağla: bazı hesaplar şifresiz (Google) olabilir → ikincil app'te Google popup ile giriş,
+  // idToken al, accountLinkConfirm, çık. Şifre gerekmez.
+  const mmgLinkGoogleBtn = document.getElementById('mmgLinkGoogleBtn');
+  if(mmgLinkGoogleBtn){
+    mmgLinkGoogleBtn.addEventListener('click', async () => {
+      mmgLinkGoogleBtn.disabled = true;
+      mmgSetLinkMsg('Google ile bağlanıyor…', 'info');
+      const linkerAuth = getLinkerAuth();
+      try{
+        const cred = await signInWithPopup(linkerAuth, new GoogleAuthProvider());
+        if(auth.currentUser && cred.user && cred.user.uid === auth.currentUser.uid){
+          try{ await signOut(linkerAuth); }catch(_e){}
+          mmgSetLinkMsg('Zaten bu hesaptasınız.', 'error'); mmgLinkGoogleBtn.disabled = false; return;
+        }
+        const idToken = await cred.user.getIdToken();
+        await httpsCallable(functions, 'accountLinkConfirm')({ targetIdToken: idToken });
+        try{ await signOut(linkerAuth); }catch(_e){}
+        mmgSetLinkMsg('Hesap bağlandı ✓', 'ok');
+        await renderMyAccountsList();
+        setTimeout(() => { const f = document.getElementById('mmgLinkAccountForm'); if(f) f.style.display = 'none'; mmgSetLinkMsg(''); }, 1200);
+      }catch(err){
+        try{ await signOut(linkerAuth); }catch(_e){}
+        mmgSetLinkMsg(mmgLinkErrorText(err), 'error');
+      }finally{ mmgLinkGoogleBtn.disabled = false; }
+    });
+  }
+  // Şifremi unuttum: girilen e-postaya (yoksa aktif hesabınkine) sıfırlama bağlantısı gönder.
+  const mmgLinkForgotBtn = document.getElementById('mmgLinkForgotBtn');
+  if(mmgLinkForgotBtn){
+    mmgLinkForgotBtn.addEventListener('click', async () => {
+      const emailEl = document.getElementById('mmgLinkEmail');
+      const email = (emailEl ? emailEl.value : '').trim();
+      if(!email){ mmgSetLinkMsg('Önce sıfırlanacak hesabın e-postasını yazın.', 'error'); return; }
+      mmgLinkForgotBtn.disabled = true;
+      try{
+        try{ await httpsCallable(functions, 'sendPasswordResetMail')({ email }); }
+        catch(_fn){ await sendPasswordResetEmail(auth, email); }
+        mmgSetLinkMsg('Şifre sıfırlama bağlantısı gönderildi (kayıtlıysa).', 'ok');
+      }catch(err){ mmgSetLinkMsg('Gönderilemedi: ' + (err && err.message ? err.message : ''), 'error'); }
+      finally{ mmgLinkForgotBtn.disabled = false; }
+    });
+  }
   function mmgLinkErrorText(err){
     const code = err && err.code ? err.code : '';
     if(code === 'auth/wrong-password' || code === 'auth/invalid-credential') return 'E-posta veya şifre hatalı.';
+    if(code === 'auth/popup-closed-by-user') return 'Google penceresi kapatıldı.';
+    if(code === 'auth/popup-blocked') return 'Tarayıcı pop-up engelledi, izin verin.';
     if(code === 'auth/user-not-found') return 'Böyle bir hesap bulunamadı.';
     if(code === 'auth/invalid-email') return 'Geçersiz e-posta.';
     if(code === 'auth/too-many-requests') return 'Çok fazla deneme. Biraz sonra tekrar deneyin.';
