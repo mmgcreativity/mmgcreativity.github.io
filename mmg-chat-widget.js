@@ -67,6 +67,7 @@ import {
   // ---- Durum ----
   let currentUser = null;
   let myChatCode = null;
+  let myName = null;   // kullanıcının adı (bildirimlerde koddan sonra göstermek için)
   let myIsAdmin = false;
   let myBlockedUids = [];
   let unsubChats = null, unsubRequests = null, unsubMessages = null;
@@ -617,7 +618,7 @@ import {
     if(els.nudgeBtn){
       els.nudgeBtn.addEventListener('click', async () => {
         if(!openChatOtherUid) return;
-        const who = myChatCode ? ('#' + myChatCode) : 'Bir kullanıcı';
+        const who = (myChatCode ? ('#' + myChatCode) : 'Bir kullanıcı') + (myName ? ' - ' + myName : '');
         try{ await window.mmgNotify(openChatOtherUid, { type:'nudge', title:'👉 Dürtüldünüz', body: who + ' sizi dürttü' }); }catch(e){}
         els.nudgeBtn.textContent = '✅';
         setTimeout(() => { els.nudgeBtn.textContent = '👉'; }, 1200);
@@ -1187,6 +1188,15 @@ import {
     { key:'hesaplama', label:'Hesaplama Araçları' }
   ];
 
+  // Bildirime tıklayınca ilgili 1:1 sohbeti aç (dürtme / yeni mesaj bildirimleri).
+  function openChatFromNotif(n){
+    if(!n || !n.fromUid || !currentUser) return;
+    mainView = 'sohbet'; activeTab = 'friends';
+    const chatId = pairChatId(currentUser.uid, n.fromUid);
+    const title = (n.fromCode ? ('#' + n.fromCode) : 'Sohbet') + (n.fromName ? ' - ' + n.fromName : '');
+    openChat(chatId, { title: title, isAdminChat: false, otherUid: n.fromUid, collection: 'chats' });
+  }
+
   function renderNotificationsTab(){
     els.footer.hidden = true;
     const notifList = Object.keys(notificationsMap).map(id => Object.assign({ _id: id }, notificationsMap[id]))
@@ -1209,7 +1219,11 @@ import {
 
     notifList.forEach(n => {
       const delBtn = document.getElementById('mmgNotifDel_' + n._id);
-      if(delBtn) delBtn.addEventListener('click', () => deleteNotification(n._id));
+      if(delBtn) delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteNotification(n._id); });
+      if(n.fromUid && (n.type === 'nudge' || n.type === 'chat')){
+        const card = els.body.querySelector('[data-notif-open="' + n._id + '"]');
+        if(card) card.addEventListener('click', (e) => { if(e.target.closest('button')) return; openChatFromNotif(n); });
+      }
     });
     const unreadIds = notifList.filter(n => !n.read).map(n => n._id);
     if(unreadIds.length) markNotificationsRead(unreadIds);
@@ -1239,9 +1253,10 @@ import {
     }catch(e){ return ''; }
   }
   function renderNotifItem(n){
-    const icon = n.type === 'invite' ? '🏢' : (n.type === 'referral' ? '🎁' : (n.type === 'reminder' ? '⏰' : '🔔'));
+    const icon = n.type === 'invite' ? '🏢' : (n.type === 'referral' ? '🎁' : (n.type === 'reminder' ? '⏰' : (n.type === 'nudge' ? '👉' : (n.type === 'chat' ? '💬' : '🔔'))));
     const when = fmtNotifTime(n.createdAt);
-    return '<div style="display:flex; gap:10px; align-items:flex-start; padding:12px; border:1px solid #2A3448; border-radius:12px; margin-bottom:8px; background:' + (n.read ? 'transparent' : 'rgba(198,161,91,0.08)') + ';">' +
+    const openable = !!(n.fromUid && (n.type === 'nudge' || n.type === 'chat'));
+    return '<div data-notif-open="' + mmgNotifEsc(n._id) + '" style="display:flex; gap:10px; align-items:flex-start; padding:12px; border:1px solid #2A3448; border-radius:12px; margin-bottom:8px; ' + (openable ? 'cursor:pointer; ' : '') + 'background:' + (n.read ? 'transparent' : 'rgba(198,161,91,0.08)') + ';">' +
         '<div style="font-size:18px; line-height:1;">' + icon + '</div>' +
         '<div style="flex:1; min-width:0;">' +
           '<div style="font-weight:600; font-size:13.5px;">' + mmgNotifEsc(n.title || 'Bildirim') + '</div>' +
@@ -1265,6 +1280,7 @@ import {
         toUid: toUid,
         fromUid: currentUser.uid,
         fromCode: (typeof myChatCode !== 'undefined' && myChatCode) ? myChatCode : null,
+        fromName: (typeof myName !== 'undefined' && myName) ? myName : null,
         type: (data && data.type) || 'info',
         title: (data && data.title) || 'Bildirim',
         body: (data && data.body) || '',
@@ -2272,7 +2288,7 @@ import {
       // Karşı tarafa bildirim düşür (uygulama-içi çan/badge; kapalı-uygulama push'u Blaze+functions ister).
       try{
         const preview = text.slice(0, 80);
-        const who = myChatCode ? ('#' + myChatCode) : 'Bir kullanıcı';
+        const who = (myChatCode ? ('#' + myChatCode) : 'Bir kullanıcı') + (myName ? ' - ' + myName : '');
         if(openChatCollection === 'chats' && openChatOtherUid){
           window.mmgNotify(openChatOtherUid, { type:'chat', title:'💬 Yeni mesaj', body: who + ': ' + preview });
         } else if(openChatCollection === 'chatGroups'){
@@ -2319,6 +2335,7 @@ import {
       const udata = usnap.exists() ? usnap.data() : {};
       myIsAdmin = udata.isAdmin === true;
       myBlockedUids = Array.isArray(udata.blockedUids) ? udata.blockedUids : [];
+      myName = udata.displayName || udata.adSoyad || udata.isim || udata.name || udata.fullName || udata.firmaAdi || (user.displayName || null);
       myChatCode = await ensureChatCode(user.uid);
       els.codeBox.innerHTML = myChatCode ? `Sizin Kullanıcı Kodunuz: <b>${esc(myChatCode)}</b>` : '';
     }catch(e){ console.error('mmg-chat-widget kullanıcı bilgisi alınamadı:', e); }

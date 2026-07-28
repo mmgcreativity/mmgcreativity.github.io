@@ -1649,17 +1649,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const wrap = document.createElement('div');
     wrap.className = 'alici-row-block';
     wrap.dataset.idx = idx;
-    wrap.dataset.mode = 'disi'; // varsayılan: grup dışı (cari) — isimden aranır
+    wrap.dataset.mode = 'ici'; // varsayılan: grup içi (grup firması seçilir)
     wrap.innerHTML = `
       <div class="alici-mode-toggle" role="group" aria-label="Alıcı kaynağı">
-        <button type="button" class="alici-mode-btn active" data-mode="disi">Grup dışı (Cari)</button>
-        <button type="button" class="alici-mode-btn" data-mode="ici">Grup içi</button>
+        <button type="button" class="alici-mode-btn active" data-mode="ici">Grup içi</button>
+        <button type="button" class="alici-mode-btn" data-mode="disi">Grup dışı (Cari)</button>
       </div>
       <div class="xcell-group">
         <div class="xcell">
           <span class="xcell-label">ALICI</span>
           <div class="mmg-ac-wrap">
-            <input type="text" id="fAliciAdi_${idx}" placeholder="İsim yazın (örn. ASTEL)…" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
+            <input type="text" id="fAliciAdi_${idx}" placeholder="Grup firması seçin / yazın…" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
             <div class="mmg-ac-list" id="aliciAcList_${idx}"></div>
           </div>
           <button type="button" class="xcell-savebtn" id="saveAliciFirmaBtn_${idx}" title="Firma bilgisini kaydet">💾</button>

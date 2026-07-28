@@ -72,7 +72,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
     --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
     --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
-    --sidebar-w:224px;
+    --sidebar-w:262px;
   }
   html.theme-light{
     --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
@@ -448,7 +448,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .hero-sub{ color:var(--muted); max-width:520px; font-size:13px; position:relative; }
   .hero-desc{ color:#D9E0EE; max-width:none; white-space:nowrap; font-size:13.5px; font-weight:500; line-height:1.55; margin-top:20px; position:relative; }
   .hero-features{ color:var(--brass,#C6A15B); font-weight:700; font-size:12px; letter-spacing:.04em; margin-top:8px; line-height:1.7; max-width:640px; }
-  .hero-credit{ position:absolute; right:48px; bottom:18px; display:inline-flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); z-index:2; }
+  .hero-credit{ position:absolute; right:48px; bottom:26px; display:inline-flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); z-index:2; }
   @media (max-width:860px){ .hero-credit{ position:static; margin-top:16px; right:auto; bottom:auto; } }
   .hero-credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
   .hero-top-row{ display:flex; align-items:center; gap:16px; position:relative; }
@@ -910,10 +910,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   // MMGI18N.t() çağırdığında sözlük henüz hazır olmuyor, ham anahtar adı görünüyordu). ----
   MMGI18N.registerDict({
     tr: {
-      nav_home:'Ana Sayfa', nav_calc:'Hesaplamalar', nav_rotatif:'Rotatif Kredi Hesaplama', nav_ortalama:'Ortalama Vade Hesaplama',
-      nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması Hesaplama', nav_vadelimevduat:'Vadeli Mevduat Faizi Hesaplama',
+      nav_home:'Ana Sayfa', nav_calc:'Hesaplamalar', nav_rotatif:'Rotatif Kredi', nav_ortalama:'Ortalama Vade',
+      nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması', nav_vadelimevduat:'Vadeli Mevduat Faizi',
       nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
-      nav_taksitli:'Taksitli Kredi Hesaplama',
+      nav_taksitli:'Taksitli Kredi',
       nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları', nav_verigirisi:'Veri Girişi', nav_verigirisi_panel:'Veri Giriş Paneli', nav_label_araclar:'Araçlar',
       nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Sosyal', nav_label_verigirisi:'Veri Girişi', nav_label_verianalizi:'Veri Analizi',
       nav_talimatlar:'Talimatlar', nav_talimatlar_desc:'İşlemleri', nav_hazirmetin:'Hazır Metin Talimatları',
@@ -1297,6 +1297,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <nav>
 
+    <div class="nav-top-row">
+    <button class="nav-item nav-home-square" data-target="home" data-title="Ana Sayfa" title="Ana Sayfa" aria-label="Ana Sayfa" data-i18n-title="nav_home" data-i18n-aria="nav_home">
+      <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V19a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg></span>
+    </button>
     <div class="home-search-wrap">
       <div class="home-search-box" id="homeSearchBox">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -1305,19 +1309,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <div class="home-search-results" id="homeSearchResults" hidden></div>
     </div>
+    </div>
 
     <div class="nav-fav-pinned" id="navFavPinned" hidden>
       <div class="nav-fav-label">★ Favoriler</div>
       <div id="navFavList"></div>
       <div class="nav-fav-divider"></div>
     </div>
-
-    <button class="nav-item" data-target="home" data-title="Ana Sayfa">
-      <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V19a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg></span>
-      <span class="nav-text-wrap">
-        <span class="nav-title" data-i18n="nav_home">Ana Sayfa</span>
-      </span>
-    </button>
 
     <div class="nav-label" data-i18n="nav_label_araclar">Araçlar</div>
 
@@ -1599,7 +1597,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <style>
       .home-search-wrap{ position:relative; margin:0 0 12px; }
-      .home-search-box{ display:flex; align-items:center; gap:8px; height:34px; width:100%; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:9px; padding:0 12px; transition:border-color .15s ease, box-shadow .15s ease; }
+      .nav-top-row{ display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+      .nav-top-row .home-search-wrap{ flex:1 1 auto; margin:0; min-width:0; }
+      .nav-home-square{
+        flex:0 0 auto; width:40px; height:40px; padding:0 !important; justify-content:center; gap:0;
+        border-radius:11px; margin-bottom:0 !important;
+        background:linear-gradient(135deg, rgba(255,107,74,0.16), rgba(124,77,217,0.12)) !important;
+        border:1px solid rgba(255,107,74,0.35) !important;
+        box-shadow:0 4px 14px rgba(0,0,0,0.28), 0 0 12px rgba(214,64,122,0.28);
+      }
+      .nav-home-square:hover{ transform:none; box-shadow:0 0 16px rgba(214,64,122,0.45); }
+      .nav-home-square .nav-icon{ color:var(--coral); width:20px; height:20px; }
+      .home-search-box{ display:flex; align-items:center; gap:8px; height:40px; width:100%; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:11px; padding:0 12px; transition:border-color .15s ease, box-shadow .15s ease; }
       .home-search-box:focus-within{ border-color:var(--brass,#C6A15B); box-shadow:0 0 0 3px rgba(198,161,91,0.12); }
       .home-search-box > svg{ width:15px; height:15px; color:var(--muted,#8D96AC); flex:none; }
       #homeSearchInput{ flex:1; min-width:0; background:none; border:none; outline:none; color:var(--text,#EAEDF3); font-size:13px; font-family:inherit; padding:0; height:100%; }
