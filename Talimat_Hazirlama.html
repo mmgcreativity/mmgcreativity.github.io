@@ -734,8 +734,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="xcell">
             <span class="xcell-label">FİRMA</span>
             <input type="text" id="fGonderenFirma" placeholder="Örn. Örnek Ticaret A.Ş." autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
-            <button type="button" class="xcell-savebtn" id="saveGonderenFirmaBtn" title="Firma bilgisini kaydet">💾</button>
-            <select class="xcell-mini" id="fGonderenFirmaSaved" title="Kayıtlı firmadan seç"><option value="">📋 Kayıtlı</option></select>
+            <select class="xcell-mini" id="fGonderenFirmaSaved" title="Grup firmasından seç"><option value="">📋 Grup Firması</option></select>
           </div>
           <div class="xcell xcell-full">
             <span class="xcell-label">BANKA</span>
@@ -747,7 +746,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <button type="button" class="xcell-savebtn" id="saveGonderenIbanBtn" title="IBAN bilgisini kaydet">💾</button>
             <select class="xcell-mini" id="fGonderenIbanSaved" title="Kayıtlı IBAN'dan seç"><option value="">📋 Kayıtlı</option></select>
           </div>
-          <div id="fGonderenIbanHint" style="display:none; grid-column:1/-1; margin:2px 0 0; padding:7px 10px; border-radius:8px; background:rgba(226,84,75,0.10); border:1px solid rgba(226,84,75,0.35); color:var(--red); font-size:11.5px; font-weight:700;">⚠️ ÇOK ÖNEMLİ: Bu firma/banka için birden fazla IBAN kayıtlı. Lütfen yukarıdaki "📋 Kayıtlı" listesinden doğru IBAN'ı seçin.</div>
+          <div id="fGonderenIbanHint" style="display:none; grid-column:1/-1; margin:2px 0 0; padding:7px 10px; border-radius:8px; background:rgba(226,84,75,0.10); border:1px solid rgba(226,84,75,0.35); color:var(--red); font-size:11.5px; font-weight:700;">⚠️ ÇOK ÖNEMLİ: Bu firma/banka için birden fazla IBAN kayıtlı. Lütfen aşağıdaki listeden doğru IBAN'ı seçin.</div>
+          <select id="fGonderenIbanChooser" title="IBAN seçin" style="display:none; grid-column:1/-1; width:100%; margin:6px 0 0; padding:10px 12px; border-radius:8px; border:2px solid var(--red); background:var(--surface-2); color:var(--text); font-family:'Inter',sans-serif; font-size:13px; font-weight:700; cursor:pointer; outline:none;"></select>
           <div class="xcell xcell-3col">
             <span class="xcell-label">TUTAR</span>
             <div style="position:relative; display:flex; align-items:center; border-left:1px solid var(--hairline);">
@@ -1363,8 +1363,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   let savedCari = [];
 
   function renderFirmaSelects(){
-    const gonderenOpts = '<option value="">📋 Kayıtlı</option>' +
-      savedGonderenFirms.map((f, i) => `<option value="${i}">${f.name}</option>`).join('');
+    // Gönderen firma önerileri SADECE kullanıcının grup/bağlı firmaları (myFirms) olsun.
+    // Elle kaydedilen rastgele isimler (savedGonderenFirms) burada gösterilmez.
+    const gonderenOpts = '<option value="">📋 Grup Firması</option>' +
+      myFirms.map((f, i) => `<option value="${i}">${escapeHtmlMmg(f.name)}</option>`).join('');
     document.getElementById('fGonderenFirmaSaved').innerHTML = gonderenOpts;
     // Alıcı "📋 Kayıtlı" seçicileri, her satırın moduna (grup içi/dışı) göre doldurulur.
     document.querySelectorAll('.alici-firma-saved').forEach(sel => { populateAliciFirmaSaved(sel); });
@@ -1446,6 +1448,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       flashButton(btnId, false, 'Kaydetmek için giriş yapmanız gerekiyor.');
       return;
     }
+    // Aynı adla ikinci kayıt engellenir (Türkçe locale, büyük/küçük harf duyarsız).
+    if(targetList.some(f => (f.name || '').trim().toLocaleLowerCase('tr') === ad.toLocaleLowerCase('tr'))){
+      flashButton(btnId, false, 'Bu ad zaten kayıtlı.');
+      return;
+    }
     targetList.push({
       name: ad,
       logo: companyLogoDataUrl || null,
@@ -1486,6 +1493,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const defaultLabel = banka ? (firma + ' — ' + banka) : (firma + ' Hesabı');
     const label = window.prompt('Bu IBAN kaydına bir isim verin (örn. "' + firma + ' — Akbank"):', defaultLabel);
     if(!label) return;
+    // Aynı ad (etiket) ya da aynı firma+IBAN ikilisi ile ikinci kayıt engellenir.
+    const labelKey = label.trim().toLocaleLowerCase('tr');
+    const firmaKey = firma.toLocaleLowerCase('tr');
+    if(savedIbans.some(b => (b.label || '').trim().toLocaleLowerCase('tr') === labelKey)
+       || savedIbans.some(b => b.iban === iban && (b.firma || '').trim().toLocaleLowerCase('tr') === firmaKey)){
+      flashButton(btnId, false, 'Bu ad/IBAN zaten kayıtlı.');
+      return;
+    }
     savedIbans.push({ label: label.trim(), banka, iban, firma });
     renderIbanSelects();
     if(!user){
@@ -1500,7 +1515,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   }
 
-  document.getElementById('saveGonderenFirmaBtn').addEventListener('click', () => saveFirmaName('fGonderenFirma','saveGonderenFirmaBtn', savedGonderenFirms));
+  // Gönderen firma önerileri grup firmalarına sabitlendiği için elle firma adı kaydetme kaldırıldı.
   document.getElementById('saveGonderenIbanBtn').addEventListener('click', () => saveIbanInfo('fGonderenBanka','fGonderenIban','saveGonderenIbanBtn','fGonderenFirma'));
 
   const gonderenTutarEl = document.getElementById('fGonderenTutar');
@@ -1522,7 +1537,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const bankaEl = document.getElementById('fGonderenBanka');
     const ibanEl  = document.getElementById('fGonderenIban');
     const hintEl  = document.getElementById('fGonderenIbanHint');
-    const hide = () => { if(hintEl) hintEl.style.display = 'none'; };
+    const chooserEl = document.getElementById('fGonderenIbanChooser');
+    const hide = () => {
+      if(hintEl) hintEl.style.display = 'none';
+      if(chooserEl){ chooserEl.style.display = 'none'; chooserEl.innerHTML = ''; }
+    };
     if(!firmaEl || !ibanEl) return;
     const firma = firmaEl.value.trim().toLowerCase();
     const banka = ((bankaEl && bankaEl.value) || '').trim().toLowerCase();
@@ -1533,6 +1552,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const byBank = banka ? firmaMatches.filter(b => (b.banka || '').trim().toLowerCase() === banka) : firmaMatches;
     const pool = byBank.length ? byBank : firmaMatches;
     if(pool.length === 1){
+      // Tek IBAN → doğrudan yerleştir.
       const m = pool[0];
       if(m.banka && bankaEl && !banka) setBankSelectValue(bankaEl, m.banka);
       ibanEl.value = formatIbanValue(m.iban);
@@ -1540,8 +1560,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(sel) sel.value = String(m.i);
       hide();
     } else {
-      // Birden fazla IBAN → kullanıcı seçsin.
+      // Birden fazla IBAN → IBAN'ı boş bırak, alta belirgin bir açılır seçim listesi getir.
       if(hintEl) hintEl.style.display = 'block';
+      if(chooserEl){
+        chooserEl.innerHTML = '<option value="">— IBAN seçiniz —</option>' +
+          pool.map(m => `<option value="${m.i}">${escapeHtmlMmg(m.label || m.iban)}</option>`).join('');
+        chooserEl.value = '';
+        chooserEl.style.display = 'block';
+      }
     }
     if(typeof renderPreview === 'function') renderPreview();
   }
@@ -1553,11 +1579,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.getElementById('fGonderenBanka').addEventListener('change', autoFillGonderenIban);
   document.getElementById('fGonderenIban').addEventListener('input', () => {
     const h = document.getElementById('fGonderenIbanHint'); if(h) h.style.display = 'none';
+    const c = document.getElementById('fGonderenIbanChooser'); if(c){ c.style.display = 'none'; c.innerHTML = ''; }
+  });
+
+  // Çoklu IBAN durumunda alta açılan seçim listesi: kullanıcı seçince IBAN'ı yerleştir ve listeyi gizle.
+  document.getElementById('fGonderenIbanChooser').addEventListener('change', (e) => {
+    if(e.target.value === '') return;
+    const b = savedIbans[+e.target.value];
+    if(!b) return;
+    if(b.banka) setBankSelectValue(document.getElementById('fGonderenBanka'), b.banka);
+    document.getElementById('fGonderenIban').value = formatIbanValue(b.iban);
+    const sel = document.getElementById('fGonderenIbanSaved');
+    if(sel) sel.value = String(+e.target.value);
+    e.target.style.display = 'none';
+    e.target.innerHTML = '';
+    const h = document.getElementById('fGonderenIbanHint'); if(h) h.style.display = 'none';
+    if(typeof renderPreview === 'function') renderPreview();
   });
 
   document.getElementById('fGonderenFirmaSaved').addEventListener('change', (e) => {
     if(e.target.value === '') return;
-    const f = savedGonderenFirms[+e.target.value];
+    const f = myFirms[+e.target.value];
+    if(!f) return;
     document.getElementById('fGonderenFirma').value = f.name;
     if(f.logo) applyCompanyLogo(f.logo, (f.logoW && f.logoH) ? { w: f.logoW, h: f.logoH } : null);
     refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma');
@@ -1834,14 +1877,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     myFirms = Array.from(map.values());
 
-    // Gönderen "📋 Kayıtlı" listesine ekle (elle eklemeye gerek kalmadan görünsün)
-    myFirms.forEach(f => {
-      const ad = (f.name || '').trim();
-      if(!ad) return;
-      if(!savedGonderenFirms.some(sf => sf.name.trim().toLowerCase() === ad.toLowerCase())){
-        savedGonderenFirms.push({ name: ad, logo: null, logoW: null, logoH: null, _db: true, _grup: true, id: f.id });
-      }
-    });
+    // Gönderen firma önerileri doğrudan myFirms (grup firmaları) üzerinden gösterilir;
+    // ayrıca savedGonderenFirms'e kopyalamaya gerek yok (renderFirmaSelects myFirms okur).
 
     // Her firma için kayıtlı gönderen banka/IBAN bilgisini çek (firma seçilince otomatik dolsun)
     for(const f of myFirms){
@@ -3741,6 +3778,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const user = window.mmgCloud.currentUser;
     if(!user && !MMG_GATE_DISABLED_FOR_PREVIEW){
       flashButton(btnId, false, 'Kaydetmek için giriş yapmanız gerekiyor.');
+      return;
+    }
+    // Aynı tür + aynı ad ile ikinci kayıt engellenir.
+    if(savedMuhataplar.some(m => m.tur === tur && (m.ad || '').trim().toLocaleLowerCase('tr') === ad.toLocaleLowerCase('tr'))){
+      flashButton(btnId, false, 'Bu ad zaten kayıtlı.');
       return;
     }
     savedMuhataplar.push({ tur, ad });

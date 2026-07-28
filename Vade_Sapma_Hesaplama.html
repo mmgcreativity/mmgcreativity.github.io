@@ -113,17 +113,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .f-field input, .f-field select{
     background:var(--bg); border:1px solid var(--hairline); border-radius:7px;
-    padding:0 8px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12.5px;
+    padding:0 8px; color:var(--text); font-family:'Inter',sans-serif; font-size:12px;
     outline:none; transition:border-color .15s ease; width:100%; height:34px;
   }
   .f-field input:focus, .f-field select:focus{ border-color:var(--brass-dim); }
   .f-field select{ cursor:pointer; }
+  /* Veri girilen (sayısal) alanlar Vadeli Mevduat sayfasindaki gibi JetBrains Mono 600 kullanir;
+     Calisma Sekli secimi (select) ise Vadeli Mevduat'taki banka secimi gibi Inter kullanir. */
+  .f-field input.date-text,
+  .f-field input.f-gun,
+  .f-field input.f-tutar,
+  .f-field input.c-tutar{
+    font-family:'JetBrains Mono',monospace; font-weight:600;
+  }
 
   /* Alan genişlikleri: tarih kutuları sadece tarihi gösterecek kadar dar,
      tutar kutuları 99.999.999,00 gibi büyük tutarların kesilmeden sığması için genişletildi,
      her satır tek satıra sığacak şekilde ayarlandı. */
   .f-field.f-tarih-wrap{ flex:0 0 106px; }
-  .f-field.f-yontem-wrap{ flex:0 0 210px; }
+  /* Calisma Sekli kutusu: 210px'lik genis alan icerigi (Fatura + / Ay sonu +) cok astigi icin,
+     kutu metnin sonuna hizali ve derli toplu olacak sekilde daraltildi; bosalan yer esnek
+     Fatura Tutari kolonuna akar. Diger sabit kolonlarin hizasi degismez. */
+  .f-field.f-yontem-wrap{ flex:0 0 118px; }
   .f-field.f-gun-wrap{ flex:0 0 78px; }
   .f-field.f-tutar-wrap{ flex:1 1 132px; min-width:132px; }
   .f-field.f-due-wrap{ flex:0 0 92px; }
