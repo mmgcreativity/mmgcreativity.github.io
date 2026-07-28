@@ -225,7 +225,7 @@ function mmgApplyTurkishFont(doc){
   .mono{font-family:'IBM Plex Mono',monospace;}
 
   header.masthead{
-    max-width:none; margin:0 auto; padding:36px 24px 24px;
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
@@ -243,10 +243,10 @@ function mmgApplyTurkishFont(doc){
   }
   .guide-btn:hover{ color:var(--coral); border-color:var(--coral); }
 
-  main{ max-width:none; margin:0 auto; padding:20px 24px; }
+  main{ max-width:1180px; margin:0 auto; padding:20px 24px; }
 
   .trial-banner{
-    max-width:none; margin:0 auto; margin-top:14px; padding:12px 24px; background:rgba(198,161,91,0.08);
+    max-width:1180px; margin:0 auto; margin-top:14px; padding:12px 24px; background:rgba(198,161,91,0.08);
     border:1px solid rgba(198,161,91,0.3); border-radius:10px; color:var(--brass); font-size:13px; font-weight:600;
   }
   .trial-banner[hidden]{ display:none; }
@@ -634,7 +634,7 @@ function mmgApplyTurkishFont(doc){
   .io-msg.err{ color:var(--coral); }
   .flag{ color:var(--brass); font-size:11.5px; margin-top:14px; }
 
-  footer{max-width:none; margin:0 auto; padding:28px 24px 0; color:var(--muted); font-size:11.5px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  footer{max-width:1180px; margin:0 auto; padding:28px 24px 0; color:var(--muted); font-size:11.5px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
   footer .credit{width:100%; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); margin-top:6px; display:flex; align-items:center; justify-content:flex-end; gap:8px;}
   .signature-pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 12px 4px 5px; border-radius:999px; background:var(--surface-2); border:1px solid var(--hairline); }
   .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
@@ -665,6 +665,9 @@ function mmgApplyTurkishFont(doc){
   #exportExcelBtn svg, #exportPdfBtn svg{
     margin-right:6px !important;
   }
+
+  /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
+  @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
 </head>
 <body>

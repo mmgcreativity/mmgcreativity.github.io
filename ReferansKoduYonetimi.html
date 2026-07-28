@@ -167,6 +167,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     display:flex; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid var(--hairline); font-size:12px;
   }
   .owner-signup-row:last-child{ border-bottom:none; }
+
+  /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
+  @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
 </head>
 <body>

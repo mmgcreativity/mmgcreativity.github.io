@@ -213,6 +213,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .modal-error{ color:var(--red); font-size:12px; margin-top:10px; display:none; }
   .modal-error.show{ display:block; }
   .faz2-hint{ font-size:11px; color:var(--brass); margin-top:4px; font-family:'IBM Plex Mono',monospace; }
+
+  /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
+  @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
 </head>
 <body>

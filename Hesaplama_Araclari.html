@@ -78,11 +78,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     -webkit-font-smoothing:antialiased; padding-bottom:60px;
   }
   header.masthead{
-    max-width:none; margin:0 auto; padding:36px 24px 24px;
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
-  .page-nav{ max-width:none; margin:0 auto; padding:14px 24px 0; display:flex; flex-wrap:wrap; gap:10px; }
+  .page-nav{ max-width:1180px; margin:0 auto; padding:14px 24px 0; display:flex; flex-wrap:wrap; gap:10px; }
   h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
   .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5; min-height:42px; max-width:640px;}
   .guide-btn{
@@ -93,7 +93,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .guide-btn:hover{ color:var(--coral); border-color:var(--coral); }
 
-  main{ max-width:none; margin:0 auto; padding:36px 24px; }
+  main{ max-width:1180px; margin:0 auto; padding:36px 24px; }
 
   /* ---- Masaüstü: sekme + iframe ---- */
   .cat-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
@@ -145,6 +145,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   @media (max-width:480px){
     .back-link{ top:64px; right:8px; }
   }
+
+  /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
+  @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
 </head>
 <body>

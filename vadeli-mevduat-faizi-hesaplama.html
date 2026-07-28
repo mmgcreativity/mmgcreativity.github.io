@@ -76,7 +76,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .wrap{max-width:1180px;margin:0 auto; padding:24px 24px 0;}
 
   header.masthead{
-    max-width:none; margin:0 auto; padding:36px 24px 24px;
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
@@ -304,6 +304,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .detail-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding-top:8px; }
   .detail-item .k{ font-size:9px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px; white-space:nowrap; }
   .detail-item .v{ font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; }
+
+  /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
+  @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
 </head>
 <body>

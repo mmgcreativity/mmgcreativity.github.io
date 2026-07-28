@@ -166,6 +166,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .blog-tab-btn:hover{ border-color:var(--brass-dim); color:var(--text); }
   .blog-tab-btn.active{ background:rgba(198,161,91,0.12); border-color:var(--brass,#C6A15B); color:var(--brass,#C6A15B); }
+
+  /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
+  @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
 </head>
 <body>

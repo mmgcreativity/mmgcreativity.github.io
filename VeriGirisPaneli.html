@@ -57,7 +57,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     -webkit-font-smoothing:antialiased; min-height:100vh; padding-bottom:60px;
   }
   header.masthead{
-    max-width:none; margin:0 auto; padding:36px 24px 24px;
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
     border-bottom:1px solid var(--hairline);
   }
   h1.title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,32px); letter-spacing:-0.01em; margin:0; display:flex; align-items:center; gap:10px; }
@@ -72,7 +72,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .back-link:hover{ color:var(--coral); border-color:var(--coral); }
   @media (max-width:480px){ .back-link{ top:64px; right:8px; } }
 
-  main{ max-width:none; margin:0 auto; padding:24px 24px 60px; }
+  main{ max-width:1180px; margin:0 auto; padding:24px 24px 60px; }
 
   .state-box{
     background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:40px 24px;
@@ -272,6 +272,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .bulk-preview-table td{ font-family:'Inter',sans-serif; font-size:12px; font-weight:400; }
   .bulk-preview-wrap{ max-height:260px; overflow-y:auto; margin-top:10px; border:1px solid var(--hairline); border-radius:10px; }
   .bulk-summary{ font-size:12.5px; color:var(--muted); margin-top:10px; }
+
+  /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
+  @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
 </head>
 <body>
