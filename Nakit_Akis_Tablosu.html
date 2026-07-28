@@ -1316,14 +1316,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const adminIds = Array.isArray(data.adminFirmaIds) ? data.adminFirmaIds : [];
       // Sadece yönettiğiniz (admin) değil, ÜYESİ olduğunuz firmaları da dahil ediyoruz —
       // index.html'deki "Bağlı Firmalar" ile aynı mantık (bkz. loadFirmaMemberships).
-      let memberIds = [];
+      // index.html ile AYNI sağlam mantık: collectionGroup sorgusu (index gerektirir) başarısız
+      // olursa eski "firmaIds" alanına düş; kaynağı ne olursa olsun her aday firmada GERÇEKTEN
+      // üye miyiz üyelik belgesine bakarak doğrula. Böylece members collectionGroup index'i
+      // deploy edilmemiş olsa bile üye olunan firmalar konsolideye dahil olur.
+      let candidateIds = [];
       try{
         const memSnap = await cloud.getDocs(cloud.query(cloud.collectionGroup(cloud.db, 'members'), cloud.where('uid', '==', uid)));
         memSnap.forEach(d => {
           const fid = d.ref.parent.parent ? d.ref.parent.parent.id : null;
-          if(fid) memberIds.push(fid);
+          if(fid) candidateIds.push(fid);
         });
-      }catch(e){ /* collectionGroup index eksikse sessizce geç, en azından admin firmaları gösterilir */ }
+      }catch(e){
+        candidateIds = Array.isArray(data.firmaIds) ? data.firmaIds : [];
+      }
+      let memberIds = [];
+      for(const fid of candidateIds){
+        try{
+          const mDoc = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'members', uid));
+          if(mDoc.exists()) memberIds.push(fid);
+        }catch(e){ /* okunamazsa güvenli tarafta kal */ }
+      }
       const allIds = Array.from(new Set([...adminIds, ...memberIds]));
       if(allIds.length < 2){ openCard.style.display = 'none'; return; }
       consolidatedFirmas = [];

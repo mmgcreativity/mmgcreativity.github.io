@@ -1835,10 +1835,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       updateDrawerToggleActiveState(toggle);
     }
 
-    toggle.addEventListener('click', () => {
-      const isOpen = toggle.getAttribute('aria-expanded') === 'true';
-      if(isOpen) closeDrawer(); else openDrawer();
-    });
+    // Kullanıcı isteği: tıklayınca HER ZAMAN açılsın; tekrar tıklamak kapatmasın
+    // ("açılma simülasyonu gibi" davranış). Kapatma yalnızca dışarı tıklayınca,
+    // bir alt öge seçilince veya başka bir çekmece açılınca olur (aşağıdaki dinleyiciler).
+    toggle.addEventListener('click', () => { openDrawer(); });
 
     // Masaüstünde üzerine gelince de (hover) açılsın; dokunmatik ekranlarda
     // hover tetiklenmediği için tıklama davranışı olduğu gibi çalışmaya devam eder.
@@ -2537,7 +2537,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // VAPID public key: Firebase Console → Proje Ayarları → Cloud Messaging → "Web Push
   // certificates" → anahtar çiftini oluştur ve buraya yapıştır. BOŞ bırakılırsa push tamamen
   // devre dışıdır; mevcut uygulama-içi çan/badge ve tarayıcı bildirimi bundan HİÇ etkilenmez.
-  const MMG_VAPID_KEY = ""; // <-- Firebase Web Push sertifika anahtarını buraya yapıştır
+  const MMG_VAPID_KEY = "BA6_W2TA8OuCyGTxUYZaLzPNTCMYeoVb8W_L5GOJRhn9R13Z8uN1AIQOA2WWz8Kw3g-lPeM3l8MiocAIRvoYi7w"; // Firebase Web Push sertifikası (28 Tem 2026)
   let mmgMessaging = null;
   async function mmgInitMessaging(){
     if(mmgMessaging) return mmgMessaging;

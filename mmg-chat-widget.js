@@ -77,14 +77,16 @@ import {
   let unsubFirmaMemberInvite = null, unsubFirmaAdminInvite = null;
   let firmaMemberInvites = []; // [{id, firmaId, kind, data}] — bir kod birden fazla firmaya davet edilebilir
   let firmaAdminInvite = null; // {id, kind, data} | null
-  let friendsSubView = 'list'; // 'list' | 'newGroup'
+  let friendsSubView = 'list'; // 'list' | 'add'  (Kod ile kişi ekleme, Sohbetler sekmesi içinde)
+  let groupsSubView = 'list';  // 'list' | 'newGroup'  (grup oluşturma, Gruplar sekmesi içinde)
   let pendingGroupMembers = []; // [{uid, code}] grup oluşturma formunda eklenen kişiler
   let chatsMap = {};     // chatId -> chat data
   let requestsMap = {};  // reqId -> request data
   let notificationsMap = {};  // notifId -> genel bildirim (davet/referans/hatırlatma) verisi
   let unsubNotifications = null;
   let notificationsFirstSnapshot = true;
-  let activeTab = 'friends'; // friends | requests | add | admin
+  let activeTab = 'friends'; // friends | requests | groups | admin | notifications
+  let mainView = 'sohbet';   // sohbet | bildirim  (üstteki iki ana başlık)
 
   // ---- Kullanıcı Kodu -> görünen ad önbelleği ----
   // userDirectory/{kod} = {uid, username} herkese açık okunur; sohbet başlığında/listesinde/
@@ -214,6 +216,23 @@ import {
   .mmg-chat-tab.active{ color:var(--text,#EAEDF3); border-color:var(--brass-dim,#8A7440); background:rgba(198,161,91,0.12); }
   .mmg-chat-tab .mmg-chat-dot{
     position:absolute; top:3px; right:6px; width:7px; height:7px; border-radius:50%; background:var(--red,#E2544B);
+  }
+  /* İki ana başlık: Sohbet | Bildirimler */
+  .mmg-chat-mainbar{ display:flex; gap:6px; padding:0 10px 8px; flex:0 0 auto; }
+  .mmg-chat-main{
+    flex:1; text-align:center; font-size:13px; font-weight:700; padding:9px 6px; border-radius:9px;
+    background:var(--surface-2,#1B2536); color:var(--muted,#8D96AC); cursor:pointer;
+    border:1px solid transparent; position:relative; white-space:nowrap;
+  }
+  .mmg-chat-main.active{ color:var(--text,#EAEDF3); border-color:var(--brass,#C6A15B); background:rgba(198,161,91,0.16); }
+  .mmg-chat-main-light{
+    position:absolute; top:7px; right:10px; width:9px; height:9px; border-radius:50%;
+    background:var(--red,#E2544B); animation:mmgNotifBlink 1.05s ease-in-out infinite;
+  }
+  .mmg-chat-main-light[hidden]{ display:none; }
+  @keyframes mmgNotifBlink{
+    0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(226,84,75,0.75); }
+    50%{ opacity:0.3; box-shadow:0 0 0 5px rgba(226,84,75,0); }
   }
   .mmg-chat-body{ flex:1 1 auto; overflow-y:auto; padding:10px 12px; }
   .mmg-chat-body::-webkit-scrollbar{ width:6px; }
@@ -451,11 +470,15 @@ import {
       </button>
     </div>
     <div id="mmgChatCodeBox" class="mmg-chat-code-box"></div>
+    <div class="mmg-chat-mainbar" id="mmgChatMainBar">
+      <div class="mmg-chat-main active" data-main="sohbet">Sohbet</div>
+      <div class="mmg-chat-main" data-main="bildirim">Bildirimler<span class="mmg-chat-main-light" id="mmgChatNotifDot" hidden></span></div>
+    </div>
     <div class="mmg-chat-tabs" id="mmgChatTabs">
       <div class="mmg-chat-tab active" data-tab="friends">Sohbetler</div>
-      <div class="mmg-chat-tab" data-tab="notifications">Davetler<span class="mmg-chat-dot" id="mmgChatNotifDot" hidden></span></div>
-      <div class="mmg-chat-tab" data-tab="requests">İstekler<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
       <div class="mmg-chat-tab" data-tab="add">Ekle</div>
+      <div class="mmg-chat-tab" data-tab="requests">İstek<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
+      <div class="mmg-chat-tab" data-tab="groups">Grup</div>
       <div class="mmg-chat-tab" data-tab="admin">Admin</div>
     </div>
     <div class="mmg-chat-body" id="mmgChatBody"></div>
@@ -516,6 +539,7 @@ import {
     els.closeBtn = document.getElementById('mmgChatCloseBtn');
     els.codeBox = document.getElementById('mmgChatCodeBox');
     els.tabs = document.getElementById('mmgChatTabs');
+    els.mainBar = document.getElementById('mmgChatMainBar');
     els.reqDot = document.getElementById('mmgChatReqDot');
     els.notifDot = document.getElementById('mmgChatNotifDot');
     els.body = document.getElementById('mmgChatBody');
@@ -558,12 +582,31 @@ import {
     els.tabs.addEventListener('click', (e) => {
       const tab = e.target.closest('.mmg-chat-tab');
       if(!tab) return;
-      activeTab = tab.dataset.tab;
-      if(activeTab !== 'friends') friendsSubView = 'list';
-      [...els.tabs.children].forEach(c => c.classList.toggle('active', c === tab));
+      const t = tab.dataset.tab;
+      if(t === 'add'){
+        // "Ekle" alt sekmesi: Sohbetler'in kod-ile-ekle görünümünü aç
+        activeTab = 'friends'; friendsSubView = 'add';
+      } else {
+        activeTab = t; friendsSubView = 'list';
+      }
+      if(activeTab !== 'groups') groupsSubView = 'list';
       closeOpenChat(false);
       renderTab();
     });
+    // Üstteki iki ana başlık: Sohbet | Bildirimler
+    if(els.mainBar){
+      els.mainBar.addEventListener('click', (e) => {
+        const m = e.target.closest('.mmg-chat-main');
+        if(!m) return;
+        closeOpenChat(false);
+        if(m.dataset.main === 'bildirim'){
+          activeTab = 'notifications';
+        } else if(activeTab === 'notifications'){
+          activeTab = 'friends'; friendsSubView = 'list';
+        }
+        renderTab();
+      });
+    }
     els.sendBtn.addEventListener('click', sendCurrentMessage);
     els.input.addEventListener('keydown', (e) => {
       if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendCurrentMessage(); }
@@ -899,8 +942,8 @@ import {
         onClick: () => {
           els.panel.hidden = false;
           positionPanelNearBubble();
-          activeTab = 'friends';
-          [...els.tabs.children].forEach(t => t.classList.toggle('active', t.dataset.tab === 'friends'));
+          activeTab = 'groups';
+          [...els.tabs.children].forEach(t => t.classList.toggle('active', t.dataset.tab === 'groups'));
           openChat(id, { title: (c.name || 'Grup'), isAdminChat: false, collection: 'chatGroups' });
         }
       });
@@ -967,7 +1010,7 @@ import {
       if(!groupsFirstSnapshot) detectNewMessagesAndToast(newGroupsMap, groupsMap, 'groups');
       groupsMap = newGroupsMap;
       groupsFirstSnapshot = false;
-      if(activeTab === 'friends' && friendsSubView === 'list') renderTab();
+      if(activeTab === 'groups' && groupsSubView === 'list') renderTab();
       updateBadge();
     }, (err) => console.error('mmg-chat-widget groups onSnapshot:', err));
 
@@ -1063,12 +1106,29 @@ import {
   function updateOpenChatHeaderIfNeeded(){ /* şu an ekstra bir şey gerekmiyor */ }
 
   // ---- Sekme render ----
+  // activeTab'e göre üst iki ana başlığı, alt sekme çubuğunun görünürlüğünü ve
+  // aktif sekme vurgusunu tek yerden senkronlar. activeTab='notifications' → Bildirimler
+  // ana başlığı aktif ve alt sekmeler gizli; diğer her şey → Sohbet ana başlığı.
+  function syncMainView(){
+    const isNotif = (activeTab === 'notifications');
+    mainView = isNotif ? 'bildirim' : 'sohbet';
+    if(els.mainBar){
+      [...els.mainBar.children].forEach(c => c.classList.toggle('active', c.dataset.main === mainView));
+    }
+    if(els.tabs){
+      els.tabs.hidden = isNotif;
+      const activeSub = (activeTab === 'friends' && friendsSubView === 'add') ? 'add' : activeTab;
+      [...els.tabs.children].forEach(c => c.classList.toggle('active', c.dataset.tab === activeSub));
+    }
+  }
+
   function renderTab(){
     if(openChatId) return; // bir sohbet açıkken sekme gövdesi değişmesin
+    syncMainView();
     if(activeTab === 'admin') return renderAdminTab();
     if(activeTab === 'friends') return renderFriendsTab();
+    if(activeTab === 'groups') return renderGroupsTab();
     if(activeTab === 'requests') return renderRequestsTab();
-    if(activeTab === 'add') return renderAddTab();
     if(activeTab === 'notifications') return renderNotificationsTab();
   }
 
@@ -1342,8 +1402,8 @@ import {
   }
 
   function renderFriendsTab(){
-    els.title.textContent = 'Sohbet';
-    if(friendsSubView === 'newGroup') return renderNewGroupForm();
+    els.title.textContent = 'Sohbetler';
+    if(friendsSubView === 'add') return renderAddTab();
 
     const chatIds = Object.keys(chatsMap).filter(id => {
       const c = chatsMap[id];
@@ -1351,7 +1411,6 @@ import {
       const otherUid = (c.participants || []).find(u => u !== currentUser.uid);
       return !myBlockedUids.includes(otherUid);
     });
-    const groupIds = Object.keys(groupsMap);
 
     const rows = [];
     chatIds.forEach(id => {
@@ -1362,43 +1421,32 @@ import {
       const lastAt = c.lastMessageAt && c.lastMessageAt.toMillis ? c.lastMessageAt.toMillis() : 0;
       const readAt = c['lastRead_' + currentUser.uid] && c['lastRead_' + currentUser.uid].toMillis ? c['lastRead_' + currentUser.uid].toMillis() : 0;
       rows.push({
-        id, kind: 'chat', label, sub: c.lastMessage || 'Henüz mesaj yok', lastAt,
+        id, label, sub: c.lastMessage || 'Henüz mesaj yok', lastAt,
         unread: lastAt > readAt && c.lastSenderUid !== currentUser.uid,
         avatarLetter: label.replace('Kod: ', '').slice(0, 1), otherUid
-      });
-    });
-    groupIds.forEach(id => {
-      const g = groupsMap[id];
-      const lastAt = g.lastMessageAt && g.lastMessageAt.toMillis ? g.lastMessageAt.toMillis() : 0;
-      const readAt = g['lastRead_' + currentUser.uid] && g['lastRead_' + currentUser.uid].toMillis ? g['lastRead_' + currentUser.uid].toMillis() : 0;
-      rows.push({
-        id, kind: 'group', label: (g.name || 'Grup') + ' (Grup)', sub: g.lastMessage || 'Henüz mesaj yok', lastAt,
-        unread: lastAt > readAt && g.lastSenderUid !== currentUser.uid,
-        avatarLetter: '👥'
       });
     });
     rows.sort((a, b) => b.lastAt - a.lastAt);
 
     const listHtml = rows.length ? rows.map(r => `
-      <div class="mmg-chat-list-item" data-kind="${r.kind}" data-chat-id="${esc(r.id)}" data-label="${esc(r.label)}" data-other-uid="${esc(r.otherUid || '')}">
+      <div class="mmg-chat-list-item" data-chat-id="${esc(r.id)}" data-label="${esc(r.label)}" data-other-uid="${esc(r.otherUid || '')}">
         <div class="mmg-chat-avatar">${esc(r.avatarLetter)}</div>
         <div class="mmg-chat-list-main">
           <div class="mmg-chat-list-name">${esc(r.label)}${r.unread ? ' •' : ''}</div>
           <div class="mmg-chat-list-sub">${esc(r.sub)}</div>
         </div>
-        ${r.kind === 'chat' ? `<button type="button" class="mmg-chat-list-delete" data-delete-chat-id="${esc(r.id)}" data-delete-label="${esc(r.label)}" title="Kişiyi sil" aria-label="Kişiyi sil">🗑</button>` : ''}
+        <button type="button" class="mmg-chat-list-delete" data-delete-chat-id="${esc(r.id)}" data-delete-label="${esc(r.label)}" title="Kişiyi sil" aria-label="Kişiyi sil">🗑</button>
       </div>`).join('')
-      : `<div class="mmg-chat-empty">Henüz bir sohbetiniz yok.<br>"Kod ile Ekle" sekmesinden bir kullanıcı kodu girerek istek gönderebilir ya da bir grup oluşturabilirsiniz.</div>`;
+      : `<div class="mmg-chat-empty">Henüz bir sohbetiniz yok.<br>"+ Kişi Ekle" ile bir kullanıcı kodu girerek istek gönderebilirsiniz.</div>`;
 
     els.body.innerHTML = `
-      <div class="mmg-chat-list-item" id="mmgNewGroupBtn" style="justify-content:center; font-weight:700; color:var(--brass,#C6A15B);">
-        + Grup Oluştur
+      <div class="mmg-chat-list-item" id="mmgAddPersonBtn" style="justify-content:center; font-weight:700; color:var(--brass,#C6A15B);">
+        + Kişi Ekle
       </div>
       ${listHtml}`;
 
-    document.getElementById('mmgNewGroupBtn').addEventListener('click', () => {
-      friendsSubView = 'newGroup';
-      pendingGroupMembers = [];
+    document.getElementById('mmgAddPersonBtn').addEventListener('click', () => {
+      friendsSubView = 'add';
       renderTab();
     });
     els.body.querySelectorAll('.mmg-chat-list-delete').forEach(btn => {
@@ -1412,12 +1460,51 @@ import {
     });
     els.body.querySelectorAll('.mmg-chat-list-item[data-chat-id]').forEach(row => {
       row.addEventListener('click', () => {
-        if(row.dataset.kind === 'group'){
-          const g = groupsMap[row.dataset.chatId] || {};
-          openChat(row.dataset.chatId, { title: (g.name || 'Grup'), isAdminChat: false, collection: 'chatGroups' });
-        } else {
-          openChat(row.dataset.chatId, { title: row.dataset.label, isAdminChat: false, otherUid: row.dataset.otherUid, collection: 'chats' });
-        }
+        openChat(row.dataset.chatId, { title: row.dataset.label, isAdminChat: false, otherUid: row.dataset.otherUid, collection: 'chats' });
+      });
+    });
+  }
+
+  function renderGroupsTab(){
+    els.title.textContent = 'Gruplar';
+    if(groupsSubView === 'newGroup') return renderNewGroupForm();
+
+    const rows = Object.keys(groupsMap).map(id => {
+      const g = groupsMap[id];
+      const lastAt = g.lastMessageAt && g.lastMessageAt.toMillis ? g.lastMessageAt.toMillis() : 0;
+      const readAt = g['lastRead_' + currentUser.uid] && g['lastRead_' + currentUser.uid].toMillis ? g['lastRead_' + currentUser.uid].toMillis() : 0;
+      return {
+        id, label: (g.name || 'Grup'), sub: g.lastMessage || 'Henüz mesaj yok', lastAt,
+        unread: lastAt > readAt && g.lastSenderUid !== currentUser.uid
+      };
+    });
+    rows.sort((a, b) => b.lastAt - a.lastAt);
+
+    const listHtml = rows.length ? rows.map(r => `
+      <div class="mmg-chat-list-item" data-group-id="${esc(r.id)}">
+        <div class="mmg-chat-avatar">👥</div>
+        <div class="mmg-chat-list-main">
+          <div class="mmg-chat-list-name">${esc(r.label)}${r.unread ? ' •' : ''}</div>
+          <div class="mmg-chat-list-sub">${esc(r.sub)}</div>
+        </div>
+      </div>`).join('')
+      : `<div class="mmg-chat-empty">Henüz bir grubunuz yok.<br>"+ Grup Oluştur" ile yeni bir grup kurabilirsiniz.</div>`;
+
+    els.body.innerHTML = `
+      <div class="mmg-chat-list-item" id="mmgNewGroupBtn" style="justify-content:center; font-weight:700; color:var(--brass,#C6A15B);">
+        + Grup Oluştur
+      </div>
+      ${listHtml}`;
+
+    document.getElementById('mmgNewGroupBtn').addEventListener('click', () => {
+      groupsSubView = 'newGroup';
+      pendingGroupMembers = [];
+      renderTab();
+    });
+    els.body.querySelectorAll('.mmg-chat-list-item[data-group-id]').forEach(row => {
+      row.addEventListener('click', () => {
+        const g = groupsMap[row.dataset.groupId] || {};
+        openChat(row.dataset.groupId, { title: (g.name || 'Grup'), isAdminChat: false, collection: 'chatGroups' });
       });
     });
   }
@@ -1426,7 +1513,7 @@ import {
     els.title.textContent = 'Grup Oluştur';
     els.body.innerHTML = `
       <div class="mmg-chat-add-form">
-        <button type="button" class="mmg-chat-iconbtn" id="mmgGroupBackBtn" style="margin-bottom:8px;">← Sohbetler'e dön</button>
+        <button type="button" class="mmg-chat-iconbtn" id="mmgGroupBackBtn" style="margin-bottom:8px;">← Gruplar'a dön</button>
         <input type="text" id="mmgGroupNameInput" placeholder="Grup adı" style="text-transform:none; letter-spacing:normal; font-family:'Inter',sans-serif;" maxlength="60">
         <input type="text" id="mmgGroupMemberInput" placeholder="Üye kullanıcı kodu (ör. 1016)" maxlength="12">
         <button type="button" class="mmg-chat-primary-btn" id="mmgGroupAddMemberBtn" style="margin-bottom:10px;">Üye Ekle</button>
@@ -1436,7 +1523,7 @@ import {
       </div>`;
 
     document.getElementById('mmgGroupBackBtn').addEventListener('click', () => {
-      friendsSubView = 'list'; renderTab();
+      groupsSubView = 'list'; renderTab();
     });
     document.getElementById('mmgGroupAddMemberBtn').addEventListener('click', addPendingGroupMember);
     document.getElementById('mmgGroupMemberInput').addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); addPendingGroupMember(); } });
@@ -1518,7 +1605,7 @@ import {
           createdAt: serverTimestamp()
         });
       }
-      friendsSubView = 'list';
+      groupsSubView = 'list';
       pendingGroupMembers = [];
       renderTab();
     }catch(e){
@@ -1611,9 +1698,10 @@ import {
 
 
   function renderAddTab(){
-    els.title.textContent = 'Kod ile Sohbet Ekle';
+    els.title.textContent = 'Kişi Ekle';
     els.body.innerHTML = `
       <div class="mmg-chat-add-form">
+        <button type="button" class="mmg-chat-iconbtn" id="mmgAddBackBtn" style="margin-bottom:8px;">← Sohbetler'e dön</button>
         <p style="font-size:12px; color:var(--muted,#8D96AC); margin-bottom:10px; line-height:1.5;">
           Arkadaşınızın Kullanıcı Kodunu (Müşteri No) girin. İsteğiniz, karşı taraf kabul ettiğinde bir sohbete dönüşür.
         </p>
@@ -1621,6 +1709,7 @@ import {
         <button type="button" class="mmg-chat-primary-btn" id="mmgChatAddBtn">İstek Gönder</button>
         <div id="mmgChatAddMsg" class="mmg-chat-msg-error"></div>
       </div>`;
+    document.getElementById('mmgAddBackBtn').addEventListener('click', () => { friendsSubView = 'list'; renderTab(); });
     document.getElementById('mmgChatAddBtn').addEventListener('click', sendChatRequest);
     document.getElementById('mmgChatAddInput').addEventListener('keydown', (e) => { if(e.key === 'Enter') sendChatRequest(); });
   }
