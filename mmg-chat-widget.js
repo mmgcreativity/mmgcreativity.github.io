@@ -1484,18 +1484,11 @@ import {
         </div>
         <button type="button" class="mmg-chat-list-delete" data-delete-chat-id="${esc(r.id)}" data-delete-label="${esc(r.label)}" title="Kişiyi sil" aria-label="Kişiyi sil">🗑</button>
       </div>`).join('')
-      : `<div class="mmg-chat-empty">Henüz bir sohbetiniz yok.<br>"+ Kişi Ekle" ile bir kullanıcı kodu girerek istek gönderebilirsiniz.</div>`;
+      : `<div class="mmg-chat-empty">Henüz bir sohbetiniz yok.<br><b>İstek → Gönderilen</b> sekmesindeki "+ Kişi Ekle" ile kullanıcı kodu girerek istek gönderebilirsiniz.</div>`;
 
-    els.body.innerHTML = `
-      <div class="mmg-chat-list-item" id="mmgAddPersonBtn" style="justify-content:center; font-weight:700; color:var(--brass,#C6A15B);">
-        + Kişi Ekle
-      </div>
-      ${listHtml}`;
+    // Kullanıcı isteği: "+ Kişi Ekle" Kişilerim'den KALDIRILDI; artık İstek > Gönderilen altında.
+    els.body.innerHTML = listHtml;
 
-    document.getElementById('mmgAddPersonBtn').addEventListener('click', () => {
-      friendsSubView = 'add';
-      renderTab();
-    });
     els.body.querySelectorAll('.mmg-chat-list-delete').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1724,9 +1717,15 @@ import {
 
     // ---- GÖNDERİLEN görünümü ----
     if(requestsSubView === 'sent'){
+      // "+ Kişi Ekle" artık burada (kullanıcı isteği: Ekle'yi İstek > Gönderilen'e taşı).
+      const addBtnHtml = `<div class="mmg-chat-list-item" id="mmgAddPersonBtn" style="justify-content:center; font-weight:700; color:var(--brass,#C6A15B); margin-bottom:10px;">+ Kişi Ekle</div>`;
+      function wireAddBtn(){
+        const b = document.getElementById('mmgAddPersonBtn');
+        if(b) b.addEventListener('click', () => { activeTab = 'friends'; friendsSubView = 'add'; renderTab(); });
+      }
       if(!sentIds.length){
-        els.body.innerHTML = subBar + `<div class="mmg-chat-empty">Gönderdiğiniz bekleyen istek yok.</div>`;
-        wireSubBar();
+        els.body.innerHTML = subBar + addBtnHtml + `<div class="mmg-chat-empty">Gönderdiğiniz bekleyen istek yok.</div>`;
+        wireSubBar(); wireAddBtn();
         return;
       }
       const sentHtml = sentIds.map(id => {
@@ -1736,8 +1735,8 @@ import {
           <button type="button" class="mmg-chat-btn decline cancel-sent" style="flex:0 0 auto; background:transparent; border:1px solid rgba(226,84,75,0.55); color:#E2544B; font-weight:600;">Geri Çek</button>
         </div>`;
       }).join('');
-      els.body.innerHTML = subBar + sentHtml;
-      wireSubBar();
+      els.body.innerHTML = subBar + addBtnHtml + sentHtml;
+      wireSubBar(); wireAddBtn();
       els.body.querySelectorAll('[data-sent-id]').forEach(row => {
         row.querySelector('.cancel-sent').addEventListener('click', () => cancelSentRequest(row.dataset.sentId));
       });
