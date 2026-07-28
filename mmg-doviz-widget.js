@@ -14,10 +14,10 @@
   // Gösterilecek pariteler (kod: etiket). Hepsi X/TRY olarak hesaplanır.
   const PAIRS = [
     { code: 'USD', label: 'USD', flag: '🇺🇸' },
-    { code: 'EUR', label: 'EUR', flag: '🇪🇺' },
-    { code: 'GBP', label: 'GBP', flag: '🇬🇧' },
-    { code: 'CHF', label: 'CHF', flag: '🇨🇭' }
+    { code: 'EUR', label: 'EUR', flag: '🇪🇺' }
   ];
+  // Gram Altın ayrı bir kaynaktan çekilir (döviz API'sinde altın yok).
+  const GOLD_URL = 'https://api.genelpara.com/embed/altin.json';
 
   function inject(){
     if(document.getElementById('mmgDovizBtn')) return; // tek örnek
@@ -105,6 +105,7 @@
                 '</div>';
       });
       rowsEl.innerHTML = html || '<div class="mmg-doviz-err">Kur bulunamadı</div>';
+      renderGold(); // Gram Altın satırını (varsa) ekle
       // Güncelleme zamanı
       let stamp = '';
       try{
@@ -115,6 +116,17 @@
       updatedEl.textContent = stamp ? ('Güncel: ' + stamp) : '';
     }
 
+    function parseTRNum(s){ if(typeof s==='number') return s; return parseFloat(String(s==null?'':s).replace(/\./g,'').replace(',','.')); }
+    function renderGold(){
+      fetch(GOLD_URL).then(r=>r.json()).then(d=>{
+        const g = d && (d.GA || d.gram || d['gram-altin'] || d.gramaltin);
+        let v = g ? parseTRNum(g.satis != null ? g.satis : (g['Satış'] != null ? g['Satış'] : g.selling)) : null;
+        if(!v || !isFinite(v)) return;
+        if(rowsEl.querySelector('.mmg-doviz-gold')) return;
+        rowsEl.insertAdjacentHTML('beforeend',
+          '<div class="mmg-doviz-row mmg-doviz-gold"><span class="mmg-doviz-pair">🥇 Gram Altın<small>/TRY</small></span><span class="mmg-doviz-val">' + fmt(v) + '</span></div>');
+      }).catch(()=>{});
+    }
     function renderError(){
       rowsEl.innerHTML = '<div class="mmg-doviz-err">Kurlar alınamadı.<br>Bağlantını kontrol et.</div>';
       updatedEl.textContent = '';
