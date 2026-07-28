@@ -3629,7 +3629,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // değiştirme listesini genişlet — kullanıcı tek tıkla firmalar arası geçebilsin.
   const mmgActiveFirmaBarEl = document.getElementById('mmgActiveFirmaBar');
   if(mmgActiveFirmaBarEl){
-    mmgActiveFirmaBarEl.addEventListener('click', () => {
+    mmgActiveFirmaBarEl.addEventListener('click', (e) => {
+      // stopPropagation ŞART: aksi halde tıklama document'a çıkıp "dışarı tıklandı"
+      // kapatıcısını tetikliyor ve menü açılır açılmaz kapanıyordu (firma listesi açılmıyordu).
+      e.stopPropagation();
       toggleAccountDropdown(true);
       const listEl = document.getElementById('mmgDataScopeList');
       if(listEl) listEl.style.display = 'block';
