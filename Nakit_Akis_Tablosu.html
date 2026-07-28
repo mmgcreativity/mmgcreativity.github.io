@@ -346,15 +346,6 @@ function mmgApplyTurkishFont(doc){
   .cons-modal-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px; }
   .cons-modal-close{ background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; padding:4px 8px; border-radius:8px; line-height:1; }
   .cons-modal-close:hover{ color:var(--red); background:rgba(226,84,75,0.1); }
-  /* Konsolide sonuç kartları: alt alta yerine yan yana responsive kutular */
-  #consolidatedResults .summary-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
-  .cons-table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  @media (max-width:760px){
-    .cons-modal-overlay{ padding:24px 10px; }
-    .cons-modal-card{ padding:18px 14px; }
-    #consolidatedResults .summary-cards{ grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); }
-    .cons-table-scroll table{ min-width:420px; }
-  }
 
   .top-combined-row{ display:flex; flex-wrap:nowrap; align-items:center; gap:8px; overflow-x:auto; padding-bottom:2px; }
   .top-combined-row::-webkit-scrollbar{ height:0; }
@@ -674,9 +665,6 @@ function mmgApplyTurkishFont(doc){
   #exportExcelBtn svg, #exportPdfBtn svg{
     margin-right:6px !important;
   }
-
-  /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
-  @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
 </head>
 <body>
@@ -749,7 +737,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <button type="button" class="ghost-btn" id="manualSaveBtn">💾 <span data-i18n="save_btn">Kaydet</span></button>
               <button type="button" class="ghost-btn" id="clearMonthBtn">🗑 <span data-i18n="clear_btn">Temizle</span></button>
               <button type="button" class="ghost-btn" id="undoClearBtn" style="display:none;">↩ <span data-i18n="undo_btn">Geri Al</span></button>
-              <button type="button" class="ghost-btn" id="consolidatedOpenCard" style="display:none;">🏢 <span class="coc-text" data-i18n="consolidate_open">KONSOLİDE GÖSTER</span></button>
             </div>
           </div>
         </div>
@@ -765,6 +752,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
       <div class="content-side" id="contentSide">
+        <button type="button" class="consolidate-open-card" id="consolidatedOpenCard" style="display:none;">
+          <span class="coc-icon">🏢</span>
+          <span class="coc-text" data-i18n="consolidate_open">KONSOLİDE GÖSTER</span>
+          <span class="coc-caret">▾</span>
+        </button>
         <div class="summary-cards" id="summaryCardsSection">
           <div class="summary-card sc-gelir">
             <div class="summary-label"><span class="summary-label-icon">▲</span><span id="sumGelirLabel">Gelir</span></div>
@@ -837,7 +829,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="summary-value" id="consNet">0,00 TL</div>
           </div>
         </div>
-        <div class="cons-table-scroll">
         <table style="width:100%; border-collapse:collapse; font-size:13px;">
           <thead>
             <tr style="text-align:left; color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;">
@@ -849,7 +840,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </thead>
           <tbody id="consolidatedFirmaTable"></tbody>
         </table>
-        </div>
       </div>
      </div>
     </div>
@@ -1326,27 +1316,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const adminIds = Array.isArray(data.adminFirmaIds) ? data.adminFirmaIds : [];
       // Sadece yönettiğiniz (admin) değil, ÜYESİ olduğunuz firmaları da dahil ediyoruz —
       // index.html'deki "Bağlı Firmalar" ile aynı mantık (bkz. loadFirmaMemberships).
-      // index.html ile AYNI sağlam mantık: collectionGroup sorgusu (index gerektirir) başarısız
-      // olursa eski "firmaIds" alanına düş; kaynağı ne olursa olsun her aday firmada GERÇEKTEN
-      // üye miyiz üyelik belgesine bakarak doğrula. Böylece members collectionGroup index'i
-      // deploy edilmemiş olsa bile üye olunan firmalar konsolideye dahil olur.
-      let candidateIds = [];
+      let memberIds = [];
       try{
         const memSnap = await cloud.getDocs(cloud.query(cloud.collectionGroup(cloud.db, 'members'), cloud.where('uid', '==', uid)));
         memSnap.forEach(d => {
           const fid = d.ref.parent.parent ? d.ref.parent.parent.id : null;
-          if(fid) candidateIds.push(fid);
+          if(fid) memberIds.push(fid);
         });
-      }catch(e){
-        candidateIds = Array.isArray(data.firmaIds) ? data.firmaIds : [];
-      }
-      let memberIds = [];
-      for(const fid of candidateIds){
-        try{
-          const mDoc = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'members', uid));
-          if(mDoc.exists()) memberIds.push(fid);
-        }catch(e){ /* okunamazsa güvenli tarafta kal */ }
-      }
+      }catch(e){ /* collectionGroup index eksikse sessizce geç, en azından admin firmaları gösterilir */ }
       const allIds = Array.from(new Set([...adminIds, ...memberIds]));
       if(allIds.length < 2){ openCard.style.display = 'none'; return; }
       consolidatedFirmas = [];
@@ -1357,7 +1334,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }catch(e){ /* tek bir firma okunamazsa listeyi bozmadan devam et */ }
       }
       if(consolidatedFirmas.length < 2){ openCard.style.display = 'none'; return; }
-      openCard.style.display = '';
+      openCard.style.display = 'flex';
       renderConsolidatedFirmaGrid();
     }catch(e){ openCard.style.display = 'none'; }
   }
@@ -1445,13 +1422,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // konsolide Gelir/Gider/Net toplamlarını ve firma kırılımını hesaplar.
   async function computeConsolidatedTotals(checked){
     const cloud = window.mmgCloud;
-    // AKTİF firma (o an düzenlenen scope) ve ekranda açık olan ay: bu firmanın bu ayı için
-    // Firestore yerine CANLI in-memory monthData kullanılır. Böylece kullanıcının yeni girdiği
-    // (henüz buluta yazılmamış / bulut yazımı geciken / kural nedeniyle yazılamayan) veriler
-    // konsolide görünümde ANINDA yansır. ("Bir sürü şey yazdım aynı duruyor" hatasının kök nedeni:
-    // konsolide, aktif firmayı da yalnızca buluttan okuyordu; taze veri yansımıyordu.)
-    const activeFid = (cloud && cloud.scopeCollection === 'firmaAccounts') ? cloud.scopeId : null;
-    const curMk = monthKeyOf(selYear, selMonth);
     const monthKeys = consolidatedNeededMonthKeys();
     const dayFilter = consolidatedNeededDayKeys();
     let grandGelir = 0, grandGider = 0;
@@ -1460,23 +1430,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const firma = consolidatedFirmas.find(f => f.id === fid);
       let fGelir = 0, fGider = 0;
       for(const mk of monthKeys){
-        let data = null;
-        if(fid === activeFid && mk === curMk){
-          // Aktif firmanın açık ayı → canlı veri (Firestore okuması yapma)
-          data = monthData || {};
-        } else {
-          try{
-            const snap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'cashflow', mk));
-            if(!snap.exists()) continue;
-            data = snap.data().data || {};
-          }catch(e){ continue; /* bu firma/ay okunamazsa sessizce geç, diğerleriyle devam */ }
-        }
-        Object.keys(data).forEach(dk => {
-          if(dayFilter && !dayFilter.has(dk)) return;
-          const day = data[dk] || {};
-          (day.gider||[]).forEach(it => { fGider += (it.amount||0); });
-          (day.gelir||[]).forEach(it => { fGelir += (it.amount||0); });
-        });
+        try{
+          const snap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'cashflow', mk));
+          if(!snap.exists()) continue;
+          const data = snap.data().data || {};
+          Object.keys(data).forEach(dk => {
+            if(dayFilter && !dayFilter.has(dk)) return;
+            const day = data[dk] || {};
+            (day.gider||[]).forEach(it => { fGider += (it.amount||0); });
+            (day.gelir||[]).forEach(it => { fGelir += (it.amount||0); });
+          });
+        }catch(e){ /* bu firma/ay okunamazsa sessizce geç, diğerleriyle devam */ }
       }
       grandGelir += fGelir; grandGider += fGider;
       rows.push({ name: firma ? firma.name : fid, gelir: fGelir, gider: fGider, net: fGelir - fGider });
@@ -1515,18 +1479,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         exitBtn = document.createElement('button');
         exitBtn.type = 'button';
         exitBtn.id = 'consolidatedExitBtn';
-        exitBtn.className = 'ghost-btn';
+        exitBtn.className = 'consolidate-open-card';
         exitBtn.style.borderColor = 'var(--red,#e2544b)';
-        exitBtn.style.color = 'var(--red,#e2544b)';
-        exitBtn.innerHTML = '✕ <span class="coc-text">Konsolide Moddan Çık</span>';
+        exitBtn.innerHTML = '<span class="coc-icon">✕</span><span class="coc-text">Konsolide Moddan Çık</span>';
         exitBtn.addEventListener('click', exitConsolidatedMode);
         card.parentNode.insertBefore(exitBtn, card.nextSibling);
       }
       if(card) card.style.display = 'none';
-      if(exitBtn) exitBtn.style.display = '';
+      if(exitBtn) exitBtn.style.display = 'flex';
     } else {
       if(exitBtn) exitBtn.style.display = 'none';
-      if(card && consolidatedFirmas.length >= 2) card.style.display = '';
+      if(card && consolidatedFirmas.length >= 2) card.style.display = 'flex';
     }
   }
 
@@ -2993,6 +2956,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 })();
 </script>
 <!-- ================== /Hesap Makinesi Widget ================== -->
+<script src="mmg-doviz-widget.js"></script>
 
 
 
@@ -3051,6 +3015,5 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 })();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>
-<script src="mmg-undo.js" defer></script>
 </body>
 </html>

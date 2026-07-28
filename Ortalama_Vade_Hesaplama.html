@@ -177,10 +177,9 @@ function mmgApplyTurkishFont(doc){
   @media (max-width:480px){
     .reset-btn.card-reset-btn{ top:10px; right:10px; padding:6px 10px; font-size:11px; }
   }
-  #resultCard{ position:relative; padding-top:54px; max-width:560px; }
+  #resultCard{ position:relative; }
   @media (max-width:480px){
     .top-actions{ width:100%; }
-    #resultCard{ padding-top:48px; }
   }
   .brand-row{
     display:inline-flex; align-items:center; gap:12px; margin-bottom:18px;
@@ -306,9 +305,6 @@ function mmgApplyTurkishFont(doc){
   #exportExcelBtn svg, #exportPdfBtn svg{
     margin-right:6px !important;
   }
-
-  /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
-  @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
 </head>
 <body>
@@ -862,6 +858,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 })();
 </script>
 <!-- ================== /Hesap Makinesi Widget ================== -->
+<script src="mmg-doviz-widget.js"></script>
 
 <script>
 (function(){
@@ -935,6 +932,5 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 })();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>
-<script src="mmg-undo.js" defer></script>
 </body>
 </html>
