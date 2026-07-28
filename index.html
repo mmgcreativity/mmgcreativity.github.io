@@ -269,15 +269,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .user-badge-dot{ width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 6px var(--teal); flex-shrink:0; }
 
   .mmg-bottom-left-bar{
-    flex-shrink:0; display:flex; align-items:center; gap:8px;
-    padding:10px 12px; border-top:1px solid var(--hairline); background:var(--surface);
+    flex-shrink:0; display:flex; align-items:center; gap:10px;
+    padding:12px 16px; border-top:1px solid var(--hairline); background:var(--surface);
   }
-  .top-right-badge{ order:1; flex:0 0 auto; }
-  .mmg-firma-bar-wrap{ order:2; flex:1 1 auto; min-width:0; }
-  /* Aktif firma: hesap ikonunun hemen sağında kompakt bir hap olarak */
+  /* Aktif firma: hesap rozetinin hemen üstünde ince, kompakt bir satır */
   .mmg-active-firma-bar{
-    flex-shrink:1; display:flex; align-items:center; gap:7px; cursor:pointer; width:100%; min-width:0;
-    padding:7px 10px; border:1px solid var(--hairline); border-radius:9px; background:var(--surface-2);
+    flex-shrink:0; display:flex; align-items:center; gap:8px; cursor:pointer;
+    padding:6px 16px; border-top:1px solid var(--hairline); background:var(--surface-2);
     transition:background .15s ease;
   }
   .mmg-active-firma-bar:hover{ background:var(--surface); }
@@ -448,7 +446,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
   }
   .hero-sub{ color:var(--muted); max-width:520px; font-size:13px; position:relative; }
-  .hero-desc{ color:#D9E0EE; max-width:none; white-space:nowrap; font-size:13.5px; font-weight:500; line-height:1.55; margin-top:10px; position:relative; }
+  .hero-desc{ color:#D9E0EE; max-width:none; white-space:nowrap; font-size:13.5px; font-weight:500; line-height:1.55; margin-top:20px; position:relative; }
   .hero-features{ color:var(--brass,#C6A15B); font-weight:700; font-size:12px; letter-spacing:.04em; margin-top:8px; line-height:1.7; max-width:640px; }
   .hero-credit{ position:absolute; right:48px; bottom:18px; display:inline-flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); z-index:2; }
   @media (max-width:860px){ .hero-credit{ position:static; margin-top:16px; right:auto; bottom:auto; } }
@@ -1302,7 +1300,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="home-search-wrap">
       <div class="home-search-box" id="homeSearchBox">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="search" id="homeSearchInput" name="mmgToolSearch" placeholder="Ara" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" aria-autocomplete="none" role="searchbox">
+        <input type="search" id="homeSearchInput" name="mmgToolSearch" placeholder="Ara" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" aria-autocomplete="none" role="searchbox" readonly onfocus="this.removeAttribute('readonly')">
         <button type="button" id="homeSearchClear" hidden aria-label="Temizle">✕</button>
       </div>
       <div class="home-search-results" id="homeSearchResults" hidden></div>
@@ -1462,8 +1460,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </button>
   </nav>
 
-<div class="mmg-bottom-left-bar" id="mmgBottomLeftBar">
-<div id="accountDropdownBackdrop" class="mmg-dropdown-backdrop" hidden></div>
 <div class="mmg-firma-bar-wrap" style="position:relative;">
   <div class="mmg-active-firma-bar" id="mmgActiveFirmaBar" hidden data-i18n-title="active_firma_hint" title="İşlem yaptığınız firma — değiştirmek için tıklayın">
     <span class="maf-dot"></span>
@@ -1472,6 +1468,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
   <div class="mmg-firma-switch-popup" id="mmgFirmaSwitchPopup" hidden></div>
 </div>
+<div class="mmg-bottom-left-bar" id="mmgBottomLeftBar">
+<div id="accountDropdownBackdrop" class="mmg-dropdown-backdrop" hidden></div>
 <div class="top-right-badge" id="topRightBadge">
   <button type="button" class="account-trigger" id="accountTrigger">
     <span class="avatar-wrap" id="avatarWrap">
@@ -1652,7 +1650,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
       results.addEventListener('click', function(e){ var row = e.target.closest('.home-search-item'); if(row) go(row.dataset.target); });
       clearBtn.addEventListener('click', function(){ input.value=''; results.hidden=true; clearBtn.hidden=true; input.focus(); });
-      document.addEventListener('click', function(e){ if(!results.hidden && !e.target.closest('.home-search-wrap')) results.hidden = true; });
+      document.addEventListener('click', function(e){ if(!results.hidden && !e.target.closest('.home-search-wrap')){ results.hidden = true; } }, true);
     })();
     </script>
 
@@ -1783,14 +1781,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="footer-final-row">
         <div class="footer-final-top-line">
           <div class="footer-col-title" style="margin-bottom:0;" data-i18n="footer_follow_us">Bizi Takip Edin</div>
-          <div class="credit">
-            <span data-i18n="footer_powered_by">Powered by</span>
-            <span class="signature-pill">
-              <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
-              <span id="credit-fallback" class="credit-fallback">M</span>
-              <b>mmgcreativity</b>
-            </span>
-          </div>
         </div>
         <div class="footer-final-bottom-line">
         <div class="footer-social-col">
