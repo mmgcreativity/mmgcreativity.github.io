@@ -716,6 +716,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   // ---------------- Kullanım İstatistikleri (en çok kullanılan uygulamalar + kullanıcı başına kullanım) ----------------
   // Bir uygulamaya tıklanınca: o uygulamayı HANGİ kullanıcı KAÇ kez açmış (çoktan aza).
+  function fmtOpenTime(iso){
+    try{ const d = new Date(iso); if(isNaN(d)) return iso; return d.toLocaleString('tr-TR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+    catch(e){ return iso; }
+  }
   function renderUsageUserBreakdown(target){
     const users = (window.mmgAppUsers && window.mmgAppUsers[target]) || {};
     const rows = Object.keys(users).map(uid => ({ uid, count: users[uid] })).sort((a,b) => b.count - a.count);
@@ -725,11 +729,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(u) return u.username + (u.customerNumber && u.customerNumber !== '—' ? (' (#' + u.customerNumber + ')') : '');
       return (uid || '').slice(0, 8) + '…';
     };
-    return '<div style="padding:4px 0 10px 34px;">' + rows.map(r =>
-      '<div style="display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:4px 0; border-bottom:1px solid var(--hairline,#2A3448);">' +
-        '<span>' + escapeHtml(labelOf(r.uid)) + '</span>' +
-        '<span style="color:var(--brass,#C6A15B); font-weight:600; white-space:nowrap;">' + r.count + ' kez</span>' +
-      '</div>').join('') + '</div>';
+    const opensMap = (window.mmgAppUserOpens && window.mmgAppUserOpens[target]) || {};
+    return '<div style="padding:4px 0 10px 34px;">' + rows.map(r => {
+      const info = opensMap[r.uid] || { opens: [], last: '' };
+      const times = (info.opens || []).slice().sort().reverse();
+      const timesHtml = times.length
+        ? times.slice(0, 50).map(t => '<div style="font-size:11.5px; color:var(--muted); padding:2px 0;">• ' + escapeHtml(fmtOpenTime(t)) + '</div>').join('')
+        : ('<div style="font-size:11.5px; color:var(--muted); padding:2px 0;">Tekil giriş zamanı kaydı yok' + (info.last ? (' · Son giriş: ' + escapeHtml(fmtOpenTime(info.last))) : '') + '</div>');
+      return '<div class="usage-user-row" data-uid="' + escapeHtml(r.uid) + '" style="border-bottom:1px solid var(--hairline,#2A3448);">' +
+        '<div style="display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:5px 0; cursor:pointer;" title="Giriş zamanlarını göster">' +
+          '<span><span class="uu-caret" style="color:var(--muted); font-size:9px; margin-right:5px;">▼</span>' + escapeHtml(labelOf(r.uid)) + '</span>' +
+          '<span style="color:var(--brass,#C6A15B); font-weight:600; white-space:nowrap;">' + r.count + ' kez</span>' +
+        '</div>' +
+        '<div class="usage-user-times" hidden style="padding:2px 0 8px 16px;">' + timesHtml + '</div>' +
+      '</div>';
+    }).join('') + '</div>';
   }
 
   async function loadUsageStats(){
@@ -740,6 +754,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const userTotals = {};     // { uid: toplamSayı }
       const userBreakdown = {};  // { uid: { target: sayı } }
       const appUsers = {};       // { target: { uid: sayı } }  — uygulama başına hangi kullanıcı kaç kez açtı
+      const appUserOpens = {};   // { target: { uid: [zaman,...] } } — kişiye tıklayınca gösterilecek giriş zamanları
       openersSnap.forEach(d => {
         const data = d.data();
         const target = d.ref.parent.parent ? d.ref.parent.parent.id : null;
@@ -752,8 +767,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         userBreakdown[uid][target] = (userBreakdown[uid][target] || 0) + count;
         if(!appUsers[target]) appUsers[target] = {};
         appUsers[target][uid] = (appUsers[target][uid] || 0) + count;
+        if(!appUserOpens[target]) appUserOpens[target] = {};
+        appUserOpens[target][uid] = { opens: Array.isArray(data.opens) ? data.opens : [], last: data.lastUsedAt || '' };
       });
       window.mmgAppUsers = appUsers;
+      window.mmgAppUserOpens = appUserOpens;
 
       // Uygulama başlıklarını (dosya adı yerine okunaklı ad) üst seviye "usageStats" belgelerinden al
       const usageTitles = {};
@@ -802,6 +820,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             detail.innerHTML = renderUsageUserBreakdown(item.dataset.target);
             detail.hidden = false;
             if(caret) caret.textContent = '▲';
+            // Kişi satırına tıklayınca giriş zamanları açılıp kapansın (app detayını kapatmasın).
+            detail.querySelectorAll('.usage-user-row > div:first-child').forEach(hdr => {
+              hdr.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                const row = hdr.parentElement;
+                const times = row.querySelector('.usage-user-times');
+                const c = hdr.querySelector('.uu-caret');
+                if(!times) return;
+                times.hidden = !times.hidden;
+                if(c) c.textContent = times.hidden ? '▼' : '▲';
+              });
+            });
           } else {
             detail.hidden = true;
             if(caret) caret.textContent = '▼';

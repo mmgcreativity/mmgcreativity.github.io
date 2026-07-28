@@ -2735,7 +2735,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         title: title, totalCount: increment(1), lastUsedAt: new Date().toISOString()
       }, { merge: true }).catch(()=>{});
       setDoc(doc(db, 'usageStats', target, 'openers', user.uid), {
-        uid: user.uid, username: username, count: increment(1), lastUsedAt: new Date().toISOString()
+        uid: user.uid, username: username, count: increment(1), lastUsedAt: new Date().toISOString(),
+        // Kişiye tıklayınca "ne zaman girdi" listesi için son giriş zamanlarını da tut (İstatistikler'de gösterilir).
+        opens: arrayUnion(new Date().toISOString())
       }, { merge: true }).catch(()=>{});
     }catch(err){ /* istatistik yazılamazsa sessizce geç, kullanıcıyı hiç etkilemesin */ }
   });
