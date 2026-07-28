@@ -1151,8 +1151,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <form id="authForm" class="auth-grid">
         <div class="auth-field auth-full" id="authUsernameWrap" style="display:none;">
-          <label id="authUsernameLabel" data-i18n="auth_fullname">Ad Soyad</label>
-          <input type="text" id="authUsername" placeholder="">
+          <label id="authUsernameLabel" data-i18n="auth_fullname">Ad Soyad (zorunlu)</label>
+          <input type="text" id="authUsername" placeholder="Örn. AHMET YILMAZ" required>
         </div>
         <div class="auth-field auth-full">
           <label data-i18n="auth_email">E-posta</label>
@@ -1471,6 +1471,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="mmgCompanySwitchWrap" style="display:none;">
       <div class="account-dropdown-section-label" data-i18n="dropdown_linked_companies">Bağlı Firmalar</div>
       <div id="mmgCompanySwitchList"></div>
+      <div class="account-dropdown-divider"></div>
+    </div>
+    <div id="mmgMyAccountsWrap" style="display:none;">
+      <div class="account-dropdown-section-label">Hesaplarım</div>
+      <div id="mmgMyAccountsList"></div>
+      <button type="button" class="account-dropdown-item" id="mmgLinkAccountBtn" style="display:none; padding:8px 10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Hesap Bağla</span>
+      </button>
+      <div id="mmgLinkAccountForm" style="display:none; padding:6px 8px 4px;">
+        <input type="email" id="mmgLinkEmail" placeholder="E-posta" autocomplete="off" spellcheck="false" style="width:100%; box-sizing:border-box; margin-bottom:6px; padding:7px 9px; font-size:12.5px; color:var(--text); background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px; outline:none;">
+        <input type="password" id="mmgLinkPass" placeholder="Şifre" autocomplete="off" style="width:100%; box-sizing:border-box; margin-bottom:6px; padding:7px 9px; font-size:12.5px; color:var(--text); background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px; outline:none;">
+        <div style="display:flex; gap:6px;">
+          <button type="button" id="mmgLinkSubmitBtn" style="flex:1; padding:7px 10px; font-size:12.5px; font-weight:700; color:#0D1420; background:var(--brass,#C6A15B); border:none; border-radius:6px; cursor:pointer;">Bağla</button>
+          <button type="button" id="mmgLinkCancelBtn" style="flex:0 0 auto; padding:7px 12px; font-size:12.5px; color:var(--muted); background:transparent; border:1px solid var(--hairline); border-radius:6px; cursor:pointer;">Vazgeç</button>
+        </div>
+        <div id="mmgLinkMsg" style="display:none; margin-top:6px; font-size:11.5px;"></div>
+      </div>
       <div class="account-dropdown-divider"></div>
     </div>
     <div id="mmgDataScopeWrap" style="display:none;">
@@ -2611,12 +2629,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script type="module">
   // ---- Firebase ----
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import {
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
     signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup,
     deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup,
-    sendPasswordResetEmail, updatePassword, sendEmailVerification
+    sendPasswordResetEmail, updatePassword, sendEmailVerification, signInWithCustomToken
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, runTransaction, serverTimestamp, increment,
@@ -3296,6 +3314,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(accountDropdownBackdrop) accountDropdownBackdrop.hidden = !shouldShow;
     if(shouldShow){
       renderCompanySwitchList();
+      renderMyAccountsList();
     }
   }
   if(accountDropdownBackdrop){
@@ -3349,6 +3368,247 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
       wrap.style.display = 'block';
     } catch(e){ wrap.style.display = 'none'; }
+  }
+
+  // ============ Çoklu hesap değiştirici ("Hesaplarım") ============
+  // Admin hesabı (users/{uid}.isAdmin === true), kendi diğer e-postalarıyla açtığı
+  // hesaplarına ŞİFRESİZ (özel custom token ile) geçebilir. Google hesap değiştirici
+  // mantığı. Backend (us-central1 callable'ları) bağlama/token/kaldırma işlerini yapar.
+  // GÜVENLİK: şifre hiçbir yerde saklanmaz — yalnızca bağlama anında ikincil app ile bir
+  // kez kimlik doğrulaması için kullanılır ve hemen atılır.
+
+  // İkincil Firebase app (ana oturumu bozmadan hedef hesabın kimlik token'ını almak için).
+  // Lazy + tek sefer: tekrar tekrar initializeApp('mmgLinker') çağrılırsa hata verir; varsa
+  // mevcut app yeniden kullanılır.
+  let mmgLinkerAuth = null;
+  function getLinkerAuth(){
+    if(mmgLinkerAuth) return mmgLinkerAuth;
+    const existing = getApps().find(a => a.name === 'mmgLinker');
+    const linkerApp = existing ? getApp('mmgLinker') : initializeApp(firebaseConfig, 'mmgLinker');
+    mmgLinkerAuth = getAuth(linkerApp);
+    return mmgLinkerAuth;
+  }
+
+  let mmgAccountSwitching = false; // çift tıklamayı / çift geçişi engelle
+
+  // Aktif kullanıcının hesap grubunu getirir.
+  // Dönen: { adminUid, isAdmin, members:[{uid,email,isAdmin}] } ya da grup yoksa null.
+  async function mmgLoadAccountGroup(){
+    const user = auth.currentUser;
+    if(!user) return null;
+    let meSnap;
+    try{ meSnap = await getDoc(doc(db, 'users', user.uid)); }catch(e){ return null; }
+    const me = meSnap.exists() ? meSnap.data() : {};
+    // Her üye için ad + müşteri kodunu users dokümanından çek (kullanıcı isteği: "kodu ve adı gelsin").
+    async function enrich(members){
+      await Promise.all(members.map(async (m) => {
+        try{
+          const s = await getDoc(doc(db, 'users', m.uid));
+          if(s.exists()){
+            const d = s.data();
+            m.name = d.username || (d.profile && d.profile.name) || d.displayName || '';
+            m.code = d.customerNumber || '';
+            if(!m.email) m.email = d.email || '';
+          }
+        }catch(e){ /* okunamazsa e-posta ile idare et */ }
+      }));
+      return members;
+    }
+    if(me.isAdmin){
+      const linked = Array.isArray(me.linkedAccounts) ? me.linkedAccounts : [];
+      const members = [{ uid: user.uid, email: user.email || me.email || '', isAdmin: true }];
+      linked.forEach(a => { if(a && a.uid) members.push({ uid: a.uid, email: a.email || '', isAdmin: false }); });
+      return { adminUid: user.uid, isAdmin: true, members: await enrich(members) };
+    }
+    // Admin değil: grup sahibini (switchOwnerUid) bul, onun linkedAccounts + kendisi = grup.
+    const ownerUid = me.switchOwnerUid;
+    if(!ownerUid) return null;
+    let ownerSnap;
+    try{ ownerSnap = await getDoc(doc(db, 'users', ownerUid)); }catch(e){ return null; }
+    if(!ownerSnap.exists()) return null;
+    const owner = ownerSnap.data();
+    const linked = Array.isArray(owner.linkedAccounts) ? owner.linkedAccounts : [];
+    const members = [{ uid: ownerUid, email: owner.email || '', isAdmin: true }];
+    linked.forEach(a => { if(a && a.uid) members.push({ uid: a.uid, email: a.email || '', isAdmin: false }); });
+    return { adminUid: ownerUid, isAdmin: false, members: await enrich(members) };
+  }
+
+  function mmgSetLinkMsg(text, kind){
+    const el = document.getElementById('mmgLinkMsg');
+    if(!el) return;
+    if(!text){ el.style.display = 'none'; el.textContent = ''; return; }
+    el.textContent = text;
+    el.style.color = kind === 'error' ? 'var(--red,#E2544B)' : (kind === 'ok' ? 'var(--teal,#3FB68A)' : 'var(--muted)');
+    el.style.display = 'block';
+  }
+
+  async function renderMyAccountsList(){
+    const wrap = document.getElementById('mmgMyAccountsWrap');
+    const listEl = document.getElementById('mmgMyAccountsList');
+    const linkBtn = document.getElementById('mmgLinkAccountBtn');
+    const linkForm = document.getElementById('mmgLinkAccountForm');
+    if(!wrap || !listEl) return;
+    const user = auth.currentUser;
+    const state = localStorage.getItem('mmg_auth_state');
+    if(!user || !state || !state.startsWith('user:')){ wrap.style.display = 'none'; return; }
+
+    const group = await mmgLoadAccountGroup();
+    // Grup yoksa (admin değil ve switchOwnerUid yok) hiç gösterme.
+    if(!group){ wrap.style.display = 'none'; return; }
+
+    const activeUid = user.uid;
+    const rows = group.members.map(m => {
+      const isActive = m.uid === activeUid;
+      // Ad + müşteri kodu göster (kullanıcı isteği). Ad yoksa e-postaya düş.
+      const nm = (m.name || '').trim();
+      const codeStr = m.code ? (' · #' + m.code) : '';
+      const label = (nm ? nm : (m.email || (m.isAdmin ? 'Admin' : m.uid))) + codeStr;
+      const badge = m.isAdmin
+        ? '<span style="flex:0 0 auto; font-size:9.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--brass,#C6A15B); border:1px solid var(--brass,#C6A15B); border-radius:4px; padding:1px 5px;">Admin</span>'
+        : '';
+      // Admin ise ve satır bağlı bir hesapsa "kaldır" (unlink) düğmesi göster.
+      const removeBtn = (group.isAdmin && !m.isAdmin)
+        ? '<span class="mmg-acc-unlink" data-unlink-uid="' + m.uid + '" title="Bağlantıyı kaldır" style="flex:0 0 auto; margin-left:2px; color:var(--muted); cursor:pointer; font-size:15px; line-height:1; padding:0 2px;">×</span>'
+        : '';
+      return '<div class="mmg-account-row' + (isActive ? ' mmg-account-row-static' : '') + '"' +
+             (isActive ? '' : ' data-switch-uid="' + m.uid + '"') + '>' +
+        (isActive
+          ? '<span class="mmg-account-row-dot" title="Aktif hesap"></span>'
+          : '<span style="width:7px; flex:0 0 auto;"></span>') +
+        '<span class="mmg-account-row-main" title="' + label + '">' + label + '</span>' +
+        badge + removeBtn +
+      '</div>';
+    }).join('');
+    listEl.innerHTML = rows;
+
+    // Hesaba GEÇİŞ: satıra tıkla → özel token al → ana app'e o token ile giriş → yenile.
+    listEl.querySelectorAll('[data-switch-uid]').forEach(row => {
+      row.addEventListener('click', async (e) => {
+        if(e.target.closest('[data-unlink-uid]')) return; // kaldır düğmesine tıklamayı yut
+        if(mmgAccountSwitching) return;
+        mmgAccountSwitching = true;
+        const targetUid = row.dataset.switchUid;
+        const mainEl = row.querySelector('.mmg-account-row-main');
+        const prevText = mainEl ? mainEl.textContent : '';
+        if(mainEl) mainEl.textContent = 'Geçiş yapılıyor…';
+        row.style.opacity = '0.6';
+        row.style.pointerEvents = 'none';
+        try{
+          const { data } = await httpsCallable(functions, 'accountSwitchToken')({ targetUid: targetUid });
+          if(!data || !data.token) throw new Error('token yok');
+          await signInWithCustomToken(auth, data.token);
+          location.reload();
+        }catch(err){
+          if(mainEl) mainEl.textContent = prevText;
+          row.style.opacity = '';
+          row.style.pointerEvents = '';
+          mmgAccountSwitching = false;
+          alert('Hesaba geçilemedi: ' + (err && err.message ? err.message : 'bilinmeyen hata'));
+        }
+      });
+    });
+
+    // Hesap KALDIRMA (unlink) — yalnızca admin.
+    listEl.querySelectorAll('[data-unlink-uid]').forEach(x => {
+      x.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const targetUid = x.dataset.unlinkUid;
+        if(!confirm('Bu hesabın bağlantısını kaldırmak istediğinize emin misiniz?')) return;
+        x.style.pointerEvents = 'none';
+        x.textContent = '…';
+        try{
+          await httpsCallable(functions, 'accountUnlink')({ targetUid: targetUid });
+          await renderMyAccountsList();
+        }catch(err){
+          x.style.pointerEvents = '';
+          x.textContent = '×';
+          alert('Kaldırılamadı: ' + (err && err.message ? err.message : 'bilinmeyen hata'));
+        }
+      });
+    });
+
+    // Bağla düğmesi/formu yalnızca admin için.
+    if(linkBtn) linkBtn.style.display = group.isAdmin ? 'flex' : 'none';
+    if(!group.isAdmin && linkForm) linkForm.style.display = 'none';
+
+    wrap.style.display = 'block';
+  }
+
+  // "+ Hesap Bağla" düğmesi → formu aç.
+  const mmgLinkAccountBtn = document.getElementById('mmgLinkAccountBtn');
+  if(mmgLinkAccountBtn){
+    mmgLinkAccountBtn.addEventListener('click', () => {
+      const form = document.getElementById('mmgLinkAccountForm');
+      if(!form) return;
+      mmgSetLinkMsg('');
+      const emailEl = document.getElementById('mmgLinkEmail');
+      const passEl = document.getElementById('mmgLinkPass');
+      if(emailEl) emailEl.value = '';
+      if(passEl) passEl.value = '';
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      if(form.style.display === 'block' && emailEl) emailEl.focus();
+    });
+  }
+  const mmgLinkCancelBtn = document.getElementById('mmgLinkCancelBtn');
+  if(mmgLinkCancelBtn){
+    mmgLinkCancelBtn.addEventListener('click', () => {
+      const form = document.getElementById('mmgLinkAccountForm');
+      const emailEl = document.getElementById('mmgLinkEmail');
+      const passEl = document.getElementById('mmgLinkPass');
+      if(emailEl) emailEl.value = '';
+      if(passEl) passEl.value = ''; // şifre hiçbir yerde tutulmaz
+      mmgSetLinkMsg('');
+      if(form) form.style.display = 'none';
+    });
+  }
+  // Hesap BAĞLAMA akışı (yalnızca admin): ikincil app ile hedef hesaba giriş → idToken al
+  //  → accountLinkConfirm → ikincil app'ten çık. Şifre hiçbir yere yazılmaz, input temizlenir.
+  const mmgLinkSubmitBtn = document.getElementById('mmgLinkSubmitBtn');
+  if(mmgLinkSubmitBtn){
+    mmgLinkSubmitBtn.addEventListener('click', async () => {
+      const emailEl = document.getElementById('mmgLinkEmail');
+      const passEl = document.getElementById('mmgLinkPass');
+      const email = (emailEl ? emailEl.value : '').trim();
+      const pass = passEl ? passEl.value : '';
+      if(!email || !pass){ mmgSetLinkMsg('E-posta ve şifre girin.', 'error'); return; }
+      if(auth.currentUser && auth.currentUser.email &&
+         email.toLowerCase() === auth.currentUser.email.toLowerCase()){
+        mmgSetLinkMsg('Zaten bu hesaptasınız.', 'error'); return;
+      }
+      mmgLinkSubmitBtn.disabled = true;
+      mmgSetLinkMsg('Bağlanıyor…', 'info');
+      const linkerAuth = getLinkerAuth();
+      try{
+        const cred = await signInWithEmailAndPassword(linkerAuth, email, pass);
+        const idToken = await cred.user.getIdToken();
+        if(passEl) passEl.value = ''; // kimlik doğrulandı; şifreyi hemen at
+        await httpsCallable(functions, 'accountLinkConfirm')({ targetIdToken: idToken });
+        try{ await signOut(linkerAuth); }catch(_e){ /* ikincil oturumu kapat */ }
+        if(emailEl) emailEl.value = '';
+        mmgSetLinkMsg('Hesap bağlandı ✓', 'ok');
+        await renderMyAccountsList();
+        setTimeout(() => {
+          const form = document.getElementById('mmgLinkAccountForm');
+          if(form) form.style.display = 'none';
+          mmgSetLinkMsg('');
+        }, 1200);
+      }catch(err){
+        try{ await signOut(linkerAuth); }catch(_e){}
+        if(passEl) passEl.value = ''; // hata olsa da şifreyi tutma
+        mmgSetLinkMsg(mmgLinkErrorText(err), 'error');
+      }finally{
+        mmgLinkSubmitBtn.disabled = false;
+      }
+    });
+  }
+  function mmgLinkErrorText(err){
+    const code = err && err.code ? err.code : '';
+    if(code === 'auth/wrong-password' || code === 'auth/invalid-credential') return 'E-posta veya şifre hatalı.';
+    if(code === 'auth/user-not-found') return 'Böyle bir hesap bulunamadı.';
+    if(code === 'auth/invalid-email') return 'Geçersiz e-posta.';
+    if(code === 'auth/too-many-requests') return 'Çok fazla deneme. Biraz sonra tekrar deneyin.';
+    if(err && err.message) return err.message;
+    return 'Bağlanamadı, tekrar deneyin.';
   }
 
   accountTrigger.addEventListener('click', (e) => {

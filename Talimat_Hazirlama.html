@@ -1849,9 +1849,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const info = await fetchFirmaGonderenBilgisi(f.id);
         f.banka = info.banka || '';
         f.iban = info.iban || '';
-        if(info.iban && !savedIbans.some(b => b.iban === info.iban)){
-          savedIbans.push({ label: f.name + (info.banka ? (' — ' + info.banka) : ''), banka: info.banka || '', iban: info.iban, firma: f.name, _db: true });
-        }
+        // Firmanın TÜM IBAN'larını kayıtlı listeye ekle (banks + kayitliMuhataplar birleşik).
+        (info.ibans && info.ibans.length ? info.ibans : (info.iban ? [{ banka: info.banka, iban: info.iban }] : []))
+          .forEach(ib => {
+            if(ib.iban && !savedIbans.some(b => b.iban === ib.iban && (b.firma||'').trim().toLowerCase() === f.name.trim().toLowerCase())){
+              savedIbans.push({ label: f.name + (ib.banka ? (' — ' + ib.banka) : ''), banka: ib.banka || '', iban: ib.iban, firma: f.name, _db: true });
+            }
+          });
       }catch(e){ /* sessizce geç */ }
     }
 
@@ -2053,7 +2057,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // kayıtlarından); talimatı o firma adına hazırlarken kullanılır.
   async function fetchFirmaGonderenBilgisi(firmaId){
     const cloud = window.mmgCloud;
-    const out = { name: firmaId, banka: '', iban: '', logo: null, logoDims: null, stamp: null, stampDims: null };
+    const out = { name: firmaId, banka: '', iban: '', ibans: [], logo: null, logoDims: null, stamp: null, stampDims: null };
     try{
       const fSnap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', firmaId));
       if(fSnap.exists()) out.name = fSnap.data().name || firmaId;
@@ -2066,14 +2070,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(d.stampBase64){ out.stamp = d.stampBase64; out.stampDims = (d.stampW && d.stampH) ? { w:d.stampW, h:d.stampH } : null; }
       }
     }catch(e){}
+    // (a) Eski/talimat kayıtlı muhatap IBAN'ları
     try{
       const mSnap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', firmaId, 'talimat', 'kayitliMuhataplar'));
       if(mSnap.exists()){
-        const ibans = mSnap.data().ibans || [];
-        const own = ibans.find(b => (b.firma||'').trim().toLowerCase() === out.name.trim().toLowerCase()) || ibans[0];
-        if(own){ out.banka = own.banka || ''; out.iban = own.iban || ''; }
+        (mSnap.data().ibans || []).forEach(b => { if(b && b.iban) out.ibans.push({ banka: b.banka || '', iban: b.iban }); });
       }
     }catch(e){}
+    // (b) ÖNEMLİ: Kullanıcının Veri Giriş → "IBAN'larım" ekranında kaydettiği firma banka
+    // hesapları burada: firmaAccounts/{firmaId}/banks. Talimat IBAN'ı asıl buradan gelmeli.
+    try{
+      const bSnap = await cloud.getDocs(cloud.collection(cloud.db, 'firmaAccounts', firmaId, 'banks'));
+      bSnap.forEach(d => {
+        const b = d.data() || {};
+        if(b.iban && !out.ibans.some(x => x.iban === b.iban)){
+          out.ibans.push({ banka: b.name || b.banka || '', iban: b.iban });
+        }
+      });
+    }catch(e){}
+    if(out.ibans.length){ out.banka = out.ibans[0].banka || ''; out.iban = out.ibans[0].iban || ''; }
     return out;
   }
   // Belirtilen grup firması için gönderen alanlarını (firma/banka/IBAN, logo, kaşe)
@@ -2509,7 +2524,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // matematiksel olarak kesin ve anında (PDF'i yeniden yüklemeden) çalışıyor.
   const IFRAME_NATIVE_WIDTH = 794;
   const IFRAME_NATIVE_HEIGHT = 1123;
-  const PREVIEW_SS = 2; // supersampling katsayısı — netlik için 2× render, CSS ile küçültme
+  const PREVIEW_SS = 3; // supersampling katsayısı — netlik için 3× render, CSS ile küçültme (daha keskin)
   const mmgPreviewUserZoom = {}; // 1 = ek yakınlaştırma yok (sadece kutuya sığdırılmış)
   function mmgApplyPreviewScale(frame){
     if(!frame) return;
