@@ -394,8 +394,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const u = d.data();
       allUsers.push({
         id: d.id,
-        username: u.username || u.email || '(isimsiz)',
-        email: u.email || null,
+        // Bazı hesaplar ismi/e-postayı profile.{name,email} altında tutuyor (üst seviyede username yok)
+        // → "(isimsiz)" görünüyordu. profile'a da bak.
+        username: u.username || (u.profile && u.profile.name) || u.email || (u.profile && u.profile.email) || '(isimsiz)',
+        email: u.email || (u.profile && u.profile.email) || null,
         customerNumber: u.customerNumber || '—',
         isPremium: u.isPremium === true,
         isAdmin: u.isAdmin === true,
