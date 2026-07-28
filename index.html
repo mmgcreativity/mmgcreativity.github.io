@@ -512,7 +512,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      (has-desc) ana kartlarla birebir aynı görünür (tam boy + açıklama metni). */
   .app-card.dynamic-shortcut:not(.has-desc){ justify-content:center; min-height:max(56px, calc(var(--dfa-card-h, 190px) * 0.37)); }
   .app-card.dynamic-shortcut:not(.has-desc) p{ display:none; }
-  .card-grid.edit-mode .app-card{ cursor:grab; outline:1.5px dashed var(--hairline); }
+  .card-grid.edit-mode .app-card{ cursor:grab; outline:1.5px dashed var(--hairline); touch-action:none; }
   .card-grid.edit-mode .app-card:active{ cursor:grabbing; }
   .card-grid.edit-mode .app-card.resizable{ resize:both; overflow:auto; min-width:180px; min-height:70px; }
   .app-card.drop-target-before{ box-shadow:-4px 0 0 0 var(--coral); }
@@ -2246,8 +2246,76 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       persistOrder();
     });
 
-    card.setAttribute('draggable', 'false'); // yalnızca edit-mode'da draggable yapılır
+    wirePointerDrag(card);
+    card.setAttribute('draggable', 'false'); // native HTML5 sürükleme devre dışı; sürükleme pointer olaylarıyla yapılıyor
   }
+
+  // ---- Pointer-tabanlı sürükle-yeniden-sırala ----
+  // Kartlar <button> öğeleridir ve butonlarda tarayıcının YEREL (HTML5 'draggable')
+  // sürüklemesi güvenilir biçimde başlamaz (buton mousedown'ı kendi "basılı" durumu
+  // için yutar), bu yüzden kullanıcı kutuları SAĞA-SOLA / yukarı-aşağı çekemiyordu.
+  // Bunun yerine pointer olaylarıyla çalışan, hem yatay hem dikey serbest sürüklemeyi
+  // destekleyen kendi mantığımızı kullanıyoruz (yalnızca düzenleme modunda aktif).
+  var mmgCardDrag = null;
+  function wirePointerDrag(card){
+    card.addEventListener('pointerdown', function(e){
+      if(!grid.classList.contains('edit-mode')) return;
+      if(e.pointerType === 'mouse' && e.button !== 0) return; // yalnızca sol tık
+      // Kart içindeki düğmeler/tutamaçlar sürüklemeyi başlatmasın (×, boyutlandırma ipucu, favori yıldızı)
+      if(e.target.closest('.card-remove-btn, .card-resize-hint, .fav-star-card')) return;
+      // Sağ-alt köşedeki YEREL boyutlandırma tutamacı: burada başlayan hareket boyutlandırmadır, sürükleme değil
+      var r = card.getBoundingClientRect();
+      if((r.right - e.clientX) < 22 && (r.bottom - e.clientY) < 22) return;
+      mmgCardDrag = { card: card, startX: e.clientX, startY: e.clientY, moved: false, pointerId: e.pointerId };
+    });
+  }
+  document.addEventListener('pointermove', function(e){
+    if(!mmgCardDrag) return;
+    var dx = e.clientX - mmgCardDrag.startX, dy = e.clientY - mmgCardDrag.startY;
+    if(!mmgCardDrag.moved){
+      if(Math.abs(dx) < 5 && Math.abs(dy) < 5) return; // küçük titremeyi (jitter) tıklama say
+      mmgCardDrag.moved = true;
+      mmgCardDrag.card.classList.add('nav-drag-ghost');
+      try{ mmgCardDrag.card.setPointerCapture(mmgCardDrag.pointerId); }catch(_){}
+    }
+    // İmlece merkezi en yakın DİĞER kartı bul; imleç o kartın solundaysa öncesine, sağındaysa sonrasına taşı.
+    // (2B mesafe kullanıldığından hareket hem yatay hem dikey olarak doğal biçimde çalışır.)
+    var cards = grid.querySelectorAll('.app-card');
+    var best = null, bestDist = Infinity;
+    for(var i = 0; i < cards.length; i++){
+      var c = cards[i];
+      if(c === mmgCardDrag.card) continue;
+      if(c.hidden || c.style.display === 'none') continue;
+      var rc = c.getBoundingClientRect();
+      var cx = rc.left + rc.width/2, cy = rc.top + rc.height/2;
+      var d = (e.clientX - cx)*(e.clientX - cx) + (e.clientY - cy)*(e.clientY - cy);
+      if(d < bestDist){ bestDist = d; best = c; }
+    }
+    if(best){
+      var rb = best.getBoundingClientRect();
+      if(e.clientX < (rb.left + rb.width/2)) grid.insertBefore(mmgCardDrag.card, best);
+      else grid.insertBefore(mmgCardDrag.card, best.nextSibling);
+    }
+  });
+  document.addEventListener('pointerup', function(){
+    if(!mmgCardDrag) return;
+    var card = mmgCardDrag.card, moved = mmgCardDrag.moved, pid = mmgCardDrag.pointerId;
+    mmgCardDrag = null;
+    try{ card.releasePointerCapture(pid); }catch(_){}
+    card.classList.remove('nav-drag-ghost');
+    if(moved){
+      persistOrder();
+      // Sürükleme bittikten hemen sonra oluşan click'i yut ki kart sayfayı AÇMASIN.
+      var suppress = function(ev){ ev.stopPropagation(); ev.preventDefault(); };
+      card.addEventListener('click', suppress, { capture: true, once: true });
+      setTimeout(function(){ card.removeEventListener('click', suppress, true); }, 300);
+    }
+  });
+  document.addEventListener('pointercancel', function(){
+    if(!mmgCardDrag) return;
+    mmgCardDrag.card.classList.remove('nav-drag-ghost');
+    mmgCardDrag = null;
+  });
 
   function persistOrder(){
     // Yalnızca sonradan eklenmiş kısayolların sırasını kaydediyoruz (varsayılan kartların sırası favori
@@ -2289,7 +2357,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       closeAddMenu();
     }
     Array.prototype.forEach.call(grid.querySelectorAll('.app-card'), function(c){
-      c.setAttribute('draggable', on ? 'true' : 'false');
+      c.setAttribute('draggable', 'false'); // sürükleme artık pointer olaylarıyla (wirePointerDrag) yapılıyor
     });
   }
   if(editBtn){
@@ -3679,13 +3747,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   }
   // Firma popup'ı: dışarı tıklanınca kapansın.
+  // ÖNEMLİ: YAKALAMA (capture) fazında dinliyoruz. Sayfadaki birçok öğe kendi 'click'
+  // işleyicisinde e.stopPropagation() çağırdığından (hesap tetikleyici, nav öğeleri,
+  // Ekle butonu, favori yıldızları, ...), kabarcık (bubble) fazındaki bir document
+  // dinleyicisi bu tıklamaları HİÇ görmüyor ve popup açık kalıyordu. Capture fazı
+  // tıklamayı hedefe İNMEDEN önce yakaladığı için dışarı tıklama her durumda kapatır.
   document.addEventListener('click', (e) => {
     const popup = document.getElementById('mmgFirmaSwitchPopup');
     const bar = document.getElementById('mmgActiveFirmaBar');
     if(popup && !popup.hidden && !popup.contains(e.target) && bar && !bar.contains(e.target)){
       popup.hidden = true;
     }
-  });
+  }, true);
 
   // ================== Firma Yöneticiliği (rol tabanlı, ayrı giriş YOK) ==================
   // Firma artık ayrı bir hesap türü değil — normal bir kullanıcı, bir ya da birden

@@ -666,7 +666,18 @@ import {
          (els.toastContainer && els.toastContainer.contains(e.target))) return;
       els.panel.hidden = true;
     }, true);
-  }
+
+    // Sayfa içeriği çoğunlukla bir <iframe> (araç sayfası) olduğundan, iframe'e tıklandığında
+    // yukarıdaki 'pointerdown' dış-tık dinleyicisi TETİKLENMEZ — olaylar iframe sınırını geçmez.
+    // Böyle durumlarda pencere odağı iframe'e geçer ve 'blur' olur; paneli o zaman da kapatıyoruz.
+    // (Kullanıcı defalarca "dışarı tıklayınca kapanmıyor" dedi — kök neden buydu.)
+    window.addEventListener('blur', () => {
+      if(!els.panel || els.panel.hidden) return;
+      // Baloncuk/panel içi bir etkileşimden dolayı blur olduysa kapatma.
+      const ae = document.activeElement;
+      if(ae && els.panel.contains(ae)) return;
+      els.panel.hidden = true;
+    });
 
   function setBadge(n){
     if(n > 0){
@@ -1719,16 +1730,14 @@ import {
       }
       const sentHtml = sentIds.map(id => {
         const s = sentRequestsMap[id];
-        return `<div class="mmg-chat-req-row" data-sent-id="${esc(id)}" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:nowrap;">
-          <div class="who" style="flex:1; min-width:0;"><b>${esc(s.toCode || s.toUid || '???')}</b> koduna gönderdiğiniz istek — <span style="color:#F5A524; font-weight:600;">Bekliyor</span></div>
-          <div class="mmg-chat-req-actions" style="margin:0; flex-shrink:0;">
-            <button type="button" class="mmg-chat-btn decline cancel-sent">Geri Çek</button>
-          </div>
+        return `<div data-sent-id="${esc(id)}" style="display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--hairline,#2A3448); border-radius:10px; margin-bottom:6px;">
+          <div style="flex:1; min-width:0; font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>${esc(s.toCode || s.toUid || '???')}</b> koduna istek</div>
+          <button type="button" class="mmg-chat-btn decline cancel-sent" style="flex:0 0 auto; background:transparent; border:1px solid rgba(226,84,75,0.55); color:#E2544B; font-weight:600;">Geri Çek</button>
         </div>`;
       }).join('');
       els.body.innerHTML = subBar + sentHtml;
       wireSubBar();
-      els.body.querySelectorAll('.mmg-chat-req-row[data-sent-id]').forEach(row => {
+      els.body.querySelectorAll('[data-sent-id]').forEach(row => {
         row.querySelector('.cancel-sent').addEventListener('click', () => cancelSentRequest(row.dataset.sentId));
       });
       return;

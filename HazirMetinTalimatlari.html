@@ -127,7 +127,10 @@
       <div class="page-title">📄 Hazır Metin Talimatlar</div>
       <div class="page-sub">Sık kullanılan banka/kurum talimatlarından birini seçin, firma/banka/isim/tutar gibi bilgileri girin — hazır metin otomatik oluşturulup Talimat Hazırlama'ya aktarılır; oradan PDF/Word olarak alabilirsiniz.</div>
     </div>
-    <a href="Talimat_Hazirlama.html" class="back-btn">← Talimat Hazırlama</a>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <button type="button" id="addTplBtn" class="back-btn" style="background:linear-gradient(90deg,#C6A15B,#8A7440); color:#1b1305; border:none; font-weight:700; cursor:pointer;">+ Hazır Metin Talimatı Ekle</button>
+      <a href="Talimat_Hazirlama.html" class="back-btn">← Talimat Hazırlama</a>
+    </div>
   </div>
 
   <div class="search-row">
@@ -136,6 +139,45 @@
   <div class="search-row" id="catChips"></div>
 
   <div id="tplContainer"></div>
+</div>
+
+<div class="modal-backdrop" id="addTplBackdrop">
+  <div class="modal-box" style="max-width:640px;">
+    <h2>Hazır Metin Talimatı Ekle</h2>
+    <div class="modal-cat">Kendi şablonunuzu oluşturun veya var olan bir metinden kopyalayın</div>
+
+    <div class="modal-field">
+      <label>Var olan bir metinden kopyala (isteğe bağlı)</label>
+      <select id="addTplCopyFrom"><option value="">— Boş başla —</option></select>
+    </div>
+    <div class="modal-field">
+      <label>Kategori</label>
+      <input type="text" id="addTplCat" placeholder="Örn. Kredi Kartı" list="addTplCatList">
+      <datalist id="addTplCatList"></datalist>
+    </div>
+    <div class="modal-field">
+      <label>Başlık</label>
+      <input type="text" id="addTplTitle" placeholder="Örn. Kredi Kartı Limit Düşürme">
+    </div>
+    <div class="modal-field">
+      <label>Kullanılacak alanlar (metinde {alan} olarak eklenir)</label>
+      <div id="addTplFields" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+    </div>
+    <div class="modal-field">
+      <label>Metin — alanları <b>{firma}</b>, <b>{tutar}</b> gibi süslü parantezle ekleyin</label>
+      <textarea id="addTplBody" rows="5" style="width:100%; padding:10px 12px; border-radius:9px; background:var(--surface-2); border:1px solid var(--hairline); color:var(--text); font-family:inherit; font-size:13px; resize:vertical;"></textarea>
+      <div id="addTplTokens" style="font-size:11px; color:var(--muted); margin-top:6px;"></div>
+    </div>
+    <div class="modal-field">
+      <label>Önizleme</label>
+      <div class="modal-preview" id="addTplPreview" style="min-height:40px;"></div>
+    </div>
+    <div id="addTplErr" style="color:var(--red,#E2544B); font-size:12px; min-height:16px;"></div>
+    <div class="modal-btns">
+      <button type="button" class="modal-close-btn" id="addTplCancel">Vazgeç</button>
+      <button type="button" class="modal-use-btn" id="addTplSave">Kaydet</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-backdrop" id="modalBackdrop">
@@ -447,6 +489,49 @@
       muhatap:function(v){ return v.banka; }, firma:function(v){ return v.firma; } }
   ];
 
+  // ================= Kullanıcının eklediği özel şablonlar =================
+  // Yerleşik şablonların sayısı (özel şablonlar bunun sonuna eklenir).
+  const BUILTIN_COUNT = TEMPLATES.length;
+  const CUSTOM_TPL_KEY = 'mmg_custom_hazir_metin';
+
+  function loadCustomTemplates(){
+    try{ const raw = localStorage.getItem(CUSTOM_TPL_KEY); const a = raw ? JSON.parse(raw) : []; return Array.isArray(a) ? a : []; }
+    catch(e){ return []; }
+  }
+  function saveCustomTemplates(arr){ try{ localStorage.setItem(CUSTOM_TPL_KEY, JSON.stringify(arr)); }catch(e){} }
+
+  // Özel kaydı, yerleşiklerle aynı şablon şekline dönüştür.
+  function customToTemplate(c){
+    const fields = (c.fieldKeys || []).map(function(k){ return F[k]; }).filter(Boolean);
+    return {
+      cat: c.cat || 'Diğer', title: c.title || 'Özel Talimat', fields: fields,
+      bodyTemplate: c.bodyTemplate || '', custom: true, _id: c.id,
+      muhatap: function(v){ return c.muhatapKey ? (v[c.muhatapKey] || '') : (v.banka || ''); },
+      firma:   function(v){ return c.firmaKey ? (v[c.firmaKey] || '') : (v.firma || ''); }
+    };
+  }
+  // Metin gövdesi: yerleşiklerde body(v) fonksiyonu, özellerde {key} kalıbı.
+  function renderBody(tpl, v){
+    if(typeof tpl.body === 'function') return tpl.body(v);
+    return String(tpl.bodyTemplate || '').replace(/\{(\w+)\}/g, function(m, k){ return (v[k] !== undefined) ? v[k] : m; });
+  }
+  // TEMPLATES dizisini yerleşikler + özeller olarak yeniden kur.
+  function rebuildTemplates(){
+    TEMPLATES.length = BUILTIN_COUNT;
+    loadCustomTemplates().forEach(function(c){ TEMPLATES.push(customToTemplate(c)); });
+  }
+  // Bir şablonu düzenlenebilir hâle çevir (kopyalama için): {key} kalıplı metin üret.
+  function templateToEditable(tpl){
+    const fieldKeys = tpl.fields.map(function(f){ return f.key; });
+    let bodyTemplate;
+    if(typeof tpl.body === 'function'){
+      const tokenV = {}; fieldKeys.forEach(function(k){ tokenV[k] = '{' + k + '}'; });
+      const proxy = new Proxy(tokenV, { get:function(t,p){ return (p in t) ? t[p] : '{' + String(p) + '}'; } });
+      try{ bodyTemplate = tpl.body(proxy); }catch(e){ bodyTemplate = ''; }
+    } else { bodyTemplate = tpl.bodyTemplate || ''; }
+    return { cat: tpl.cat, title: tpl.title, fieldKeys: fieldKeys, bodyTemplate: bodyTemplate };
+  }
+
   let activeCat = 'Tümü';
   let activeTemplate = null;
 
@@ -514,7 +599,21 @@
   function openModal(tpl){
     activeTemplate = tpl;
     document.getElementById('modalTitle').textContent = tpl.title;
-    document.getElementById('modalCat').textContent = tpl.cat;
+    document.getElementById('modalCat').textContent = tpl.cat + (tpl.custom ? ' · ÖZEL' : '');
+    // Özel şablon ise silme butonu göster.
+    var oldDel = document.getElementById('modalDeleteBtn'); if(oldDel) oldDel.remove();
+    if(tpl.custom){
+      var delBtn = document.createElement('button');
+      delBtn.id = 'modalDeleteBtn'; delBtn.type = 'button';
+      delBtn.textContent = '🗑 Bu özel şablonu sil';
+      delBtn.style.cssText = 'background:none; border:1px solid rgba(226,84,75,0.5); color:#E2544B; border-radius:8px; padding:5px 11px; font-size:11.5px; cursor:pointer; margin-bottom:12px;';
+      delBtn.addEventListener('click', function(){
+        if(!confirm('Bu özel şablonu silmek istediğinize emin misiniz?')) return;
+        var arr = loadCustomTemplates().filter(function(c){ return c.id !== tpl._id; });
+        saveCustomTemplates(arr); rebuildTemplates(); closeModal(); renderChips(); applyFilter();
+      });
+      document.getElementById('modalCat').insertAdjacentElement('afterend', delBtn);
+    }
     const fieldsEl = document.getElementById('modalFields');
     fieldsEl.innerHTML = tpl.fields.map(function(f){
       if(f.type === 'select'){
@@ -557,13 +656,13 @@
   function updatePreview(){
     if(!activeTemplate) return;
     const v = readValues();
-    document.getElementById('modalPreview').textContent = activeTemplate.body(v);
+    document.getElementById('modalPreview').textContent = renderBody(activeTemplate, v);
   }
 
   document.getElementById('modalUseBtn').addEventListener('click', function(){
     if(!activeTemplate) return;
     const v = readValues();
-    const text = activeTemplate.body(v);
+    const text = renderBody(activeTemplate, v);
     const firma = activeTemplate.firma ? activeTemplate.firma(v) : '';
     const muhatapAdi = activeTemplate.muhatap ? activeTemplate.muhatap(v) : '';
     // Yeni girilen firma/kişi isimlerini de Talimat Hazırlama'nın kayıtlı
@@ -588,8 +687,83 @@
     window.location.href = 'Talimat_Hazirlama.html';
   });
 
+  // ================= "Hazır Metin Talimatı Ekle" modalı =================
+  const addBackdrop = document.getElementById('addTplBackdrop');
+  const ADD_FIELD_KEYS = Object.keys(F);
+  function addTplRenderFieldChecks(selected){
+    document.getElementById('addTplFields').innerHTML = ADD_FIELD_KEYS.map(function(k){
+      const on = selected && selected.indexOf(k) !== -1;
+      return '<label style="display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--text); background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:5px 9px; cursor:pointer;">'
+        + '<input type="checkbox" value="' + k + '"' + (on ? ' checked' : '') + '> ' + F[k].label + '</label>';
+    }).join('');
+  }
+  function addTplSelectedKeys(){
+    return Array.prototype.map.call(document.querySelectorAll('#addTplFields input:checked'), function(cb){ return cb.value; });
+  }
+  function addTplRefreshTokens(){
+    const keys = addTplSelectedKeys();
+    document.getElementById('addTplTokens').innerHTML = keys.length
+      ? 'Kullanılabilir alanlar: ' + keys.map(function(k){ return '<code>{' + k + '}</code>'; }).join(' ')
+      : 'Önce yukarıdan alan seçin, sonra metinde {alan} olarak kullanın.';
+    addTplUpdatePreview();
+  }
+  function addTplUpdatePreview(){
+    const body = document.getElementById('addTplBody').value;
+    const v = {}; addTplSelectedKeys().forEach(function(k){ v[k] = F[k].label; });
+    document.getElementById('addTplPreview').textContent = String(body || '').replace(/\{(\w+)\}/g, function(m, k){ return v[k] !== undefined ? v[k] : m; });
+  }
+  function openAddTpl(prefill){
+    document.getElementById('addTplErr').textContent = '';
+    document.getElementById('addTplCatList').innerHTML = categories().filter(function(c){ return c !== 'Tümü'; }).map(function(c){ return '<option value="' + c + '">'; }).join('');
+    const copySel = document.getElementById('addTplCopyFrom');
+    copySel.innerHTML = '<option value="">— Boş başla —</option>' + TEMPLATES.map(function(t, i){ return '<option value="' + i + '">' + (t.custom ? '★ ' : '') + t.cat + ' — ' + t.title + '</option>'; }).join('');
+    copySel.value = '';
+    document.getElementById('addTplCat').value = prefill ? prefill.cat : '';
+    document.getElementById('addTplTitle').value = prefill ? prefill.title : '';
+    document.getElementById('addTplBody').value = prefill ? prefill.bodyTemplate : '';
+    addTplRenderFieldChecks(prefill ? prefill.fieldKeys : []);
+    addTplRefreshTokens();
+    addBackdrop.classList.add('open');
+  }
+  function closeAddTpl(){ addBackdrop.classList.remove('open'); }
+  document.getElementById('addTplBtn').addEventListener('click', function(){ openAddTpl(null); });
+  document.getElementById('addTplCancel').addEventListener('click', closeAddTpl);
+  addBackdrop.addEventListener('click', function(e){ if(e.target === addBackdrop) closeAddTpl(); });
+  document.getElementById('addTplFields').addEventListener('change', addTplRefreshTokens);
+  document.getElementById('addTplBody').addEventListener('input', addTplUpdatePreview);
+  document.getElementById('addTplCopyFrom').addEventListener('change', function(e){
+    if(e.target.value === '') return;
+    const tpl = TEMPLATES[Number(e.target.value)];
+    if(!tpl) return;
+    const ed = templateToEditable(tpl);
+    document.getElementById('addTplCat').value = ed.cat;
+    document.getElementById('addTplTitle').value = ed.title + ' (Kopya)';
+    document.getElementById('addTplBody').value = ed.bodyTemplate;
+    addTplRenderFieldChecks(ed.fieldKeys);
+    addTplRefreshTokens();
+  });
+  document.getElementById('addTplSave').addEventListener('click', function(){
+    const cat = document.getElementById('addTplCat').value.trim();
+    const title = document.getElementById('addTplTitle').value.trim();
+    const body = document.getElementById('addTplBody').value.trim();
+    const keys = addTplSelectedKeys();
+    const err = document.getElementById('addTplErr');
+    if(!title){ err.textContent = 'Lütfen bir başlık girin.'; return; }
+    if(!body){ err.textContent = 'Lütfen metni girin.'; return; }
+    const arr = loadCustomTemplates();
+    arr.push({ id: 'ct_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      cat: cat || 'Diğer', title: title, fieldKeys: keys, bodyTemplate: body,
+      muhatapKey: keys.indexOf('banka') !== -1 ? 'banka' : '', firmaKey: keys.indexOf('firma') !== -1 ? 'firma' : '' });
+    saveCustomTemplates(arr);
+    rebuildTemplates();
+    closeAddTpl();
+    renderChips();
+    applyFilter();
+  });
+
+  rebuildTemplates();
   renderChips();
-  renderList(TEMPLATES);
+  applyFilter();
 
   // Grup firmaları listesi modal açıkken gelirse (Firebase asenkron olduğu için),
   // Firma Adı alanının datalist'ini yerinde güncelle — kullanıcının o ana kadar
