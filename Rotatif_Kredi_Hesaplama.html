@@ -734,7 +734,7 @@ let rowIdCounter = 0;
 
 function addTrancheRow(data){
   const id = rowIdCounter++;
-  trancheRows.push({id, tutar: data?.tutar ?? 0, vade: data?.vade ?? 30, oran: data?.oran ?? 45, komOran: data?.komOran ?? 1});
+  trancheRows.push({id, tutar: data?.tutar ?? 100000, vade: data?.vade ?? 30, oran: data?.oran ?? 45, komOran: data?.komOran ?? 1});
   renderTranches();
 }
 function removeTrancheRow(id){
@@ -844,8 +844,8 @@ document.getElementById('resetTranchesBtn').addEventListener('click', ()=>{
 });
 
 // Seed with the example from the source workbook
-addTrancheRow({tutar:9000000, vade:365, oran:45, komOran:1});
-addTrancheRow({tutar:50000000, vade:30, oran:45, komOran:1});
+addTrancheRow({tutar:100000, vade:30, oran:45, komOran:1});
+addTrancheRow({tutar:100000, vade:30, oran:45, komOran:1});
 
 // ---- Premium kontrolü (Excel/PDF aktarma ve çoklu çekim satırı ekleme premium üyelere özeldir) ----
 // [[GEÇİCİ DONDURMA — BAŞLANGIÇ]] Premium özellikler herkese açıldı. Geri almak için bu bloğu

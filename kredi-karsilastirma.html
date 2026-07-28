@@ -488,10 +488,10 @@ try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
 const KK_MONTH_WORD = MMG_LANG === 'en' ? 'Mo' : 'Ay';
 const LBL_BEST_GROUP_EMPTY = MMG_LANG === 'en' ? 'Add offers to compare.' : 'Karşılaştırmak için teklif ekleyin.';
 let offers = [
-  {bank:"VAKIF KATILIM", amount:190043, monthlyRate:4.33, months:2, annualFeeRate:1.12},
-  {bank:"KUVEYT TÜRK", amount:398478, monthlyRate:4.15, months:2, annualFeeRate:1.13},
-  {bank:"AKBANK", amount:3500000, monthlyRate:4.58, months:2, annualFeeRate:1.17},
-  {bank:"TÜRKİYE FİNANS", amount:856077, monthlyRate:4.08, months:2, annualFeeRate:1.82},
+  {bank:"", amount:100000, monthlyRate:4.33, months:12, annualFeeRate:1.12},
+  {bank:"", amount:100000, monthlyRate:4.15, months:12, annualFeeRate:1.13},
+  {bank:"", amount:100000, monthlyRate:4.58, months:12, annualFeeRate:1.17},
+  {bank:"", amount:100000, monthlyRate:4.08, months:12, annualFeeRate:1.82},
 ];
 
 const BSMV_RATE = 0.05;
@@ -784,7 +784,7 @@ function renderStats(){
 }
 
 document.getElementById('addRowBtn').addEventListener('click', ()=>{
-  offers.push({bank:"", amount:100000, monthlyRate:4.5, months:2, annualFeeRate:1.0});
+  offers.push({bank:"", amount:100000, monthlyRate:4.5, months:12, annualFeeRate:1.0});
   renderTable();
   renderStats();
 });

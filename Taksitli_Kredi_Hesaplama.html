@@ -586,7 +586,7 @@ function addCreditRow(data){
   creditRows.push({
     id: ++rowSeq,
     banka: (data && data.banka != null) ? data.banka : '',
-    tutar: (data && data.tutar != null) ? data.tutar : 0,
+    tutar: (data && data.tutar != null) ? data.tutar : 100000,
     vade:  (data && data.vade  != null) ? data.vade  : 30,
     oran:  (data && data.oran  != null) ? data.oran  : 45,
     komOran: (data && data.komOran != null) ? data.komOran : 1
@@ -796,8 +796,8 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
 });
 
 // ---- Başlangıç satırları (xlsx örnekleriyle uyumlu doğrulama satırları) ----
-addCreditRow({ banka:'AKBANK', tutar:3500000, vade:61, oran:55, komOran:1.17 });
-addCreditRow({ banka:'', tutar:1000000, vade:60, oran:49, komOran:0.55 });
+addCreditRow({ banka:'', tutar:100000, vade:30, oran:45, komOran:1 });
+addCreditRow({ banka:'', tutar:100000, vade:30, oran:45, komOran:1 });
 </script>
 
 <script>
