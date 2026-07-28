@@ -107,6 +107,9 @@
   .member-icon-btn:hover{ color:var(--brass); border-color:var(--brass-dim,#8A7440); background:var(--surface); }
   .member-icon-btn-danger:hover{ color:var(--red); border-color:var(--red); }
   .member-perm-panel{ margin-top:8px; padding-top:8px; border-top:1px solid var(--hairline); display:flex; flex-direction:column; gap:7px; }
+  /* display:flex, hidden özniteliğini eziyordu → panel hep açık kalıyordu. Açıkça gizle:
+     varsayılan KAPALI (kompakt liste), isme tıklayınca aç/kapa. */
+  .member-perm-panel[hidden]{ display:none !important; }
   .member-sub-box{
     background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:9px 11px;
   }
