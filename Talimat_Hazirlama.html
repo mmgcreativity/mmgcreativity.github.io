@@ -1791,6 +1791,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }catch(e){ /* sessizce geç */ }
     }
 
+    // Kullanıcı isteği: bağlı firmanın GÖNDERİCİ bilgileri (firma adı + banka + IBAN) sayfa
+    // açılınca OTOMATİK gelsin (elle "📋 Kayıtlı"dan seçmeye gerek kalmadan). Öncelik aktif
+    // firma (kapsam); yoksa IBAN'ı olan ilk firma. Yalnızca alan BOŞsa doldurulur — kullanıcı
+    // kendisi bir şey yazdıysa ezilmez.
+    try{
+      const firmaEl = document.getElementById('fGonderenFirma');
+      const ibanEl  = document.getElementById('fGonderenIban');
+      if(firmaEl && !firmaEl.value.trim()){
+        let auto = myFirms.find(f => f.id === cloud.scopeId && (f.iban || f.banka));
+        if(!auto) auto = myFirms.find(f => f.iban);
+        if(!auto && myFirms.length) auto = myFirms[0];
+        if(auto){
+          firmaEl.value = auto.name || '';
+          if(auto.banka) setBankSelectValue(document.getElementById('fGonderenBanka'), auto.banka);
+          if(auto.iban && ibanEl) ibanEl.value = formatIbanValue(auto.iban);
+        }
+      }
+    }catch(e){ /* otomatik doldurma başarısızsa sessizce geç */ }
+
     renderFirmaSelects();
     renderIbanSelects();
     renderGlFirmaSelects();
