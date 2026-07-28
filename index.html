@@ -909,7 +909,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_talimatlar:'Talimatlar', nav_talimatlar_desc:'İşlemleri', nav_hazirmetin:'Hazır Metin Talimatları',
       nav_budget:'Bütçeleme', nav_budget_desc:'Araçları',
       hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
-      hero_desc:'İşletmeler, Bankacılar ve Finans uzmanları için geliştirilmiş hepsi bir arada finans platformu',
+      hero_desc:'İşletmeler, Bankacılar ve Finans profesyonelleri için geliştirilmiş hepsi bir arada finans platformu',
       hero_features:'Kredi Hesaplama • Ortalama vade • Bütçe Planlama • Talimat hazırlama • Finans rehberi • Forum',
       card_calc_desc:'Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.',
       card_cashflow_title:'Nakit Akış Tablosu',
@@ -1555,9 +1555,74 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <p class="hero-tagline" data-i18n="hero_tagline">Finansal kararlarınızın dijital iş ortağı</p>
         </div>
       </div>
-      <p class="hero-desc" data-i18n="hero_desc">İşletmeler, Bankacılar ve Finans uzmanları için geliştirilmiş hepsi bir arada finans platformu</p>
+      <p class="hero-desc" data-i18n="hero_desc">İşletmeler, Bankacılar ve Finans profesyonelleri için geliştirilmiş hepsi bir arada finans platformu</p>
       <p class="hero-features" data-i18n="hero_features">Kredi Hesaplama • Ortalama vade • Bütçe Planlama • Talimat hazırlama • Finans rehberi • Forum</p>
     </section>
+
+    <div class="home-search-wrap">
+      <div class="home-search-box" id="homeSearchBox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="homeSearchInput" placeholder="Uygulama ara — kredi, nakit akış, talimat, bütçe..." autocomplete="off" spellcheck="false">
+        <button type="button" id="homeSearchClear" hidden aria-label="Temizle">✕</button>
+      </div>
+      <div class="home-search-results" id="homeSearchResults" hidden></div>
+    </div>
+    <style>
+      .home-search-wrap{ position:relative; max-width:640px; margin:2px auto 8px; padding:0 20px; }
+      .home-search-box{ display:flex; align-items:center; gap:10px; background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448); border-radius:14px; padding:12px 16px; transition:border-color .15s ease, box-shadow .15s ease; }
+      .home-search-box:focus-within{ border-color:var(--brass,#C6A15B); box-shadow:0 0 0 3px rgba(198,161,91,0.12); }
+      .home-search-box > svg{ width:18px; height:18px; color:var(--muted,#8D96AC); flex:none; }
+      #homeSearchInput{ flex:1; min-width:0; background:none; border:none; outline:none; color:var(--text,#EAEDF3); font-size:14px; font-family:inherit; }
+      #homeSearchInput::placeholder{ color:var(--muted,#8D96AC); }
+      #homeSearchClear{ background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:14px; padding:2px 6px; flex:none; }
+      #homeSearchClear:hover{ color:var(--text,#EAEDF3); }
+      .home-search-results{ position:absolute; left:20px; right:20px; top:calc(100% + 6px); z-index:60; background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448); border-radius:14px; box-shadow:0 24px 60px rgba(0,0,0,0.5); max-height:360px; overflow-y:auto; }
+      .home-search-item{ display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; border-bottom:1px solid var(--hairline,#2A3448); }
+      .home-search-item:last-child{ border-bottom:none; }
+      .home-search-item:hover{ background:var(--surface-2,#1B2536); }
+      .home-search-item .hsi-title{ color:var(--text,#EAEDF3); font-size:13.5px; font-weight:600; }
+      .home-search-item .hsi-go{ margin-left:auto; color:var(--brass,#C6A15B); font-size:12px; }
+      .home-search-empty{ padding:16px; color:var(--muted,#8D96AC); font-size:13px; text-align:center; }
+    </style>
+    <script>
+    (function(){
+      var input = document.getElementById('homeSearchInput');
+      var results = document.getElementById('homeSearchResults');
+      var clearBtn = document.getElementById('homeSearchClear');
+      if(!input || !results) return;
+      var index = [], seen = {};
+      Array.prototype.forEach.call(document.querySelectorAll('.nav-item[data-target]'), function(el){
+        var t = el.dataset.target, title = el.dataset.title || t;
+        if(!t || t === 'home' || seen[t]) return;
+        seen[t] = 1; index.push({ title: title, target: t });
+      });
+      function norm(s){ return (s||'').toString().toLocaleLowerCase('tr').replace(/ı/g,'i').replace(/İ/g,'i').replace(/ç/g,'c').replace(/ş/g,'s').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o'); }
+      function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+      function go(target){
+        var item = document.querySelector('.nav-item[data-target="'+target+'"]');
+        if(item){ item.click(); } else { window.location.href = target; }
+        input.value=''; results.hidden=true; clearBtn.hidden=true;
+      }
+      function render(q){
+        var nq = norm(q);
+        if(!nq){ results.hidden = true; return; }
+        var matches = index.filter(function(it){ return norm(it.title).indexOf(nq) !== -1; }).slice(0,10);
+        if(!matches.length){ results.innerHTML = '<div class="home-search-empty">Sonuç bulunamadı</div>'; results.hidden=false; return; }
+        results.innerHTML = matches.map(function(it){
+          return '<div class="home-search-item" data-target="'+esc(it.target)+'"><span class="hsi-title">'+esc(it.title)+'</span><span class="hsi-go">Aç →</span></div>';
+        }).join('');
+        results.hidden = false;
+      }
+      input.addEventListener('input', function(){ clearBtn.hidden = !input.value; render(input.value); });
+      input.addEventListener('keydown', function(e){
+        if(e.key === 'Enter'){ var first = results.querySelector('.home-search-item'); if(first) go(first.dataset.target); }
+        else if(e.key === 'Escape'){ input.value=''; results.hidden=true; clearBtn.hidden=true; }
+      });
+      results.addEventListener('click', function(e){ var row = e.target.closest('.home-search-item'); if(row) go(row.dataset.target); });
+      clearBtn.addEventListener('click', function(){ input.value=''; results.hidden=true; clearBtn.hidden=true; input.focus(); });
+      document.addEventListener('click', function(e){ if(!results.hidden && !e.target.closest('.home-search-wrap')) results.hidden = true; });
+    })();
+    </script>
 
     <div class="home-scroll" id="homeScroll">
     <section class="tools-section">
