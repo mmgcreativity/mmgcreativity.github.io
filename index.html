@@ -448,6 +448,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .hero-sub{ color:var(--muted); max-width:520px; font-size:13px; position:relative; }
   .hero-desc{ color:var(--muted); max-width:none; white-space:nowrap; font-size:13px; line-height:1.55; margin-top:10px; position:relative; }
   .hero-features{ color:var(--brass,#C6A15B); font-weight:700; font-size:12px; letter-spacing:.04em; margin-top:8px; line-height:1.7; max-width:640px; }
+  .hero-credit{ margin-top:16px; display:inline-flex; align-items:center; gap:8px; position:relative; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); }
+  .hero-credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
   .hero-top-row{ display:flex; align-items:center; gap:16px; position:relative; }
   .hero-app-icon{
     width:64px; height:64px; border-radius:16px; flex-shrink:0;
@@ -1569,6 +1571,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <p class="hero-desc" data-i18n="hero_desc">İşletmeler, Bankacılar ve Finans profesyonelleri için geliştirilmiş hepsi bir arada finans platformu</p>
       <p class="hero-features" data-i18n="hero_features">Kredi Hesaplama • Ortalama vade • Bütçe Planlama • Talimat hazırlama • Finans rehberi • Forum</p>
+      <div class="hero-credit">
+        <span data-i18n="footer_powered_by">Powered by</span>
+        <span class="signature-pill">
+          <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <span class="credit-fallback">M</span>
+          <b>mmgcreativity</b>
+        </span>
+      </div>
     </section>
 
     <div class="home-search-wrap">
