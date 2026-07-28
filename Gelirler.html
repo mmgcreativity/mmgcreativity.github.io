@@ -1300,7 +1300,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.getElementById('downloadTemplateBtn').addEventListener('click', async () => {
     try{
       const header = [LBL.descriptionCol, MMGI18N.t('category_col'), MMGI18N.t('amount_col'), MMGI18N.t('due_date_col'), MMGI18N.t('recurrence_col')];
-      const example = [LBL.descPlaceholderTemplate, CATS[0].label, 1000, todayKey(), LBL.doNotRepeat];
+      const example = [LBL.descPlaceholderTemplate, CATS[0].label, 1000000, todayKey(), LBL.doNotRepeat];
       const catList = CATS.map(c => c.label);
       const recList = String(LBL.recurrenceOptionsList || '').split('/').map(s => s.trim()).filter(Boolean);
 
@@ -1311,7 +1311,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const ws = wb.addWorksheet(LBL.templateName);
         ws.addRow(header);
         ws.addRow(example);
-        ws.columns = [{width:30},{width:22},{width:14},{width:16},{width:20}];
+        ws.columns = [{width:30},{width:22},{width:18},{width:16},{width:20}];
+        // Tutar sütunu (C): binlik ayraçlı, iki ondalıklı biçim → Türkçe Excel'de 1.000.000,00 görünür.
+        ws.getColumn(3).numFmt = '#,##0.00';
         ws.getRow(1).eachCell(c => { c.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFC6A15B'} }; c.font = { bold:true, color:{argb:'FF141220'} }; });
 
         const wsL = wb.addWorksheet('Listeler');
