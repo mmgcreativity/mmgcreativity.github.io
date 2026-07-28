@@ -665,6 +665,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   // ---------------- Kullanım İstatistikleri (en çok kullanılan uygulamalar + kullanıcı başına kullanım) ----------------
+  // Bir uygulamaya tıklanınca: o uygulamayı HANGİ kullanıcı KAÇ kez açmış (çoktan aza).
+  function renderUsageUserBreakdown(target){
+    const users = (window.mmgAppUsers && window.mmgAppUsers[target]) || {};
+    const rows = Object.keys(users).map(uid => ({ uid, count: users[uid] })).sort((a,b) => b.count - a.count);
+    if(!rows.length) return '<div style="color:var(--muted); font-size:12px; padding:6px 0 8px 34px;">Bu uygulama için kullanıcı kaydı yok.</div>';
+    const labelOf = (uid) => {
+      const u = (allUsers || []).find(x => x.id === uid);
+      if(u) return u.username + (u.customerNumber && u.customerNumber !== '—' ? (' (#' + u.customerNumber + ')') : '');
+      return (uid || '').slice(0, 8) + '…';
+    };
+    return '<div style="padding:4px 0 10px 34px;">' + rows.map(r =>
+      '<div style="display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:4px 0; border-bottom:1px solid var(--hairline,#2A3448);">' +
+        '<span>' + escapeHtml(labelOf(r.uid)) + '</span>' +
+        '<span style="color:var(--brass,#C6A15B); font-weight:600; white-space:nowrap;">' + r.count + ' kez</span>' +
+      '</div>').join('') + '</div>';
+  }
+
   async function loadUsageStats(){
     const listEl = document.getElementById('usageAppList');
     try{
@@ -672,6 +689,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const appTotals = {};      // { target: toplamSayı }
       const userTotals = {};     // { uid: toplamSayı }
       const userBreakdown = {};  // { uid: { target: sayı } }
+      const appUsers = {};       // { target: { uid: sayı } }  — uygulama başına hangi kullanıcı kaç kez açtı
       openersSnap.forEach(d => {
         const data = d.data();
         const target = d.ref.parent.parent ? d.ref.parent.parent.id : null;
@@ -682,7 +700,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         userTotals[uid] = (userTotals[uid] || 0) + count;
         if(!userBreakdown[uid]) userBreakdown[uid] = {};
         userBreakdown[uid][target] = (userBreakdown[uid][target] || 0) + count;
+        if(!appUsers[target]) appUsers[target] = {};
+        appUsers[target][uid] = (appUsers[target][uid] || 0) + count;
       });
+      window.mmgAppUsers = appUsers;
 
       // Uygulama başlıklarını (dosya adı yerine okunaklı ad) üst seviye "usageStats" belgelerinden al
       const usageTitles = {};
@@ -705,19 +726,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const maxCount = ranked[0].count || 1;
       listEl.innerHTML = ranked.map((r, i) => {
         const pct = Math.max(4, Math.round((r.count / maxCount) * 100));
-        return '<div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">' +
-          '<div style="width:22px; flex-shrink:0; color:var(--muted); font-size:12px;">' + (i+1) + '.</div>' +
-          '<div style="flex:1; min-width:0;">' +
-            '<div style="display:flex; justify-content:space-between; gap:8px; font-size:13px; margin-bottom:4px;">' +
-              '<span style="font-weight:600;">' + escapeHtml(r.title) + '</span>' +
-              '<span style="color:var(--brass,#C6A15B); font-weight:700;">' + r.count + '</span>' +
-            '</div>' +
-            '<div style="height:8px; border-radius:4px; background:var(--hairline); overflow:hidden;">' +
-              '<div style="height:100%; width:' + pct + '%; border-radius:4px; background:linear-gradient(90deg, var(--coral,#FF6B4A), var(--brass,#C6A15B));"></div>' +
+        return '<div class="usage-app-item" data-target="' + escapeHtml(r.target) + '" style="cursor:pointer; margin-bottom:10px;" title="Hangi kullanıcı kaç kez açmış görmek için tıklayın">' +
+          '<div style="display:flex; align-items:center; gap:12px;">' +
+            '<div style="width:22px; flex-shrink:0; color:var(--muted); font-size:12px;">' + (i+1) + '.</div>' +
+            '<div style="flex:1; min-width:0;">' +
+              '<div style="display:flex; justify-content:space-between; gap:8px; font-size:13px; margin-bottom:4px;">' +
+                '<span style="font-weight:600;"><span class="usage-caret" style="color:var(--muted); font-size:10px; margin-right:5px;">▼</span>' + escapeHtml(r.title) + '</span>' +
+                '<span style="color:var(--brass,#C6A15B); font-weight:700;">' + r.count + '</span>' +
+              '</div>' +
+              '<div style="height:8px; border-radius:4px; background:var(--hairline); overflow:hidden;">' +
+                '<div style="height:100%; width:' + pct + '%; border-radius:4px; background:linear-gradient(90deg, var(--coral,#FF6B4A), var(--brass,#C6A15B));"></div>' +
+              '</div>' +
             '</div>' +
           '</div>' +
+          '<div class="usage-app-detail" hidden></div>' +
         '</div>';
       }).join('');
+      // Bir uygulamaya tıklayınca o uygulamayı HANGİ kullanıcının KAÇ kez açtığını aç/kapa
+      listEl.querySelectorAll('.usage-app-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const detail = item.querySelector('.usage-app-detail');
+          const caret = item.querySelector('.usage-caret');
+          if(!detail) return;
+          if(detail.hidden){
+            detail.innerHTML = renderUsageUserBreakdown(item.dataset.target);
+            detail.hidden = false;
+            if(caret) caret.textContent = '▲';
+          } else {
+            detail.hidden = true;
+            if(caret) caret.textContent = '▼';
+          }
+        });
+      });
     }catch(e){
       listEl.innerHTML = '<div class="comment-empty" style="padding:12px 0;">Kullanım verisi okunamadı.</div>';
     }
