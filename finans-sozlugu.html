@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{ var mode=localStorage.getItem('mmg_theme')||'dark'; document.documentElement.classList.toggle('theme-light', mode==='light'); }catch(e){}
+  window.addEventListener('message', function(ev){ if(ev&&ev.data&&ev.data.mmgTheme){ document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme==='light'); try{localStorage.setItem('mmg_theme',ev.data.mmgTheme);}catch(e2){} } });
+})();
+</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Finans Sözlüğü</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  html.theme-light{ --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6; --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  body{ background:radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%), radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%), var(--bg); color:var(--text); font-family:'Inter',sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased; padding-bottom:60px; }
+  header.masthead{ max-width:1000px; margin:0 auto; padding:36px 24px 20px; display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px; }
+  header.masthead > div:first-child{ flex:1 1 0%; min-width:0; }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,34px); letter-spacing:-0.01em; margin:0;}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5;}
+  .back-link{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none; border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap; background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35); transition:border-color .15s ease, color .15s ease; }
+  .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  main{ max-width:1000px; margin:0 auto; padding:22px 24px 24px; }
+  .search-box{ display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:12px 16px; position:sticky; top:10px; z-index:10; box-shadow:0 8px 24px rgba(0,0,0,0.25); }
+  .search-box svg{ width:18px; height:18px; color:var(--muted); flex:none; }
+  .search-box input{ flex:1; min-width:0; background:none; border:none; outline:none; color:var(--text); font-size:15px; font-family:inherit; }
+  .search-box input::placeholder{ color:var(--muted); }
+  .count{ color:var(--muted); font-size:12px; margin:14px 2px 6px; font-family:'IBM Plex Mono',monospace; }
+  .term{ background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:16px 18px; margin-bottom:10px; }
+  .term h3{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; margin:0 0 6px; }
+  .term h3 .tag{ font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--brass); border:1px solid var(--brass-dim); border-radius:4px; padding:1px 6px; margin-left:8px; vertical-align:middle; }
+  .term p{ color:var(--muted); font-size:13.5px; line-height:1.6; margin:0; }
+  .term p b{ color:var(--text); }
+  .empty{ color:var(--muted); text-align:center; padding:40px 0; font-size:14px; }
+  mark{ background:rgba(198,161,91,0.35); color:var(--text); border-radius:3px; padding:0 1px; }
+  footer{ max-width:1000px; margin:28px auto 0; padding:22px 24px 0; border-top:1px solid var(--hairline); }
+  footer .credit{width:100%; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--muted); display:flex; align-items:center; justify-content:flex-end; gap:8px;}
+  .signature-pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 12px 4px 5px; border-radius:999px; background:var(--surface-2); border:1px solid var(--hairline); }
+  .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
+  .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff; }
+  footer .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+</style>
+</head>
+<body>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+<header class="masthead">
+  <div>
+    <h1 class="title" data-i18n="page_title">Finans Sözlüğü</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Bankacılık ve finans terimlerini sade Türkçe açıklamalarıyla arayın.</div>
+  </div>
+  <div class="top-actions"><a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a></div>
+</header>
+
+<main>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input type="search" id="q" placeholder="Terim ara — faiz, BSMV, iskonto, IBAN..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other" aria-label="Terim ara">
+  </div>
+  <div class="count" id="count"></div>
+  <div id="list"></div>
+</main>
+
+<footer>
+  <div class="credit">
+    <span>Powered by</span>
+    <span class="signature-pill">
+      <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+      <span id="credit-fallback" class="credit-fallback">M</span>
+      <b>mmgcreativity</b>
+    </span>
+  </div>
+</footer>
+
+<script>
+  const TERIMLER = [
+    ["Anapara","Kredinin veya mevduatın faiz hariç asıl tutarı. Faiz ve masraflar bu tutar üzerinden hesaplanır."],
+    ["Faiz","Paranın kullanım bedeli. Kredide ödenen, mevduatta kazanılan tutarın orana bağlı karşılığı."],
+    ["Nominal Faiz","Vergiler ve bileşik etki hesaba katılmadan ilan edilen ham faiz oranı."],
+    ["Efektif Faiz","Bileşik etki, vergi ve masrafların dahil edildiği, gerçek yıllık maliyeti/getiriyi gösteren oran."],
+    ["Vade","Bir borç, mevduat veya çekin ödenme/olgunlaşma tarihi ya da süresi."],
+    ["Vade Farkı","Peşin fiyat ile vadeli fiyat arasındaki fark; vadeli satışta uygulanan ek bedel."],
+    ["BSMV","Banka ve Sigorta Muameleleri Vergisi. Bankacılık işlemlerinde faiz ve komisyon üzerinden alınan vergi (genellikle %5, tüketici kredilerinde %15)."],
+    ["KKDF","Kaynak Kullanımını Destekleme Fonu. Tüketici kredilerinde faiz üzerinden alınan kesinti (genellikle %15)."],
+    ["Stopaj","Mevduat faizi gibi gelirlerden kaynağında kesilen gelir vergisi."],
+    ["Taksit","Bir borcun eşit veya değişen dönemsel ödeme parçalarından her biri."],
+    ["Annüite (Eşit Taksit)","Her dönem aynı tutarda taksit ödenen geri ödeme yöntemi; taksitin içindeki faiz azalırken anapara payı artar."],
+    ["Rotatif Kredi","Belirli bir limit içinde defalarca kullanılıp geri ödenebilen, faizi kullanılan gün üzerinden işleyen kredi."],
+    ["KMH (Kredili Mevduat Hesabı)","Vadesiz hesaba tanınan, ihtiyaç anında eksiye düşülebilen limitli kredi."],
+    ["BCH (Borçlu Cari Hesap)","Ticari müşterilere açılan, cari hesap üzerinden çalışan rotatif nitelikli kredi."],
+    ["İhtiyaç Kredisi","Bireysel harcamalar için kullanılan, genellikle sabit taksitli tüketici kredisi."],
+    ["Teminat Mektubu","Bankanın, müşterisi adına bir yükümlülüğün yerine getirileceğine dair karşı tarafa verdiği gayrinakdi kredi/garanti."],
+    ["Gayrinakdi Kredi","Nakit ödeme yerine banka garantisi/kefaleti şeklinde kullandırılan kredi (ör. teminat mektubu, akreditif)."],
+    ["İskonto","Vadeli bir alacağın (çek/senet) vadesinden önce, faiz düşülerek nakde çevrilmesi."],
+    ["Çek","Bir bankaya hitaben yazılan, görüldüğünde ödenmesi gereken kıymetli evrak."],
+    ["Senet (Bono)","Belirli bir tarihte belirli bir tutarın ödeneceğine dair borç taahhüdü içeren kıymetli evrak."],
+    ["Karşılıksız Çek","Hesapta yeterli bakiye olmadığı için ödenemeyen çek."],
+    ["Ciro","Çek veya senedin arkasının imzalanarak bir başkasına devredilmesi."],
+    ["Aval","Bir senette borçlunun ödemesini garanti eden kefalet."],
+    ["Kefil","Borçlu ödemezse borcu üstlenmeyi taahhüt eden kişi."],
+    ["İpotek (Mortgage)","Bir gayrimenkulün, kredi teminatı olarak rehin gösterilmesi; konut kredisinde kullanılır."],
+    ["IBAN","Uluslararası Banka Hesap Numarası. TR ile başlayan 26 haneli standart hesap numarası."],
+    ["Havale","Aynı banka içindeki hesaplar arasında para transferi."],
+    ["EFT","Elektronik Fon Transferi. Farklı bankalar arasında para transferi."],
+    ["FAST","Fonların Anlık ve Sürekli Transferi. 7/24 anlık, düşük tutarlı ödeme sistemi."],
+    ["Komisyon","Bankanın verdiği hizmet karşılığında aldığı ücret."],
+    ["Dekont","Bir bankacılık işleminin gerçekleştiğini gösteren belge."],
+    ["Ekstre","Hesap veya kredi kartı hareketlerini dönemsel olarak listeleyen özet."],
+    ["Bakiye","Bir hesapta o an mevcut olan tutar."],
+    ["Cari Hesap","Karşılıklı borç-alacak hareketlerinin işlendiği, sürekli çalışan hesap."],
+    ["Mutabakat","İki tarafın kayıtlarının (bakiye/hareket) karşılıklı olarak doğrulanması."],
+    ["Konsolidasyon","Birden fazla hesabın veya borcun tek bir tutar/çatı altında birleştirilmesi."],
+    ["Mevduat","Bankaya yatırılan ve saklanan para; vadeli veya vadesiz olabilir."],
+    ["Vadeli Mevduat","Belirli bir süre çekilmemek üzere faiz karşılığı bankada tutulan mevduat."],
+    ["Repo","Menkul kıymetin geri alım taahhüdüyle satılarak kısa vadeli fon sağlanması."],
+    ["Tahvil","Devlet veya şirketlerin borçlanmak için çıkardığı, faiz getirili uzun vadeli menkul kıymet."],
+    ["Bono","Vadesi bir yıldan kısa olan borçlanma senedi."],
+    ["Stopaj","Gelirden kaynağında kesilen vergi (mevduat faizi, kira vb.)."],
+    ["Temerrüt","Borcun vadesinde ödenmemesi durumu."],
+    ["Gecikme Faizi","Vadesinde ödenmeyen borca, geciken süre için uygulanan ek faiz."],
+    ["Spread","Bankanın topladığı mevduat faizi ile verdiği kredi faizi arasındaki fark/kâr marjı."],
+    ["Reeskont","Bankaların ellerindeki senetleri Merkez Bankası'na kırdırarak (iskonto) fon sağlaması."],
+    ["TCMB","Türkiye Cumhuriyet Merkez Bankası. Para politikasını yürüten, politika faizini belirleyen kurum."],
+    ["Politika Faizi","Merkez Bankası'nın piyasayı yönlendirmek için belirlediği referans faiz oranı."],
+    ["Likidite","Bir varlığın hızlıca ve değer kaybetmeden nakde çevrilebilme kolaylığı."],
+    ["Amortisman","Bir varlığın değerinin ekonomik ömrü boyunca dönemlere yayılarak giderleştirilmesi."],
+    ["Findeks / Kredi Notu","Bireyin ödeme geçmişine göre hesaplanan, kredibilitesini gösteren puan."],
+    ["Ortalama Vade","Farklı vadelerdeki ödemelerin, tutarlarına göre ağırlıklandırılmış tek bir ortalama vadesi."],
+    ["Vade Sapması","Alacak ve borç vadeleri arasındaki gün farkı; nakit akışı planlamasında kullanılır."],
+    ["Akreditif","İthalat/ihracatta, bankanın satıcıya ödeme garantisi verdiği gayrinakdi kredi türü."],
+    ["Faktoring","İşletmelerin vadeli alacaklarını bir kuruma devrederek erken nakit sağlaması."],
+    ["Leasing (Finansal Kiralama)","Bir varlığın satın alma opsiyonuyla, kira ödemeleri karşılığında kullanılması."]
+  ];
+
+  const listEl=document.getElementById('list'), qEl=document.getElementById('q'), countEl=document.getElementById('count');
+  function norm(s){ return (s||'').toString().toLocaleLowerCase('tr').replace(/ı/g,'i').replace(/İ/g,'i').replace(/ç/g,'c').replace(/ş/g,'s').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o'); }
+  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function hl(text, q){ if(!q) return esc(text); const nt=norm(text), nq=norm(q); let out='', i=0; while(true){ const p=nt.indexOf(nq,i); if(p===-1){ out+=esc(text.slice(i)); break; } out+=esc(text.slice(i,p))+'<mark>'+esc(text.slice(p,p+q.length))+'</mark>'; i=p+q.length; } return out; }
+  const sorted = TERIMLER.slice().sort((a,b)=> a[0].localeCompare(b[0],'tr'));
+  function render(){
+    const q=qEl.value.trim(), nq=norm(q);
+    const matches = nq ? sorted.filter(t=> norm(t[0]).indexOf(nq)!==-1 || norm(t[1]).indexOf(nq)!==-1) : sorted;
+    countEl.textContent = matches.length + (MMG_LANG==='en'?' terms':' terim');
+    if(!matches.length){ listEl.innerHTML='<div class="empty">Sonuç bulunamadı.</div>'; return; }
+    listEl.innerHTML = matches.map(t=> '<div class="term"><h3>'+hl(t[0],q)+'</h3><p>'+hl(t[1],q)+'</p></div>').join('');
+  }
+  let MMG_LANG='tr'; try{ MMG_LANG=localStorage.getItem('mmg_lang')||'tr'; }catch(e){}
+  qEl.addEventListener('input', render);
+  render();
+</script>
+<script>
+(function(){
+  if(window.MMGI18N){
+    MMGI18N.registerDict({
+      tr:{ page_title:'Finans Sözlüğü', page_subtitle:'Bankacılık ve finans terimlerini sade Türkçe açıklamalarıyla arayın.', back_home:'← Ana Sayfa' },
+      en:{ page_title:'Finance Glossary', page_subtitle:'Search banking and finance terms with plain-language explanations.', back_home:'← Home' }
+    });
+    const ACTIVE_LANG=(localStorage.getItem('mmg_lang')||'tr');
+    window.addEventListener('message',(ev)=>{ if(ev&&ev.data&&ev.data.mmgLang&&ev.data.mmgLang!==ACTIVE_LANG){ try{localStorage.setItem('mmg_lang',ev.data.mmgLang);}catch(e){} location.reload(); } });
+    MMGI18N.onChange(function(lang){ if(lang!==ACTIVE_LANG){ location.reload(); } });
+    MMGI18N.detectAndApplyDefaultLang();
+  }
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
+</body>
+</html>
