@@ -893,8 +893,11 @@
       await Promise.all(memberDocs.map(async (m) => {
         try{
           const uSnap = await getDoc(doc(db, 'users', m.id));
-          m.code = uSnap.exists() ? uSnap.data().customerNumber : null;
-        }catch(e){ m.code = null; }
+          const ud = uSnap.exists() ? uSnap.data() : {};
+          m.code = ud.customerNumber || null;
+          // İsim: üst-seviye username yoksa profile.name'e bak (bazı hesaplar ismi orada tutuyor).
+          m.displayName = ud.username || (ud.profile && ud.profile.name) || null;
+        }catch(e){ m.code = null; m.displayName = null; }
       }));
 
       // ---- Geriye dönük uyumluluk: bu düzeltmeden ÖNCE oluşturulmuş üyelik kayıtlarında
@@ -925,7 +928,7 @@
       }));
 
       const rows = [];
-      memberDocs.forEach(({ id, data: md, code }) => {
+      memberDocs.forEach(({ id, data: md, code, displayName }) => {
         const idPrefix = 'm_' + id;
         const firmaAccessBoxHtml = myAdminFirmas.length > 1
           ? '<div class="member-sub-box">' +
@@ -947,7 +950,7 @@
           '<div class="member-row" data-uid="' + id + '">' +
             '<div class="member-row-top">' +
               '<div class="member-info">' +
-                '<div class="member-name">' + (md.username || md.email || id) + '</div>' +
+                '<div class="member-name">' + (displayName || md.username || 'Kullanıcı') + (code ? ' <span style="color:var(--muted); font-weight:500;">#' + code + '</span>' : '') + '</div>' +
                 '<div class="member-sub">' + (code ? '#' + code : '') + '</div>' +
               '</div>' +
               '<div class="member-row-actions">' +
