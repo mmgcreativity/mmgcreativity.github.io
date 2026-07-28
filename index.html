@@ -72,7 +72,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
     --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
     --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
-    --sidebar-w:280px;
+    --sidebar-w:224px;
   }
   html.theme-light{
     --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
@@ -111,7 +111,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     position:fixed; top:0; left:0; z-index:100;
   }
   .brand{
-    padding:18px 20px 18px; border-bottom:1px solid var(--hairline); position:relative; overflow:hidden;
+    padding:6px 10px 6px; border-bottom:1px solid var(--hairline); position:relative; overflow:hidden;
     min-height:0; display:flex; align-items:center; justify-content:center;
   }
   .brand::before{
@@ -138,15 +138,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     text-align:center; position:relative;
   }
 
-  nav{ padding:18px 12px 84px; flex:1; overflow-y:auto; min-height:0; }
+  nav{ padding:10px 10px 40px; flex:1; overflow-y:auto; min-height:0; }
   .nav-label{
     font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.16em;
-    color:var(--muted); text-transform:uppercase; padding:8px 12px 10px;
+    color:var(--muted); text-transform:uppercase; padding:6px 12px 4px;
   }
   .nav-item{
     display:flex; align-items:center; gap:13px; width:100%; text-align:left;
-    padding:11px 16px; border-radius:14px; border:1px solid transparent;
-    background:transparent; color:var(--text); cursor:pointer; margin-bottom:3px;
+    padding:8px 14px; border-radius:11px; border:1px solid transparent;
+    background:transparent; color:var(--text); cursor:pointer; margin-bottom:1px;
     position:relative; transition:background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
   }
   .nav-item:hover{ background:var(--surface-2); transform:translateX(2px); }
@@ -269,13 +269,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .user-badge-dot{ width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 6px var(--teal); flex-shrink:0; }
 
   .mmg-bottom-left-bar{
-    flex-shrink:0; display:flex; align-items:center; gap:10px;
-    padding:14px 16px; border-top:1px solid var(--hairline); background:var(--surface);
+    flex-shrink:0; display:flex; align-items:center; gap:8px;
+    padding:10px 12px; border-top:1px solid var(--hairline); background:var(--surface);
   }
-  /* Her zaman görünür "aktif firma" çubuğu (hesap rozetinin hemen üstünde) */
+  .top-right-badge{ order:1; flex:0 0 auto; }
+  .mmg-firma-bar-wrap{ order:2; flex:1 1 auto; min-width:0; }
+  /* Aktif firma: hesap ikonunun hemen sağında kompakt bir hap olarak */
   .mmg-active-firma-bar{
-    flex-shrink:0; display:flex; align-items:center; gap:8px; cursor:pointer;
-    padding:9px 16px; border-top:1px solid var(--hairline); background:var(--surface-2);
+    flex-shrink:1; display:flex; align-items:center; gap:7px; cursor:pointer; width:100%; min-width:0;
+    padding:7px 10px; border:1px solid var(--hairline); border-radius:9px; background:var(--surface-2);
     transition:background .15s ease;
   }
   .mmg-active-firma-bar:hover{ background:var(--surface); }
@@ -913,7 +915,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_home:'Ana Sayfa', nav_calc:'Hesaplamalar', nav_rotatif:'Rotatif Kredi Hesaplama', nav_ortalama:'Ortalama Vade Hesaplama',
       nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması Hesaplama', nav_vadelimevduat:'Vadeli Mevduat Faizi Hesaplama',
       nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
-      nav_taksitli:'Aylık Taksitli Kredi Hesaplama',
+      nav_taksitli:'Taksitli Kredi Hesaplama',
       nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları', nav_verigirisi:'Veri Girişi', nav_verigirisi_panel:'Veri Giriş Paneli', nav_label_araclar:'Araçlar',
       nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Sosyal', nav_label_verigirisi:'Veri Girişi', nav_label_verianalizi:'Veri Analizi',
       nav_talimatlar:'Talimatlar', nav_talimatlar_desc:'İşlemleri', nav_hazirmetin:'Hazır Metin Talimatları',
@@ -1021,7 +1023,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_home:'Home', nav_calc:'Calculators', nav_rotatif:'Revolving Loan Calculator', nav_ortalama:'Average Maturity Calculator',
       nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
       nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
-      nav_taksitli:'Monthly Installment Loan Calculator',
+      nav_taksitli:'Installment Loan Calculator',
       nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools', nav_verigirisi:'Data Entry', nav_verigirisi_panel:'Data Entry Panel', nav_label_araclar:'Tools',
       nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Social', nav_label_verigirisi:'Data Entry', nav_label_verianalizi:'Data Analysis',
       nav_talimatlar:'Instructions', nav_talimatlar_desc:'Center', nav_hazirmetin:'Ready-made Text Instructions',
@@ -1300,7 +1302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="home-search-wrap">
       <div class="home-search-box" id="homeSearchBox">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="text" id="homeSearchInput" placeholder="Ara" autocomplete="off" spellcheck="false">
+        <input type="search" id="homeSearchInput" name="mmgToolSearch" placeholder="Ara" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" aria-autocomplete="none" role="searchbox">
         <button type="button" id="homeSearchClear" hidden aria-label="Temizle">✕</button>
       </div>
       <div class="home-search-results" id="homeSearchResults" hidden></div>
@@ -1355,9 +1357,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="fav-star" role="button" tabindex="0" data-fav-target="kredi-karsilastirma.html" data-fav-title="Kredi Tekliflerini Karşılaştır" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_krediteklif">Kredi Tekliflerini Karşılaştır</span></span>
       </button>
-      <button class="nav-item nav-subitem" data-target="aylik-taksitli-kredi-hesaplama.html" data-title="Aylık Taksitli Kredi Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="aylik-taksitli-kredi-hesaplama.html" data-fav-title="Aylık Taksitli Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_taksitli">Aylık Taksitli Kredi Hesaplama</span></span>
+      <button class="nav-item nav-subitem" data-target="aylik-taksitli-kredi-hesaplama.html" data-title="Taksitli Kredi Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="aylik-taksitli-kredi-hesaplama.html" data-fav-title="Taksitli Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_taksitli">Taksitli Kredi Hesaplama</span></span>
       </button>
     </div>
     </div>
@@ -1460,6 +1462,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </button>
   </nav>
 
+<div class="mmg-bottom-left-bar" id="mmgBottomLeftBar">
+<div id="accountDropdownBackdrop" class="mmg-dropdown-backdrop" hidden></div>
 <div class="mmg-firma-bar-wrap" style="position:relative;">
   <div class="mmg-active-firma-bar" id="mmgActiveFirmaBar" hidden data-i18n-title="active_firma_hint" title="İşlem yaptığınız firma — değiştirmek için tıklayın">
     <span class="maf-dot"></span>
@@ -1468,8 +1472,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
   <div class="mmg-firma-switch-popup" id="mmgFirmaSwitchPopup" hidden></div>
 </div>
-<div class="mmg-bottom-left-bar" id="mmgBottomLeftBar">
-<div id="accountDropdownBackdrop" class="mmg-dropdown-backdrop" hidden></div>
 <div class="top-right-badge" id="topRightBadge">
   <button type="button" class="account-trigger" id="accountTrigger">
     <span class="avatar-wrap" id="avatarWrap">
