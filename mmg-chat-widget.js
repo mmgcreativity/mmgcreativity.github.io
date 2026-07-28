@@ -473,13 +473,13 @@ import {
     <div class="mmg-chat-mainbar" id="mmgChatMainBar">
       <div class="mmg-chat-main active" data-main="sohbet">Sohbet</div>
       <div class="mmg-chat-main" data-main="bildirim">Bildirimler<span class="mmg-chat-main-light" id="mmgChatNotifDot" hidden></span></div>
+      <div class="mmg-chat-main" data-main="admin" id="mmgChatAdminMain">Admin</div>
     </div>
     <div class="mmg-chat-tabs" id="mmgChatTabs">
       <div class="mmg-chat-tab active" data-tab="friends">Sohbetler</div>
       <div class="mmg-chat-tab" data-tab="add">Ekle</div>
       <div class="mmg-chat-tab" data-tab="requests">İstek<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
       <div class="mmg-chat-tab" data-tab="groups">Grup</div>
-      <div class="mmg-chat-tab" data-tab="admin">Admin</div>
     </div>
     <div class="mmg-chat-body" id="mmgChatBody"></div>
     <div class="mmg-chat-reply-bar" id="mmgChatReplyBar" hidden></div>
@@ -601,7 +601,9 @@ import {
         closeOpenChat(false);
         if(m.dataset.main === 'bildirim'){
           activeTab = 'notifications';
-        } else if(activeTab === 'notifications'){
+        } else if(m.dataset.main === 'admin'){
+          activeTab = 'admin';
+        } else if(activeTab === 'notifications' || activeTab === 'admin'){
           activeTab = 'friends'; friendsSubView = 'list';
         }
         renderTab();
@@ -1110,15 +1112,18 @@ import {
   // aktif sekme vurgusunu tek yerden senkronlar. activeTab='notifications' → Bildirimler
   // ana başlığı aktif ve alt sekmeler gizli; diğer her şey → Sohbet ana başlığı.
   function syncMainView(){
-    const isNotif = (activeTab === 'notifications');
-    mainView = isNotif ? 'bildirim' : 'sohbet';
+    mainView = (activeTab === 'notifications') ? 'bildirim'
+             : (activeTab === 'admin') ? 'admin' : 'sohbet';
     if(els.mainBar){
       [...els.mainBar.children].forEach(c => c.classList.toggle('active', c.dataset.main === mainView));
     }
     if(els.tabs){
-      els.tabs.hidden = isNotif;
-      const activeSub = (activeTab === 'friends' && friendsSubView === 'add') ? 'add' : activeTab;
-      [...els.tabs.children].forEach(c => c.classList.toggle('active', c.dataset.tab === activeSub));
+      const hideTabs = (mainView !== 'sohbet');   // Bildirimler ve Admin ana başlıklarında alt sekmeler gizli
+      els.tabs.hidden = hideTabs;
+      if(!hideTabs){
+        const activeSub = (activeTab === 'friends' && friendsSubView === 'add') ? 'add' : activeTab;
+        [...els.tabs.children].forEach(c => c.classList.toggle('active', c.dataset.tab === activeSub));
+      }
     }
   }
 
