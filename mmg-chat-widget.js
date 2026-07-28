@@ -75,6 +75,9 @@ import {
   let groupInvitesMap = {};  // inviteId -> invite data
   let unsubGroups = null, unsubGroupInvites = null;
   let sentGroupInvitesMap = {};  // gönderdiğim bekleyen grup davetleri (geri çekmek için)
+  let sentRequestsMap = {};      // gönderdiğim bekleyen sohbet istekleri (geri çekmek için)
+  let unsubSentRequests = null;
+  let requestsSubView = 'incoming'; // incoming | sent
   let unsubSentGroupInvites = null;
   let unsubFirmaMemberInvite = null, unsubFirmaAdminInvite = null;
   let firmaMemberInvites = []; // [{id, firmaId, kind, data}] — bir kod birden fazla firmaya davet edilebilir
@@ -482,7 +485,6 @@ import {
     <div id="mmgChatCodeBox" class="mmg-chat-code-box"></div>
     <div class="mmg-chat-tabs" id="mmgChatTabs">
       <div class="mmg-chat-tab active" data-tab="friends">Kişilerim</div>
-      <div class="mmg-chat-tab" data-tab="add">Ekle</div>
       <div class="mmg-chat-tab" data-tab="requests">İstek<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
       <div class="mmg-chat-tab" data-tab="groups">Grup</div>
     </div>
@@ -1020,6 +1022,13 @@ import {
       if(activeTab === 'requests') renderTab();
       updateBadge();
     }, (err) => console.error('mmg-chat-widget requests onSnapshot:', err));
+
+    // GÖNDERDİĞİM bekleyen sohbet istekleri (geri çekebilmek + durum görebilmek için) — kullanıcı isteği.
+    unsubSentRequests = onSnapshot(query(collection(db, 'chatRequests'), where('fromUid', '==', uid), where('status', '==', 'pending')), (snap) => {
+      sentRequestsMap = {};
+      snap.forEach(d => { sentRequestsMap[d.id] = Object.assign({ _id: d.id }, d.data()); });
+      if(activeTab === 'requests') renderTab();
+    }, (err) => console.error('mmg-chat-widget sentRequests onSnapshot:', err));
 
     unsubGroups = onSnapshot(query(collection(db, 'chatGroups'), where('members', 'array-contains', uid)), (snap) => {
       const newGroupsMap = {};
@@ -1680,8 +1689,55 @@ import {
     els.title.textContent = 'Sohbet İstekleri';
     const reqIds = Object.keys(requestsMap).filter(id => !myBlockedUids.includes(requestsMap[id].fromUid));
     const invIds = Object.keys(groupInvitesMap).filter(id => !myBlockedUids.includes(groupInvitesMap[id].fromUid));
+    const sentIds = Object.keys(sentRequestsMap);
+    const incomingCount = reqIds.length + invIds.length;
+
+    // İki alt başlık: Gelen İstekler / Gönderilen İstekler — kullanıcı isteği.
+    const subBar = `<div class="mmg-chat-subtabs" style="display:flex; gap:6px; margin:0 0 12px;">
+        <button type="button" class="mmg-chat-subtab${requestsSubView==='incoming'?' active':''}" data-rsub="incoming"
+          style="flex:1; padding:8px 6px; border-radius:9px; border:1px solid var(--line,#232B3E); cursor:pointer; font-size:12.5px; font-weight:600;
+          background:${requestsSubView==='incoming'?'var(--accent,#3B82F6)':'transparent'}; color:${requestsSubView==='incoming'?'#fff':'var(--muted,#8D96AC)'};">
+          Gelen${incomingCount?` (${incomingCount})`:''}</button>
+        <button type="button" class="mmg-chat-subtab${requestsSubView==='sent'?' active':''}" data-rsub="sent"
+          style="flex:1; padding:8px 6px; border-radius:9px; border:1px solid var(--line,#232B3E); cursor:pointer; font-size:12.5px; font-weight:600;
+          background:${requestsSubView==='sent'?'var(--accent,#3B82F6)':'transparent'}; color:${requestsSubView==='sent'?'#fff':'var(--muted,#8D96AC)'};">
+          Gönderilen${sentIds.length?` (${sentIds.length})`:''}</button>
+      </div>`;
+
+    function wireSubBar(){
+      els.body.querySelectorAll('.mmg-chat-subtab').forEach(b => {
+        b.addEventListener('click', () => { requestsSubView = b.dataset.rsub; renderTab(); });
+      });
+    }
+
+    // ---- GÖNDERİLEN görünümü ----
+    if(requestsSubView === 'sent'){
+      if(!sentIds.length){
+        els.body.innerHTML = subBar + `<div class="mmg-chat-empty">Gönderdiğiniz bekleyen istek yok.</div>`;
+        wireSubBar();
+        return;
+      }
+      const sentHtml = sentIds.map(id => {
+        const s = sentRequestsMap[id];
+        return `<div class="mmg-chat-req-row" data-sent-id="${esc(id)}">
+          <div class="who"><b>${esc(s.toCode || s.toUid || '???')}</b> koduna gönderdiğiniz istek — <span style="color:#F5A524; font-weight:600;">Bekliyor</span></div>
+          <div class="mmg-chat-req-actions">
+            <button type="button" class="mmg-chat-btn decline cancel-sent">Geri Çek</button>
+          </div>
+        </div>`;
+      }).join('');
+      els.body.innerHTML = subBar + sentHtml;
+      wireSubBar();
+      els.body.querySelectorAll('.mmg-chat-req-row[data-sent-id]').forEach(row => {
+        row.querySelector('.cancel-sent').addEventListener('click', () => cancelSentRequest(row.dataset.sentId));
+      });
+      return;
+    }
+
+    // ---- GELEN görünümü ----
     if(!reqIds.length && !invIds.length){
-      els.body.innerHTML = `<div class="mmg-chat-empty">Bekleyen bir isteğiniz yok.</div>`;
+      els.body.innerHTML = subBar + `<div class="mmg-chat-empty">Bekleyen bir isteğiniz yok.</div>`;
+      wireSubBar();
       return;
     }
     const reqHtml = reqIds.map(id => {
@@ -1706,7 +1762,8 @@ import {
         </div>
       </div>`;
     }).join('');
-    els.body.innerHTML = reqHtml + invHtml;
+    els.body.innerHTML = subBar + reqHtml + invHtml;
+    wireSubBar();
 
     els.body.querySelectorAll('.mmg-chat-req-row[data-kind="chat"]').forEach(row => {
       const reqId = row.dataset.reqId, fromUid = row.dataset.fromUid, fromCode = row.dataset.fromCode;
@@ -1730,6 +1787,15 @@ import {
         }
       });
     });
+  }
+
+  // Gönderdiğim bekleyen sohbet isteğini geri çek (sil) — kullanıcı isteği.
+  async function cancelSentRequest(reqId){
+    try{
+      await deleteDoc(doc(db, 'chatRequests', reqId));
+      delete sentRequestsMap[reqId];
+      if(activeTab === 'requests') renderTab();
+    }catch(e){ console.error('cancelSentRequest:', e); alert('İstek geri çekilemedi. Lütfen tekrar deneyin.'); }
   }
 
   async function acceptGroupInvite(inviteId, groupId){
@@ -1815,6 +1881,13 @@ import {
         status: 'pending',
         createdAt: serverTimestamp()
       });
+      // Karşı tarafa bildirim düş (çan/badge) — kullanıcı isteği: "isteklere bildirim gitmiyor".
+      try{ await window.mmgNotify(targetUid, {
+        type: 'chatRequest',
+        title: 'Yeni sohbet isteği',
+        body: (myChatCode ? (myChatCode + ' kodlu kullanıcı') : 'Bir kullanıcı') + ' sizinle sohbet etmek istiyor.',
+        link: null
+      }); }catch(_e){}
       msgEl.className = 'mmg-chat-msg-ok';
       msgEl.textContent = 'İsteğiniz gönderildi. Karşı taraf onayladığında sohbet açılacak.';
       inputEl.value = '';
@@ -1846,6 +1919,13 @@ import {
         lastMessageAt: null,
         lastSenderUid: null
       }, { merge: true });
+      // İsteği gönderene "kabul edildi" bildirimi düş.
+      try{ await window.mmgNotify(fromUid, {
+        type: 'chatAccepted',
+        title: 'Sohbet isteğiniz kabul edildi',
+        body: (myChatCode ? (myChatCode + ' kodlu kullanıcı') : 'Kullanıcı') + ' isteğinizi kabul etti, artık sohbet edebilirsiniz.',
+        link: null
+      }); }catch(_e){}
       if(msgEl){ msgEl.className = 'mmg-chat-msg-ok'; msgEl.textContent = 'İstek kabul edildi, sohbet açıldı.'; }
     }catch(e){ console.error(e); }
   }
@@ -2199,6 +2279,7 @@ import {
   function stopAll(){
     if(unsubChats){ unsubChats(); unsubChats = null; }
     if(unsubRequests){ unsubRequests(); unsubRequests = null; }
+    if(unsubSentRequests){ unsubSentRequests(); unsubSentRequests = null; }
     if(unsubMessages){ unsubMessages(); unsubMessages = null; }
     if(unsubGroups){ unsubGroups(); unsubGroups = null; }
     if(unsubGroupInvites){ unsubGroupInvites(); unsubGroupInvites = null; }

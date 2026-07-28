@@ -664,7 +664,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           if(!p) p = {};
           if(!p.username && uname) p.username = uname;
           if(!p.displayName) p.displayName = ud.displayName || ud.username || fallbackName || uname || '';
-          if(!p.photoURL && (ud.avatarBase64 || ud.logoBase64)) p.photoURL = ud.avatarBase64 || ud.logoBase64;
+          // Logo/avatar farklı alan adlarıyla saklanmış olabilir → hepsini dene (kullanıcı isteği: "LOGO GELMİYOR").
+          if(!p.photoURL){
+            const cand = ud.avatarBase64 || ud.logoBase64 || ud.photoURL || ud.avatarURL || ud.logoURL
+              || ud.avatar || ud.logo || ud.profilResmi || ud.logoDataUrl || ud.kaseBase64 || '';
+            if(cand) p.photoURL = cand;
+          }
         }
       }catch(e){ /* sessizce geç */ }
     }
