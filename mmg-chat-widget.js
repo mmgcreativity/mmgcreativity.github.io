@@ -130,9 +130,14 @@ import {
   function labelForCode(code){
     if(!code) return 'Kullanıcı';
     const cached = nameByCode[code];
-    if(cached) return cached;                     // ad bulundu
+    if(cached) return '#' + code + ' ' + cached;  // kod + ad (ör. "#1002 tuba güler")
     if(cached === undefined) prefetchName(code);  // henüz çözülmedi -> arka planda çöz
-    return 'Kod: ' + code;                        // ad yok / gelene kadar koda düş
+    return '#' + code;                            // ad gelene kadar sadece kod
+  }
+  // Etiketten (kod + ad) baş harfi/avatar harfini güvenle çıkar (kod önekini at).
+  function avatarLetterFromLabel(label){
+    const s = String(label || '').replace(/^#\d+\s*/, '').replace(/^Kod:\s*/, '').trim();
+    return (s.slice(0, 1) || '#').toUpperCase();
   }
   async function prefetchName(code){
     if(!code || nameByCode[code] !== undefined || pendingNameFetches[code]) return;
@@ -987,7 +992,7 @@ import {
     const label = labelForCode(info.code);
     notifyNewMessage(label, c.lastMessage || 'Yeni mesaj');
     showChatToast({
-      title: label, message: c.lastMessage || 'Yeni mesaj', avatarLetter: label.replace('Kod: ', '').slice(0, 1),
+      title: label, message: c.lastMessage || 'Yeni mesaj', avatarLetter: avatarLetterFromLabel(label),
       onClick: () => {
         els.panel.hidden = false;
         positionPanelNearBubble();
@@ -1486,7 +1491,7 @@ import {
       rows.push({
         id, label, sub: c.lastMessage || 'Henüz mesaj yok', lastAt,
         unread: lastAt > readAt && c.lastSenderUid !== currentUser.uid,
-        avatarLetter: label.replace('Kod: ', '').slice(0, 1), otherUid
+        avatarLetter: avatarLetterFromLabel(label), otherUid
       });
     });
     rows.sort((a, b) => b.lastAt - a.lastAt);
@@ -2193,7 +2198,7 @@ import {
       if(myBlockedUids.includes(other)) return;
       const info = (c.participantInfo && c.participantInfo[other]) || {};
       const label = labelForCode(info.code);
-      items.push({ id, coll: 'chats', label, av: label.replace('Kod: ', '').slice(0, 1) });
+      items.push({ id, coll: 'chats', label, av: avatarLetterFromLabel(label) });
     });
     Object.keys(groupsMap).forEach(id => {
       const g = groupsMap[id];

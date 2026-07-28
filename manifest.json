@@ -1,15 +1,14 @@
 {
-  "name": "Dijital Finans Asistanı",
+  "name": "mmgcreativity — Dijital Finans Asistanı",
   "short_name": "DFA",
-  "start_url": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0B111E",
-  "theme_color": "#0B111E",
+  "orientation": "any",
+  "background_color": "#0D1420",
+  "theme_color": "#0D1420",
   "icons": [
-    {
-      "src": "https://mmgcreativity.com/DFA_icon.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
