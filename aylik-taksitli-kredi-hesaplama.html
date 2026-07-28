@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{
+    var mode = localStorage.getItem('mmg_theme') || 'dark';
+    document.documentElement.classList.toggle('theme-light', mode === 'light');
+  }catch(e){}
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.mmgTheme){
+      document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme === 'light');
+      try{ localStorage.setItem('mmg_theme', ev.data.mmgTheme); }catch(e2){}
+    }
+  });
+})();
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<!-- End Google Tag Manager -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Aylık Taksitli Kredi Hesaplama</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A; --blue:#5B9BC4;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  html.theme-light{
+    --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6;
+    --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; padding-bottom:60px;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  header.masthead{
+    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
+    display:flex; justify-content:space-between; align-items:flex-end;
+    border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
+  }
+  header.masthead > div:first-child{ flex:1 1 0%; min-width:0; }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; color:var(--text); margin:0;}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5; max-width:680px;}
+  .top-actions{ display:flex; gap:8px; flex-shrink:0; }
+  .back-link{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none;
+    border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap;
+    background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+
+  main{ max-width:1180px; margin:0 auto; padding:28px 24px 24px; }
+  .cols{ display:grid; grid-template-columns:1fr 1.15fr; gap:24px; align-items:start; }
+  @media (max-width:940px){ .cols{ grid-template-columns:1fr; } }
+
+  .panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:22px; }
+  .panel-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; margin-bottom:4px; }
+  .panel-desc{ color:var(--muted); font-size:12.5px; margin-bottom:18px; line-height:1.5; }
+
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; font-weight:600; }
+  .input-wrap{ position:relative; display:flex; align-items:center; }
+  .input-wrap input, .input-wrap select{
+    width:100%; height:46px; background:var(--bg); border:1px solid var(--hairline); border-radius:10px;
+    padding:0 46px 0 14px; color:var(--text); font-family:'JetBrains Mono',monospace; font-weight:600; font-size:16px;
+    outline:none; transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .input-wrap select{ font-family:'Inter',sans-serif; font-weight:600; cursor:pointer; padding-right:14px; }
+  .input-wrap input:focus, .input-wrap select:focus{ border-color:var(--brass); box-shadow:0 0 0 3px rgba(198,161,91,0.12); }
+  .input-suffix{ position:absolute; right:14px; color:var(--muted); font-size:13px; font-weight:600; pointer-events:none; }
+
+  .tax-toggle{ display:flex; align-items:flex-start; gap:10px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:12px 14px; cursor:pointer; margin-top:4px; }
+  .tax-toggle input{ margin-top:2px; width:16px; height:16px; accent-color:var(--brass); cursor:pointer; flex:none; }
+  .tax-toggle .tt-text{ font-size:12.5px; color:var(--text); line-height:1.45; }
+  .tax-toggle .tt-text small{ display:block; color:var(--muted); font-size:11px; margin-top:2px; }
+
+  /* Sonuç kartı */
+  .result-hero{ background:linear-gradient(135deg, rgba(255,107,74,0.10), rgba(124,77,217,0.08)); border:1px solid rgba(255,107,74,0.22); border-radius:14px; padding:22px; margin-bottom:16px; }
+  .rh-label{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  .rh-value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(30px,6vw,44px); letter-spacing:-0.02em; margin-top:4px; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .rh-value span{ font-size:20px; }
+
+  .stat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+  .stat{ background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:14px 16px; }
+  .stat .l{ font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  .stat .v{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:19px; margin-top:5px; color:var(--text); }
+  .stat.principal .v{ color:var(--teal); }
+  .stat.cost .v{ color:var(--amber); }
+
+  .toggle-plan{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--brass); font-weight:600; background:none; border:1px solid var(--hairline); border-radius:8px; padding:8px 14px; cursor:pointer; transition:border-color .15s, color .15s; }
+  .toggle-plan:hover{ border-color:var(--brass); }
+  .toggle-plan::before{ content:'▾  '; }
+  .toggle-plan.open::before{ content:'▴  '; }
+
+  .plan-wrap{ margin-top:16px; overflow-x:auto; }
+  table.plan{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.plan th, table.plan td{ padding:9px 12px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--hairline); }
+  table.plan th{ color:var(--muted); font-weight:600; font-size:10.5px; letter-spacing:.03em; text-transform:uppercase; text-align:right; position:sticky; top:0; background:var(--surface); }
+  table.plan th:first-child, table.plan td:first-child{ text-align:center; color:var(--muted); }
+  table.plan td{ font-family:'JetBrains Mono',monospace; font-weight:500; }
+  table.plan tbody tr:hover{ background:var(--surface-2); }
+  table.plan tfoot td{ font-weight:700; border-top:2px solid var(--hairline); border-bottom:none; color:var(--text); }
+
+  .flag{ margin-top:18px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:14px 16px; color:var(--muted); font-size:12px; line-height:1.7; }
+  .flag b{ color:var(--text); }
+
+  footer{ max-width:1180px; margin:28px auto 0; padding:22px 24px 0; border-top:1px solid var(--hairline); }
+  footer .credit{width:100%; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); display:flex; align-items:center; justify-content:flex-end; gap:8px;}
+  .signature-pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 12px 4px 5px; border-radius:999px; background:var(--surface-2); border:1px solid var(--hairline); }
+  .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
+  .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff; }
+  footer .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+</style>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<header class="masthead">
+  <div>
+    <h1 class="title" data-i18n="page_title">Aylık Taksitli Kredi Hesaplama</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Kredi tutarı, aylık faiz oranı ve vadeyi girin; KKDF ve BSMV dahil aylık taksitinizi, toplam geri ödemenizi ve ödeme planınızı anında görün.</div>
+  </div>
+  <div class="top-actions">
+    <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
+  </div>
+</header>
+
+<main>
+  <div class="cols">
+
+    <!-- GİRİŞ PANELİ -->
+    <div class="panel">
+      <div class="panel-title" data-i18n="input_title">Kredi Bilgileri</div>
+      <div class="panel-desc" data-i18n="input_desc">Değerleri değiştirdikçe sonuç anında güncellenir.</div>
+
+      <div class="field">
+        <label data-i18n="lbl_amount">Kredi Tutarı</label>
+        <div class="input-wrap">
+          <input type="text" id="amount" inputmode="numeric" value="100.000">
+          <span class="input-suffix">TL</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label data-i18n="lbl_rate">Aylık Faiz Oranı</label>
+        <div class="input-wrap">
+          <input type="text" id="rate" inputmode="decimal" value="3,29">
+          <span class="input-suffix">%</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label data-i18n="lbl_term">Vade</label>
+        <div class="input-wrap">
+          <input type="text" id="term" inputmode="numeric" value="12">
+          <span class="input-suffix" data-i18n="suffix_month">ay</span>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:0;">
+        <label class="tax-toggle">
+          <input type="checkbox" id="taxToggle" checked>
+          <span class="tt-text" data-i18n-html="tax_label">Vergiler dahil (KKDF %15 + BSMV %15)<small>Bankaların ilan ettiği taksitlerle uyumlu olması için işaretli tutun.</small></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- SONUÇ PANELİ -->
+    <div>
+      <div class="result-hero">
+        <div class="rh-label" data-i18n="res_monthly">Aylık Taksit</div>
+        <div class="rh-value"><span id="taksit">0,00</span> <span>TL</span></div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="l" data-i18n="res_total">Toplam Geri Ödeme</div>
+          <div class="v mono" id="toplam">0,00 TL</div>
+        </div>
+        <div class="stat principal">
+          <div class="l" data-i18n="res_principal">Anapara</div>
+          <div class="v mono" id="anapara">0,00 TL</div>
+        </div>
+        <div class="stat cost">
+          <div class="l" data-i18n="res_cost">Toplam Faiz + Vergi</div>
+          <div class="v mono" id="maliyet">0,00 TL</div>
+        </div>
+        <div class="stat">
+          <div class="l" data-i18n="res_effrate">Aylık Maliyet Oranı</div>
+          <div class="v mono" id="effrate">0,00%</div>
+        </div>
+      </div>
+
+      <button type="button" class="toggle-plan" id="togglePlan" data-i18n="show_plan">Ödeme Planını Göster</button>
+
+      <div class="plan-wrap" id="planWrap" hidden>
+        <table class="plan">
+          <thead>
+            <tr>
+              <th data-i18n="th_no">#</th>
+              <th data-i18n="th_installment">Taksit</th>
+              <th data-i18n="th_principal">Anapara</th>
+              <th data-i18n="th_interest">Faiz</th>
+              <th data-i18n="th_tax">Vergi</th>
+              <th data-i18n="th_balance">Kalan</th>
+            </tr>
+          </thead>
+          <tbody id="planBody"></tbody>
+          <tfoot id="planFoot"></tfoot>
+        </table>
+      </div>
+
+      <div class="flag" data-i18n-html="calc_note"><b>Hesaplama esası:</b> Aylık taksit, vergiler dahil aylık orana göre annüite (eşit taksit) formülüyle hesaplanır: Taksit = Anapara × r ÷ (1 − (1+r)⁻ⁿ), burada r = aylık faiz × (1 + KKDF + BSMV). Her taksitte faiz kalan anapara üzerinden, vergi ise faiz üzerinden alınır. Sonuçlar bilgilendirme amaçlıdır; bankaların dosya/tahsis ücreti gibi ek masrafları teklife göre değişebilir.</div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="credit">
+    <span data-i18n="powered_by">Powered by</span>
+    <span class="signature-pill">
+      <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+      <span id="credit-fallback" class="credit-fallback">M</span>
+      <b>mmgcreativity</b>
+    </span>
+  </div>
+</footer>
+
+<script>
+  let MMG_LANG = 'tr';
+  try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
+
+  const KKDF = 0.15, BSMV = 0.15;
+
+  function parseTR(str){
+    if(str === null || str === undefined) return 0;
+    let s = String(str).trim().replace(/\s/g,'').replace(/\./g,'').replace(',', '.');
+    let n = parseFloat(s);
+    return isFinite(n) ? n : 0;
+  }
+  function fmt(n){
+    if(!isFinite(n)) n = 0;
+    return n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function fmtInt(n){
+    if(!isFinite(n)) n = 0;
+    return Math.round(n).toLocaleString('tr-TR');
+  }
+
+  const amountEl = document.getElementById('amount');
+  const rateEl   = document.getElementById('rate');
+  const termEl   = document.getElementById('term');
+  const taxEl    = document.getElementById('taxToggle');
+
+  // Tutar kutusunu binlik ayraçla biçimle (yazarken)
+  amountEl.addEventListener('input', function(){
+    const caretEnd = amountEl.selectionStart === amountEl.value.length;
+    let digits = amountEl.value.replace(/[^\d]/g,'');
+    if(digits === ''){ amountEl.value=''; recalc(); return; }
+    amountEl.value = parseInt(digits,10).toLocaleString('tr-TR');
+    recalc();
+  });
+  rateEl.addEventListener('input', recalc);
+  termEl.addEventListener('input', function(){
+    termEl.value = termEl.value.replace(/[^\d]/g,'');
+    recalc();
+  });
+  taxEl.addEventListener('change', recalc);
+
+  document.getElementById('togglePlan').addEventListener('click', function(){
+    const w = document.getElementById('planWrap');
+    const show = w.hidden;              // şu an gizliyse açılacak
+    w.hidden = !show;
+    this.classList.toggle('open', show);
+    const fallback = show ? 'Ödeme Planını Gizle' : 'Ödeme Planını Göster';
+    this.textContent = (MMGI18N && MMGI18N.t) ? MMGI18N.t(show ? 'hide_plan' : 'show_plan') : fallback;
+  });
+
+  function recalc(){
+    const P = parseTR(amountEl.value);
+    const iNom = parseTR(rateEl.value) / 100;              // aylık nominal faiz (ondalık)
+    const n = parseInt(termEl.value, 10) || 0;
+    const withTax = taxEl.checked;
+    const taxMul = withTax ? (1 + KKDF + BSMV) : 1;
+    const r = iNom * taxMul;                                // vergiler dahil aylık oran
+
+    const setPlan = (rows, foot) => {
+      document.getElementById('planBody').innerHTML = rows;
+      document.getElementById('planFoot').innerHTML = foot;
+    };
+
+    if(P <= 0 || n <= 0 || iNom < 0){
+      document.getElementById('taksit').textContent = '0,00';
+      document.getElementById('toplam').textContent = '0,00 TL';
+      document.getElementById('anapara').textContent = fmt(P) + ' TL';
+      document.getElementById('maliyet').textContent = '0,00 TL';
+      document.getElementById('effrate').textContent = (r*100).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '%';
+      setPlan('', '');
+      return;
+    }
+
+    let taksit;
+    if(r === 0){ taksit = P / n; }
+    else { taksit = P * r / (1 - Math.pow(1 + r, -n)); }
+
+    const toplam = taksit * n;
+    const maliyet = toplam - P;
+
+    document.getElementById('taksit').textContent = fmt(taksit);
+    document.getElementById('toplam').textContent = fmt(toplam) + ' TL';
+    document.getElementById('anapara').textContent = fmt(P) + ' TL';
+    document.getElementById('maliyet').textContent = fmt(maliyet) + ' TL';
+    document.getElementById('effrate').textContent = (r*100).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '%';
+
+    // Ödeme planı
+    let bal = P, rows = '', sumP=0, sumI=0, sumT=0;
+    for(let k=1; k<=n; k++){
+      const faizNet = bal * iNom;                  // net faiz (kalan anapara üzerinden)
+      const vergi   = withTax ? faizNet * (KKDF + BSMV) : 0;
+      let anaparaK  = taksit - faizNet - vergi;
+      if(k === n){ anaparaK = bal; }               // son taksitte yuvarlama farkını kapat
+      let kalan = bal - anaparaK;
+      if(k === n) kalan = 0;
+      sumP += anaparaK; sumI += faizNet; sumT += vergi;
+      rows += '<tr><td>'+k+'</td><td>'+fmt(taksit)+'</td><td>'+fmt(anaparaK)+'</td><td>'+fmt(faizNet)+'</td><td>'+fmt(vergi)+'</td><td>'+fmt(Math.max(0,kalan))+'</td></tr>';
+      bal = kalan;
+    }
+    const foot = '<tr><td data-i18n="th_total">Toplam</td><td>'+fmt(toplam)+'</td><td>'+fmt(sumP)+'</td><td>'+fmt(sumI)+'</td><td>'+fmt(sumT)+'</td><td>—</td></tr>';
+    setPlan(rows, foot);
+  }
+
+  recalc();
+</script>
+
+<script>
+(function(){
+  MMGI18N.registerDict({
+    tr: {
+      page_title:'Aylık Taksitli Kredi Hesaplama',
+      page_subtitle:'Kredi tutarı, aylık faiz oranı ve vadeyi girin; KKDF ve BSMV dahil aylık taksitinizi, toplam geri ödemenizi ve ödeme planınızı anında görün.',
+      back_home:'← Ana Sayfa', powered_by:'Powered by',
+      input_title:'Kredi Bilgileri', input_desc:'Değerleri değiştirdikçe sonuç anında güncellenir.',
+      lbl_amount:'Kredi Tutarı', lbl_rate:'Aylık Faiz Oranı', lbl_term:'Vade', suffix_month:'ay',
+      tax_label:'Vergiler dahil (KKDF %15 + BSMV %15)<small>Bankaların ilan ettiği taksitlerle uyumlu olması için işaretli tutun.</small>',
+      res_monthly:'Aylık Taksit', res_total:'Toplam Geri Ödeme', res_principal:'Anapara', res_cost:'Toplam Faiz + Vergi', res_effrate:'Aylık Maliyet Oranı',
+      show_plan:'Ödeme Planını Göster', hide_plan:'Ödeme Planını Gizle',
+      th_no:'#', th_installment:'Taksit', th_principal:'Anapara', th_interest:'Faiz', th_tax:'Vergi', th_balance:'Kalan', th_total:'Toplam',
+      calc_note:'<b>Hesaplama esası:</b> Aylık taksit, vergiler dahil aylık orana göre annüite (eşit taksit) formülüyle hesaplanır: Taksit = Anapara × r ÷ (1 − (1+r)⁻ⁿ), burada r = aylık faiz × (1 + KKDF + BSMV). Her taksitte faiz kalan anapara üzerinden, vergi ise faiz üzerinden alınır. Sonuçlar bilgilendirme amaçlıdır; bankaların dosya/tahsis ücreti gibi ek masrafları teklife göre değişebilir.'
+    },
+    en: {
+      page_title:'Monthly Installment Loan Calculator',
+      page_subtitle:'Enter the loan amount, monthly interest rate and term; instantly see your monthly installment (incl. KKDF & BSMV taxes), total repayment and payment schedule.',
+      back_home:'← Home', powered_by:'Powered by',
+      input_title:'Loan Details', input_desc:'Results update instantly as you change the values.',
+      lbl_amount:'Loan Amount', lbl_rate:'Monthly Interest Rate', lbl_term:'Term', suffix_month:'mo',
+      tax_label:'Taxes included (KKDF 15% + BSMV 15%)<small>Keep this checked to match the installments banks advertise.</small>',
+      res_monthly:'Monthly Installment', res_total:'Total Repayment', res_principal:'Principal', res_cost:'Total Interest + Tax', res_effrate:'Effective Monthly Rate',
+      show_plan:'Show Payment Schedule', hide_plan:'Hide Payment Schedule',
+      th_no:'#', th_installment:'Installment', th_principal:'Principal', th_interest:'Interest', th_tax:'Tax', th_balance:'Balance', th_total:'Total',
+      calc_note:'<b>Calculation basis:</b> The monthly installment is computed with the annuity (equal-installment) formula on the tax-inclusive monthly rate: Installment = Principal × r ÷ (1 − (1+r)⁻ⁿ), where r = monthly interest × (1 + KKDF + BSMV). Interest is charged on the remaining balance each month and tax on the interest. Results are for information only; bank fees such as allocation/file charges may vary by offer.'
+    }
+  });
+
+  const ACTIVE_LANG = (typeof MMG_LANG !== 'undefined') ? MMG_LANG : (localStorage.getItem('mmg_lang') || 'tr');
+  window.addEventListener('message', (ev) => {
+    if(ev && ev.data && ev.data.mmgLang && ev.data.mmgLang !== ACTIVE_LANG){
+      try{ localStorage.setItem('mmg_lang', ev.data.mmgLang); }catch(e){}
+      location.reload();
+    }
+  });
+  MMGI18N.onChange(function(lang){ if(lang !== ACTIVE_LANG){ location.reload(); } });
+  MMGI18N.detectAndApplyDefaultLang();
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
+</body>
+</html>
