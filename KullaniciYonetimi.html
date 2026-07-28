@@ -54,7 +54,8 @@
     background:var(--surface); border:1px solid var(--hairline); border-radius:16px;
     padding:12px; box-shadow:0 10px 30px rgba(0,0,0,0.25); margin-bottom:10px;
   }
-  .two-col-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; align-items:start; }
+  .two-col-grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; align-items:start; }
+  @media (max-width:1100px){ .two-col-grid{ grid-template-columns:1fr 1fr; } }
   @media (max-width:760px){ .two-col-grid{ grid-template-columns:1fr; } }
   .card h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; margin-bottom:2px; }
   .card .card-sub{ color:var(--muted); font-size:12.5px; margin-bottom:6px; line-height:1.4; }
@@ -167,7 +168,10 @@
       <h2 data-i18n="my_users_title" style="margin-bottom:8px;">Kullanıcılarım</h2>
       <div class="member-list" id="membersList"><div class="empty-note" data-i18n="loading">Yükleniyor…</div></div>
     </div>
+  </div>
 
+  <!-- SÜTUN 2: Veri Paylaşım Grubu + Bekleyen Davetler -->
+  <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
     <div class="card" id="dataGroupCard" style="display:none;">
       <h2 data-i18n="data_group_title">🔗 Veri Paylaşım Grubu</h2>
       <div class="card-sub" data-i18n="data_group_desc">Birden fazla firmanızın (örn. aynı grubun/holdingin parçası) müşteri, tedarikçi, muhatap ve banka verilerini ortak kullanmak isterseniz, burada bir ana firma seçip diğer firmalarınızı ona bağlayabilirsiniz. Kod kopyalamanıza gerek yok.</div>
@@ -235,21 +239,22 @@
       <button type="button" class="auth-submit" id="inviteSubmitBtn" data-i18n="send_invite">Davet Gönder</button>
       <div class="auth-error" id="inviteError"></div>
       <div class="auth-success" id="inviteSuccess"></div>
-    </div>
 
-    <div class="card">
-      <h2 id="userLimitTitleEl">Kullanıcı Limiti</h2>
-      <div class="card-sub" id="userLimitDescEl">Bu firmaya en fazla kaç kullanıcı eklenebileceğini belirleyin. Limit dolduğunda yeni davet gönderilemez; bu, istenmeyen/sahte kullanıcı eklenmesini önler.</div>
-      <div style="display:flex; gap:8px; align-items:flex-end;">
-        <div class="auth-field" style="flex:1; min-width:0; margin-bottom:0;">
-          <label id="userLimitLabelEl">Maksimum kullanıcı sayısı</label>
-          <input type="number" id="userLimitInput" inputmode="numeric" min="1" max="100" step="1" placeholder="ör. 5">
+      <!-- Kullanıcı Limiti — Kullanıcı Ekle kartının içine entegre edildi (kullanıcı isteği) -->
+      <div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--hairline);">
+        <h2 id="userLimitTitleEl" style="font-size:16px; margin-bottom:4px;">Kullanıcı Limiti</h2>
+        <div class="card-sub" id="userLimitDescEl">Bu firmaya en fazla kaç kullanıcı eklenebileceğini belirleyin. Limit dolduğunda yeni davet gönderilemez; bu, istenmeyen/sahte kullanıcı eklenmesini önler.</div>
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div class="auth-field" style="flex:1; min-width:0; margin-bottom:0;">
+            <label id="userLimitLabelEl">Maksimum kullanıcı sayısı</label>
+            <input type="number" id="userLimitInput" inputmode="numeric" min="1" max="100" step="1" placeholder="ör. 5">
+          </div>
+          <button type="button" class="auth-submit" id="userLimitSaveBtn" style="flex:0 0 auto; min-width:0; margin-top:0;">Kaydet</button>
         </div>
-        <button type="button" class="auth-submit" id="userLimitSaveBtn" style="flex:0 0 auto; min-width:0; margin-top:0;">Kaydet</button>
+        <div class="card-sub" id="userLimitCurrent" style="margin-top:8px;"></div>
+        <div class="auth-error" id="userLimitError"></div>
+        <div class="auth-success" id="userLimitSuccess"></div>
       </div>
-      <div class="card-sub" id="userLimitCurrent" style="margin-top:8px;"></div>
-      <div class="auth-error" id="userLimitError"></div>
-      <div class="auth-success" id="userLimitSuccess"></div>
     </div>
   </div>
   </div>
