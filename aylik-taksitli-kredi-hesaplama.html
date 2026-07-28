@@ -111,6 +111,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .stat.principal .v{ color:var(--teal); }
   .stat.cost .v{ color:var(--amber); }
 
+  .rh-sub{ margin-top:10px; font-size:12px; color:var(--muted); }
+  .rh-sub b{ color:var(--text); }
+
+  .breakdown{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:6px 18px; margin-bottom:16px; }
+  .bd-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--hairline); font-size:13.5px; }
+  .bd-row:last-child{ border-bottom:none; }
+  .bd-row > span{ color:var(--muted); }
+  .bd-row b{ font-family:'JetBrains Mono',monospace; font-weight:600; font-size:15px; color:var(--text); }
+  .bd-row.sub > span{ padding-left:14px; font-size:12.5px; }
+  .bd-row.total{ border-top:2px solid var(--hairline); }
+  .bd-row.total > span{ color:var(--text); font-weight:700; font-family:'Space Grotesk',sans-serif; font-size:14px; }
+  .bd-row.total b{ font-size:19px; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
   .toggle-plan{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--brass); font-weight:600; background:none; border:1px solid var(--hairline); border-radius:8px; padding:8px 14px; cursor:pointer; transition:border-color .15s, color .15s; }
   .toggle-plan:hover{ border-color:var(--brass); }
   .toggle-plan::before{ content:'▾  '; }
@@ -184,6 +197,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
 
+      <div class="field">
+        <label data-i18n="lbl_fee">Masraf / Dosya Ücreti (opsiyonel)</label>
+        <div class="input-wrap">
+          <input type="text" id="fee" inputmode="numeric" value="0">
+          <span class="input-suffix">TL</span>
+        </div>
+      </div>
+
       <div class="field" style="margin-bottom:0;">
         <label class="tax-toggle">
           <input type="checkbox" id="taxToggle" checked>
@@ -197,25 +218,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="result-hero">
         <div class="rh-label" data-i18n="res_monthly">Aylık Taksit</div>
         <div class="rh-value"><span id="taksit">0,00</span> <span>TL</span></div>
+        <div class="rh-sub"><span data-i18n="res_effrate">Aylık Maliyet Oranı</span> <b id="effrate">0,00%</b> · <b id="rhTerm">12</b> <span data-i18n="suffix_month">ay</span></div>
       </div>
 
-      <div class="stat-grid">
-        <div class="stat">
-          <div class="l" data-i18n="res_total">Toplam Geri Ödeme</div>
-          <div class="v mono" id="toplam">0,00 TL</div>
-        </div>
-        <div class="stat principal">
-          <div class="l" data-i18n="res_principal">Anapara</div>
-          <div class="v mono" id="anapara">0,00 TL</div>
-        </div>
-        <div class="stat cost">
-          <div class="l" data-i18n="res_cost">Toplam Faiz + Vergi</div>
-          <div class="v mono" id="maliyet">0,00 TL</div>
-        </div>
-        <div class="stat">
-          <div class="l" data-i18n="res_effrate">Aylık Maliyet Oranı</div>
-          <div class="v mono" id="effrate">0,00%</div>
-        </div>
+      <div class="breakdown">
+        <div class="bd-row"><span data-i18n="res_principal">Anapara</span><b id="bdAnapara">0,00 TL</b></div>
+        <div class="bd-row"><span data-i18n="res_interest">Toplam Faiz</span><b id="bdFaiz">0,00 TL</b></div>
+        <div class="bd-row sub" id="rowKkdf"><span data-i18n="res_kkdf">KKDF (%15)</span><b id="bdKkdf">0,00 TL</b></div>
+        <div class="bd-row sub" id="rowBsmv"><span data-i18n="res_bsmv">BSMV (%15)</span><b id="bdBsmv">0,00 TL</b></div>
+        <div class="bd-row" id="rowMasraf"><span data-i18n="res_fee">Masraf (Dosya/Tahsis)</span><b id="bdMasraf">0,00 TL</b></div>
+        <div class="bd-row total"><span data-i18n="res_total">Genel Toplam</span><b id="bdToplam">0,00 TL</b></div>
       </div>
 
       <button type="button" class="toggle-plan" id="togglePlan" data-i18n="show_plan">Ödeme Planını Göster</button>
@@ -278,6 +290,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const amountEl = document.getElementById('amount');
   const rateEl   = document.getElementById('rate');
   const termEl   = document.getElementById('term');
+  const feeEl    = document.getElementById('fee');
   const taxEl    = document.getElementById('taxToggle');
 
   // Tutar kutusunu binlik ayraçla biçimle (yazarken)
@@ -291,6 +304,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   rateEl.addEventListener('input', recalc);
   termEl.addEventListener('input', function(){
     termEl.value = termEl.value.replace(/[^\d]/g,'');
+    recalc();
+  });
+  feeEl.addEventListener('input', function(){
+    let digits = feeEl.value.replace(/[^\d]/g,'');
+    feeEl.value = digits === '' ? '' : parseInt(digits,10).toLocaleString('tr-TR');
     recalc();
   });
   taxEl.addEventListener('change', recalc);
@@ -308,39 +326,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const P = parseTR(amountEl.value);
     const iNom = parseTR(rateEl.value) / 100;              // aylık nominal faiz (ondalık)
     const n = parseInt(termEl.value, 10) || 0;
+    const masraf = parseTR(feeEl.value);
     const withTax = taxEl.checked;
     const taxMul = withTax ? (1 + KKDF + BSMV) : 1;
     const r = iNom * taxMul;                                // vergiler dahil aylık oran
 
+    document.getElementById('rhTerm').textContent = n || 0;
+    document.getElementById('effrate').textContent = (r*100).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '%';
+    document.getElementById('rowKkdf').style.display = withTax ? '' : 'none';
+    document.getElementById('rowBsmv').style.display = withTax ? '' : 'none';
+    document.getElementById('rowMasraf').style.display = masraf > 0 ? '' : 'none';
+
+    const setBreak = (taksit, faiz, kkdf, bsmv, genel) => {
+      document.getElementById('taksit').textContent = fmt(taksit);
+      document.getElementById('bdAnapara').textContent = fmt(P) + ' TL';
+      document.getElementById('bdFaiz').textContent = fmt(faiz) + ' TL';
+      document.getElementById('bdKkdf').textContent = fmt(kkdf) + ' TL';
+      document.getElementById('bdBsmv').textContent = fmt(bsmv) + ' TL';
+      document.getElementById('bdMasraf').textContent = fmt(masraf) + ' TL';
+      document.getElementById('bdToplam').textContent = fmt(genel) + ' TL';
+    };
     const setPlan = (rows, foot) => {
       document.getElementById('planBody').innerHTML = rows;
       document.getElementById('planFoot').innerHTML = foot;
     };
 
     if(P <= 0 || n <= 0 || iNom < 0){
-      document.getElementById('taksit').textContent = '0,00';
-      document.getElementById('toplam').textContent = '0,00 TL';
-      document.getElementById('anapara').textContent = fmt(P) + ' TL';
-      document.getElementById('maliyet').textContent = '0,00 TL';
-      document.getElementById('effrate').textContent = (r*100).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '%';
+      setBreak(0, 0, 0, 0, P + masraf);
       setPlan('', '');
       return;
     }
 
-    let taksit;
-    if(r === 0){ taksit = P / n; }
-    else { taksit = P * r / (1 - Math.pow(1 + r, -n)); }
+    let taksit = (r === 0) ? P / n : P * r / (1 - Math.pow(1 + r, -n));
 
-    const toplam = taksit * n;
-    const maliyet = toplam - P;
-
-    document.getElementById('taksit').textContent = fmt(taksit);
-    document.getElementById('toplam').textContent = fmt(toplam) + ' TL';
-    document.getElementById('anapara').textContent = fmt(P) + ' TL';
-    document.getElementById('maliyet').textContent = fmt(maliyet) + ' TL';
-    document.getElementById('effrate').textContent = (r*100).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '%';
-
-    // Ödeme planı
+    // Ödeme planı + faiz/vergi toplamları
     let bal = P, rows = '', sumP=0, sumI=0, sumT=0;
     for(let k=1; k<=n; k++){
       const faizNet = bal * iNom;                  // net faiz (kalan anapara üzerinden)
@@ -353,7 +372,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       rows += '<tr><td>'+k+'</td><td>'+fmt(taksit)+'</td><td>'+fmt(anaparaK)+'</td><td>'+fmt(faizNet)+'</td><td>'+fmt(vergi)+'</td><td>'+fmt(Math.max(0,kalan))+'</td></tr>';
       bal = kalan;
     }
-    const foot = '<tr><td data-i18n="th_total">Toplam</td><td>'+fmt(toplam)+'</td><td>'+fmt(sumP)+'</td><td>'+fmt(sumI)+'</td><td>'+fmt(sumT)+'</td><td>—</td></tr>';
+    const kkdf = withTax ? sumI * KKDF : 0;
+    const bsmv = withTax ? sumI * BSMV : 0;
+    const genel = taksit * n + masraf;
+
+    setBreak(taksit, sumI, kkdf, bsmv, genel);
+
+    const foot = '<tr><td>Σ</td><td>'+fmt(taksit*n)+'</td><td>'+fmt(sumP)+'</td><td>'+fmt(sumI)+'</td><td>'+fmt(sumT)+'</td><td>—</td></tr>';
     setPlan(rows, foot);
   }
 
@@ -368,9 +393,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       page_subtitle:'Kredi tutarı, aylık faiz oranı ve vadeyi girin; KKDF ve BSMV dahil aylık taksitinizi, toplam geri ödemenizi ve ödeme planınızı anında görün.',
       back_home:'← Ana Sayfa', powered_by:'Powered by',
       input_title:'Kredi Bilgileri', input_desc:'Değerleri değiştirdikçe sonuç anında güncellenir.',
-      lbl_amount:'Kredi Tutarı', lbl_rate:'Aylık Faiz Oranı', lbl_term:'Vade', suffix_month:'ay',
+      lbl_amount:'Kredi Tutarı', lbl_rate:'Aylık Faiz Oranı', lbl_term:'Vade', lbl_fee:'Masraf / Dosya Ücreti (opsiyonel)', suffix_month:'ay',
       tax_label:'Vergiler dahil (KKDF %15 + BSMV %15)<small>Bankaların ilan ettiği taksitlerle uyumlu olması için işaretli tutun.</small>',
-      res_monthly:'Aylık Taksit', res_total:'Toplam Geri Ödeme', res_principal:'Anapara', res_cost:'Toplam Faiz + Vergi', res_effrate:'Aylık Maliyet Oranı',
+      res_monthly:'Aylık Taksit', res_total:'Genel Toplam', res_principal:'Anapara', res_interest:'Toplam Faiz', res_kkdf:'KKDF (%15)', res_bsmv:'BSMV (%15)', res_fee:'Masraf (Dosya/Tahsis)', res_cost:'Toplam Faiz + Vergi', res_effrate:'Aylık Maliyet Oranı',
       show_plan:'Ödeme Planını Göster', hide_plan:'Ödeme Planını Gizle',
       th_no:'#', th_installment:'Taksit', th_principal:'Anapara', th_interest:'Faiz', th_tax:'Vergi', th_balance:'Kalan', th_total:'Toplam',
       calc_note:'<b>Hesaplama esası:</b> Aylık taksit, vergiler dahil aylık orana göre annüite (eşit taksit) formülüyle hesaplanır: Taksit = Anapara × r ÷ (1 − (1+r)⁻ⁿ), burada r = aylık faiz × (1 + KKDF + BSMV). Her taksitte faiz kalan anapara üzerinden, vergi ise faiz üzerinden alınır. Sonuçlar bilgilendirme amaçlıdır; bankaların dosya/tahsis ücreti gibi ek masrafları teklife göre değişebilir.'
@@ -380,9 +405,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       page_subtitle:'Enter the loan amount, monthly interest rate and term; instantly see your monthly installment (incl. KKDF & BSMV taxes), total repayment and payment schedule.',
       back_home:'← Home', powered_by:'Powered by',
       input_title:'Loan Details', input_desc:'Results update instantly as you change the values.',
-      lbl_amount:'Loan Amount', lbl_rate:'Monthly Interest Rate', lbl_term:'Term', suffix_month:'mo',
+      lbl_amount:'Loan Amount', lbl_rate:'Monthly Interest Rate', lbl_term:'Term', lbl_fee:'Fee / File Charge (optional)', suffix_month:'mo',
       tax_label:'Taxes included (KKDF 15% + BSMV 15%)<small>Keep this checked to match the installments banks advertise.</small>',
-      res_monthly:'Monthly Installment', res_total:'Total Repayment', res_principal:'Principal', res_cost:'Total Interest + Tax', res_effrate:'Effective Monthly Rate',
+      res_monthly:'Monthly Installment', res_total:'Grand Total', res_principal:'Principal', res_interest:'Total Interest', res_kkdf:'KKDF (15%)', res_bsmv:'BSMV (15%)', res_fee:'Fee (File/Allocation)', res_cost:'Total Interest + Tax', res_effrate:'Effective Monthly Rate',
       show_plan:'Show Payment Schedule', hide_plan:'Hide Payment Schedule',
       th_no:'#', th_installment:'Installment', th_principal:'Principal', th_interest:'Interest', th_tax:'Tax', th_balance:'Balance', th_total:'Total',
       calc_note:'<b>Calculation basis:</b> The monthly installment is computed with the annuity (equal-installment) formula on the tax-inclusive monthly rate: Installment = Principal × r ÷ (1 − (1+r)⁻ⁿ), where r = monthly interest × (1 + KKDF + BSMV). Interest is charged on the remaining balance each month and tax on the interest. Results are for information only; bank fees such as allocation/file charges may vary by offer.'
