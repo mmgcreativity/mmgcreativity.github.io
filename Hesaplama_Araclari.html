@@ -174,6 +174,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <button type="button" class="cat-tab" data-file="vadeli-mevduat-faizi-hesaplama.html" data-hash="vadelimevduat" data-i18n="tab_vadelimevduat">Vadeli Mevduat Faizi</button>
       <button type="button" class="cat-tab" data-file="kredi-karsilastirma.html" data-hash="krediteklif" data-i18n="tab_krediteklif">Kredi Tekliflerini Karşılaştır</button>
       <button type="button" class="cat-tab" data-file="aylik-taksitli-kredi-hesaplama.html" data-hash="taksitli" data-i18n="tab_taksitli">Taksitli Kredi</button>
+      <button type="button" class="cat-tab" data-file="teminat-mektubu-komisyonu-hesaplama.html" data-hash="teminat" data-i18n="tab_teminat">Teminat Mektubu Komisyonu</button>
+      <button type="button" class="cat-tab" data-file="cek-iskontosu-hesaplama.html" data-hash="cekiskonto" data-i18n="tab_cekiskonto">Çek İskontosu</button>
     </div>
     <div class="frame-wrap">
       <iframe id="toolFrame" src=""></iframe>
@@ -212,6 +214,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="arrow">↗</span>
         <h3 data-i18n="card6_title">Taksitli Kredi Hesaplama</h3>
         <p data-i18n="card6_desc">Tutar, aylık faiz oranı ve vadeyi girin; KKDF+BSMV dahil aylık taksit, toplam geri ödeme ve ödeme planını görün.</p>
+      </a>
+      <a class="tool-card" href="teminat-mektubu-komisyonu-hesaplama.html">
+        <span class="arrow">↗</span>
+        <h3 data-i18n="card7_title">Teminat Mektubu Komisyonu Hesaplama</h3>
+        <p data-i18n="card7_desc">Teminat tutarı, komisyon oranı ve süreyi girin; dönem komisyonu, BSMV ve toplam maliyeti görün.</p>
+      </a>
+      <a class="tool-card" href="cek-iskontosu-hesaplama.html">
+        <span class="arrow">↗</span>
+        <h3 data-i18n="card8_title">Çek İskontosu Hesaplama</h3>
+        <p data-i18n="card8_desc">Çekin nominal tutarı, iskonto oranı ve vadeye kalan günü girin; iskonto faizi, BSMV ve elinize geçecek net tutarı görün.</p>
       </a>
     </div>
   </div>
@@ -441,13 +453,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       page_title:'Hesaplama Araçları', page_subtitle:'Rotatif kredi, kredi kartı vade farkı ve ortalama vade hesaplamalarınızı tek yerden yapın.',
       back_home:'← Ana Sayfa',
       tab_rotatif:'Rotatif Kredi', tab_vadefarki:'Kredi Kartı Vade Farkı', tab_ortalamavade:'Ortalama Vade',
-      tab_vadelimevduat:'Vadeli Mevduat Faizi', tab_krediteklif:'Kredi Tekliflerini Karşılaştır', tab_taksitli:'Taksitli Kredi',
+      tab_vadelimevduat:'Vadeli Mevduat Faizi', tab_krediteklif:'Kredi Tekliflerini Karşılaştır', tab_taksitli:'Taksitli Kredi', tab_teminat:'Teminat Mektubu Komisyonu', tab_cekiskonto:'Çek İskontosu',
       card1_title:'Rotatif Kredi Hesaplama', card1_desc:'Tutar, oran ve vade girin — faiz, komisyon, BSMV ve toplam geri ödeme anında hesaplansın.',
       card2_title:'Kredi Kartı Vade Farkı Hesaplama', card2_desc:'Net tutardan yola çıkarak girmeniz veya müşteriye yansıtmanız gereken brüt tutarı hesaplayın.',
       card3_title:'Ortalama Vade Hesaplama', card3_desc:'Taksitlerin kaç günde bir yansıyacağını girin — her taksit sayısı için ortalama vadeyi görün.',
       card4_title:'Vadeli Mevduat Faizi Hesaplama', card4_desc:'Bankaların vadeli mevduat tekliflerini girin; brüt faiz, stopaj ve net vade sonu bakiyeyi karşılaştırın.',
       card5_title:'Kredi Tekliflerini Karşılaştır', card5_desc:'Bankaların ihtiyaç kredisi tekliflerini girin; taksit, BSMV ve toplam geri ödemeyi karşılaştırın.',
       card6_title:'Taksitli Kredi Hesaplama', card6_desc:'Tutar, aylık faiz oranı ve vadeyi girin; KKDF+BSMV dahil aylık taksit, toplam geri ödeme ve ödeme planını görün.',
+      card7_title:'Teminat Mektubu Komisyonu Hesaplama', card7_desc:'Teminat tutarı, komisyon oranı ve süreyi girin; dönem komisyonu, BSMV ve toplam maliyeti görün.',
+      card8_title:'Çek İskontosu Hesaplama', card8_desc:'Çekin nominal tutarı, iskonto oranı ve vadeye kalan günü girin; iskonto faizi, BSMV ve elinize geçecek net tutarı görün.',
+      tab_teminat:'Teminat Mektubu Komisyonu', tab_cekiskonto:'Çek İskontosu',
       powered_by:'powered by', calc_widget_title:'Hesap Makinesi', close:'Kapat'
     },
     en: {
@@ -461,6 +476,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       card4_title:'Time Deposit Interest Calculator', card4_desc:"Enter banks' time deposit offers; compare gross interest, withholding tax, and net maturity balance.",
       card5_title:'Compare Loan Offers', card5_desc:"Enter banks' personal loan offers; compare installments, tax, and total repayment.",
       card6_title:'Monthly Installment Loan Calculator', card6_desc:'Enter the amount, monthly interest rate and term; see the monthly installment (incl. KKDF+BSMV), total repayment and payment schedule.',
+      card7_title:'Letter of Guarantee Commission Calculator', card7_desc:'Enter the guarantee amount, commission rate and term; see the period commission, BSMV and total cost.',
+      card8_title:'Cheque Discount Calculator', card8_desc:'Enter the cheque nominal amount, discount rate and days to maturity; see the discount interest, BSMV and the net amount you receive.',
+      tab_teminat:'Letter of Guarantee Commission', tab_cekiskonto:'Cheque Discount',
       powered_by:'powered by', calc_widget_title:'Calculator', close:'Close'
     }
   });

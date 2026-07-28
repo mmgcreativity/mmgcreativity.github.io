@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{ var mode=localStorage.getItem('mmg_theme')||'dark'; document.documentElement.classList.toggle('theme-light', mode==='light'); }catch(e){}
+  window.addEventListener('message', function(ev){ if(ev&&ev.data&&ev.data.mmgTheme){ document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme==='light'); try{localStorage.setItem('mmg_theme',ev.data.mmgTheme);}catch(e2){} } });
+})();
+</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Çek İskontosu Hesaplama</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --red:#E2544B; --amber:#E3A23C; --teal:#3FB68A;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  html.theme-light{ --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6; --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  body{ background:radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%), radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%), var(--bg); color:var(--text); font-family:'Inter',sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased; padding-bottom:60px; }
+  header.masthead{ max-width:1180px; margin:0 auto; padding:36px 24px 24px; display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px; }
+  header.masthead > div:first-child{ flex:1 1 0%; min-width:0; }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); letter-spacing:-0.01em; margin:0;}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px; line-height:1.5; max-width:680px;}
+  .back-link{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none; border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap; background:var(--surface-2,#1B2536); box-shadow:0 6px 16px rgba(0,0,0,0.35); transition:border-color .15s ease, color .15s ease; }
+  .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  main{ max-width:1180px; margin:0 auto; padding:28px 24px 24px; }
+  .cols{ display:grid; grid-template-columns:1fr 1.15fr; gap:24px; align-items:start; }
+  @media (max-width:940px){ .cols{ grid-template-columns:1fr; } }
+  .panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:22px; }
+  .panel-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; margin-bottom:4px; }
+  .panel-desc{ color:var(--muted); font-size:12.5px; margin-bottom:18px; line-height:1.5; }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; font-weight:600; }
+  .input-wrap{ position:relative; display:flex; align-items:center; }
+  .input-wrap input{ width:100%; height:46px; background:var(--bg); border:1px solid var(--hairline); border-radius:10px; padding:0 46px 0 14px; color:var(--text); font-family:'JetBrains Mono',monospace; font-weight:600; font-size:16px; outline:none; transition:border-color .15s ease, box-shadow .15s ease; }
+  .input-wrap input:focus{ border-color:var(--brass); box-shadow:0 0 0 3px rgba(198,161,91,0.12); }
+  .input-suffix{ position:absolute; right:14px; color:var(--muted); font-size:13px; font-weight:600; pointer-events:none; }
+  .result-hero{ background:linear-gradient(135deg, rgba(63,182,138,0.12), rgba(62,143,224,0.08)); border:1px solid rgba(63,182,138,0.25); border-radius:14px; padding:22px; margin-bottom:16px; }
+  .rh-label{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  .rh-value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(28px,5.5vw,40px); letter-spacing:-0.02em; margin-top:4px; color:var(--teal); }
+  .rh-sub{ margin-top:8px; font-size:12px; color:var(--muted); }
+  .breakdown{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:6px 18px; }
+  .bd-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--hairline); font-size:13.5px; }
+  .bd-row:last-child{ border-bottom:none; }
+  .bd-row > span{ color:var(--muted); }
+  .bd-row b{ font-family:'JetBrains Mono',monospace; font-weight:600; font-size:15px; color:var(--text); }
+  .bd-row.total{ border-top:2px solid var(--hairline); }
+  .bd-row.total > span{ color:var(--text); font-weight:700; font-family:'Space Grotesk',sans-serif; font-size:14px; }
+  .bd-row.total b{ font-size:18px; color:var(--teal); }
+  .flag{ margin-top:18px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:14px 16px; color:var(--muted); font-size:12px; line-height:1.7; }
+  .flag b{ color:var(--text); }
+  footer{ max-width:1180px; margin:28px auto 0; padding:22px 24px 0; border-top:1px solid var(--hairline); }
+  footer .credit{width:100%; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:var(--muted); display:flex; align-items:center; justify-content:flex-end; gap:8px;}
+  .signature-pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 12px 4px 5px; border-radius:999px; background:var(--surface-2); border:1px solid var(--hairline); }
+  .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
+  .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:9px; color:#fff; }
+  footer .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; font-style:normal; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+</style>
+</head>
+<body>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+<header class="masthead">
+  <div>
+    <h1 class="title" data-i18n="page_title">Çek İskontosu Hesaplama</h1>
+    <div class="subtitle" data-i18n="page_subtitle">Vadeli çekin nominal tutarını, yıllık iskonto oranını ve vadeye kalan günü girin; iskonto faizini, BSMV'yi ve elinize geçecek net tutarı görün.</div>
+  </div>
+  <div class="top-actions"><a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a></div>
+</header>
+
+<main>
+  <div class="cols">
+    <div class="panel">
+      <div class="panel-title" data-i18n="input_title">Çek Bilgileri</div>
+      <div class="panel-desc" data-i18n="input_desc">Değerleri değiştirdikçe sonuç anında güncellenir.</div>
+      <div class="field">
+        <label data-i18n="lbl_amount">Çek Tutarı (Nominal)</label>
+        <div class="input-wrap"><input type="text" id="amount" inputmode="numeric" value="100.000"><span class="input-suffix">TL</span></div>
+      </div>
+      <div class="field">
+        <label data-i18n="lbl_rate">Yıllık İskonto Oranı</label>
+        <div class="input-wrap"><input type="text" id="rate" inputmode="decimal" value="45"><span class="input-suffix">%</span></div>
+      </div>
+      <div class="field">
+        <label data-i18n="lbl_term">Vadeye Kalan Gün</label>
+        <div class="input-wrap"><input type="text" id="term" inputmode="numeric" value="90"><span class="input-suffix" data-i18n="unit_days">gün</span></div>
+      </div>
+      <div class="field">
+        <label data-i18n="lbl_bsmv">BSMV Oranı</label>
+        <div class="input-wrap"><input type="text" id="bsmv" inputmode="decimal" value="5"><span class="input-suffix">%</span></div>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label data-i18n="lbl_comm">Komisyon (opsiyonel)</label>
+        <div class="input-wrap"><input type="text" id="comm" inputmode="numeric" value="0"><span class="input-suffix">TL</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="result-hero">
+        <div class="rh-label" data-i18n="res_net">Elinize Geçecek Net Tutar</div>
+        <div class="rh-value"><span id="rNet">0,00</span> TL</div>
+        <div class="rh-sub" id="rSub">—</div>
+      </div>
+      <div class="breakdown">
+        <div class="bd-row"><span data-i18n="res_nominal">Nominal Tutar</span><b id="rNominal">0,00 TL</b></div>
+        <div class="bd-row"><span data-i18n="res_interest">İskonto Faizi</span><b id="rFaiz">0,00 TL</b></div>
+        <div class="bd-row"><span data-i18n="res_bsmv">BSMV</span><b id="rBsmv">0,00 TL</b></div>
+        <div class="bd-row" id="rowComm"><span data-i18n="res_comm">Komisyon</span><b id="rComm">0,00 TL</b></div>
+        <div class="bd-row"><span data-i18n="res_costtotal">Toplam Kesinti</span><b id="rKesinti">0,00 TL</b></div>
+        <div class="bd-row total"><span data-i18n="res_net2">Net Ödenecek</span><b id="rNet2">0,00 TL</b></div>
+      </div>
+      <div class="flag" data-i18n-html="calc_note"><b>Hesaplama esası:</b> İskonto Faizi = Nominal × (Yıllık Oran ÷ 100) × Vadeye Kalan Gün ÷ 365. BSMV faiz üzerinden alınır. Net Tutar = Nominal − Faiz − BSMV − Komisyon. Sonuçlar bilgilendirme amaçlıdır; bankaların gün bazı (360/365), asgari komisyon ve masraf uygulamaları değişebilir.</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="credit">
+    <span data-i18n="powered_by">Powered by</span>
+    <span class="signature-pill">
+      <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+      <span id="credit-fallback" class="credit-fallback">M</span>
+      <b>mmgcreativity</b>
+    </span>
+  </div>
+</footer>
+
+<script>
+  let MMG_LANG='tr'; try{ MMG_LANG=localStorage.getItem('mmg_lang')||'tr'; }catch(e){}
+  function parseTR(str){ if(str==null) return 0; let s=String(str).trim().replace(/\s/g,'').replace(/\./g,'').replace(',', '.'); let n=parseFloat(s); return isFinite(n)?n:0; }
+  function fmt(n){ if(!isFinite(n)) n=0; return n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  const amountEl=document.getElementById('amount'), rateEl=document.getElementById('rate'), termEl=document.getElementById('term'), bsmvEl=document.getElementById('bsmv'), commEl=document.getElementById('comm');
+  amountEl.addEventListener('input', ()=>{ let d=amountEl.value.replace(/[^\d]/g,''); amountEl.value=d===''?'':parseInt(d,10).toLocaleString('tr-TR'); recalc(); });
+  commEl.addEventListener('input', ()=>{ let d=commEl.value.replace(/[^\d]/g,''); commEl.value=d===''?'':parseInt(d,10).toLocaleString('tr-TR'); recalc(); });
+  termEl.addEventListener('input', ()=>{ termEl.value=termEl.value.replace(/[^\d]/g,''); recalc(); });
+  [rateEl,bsmvEl].forEach(el=>el.addEventListener('input', recalc));
+  function recalc(){
+    const nominal=parseTR(amountEl.value), oran=parseTR(rateEl.value)/100, gun=parseInt(termEl.value,10)||0, bsmvR=parseTR(bsmvEl.value)/100, komisyon=parseTR(commEl.value);
+    let faiz=nominal*oran*gun/365; if(nominal<=0||gun<=0) faiz=0;
+    const bsmv=faiz*bsmvR; const kesinti=faiz+bsmv+komisyon; const net=Math.max(0, nominal-kesinti);
+    document.getElementById('rNet').textContent=fmt(net);
+    document.getElementById('rSub').textContent=fmt(nominal)+' TL · '+(gun||0).toLocaleString('tr-TR')+(MMG_LANG==='en'?' days':' gün');
+    document.getElementById('rNominal').textContent=fmt(nominal)+' TL';
+    document.getElementById('rFaiz').textContent=fmt(faiz)+' TL';
+    document.getElementById('rBsmv').textContent=fmt(bsmv)+' TL';
+    document.getElementById('rComm').textContent=fmt(komisyon)+' TL';
+    document.getElementById('rowComm').style.display=komisyon>0?'':'none';
+    document.getElementById('rKesinti').textContent=fmt(kesinti)+' TL';
+    document.getElementById('rNet2').textContent=fmt(net)+' TL';
+  }
+  recalc();
+</script>
+<script>
+(function(){
+  MMGI18N.registerDict({
+    tr:{
+      page_title:'Çek İskontosu Hesaplama',
+      page_subtitle:"Vadeli çekin nominal tutarını, yıllık iskonto oranını ve vadeye kalan günü girin; iskonto faizini, BSMV'yi ve elinize geçecek net tutarı görün.",
+      back_home:'← Ana Sayfa', powered_by:'Powered by',
+      input_title:'Çek Bilgileri', input_desc:'Değerleri değiştirdikçe sonuç anında güncellenir.',
+      lbl_amount:'Çek Tutarı (Nominal)', lbl_rate:'Yıllık İskonto Oranı', lbl_term:'Vadeye Kalan Gün', unit_days:'gün', lbl_bsmv:'BSMV Oranı', lbl_comm:'Komisyon (opsiyonel)',
+      res_net:'Elinize Geçecek Net Tutar', res_nominal:'Nominal Tutar', res_interest:'İskonto Faizi', res_bsmv:'BSMV', res_comm:'Komisyon', res_costtotal:'Toplam Kesinti', res_net2:'Net Ödenecek',
+      calc_note:'<b>Hesaplama esası:</b> İskonto Faizi = Nominal × (Yıllık Oran ÷ 100) × Vadeye Kalan Gün ÷ 365. BSMV faiz üzerinden alınır. Net Tutar = Nominal − Faiz − BSMV − Komisyon. Sonuçlar bilgilendirme amaçlıdır; bankaların gün bazı (360/365), asgari komisyon ve masraf uygulamaları değişebilir.'
+    },
+    en:{
+      page_title:'Cheque Discount Calculator',
+      page_subtitle:'Enter the post-dated cheque nominal amount, annual discount rate and days to maturity; see the discount interest, BSMV tax and the net amount you receive.',
+      back_home:'← Home', powered_by:'Powered by',
+      input_title:'Cheque Details', input_desc:'Results update instantly as you change the values.',
+      lbl_amount:'Cheque Amount (Nominal)', lbl_rate:'Annual Discount Rate', lbl_term:'Days to Maturity', unit_days:'days', lbl_bsmv:'BSMV Rate', lbl_comm:'Commission (optional)',
+      res_net:'Net Amount You Receive', res_nominal:'Nominal Amount', res_interest:'Discount Interest', res_bsmv:'BSMV', res_comm:'Commission', res_costtotal:'Total Deduction', res_net2:'Net Payable',
+      calc_note:'<b>Calculation basis:</b> Discount Interest = Nominal × (Annual Rate ÷ 100) × Days to Maturity ÷ 365. BSMV is charged on the interest. Net = Nominal − Interest − BSMV − Commission. Results are for information only; day-count (360/365), minimum commission and fees may vary by bank.'
+    }
+  });
+  const ACTIVE_LANG=(typeof MMG_LANG!=='undefined')?MMG_LANG:(localStorage.getItem('mmg_lang')||'tr');
+  window.addEventListener('message',(ev)=>{ if(ev&&ev.data&&ev.data.mmgLang&&ev.data.mmgLang!==ACTIVE_LANG){ try{localStorage.setItem('mmg_lang',ev.data.mmgLang);}catch(e){} location.reload(); } });
+  MMGI18N.onChange(function(lang){ if(lang!==ACTIVE_LANG){ location.reload(); } });
+  MMGI18N.detectAndApplyDefaultLang();
+})();
+</script>
+<script type="module" src="mmg-chat-widget.js"></script>
+</body>
+</html>
