@@ -2451,9 +2451,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var eab = document.getElementById('desktopEmptyAddBtn');
     if(eab) eab.addEventListener('click', function(){
       setEditMode(true);
-      buildAddMenu();
-      if(addMenu) addMenu.hidden = false;
-      if(addBtn) addBtn.setAttribute('aria-pressed', 'true');
+      // Boş masaüstünde Ekle menüsü üst araç çubuğunda (gizli/uzakta) kaldığından görünmüyordu;
+      // eklenebilecek kısayolları DOĞRUDAN bu kutunun içinde bir LİSTE olarak gösteriyoruz.
+      var onDesktop = {};
+      Array.prototype.forEach.call(grid.querySelectorAll('.app-card'), function(c){ onDesktop[c.dataset.target] = true; });
+      var seen = {}, candidates = [];
+      Array.prototype.forEach.call(document.querySelectorAll('.nav-item[data-target]'), function(el){
+        var t = el.dataset.target;
+        if(!t || t === 'home' || onDesktop[t] || seen[t]) return;
+        if(el.offsetParent === null && el.style.display === 'none') return;
+        seen[t] = true;
+        candidates.push({ target: t, title: el.dataset.title || t });
+      });
+      var listWrap = document.getElementById('desktopEmptyAddList');
+      if(!listWrap){
+        listWrap = document.createElement('div');
+        listWrap.id = 'desktopEmptyAddList';
+        listWrap.style.cssText = 'margin:16px auto 0; display:flex; flex-direction:column; gap:6px; max-width:340px; text-align:left; max-height:340px; overflow-y:auto;';
+        eab.parentNode.insertBefore(listWrap, eab.nextSibling);
+      }
+      listWrap.innerHTML = candidates.length
+        ? candidates.map(function(c){ return '<button type="button" data-add-target="' + c.target + '" data-add-title="' + c.title + '" style="width:100%; text-align:left; padding:10px 12px; border-radius:8px; border:1px solid var(--hairline); background:var(--surface-2); color:var(--text); cursor:pointer; font-size:13px;">➕ ' + c.title + '</button>'; }).join('')
+        : '<div style="color:var(--muted); font-size:12.5px;">Eklenebilecek başka kısayol yok.</div>';
+      Array.prototype.forEach.call(listWrap.querySelectorAll('[data-add-target]'), function(btn){
+        btn.addEventListener('click', function(){ addShortcutToDesktop(btn.dataset.addTarget, btn.dataset.addTitle); });
+      });
     });
     // Küçük ikincil bağlantı: gerçekten hepsini varsayılana döndürmek isteyen için.
     var rb = document.getElementById('desktopRestoreDefaultsBtn');

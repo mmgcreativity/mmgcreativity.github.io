@@ -74,6 +74,8 @@ import {
   let groupsMap = {};        // groupId -> group data
   let groupInvitesMap = {};  // inviteId -> invite data
   let unsubGroups = null, unsubGroupInvites = null;
+  let sentGroupInvitesMap = {};  // gönderdiğim bekleyen grup davetleri (geri çekmek için)
+  let unsubSentGroupInvites = null;
   let unsubFirmaMemberInvite = null, unsubFirmaAdminInvite = null;
   let firmaMemberInvites = []; // [{id, firmaId, kind, data}] — bir kod birden fazla firmaya davet edilebilir
   let firmaAdminInvite = null; // {id, kind, data} | null
@@ -220,19 +222,19 @@ import {
   .mmg-chat-tab .mmg-chat-dot{
     position:absolute; top:3px; right:6px; width:7px; height:7px; border-radius:50%; background:var(--red,#E2544B);
   }
-  /* İki ana başlık: Sohbet | Bildirimler */
-  .mmg-chat-mainbar{ display:flex; gap:6px; padding:0 10px 8px; flex:0 0 auto; }
-  .mmg-chat-main{
-    flex:1; text-align:center; font-size:13px; font-weight:700; padding:9px 6px; border-radius:9px;
-    background:var(--surface-2,#1B2536); color:var(--muted,#8D96AC); cursor:pointer;
-    border:1px solid transparent; position:relative; white-space:nowrap;
+  /* Bildirim zili (sağ üstte): bekleyen bildirim varken kırmızı nokta + titreme (shake) */
+  .mmg-chat-bell.active{ color:var(--brass,#C6A15B); }
+  .mmg-chat-bell-dot{
+    position:absolute; top:3px; right:3px; width:8px; height:8px; border-radius:50%;
+    background:var(--red,#E2544B); box-shadow:0 0 0 2px var(--surface,#141C2B);
   }
-  .mmg-chat-main.active{ color:var(--text,#EAEDF3); border-color:var(--brass,#C6A15B); background:rgba(198,161,91,0.16); }
-  .mmg-chat-main-light{
-    position:absolute; top:7px; right:10px; width:9px; height:9px; border-radius:50%;
-    background:var(--red,#E2544B); animation:mmgNotifBlink 1.05s ease-in-out infinite;
+  .mmg-chat-bell-dot[hidden]{ display:none; }
+  .mmg-chat-bell.mmg-chat-bell-shake{ animation:mmgBellShake 1.1s ease-in-out infinite; transform-origin:top center; }
+  @keyframes mmgBellShake{
+    0%,60%,100%{ transform:rotate(0); }
+    5%{ transform:rotate(14deg); } 10%{ transform:rotate(-12deg); } 15%{ transform:rotate(10deg); }
+    20%{ transform:rotate(-8deg); } 25%{ transform:rotate(6deg); } 30%{ transform:rotate(-3deg); } 35%{ transform:rotate(0); }
   }
-  .mmg-chat-main-light[hidden]{ display:none; }
   @keyframes mmgNotifBlink{
     0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(226,84,75,0.75); }
     50%{ opacity:0.3; box-shadow:0 0 0 5px rgba(226,84,75,0); }
@@ -469,18 +471,17 @@ import {
       <button type="button" class="mmg-chat-iconbtn" id="mmgChatLeaveGroupBtn" hidden aria-label="Gruptan ayrıl" title="Gruptan ayrıl">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
       </button>
+      <button type="button" class="mmg-chat-iconbtn mmg-chat-bell" id="mmgChatBellBtn" aria-label="Bildirimler" title="Bildirimler" style="position:relative;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="mmg-chat-bell-dot" id="mmgChatNotifDot" hidden></span>
+      </button>
       <button type="button" class="mmg-chat-iconbtn" id="mmgChatCloseBtn" aria-label="Kapat">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
     <div id="mmgChatCodeBox" class="mmg-chat-code-box"></div>
-    <div class="mmg-chat-mainbar" id="mmgChatMainBar">
-      <div class="mmg-chat-main active" data-main="sohbet">Sohbet</div>
-      <div class="mmg-chat-main" data-main="bildirim">Bildirimler<span class="mmg-chat-main-light" id="mmgChatNotifDot" hidden></span></div>
-      <div class="mmg-chat-main" data-main="admin" id="mmgChatAdminMain">Admin</div>
-    </div>
     <div class="mmg-chat-tabs" id="mmgChatTabs">
-      <div class="mmg-chat-tab active" data-tab="friends">Sohbetler</div>
+      <div class="mmg-chat-tab active" data-tab="friends">Kişilerim</div>
       <div class="mmg-chat-tab" data-tab="add">Ekle</div>
       <div class="mmg-chat-tab" data-tab="requests">İstek<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
       <div class="mmg-chat-tab" data-tab="groups">Grup</div>
@@ -544,7 +545,7 @@ import {
     els.closeBtn = document.getElementById('mmgChatCloseBtn');
     els.codeBox = document.getElementById('mmgChatCodeBox');
     els.tabs = document.getElementById('mmgChatTabs');
-    els.mainBar = document.getElementById('mmgChatMainBar');
+    els.bellBtn = document.getElementById('mmgChatBellBtn');
     els.reqDot = document.getElementById('mmgChatReqDot');
     els.notifDot = document.getElementById('mmgChatNotifDot');
     els.body = document.getElementById('mmgChatBody');
@@ -598,18 +599,14 @@ import {
       closeOpenChat(false);
       renderTab();
     });
-    // Üstteki iki ana başlık: Sohbet | Bildirimler
-    if(els.mainBar){
-      els.mainBar.addEventListener('click', (e) => {
-        const m = e.target.closest('.mmg-chat-main');
-        if(!m) return;
+    // Sağ üstteki BİLDİRİM ZİLİ: tıklayınca bildirimler görünümüne geç / geri dön (ana başlık barı kaldırıldı).
+    if(els.bellBtn){
+      els.bellBtn.addEventListener('click', () => {
         closeOpenChat(false);
-        if(m.dataset.main === 'bildirim'){
-          activeTab = 'notifications';
-        } else if(m.dataset.main === 'admin'){
-          activeTab = 'admin';
-        } else if(activeTab === 'notifications' || activeTab === 'admin'){
+        if(activeTab === 'notifications'){
           activeTab = 'friends'; friendsSubView = 'list';
+        } else {
+          activeTab = 'notifications';
         }
         renderTab();
       });
@@ -1041,6 +1038,13 @@ import {
       updateBadge();
     }, (err) => console.error('mmg-chat-widget groupInvites onSnapshot:', err));
 
+    // GÖNDERDİĞİM bekleyen grup davetleri (geri çekebilmek için) — kullanıcı isteği.
+    unsubSentGroupInvites = onSnapshot(query(collection(db, 'chatGroupInvites'), where('fromUid', '==', uid), where('status', '==', 'pending')), (snap) => {
+      sentGroupInvitesMap = {};
+      snap.forEach(d => { sentGroupInvitesMap[d.id] = Object.assign({ _id: d.id }, d.data()); });
+      if(activeTab === 'groups') renderTab();
+    }, (err) => console.error('mmg-chat-widget sentGroupInvites onSnapshot:', err));
+
     // ---- Genel bildirimler (çan/badge): davet gönderildi, referans kullanıldı, hatırlatma ----
     unsubNotifications = onSnapshot(query(collection(db, 'notifications'), where('toUid', '==', uid)), (snap) => {
       const prev = notificationsMap;
@@ -1106,7 +1110,10 @@ import {
     els.reqDot.hidden = reqCount === 0;
     const firmaInviteCount = firmaMemberInvites.length + (firmaAdminInvite ? 1 : 0);
     const notifUnread = Object.keys(notificationsMap).filter(id => !notificationsMap[id].read).length;
-    if(els.notifDot) els.notifDot.hidden = (firmaInviteCount + notifUnread) === 0;
+    const bellPending = firmaInviteCount + notifUnread;
+    if(els.notifDot) els.notifDot.hidden = bellPending === 0;
+    // Bildirim zili: bekleyen varken titresin (shake), yoksa dursun.
+    if(els.bellBtn) els.bellBtn.classList.toggle('mmg-chat-bell-shake', bellPending > 0);
     let unread = 0;
     Object.keys(chatsMap).forEach(id => {
       const c = chatsMap[id];
@@ -1126,19 +1133,15 @@ import {
   function updateOpenChatHeaderIfNeeded(){ /* şu an ekstra bir şey gerekmiyor */ }
 
   // ---- Sekme render ----
-  // activeTab'e göre üst iki ana başlığı, alt sekme çubuğunun görünürlüğünü ve
-  // aktif sekme vurgusunu tek yerden senkronlar. activeTab='notifications' → Bildirimler
-  // ana başlığı aktif ve alt sekmeler gizli; diğer her şey → Sohbet ana başlığı.
+  // Ana başlık barı kaldırıldı. Bildirimler artık sağ üstteki zil ile açılıyor. Bu fonksiyon,
+  // bildirimler görünümündeyken alt sekme çubuğunu gizler; diğer her durumda gösterir + aktif
+  // sekmeyi vurgular. Ayrıca zil, bildirimler görünümündeyken vurgulanır.
   function syncMainView(){
-    mainView = (activeTab === 'notifications') ? 'bildirim'
-             : (activeTab === 'admin') ? 'admin' : 'sohbet';
-    if(els.mainBar){
-      [...els.mainBar.children].forEach(c => c.classList.toggle('active', c.dataset.main === mainView));
-    }
+    const isNotif = (activeTab === 'notifications');
+    if(els.bellBtn) els.bellBtn.classList.toggle('active', isNotif);
     if(els.tabs){
-      const hideTabs = (mainView !== 'sohbet');   // Bildirimler ve Admin ana başlıklarında alt sekmeler gizli
-      els.tabs.hidden = hideTabs;
-      if(!hideTabs){
+      els.tabs.hidden = isNotif;   // bildirimler görünümünde alt sekmeler gizli
+      if(!isNotif){
         const activeSub = (activeTab === 'friends' && friendsSubView === 'add') ? 'add' : activeTab;
         [...els.tabs.children].forEach(c => c.classList.toggle('active', c.dataset.tab === activeSub));
       }
@@ -1513,11 +1516,28 @@ import {
       </div>`).join('')
       : `<div class="mmg-chat-empty">Henüz bir grubunuz yok.<br>"+ Grup Oluştur" ile yeni bir grup kurabilirsiniz.</div>`;
 
+    // Gönderdiğim bekleyen grup davetleri (geri çekilebilir) — kullanıcı isteği.
+    const sentInv = Object.keys(sentGroupInvitesMap).map(id => sentGroupInvitesMap[id]);
+    let sentHtml = '';
+    if(sentInv.length){
+      sentHtml = '<div style="margin-top:14px; padding-top:10px; border-top:1px solid var(--hairline,#2A3448);">' +
+        '<div style="font-size:11.5px; color:var(--muted,#8D96AC); font-weight:600; margin:0 2px 8px;">Gönderdiğim bekleyen davetler</div>' +
+        sentInv.map(inv =>
+          '<div style="display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--hairline,#2A3448); border-radius:10px; margin-bottom:6px;">' +
+            '<div style="flex:1; min-width:0; font-size:12.5px;">' +
+              '<b>' + esc(inv.groupName || 'Grup') + '</b> → <b>' + esc(inv.toCode || inv.toUid || '?') + '</b> koduna davet' +
+            '</div>' +
+            '<button type="button" class="mmg-chat-btn" data-cancel-invite="' + esc(inv._id) + '" style="flex:0 0 auto;">Geri Çek</button>' +
+          '</div>'
+        ).join('') + '</div>';
+    }
+
     els.body.innerHTML = `
       <div class="mmg-chat-list-item" id="mmgNewGroupBtn" style="justify-content:center; font-weight:700; color:var(--brass,#C6A15B);">
         + Grup Oluştur
       </div>
-      ${listHtml}`;
+      ${listHtml}
+      ${sentHtml}`;
 
     document.getElementById('mmgNewGroupBtn').addEventListener('click', () => {
       groupsSubView = 'newGroup';
@@ -1530,6 +1550,15 @@ import {
         openChat(row.dataset.groupId, { title: (g.name || 'Grup'), isAdminChat: false, collection: 'chatGroups' });
       });
     });
+    els.body.querySelectorAll('[data-cancel-invite]').forEach(btn => {
+      btn.addEventListener('click', () => cancelSentGroupInvite(btn.dataset.cancelInvite));
+    });
+  }
+
+  // Gönderdiğim bir grup davetini geri çek (sil).
+  async function cancelSentGroupInvite(inviteId){
+    try{ await deleteDoc(doc(db, 'chatGroupInvites', inviteId)); }
+    catch(e){ console.error('cancelSentGroupInvite:', e); }
   }
 
   function renderNewGroupForm(){
@@ -2173,6 +2202,7 @@ import {
     if(unsubMessages){ unsubMessages(); unsubMessages = null; }
     if(unsubGroups){ unsubGroups(); unsubGroups = null; }
     if(unsubGroupInvites){ unsubGroupInvites(); unsubGroupInvites = null; }
+    if(unsubSentGroupInvites){ unsubSentGroupInvites(); unsubSentGroupInvites = null; }
     if(unsubFirmaMemberInvite){ unsubFirmaMemberInvite(); unsubFirmaMemberInvite = null; }
     if(unsubFirmaAdminInvite){ unsubFirmaAdminInvite(); unsubFirmaAdminInvite = null; }
     if(unsubNotifications){ unsubNotifications(); unsubNotifications = null; }
