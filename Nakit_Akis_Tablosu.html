@@ -749,6 +749,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <button type="button" class="ghost-btn" id="manualSaveBtn">💾 <span data-i18n="save_btn">Kaydet</span></button>
               <button type="button" class="ghost-btn" id="clearMonthBtn">🗑 <span data-i18n="clear_btn">Temizle</span></button>
               <button type="button" class="ghost-btn" id="undoClearBtn" style="display:none;">↩ <span data-i18n="undo_btn">Geri Al</span></button>
+              <button type="button" class="ghost-btn" id="consolidatedOpenCard" style="display:none;">🏢 <span class="coc-text" data-i18n="consolidate_open">KONSOLİDE GÖSTER</span></button>
             </div>
           </div>
         </div>
@@ -764,11 +765,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
       <div class="content-side" id="contentSide">
-        <button type="button" class="consolidate-open-card" id="consolidatedOpenCard" style="display:none;">
-          <span class="coc-icon">🏢</span>
-          <span class="coc-text" data-i18n="consolidate_open">KONSOLİDE GÖSTER</span>
-          <span class="coc-caret">▾</span>
-        </button>
         <div class="summary-cards" id="summaryCardsSection">
           <div class="summary-card sc-gelir">
             <div class="summary-label"><span class="summary-label-icon">▲</span><span id="sumGelirLabel">Gelir</span></div>
@@ -1361,7 +1357,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }catch(e){ /* tek bir firma okunamazsa listeyi bozmadan devam et */ }
       }
       if(consolidatedFirmas.length < 2){ openCard.style.display = 'none'; return; }
-      openCard.style.display = 'flex';
+      openCard.style.display = '';
       renderConsolidatedFirmaGrid();
     }catch(e){ openCard.style.display = 'none'; }
   }
@@ -1449,6 +1445,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // konsolide Gelir/Gider/Net toplamlarını ve firma kırılımını hesaplar.
   async function computeConsolidatedTotals(checked){
     const cloud = window.mmgCloud;
+    // AKTİF firma (o an düzenlenen scope) ve ekranda açık olan ay: bu firmanın bu ayı için
+    // Firestore yerine CANLI in-memory monthData kullanılır. Böylece kullanıcının yeni girdiği
+    // (henüz buluta yazılmamış / bulut yazımı geciken / kural nedeniyle yazılamayan) veriler
+    // konsolide görünümde ANINDA yansır. ("Bir sürü şey yazdım aynı duruyor" hatasının kök nedeni:
+    // konsolide, aktif firmayı da yalnızca buluttan okuyordu; taze veri yansımıyordu.)
+    const activeFid = (cloud && cloud.scopeCollection === 'firmaAccounts') ? cloud.scopeId : null;
+    const curMk = monthKeyOf(selYear, selMonth);
     const monthKeys = consolidatedNeededMonthKeys();
     const dayFilter = consolidatedNeededDayKeys();
     let grandGelir = 0, grandGider = 0;
@@ -1457,17 +1460,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const firma = consolidatedFirmas.find(f => f.id === fid);
       let fGelir = 0, fGider = 0;
       for(const mk of monthKeys){
-        try{
-          const snap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'cashflow', mk));
-          if(!snap.exists()) continue;
-          const data = snap.data().data || {};
-          Object.keys(data).forEach(dk => {
-            if(dayFilter && !dayFilter.has(dk)) return;
-            const day = data[dk] || {};
-            (day.gider||[]).forEach(it => { fGider += (it.amount||0); });
-            (day.gelir||[]).forEach(it => { fGelir += (it.amount||0); });
-          });
-        }catch(e){ /* bu firma/ay okunamazsa sessizce geç, diğerleriyle devam */ }
+        let data = null;
+        if(fid === activeFid && mk === curMk){
+          // Aktif firmanın açık ayı → canlı veri (Firestore okuması yapma)
+          data = monthData || {};
+        } else {
+          try{
+            const snap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'cashflow', mk));
+            if(!snap.exists()) continue;
+            data = snap.data().data || {};
+          }catch(e){ continue; /* bu firma/ay okunamazsa sessizce geç, diğerleriyle devam */ }
+        }
+        Object.keys(data).forEach(dk => {
+          if(dayFilter && !dayFilter.has(dk)) return;
+          const day = data[dk] || {};
+          (day.gider||[]).forEach(it => { fGider += (it.amount||0); });
+          (day.gelir||[]).forEach(it => { fGelir += (it.amount||0); });
+        });
       }
       grandGelir += fGelir; grandGider += fGider;
       rows.push({ name: firma ? firma.name : fid, gelir: fGelir, gider: fGider, net: fGelir - fGider });
@@ -1506,17 +1515,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         exitBtn = document.createElement('button');
         exitBtn.type = 'button';
         exitBtn.id = 'consolidatedExitBtn';
-        exitBtn.className = 'consolidate-open-card';
+        exitBtn.className = 'ghost-btn';
         exitBtn.style.borderColor = 'var(--red,#e2544b)';
-        exitBtn.innerHTML = '<span class="coc-icon">✕</span><span class="coc-text">Konsolide Moddan Çık</span>';
+        exitBtn.style.color = 'var(--red,#e2544b)';
+        exitBtn.innerHTML = '✕ <span class="coc-text">Konsolide Moddan Çık</span>';
         exitBtn.addEventListener('click', exitConsolidatedMode);
         card.parentNode.insertBefore(exitBtn, card.nextSibling);
       }
       if(card) card.style.display = 'none';
-      if(exitBtn) exitBtn.style.display = 'flex';
+      if(exitBtn) exitBtn.style.display = '';
     } else {
       if(exitBtn) exitBtn.style.display = 'none';
-      if(card && consolidatedFirmas.length >= 2) card.style.display = 'flex';
+      if(card && consolidatedFirmas.length >= 2) card.style.display = '';
     }
   }
 
