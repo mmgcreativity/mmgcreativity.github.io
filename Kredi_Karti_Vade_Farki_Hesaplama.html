@@ -296,6 +296,9 @@ function mmgApplyTurkishFont(doc){
   #exportExcelBtn svg, #exportPdfBtn svg{
     margin-right:6px !important;
   }
+
+  /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
+  @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
 </head>
 <body>
@@ -306,7 +309,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <header class="masthead">
   <div>
-    <h1 class="title" data-i18n="page_title">Kredi Kartı Vade Farkı Hesaplama</h1>
+    <h1 class="title" data-i18n="page_title">Kredi Kartı Vade Farkı Hesaplama (POS Bozum)</h1>
     <div class="subtitle" data-i18n="page_subtitle">Komisyon veya müşteriye vade farkı yansıtma senaryoları için elinize geçmesini istediğiniz net tutardan yola çıkarak girmeniz/yansıtmanız gereken brüt tutarı hesaplayın</div>
   </div>
   <div class="top-actions">
@@ -1027,7 +1030,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 })();
 </script>
 <!-- ================== /Hesap Makinesi Widget ================== -->
-<script src="mmg-doviz-widget.js"></script>
 
 <script>
 (function(){
@@ -1066,7 +1068,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 (function(){
   MMGI18N.registerDict({
     tr: {
-      page_title:'Kredi Kartı Vade Farkı Hesaplama',
+      page_title:'Kredi Kartı Vade Farkı Hesaplama (POS Bozum)',
       page_subtitle:'Komisyon veya müşteriye vade farkı yansıtma senaryoları için elinize geçmesini istediğiniz net tutardan yola çıkarak girmeniz/yansıtmanız gereken brüt tutarı hesaplayın',
       reset_btn:'Sıfırla', back_home:'← Ana Sayfa',
       tab_nextday:'Ertesi gün', tab_3days:'3 gün', tab_7days:'7 gün', tab_15days:'15 gün', tab_30days:'30 gün', tab_45days:'45 gün',
@@ -1082,7 +1084,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       rates_flag:'⚠ Vade farkı oranları banka, kart programı ve kampanya dönemine göre değişir. Kesin oranlar için bankanızın güncel bilgilerine başvurun.'
     },
     en: {
-      page_title:'Credit Card Late Fee Calculator',
+      page_title:'Credit Card Late Fee Calculator (POS Cash-out)',
       page_subtitle:'For commission or late-fee pass-through scenarios, calculate the gross amount you need to enter/charge starting from the net amount you want to receive.',
       reset_btn:'Reset', back_home:'← Home',
       tab_nextday:'Next day', tab_3days:'3 days', tab_7days:'7 days', tab_15days:'15 days', tab_30days:'30 days', tab_45days:'45 days',
@@ -1115,5 +1117,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 })();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>
+<script src="mmg-undo.js" defer></script>
 </body>
 </html>

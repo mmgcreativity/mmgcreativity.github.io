@@ -45,7 +45,7 @@
     color:var(--text); font-family:'Inter',sans-serif; line-height:1.5;
     -webkit-font-smoothing:antialiased; min-height:100vh;
   }
-  .page-wrap{ max-width:860px; margin:0 auto; padding:28px 24px 48px; }
+  .page-wrap{ max-width:1180px; margin:0 auto; padding:28px 32px 48px; }
   .page-header{ margin-bottom:22px; }
   .page-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:26px; letter-spacing:-0.01em; margin-bottom:6px; display:flex; align-items:center; gap:10px; }
   .page-sub{ color:var(--muted); font-size:13.5px; line-height:1.5; }
@@ -54,7 +54,8 @@
     background:var(--surface); border:1px solid var(--hairline); border-radius:16px;
     padding:12px; box-shadow:0 10px 30px rgba(0,0,0,0.25); margin-bottom:10px;
   }
-  .two-col-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; align-items:start; }
+  .two-col-grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; align-items:start; }
+  @media (max-width:1100px){ .two-col-grid{ grid-template-columns:1fr 1fr; } }
   @media (max-width:760px){ .two-col-grid{ grid-template-columns:1fr; } }
   .card h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; margin-bottom:2px; }
   .card .card-sub{ color:var(--muted); font-size:12.5px; margin-bottom:6px; line-height:1.4; }
@@ -80,6 +81,10 @@
   .auth-success.show{ display:block; }
 
   .perm-grid{ display:flex; flex-wrap:wrap; gap:8px 16px; margin:8px 0 10px; }
+  /* Davet formunda firma/yetki detay listeleri varsayılan kapalı; "seç" ile açılır çekmece. */
+  .perm-grid[hidden], .invite-firma-grid[hidden]{ display:none !important; }
+  .mmg-invite-collapse-toggle{ background:none; border:1px solid var(--hairline); color:var(--muted); font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:8px; cursor:pointer; }
+  .mmg-invite-collapse-toggle:hover{ color:var(--text); border-color:var(--brass-dim,#8A7440); }
   .invite-firma-grid{ display:flex; flex-direction:column; gap:7px; margin:7px 0 10px; }
   .perm-check{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text); cursor:pointer; }
   .perm-select-all-row{ margin-top:10px; }
@@ -107,6 +112,9 @@
   .member-icon-btn:hover{ color:var(--brass); border-color:var(--brass-dim,#8A7440); background:var(--surface); }
   .member-icon-btn-danger:hover{ color:var(--red); border-color:var(--red); }
   .member-perm-panel{ margin-top:8px; padding-top:8px; border-top:1px solid var(--hairline); display:flex; flex-direction:column; gap:7px; }
+  /* display:flex, hidden özniteliğini eziyordu → panel hep açık kalıyordu. Açıkça gizle:
+     varsayılan KAPALI (kompakt liste), isme tıklayınca aç/kapa. */
+  .member-perm-panel[hidden]{ display:none !important; }
   .member-sub-box{
     background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:9px 11px;
   }
@@ -160,7 +168,10 @@
       <h2 data-i18n="my_users_title" style="margin-bottom:8px;">Kullanıcılarım</h2>
       <div class="member-list" id="membersList"><div class="empty-note" data-i18n="loading">Yükleniyor…</div></div>
     </div>
+  </div>
 
+  <!-- SÜTUN 2: Veri Paylaşım Grubu + Bekleyen Davetler -->
+  <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
     <div class="card" id="dataGroupCard" style="display:none;">
       <h2 data-i18n="data_group_title">🔗 Veri Paylaşım Grubu</h2>
       <div class="card-sub" data-i18n="data_group_desc">Birden fazla firmanızın (örn. aynı grubun/holdingin parçası) müşteri, tedarikçi, muhatap ve banka verilerini ortak kullanmak isterseniz, burada bir ana firma seçip diğer firmalarınızı ona bağlayabilirsiniz. Kod kopyalamanıza gerek yok.</div>
@@ -206,42 +217,44 @@
       <div class="auth-field" id="inviteFirmaMultiWrap" style="display:none; margin-bottom:8px;">
         <div class="member-sub-box">
           <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-            <label style="margin-bottom:0;" data-i18n="invite_firmas_label">Hangi Firma(lar)a Eklensin?</label>
             <label class="perm-select-all-label" style="margin:0;">
               <input type="checkbox" id="inviteFirmaSelectAll">
-              <span data-i18n="select_all_perms">Tümünü Seç</span>
+              <span data-i18n="invite_firmas_label">Tüm firmalar</span>
             </label>
+            <button type="button" class="mmg-invite-collapse-toggle" id="inviteFirmaToggle">Firma seç ▾</button>
           </div>
-          <div class="invite-firma-grid" id="inviteFirmaMultiGrid"></div>
+          <div class="invite-firma-grid" id="inviteFirmaMultiGrid" hidden></div>
         </div>
       </div>
       <div class="member-sub-box" style="margin-bottom:8px;">
-        <div class="perm-select-all-row">
-          <label class="perm-select-all-label">
-            <input type="checkbox" id="invite_selectAll">
-            <span data-i18n="select_all_perms">Tümünü Seç</span>
+        <div class="perm-select-all-row" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <label class="perm-select-all-label" style="margin:0;">
+            <input type="checkbox" id="invite_selectAll" checked>
+            <span>Tüm yetkiler</span>
           </label>
+          <button type="button" class="mmg-invite-collapse-toggle" id="invitePermToggle">Yetki seç ▾</button>
         </div>
-        <div class="perm-grid" id="invitePermGrid"></div>
+        <div class="perm-grid" id="invitePermGrid" hidden></div>
       </div>
       <button type="button" class="auth-submit" id="inviteSubmitBtn" data-i18n="send_invite">Davet Gönder</button>
       <div class="auth-error" id="inviteError"></div>
       <div class="auth-success" id="inviteSuccess"></div>
-    </div>
 
-    <div class="card">
-      <h2 id="userLimitTitleEl">Kullanıcı Limiti</h2>
-      <div class="card-sub" id="userLimitDescEl">Bu firmaya en fazla kaç kullanıcı eklenebileceğini belirleyin. Limit dolduğunda yeni davet gönderilemez; bu, istenmeyen/sahte kullanıcı eklenmesini önler.</div>
-      <div style="display:flex; gap:8px; align-items:flex-end;">
-        <div class="auth-field" style="flex:1; min-width:0; margin-bottom:0;">
-          <label id="userLimitLabelEl">Maksimum kullanıcı sayısı</label>
-          <input type="number" id="userLimitInput" inputmode="numeric" min="1" max="100" step="1" placeholder="ör. 5">
+      <!-- Kullanıcı Limiti — Kullanıcı Ekle kartının içine entegre edildi (kullanıcı isteği) -->
+      <div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--hairline);">
+        <h2 id="userLimitTitleEl" style="font-size:16px; margin-bottom:4px;">Kullanıcı Limiti</h2>
+        <div class="card-sub" id="userLimitDescEl">Bu firmaya en fazla kaç kullanıcı eklenebileceğini belirleyin. Limit dolduğunda yeni davet gönderilemez; bu, istenmeyen/sahte kullanıcı eklenmesini önler.</div>
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div class="auth-field" style="flex:1; min-width:0; margin-bottom:0;">
+            <label id="userLimitLabelEl">Maksimum kullanıcı sayısı</label>
+            <input type="number" id="userLimitInput" inputmode="numeric" min="1" max="100" step="1" placeholder="ör. 5">
+          </div>
+          <button type="button" class="auth-submit" id="userLimitSaveBtn" style="flex:0 0 auto; min-width:0; margin-top:0;">Kaydet</button>
         </div>
-        <button type="button" class="auth-submit" id="userLimitSaveBtn" style="flex:0 0 auto; min-width:0; margin-top:0;">Kaydet</button>
+        <div class="card-sub" id="userLimitCurrent" style="margin-top:8px;"></div>
+        <div class="auth-error" id="userLimitError"></div>
+        <div class="auth-success" id="userLimitSuccess"></div>
       </div>
-      <div class="card-sub" id="userLimitCurrent" style="margin-top:8px;"></div>
-      <div class="auth-error" id="userLimitError"></div>
-      <div class="auth-success" id="userLimitSuccess"></div>
     </div>
   </div>
   </div>
@@ -534,16 +547,36 @@
     const f = myAdminFirmas.find(x => x.id === fid);
     document.getElementById('firmaHeaderSub').textContent =
       LBL.firmaSubPrefix + (f ? f.name : fid) + LBL.firmaSubSuffix;
-    document.getElementById('invitePermGrid').innerHTML = permGridHtml('invite', null);
+    // Kullanıcı isteği: davet formunda yetkiler VARSAYILAN olarak TÜMÜ İŞARETLİ gelsin (üye tam
+    // erişimle başlasın; admin istemediğini kaldırır). null yerine {} verince permGridHtml tümünü
+    // işaretli üretir ("false değilse işaretli" mantığı). Önceki null → hepsi işaretsiz → üye yetkisiz kalıyordu.
+    document.getElementById('invitePermGrid').innerHTML = permGridHtml('invite', {});
     wirePermSelectAll('invite');
+    // Yetki detay listesi varsayılan KAPALI; "Tüm yetkiler" işaretli (permGrid zaten tümü işaretli).
+    document.getElementById('invitePermGrid').hidden = true;
+    const permSelAll = document.getElementById('invite_selectAll'); if(permSelAll) permSelAll.checked = true;
     const multiWrap = document.getElementById('inviteFirmaMultiWrap');
     if(myAdminFirmas.length > 1){
       multiWrap.style.display = 'block';
       document.getElementById('inviteFirmaMultiGrid').innerHTML = inviteFirmaMultiGridHtml();
       wireInviteFirmaSelectAll();
+      document.getElementById('inviteFirmaMultiGrid').hidden = true; // firma detay listesi varsayılan KAPALI
     } else {
       multiWrap.style.display = 'none';
     }
+    // Açılır çekmece toggle'ları (bir kez bağla): "Firma seç" / "Yetki seç" → detay listesini aç/kapa
+    [['inviteFirmaToggle','inviteFirmaMultiGrid'],['invitePermToggle','invitePermGrid']].forEach(pair => {
+      const t = document.getElementById(pair[0]);
+      if(t && !t.dataset.wired){
+        t.dataset.wired = '1';
+        t.addEventListener('click', () => {
+          const g = document.getElementById(pair[1]);
+          if(!g) return;
+          g.hidden = !g.hidden;
+          t.textContent = t.textContent.replace(/[▾▴]/, g.hidden ? '▾' : '▴');
+        });
+      }
+    });
     await loadUserLimit();
     await loadMembers();
     await loadPendingInvites();
@@ -860,8 +893,11 @@
       await Promise.all(memberDocs.map(async (m) => {
         try{
           const uSnap = await getDoc(doc(db, 'users', m.id));
-          m.code = uSnap.exists() ? uSnap.data().customerNumber : null;
-        }catch(e){ m.code = null; }
+          const ud = uSnap.exists() ? uSnap.data() : {};
+          m.code = ud.customerNumber || null;
+          // İsim: üst-seviye username yoksa profile.name'e bak (bazı hesaplar ismi orada tutuyor).
+          m.displayName = ud.username || (ud.profile && ud.profile.name) || null;
+        }catch(e){ m.code = null; m.displayName = null; }
       }));
 
       // ---- Geriye dönük uyumluluk: bu düzeltmeden ÖNCE oluşturulmuş üyelik kayıtlarında
@@ -892,7 +928,7 @@
       }));
 
       const rows = [];
-      memberDocs.forEach(({ id, data: md, code }) => {
+      memberDocs.forEach(({ id, data: md, code, displayName }) => {
         const idPrefix = 'm_' + id;
         const firmaAccessBoxHtml = myAdminFirmas.length > 1
           ? '<div class="member-sub-box">' +
@@ -914,7 +950,7 @@
           '<div class="member-row" data-uid="' + id + '">' +
             '<div class="member-row-top">' +
               '<div class="member-info">' +
-                '<div class="member-name">' + (md.username || md.email || id) + '</div>' +
+                '<div class="member-name">' + (displayName || md.username || 'Kullanıcı') + (code ? ' <span style="color:var(--muted); font-weight:500;">#' + code + '</span>' : '') + '</div>' +
                 '<div class="member-sub">' + (code ? '#' + code : '') + '</div>' +
               '</div>' +
               '<div class="member-row-actions">' +
@@ -1158,5 +1194,6 @@
 })();
 </script>
 
+<script type="module" src="mmg-chat-widget.js"></script>
 </body>
 </html>

@@ -188,10 +188,15 @@ function mmgApplyTurkishFont(doc){
   }
   .reset-btn:hover{ color:var(--red); border-color:var(--red); }
   .reset-btn.card-reset-btn{ position:absolute; top:14px; right:14px; z-index:3; box-shadow:none; }
+  .card-btn-group{ position:absolute; top:14px; right:14px; z-index:3; display:flex; gap:8px; }
+  .card-btn-group .reset-btn{ box-shadow:none; }
   @media (max-width:480px){
     .reset-btn.card-reset-btn{ top:10px; right:10px; padding:6px 10px; font-size:11px; }
+    .card-btn-group{ top:10px; right:10px; gap:6px; }
+    .card-btn-group .reset-btn{ padding:6px 10px; font-size:11px; }
   }
-  #resultCard{ position:relative; }
+  #resultCard{ position:relative; padding-top:60px; }
+  @media (max-width:560px){ #resultCard{ padding-top:52px; } }
   @media (max-width:480px){
     .top-actions{ width:100%; }
   }
@@ -344,7 +349,7 @@ function mmgApplyTurkishFont(doc){
       position:sticky; left:0; background:var(--bg,#0a0e17); z-index:2;
     }
   }
-  table{border-collapse:collapse; font-size:12px; table-layout:fixed;}
+  table{border-collapse:collapse; font-size:12px; table-layout:fixed; width:100%; min-width:986px;}
   thead th{text-align:right; padding:9px 6px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--hairline); white-space:nowrap; overflow:hidden;}
   thead th:first-child{text-align:left;}
   tbody td{padding:6px 6px; border-bottom:1px solid rgba(42,52,72,0.5); font-family:'IBM Plex Mono',monospace; text-align:right; white-space:nowrap; overflow:hidden;}
@@ -386,6 +391,9 @@ function mmgApplyTurkishFont(doc){
   #exportExcelBtn svg, #exportPdfBtn svg{
     margin-right:6px !important;
   }
+
+  /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
+  @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
 </head>
 <body>
@@ -449,8 +457,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
           </div>
           <div class="io-msg" id="gunBaziIoMsg"></div>
-          <div class="gun-tool">
-            <div style="font-size:12px; color:var(--brass); margin-bottom:10px; font-weight:600;" data-i18n="days_between_title">İki Tarih Arası Gün Hesaplama</div>
+
+          <!-- Kullanıcı isteği: "İki Tarih Arası Gün" bölümü Gelişmiş'ten ÇIKARILIP kartın ALTINA,
+               her zaman görünür bir satır olarak eklendi (eski düzen aynı kaldı). -->
+          <div class="gun-tool" style="margin-top:18px; padding-top:16px; border-top:1px solid var(--hairline);">
+            <div style="font-size:13px; color:var(--brass); margin-bottom:12px; font-weight:700;" data-i18n="days_between_title">İki Tarih Arasındaki Gün Sayısı</div>
             <div class="field-row">
               <div class="field">
                 <label data-i18n="label_start_date">Kullanım Tarihi</label>
@@ -468,7 +479,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
       <div class="result-card" id="resultCard">
-        <button type="button" class="reset-btn card-reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
+        <div class="card-btn-group">
+          <button type="button" class="reset-btn" data-mmg-undo aria-label="Geri Al" title="Son değişikliği geri al (Ctrl+Z)">↶ <span data-i18n="undo_btn">Geri Al</span></button>
+          <button type="button" class="reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
+        </div>
         <div class="result-hero">
           <div class="label" data-i18n="total_repayment">TOPLAM GERİ ÖDEME</div>
           <div class="value" id="rToplamGeri">—</div>
@@ -493,9 +507,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="section-title" data-i18n="tranche_table_title">Rotatif Kredi Çekim Tablosu</div>
     <div class="tranche-toolbar">
       <div style="font-size:12px; color:var(--muted);" data-i18n="tranche_note">Rotatif kredide birden fazla eş zamanlı çekim olabilir — her satır ayrı bir çekimi temsil eder. <span style="color:var(--muted);">(Tutarlar TL cinsindendir.)</span></div>
-      <div style="display:flex; gap:8px;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
         <button class="btn ghost small" id="addFromQuick" data-i18n="add_from_quick">Hızlı hesaptan satır ekle</button>
         <button class="btn small" id="addRow" data-i18n="add_row">+ Satır Ekle</button>
+        <button type="button" class="btn ghost small" id="resetTranchesBtn">↺ <span data-i18n="reset_tranches_btn">Sıfırla</span></button>
+        <button type="button" class="btn ghost small" id="undoTranchesBtn" data-mmg-undo aria-label="Geri Al" title="Son değişikliği geri al (Ctrl+Z)">↶ <span data-i18n="undo_btn">Geri Al</span></button>
       </div>
     </div>
     <div class="table-scroll-hint">
@@ -674,6 +690,15 @@ advToggle.addEventListener('click', ()=>{
 });
 
 // ---- Gun hesaplama tool ----
+// Kullanıcı isteği: iki tarih de varsayılan olarak BUGÜN gelsin.
+function mmgSetGunTarihleriBugun(){
+  var t = new Date();
+  var iso = t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
+  var b = document.getElementById('gunBaslangic'), s = document.getElementById('gunBitis');
+  if(b) b.value = iso;
+  if(s) s.value = iso;
+}
+mmgSetGunTarihleriBugun();
 function updateGun(){
   const b = document.getElementById('gunBaslangic').value;
   const s = document.getElementById('gunBitis').value;
@@ -709,7 +734,7 @@ let rowIdCounter = 0;
 
 function addTrancheRow(data){
   const id = rowIdCounter++;
-  trancheRows.push({id, tutar: data?.tutar ?? 0, vade: data?.vade ?? 30, oran: data?.oran ?? 45, komOran: data?.komOran ?? 1});
+  trancheRows.push({id, tutar: data?.tutar ?? 100000, vade: data?.vade ?? 30, oran: data?.oran ?? 45, komOran: data?.komOran ?? 1});
   renderTranches();
 }
 function removeTrancheRow(id){
@@ -811,9 +836,16 @@ document.getElementById('addFromQuick').addEventListener('click', ()=>{
   addTrancheRow({tutar:num('qTutar'), vade:num('qVade'), oran:num('qOran'), komOran:num('qKomOran')});
 });
 
+// Çoklu Çekim Tablosu Sıfırla: SADECE bu tabloyu temizler; tekli hesaplayıcıya (qTutar/qVade/...) DOKUNMAZ.
+document.getElementById('resetTranchesBtn').addEventListener('click', ()=>{
+  if(!confirm(LBL.resetConfirm)) return;
+  trancheRows.length = 0;      // tüm çekim satırlarını temizle
+  addTrancheRow();             // tek boş/varsayılan satıra dön (renderTranches çağrılır, toplamlar sıfırlanır)
+});
+
 // Seed with the example from the source workbook
-addTrancheRow({tutar:9000000, vade:365, oran:45, komOran:1});
-addTrancheRow({tutar:50000000, vade:30, oran:45, komOran:1});
+addTrancheRow({tutar:100000, vade:30, oran:45, komOran:1});
+addTrancheRow({tutar:100000, vade:30, oran:45, komOran:1});
 
 // ---- Premium kontrolü (Excel/PDF aktarma ve çoklu çekim satırı ekleme premium üyelere özeldir) ----
 // [[GEÇİCİ DONDURMA — BAŞLANGIÇ]] Premium özellikler herkese açıldı. Geri almak için bu bloğu
@@ -1156,7 +1188,6 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
 })();
 </script>
 <!-- ================== /Hesap Makinesi Widget ================== -->
-<script src="mmg-doviz-widget.js"></script>
 
 
 
@@ -1169,15 +1200,12 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
         var el = document.getElementById(id);
         if(el) el.value = '0';
       });
-      ['gunBaslangic','gunBitis'].forEach(function(id){
-        var el = document.getElementById(id);
-        if(el) el.value = '';
-      });
+      // Kullanıcı isteği: sıfırlayınca iki tarih de BUGÜN'e dönsün (boş değil).
+      if(typeof mmgSetGunTarihleriBugun === 'function') mmgSetGunTarihleriBugun();
       var gunSonuc = document.getElementById('gunSonuc');
       if(gunSonuc) gunSonuc.textContent = '—';
-      // Çoklu çekim tablosunu tamamen temizle (demo satırları geri gelmez).
-      if(typeof trancheRows !== 'undefined'){ trancheRows.length = 0; }
-      if(typeof renderTranches === 'function'){ renderTranches(); }
+      // NOT: Tekli hesaplayıcı Sıfırla'sı SADECE yukarıdaki tekli alanları ve tekli sonuç kartını
+      // sıfırlar. Çoklu Çekim Tablosu'na (trancheRows) DOKUNMAZ — onun kendi "Sıfırla" butonu vardır.
       if(typeof updateQuick === 'function'){ updateQuick(); }
     }
   });
@@ -1202,7 +1230,7 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
       total_difference_note:'(anapara hariç ek maliyet)', effective_annual_cost:'Efektif Yıllık Maliyet Oranı', extra_indicator:'ek gösterge',
       multi_draw:'Çoklu Çekim', tranche_table_title:'Rotatif Kredi Çekim Tablosu',
       tranche_note:'Rotatif kredide birden fazla eş zamanlı çekim olabilir — her satır ayrı bir çekimi temsil eder. (Tutarlar TL cinsindendir.)',
-      add_from_quick:'Hızlı hesaptan satır ekle', add_row:'+ Satır Ekle', scroll_hint:'Daha fazla sütun için yatay kaydırın',
+      add_from_quick:'Hızlı hesaptan satır ekle', add_row:'+ Satır Ekle', reset_tranches_btn:'Sıfırla', undo_btn:'Geri Al', scroll_hint:'Daha fazla sütun için yatay kaydırın',
       th_amount:'Tutar', th_term:'Vade', th_rate:'Oran %', th_com_rate:'Kom. Oran %', th_interest:'Faiz', th_interest_bsmv:'Faiz BSMV',
       th_commission:'Komisyon', th_com_bsmv:'Kom. BSMV', th_total_repay:'Toplam Geri Ödeme', th_total_diff:'Toplam Fark',
       export_excel:"Excel'e Aktar", export_pdf:"PDF'e Aktar", scroll_down:'Aşağı kaydır'
@@ -1224,7 +1252,7 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
       total_difference_note:'(extra cost excluding principal)', effective_annual_cost:'Effective Annual Cost Rate', extra_indicator:'extra indicator',
       multi_draw:'Multiple Draws', tranche_table_title:'Revolving Loan Draw Table',
       tranche_note:'A revolving loan can have several simultaneous draws — each row represents a separate draw. (Amounts are in TL.)',
-      add_from_quick:'Add row from quick calc', add_row:'+ Add Row', scroll_hint:'Scroll horizontally for more columns',
+      add_from_quick:'Add row from quick calc', add_row:'+ Add Row', reset_tranches_btn:'Reset', undo_btn:'Undo', scroll_hint:'Scroll horizontally for more columns',
       th_amount:'Amount', th_term:'Term', th_rate:'Rate %', th_com_rate:'Com. Rate %', th_interest:'Interest', th_interest_bsmv:'Interest Tax',
       th_commission:'Commission', th_com_bsmv:'Com. Tax', th_total_repay:'Total Repayment', th_total_diff:'Total Difference',
       export_excel:"Export to Excel", export_pdf:"Export to PDF", scroll_down:'Scroll down'
@@ -1249,5 +1277,17 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
 })();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>
+<script src="mmg-undo.js" defer></script>
+<!-- MMG GA4: hesaplama kullanım olayı (oturumda bir kez, anlamlı eylemde) -->
+<script>
+(function(){
+  var done=false;
+  function track(){ if(done) return; done=true; try{ gtag('event','hesaplama_tamamla',{arac:'rotatif_kredi'}); }catch(e){} }
+  ['addRow','addFromQuick','exportExcelBtn','exportPdfBtn','gunUygula'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.addEventListener('click', track);
+  });
+})();
+</script>
 </body>
 </html>

@@ -346,6 +346,15 @@ function mmgApplyTurkishFont(doc){
   .cons-modal-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px; }
   .cons-modal-close{ background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; padding:4px 8px; border-radius:8px; line-height:1; }
   .cons-modal-close:hover{ color:var(--red); background:rgba(226,84,75,0.1); }
+  /* Konsolide sonuç kartları: alt alta yerine yan yana responsive kutular */
+  #consolidatedResults .summary-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .cons-table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  @media (max-width:760px){
+    .cons-modal-overlay{ padding:24px 10px; }
+    .cons-modal-card{ padding:18px 14px; }
+    #consolidatedResults .summary-cards{ grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); }
+    .cons-table-scroll table{ min-width:420px; }
+  }
 
   .top-combined-row{ display:flex; flex-wrap:nowrap; align-items:center; gap:8px; overflow-x:auto; padding-bottom:2px; }
   .top-combined-row::-webkit-scrollbar{ height:0; }
@@ -665,6 +674,9 @@ function mmgApplyTurkishFont(doc){
   #exportExcelBtn svg, #exportPdfBtn svg{
     margin-right:6px !important;
   }
+
+  /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
+  @media (max-width:760px){ .back-link{ position:static !important; display:inline-flex; align-items:center; margin:14px 24px 2px !important; top:auto !important; right:auto !important; left:auto !important; box-shadow:none; } }
 </style>
 </head>
 <body>
@@ -737,7 +749,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <button type="button" class="ghost-btn" id="manualSaveBtn">💾 <span data-i18n="save_btn">Kaydet</span></button>
               <button type="button" class="ghost-btn" id="clearMonthBtn">🗑 <span data-i18n="clear_btn">Temizle</span></button>
               <button type="button" class="ghost-btn" id="undoClearBtn" style="display:none;">↩ <span data-i18n="undo_btn">Geri Al</span></button>
-              <button type="button" class="ghost-btn" id="consolidatedTopBtn" style="display:none;">🏢 <span data-i18n="consolidate_open">Konsolide</span></button>
+              <button type="button" class="ghost-btn" id="consolidatedOpenCard" style="display:none;">🏢 <span class="coc-text" data-i18n="consolidate_open">KONSOLİDE GÖSTER</span></button>
             </div>
           </div>
         </div>
@@ -753,11 +765,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
       <div class="content-side" id="contentSide">
-        <button type="button" class="consolidate-open-card" id="consolidatedOpenCard" style="display:none;">
-          <span class="coc-icon">🏢</span>
-          <span class="coc-text" data-i18n="consolidate_open">KONSOLİDE GÖSTER</span>
-          <span class="coc-caret">▾</span>
-        </button>
         <div class="summary-cards" id="summaryCardsSection">
           <div class="summary-card sc-gelir">
             <div class="summary-label"><span class="summary-label-icon">▲</span><span id="sumGelirLabel">Gelir</span></div>
@@ -830,6 +837,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="summary-value" id="consNet">0,00 TL</div>
           </div>
         </div>
+        <div class="cons-table-scroll">
         <table style="width:100%; border-collapse:collapse; font-size:13px;">
           <thead>
             <tr style="text-align:left; color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;">
@@ -841,6 +849,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </thead>
           <tbody id="consolidatedFirmaTable"></tbody>
         </table>
+        </div>
       </div>
      </div>
     </div>
@@ -1307,11 +1316,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   async function loadConsolidationFirmas(){
     const openCard = document.getElementById('consolidatedOpenCard');
-    const topBtn = document.getElementById('consolidatedTopBtn');
-    if(openCard) openCard.style.display = 'none'; // eski sağ-panel kartı kullanılmıyor; tetik üst araç çubuğunda
-    if(topBtn) topBtn.style.display = 'none';
+    if(!openCard) return;
     const cloud = window.mmgCloud;
-    if(!cloud || !cloud.currentUser){ return; }
+    if(!cloud || !cloud.currentUser){ openCard.style.display = 'none'; return; }
     try{
       const uid = cloud.currentUser.uid;
       const uSnap = await cloud.getDoc(cloud.doc(cloud.db, 'users', uid));
@@ -1319,14 +1326,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const adminIds = Array.isArray(data.adminFirmaIds) ? data.adminFirmaIds : [];
       // Sadece yönettiğiniz (admin) değil, ÜYESİ olduğunuz firmaları da dahil ediyoruz —
       // index.html'deki "Bağlı Firmalar" ile aynı mantık (bkz. loadFirmaMemberships).
-      let memberIds = [];
+      // index.html ile AYNI sağlam mantık: collectionGroup sorgusu (index gerektirir) başarısız
+      // olursa eski "firmaIds" alanına düş; kaynağı ne olursa olsun her aday firmada GERÇEKTEN
+      // üye miyiz üyelik belgesine bakarak doğrula. Böylece members collectionGroup index'i
+      // deploy edilmemiş olsa bile üye olunan firmalar konsolideye dahil olur.
+      let candidateIds = [];
       try{
         const memSnap = await cloud.getDocs(cloud.query(cloud.collectionGroup(cloud.db, 'members'), cloud.where('uid', '==', uid)));
         memSnap.forEach(d => {
           const fid = d.ref.parent.parent ? d.ref.parent.parent.id : null;
-          if(fid) memberIds.push(fid);
+          if(fid) candidateIds.push(fid);
         });
-      }catch(e){ /* collectionGroup index eksikse sessizce geç, en azından admin firmaları gösterilir */ }
+      }catch(e){
+        candidateIds = Array.isArray(data.firmaIds) ? data.firmaIds : [];
+      }
+      let memberIds = [];
+      for(const fid of candidateIds){
+        try{
+          const mDoc = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'members', uid));
+          if(mDoc.exists()) memberIds.push(fid);
+        }catch(e){ /* okunamazsa güvenli tarafta kal */ }
+      }
       const allIds = Array.from(new Set([...adminIds, ...memberIds]));
       if(allIds.length < 2){ openCard.style.display = 'none'; return; }
       consolidatedFirmas = [];
@@ -1336,10 +1356,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           if(fSnap.exists()) consolidatedFirmas.push({ id: fid, name: fSnap.data().name || fid });
         }catch(e){ /* tek bir firma okunamazsa listeyi bozmadan devam et */ }
       }
-      if(consolidatedFirmas.length < 2){ if(topBtn) topBtn.style.display = 'none'; return; }
-      if(topBtn) topBtn.style.display = '';
+      if(consolidatedFirmas.length < 2){ openCard.style.display = 'none'; return; }
+      openCard.style.display = '';
       renderConsolidatedFirmaGrid();
-    }catch(e){ if(topBtn) topBtn.style.display = 'none'; }
+    }catch(e){ openCard.style.display = 'none'; }
   }
 
   function renderConsolidatedFirmaGrid(){
@@ -1370,15 +1390,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     consolidatedOpenCard.addEventListener('click', () => {
       renderConsolidatedFirmaGrid();
       consolidatedModal.hidden = false;
-    });
-  }
-  // Üst araç çubuğundaki Konsolide tetiği: kapalıyken modalı açar, konsolide moddayken moddan çıkar.
-  const consolidatedTopBtn = document.getElementById('consolidatedTopBtn');
-  if(consolidatedTopBtn){
-    consolidatedTopBtn.addEventListener('click', () => {
-      if(consolidatedMode){ exitConsolidatedMode(); return; }
-      renderConsolidatedFirmaGrid();
-      if(consolidatedModal) consolidatedModal.hidden = false;
     });
   }
   if(consolidatedCloseBtn && consolidatedModal){
@@ -1434,32 +1445,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // konsolide Gelir/Gider/Net toplamlarını ve firma kırılımını hesaplar.
   async function computeConsolidatedTotals(checked){
     const cloud = window.mmgCloud;
+    // AKTİF firma (o an düzenlenen scope) ve ekranda açık olan ay: bu firmanın bu ayı için
+    // Firestore yerine CANLI in-memory monthData kullanılır. Böylece kullanıcının yeni girdiği
+    // (henüz buluta yazılmamış / bulut yazımı geciken / kural nedeniyle yazılamayan) veriler
+    // konsolide görünümde ANINDA yansır. ("Bir sürü şey yazdım aynı duruyor" hatasının kök nedeni:
+    // konsolide, aktif firmayı da yalnızca buluttan okuyordu; taze veri yansımıyordu.)
+    const activeFid = (cloud && cloud.scopeCollection === 'firmaAccounts') ? cloud.scopeId : null;
+    const curMk = monthKeyOf(selYear, selMonth);
     const monthKeys = consolidatedNeededMonthKeys();
     const dayFilter = consolidatedNeededDayKeys();
     let grandGelir = 0, grandGider = 0;
     const rows = [];
-    const dayTotals = {}; // dk -> {gelir, gider}  (seçili tüm firmaların o gündeki TOPLAMI)
     for(const fid of checked){
       const firma = consolidatedFirmas.find(f => f.id === fid);
       let fGelir = 0, fGider = 0;
       for(const mk of monthKeys){
-        try{
-          const snap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'cashflow', mk));
-          if(!snap.exists()) continue;
-          const data = snap.data().data || {};
-          Object.keys(data).forEach(dk => {
-            if(dayFilter && !dayFilter.has(dk)) return;
-            const day = data[dk] || {};
-            if(!dayTotals[dk]) dayTotals[dk] = { gelir:0, gider:0 };
-            (day.gider||[]).forEach(it => { const a = it.amount||0; fGider += a; dayTotals[dk].gider += a; });
-            (day.gelir||[]).forEach(it => { const a = it.amount||0; fGelir += a; dayTotals[dk].gelir += a; });
-          });
-        }catch(e){ /* bu firma/ay okunamazsa sessizce geç, diğerleriyle devam */ }
+        let data = null;
+        if(fid === activeFid && mk === curMk){
+          // Aktif firmanın açık ayı → canlı veri (Firestore okuması yapma)
+          data = monthData || {};
+        } else {
+          try{
+            const snap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'cashflow', mk));
+            if(!snap.exists()) continue;
+            data = snap.data().data || {};
+          }catch(e){ continue; /* bu firma/ay okunamazsa sessizce geç, diğerleriyle devam */ }
+        }
+        Object.keys(data).forEach(dk => {
+          if(dayFilter && !dayFilter.has(dk)) return;
+          const day = data[dk] || {};
+          (day.gider||[]).forEach(it => { fGider += (it.amount||0); });
+          (day.gelir||[]).forEach(it => { fGelir += (it.amount||0); });
+        });
       }
       grandGelir += fGelir; grandGider += fGider;
       rows.push({ name: firma ? firma.name : fid, gelir: fGelir, gider: fGider, net: fGelir - fGider });
     }
-    return { grandGelir, grandGider, grandNet: grandGelir - grandGider, rows, dayTotals };
+    return { grandGelir, grandGider, grandNet: grandGelir - grandGider, rows };
   }
 
   // "Konsolide Göster" → konsolide moda geç: sonuç modal yerine ANA Nakit Akış tablosuna yansır
@@ -1479,28 +1501,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   }
 
-  // Konsolide moddayken üst araç çubuğundaki veri-değiştiren butonları kilitle.
-  // Konsolide aç/çık tetiği artık üst araç çubuğundaki #consolidatedTopBtn (Temizle hizasında).
+  // Konsolide moddayken üst araç çubuğundaki veri-değiştiren butonları kilitle + çıkış butonu göster.
   function updateConsolidatedModeUI(){
     const on = consolidatedMode;
     ['manualSaveBtn','clearMonthBtn','archiveSaveBtn','refreshSyncBtn'].forEach(id => {
       const b = document.getElementById(id);
       if(b){ b.disabled = on; b.style.opacity = on ? '0.4' : ''; b.style.pointerEvents = on ? 'none' : ''; }
     });
-    // Eski sağ-panel kartı kullanılmıyor
     const card = document.getElementById('consolidatedOpenCard');
-    if(card) card.style.display = 'none';
-    const topBtn = document.getElementById('consolidatedTopBtn');
-    if(topBtn){
-      if(on){
-        topBtn.innerHTML = '✕ <span>Konsolide Çık</span>';
-        topBtn.style.color = 'var(--red,#e2544b)';
-        topBtn.style.borderColor = 'var(--red,#e2544b)';
-      } else {
-        topBtn.innerHTML = '🏢 <span data-i18n="consolidate_open">Konsolide</span>';
-        topBtn.style.color = '';
-        topBtn.style.borderColor = '';
+    let exitBtn = document.getElementById('consolidatedExitBtn');
+    if(on){
+      if(!exitBtn && card && card.parentNode){
+        exitBtn = document.createElement('button');
+        exitBtn.type = 'button';
+        exitBtn.id = 'consolidatedExitBtn';
+        exitBtn.className = 'ghost-btn';
+        exitBtn.style.borderColor = 'var(--red,#e2544b)';
+        exitBtn.style.color = 'var(--red,#e2544b)';
+        exitBtn.innerHTML = '✕ <span class="coc-text">Konsolide Moddan Çık</span>';
+        exitBtn.addEventListener('click', exitConsolidatedMode);
+        card.parentNode.insertBefore(exitBtn, card.nextSibling);
       }
+      if(card) card.style.display = 'none';
+      if(exitBtn) exitBtn.style.display = '';
+    } else {
+      if(exitBtn) exitBtn.style.display = 'none';
+      if(card && consolidatedFirmas.length >= 2) card.style.display = '';
     }
   }
 
@@ -1539,95 +1565,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.getElementById('sumGelirSub').textContent = periodTag;
     document.getElementById('sumGiderSub').textContent = periodTag;
     document.getElementById('sumNetSub').textContent = consolidatedActiveIds.length + ' firma';
-    // --- Tarih-bazlı KONSOLİDE toplam: her tarihte seçili firmaların verileri TOPLANIR ---
-    const dt = res.dayTotals || {};
-    const dg = dk => (dt[dk] && dt[dk].gelir) || 0;
-    const dx = dk => (dt[dk] && dt[dk].gider) || 0;
-    function consRow(label, gelir, gider, opts){
-      const net = gelir - gider;
-      const nc = net > 0 ? 'pos' : (net < 0 ? 'neg' : 'zero');
-      const strong = opts && opts.strong;
-      const bg = (opts && opts.sub) ? 'background:var(--surface-2);' : '';
-      return '<tr style="border-top:1px solid var(--hairline);' + bg + '">' +
-        '<td style="padding:8px 10px;font-weight:' + (strong?800:600) + ';">' + escapeHtml(label) + '</td>' +
-        '<td style="padding:8px 10px;color:var(--teal);">' + fmtMoney(gelir) + '</td>' +
-        '<td style="padding:8px 10px;color:var(--red);">' + fmtMoney(gider) + '</td>' +
-        '<td style="padding:8px 10px;font-weight:700;">' + (net>=0?'':'-') + fmtMoney(Math.abs(net)) + '</td></tr>';
-    }
-
-    let bodyRows = '';
-    const rng = consRangeActive();
-    if(rng){
-      Object.keys(dt).sort().forEach(dk => { bodyRows += consRow(formatDayKeyLabel(dk), dg(dk), dx(dk)); });
-    } else if(reportTab === 'yillik'){
-      for(let m=0; m<12; m++){
-        const pref = monthKeyOf(selYear, m);
-        let mg=0, mx=0;
-        Object.keys(dt).forEach(dk => { if(dk.slice(0,7) === pref){ mg += dg(dk); mx += dx(dk); } });
-        bodyRows += consRow(AY_ADLARI[m] + ' ' + selYear, mg, mx);
-      }
-    } else if(reportTab === 'gunluk'){
-      const dk = dayKey(selYear, selMonth, reportDay);
-      const dow = GUN_ADLARI[getWeekdayMon0(new Date(selYear, selMonth, reportDay))];
-      bodyRows += consRow(formatDayKeyLabel(dk) + ' · ' + dow, dg(dk), dx(dk));
-    } else {
-      const weeks = buildWeeks(selYear, selMonth);
-      const list = (reportTab === 'haftalik') ? [ weeks[reportWeekIdx] || weeks[0] || [] ] : weeks;
-      list.forEach(wk => {
-        if(!wk || !wk.length) return;
-        let wg=0, wx=0, dayRows='';
-        wk.forEach(d => {
-          const dk = dayKey(selYear, selMonth, d);
-          const g = dg(dk), x = dx(dk);
-          wg += g; wx += x;
-          const dow = GUN_ADLARI[getWeekdayMon0(new Date(selYear, selMonth, d))];
-          dayRows += consRow(pad2(d) + ' ' + AY_ADLARI[selMonth] + ' · ' + dow, g, x);
-        });
-        if(reportTab === 'aylik'){
-          const wIdx = weeks.indexOf(wk);
-          bodyRows += consRow(weekOrdinal((wIdx>=0?wIdx:0)+1) + ' (' + wk[0] + '-' + wk[wk.length-1] + ' ' + AY_ADLARI[selMonth] + ')', wg, wx, {strong:true, sub:true});
-        }
-        bodyRows += dayRows;
-      });
-    }
-    if(!bodyRows) bodyRows = '<tr><td colspan="4" style="padding:14px;color:var(--muted);text-align:center;">Bu dönemde kayıt yok.</td></tr>';
-
-    let html = '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">' +
+    let html = '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">' +
       '<span style="font-weight:700;font-size:15px;">🏢 Konsolide Görünüm</span>' +
-      '<span style="color:var(--muted);font-size:12.5px;">' + escapeHtml(periodTag) + ' · ' + consolidatedActiveIds.length + ' firma</span></div>' +
-      '<div style="color:var(--muted);font-size:11.5px;margin-bottom:12px;">Her tarihte seçili firmaların gelir/giderleri toplanır.</div>';
-    html += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13.5px;">' +
+      '<span style="color:var(--muted);font-size:12.5px;">' + escapeHtml(periodTag) + ' · ' + consolidatedActiveIds.length + ' firma</span></div>';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:13.5px;">' +
       '<thead><tr style="text-align:left;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;">' +
-      '<th style="padding:8px 10px;">Tarih</th><th style="padding:8px 10px;">Gelir</th><th style="padding:8px 10px;">Gider</th><th style="padding:8px 10px;">Net</th></tr></thead><tbody>' +
-      bodyRows +
-      '<tr style="border-top:2px solid var(--hairline);font-weight:800;">' +
-        '<td style="padding:8px 10px;">TOPLAM</td>' +
-        '<td style="padding:8px 10px;color:var(--teal);">' + fmtMoney(res.grandGelir) + '</td>' +
-        '<td style="padding:8px 10px;color:var(--red);">' + fmtMoney(res.grandGider) + '</td>' +
-        '<td style="padding:8px 10px;">' + (res.grandNet>=0?'':'-') + fmtMoney(Math.abs(res.grandNet)) + '</td></tr>' +
-      '</tbody></table></div>';
-
-    // --- Firma bazında kırılım (ayrıca, katlanabilir) ---
-    let firmRows = '';
+      '<th style="padding:8px;">Firma</th><th style="padding:8px;">Gelir</th><th style="padding:8px;">Gider</th><th style="padding:8px;">Net</th></tr></thead><tbody>';
     res.rows.forEach(row => {
-      firmRows += '<tr style="border-top:1px solid var(--hairline);">' +
-        '<td style="padding:8px 10px;font-weight:600;">' + escapeHtml(row.name) + '</td>' +
-        '<td style="padding:8px 10px;color:var(--teal);">' + fmtMoney(row.gelir) + '</td>' +
-        '<td style="padding:8px 10px;color:var(--red);">' + fmtMoney(row.gider) + '</td>' +
-        '<td style="padding:8px 10px;font-weight:700;">' + (row.net>=0?'':'-') + fmtMoney(Math.abs(row.net)) + '</td></tr>';
+      html += '<tr style="border-top:1px solid var(--hairline);">' +
+        '<td style="padding:8px;font-weight:600;">' + escapeHtml(row.name) + '</td>' +
+        '<td style="padding:8px;color:var(--teal);">' + fmtMoney(row.gelir) + '</td>' +
+        '<td style="padding:8px;color:var(--red);">' + fmtMoney(row.gider) + '</td>' +
+        '<td style="padding:8px;font-weight:700;">' + (row.net>=0?'':'-') + fmtMoney(Math.abs(row.net)) + '</td></tr>';
     });
-    html += '<details style="margin-top:16px;"><summary style="cursor:pointer;color:var(--brass,#C6A15B);font-size:12.5px;font-weight:700;padding:8px 0;">🏢 Firma Bazında Kırılım</summary>' +
-      '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px;">' +
-      '<thead><tr style="text-align:left;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;">' +
-      '<th style="padding:8px 10px;">Firma</th><th style="padding:8px 10px;">Gelir</th><th style="padding:8px 10px;">Gider</th><th style="padding:8px 10px;">Net</th></tr></thead><tbody>' +
-      firmRows +
-      '<tr style="border-top:2px solid var(--hairline);font-weight:800;">' +
-        '<td style="padding:8px 10px;">TOPLAM</td>' +
-        '<td style="padding:8px 10px;color:var(--teal);">' + fmtMoney(res.grandGelir) + '</td>' +
-        '<td style="padding:8px 10px;color:var(--red);">' + fmtMoney(res.grandGider) + '</td>' +
-        '<td style="padding:8px 10px;">' + (res.grandNet>=0?'':'-') + fmtMoney(Math.abs(res.grandNet)) + '</td></tr>' +
-      '</tbody></table></div></details>';
-
+    html += '<tr style="border-top:2px solid var(--hairline);font-weight:800;">' +
+      '<td style="padding:8px;">TOPLAM</td>' +
+      '<td style="padding:8px;color:var(--teal);">' + fmtMoney(res.grandGelir) + '</td>' +
+      '<td style="padding:8px;color:var(--red);">' + fmtMoney(res.grandGider) + '</td>' +
+      '<td style="padding:8px;">' + (res.grandNet>=0?'':'-') + fmtMoney(Math.abs(res.grandNet)) + '</td></tr>';
+    html += '</tbody></table>';
     if(weeksC) weeksC.innerHTML = html;
     const rl = document.getElementById('reportsList'); if(rl) rl.innerHTML = '';
     const bw = document.getElementById('breakdownWrap'); if(bw) bw.style.display = 'none';
@@ -3037,7 +2993,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 })();
 </script>
 <!-- ================== /Hesap Makinesi Widget ================== -->
-<script src="mmg-doviz-widget.js"></script>
 
 
 
@@ -3096,5 +3051,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 })();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>
+<script src="mmg-undo.js" defer></script>
 </body>
 </html>
