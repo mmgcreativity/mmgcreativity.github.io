@@ -3471,10 +3471,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const activeUid = user.uid;
     const rows = group.members.map(m => {
       const isActive = m.uid === activeUid;
-      // Ad + müşteri kodu göster (kullanıcı isteği). Ad yoksa e-postaya düş.
+      // Kod + ad göster; KOD İSİMDEN ÖNCE (kullanıcı isteği). Ad yoksa e-postaya düş.
       const nm = (m.name || '').trim();
-      const codeStr = m.code ? (' · #' + m.code) : '';
-      const label = (nm ? nm : (m.email || (m.isAdmin ? 'Admin' : m.uid))) + codeStr;
+      const nameStr = nm ? nm : (m.email || (m.isAdmin ? 'Admin' : m.uid));
+      const label = (m.code ? ('#' + m.code + ' · ') : '') + nameStr;
       const badge = m.isAdmin
         ? '<span style="flex:0 0 auto; font-size:9.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--brass,#C6A15B); border:1px solid var(--brass,#C6A15B); border-radius:4px; padding:1px 5px;">Admin</span>'
         : '';
