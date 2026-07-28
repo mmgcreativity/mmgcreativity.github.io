@@ -208,6 +208,15 @@ import {
     display:flex; flex-direction:column; overflow:hidden; font-family:'Inter',sans-serif;
   }
   #mmgChatPanel[hidden]{ display:none; }
+  .mmg-chat-fab{
+    position:absolute; right:16px; bottom:18px; width:46px; height:46px; border-radius:50%;
+    background:var(--grad,linear-gradient(120deg,#FF6B4A,#7C4DD9)); color:#fff; border:none;
+    font-size:28px; line-height:1; cursor:pointer; z-index:6;
+    box-shadow:0 8px 22px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .mmg-chat-fab:hover{ transform:scale(1.08); box-shadow:0 10px 26px rgba(214,64,122,0.45); }
+  .mmg-chat-fab[hidden]{ display:none; }
   .mmg-chat-head{
     display:flex; align-items:center; gap:8px; padding:14px 14px 10px; border-bottom:1px solid var(--hairline,#2A3448);
     flex:0 0 auto;
@@ -495,6 +504,7 @@ import {
       <div class="mmg-chat-tab" data-tab="groups">Grup</div>
     </div>
     <div class="mmg-chat-body" id="mmgChatBody"></div>
+    <button type="button" id="mmgChatNewBtn" class="mmg-chat-fab" aria-label="Yeni sohbet" title="Yeni sohbet başlat" hidden>+</button>
     <div class="mmg-chat-reply-bar" id="mmgChatReplyBar" hidden></div>
     <div class="mmg-chat-footer" id="mmgChatFooter" hidden>
       <div style="position:relative;">
@@ -557,6 +567,14 @@ import {
     els.reqDot = document.getElementById('mmgChatReqDot');
     els.notifDot = document.getElementById('mmgChatNotifDot');
     els.body = document.getElementById('mmgChatBody');
+    els.newBtn = document.getElementById('mmgChatNewBtn');
+    if(els.newBtn){
+      els.newBtn.addEventListener('click', () => {
+        if(!currentUser) return;
+        activeTab = 'friends'; friendsSubView = 'add';
+        renderTab();
+      });
+    }
     els.footer = document.getElementById('mmgChatFooter');
     els.input = document.getElementById('mmgChatInput');
     els.sendBtn = document.getElementById('mmgChatSendBtn');
@@ -1178,6 +1196,8 @@ import {
   function renderTab(){
     if(openChatId) return; // bir sohbet açıkken sekme gövdesi değişmesin
     syncMainView();
+    // "+" yeni sohbet butonu yalnızca Kişilerim listesinde görünsün.
+    if(els.newBtn) els.newBtn.hidden = !(currentUser && activeTab === 'friends' && friendsSubView === 'list' && mainView !== 'bildirim');
     if(activeTab === 'admin') return renderAdminTab();
     if(activeTab === 'friends') return renderFriendsTab();
     if(activeTab === 'groups') return renderGroupsTab();
@@ -1995,6 +2015,7 @@ import {
   function openChat(chatId, info){
     openChatId = chatId;
     openChatInfo = info || {};
+    if(els.newBtn) els.newBtn.hidden = true;
     openChatOtherUid = (info && info.otherUid) || null;
     openChatCollection = (info && info.collection) || 'chats';
     els.backBtn.hidden = false;

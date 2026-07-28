@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{ var mode=localStorage.getItem('mmg_theme')||'dark'; document.documentElement.classList.toggle('theme-light', mode==='light'); }catch(e){}
+  window.addEventListener('message', function(ev){ if(ev&&ev.data&&ev.data.mmgTheme){ document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme==='light'); try{localStorage.setItem('mmg_theme',ev.data.mmgTheme);}catch(e2){} } });
+})();
+</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Logo & Zirve Entegrasyonu</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1420; --surface:#141C2B; --surface-2:#1B2536; --hairline:#2A3448;
+    --text:#EAEDF3; --muted:#8D96AC; --brass:#C6A15B; --brass-dim:#8A7440;
+    --teal:#3FB68A; --amber:#E3A23C;
+    --coral:#FF6B4A; --magenta:#D6407A; --violet:#7C4DD9; --azure:#3E8FE0;
+    --grad:linear-gradient(120deg, var(--coral), var(--magenta) 45%, var(--violet) 75%, var(--azure));
+  }
+  html.theme-light{ --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#EEF0F3; --hairline:#DCE0E6; --text:#1B2230; --muted:#6B7383; --brass:#9A7B3F; --brass-dim:#B8A06C; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  body{ background:radial-gradient(1200px 600px at 85% -10%, rgba(198,161,91,0.08), transparent 60%), radial-gradient(900px 500px at -10% 20%, rgba(79,163,196,0.06), transparent 60%), var(--bg); color:var(--text); font-family:'Inter',sans-serif; line-height:1.6; -webkit-font-smoothing:antialiased; padding-bottom:60px; }
+  header.masthead{ max-width:920px; margin:0 auto; padding:36px 24px 20px; display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px; }
+  header.masthead > div:first-child{ flex:1 1 320px; min-width:0; }
+  h1.title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,34px); letter-spacing:-0.01em; margin:0;}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
+  .back-link{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text); font-weight:600; text-decoration:none; border:1px solid var(--hairline); padding:8px 14px; border-radius:6px; white-space:nowrap; background:var(--surface-2); box-shadow:0 6px 16px rgba(0,0,0,0.35); transition:border-color .15s, color .15s; }
+  .back-link:hover{ color:var(--coral); border-color:var(--coral); }
+  main{ max-width:920px; margin:0 auto; padding:24px; }
+  .card{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:22px 24px; margin-bottom:18px; }
+  .card h2{ font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:700; margin:0 0 4px; }
+  .card h2 .em{ background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .card h3{ font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:700; margin:16px 0 6px; color:var(--brass); }
+  .card p{ color:var(--muted); font-size:14px; margin:0 0 8px; }
+  .card p b, .card li b{ color:var(--text); }
+  .card ul{ margin:6px 0 8px 18px; color:var(--muted); font-size:14px; }
+  .card ol{ margin:6px 0 8px 20px; color:var(--muted); font-size:14px; }
+  .card li{ margin-bottom:5px; }
+  .pill{ display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; color:var(--brass); border:1px solid var(--brass-dim); border-radius:5px; padding:2px 8px; margin:0 4px 4px 0; }
+  .level{ display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--hairline); }
+  .level:last-child{ border-bottom:none; }
+  .level .n{ flex:0 0 30px; height:30px; border-radius:8px; background:var(--surface-2); border:1px solid var(--hairline); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; color:var(--brass); }
+  .level .t b{ color:var(--text); font-size:14.5px; }
+  .level .t div{ color:var(--muted); font-size:13px; margin-top:2px; }
+  .note{ background:var(--surface-2); border:1px solid var(--hairline); border-left:3px solid var(--amber); border-radius:8px; padding:12px 14px; color:var(--muted); font-size:13px; margin-top:10px; }
+  .cta{ display:inline-flex; align-items:center; gap:8px; background:var(--grad); color:#fff; font-weight:700; font-size:14px; text-decoration:none; padding:12px 20px; border-radius:10px; margin-top:6px; }
+  .flex2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:640px){ .flex2{ grid-template-columns:1fr; } }
+  .src{ color:var(--muted); font-size:12px; }
+  .src a{ color:var(--azure); text-decoration:none; }
+  footer{ max-width:920px; margin:28px auto 0; padding:22px 24px 0; border-top:1px solid var(--hairline); text-align:right; }
+  footer .credit{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--muted); display:inline-flex; align-items:center; gap:8px; }
+  .signature-pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 12px 4px 5px; border-radius:999px; background:var(--surface-2); border:1px solid var(--hairline); }
+  .credit-logo{height:18px; width:18px; border-radius:5px; object-fit:cover;}
+  .credit-fallback{ display:none; width:18px; height:18px; border-radius:5px; align-items:center; justify-content:center; background:var(--grad); font-weight:700; font-size:9px; color:#fff; }
+  .credit b{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+</style>
+</head>
+<body>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVBZ8M9Q" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+<header class="masthead">
+  <div>
+    <h1 class="title">Logo &amp; Zirve Entegrasyonu</h1>
+    <div class="subtitle">Dijital Finans Asistanı verilerinizi muhasebe/ERP programınıza aktarın veya canlı senkronize edin.</div>
+  </div>
+  <div><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
+</header>
+
+<main>
+  <div class="card">
+    <h2>Nasıl çalışır? <span class="em">3 seviye</span></h2>
+    <p>İhtiyacınıza ve programınızın sürümüne göre üç entegrasyon seviyesinden birini seçebilirsiniz:</p>
+    <div class="level"><div class="n">1</div><div class="t"><b>Excel / XML Aktarımı</b> <span class="pill">Hemen · Lisanssız</span><div>Verinizi Excel/XML olarak dışa aktarır, Logo/Zirve'nin içe aktarım ekranından yüklersiniz. Ek altyapı, API veya lisans gerektirmez.</div></div></div>
+    <div class="level"><div class="n">2</div><div class="t"><b>REST API ile Canlı Senkron</b> <span class="pill">API Key gerekir</span><div>Program bir REST API sunuyorsa (Logo j-Platform, Logo İşbaşı, Zirve) verileriniz otomatik ve çift yönlü senkronize edilir. API bilgileri + bir sunucu bağlantısı gerekir.</div></div></div>
+    <div class="level"><div class="n">3</div><div class="t"><b>Yerel Köprü (Agent) + SQL</b> <span class="pill">Yerel kurulum</span><div>Program kendi sunucunuzda (MS SQL Server) çalışıyorsa, küçük bir yerel köprü programı Logo/Zirve veritabanı ile bulut arasında bağ kurar. En güçlü, en çok kurulum isteyen yol.</div></div></div>
+  </div>
+
+  <div class="flex2">
+    <div class="card">
+      <h2>Logo</h2>
+      <p>Sürümünüze göre desteklenen yollar:</p>
+      <h3>Logo j-Platform</h3>
+      <p>SOA mimarisi ile <b>RESTful API</b>, <b>Excel/XML</b> içeri-dışarı aktarım ve doğrudan <b>MS SQL Server</b> erişimi destekler. Web/mobil uygulamalarla canlı entegrasyona en uygun sürümdür.</p>
+      <span class="pill">RESTful API</span><span class="pill">Excel/XML</span><span class="pill">SQL</span>
+      <h3>Logo Tiger / GO 3 &amp; Wings</h3>
+      <p><b>Logo Objects (LObjects)</b> + <b>Logo REST Servis</b> (Windows servisi), veya doğrudan <b>SQL</b>. Objects run-time lisansı gerekebilir.</p>
+      <span class="pill">Logo REST Servis</span><span class="pill">LObjects</span><span class="pill">SQL</span>
+      <h3>Logo İşbaşı (bulut)</h3>
+      <p><b>REST API</b>. Entegrasyon için Logo İşbaşı'ndan <b>API Key + kullanıcı adı + şifre</b> alınır; eşleşme ürün/cari kodu gibi tekil anahtar üzerinden kurulur.</p>
+      <span class="pill">REST API</span>
+    </div>
+    <div class="card">
+      <h2>Zirve</h2>
+      <p>Zirve Yazılım entegrasyon yolları:</p>
+      <h3>Excel / XML — Express Aktarım</h3>
+      <p><b>Express Aktarım</b> modülü XML/Excel fatura ve fişleri tek tek veya toplu alır; günlük/haftalık/aylık <b>otonom aktarım planı</b> kurulabilir. Banka ekstreleri Excel/PDF/TXT/HTML olarak da içe alınır.</p>
+      <span class="pill">Express Aktarım</span><span class="pill">Excel/XML</span>
+      <h3>API</h3>
+      <p>Entegrasyon için yazılım firmalarından <b>API KEY + API SECRET</b> alınır.</p>
+      <span class="pill">API Key/Secret</span>
+      <div class="note">Zirve, canlı API'de Logo'ya göre daha kapalıdır; çoğu senaryoda en pratik yol <b>Excel/XML aktarımı</b>dır.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Adım adım — Excel/XML ile aktarım (bugün yapabilirsiniz)</h2>
+    <ol>
+      <li>Dijital Finans Asistanı'nda <b>Gelirler / Giderler / Nakit Akış</b> ekranından <b>“Excel'e Aktar”</b> ile verinizi indirin.</li>
+      <li>Logo veya Zirve'de <b>içe aktarım / Express Aktarım</b> ekranını açın.</li>
+      <li>Kolon eşlemesini yapın (tarih, tutar, cari/hesap kodu, açıklama). Cari/hesap kodlarının iki tarafta da <b>tekil ve aynı</b> olması şarttır.</li>
+      <li>Aktarımı çalıştırın; kayıtlar muhasebe fişi olarak oluşur.</li>
+    </ol>
+    <div class="note">İstерseniz çıktı formatını doğrudan sizin Logo/Zirve <b>içe aktarım şablonunuza</b> birebir uyacak şekilde hazırlayabiliriz — böylece kolon eşlemesiyle uğraşmazsınız.</div>
+  </div>
+
+  <div class="card">
+    <h2>Canlı (API) entegrasyon için gerekenler</h2>
+    <ul>
+      <li><b>Program sürümü:</b> j-Platform / Tiger-GO 3-Wings / İşbaşı / Zirve.</li>
+      <li><b>API erişimi:</b> API Key / kullanıcı-şifre (Logo İşbaşı, Zirve) veya REST Servis + lisans (Tiger/j-Platform).</li>
+      <li><b>Sunucu erişimi:</b> Yerel kurulumda SQL Server erişimi ya da REST Servis'in açık olması.</li>
+      <li><b>Eşleme anahtarları:</b> cari, hesap ve ürün kodlarının tekil olması.</li>
+    </ul>
+    <p>Bu bilgiler tamam olduğunda, verinizi otomatik ve çift yönlü senkronize eden bir bağlantı kurarız.</p>
+    <a class="cta" href="mailto:mmgcreativity@gmail.com?subject=Entegrasyon%20Talebi%20(Logo%2FZirve)&body=Program%20ve%20s%C3%BCr%C3%BCm%3A%0AAPI%20eri%C5%9Fimi%20var%20m%C4%B1%3A%0ABulut%20mu%20yerel%20mi%3A%0ANot%3A">✉ Entegrasyon Talebi Gönder</a>
+  </div>
+
+  <div class="card">
+    <div class="src">Kaynaklar:
+      <a href="https://isbasi.com/entegrasyonlar" target="_blank" rel="noopener">Logo İşbaşı Entegrasyonları</a> ·
+      <a href="https://www.noktabilgiislem.com/blog/logo-entegrasyonu-sql-tiger-objects-ve-rest-servis-kullanimi" target="_blank" rel="noopener">Logo SQL/Objects/REST</a> ·
+      <a href="https://github.com/dogukankosan/Logo_J-Platform_Rest_Service" target="_blank" rel="noopener">Logo j-Platform REST</a> ·
+      <a href="https://blog.zirveyazilim.net/entegrasyon-islemleri" target="_blank" rel="noopener">Zirve Entegrasyon</a> ·
+      <a href="https://www.zirveyazilim.net/express-fatura-aktarim/" target="_blank" rel="noopener">Zirve Express Aktarım</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="credit"><span>Powered by</span>
+    <span class="signature-pill">
+      <img src="logo.png" alt="" class="credit-logo" onerror="this.style.display='none'; document.getElementById('credit-fallback').style.display='flex';">
+      <span id="credit-fallback" class="credit-fallback">M</span>
+      <b>mmgcreativity</b>
+    </span>
+  </div>
+</footer>
+<script type="module" src="mmg-chat-widget.js"></script>
+</body>
+</html>
