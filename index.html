@@ -1956,6 +1956,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function openTarget(target, title){
     closeMobileNav();
+    // Ayarlar ana alanda açıldığı için, başka bir sayfa (Hesabım, araçlar vb.) açılınca
+    // Ayarlar paneli de kapansın (kullanıcı isteği: Hesabım'a tıklayınca Ayarlar kapansın).
+    try{ var _stOv = document.getElementById('mmgSettingsOverlay'); if(_stOv) _stOv.hidden = true; }catch(e){}
     if(target === 'home'){
       homeScreen.style.display = 'flex';
       frameWrap.style.display = 'none';
