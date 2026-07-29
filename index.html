@@ -1216,7 +1216,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="phoneLoginPanel" style="display:none; margin-top:12px; border-top:1px solid var(--hairline); padding-top:12px;">
         <div id="phoneStep1">
           <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px;" data-i18n="auth_phone_label">Telefon numarası (+90…)</label>
-          <input type="tel" id="phoneNumberInput" placeholder="+90 5xx xxx xx xx" autocomplete="tel" style="width:100%; box-sizing:border-box; height:42px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:0 12px; color:var(--text); font-size:14px; outline:none; margin-bottom:8px;">
+          <input type="tel" id="phoneNumberInput" value="+90 " placeholder="+90 5xx xxx xx xx" autocomplete="tel" style="width:100%; box-sizing:border-box; height:42px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:0 12px; color:var(--text); font-size:14px; outline:none; margin-bottom:8px;">
           <button type="button" class="auth-submit auth-full" id="phoneSendCodeBtn" data-i18n="auth_phone_send">Kod Gönder</button>
         </div>
         <div id="phoneStep2" style="display:none;">
@@ -4354,7 +4354,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     phoneBtn.addEventListener('click', ()=>{ panel.style.display = (panel.style.display==='none' || !panel.style.display) ? 'block' : 'none'; });
     sendBtn.addEventListener('click', async ()=>{
-      const phone = (numInput.value||'').replace(/[\s()-]/g,'');
+      let phone = (numInput.value||'').replace(/[\s()-]/g,'');
+      if(/^0\d{10}$/.test(phone)) phone = '+90' + phone.slice(1);
+      else if(/^90\d{10}$/.test(phone)) phone = '+' + phone;
+      else if(/^5\d{9}$/.test(phone)) phone = '+90' + phone;
       if(!/^\+\d{10,15}$/.test(phone)){ msg.textContent='Numarayı +90… biçiminde girin.'; msg.style.color='var(--red)'; return; }
       sendBtn.disabled=true; msg.textContent='Kod gönderiliyor…'; msg.style.color='var(--muted)';
       try{
@@ -4417,7 +4420,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
     sendBtn.addEventListener('click', async ()=>{
       if(!auth.currentUser){ msg.textContent='Önce e-posta ile giriş yapın.'; msg.style.color='var(--red,#E2544B)'; return; }
-      const phone = (numInput.value||'').replace(/[\s()-]/g,'');
+      let phone = (numInput.value||'').replace(/[\s()-]/g,'');
+      if(/^0\d{10}$/.test(phone)) phone = '+90' + phone.slice(1);
+      else if(/^90\d{10}$/.test(phone)) phone = '+' + phone;
+      else if(/^5\d{9}$/.test(phone)) phone = '+90' + phone;
       if(!/^\+\d{10,15}$/.test(phone)){ msg.textContent='Numarayı +90… biçiminde girin.'; msg.style.color='var(--red,#E2544B)'; return; }
       sendBtn.disabled=true; msg.textContent='Kod gönderiliyor…'; msg.style.color='var(--muted,#8D96AC)';
       try{
@@ -4797,7 +4803,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </button>
     <div id="mmgLinkPhoneForm" style="margin-bottom:6px; display:none;">
       <div style="font-size:11px; color:var(--muted,#8D96AC); margin-bottom:8px;" data-i18n="settings_link_phone_hint">Telefonunu bir kez bağla; sonra giriş ekranından "Telefon ile giriş" ile bu hesaba girebilirsin.</div>
-      <input type="tel" id="mmgLinkPhoneNumber" placeholder="+90 5xx xxx xx xx" autocomplete="tel"
+      <input type="tel" id="mmgLinkPhoneNumber" value="+90 " placeholder="+90 5xx xxx xx xx" autocomplete="tel"
         style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-size:13.5px; margin-bottom:8px; outline:none;">
       <button type="button" class="mmg-lang-btn" id="mmgLinkPhoneSendBtn" style="width:100%; margin-bottom:8px;" data-i18n="auth_phone_send">Kod Gönder</button>
       <div id="mmgLinkPhoneStep2" style="display:none;">
