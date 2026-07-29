@@ -357,7 +357,7 @@ function mmgApplyTurkishFont(doc){
     .cons-table-scroll table{ min-width:420px; }
   }
 
-  .top-combined-row{ display:flex; flex-wrap:nowrap; align-items:center; gap:8px; overflow-x:auto; padding-bottom:2px; }
+  .top-combined-row{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
   .top-combined-row::-webkit-scrollbar{ height:0; }
   .top-combined-row .report-tabs{ flex-shrink:0; }
   .top-combined-row .date-controls-group{ flex-shrink:0; }
@@ -750,7 +750,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <button type="button" class="ghost-btn" id="manualSaveBtn">💾 <span data-i18n="save_btn">Kaydet</span></button>
               <button type="button" class="ghost-btn" id="clearMonthBtn">🗑 <span data-i18n="clear_btn">Temizle</span></button>
               <button type="button" class="ghost-btn" id="undoClearBtn" style="display:none;">↩ <span data-i18n="undo_btn">Geri Al</span></button>
-              <button type="button" class="ghost-btn" id="consolidatedOpenCard" style="display:none;">🏢 <span class="coc-text" data-i18n="consolidate_open">KONSOLİDE GÖSTER</span></button>
+              <button type="button" class="ghost-btn" id="consolidatedOpenCard" style="display:none;">🏢 <span class="coc-text" data-i18n="consolidate_open">GRUP GÖSTER</span></button>
             </div>
           </div>
         </div>
@@ -795,15 +795,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="cons-modal-overlay" id="consolidatedModal" hidden>
      <div class="cons-modal-card">
       <div class="cons-modal-head">
-        <div class="section-title" style="margin-bottom:0;">🏢 Konsolide Nakit Akış</div>
+        <div class="section-title" style="margin-bottom:0;">🏢 Grup Nakit Akış</div>
         <button type="button" class="cons-modal-close" id="consolidatedCloseBtn" aria-label="Kapat">✕</button>
       </div>
       <div class="card-sub" style="color:var(--muted); font-size:12.5px; margin:6px 0 14px;">
-        Konsolide görmek istediğiniz firmaları seçin; şu an ekranda seçili olan döneme (Günlük/Haftalık/Aylık/Yıllık) göre gelir, gider ve net durumları toplu (konsolide) gösterilir.
+        Grup halinde görmek istediğiniz firmaları seçin; şu an ekranda seçili olan döneme (Günlük/Haftalık/Aylık/Yıllık) göre seçili firmaların gelir, gider ve net durumları toplanarak gösterilir.
       </div>
       <div id="consolidatedPicker" style="margin-bottom:14px;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
-          <label style="font-size:12.5px; color:var(--muted); font-weight:600;">Konsolide Edilecek Firmalar</label>
+          <label style="font-size:12.5px; color:var(--muted); font-weight:600;">Grupta Gösterilecek Firmalar</label>
           <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--brass,#C6A15B); cursor:pointer;">
             <input type="checkbox" id="consolidatedSelectAll"> Tümünü Seç
           </label>
@@ -820,7 +820,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
         <div style="font-size:11px; color:var(--muted); margin-bottom:12px;" data-i18n="cons_range_hint">Tarih aralığı boş bırakılırsa, ekranda seçili döneme (Günlük/Haftalık/Aylık/Yıllık) göre hesaplanır.</div>
-        <button type="button" class="archive-save-btn" id="consolidatedRunBtn">📊 Konsolide Göster</button>
+        <button type="button" class="archive-save-btn" id="consolidatedRunBtn">📊 Grup Göster</button>
         <div class="io-msg" id="consolidatedMsg" style="margin-top:8px;"></div>
       </div>
       <div id="consolidatedResults" style="display:none;">
@@ -1519,7 +1519,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         exitBtn.className = 'ghost-btn';
         exitBtn.style.borderColor = 'var(--red,#e2544b)';
         exitBtn.style.color = 'var(--red,#e2544b)';
-        exitBtn.innerHTML = '✕ <span class="coc-text">Konsolide Moddan Çık</span>';
+        exitBtn.innerHTML = '✕ <span class="coc-text">Grup Görünümünden Çık</span>';
         exitBtn.addEventListener('click', exitConsolidatedMode);
         card.parentNode.insertBefore(exitBtn, card.nextSibling);
       }
@@ -1555,9 +1555,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     try{ res = await computeConsolidatedTotals(consolidatedActiveIds); }
     catch(e){ if(weeksC) weeksC.innerHTML = '<div class="reports-empty">Konsolide edilirken bir hata oluştu.</div>'; return; }
     if(!consolidatedMode) return; // arada çıkış yapıldıysa boyama
-    document.getElementById('sumGelirLabel').textContent = NAT.income + ' · Konsolide';
-    document.getElementById('sumGiderLabel').textContent = NAT.expense + ' · Konsolide';
-    document.getElementById('sumNetLabel').textContent = NAT.net + ' · Konsolide';
+    document.getElementById('sumGelirLabel').textContent = NAT.income + ' · Grup';
+    document.getElementById('sumGiderLabel').textContent = NAT.expense + ' · Grup';
+    document.getElementById('sumNetLabel').textContent = NAT.net + ' · Grup';
     document.getElementById('sumGelir').textContent = fmtMoney(res.grandGelir);
     document.getElementById('sumGider').textContent = fmtMoney(res.grandGider);
     const netEl = document.getElementById('sumNet');
@@ -1567,7 +1567,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.getElementById('sumGiderSub').textContent = periodTag;
     document.getElementById('sumNetSub').textContent = consolidatedActiveIds.length + ' firma';
     let html = '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">' +
-      '<span style="font-weight:700;font-size:15px;">🏢 Konsolide Görünüm</span>' +
+      '<span style="font-weight:700;font-size:15px;">🏢 Grup Görünümü</span>' +
       '<span style="color:var(--muted);font-size:12.5px;">' + escapeHtml(periodTag) + ' · ' + consolidatedActiveIds.length + ' firma</span></div>';
     html += '<table style="width:100%;border-collapse:collapse;font-size:13.5px;">' +
       '<thead><tr style="text-align:left;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;">' +
@@ -3007,7 +3007,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       tab_daily:'Günlük', tab_weekly:'Haftalık', tab_monthly:'Aylık', tab_yearly:'Yıllık',
       goto_today:'Bugün', save_btn:'Kaydet', clear_btn:'Temizle', undo_btn:'Geri Al',
       refresh_btn:'Yenile', refresh_sync_hint:'Gelir/Giderlerden vadesi gelen aktarımları çek',
-      consolidate_open:'KONSOLİDE GÖSTER',
+      consolidate_open:'GRUP GÖSTER',
       cons_from:'Başlangıç (ops.)', cons_to:'Bitiş (ops.)', cons_range_hint:'Tarih aralığı boş bırakılırsa, ekranda seçili döneme (Günlük/Haftalık/Aylık/Yıllık) göre hesaplanır.',
       trial_over_title:'Ücretsiz Deneme Süreniz Sona Erdi',
       trial_over_desc:'Nakit Akış Tablosu premium üyelere aittir. 90 günlük ücretsiz deneme sürenizi tamamladınız — kullanmaya devam etmek için premium üyeliğe geçmeniz gerekiyor.',
@@ -3022,7 +3022,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       tab_daily:'Daily', tab_weekly:'Weekly', tab_monthly:'Monthly', tab_yearly:'Yearly',
       goto_today:'Today', save_btn:'Save', clear_btn:'Clear', undo_btn:'Undo',
       refresh_btn:'Refresh', refresh_sync_hint:'Pull due transfers from Income/Expenses',
-      consolidate_open:'SHOW CONSOLIDATED',
+      consolidate_open:'SHOW GROUP',
       cons_from:'Start (opt.)', cons_to:'End (opt.)', cons_range_hint:'If the date range is left empty, the currently selected period (Daily/Weekly/Monthly/Yearly) is used.',
       trial_over_title:'Your Free Trial Has Ended',
       trial_over_desc:'The Cash Flow Table is for premium members. You have completed your 90-day free trial — you need to upgrade to premium to keep using it.',
