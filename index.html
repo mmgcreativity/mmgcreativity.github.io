@@ -989,6 +989,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       kvkk_modal_title:'KVKK Aydınlatma Metni',
       auth_remember_me:'Oturumu açık tut', auth_forgot_password:'Şifremi unuttum?', auth_or:'veya',
       auth_google:'Google ile devam et', auth_guest:'Misafir olarak gir',
+      auth_phone:'Telefon ile giriş', auth_phone_label:'Telefon numarası (+90…)', auth_phone_send:'Kod Gönder', auth_phone_code_label:'SMS kodu', auth_phone_verify:'Doğrula ve Giriş Yap',
       auth_not_logged_in:'Giriş yapmadınız', auth_guest_mode:'Misafir modundasınız', auth_user_code:'Kullanıcı Kodu: #',
       no_user_code:'Kullanıcı Kodu atanmamış',
       auth_err_need_email_reset:'Şifre sıfırlama bağlantısı gönderebilmemiz için önce e-posta adresinizi yazın.',
@@ -1097,6 +1098,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       kvkk_modal_title:'Data Protection (KVKK) Notice',
       auth_remember_me:'Keep me signed in', auth_forgot_password:'Forgot password?', auth_or:'or',
       auth_google:'Continue with Google', auth_guest:'Continue as guest',
+      auth_phone:'Sign in with phone', auth_phone_label:'Phone number (+90…)', auth_phone_send:'Send Code', auth_phone_code_label:'SMS code', auth_phone_verify:'Verify & Sign In',
       auth_not_logged_in:'You are not signed in', auth_guest_mode:'You are in guest mode', auth_user_code:'User Code: #',
       no_user_code:'No user code assigned',
       auth_err_need_email_reset:'Please enter your email address first so we can send a password reset link.',
@@ -1206,6 +1208,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span data-i18n="auth_google">Google ile devam et</span>
       </button>
       <button type="button" class="auth-guest" id="guestBtn" data-i18n="auth_guest">Misafir olarak gir</button>
+      <button type="button" class="auth-guest" id="phoneLoginBtn" style="margin-top:8px;">📱 <span data-i18n="auth_phone">Telefon ile giriş</span></button>
+
+      <!-- Telefon ile giriş akışı (Firebase Phone Auth) -->
+      <div id="phoneLoginPanel" style="display:none; margin-top:12px; border-top:1px solid var(--hairline); padding-top:12px;">
+        <div id="phoneStep1">
+          <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px;" data-i18n="auth_phone_label">Telefon numarası (+90…)</label>
+          <input type="tel" id="phoneNumberInput" placeholder="+90 5xx xxx xx xx" autocomplete="tel" style="width:100%; box-sizing:border-box; height:42px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:0 12px; color:var(--text); font-size:14px; outline:none; margin-bottom:8px;">
+          <button type="button" class="auth-submit auth-full" id="phoneSendCodeBtn" data-i18n="auth_phone_send">Kod Gönder</button>
+        </div>
+        <div id="phoneStep2" style="display:none;">
+          <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px;" data-i18n="auth_phone_code_label">SMS kodu</label>
+          <input type="text" id="phoneCodeInput" inputmode="numeric" autocomplete="one-time-code" placeholder="6 haneli kod" style="width:100%; box-sizing:border-box; height:42px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:0 12px; color:var(--text); font-size:16px; letter-spacing:4px; outline:none; margin-bottom:8px;">
+          <button type="button" class="auth-submit auth-full" id="phoneVerifyBtn" data-i18n="auth_phone_verify">Doğrula ve Giriş Yap</button>
+        </div>
+        <div id="phoneMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>
+        <div id="recaptchaContainer"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -2774,7 +2793,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
     signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup,
     deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup,
-    sendPasswordResetEmail, updatePassword, sendEmailVerification, signInWithCustomToken
+    sendPasswordResetEmail, updatePassword, sendEmailVerification, signInWithCustomToken,
+    RecaptchaVerifier, signInWithPhoneNumber
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, runTransaction, serverTimestamp, increment,
@@ -4300,6 +4320,66 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       googleBtn.disabled = false;
     }
   });
+
+  // ---- Telefon ile Giriş (Firebase Phone Auth — istemci tarafı; Console'da Phone açık olmalı) ----
+  (function(){
+    const phoneBtn = document.getElementById('phoneLoginBtn');
+    const panel = document.getElementById('phoneLoginPanel');
+    const step1 = document.getElementById('phoneStep1');
+    const step2 = document.getElementById('phoneStep2');
+    const numInput = document.getElementById('phoneNumberInput');
+    const codeInput = document.getElementById('phoneCodeInput');
+    const sendBtn = document.getElementById('phoneSendCodeBtn');
+    const verifyBtn = document.getElementById('phoneVerifyBtn');
+    const msg = document.getElementById('phoneMsg');
+    if(!phoneBtn) return;
+    let confirmationResult = null, recaptcha = null;
+    function ensureRecaptcha(){
+      if(recaptcha) return recaptcha;
+      recaptcha = new RecaptchaVerifier(auth, 'recaptchaContainer', { size:'invisible' });
+      return recaptcha;
+    }
+    function mapPhoneErr(err){
+      const c = err && err.code ? err.code : '';
+      if(c==='auth/invalid-phone-number') return 'Geçersiz telefon numarası.';
+      if(c==='auth/missing-phone-number') return 'Telefon numarası girin.';
+      if(c==='auth/too-many-requests') return 'Çok fazla deneme. Bir süre sonra tekrar deneyin.';
+      if(c==='auth/invalid-verification-code') return 'Kod hatalı.';
+      if(c==='auth/code-expired') return 'Kodun süresi doldu, tekrar gönderin.';
+      if(c==='auth/operation-not-allowed') return "Telefon ile giriş Firebase'de etkin değil (Console → Authentication → Sign-in method → Phone).";
+      if(c==='auth/billing-not-enabled') return 'Telefon girişi için Firebase Blaze planı gerekir.';
+      return 'Hata: ' + (c || (err && err.message) || 'bilinmeyen');
+    }
+    phoneBtn.addEventListener('click', ()=>{ panel.style.display = (panel.style.display==='none' || !panel.style.display) ? 'block' : 'none'; });
+    sendBtn.addEventListener('click', async ()=>{
+      const phone = (numInput.value||'').replace(/[\s()-]/g,'');
+      if(!/^\+\d{10,15}$/.test(phone)){ msg.textContent='Numarayı +90… biçiminde girin.'; msg.style.color='var(--red)'; return; }
+      sendBtn.disabled=true; msg.textContent='Kod gönderiliyor…'; msg.style.color='var(--muted)';
+      try{
+        const verifier = ensureRecaptcha();
+        confirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
+        step1.style.display='none'; step2.style.display='block';
+        msg.textContent='SMS gönderildi. Kodu girin.'; msg.style.color='var(--teal)';
+      }catch(err){
+        msg.textContent = mapPhoneErr(err); msg.style.color='var(--red)';
+        try{ if(recaptcha){ recaptcha.clear(); recaptcha=null; } }catch(e){}
+      }finally{ sendBtn.disabled=false; }
+    });
+    verifyBtn.addEventListener('click', async ()=>{
+      const code = (codeInput.value||'').trim();
+      if(!/^\d{6}$/.test(code)){ msg.textContent='6 haneli kodu girin.'; msg.style.color='var(--red)'; return; }
+      if(!confirmationResult){ msg.textContent='Önce kod gönderin.'; msg.style.color='var(--red)'; return; }
+      verifyBtn.disabled=true; msg.textContent='Doğrulanıyor…'; msg.style.color='var(--muted)';
+      try{
+        await confirmationResult.confirm(code);
+        msg.textContent='Giriş başarılı ✓'; msg.style.color='var(--teal)';
+        // onAuthStateChanged devralır (kullanıcı dokümanı + overlay kapanışı).
+      }catch(err){
+        msg.textContent = mapPhoneErr(err); msg.style.color='var(--red)';
+        verifyBtn.disabled=false;
+      }
+    });
+  })();
 
   authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
