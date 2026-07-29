@@ -990,7 +990,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       kvkk_modal_title:'KVKK Aydınlatma Metni',
       auth_remember_me:'Oturumu açık tut', auth_forgot_password:'Şifremi unuttum?', auth_or:'veya',
       auth_google:'Google ile devam et', auth_guest:'Misafir olarak gir',
-      auth_phone:'Telefon ile giriş', auth_phone_label:'Telefon numarası (+90…)', auth_phone_send:'Kod Gönder', auth_phone_code_label:'SMS kodu', auth_phone_verify:'Doğrula ve Giriş Yap',
+      auth_phone:'Telefon ile giriş', auth_phone_label:'Telefon numarası (+90…)', auth_phone_send:'Kod Gönder', auth_phone_code_label:'SMS kodu', auth_phone_verify:'Doğrula ve Giriş Yap', auth_phone_back:'← Numarayı değiştir / tekrar gönder',
       auth_not_logged_in:'Giriş yapmadınız', auth_guest_mode:'Misafir modundasınız', auth_user_code:'Kullanıcı Kodu: #',
       no_user_code:'Kullanıcı Kodu atanmamış',
       auth_err_need_email_reset:'Şifre sıfırlama bağlantısı gönderebilmemiz için önce e-posta adresinizi yazın.',
@@ -1100,7 +1100,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       kvkk_modal_title:'Data Protection (KVKK) Notice',
       auth_remember_me:'Keep me signed in', auth_forgot_password:'Forgot password?', auth_or:'or',
       auth_google:'Continue with Google', auth_guest:'Continue as guest',
-      auth_phone:'Sign in with phone', auth_phone_label:'Phone number (+90…)', auth_phone_send:'Send Code', auth_phone_code_label:'SMS code', auth_phone_verify:'Verify & Sign In',
+      auth_phone:'Sign in with phone', auth_phone_label:'Phone number (+90…)', auth_phone_send:'Send Code', auth_phone_code_label:'SMS code', auth_phone_verify:'Verify & Sign In', auth_phone_back:'← Change number / resend',
       auth_not_logged_in:'You are not signed in', auth_guest_mode:'You are in guest mode', auth_user_code:'User Code: #',
       no_user_code:'No user code assigned',
       auth_err_need_email_reset:'Please enter your email address first so we can send a password reset link.',
@@ -1223,6 +1223,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px;" data-i18n="auth_phone_code_label">SMS kodu</label>
           <input type="text" id="phoneCodeInput" inputmode="numeric" autocomplete="one-time-code" placeholder="6 haneli kod" style="width:100%; box-sizing:border-box; height:42px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:0 12px; color:var(--text); font-size:16px; letter-spacing:4px; outline:none; margin-bottom:8px;">
           <button type="button" class="auth-submit auth-full" id="phoneVerifyBtn" data-i18n="auth_phone_verify">Doğrula ve Giriş Yap</button>
+          <button type="button" id="phoneBackBtn" style="width:100%; margin-top:8px; background:none; border:none; color:var(--brass,#C6A15B); font-size:12px; cursor:pointer; text-decoration:underline;" data-i18n="auth_phone_back">← Numarayı değiştir / tekrar gönder</button>
         </div>
         <div id="phoneMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>
         <div id="recaptchaContainer"></div>
@@ -4355,6 +4356,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     phoneBtn.addEventListener('click', ()=>{ panel.style.display = (panel.style.display==='none' || !panel.style.display) ? 'block' : 'none'; });
     numInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); sendBtn.click(); } });
     codeInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); verifyBtn.click(); } });
+    const backBtn = document.getElementById('phoneBackBtn');
+    if(backBtn) backBtn.addEventListener('click', ()=>{
+      step2.style.display='none'; step1.style.display='block';
+      confirmationResult = null;
+      try{ if(recaptcha){ recaptcha.clear(); recaptcha=null; } }catch(e){}
+      codeInput.value=''; msg.textContent=''; sendBtn.disabled=false; verifyBtn.disabled=false;
+      try{ numInput.focus(); }catch(e){}
+    });
     sendBtn.addEventListener('click', async ()=>{
       let phone = (numInput.value||'').replace(/[\s()-]/g,'');
       if(/^0\d{10}$/.test(phone)) phone = '+90' + phone.slice(1);
