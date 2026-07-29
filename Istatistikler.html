@@ -391,8 +391,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function fmtDate(iso){
     try{
+      if(!iso) return '—';
       const d = (iso && iso.toDate) ? iso.toDate() : new Date(iso);
-      if(isNaN(d.getTime())) return '—';
+      // new Date(null) epoch (1970) döndürür ve isNaN'a takılmaz; 2000 öncesi = eksik/geçersiz say.
+      if(isNaN(d.getTime()) || d.getTime() < 946684800000) return '—';
       return d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
     }catch(e){ return '—'; }
   }
