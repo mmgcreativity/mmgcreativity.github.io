@@ -10,7 +10,7 @@
  * firebase-messaging-service-worker.js dosyası gerekir; bu dosya onun yerini tutmaz.
  */
 
-const SW_VERSION = '2026-07-29-telefon-overlay-kapat';
+const SW_VERSION = '2026-07-29-login-iban-fix';
 
 // Yeni sürüm yayınlanınca hemen devreye girsin (bekleyen SW'yi atla).
 self.addEventListener('install', () => {

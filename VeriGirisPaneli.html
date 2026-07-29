@@ -557,6 +557,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     bankListAdded:'Bank added.', bankListSaved:'Saved ✓', bankListSaveFailed:'Could not be saved, please try again.',
     bankListRemoveFailed:'Could not be removed, please try again.', bankListEnterName:'Please enter a bank name.',
     bankListDuplicate:'This bank name is already in the list.',
+    bankDuplicateIban:'This IBAN is already saved.',
+    bankDupsCleaned:'{n} duplicate IBAN record(s) cleaned.',
     bulkNotesCol:'Notes/Address', bulkBankNameOnlyCol:'Bank Name'
   } : {
     loginRequired:'Bu sayfayı görüntülemek için giriş yapmış olmanız gerekir.<br><br>',
@@ -581,6 +583,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     bankListAdded:'Banka eklendi.', bankListSaved:'Kaydedildi ✓', bankListSaveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
     bankListRemoveFailed:'Çıkarılamadı, lütfen tekrar deneyin.', bankListEnterName:'Lütfen bir banka adı girin.',
     bankListDuplicate:'Bu banka adı zaten listede var.',
+    bankDuplicateIban:'Bu IBAN zaten kayıtlı.',
+    bankDupsCleaned:'{n} tekrar eden IBAN kaydı temizlendi.',
     bulkNotesCol:'Not/Adres', bulkBankNameOnlyCol:'Banka Adı'
   };
 
@@ -911,9 +915,35 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   async function loadBanks(){
     const snap = await getDocs(colRef('banks'));
     banksList = [];
-    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '', iban: d.data().iban || '', currency: d.data().currency || '', note: d.data().note || '', appliesToFirmaIds: d.data().appliesToFirmaIds || null }));
+    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '', iban: d.data().iban || '', currency: d.data().currency || '', note: d.data().note || '', appliesToFirmaIds: d.data().appliesToFirmaIds || null, createdAt: d.data().createdAt || null }));
+    await dedupeBanks();
     banksList.sort((a,b) => a.name.localeCompare(b.name, 'tr'));
     renderBanks();
+  }
+  // Aynı IBAN'a sahip tekrar eden kayıtları temizler: her IBAN için en eski
+  // (createdAt) kayıt tutulur, diğerleri Firestore'dan silinir. IBAN'sız
+  // kayıtlar tekilleştirilmez.
+  async function dedupeBanks(){
+    const seen = new Map();
+    const dupIds = [];
+    const ordered = banksList.slice().sort((a,b) => {
+      const ta = (a.createdAt && a.createdAt.seconds) ? a.createdAt.seconds : 0;
+      const tb = (b.createdAt && b.createdAt.seconds) ? b.createdAt.seconds : 0;
+      if(ta !== tb) return ta - tb;
+      return String(a.id).localeCompare(String(b.id));
+    });
+    for(const b of ordered){
+      const ibanKey = (b.iban||'').toUpperCase().replace(/\s+/g,'');
+      if(!ibanKey) continue;
+      if(seen.has(ibanKey)) dupIds.push(b.id);
+      else seen.set(ibanKey, b.id);
+    }
+    if(!dupIds.length) return;
+    for(const id of dupIds){
+      try{ await deleteDoc(docRef('banks', id)); }catch(e){}
+    }
+    banksList = banksList.filter(b => dupIds.indexOf(b.id) === -1);
+    try{ showMsg('banks_msg', (LBL.bankDupsCleaned||'{n}').replace('{n}', dupIds.length), false); }catch(e){}
   }
   function renderBanks(){
     const listEl = document.getElementById('banksChipList');
@@ -947,6 +977,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const noteInput = document.getElementById('bankNoteInput');
     const note = noteInput.value.trim();
     if(!name){ showMsg('banks_msg', LBL.enterValidName, true); return; }
+    // Aynı IBAN'ın ikinci kez kaydedilmesini engelle (IBAN globalde tekildir).
+    if(iban && banksList.some(b => (b.iban||'').toUpperCase().replace(/\s+/g,'') === iban)){
+      showMsg('banks_msg', LBL.bankDuplicateIban, true);
+      return;
+    }
     const appliesTo = collectFirmaSelection('bank_firmaSelect');
     try{
       const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
@@ -996,10 +1031,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   function readIbanRows(prefix){
     const wrap = document.getElementById(prefix + '_ibanRows');
     const out = [];
+    const seen = new Set();
     wrap.querySelectorAll('.iban-row').forEach(row => {
       const bank = row.querySelector('.iban-bank').value.trim();
       const iban = row.querySelector('.iban-num').value.trim().toUpperCase().replace(/\s+/g, '');
       const currency = row.querySelector('.iban-cur').value.trim().toUpperCase() || 'TRY';
+      if(iban){ if(seen.has(iban)) return; seen.add(iban); }
       if(bank || iban) out.push({ bank, iban, currency });
     });
     return out;
@@ -1387,13 +1424,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const original = btn.textContent;
     btn.textContent = LBL.bulkSaving;
     try{
-      let count = 0;
+      // Mevcut ve bu partideki IBAN'ları izle; aynı IBAN'ı bir daha ekleme.
+      const seenIbans = new Set(banksList.map(b => (b.iban||'').toUpperCase().replace(/\s+/g,'')).filter(Boolean));
+      let count = 0, skipped = 0;
       for(const r of pendingBanksBulkRows){
+        const ibanKey = (r.iban||'').toUpperCase().replace(/\s+/g,'');
+        if(ibanKey && seenIbans.has(ibanKey)){ skipped++; continue; }
+        if(ibanKey) seenIbans.add(ibanKey);
         const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
         await setDoc(docRef('banks', id), { name: r.bank, iban: r.iban, currency: r.currency || 'TRY', note: r.note || '', createdAt: serverTimestamp() });
         count++;
       }
-      showMsg('banksBulkMsg', fmt(LBL.bulkDone, { n: count }), false);
+      showMsg('banksBulkMsg', fmt(LBL.bulkDone, { n: count }) + (skipped ? ' (' + skipped + ' ' + (MMG_LANG==='en'?'duplicate skipped':'tekrar atlandı') + ')' : ''), false);
       pendingBanksBulkRows = null;
       document.getElementById('banksBulkPreviewWrap').style.display = 'none';
       await loadBanks();
