@@ -1800,27 +1800,32 @@ import {
         row.querySelector('.cancel-sent').addEventListener('click', () => cancelSentRequest(row.dataset.sentId));
         const nudgeBtn = row.querySelector('.nudge-sent');
         if(nudgeBtn){
-          nudgeBtn.addEventListener('click', async () => {
-            const uid = row.dataset.toUid;
-            if(!uid || !window.mmgNotify){ nudgeBtn.textContent = '—'; setTimeout(()=>{ nudgeBtn.textContent = '👉 Dürt'; }, 1200); return; }
-            // Kullanıcı isteği: 1 dakikada 1 dürtme (kişi bazında cooldown).
-            const nkey = 'mmg_last_nudge_' + uid;
-            const now = Date.now();
-            const last = +(localStorage.getItem(nkey) || 0);
-            if(now - last < 60000){
-              const sec = Math.ceil((60000 - (now - last)) / 1000);
-              nudgeBtn.textContent = sec + ' sn';
-              setTimeout(()=>{ nudgeBtn.textContent = '👉 Dürt'; }, 1500);
-              return;
+          const uid = row.dataset.toUid;
+          const nkey = 'mmg_last_nudge_' + uid;
+          // Cooldown içindeyse ✅ + pasif göster; kalan süre bitince eski haline dön (kullanıcı isteği:
+          // tik işareti 1 dk dolana kadar kalsın).
+          function applyCooldown(){
+            const rem = 60000 - (Date.now() - (+(localStorage.getItem(nkey) || 0)));
+            if(rem > 0){
+              nudgeBtn.disabled = true;
+              nudgeBtn.textContent = '✅';
+              nudgeBtn.title = 'Dürtüldü — 1 dk sonra tekrar dürtebilirsiniz';
+              setTimeout(() => { nudgeBtn.disabled = false; nudgeBtn.textContent = '👉 Dürt'; nudgeBtn.title = 'Dürt — karşı tarafa bildirim gönder'; }, rem);
+              return true;
             }
+            return false;
+          }
+          applyCooldown();
+          nudgeBtn.addEventListener('click', async () => {
+            if(!uid || !window.mmgNotify){ nudgeBtn.textContent = '—'; setTimeout(()=>{ nudgeBtn.textContent = '👉 Dürt'; }, 1200); return; }
+            if(applyCooldown()) return;
             nudgeBtn.disabled = true;
             try{
               await window.mmgNotify(uid, { type:'nudge', title:'👉 Dürtüldünüz', body:'Bir kullanıcı sizi dürttü — bekleyen sohbet isteğini yanıtlayın.' });
-              try{ localStorage.setItem(nkey, String(now)); }catch(e){}
-              nudgeBtn.textContent = '✅';
+              try{ localStorage.setItem(nkey, String(Date.now())); }catch(e){}
+              applyCooldown();
             }
-            catch(e){ nudgeBtn.textContent = '—'; }
-            setTimeout(()=>{ nudgeBtn.textContent = '👉 Dürt'; nudgeBtn.disabled = false; }, 1400);
+            catch(e){ nudgeBtn.textContent = '—'; setTimeout(()=>{ nudgeBtn.disabled = false; nudgeBtn.textContent = '👉 Dürt'; }, 1400); }
           });
         }
       });

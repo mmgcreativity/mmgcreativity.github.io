@@ -974,13 +974,19 @@
       // Her üyenin kendi profilindeki kullanıcı kodunu (users/{uid}.customerNumber) çekiyoruz;
       // listede e-posta yerine bu kodu ("#1001" gibi) göstermek için kullanılacak.
       await Promise.all(memberDocs.map(async (m) => {
+        m.code = null; m.displayName = null;
         try{
           const uSnap = await getDoc(doc(db, 'users', m.id));
-          const ud = uSnap.exists() ? uSnap.data() : {};
-          m.code = ud.customerNumber || null;
-          // İsim: üst-seviye username yoksa profile.name'e bak (bazı hesaplar ismi orada tutuyor).
-          m.displayName = ud.username || (ud.profile && ud.profile.name) || null;
-        }catch(e){ m.code = null; m.displayName = null; }
+          if(uSnap.exists()){ const ud = uSnap.data(); m.code = ud.customerNumber || null; m.displayName = ud.username || (ud.profile && ud.profile.name) || null; }
+        }catch(e){}
+        // users/{uid} okunamazsa (Firestore kuralları başka kullanıcının dokümanını engelleyebilir),
+        // herkese-açık userDirectory'den (customerNumber ile anahtarlı, uid alanlı) kod + adı çek.
+        if(!m.code || !m.displayName){
+          try{
+            const dq = await getDocs(query(collection(db, 'userDirectory'), where('uid', '==', m.id)));
+            if(!dq.empty){ const dd = dq.docs[0]; if(!m.code) m.code = dd.id; if(!m.displayName) m.displayName = (dd.data().username || null); }
+          }catch(e){}
+        }
       }));
 
       // ---- Geriye dönük uyumluluk: bu düzeltmeden ÖNCE oluşturulmuş üyelik kayıtlarında

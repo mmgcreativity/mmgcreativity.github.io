@@ -702,8 +702,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .deco{ display:none; }
     .card-grid{ gap:10px; }
     .app-card{ padding:16px; width:100%; height:auto; }
-    .app-card p{ display:block; font-size:12.5px; line-height:1.5; margin-top:6px; }
-    .app-card h3{ margin-bottom:4px; }
+    /* Mobil: kartlarda sadece ana başlık kalsın; açıklama (alt başlık) gizli — yer kazanır. */
+    .app-card p{ display:none !important; }
+    .app-card h3{ margin-bottom:0; }
+    /* Mobil: marka logosu + başlık çok yer kaplıyordu — küçültülüp hero'ya yaklaştırıldı. */
+    .brand-row-logo, .brand-row-fallback{ height:88px !important; width:88px !important; border-radius:20px; font-size:34px; }
+    .brand-title{ font-size:15px; }
     .card-grid.edit-mode .app-card.resizable{ resize:none; }
     .card-grid.edit-mode .app-card.resizable .card-resize-hint{ display:none; }
     .desktop-toolbar{ position:absolute; top:6px; right:14px; margin:0; justify-content:flex-end; z-index:16; }
