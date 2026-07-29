@@ -384,7 +384,10 @@ function mmgApplyTurkishFont(doc){
        taşmasına ve sayfanın altında gereksiz bir yatay kaydırma çubuğu çıkmasına
        sebep oluyordu. Dar ekranda bu alt sınırı kaldırıyoruz; A4 önizleme zaten
        JS tarafında (mmgApplyPreviewScale) mevcut genişliğe göre ölçekleniyor. */
-    .doc-preview-row .doc-preview{ min-width:0; }
+    /* mmgcreativity (tablet fix): tek kolona düşünce aspect-ratio + min-height:480px
+       önizlemeyi ~339px'e sıkıştırıp sola yaslıyor, sağda büyük boşluk kalıyordu.
+       Tam genişliğe yaydırıyoruz (min-height'i aspect-ratio yönetsin). */
+    .doc-preview-row .doc-preview{ min-width:0; width:100%; min-height:0; }
   }
 
   .form-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:26px; }
