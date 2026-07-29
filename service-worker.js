@@ -10,7 +10,7 @@
  * firebase-messaging-service-worker.js dosyası gerekir; bu dosya onun yerini tutmaz.
  */
 
-const SW_VERSION = '2026-07-29-kayit-tarihi-fix';
+const SW_VERSION = '2026-07-29-iban-dedup-kullanici';
 
 // Yeni sürüm yayınlanınca hemen devreye girsin (bekleyen SW'yi atla).
 self.addEventListener('install', () => {

@@ -1404,13 +1404,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       .filter(b => !bankSel || ((b.banka || '').trim().toLowerCase() === bankSel))
       // Aynı IBAN birden fazla kez listelenmesin.
       .filter(b => {
-        const key = (b.iban || '').toUpperCase().replace(/\s+/g, '');
-        if(!key) return true;
+        const ibanKey = (b.iban || '').toUpperCase().replace(/\s+/g, '');
+        // IBAN yoksa etiket+firma+banka bileşimine göre tekilleştir; böylece boş IBAN'lı
+        // aynı görünen tekrarlar da (kullanıcının şikâyeti) tek satıra iner.
+        const key = ibanKey || ('L|' + (b.label||'').trim().toLowerCase() + '|' + (b.firma||'').trim().toLowerCase() + '|' + (b.banka||'').trim().toLowerCase());
         if(seen.has(key)) return false;
         seen.add(key); return true;
       });
     const prevVal = sel.value;
-    sel.innerHTML = '<option value="">📋 Kayıtlı</option>' + matches.map(b => `<option value="${b.i}">${b.label}</option>`).join('');
+    // Etikete IBAN'ı ekle ki aynı firma/bankadaki farklı hesaplar ayırt edilebilsin.
+    sel.innerHTML = '<option value="">📋 Kayıtlı</option>' + matches.map(b => {
+      const ib = (b.iban || '').trim();
+      const extra = ib ? ' · ' + ib + (b.currency ? ' ' + b.currency : '') : '';
+      return `<option value="${b.i}">${b.label}${extra}</option>`;
+    }).join('');
     if(matches.some(b => String(b.i) === prevVal)) sel.value = prevVal;
   }
 

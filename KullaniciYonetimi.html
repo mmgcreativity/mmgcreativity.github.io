@@ -950,8 +950,8 @@
           '<div class="member-row" data-uid="' + id + '">' +
             '<div class="member-row-top">' +
               '<div class="member-info">' +
-                '<div class="member-name">' + (code ? '<span style="color:var(--brass,#C6A15B); font-weight:700;">#' + code + '</span> ' : '') + (displayName || md.username || md.email || 'Kullanıcı') + '</div>' +
-                '<div class="member-sub">' + (md.email && (displayName || md.username) ? md.email : '') + '</div>' +
+                '<div class="member-name">' + (code ? '<span style="color:var(--brass,#C6A15B); font-weight:700;">#' + code + '</span> ' : '') + (displayName || md.username || (md.email ? md.email.split('@')[0] : '') || 'Kullanıcı') + '</div>' +
+                '<div class="member-sub">' + (md.email || '') + '</div>' +
               '</div>' +
               '<div class="member-row-actions">' +
                 '<button type="button" class="member-icon-btn member-edit-btn" data-edit="' + id + '" title="' + LBL.editPerms + '" aria-label="' + LBL.editPerms + '">✏️</button>' +
