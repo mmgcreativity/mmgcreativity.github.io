@@ -260,7 +260,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="panel-head">
         <div class="panel-title fatura" data-i18n="invoices_title">📄 Faturalar</div>
       </div>
-      <div class="panel-desc" data-i18n-html="invoices_desc">Fatura tarihi, çalışma koşulu ve vade gün sayısını girin — vade tarihi otomatik hesaplanır. <b>Çalışma Şekli:</b> vadenin faturanın tarihine mi (<b>Fatura +</b>) yoksa ayının sonuna mı (<b>Ay sonu +</b>) ekleneceğini belirler.</div>
+      <div class="panel-desc" data-i18n-html="invoices_desc">Fatura tarihi, çalışma koşulu (<b>vade faturanın tarihine mi, ay sonuna mı</b>) ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.</div>
       <div class="row-table" id="faturaRows"></div>
       <button type="button" class="add-btn fatura" id="addFaturaBtn" data-i18n="add_invoice">+ Fatura Ekle</button>
       <div class="subtotal-line"><span data-i18n="total_invoice_amount">Toplam Fatura Tutarı</span><b id="faturaToplam" class="mono">0,00</b></div>
@@ -688,7 +688,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       page_title:'Vade Sapma Hesaplama',
       page_subtitle:'Fatura vadeleriniz ile tahsil ettiğiniz çeklerin vadelerini karşılaştırın; ortalama kaç gün sapma olduğunu ve karşılama oranını görün.',
       reset_btn:'Sıfırla', back_home:'← Ana Sayfa',
-      invoices_title:'📄 Faturalar', invoices_desc:'Fatura tarihi, çalışma koşulu ve vade gün sayısını girin — vade tarihi otomatik hesaplanır. <b>Çalışma Şekli:</b> vadenin faturanın tarihine mi (<b>Fatura +</b>) yoksa ayının sonuna mı (<b>Ay sonu +</b>) ekleneceğini belirler.',
+      invoices_title:'📄 Faturalar', invoices_desc:'Fatura tarihi, çalışma koşulu (<b>vade faturanın tarihine mi, ay sonuna mı</b>) ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.',
       add_invoice:'+ Fatura Ekle', total_invoice_amount:'Toplam Fatura Tutarı',
       checks_title:'🧾 Çekler', checks_desc:'Tahsil ettiğiniz / vadesi gelen çeklerin tarih ve tutarlarını girin.',
       add_check:'+ Çek Ekle', total_check_amount:'Toplam Çek Tutarı',
@@ -700,7 +700,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       page_title:'Maturity Deviation Calculator',
       page_subtitle:'Compare your invoice due dates against the checks you collect; see the average deviation in days and the coverage ratio.',
       reset_btn:'Reset', back_home:'← Home',
-      invoices_title:'📄 Invoices', invoices_desc:'Enter invoice date, terms, and number of due days — the due date is calculated automatically. <b>Terms:</b> sets whether the term is added to the invoice date (<b>Invoice +</b>) or to the end of its month (<b>Month-end +</b>).',
+      invoices_title:'📄 Invoices', invoices_desc:'Enter the invoice date, terms (<b>whether the due date is based on the invoice date or month-end</b>) and the number of due days — the due date is calculated automatically.',
       add_invoice:'+ Add Invoice', total_invoice_amount:'Total Invoice Amount',
       checks_title:'🧾 Checks', checks_desc:'Enter the date and amount of checks you collect / that are due.',
       add_check:'+ Add Check', total_check_amount:'Total Check Amount',

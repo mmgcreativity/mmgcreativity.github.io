@@ -201,6 +201,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .nav-subitem{ padding:9px 10px; margin-bottom:0; border-radius:8px; }
   .nav-subitem:hover{ background:rgba(255,255,255,0.05); }
   .nav-subitem .nav-title{ font-size:13.5px; font-weight:600; }
+  .nav-drawer-section{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding:9px 12px 4px; user-select:none; }
+  .nav-drawer-section:first-child{ padding-top:2px; }
   /* Mobil: masaüstü "düzenle" (kalem) araç çubuğunu gizle ve menüde alt-menüleri gösterme
      — sadece ana başlıklar kalsın (kullanıcı isteği). */
   @media (max-width:860px){
@@ -936,6 +938,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   // MMGI18N.t() çağırdığında sözlük henüz hazır olmuyor, ham anahtar adı görünüyordu). ----
   MMGI18N.registerDict({
     tr: {
+      nav_sec_krediler:'Krediler', nav_sec_diger:'Diğer Araçlar',
       nav_home:'Ana Sayfa', nav_calc:'Hesaplamalar', nav_rotatif:'Rotatif Kredi', nav_ortalama:'Ortalama Vade',
       nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması', nav_vadelimevduat:'Vadeli Mevduat Faizi',
       nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
@@ -1046,6 +1049,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       scroll_down:'Aşağı kaydır', remove_from_list:'Listeden kaldır'
     },
     en: {
+      nav_sec_krediler:'Loans', nav_sec_diger:'Other Tools',
       nav_home:'Home', nav_calc:'Calculators', nav_rotatif:'Revolving Loan Calculator', nav_ortalama:'Average Maturity Calculator',
       nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
       nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
@@ -1375,10 +1379,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span class="nav-drawer-chevron" id="hesaplamaChevron">›</span>
     </button>
     <div class="nav-drawer" id="hesaplamaDrawer" hidden>
+      <div class="nav-drawer-section" data-i18n="nav_sec_krediler">Krediler</div>
       <button class="nav-item nav-subitem" data-target="Rotatif_Kredi_Hesaplama.html" data-title="Rotatif Kredi Hesaplama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Rotatif_Kredi_Hesaplama.html" data-fav-title="Rotatif Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_rotatif">Rotatif Kredi Hesaplama</span></span>
       </button>
+      <button class="nav-item nav-subitem" data-target="aylik-taksitli-kredi-hesaplama.html" data-title="Taksitli Kredi Hesaplama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="aylik-taksitli-kredi-hesaplama.html" data-fav-title="Taksitli Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_taksitli">Taksitli Kredi Hesaplama</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="kredi-karsilastirma.html" data-title="Kredi Tekliflerini Karşılaştır">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="kredi-karsilastirma.html" data-fav-title="Kredi Tekliflerini Karşılaştır" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_krediteklif">Kredi Tekliflerini Karşılaştır</span></span>
+      </button>
+      <div class="nav-drawer-section" data-i18n="nav_sec_diger">Diğer Araçlar</div>
       <button class="nav-item nav-subitem" data-target="Ortalama_Vade_Hesaplama.html" data-title="Ortalama Vade Hesaplama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Ortalama_Vade_Hesaplama.html" data-fav-title="Ortalama Vade Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_ortalama">Ortalama Vade Hesaplama</span></span>
@@ -1394,14 +1408,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <button class="nav-item nav-subitem" data-target="vadeli-mevduat-faizi-hesaplama.html" data-title="Vadeli Mevduat Faizi Hesaplama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="vadeli-mevduat-faizi-hesaplama.html" data-fav-title="Vadeli Mevduat Faizi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_vadelimevduat">Vadeli Mevduat Faizi Hesaplama</span></span>
-      </button>
-      <button class="nav-item nav-subitem" data-target="kredi-karsilastirma.html" data-title="Kredi Tekliflerini Karşılaştır">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="kredi-karsilastirma.html" data-fav-title="Kredi Tekliflerini Karşılaştır" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_krediteklif">Kredi Tekliflerini Karşılaştır</span></span>
-      </button>
-      <button class="nav-item nav-subitem" data-target="aylik-taksitli-kredi-hesaplama.html" data-title="Taksitli Kredi Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="aylik-taksitli-kredi-hesaplama.html" data-fav-title="Taksitli Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_taksitli">Taksitli Kredi Hesaplama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="teminat-mektubu-komisyonu-hesaplama.html" data-title="Teminat Mektubu Komisyonu">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="teminat-mektubu-komisyonu-hesaplama.html" data-fav-title="Teminat Mektubu Komisyonu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
@@ -1424,13 +1430,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span class="nav-drawer-chevron" id="butcelemeChevron">›</span>
     </button>
     <div class="nav-drawer" id="butcelemeDrawer" hidden>
-      <button class="nav-item nav-subitem" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_nakitakis">Nakit Akış Tablosu</span></span>
-      </button>
       <button class="nav-item nav-subitem" data-target="Gunluk_Panorama.html" data-title="Günlük Panorama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Gunluk_Panorama.html" data-fav-title="Günlük Panorama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_panorama">Günlük Panorama</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_nakitakis">Nakit Akış Tablosu</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="Gelirler.html" data-title="Gelirler">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
