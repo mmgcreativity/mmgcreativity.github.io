@@ -1376,12 +1376,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   // çünkü IBAN'larım kaydı bir firma/kişi değil, kullanıcının kendi banka hesabıdır.
   document.getElementById('downloadBanksTemplateBtn').addEventListener('click', () => {
     try{
-      const header = [LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol, LBL.bulkNoteCol];
-      const example1 = ['Ziraat Bankası', 'TR000000000000000000000000', 'TRY', 'Yozgat şubesi'];
-      const example2 = ['Ziraat Bankası', 'TR111111111111111111111111', 'USD', 'Kars şubesi'];
+      const header = ['Firma', LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol, LBL.bulkNoteCol];
+      const example1 = ['YAŞAR CİHAN HAZIR BETON', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY', 'Yozgat şubesi'];
+      const example2 = ['ADERANS MADENCİLİK', 'Akbank', 'TR111111111111111111111111', 'USD', 'Kars şubesi'];
       const rows = [header, example1, example2];
       const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols'] = [{wch:24},{wch:30},{wch:10},{wch:22}];
+      ws['!cols'] = [{wch:28},{wch:24},{wch:30},{wch:10},{wch:22}];
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, MMG_LANG==='en' ? 'Template' : 'Şablon');
       XLSX.writeFile(wb, 'iban-sablon.xlsx');
@@ -1405,12 +1405,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
       const rows = [];
       for(const row of json){
+        const firmaName = String(row['Firma'] ?? row['Company'] ?? '').trim();
         const bank = String(row['Banka'] ?? row['Bank'] ?? '').trim();
         const iban = String(row['IBAN'] ?? '').trim().toUpperCase().replace(/\s+/g, '');
         const currency = String(row['Döviz'] ?? row['Doviz'] ?? row['Currency'] ?? '').trim().toUpperCase() || 'TRY';
         const note = String(row['Açıklama'] ?? row['Aciklama'] ?? row['Note'] ?? row['Description'] ?? '').trim();
         if(!bank && !iban) continue;
-        rows.push({ bank, iban, currency, note });
+        rows.push({ firmaName, bank, iban, currency, note });
       }
 
       if(!rows.length){ showMsg('banksBulkMsg', LBL.bulkNoRows, true); return; }
@@ -1425,8 +1426,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   function renderBanksBulkPreview(rows){
     const wrap = document.getElementById('banksBulkPreviewWrap');
     const table = document.getElementById('banksBulkPreviewTable');
-    const trs = rows.map(r => '<tr><td>' + escapeHtml(r.bank||'—') + '</td><td>' + escapeHtml(r.iban||'—') + '</td><td>' + escapeHtml(r.currency||'TRY') + '</td><td>' + escapeHtml(r.note||'') + '</td></tr>');
-    table.innerHTML = '<thead><tr><th>' + LBL.bulkBankCol + '</th><th>' + LBL.bulkIbanCol + '</th><th>' + LBL.bulkCurrencyCol + '</th><th>' + LBL.bulkNoteCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
+    const trs = rows.map(r => '<tr><td>' + escapeHtml(r.firmaName||'—') + '</td><td>' + escapeHtml(r.bank||'—') + '</td><td>' + escapeHtml(r.iban||'—') + '</td><td>' + escapeHtml(r.currency||'TRY') + '</td><td>' + escapeHtml(r.note||'') + '</td></tr>');
+    table.innerHTML = '<thead><tr><th>Firma</th><th>' + LBL.bulkBankCol + '</th><th>' + LBL.bulkIbanCol + '</th><th>' + LBL.bulkCurrencyCol + '</th><th>' + LBL.bulkNoteCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
     document.getElementById('banksBulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: rows.length, p: rows.length });
     wrap.style.display = 'block';
   }
@@ -1445,13 +1446,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     try{
       // Mevcut ve bu partideki IBAN'ları izle; aynı IBAN'ı bir daha ekleme.
       const seenIbans = new Set(banksList.map(b => (b.iban||'').toUpperCase().replace(/\s+/g,'')).filter(Boolean));
+      // Firma adı → id eşlemesi (Excel'deki "Firma" kolonuna göre IBAN'ı doğru firmaya bağla).
+      const nameToId = {};
+      (groupFirmaMembers || []).forEach(m => { nameToId[(m.name||'').trim().toLocaleLowerCase('tr-TR')] = m.id; });
       let count = 0, skipped = 0;
       for(const r of pendingBanksBulkRows){
         const ibanKey = (r.iban||'').toUpperCase().replace(/\s+/g,'');
         if(ibanKey && seenIbans.has(ibanKey)){ skipped++; continue; }
         if(ibanKey) seenIbans.add(ibanKey);
         const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
-        await setDoc(docRef('banks', id), { name: r.bank, iban: r.iban, currency: r.currency || 'TRY', note: r.note || '', createdAt: serverTimestamp() });
+        const docData = { name: r.bank, iban: r.iban, currency: r.currency || 'TRY', note: r.note || '', createdAt: serverTimestamp() };
+        // Firma kolonu doluysa ve eşleşiyorsa, bu IBAN'ı yalnızca o firmaya bağla (appliesToFirmaIds).
+        const fid = r.firmaName ? nameToId[r.firmaName.trim().toLocaleLowerCase('tr-TR')] : null;
+        if(fid) docData.appliesToFirmaIds = [fid];
+        await setDoc(docRef('banks', id), docData);
         count++;
       }
       showMsg('banksBulkMsg', fmt(LBL.bulkDone, { n: count }) + (skipped ? ' (' + skipped + ' ' + (MMG_LANG==='en'?'duplicate skipped':'tekrar atlandı') + ')' : ''), false);
