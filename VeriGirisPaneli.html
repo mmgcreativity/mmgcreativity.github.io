@@ -467,6 +467,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div id="bank_firmaSelect"></div>
         <button type="button" class="auth-submit" id="addBankBtn" data-i18n="add_bank_btn">Ekle</button>
         <div class="bank-chip-list" id="banksChipList"></div>
+        <button type="button" id="deleteAllBanksBtn" style="margin-top:10px; width:100%; background:transparent; border:1px solid rgba(226,84,75,0.5); color:var(--red,#E2544B); border-radius:9px; padding:9px 0; font-weight:600; cursor:pointer;">🗑 Tüm IBAN'ları Sil</button>
         <div class="form-msg" id="banks_msg"></div>
       </div>
     </div>
@@ -993,6 +994,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       showMsg('banks_msg', LBL.saved, false);
       await loadBanks();
     }catch(e){ showMsg('banks_msg', LBL.saveFailed, true); }
+  });
+
+  // Tüm IBAN'ları sil (kullanıcı isteği: bozuk/toplu veriyi temizleyip doğrusunu yeniden yüklemek için).
+  // Çift onaylı — geri döndürülemez toplu silme.
+  document.getElementById('deleteAllBanksBtn').addEventListener('click', async () => {
+    if(!confirm('TÜM kayıtlı IBAN\'lar silinecek. Bu işlem GERİ ALINAMAZ. Emin misiniz?')) return;
+    if(!confirm('Son kez soruyorum: bütün IBAN kayıtları kalıcı olarak silinsin mi?')) return;
+    const btn = document.getElementById('deleteAllBanksBtn');
+    btn.disabled = true;
+    showMsg('banks_msg', 'Siliniyor…', false);
+    try{
+      const snap = await getDocs(colRef('banks'));
+      let n = 0;
+      for(const d of snap.docs){ try{ await deleteDoc(docRef('banks', d.id)); n++; }catch(e){} }
+      showMsg('banks_msg', n + ' IBAN silindi.', false);
+      await loadBanks();
+    }catch(e){ showMsg('banks_msg', 'Silme başarısız, tekrar deneyin.', true); }
+    finally{ btn.disabled = false; }
   });
 
   function ibanRowHtml(idx, prefix, values){

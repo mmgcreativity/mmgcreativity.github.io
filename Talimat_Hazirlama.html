@@ -448,7 +448,7 @@ function mmgApplyTurkishFont(doc){
   .mmg-person-row .mmg-person-remove{ flex:0 0 34px; width:34px; }
   .mmg-person-row .mmg-person-input, .mmg-person-row .mmg-person-tc, .mmg-person-row .mmg-person-saved{ height:32px; padding-top:0; padding-bottom:0; }
   .mmg-person-row .xcell-savebtn{ height:32px; padding:0; align-self:stretch; }
-  .xcell-group{ border:1px solid var(--hairline); border-radius:6px; overflow:hidden; margin-bottom:8px; }
+  .xcell-group{ border:1px solid var(--hairline); border-radius:6px; overflow:visible; margin-bottom:8px; }
   .xcell-title{
     font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15.5px; color:var(--text);
     text-transform:uppercase; letter-spacing:.045em; margin:12px 0 10px;
@@ -1655,7 +1655,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(q) items = items.filter(f => (f.name || '').toLocaleLowerCase('tr').includes(q));
       items = items.slice(0, 12);
       if(!items.length){ listEl.innerHTML = '<div class="mmg-ac-empty">Grup firması yok.</div>'; listEl.classList.add('open'); return; }
-      listEl.innerHTML = items.map(f => '<div class="mmg-ac-item" data-name="' + escapeHtmlMmg(f.name) + '"><span>' + escapeHtmlMmg(f.name) + '</span><span class="mmg-ac-meta">GRUP FİRMASI</span></div>').join('');
+      listEl.innerHTML = items.map(f => '<div class="mmg-ac-item" data-name="' + escapeHtmlMmg(f.name) + '"><span>' + escapeHtmlMmg(f.name) + '</span></div>').join('');
       listEl.classList.add('open');
       Array.from(listEl.querySelectorAll('.mmg-ac-item')).forEach(el => {
         el.addEventListener('mousedown', (ev) => { ev.preventDefault(); const f = (myFirms || []).find(x => x.name === el.getAttribute('data-name')); if(f) pick(f); });

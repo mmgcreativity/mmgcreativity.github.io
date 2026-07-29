@@ -1,37 +1,51 @@
 /* service-worker.js — MMG Creativity PWA
- * Amaç: "Ana Ekrana Ekle" (PWA install) desteği için gereken minimal service worker.
+ * PWA install desteği + HIZLI açılış için statik dosya önbelleği.
  *
- * Tasarım kararı: AGRESİF CACHE YOK. İçerik sürekli güncellendiği (finans verisi, sürüm
- * çıkışları) için burada dosya önbelleğe alınmaz — bayat/eski içerik riski önlenir. Chrome'un
- * installability şartı yalnızca bir "fetch" dinleyicisidir; bu yüzden istekler doğrudan ağa
- * geçirilir (network passthrough) ve ağ yoksa (offline) önbellekte varsa geri dönülür.
+ * Strateji: stale-while-revalidate (yalnızca KENDİ origin'imizdeki GET istekleri için).
+ *  - Önbellekte varsa ANINDA döner (modüller hızlı açılır), arka planda ağdan tazelenir.
+ *  - Yeni deploy'da SW_VERSION değişir → yeni cache adı → eski cache silinir → kullanıcı
+ *    ilk açılışta güncel kodu çeker. Böylece hız + tazelik birlikte sağlanır.
+ *  - Cross-origin (Firestore/Firebase/CDN) ve non-GET istekler DOKUNULMAZ (doğrudan ağ).
+ *    Kullanıcı verisi runtime'da Firestore'dan geldiği için önbellek onu bayatlatmaz.
  *
- * İleride (#16 mobil push / offline destek) genişletilebilir. FCM için AYRI bir
- * firebase-messaging-service-worker.js dosyası gerekir; bu dosya onun yerini tutmaz.
+ * FCM için AYRI bir firebase-messaging-service-worker.js gerekir; bu dosya onun yerini tutmaz.
  */
 
-const SW_VERSION = '2026-07-29-firma-trash-kullanici-detay';
+const SW_VERSION = '2026-07-29-cache-hizli';
+const CACHE = 'mmg-' + SW_VERSION;
 
-// Yeni sürüm yayınlanınca hemen devreye girsin (bekleyen SW'yi atla).
 self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
-// Aktivasyonda eski önbellekleri temizle ve açık sekmelerin kontrolünü hemen al.
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.map((key) => caches.delete(key)));
+    await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
     await self.clients.claim();
   })());
 });
 
-// Ağ öncelikli: her istek doğrudan ağa gider; ağ başarısız olursa (offline) önbellekte
-// varsa ondan yanıt ver. Önbelleğe yazma yapılmadığı için normalde eşleşme bulunmaz —
-// bu bilinçli bir tercih (bayat içerik yok).
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-  event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
-  );
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  let url;
+  try { url = new URL(req.url); } catch (e) { return; }
+  // Yalnızca kendi origin'imizin statik dosyalarını önbelleğe al.
+  if (url.origin !== self.location.origin) return; // cross-origin → tarayıcı/ağ yönetir
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const cached = await cache.match(req);
+    const networkPromise = fetch(req).then((res) => {
+      // Yalnızca başarılı, aynı-origin (basic) yanıtları önbelleğe yaz.
+      if (res && res.status === 200 && res.type === 'basic') {
+        try { cache.put(req, res.clone()); } catch (e) {}
+      }
+      return res;
+    }).catch(() => null);
+    // Önbellekte varsa anında ver (arka planda güncellenir); yoksa ağdan bekle.
+    if (cached) { networkPromise; return cached; }
+    const net = await networkPromise;
+    return net || fetch(req);
+  })());
 });
