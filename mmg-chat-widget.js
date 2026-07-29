@@ -500,8 +500,8 @@ import {
     <div id="mmgChatCodeBox" class="mmg-chat-code-box"></div>
     <div class="mmg-chat-tabs" id="mmgChatTabs">
       <div class="mmg-chat-tab active" data-tab="friends">Kişilerim</div>
-      <div class="mmg-chat-tab" data-tab="requests">İstek<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
       <div class="mmg-chat-tab" data-tab="groups">Grup</div>
+      <div class="mmg-chat-tab" data-tab="requests">İstek<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
     </div>
     <div class="mmg-chat-body" id="mmgChatBody"></div>
     <button type="button" id="mmgChatNewBtn" class="mmg-chat-fab" aria-label="Yeni sohbet" title="Yeni sohbet başlat" hidden>+</button>
@@ -1246,8 +1246,18 @@ import {
     let html = '';
     if(firmaMemberInvites.length) html += renderGroupedMemberInviteCard(firmaMemberInvites);
     if(firmaAdminInvite) html += renderInviteCard(firmaAdminInvite, 'admin');
+    if(notifList.length){
+      html += '<div style="display:flex; justify-content:flex-end; margin-bottom:8px;"><button type="button" id="mmgNotifClearAll" style="background:transparent; border:1px solid rgba(226,84,75,0.5); color:#E2544B; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:600; cursor:pointer;">🗑 Tümünü Sil</button></div>';
+    }
     html += notifList.map(renderNotifItem).join('');
     els.body.innerHTML = html;
+
+    const clearAllBtn = document.getElementById('mmgNotifClearAll');
+    if(clearAllBtn) clearAllBtn.addEventListener('click', async () => {
+      if(!confirm('Tüm bildirimler silinsin mi?')) return;
+      clearAllBtn.disabled = true;
+      for(const n of notifList){ await deleteNotification(n._id); }
+    });
 
     notifList.forEach(n => {
       const delBtn = document.getElementById('mmgNotifDel_' + n._id);

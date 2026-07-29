@@ -203,6 +203,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .nav-subitem .nav-title{ font-size:13.5px; font-weight:600; }
   .nav-drawer-section{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding:9px 12px 4px; user-select:none; }
   .nav-drawer-section:first-child{ padding-top:2px; }
+  /* 3. seviye sağa açılan alt-menü (ör. Krediler): fareyle üzerine gelince sağda açılır. */
+  .nav-subwrap{ position:relative; }
+  .nav-subwrap > .nav-item .nav-drawer-chevron{ display:inline-block; margin-left:auto; }
+  .nav-subdrawer{
+    position:absolute; left:calc(100% + 6px); top:-8px; min-width:220px; z-index:600;
+    display:flex; flex-direction:column; gap:2px;
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:12px;
+    padding:8px; box-shadow:0 14px 34px rgba(0,0,0,0.45);
+    opacity:0; transform:translateX(-6px); pointer-events:none;
+    transition:opacity .16s ease, transform .16s ease;
+  }
+  .nav-subdrawer::before{ content:''; position:absolute; left:-12px; top:0; width:12px; height:100%; }
+  .nav-subwrap:hover > .nav-subdrawer, .nav-subwrap:focus-within > .nav-subdrawer{ opacity:1; transform:translateX(0); pointer-events:auto; }
+  @media (max-width:860px){ .nav-subdrawer{ display:none !important; } }
   /* Mobil: masaüstü "düzenle" (kalem) araç çubuğunu gizle ve menüde alt-menüleri gösterme
      — sadece ana başlıklar kalsın (kullanıcı isteği). */
   @media (max-width:860px){
@@ -486,7 +500,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .card-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(var(--dfa-card-w, 300px), 1fr)); align-items:start; gap:18px; max-width:1400px; position:relative; }
   .card-grid.drag-over{ outline:2px dashed var(--brass); outline-offset:8px; border-radius:16px; background:rgba(198,161,91,0.05); }
   .desktop-toolbar{
-    position:absolute; top:40px; right:24px; z-index:15;
+    position:fixed; top:64px; right:24px; z-index:15;
     display:flex; align-items:flex-start; justify-content:flex-end; gap:12px; margin-bottom:0;
   }
   .desktop-edit-btn{
@@ -941,7 +955,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_sec_krediler:'Krediler', nav_sec_diger:'Diğer Araçlar',
       nav_home:'Ana Sayfa', nav_calc:'Hesaplamalar', nav_rotatif:'Rotatif Kredi', nav_ortalama:'Ortalama Vade',
       nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması', nav_vadelimevduat:'Vadeli Mevduat Faizi',
-      nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
+      nav_krediteklif:'Kredi Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
       nav_taksitli:'Taksitli Kredi', nav_teminat:'Teminat Mektubu Komisyonu', nav_cekiskonto:'Çek İskontosu', nav_sozluk:'Finans Sözlüğü', nav_entegrasyon:'Entegrasyon',
       nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları', nav_verigirisi:'Veri Girişi', nav_verigirisi_panel:'Veri Giriş Paneli', nav_label_araclar:'Araçlar',
       nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Keşfet', nav_label_verigirisi:'Veri Girişi', nav_label_verianalizi:'Veri Yönetimi',
@@ -1052,7 +1066,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_sec_krediler:'Loans', nav_sec_diger:'Other Tools',
       nav_home:'Home', nav_calc:'Calculators', nav_rotatif:'Revolving Loan Calculator', nav_ortalama:'Average Maturity Calculator',
       nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
-      nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
+      nav_krediteklif:'Compare Loans', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
       nav_taksitli:'Installment Loan Calculator', nav_teminat:'Letter of Guarantee Commission', nav_cekiskonto:'Cheque Discount', nav_sozluk:'Finance Glossary', nav_entegrasyon:'Integration',
       nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools', nav_verigirisi:'Data Entry', nav_verigirisi_panel:'Data Entry Panel', nav_label_araclar:'Tools',
       nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Explore', nav_label_verigirisi:'Data Entry', nav_label_verianalizi:'Data Management',
@@ -1379,19 +1393,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span class="nav-drawer-chevron" id="hesaplamaChevron">›</span>
     </button>
     <div class="nav-drawer" id="hesaplamaDrawer" hidden>
-      <div class="nav-drawer-section" data-i18n="nav_sec_krediler">Krediler</div>
-      <button class="nav-item nav-subitem" data-target="Rotatif_Kredi_Hesaplama.html" data-title="Rotatif Kredi Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Rotatif_Kredi_Hesaplama.html" data-fav-title="Rotatif Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_rotatif">Rotatif Kredi Hesaplama</span></span>
-      </button>
-      <button class="nav-item nav-subitem" data-target="aylik-taksitli-kredi-hesaplama.html" data-title="Taksitli Kredi Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="aylik-taksitli-kredi-hesaplama.html" data-fav-title="Taksitli Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_taksitli">Taksitli Kredi Hesaplama</span></span>
-      </button>
-      <button class="nav-item nav-subitem" data-target="kredi-karsilastirma.html" data-title="Kredi Tekliflerini Karşılaştır">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="kredi-karsilastirma.html" data-fav-title="Kredi Tekliflerini Karşılaştır" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_krediteklif">Kredi Tekliflerini Karşılaştır</span></span>
-      </button>
+      <div class="nav-subwrap">
+        <button type="button" class="nav-item nav-subitem" style="width:100%;" aria-haspopup="true">
+          <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_sec_krediler">Krediler</span></span>
+          <span class="nav-drawer-chevron">›</span>
+        </button>
+        <div class="nav-subdrawer">
+          <button class="nav-item nav-subitem" data-target="Rotatif_Kredi_Hesaplama.html" data-title="Rotatif Kredi Hesaplama">
+            <span class="fav-star" role="button" tabindex="0" data-fav-target="Rotatif_Kredi_Hesaplama.html" data-fav-title="Rotatif Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+            <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_rotatif">Rotatif Kredi Hesaplama</span></span>
+          </button>
+          <button class="nav-item nav-subitem" data-target="aylik-taksitli-kredi-hesaplama.html" data-title="Taksitli Kredi Hesaplama">
+            <span class="fav-star" role="button" tabindex="0" data-fav-target="aylik-taksitli-kredi-hesaplama.html" data-fav-title="Taksitli Kredi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+            <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_taksitli">Taksitli Kredi Hesaplama</span></span>
+          </button>
+          <button class="nav-item nav-subitem" data-target="kredi-karsilastirma.html" data-title="Kredi Karşılaştır">
+            <span class="fav-star" role="button" tabindex="0" data-fav-target="kredi-karsilastirma.html" data-fav-title="Kredi Karşılaştır" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+            <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_krediteklif">Kredi Karşılaştır</span></span>
+          </button>
+        </div>
+      </div>
       <div class="nav-drawer-section" data-i18n="nav_sec_diger">Diğer Araçlar</div>
       <button class="nav-item nav-subitem" data-target="Ortalama_Vade_Hesaplama.html" data-title="Ortalama Vade Hesaplama">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Ortalama_Vade_Hesaplama.html" data-fav-title="Ortalama Vade Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
