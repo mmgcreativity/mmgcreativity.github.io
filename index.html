@@ -4121,15 +4121,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(!wrap) return;
     if(!mmgFirmaMemberships.length){
       wrap.style.display = 'none'; // değiştirilecek firma yok → geçiş menüsü gizli
-      // Firması olmayan kullanıcıda da sol-alt çubuk hangi kapsamda çalışıldığını göstersin:
-      // artık gizlemiyoruz, "Kendi Hesabım" (kişisel veri) olarak etiketliyoruz.
-      if(firmaBar && firmaBarName){
-        // "#kod ad" biçimi (kullanıcı isteği): kişisel kapsamda da kodun sağına ad gelsin.
-        const _no = localStorage.getItem('mmg_customer_no');
-        const _un = localStorage.getItem('mmg_username');
-        firmaBarName.textContent = '👤 ' + (_no ? ('#' + _no + (_un ? ' ' + _un : '')) : (_un || 'Kendi Hesabım'));
-        firmaBar.hidden = false;
-      }
+      // Kullanıcı isteği: firma YOKSA sol-alt kapsam çubuğuna (firma değiştirici) gerek yok —
+      // kimlik zaten sağ-üst hesap rozetinde "#kod ad" olarak görünüyor, mükerrer olmasın.
+      if(firmaBar){ firmaBar.hidden = true; }
       return;
     }
     wrap.style.display = 'none'; // firma listesi üst hesap menüsünde GÖSTERİLMİYOR (sol-alt popup'ta)
@@ -4578,13 +4572,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <style>
   #mmgSettingsOverlay{
     position:fixed; inset:0; z-index:920; background:rgba(5,8,14,0.7);
-    display:flex; align-items:center; justify-content:center; padding:20px;
+    display:flex; align-items:stretch; justify-content:stretch; padding:0;
   }
   #mmgSettingsOverlay[hidden]{ display:none; }
+  /* Tam ekran Ayarlar (kullanıcı isteği): panel tüm ekranı kaplar, içerik ortada
+     okunur bir kolonda toplanır. */
   #mmgSettingsPanel{
-    width:100%; max-width:380px; background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448);
-    border-radius:16px; box-shadow:0 24px 60px rgba(0,0,0,0.5); padding:22px;
+    width:100%; height:100%; max-width:none; background:var(--surface,#141C2B); border:none;
+    border-radius:0; box-shadow:none; padding:40px 22px calc(40px + env(safe-area-inset-bottom));
+    overflow-y:auto; box-sizing:border-box;
+    display:flex; flex-direction:column; align-items:center;
   }
+  #mmgSettingsPanel > *{ width:100%; max-width:520px; }
   #mmgSettingsPanel h3{ font-family:'Space Grotesk',sans-serif; font-size:17px; color:var(--text,#EAEDF3); margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; }
   #mmgSettingsCloseBtn{ background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:16px; }
   #mmgSettingsCloseBtn:hover{ color:var(--text,#EAEDF3); }
@@ -4641,6 +4640,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="mmgPasswordMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>
     </form>
 
+    <div class="mmg-settings-label" style="margin-top:18px;" data-i18n="nav_entegrasyon">Entegrasyon</div>
+    <button type="button" class="mmg-lang-btn" id="mmgSettingsEntegrasyonBtn" style="width:100%; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:6px;">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h11a4 4 0 0 1 0 8H9a4 4 0 0 1 0-8"/><circle cx="15" cy="11" r="1.6" fill="currentColor" stroke="none"/></svg>
+      <span data-i18n="nav_entegrasyon">Entegrasyon</span>
+    </button>
+
     <button type="button" id="mmgSettingsOkBtn" style="width:100%; margin-top:14px; padding:12px 0; border-radius:9px; border:none; cursor:pointer; background:linear-gradient(120deg, var(--coral,#FF6B4A), var(--brass,#C6A15B) 75%); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;" data-i18n="settings_ok">✓ Tamam</button>
 
   </div>
@@ -4674,6 +4679,16 @@ const auth = getApps().length ? getAuth(getApp()) : null;
   if(closeBtn) closeBtn.addEventListener('click', () => { overlay.hidden = true; });
   const okBtn = document.getElementById('mmgSettingsOkBtn');
   if(okBtn) okBtn.addEventListener('click', () => { overlay.hidden = true; });
+  // Ayarlar içindeki "Entegrasyon" butonu: paneli kapat, Entegrasyon sayfasını
+  // menüdeki nav öğesiyle aynı akışla aç (openTarget'i yeniden kullanır).
+  const settingsEntegrasyonBtn = document.getElementById('mmgSettingsEntegrasyonBtn');
+  if(settingsEntegrasyonBtn){
+    settingsEntegrasyonBtn.addEventListener('click', () => {
+      overlay.hidden = true;
+      const navEl = document.querySelector('.nav-item[data-target="entegrasyon.html"]');
+      if(navEl) navEl.click();
+    });
+  }
   if(overlay) overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.hidden = true; });
   document.querySelectorAll('.mmg-lang-btn[data-lang]').forEach(btn => {
     btn.addEventListener('click', () => {
