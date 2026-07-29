@@ -201,6 +201,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .nav-subitem{ padding:9px 10px; margin-bottom:0; border-radius:8px; }
   .nav-subitem:hover{ background:rgba(255,255,255,0.05); }
   .nav-subitem .nav-title{ font-size:13.5px; font-weight:600; }
+  /* Mobil: masaüstü "düzenle" (kalem) araç çubuğunu gizle ve menüde alt-menüleri gösterme
+     — sadece ana başlıklar kalsın (kullanıcı isteği). */
+  @media (max-width:860px){
+    #desktopEditToggle, #desktopAddWrap, #desktopRemoveToggle, #desktopResetBtn{ display:none !important; }
+    .nav-drawer, .nav-drawer-chevron{ display:none !important; }
+  }
   @media (max-width: 860px){
     .nav-drawer{
       position:static; margin:2px 0 8px 30px; padding:0 0 0 12px; min-width:0;

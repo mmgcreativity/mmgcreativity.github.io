@@ -736,7 +736,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="xcell-group">
           <div class="xcell">
             <span class="xcell-label">FİRMA</span>
-            <input type="text" id="fGonderenFirma" placeholder="Örn. Örnek Ticaret A.Ş." autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
+            <div class="mmg-ac-wrap"><input type="text" id="fGonderenFirma" placeholder="Örn. Örnek Ticaret A.Ş." autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off"><div class="mmg-ac-list" id="fGonderenFirmaAcList"></div></div>
             <select class="xcell-mini" id="fGonderenFirmaSaved" title="Grup firmasından seç"><option value="">📋 Grup Firması</option></select>
           </div>
           <div class="xcell xcell-full">
@@ -1633,6 +1633,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(typeof renderPreview === 'function') renderPreview();
   });
 
+  // Gönderen firma alanı: tıklayınca/odakta grup firmaları açılır liste olarak gelsin (kullanıcı isteği).
+  (function(){
+    const inp = document.getElementById('fGonderenFirma');
+    const listEl = document.getElementById('fGonderenFirmaAcList');
+    if(!inp || !listEl) return;
+    function closeL(){ listEl.classList.remove('open'); listEl.innerHTML = ''; }
+    function pick(f){
+      inp.value = f.name || '';
+      if(f.logo) applyCompanyLogo(f.logo, (f.logoW && f.logoH) ? { w:f.logoW, h:f.logoH } : null);
+      if(f.banka) setBankSelectValue(document.getElementById('fGonderenBanka'), f.banka);
+      if(f.iban) document.getElementById('fGonderenIban').value = formatIbanValue(f.iban);
+      refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma', 'fGonderenBanka');
+      if(typeof autoFillGonderenIban === 'function') autoFillGonderenIban();
+      if(typeof renderPreview === 'function') renderPreview();
+      closeL();
+    }
+    function render(showAll){
+      const q = showAll ? '' : inp.value.trim().toLocaleLowerCase('tr');
+      let items = (myFirms || []).slice();
+      if(q) items = items.filter(f => (f.name || '').toLocaleLowerCase('tr').includes(q));
+      items = items.slice(0, 12);
+      if(!items.length){ listEl.innerHTML = '<div class="mmg-ac-empty">Grup firması yok.</div>'; listEl.classList.add('open'); return; }
+      listEl.innerHTML = items.map(f => '<div class="mmg-ac-item" data-name="' + escapeHtmlMmg(f.name) + '"><span>' + escapeHtmlMmg(f.name) + '</span><span class="mmg-ac-meta">GRUP FİRMASI</span></div>').join('');
+      listEl.classList.add('open');
+      Array.from(listEl.querySelectorAll('.mmg-ac-item')).forEach(el => {
+        el.addEventListener('mousedown', (ev) => { ev.preventDefault(); const f = (myFirms || []).find(x => x.name === el.getAttribute('data-name')); if(f) pick(f); });
+      });
+    }
+    inp.addEventListener('focus', () => render(true));
+    inp.addEventListener('click', () => render(true));
+    inp.addEventListener('input', () => render(false));
+    inp.addEventListener('blur', () => setTimeout(closeL, 150));
+  })();
+
   document.getElementById('fGonderenFirmaSaved').addEventListener('change', (e) => {
     if(e.target.value === '') return;
     const f = myFirms[+e.target.value];
@@ -1729,8 +1763,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function acDataset(){ return getAliciDataset(wrap.dataset.mode); }
     function closeList(){ listEl.classList.remove('open'); listEl.innerHTML = ''; acActive = -1; }
-    function renderList(){
-      const q = adiEl.value.trim().toLocaleLowerCase('tr');
+    function renderList(showAll){
+      // Odaklanınca (showAll) kutudaki mevcut metne bakmadan TÜM grup firmalarını göster;
+      // sadece kullanıcı yazdıkça filtrele (kullanıcı isteği: seçtikten sonra tekrar tıklayınca hepsi gelsin).
+      const q = showAll ? '' : adiEl.value.trim().toLocaleLowerCase('tr');
       let items = acDataset();
       if(q) items = items.filter(p => p.name.toLocaleLowerCase('tr').includes(q));
       items = items.slice(0, 12);
@@ -1758,8 +1794,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
     }
 
-    adiEl.addEventListener('focus', renderList);
-    adiEl.addEventListener('input', renderList);
+    adiEl.addEventListener('focus', () => renderList(true));
+    adiEl.addEventListener('click', () => renderList(true));
+    adiEl.addEventListener('input', () => renderList(false));
     adiEl.addEventListener('input', () => { refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`, `fAliciBanka_${idx}`); });
     adiEl.addEventListener('input', renderPreview);
     adiEl.addEventListener('keydown', (ev) => {
