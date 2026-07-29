@@ -1,67 +1,172 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: 2026-07-28 · Canlı sürüm: **app-version.json = 2026-07-28-44** (sırada 45)
+Son güncelleme: **2026-07-30 (3. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-30-kod-durt-mobil'`. **Canlı doğrulandı** (KullaniciYonetimi=userDirectory ✓, mmg-chat-widget=applyCooldown ✓, index=`.app-card p{display:none}` ✓, SW ✓).
+
+> ✅ **Sürümleme çözüldü:** "Güncelleme var, yenile" banner'ı (index.html #mmgUpdateBanner) NE app-version.json NE de SW_VERSION'a bakar — index.html'e HEAD atıp ETag/Last-Modified karşılaştırır (tamamen otomatik). `SW_VERSION` sadece cache-bust; `app-version.json` artık okunmuyor ama ikisi senkron tutuluyor. Her deploy'da ikisini de bump'la.
+
+> ⚠️ **OneDrive senkron tuzağı:** OneDrive çalışmıyorken dosyalar "cloud-only" görünür; bash "Invalid argument" verir, düzenleme kaybolabilir veya ESKİ sürüm yüklenir. Deploy öncesi işaret (marker) kontrolü şart. (Kayıtlı skill: `mmg-onedrive-sync-guard`.) Bu klasörde `DEVIR-NOTU-DESKTOP-V12JA3F.md` gibi "DESKTOP-xxxx" çakışma kopyaları OneDrive'ın ürettiği artıklardır — silinebilir.
+
+## 🟢 2026-07-30 (3. OTONOM OTURUM) — CANLIYA ALINANLAR
+**Giriş / hesap**
+- **Giriş butonu çalışmıyordu** → gizli `#authUsername` alanındaki statik `required` formu görünmez şekilde geçersiz kılıyordu. `required` HTML'den kaldırıldı, `setAuthMode` içinde moda göre toggle edilir. ✓ canlı doğrulandı.
+- **E-posta normalize (`mmgNormalizeEmail`):** ASCII küçük harfe çevirir, birleşik aksan işaretlerini soyar → autofill'in gönderdiği "FİNANS@…" (büyük Türkçe İ) artık reddedilmiyor. `#authEmail{text-transform:lowercase}` + autofill koyu-tema CSS (`-webkit-autofill`).
+- **"Oturumu açık tut"** kalıcı (`mmg_keep_signed_in`); seçilince hep tikli gelir.
+- **Rozet** artık **"#kod ad"** (e-posta yok); ad yoksa e-posta local-part fallback.
+
+**Menü / index.html**
+- **Ayarlar** artık açılır-pencere değil, diğer modüller gibi ana alanda açılıyor (`#mmgSettingsOverlay` sol=`var(--sidebar-w)`); başka modüle geçince kapanır (`_stOv.hidden=true`).
+- **"Kurumsal Hesap"** bölümü kaldırıldı; **"Entegrasyon"** nav öğesi gizlendi (`display:none`).
+- **"Veri Analizi" → "Veri Yönetimi"**; nav yazı boyu +1.
+- **Krediler alt-menüsü sağa açılan (flyout):** `.nav-subwrap`/`.nav-subdrawer` hover CSS → Rotatif / Taksitli / **Kredi Karşılaştır** (eski "Kredi Teklif Karşılaştırma" yeniden adlandırıldı).
+- **Günlük Panorama** Bütçeleme çekmecesinin en üstüne alındı.
+- **Masaüstü döviz/altın widget'ı** artık sabit (`position:fixed; top:64px`) — sayfayla aşağı kaymıyor.
+- **Mobil:** `.app-card p{display:none}` (kartlarda sadece başlık); `.brand-row-logo/-fallback` 88px'e küçültüldü; `.brand-title` 15px. ✓ canlı doğrulandı.
+
+**IBAN kök çözümü (kullanıcının en çok uğraştığı sorun)**
+- Sebep: paylaşımlı havuzda bankalar firmaya etiketsizdi → her firmada 15+ IBAN görünüyordu.
+- `VeriGirisPaneli.html`: **IBAN Excel içe aktarımına "Firma" kolonu** eklendi (şablon başlığı `['Firma', …]`); firma adı → id eşlenir (`groupFirmaMembers`/`nameToId`) ve `docData.appliesToFirmaIds=[fid]` yazılır. Yükleme sırasında **tekilleştirme** (`dedupeBanks`), kayıtta **mükerrer IBAN engeli**, **"🗑 Tüm IBAN'ları Sil"** (çift onay) butonu.
+- `Talimat_Hazirlama.html`: "Kayıtlı" IBAN dropdown'u `appliesToFirmaIds`'e göre **firmaya göre filtreler** + dedup; Akbank seçiliyken diğer bankalar gelmez. Gönderen/alıcı firma alanına tıklayınca grup firmaları anında açılır (odakta hepsi listelenir); "GRUP FİRMASI" etiketi kaldırıldı; dropdown kırpılması giderildi (`.xcell-group{overflow:visible}`). PDF logo y 12→26mm (~2.6cm üst boşluk). Logo/kaşe Yükle+Kaldır 3 kutu yan yana.
+
+**Kullanıcı Yönetimi (`KullaniciYonetimi.html`)**
+- **Gruba firma ekleme/çıkarma** (`deleteFirmaById`, onaylı); Firmalarım'da firma seçici + küçük 🗑; grup listesinde firma-başı 🗑.
+- **Kullanıcılarım** artık **"#kod ad"** (e-posta gizli, tıklayınca alta açılır panelde); üye çıkar ✕ → 🗑; tüm silmeler "emin misiniz?" sorar.
+- **#kod görünmüyordu** (firma-admin diğer `users/{uid}` dokümanını okuyamıyor) → **`userDirectory`'den fallback** (uid ile sorgu; doküman anahtarı = müşteri no, `{uid, username, email}` içerir). ✓ canlı doğrulandı.
+
+**Chat (`mmg-chat-widget.js`)**
+- **Dürt butonu** (kabul beklenen kişiyi dürtme) gönderilen-istekler listesinde; İstek↔Grup sekmeleri yer değiştirdi; bildirimlerde **"🗑 Tümünü Sil"**; toast üst sınırı 3.
+- **Dürt ✅ işareti tam 60 sn kalır** (`applyCooldown()` → `localStorage['mmg_last_nudge_'+uid]` okur, kalan süre boyunca disable+✅, her render'da yeniden uygulanır). ✓ canlı doğrulandı.
+
+**Hesaplama araçları**
+- **Rotatif Kredi:** bileşik faiz eklendi (`bilesikPeriyot` → `tutar*(pow(1+oran*P/gbFaiz, vade/P)-1)`), "Bileşik Faiz Periyodu" girişi; BSMV kutusu 2 haneye daraltıldı.
+- **Taksitli Kredi → "📤 Kredi Karşılaştırma'ya Aktar"** butonu: `trancheRows` → offers'a map, `localStorage['mmg_kk_transfer']`, `mmg_last_open_page='kredi-karsilastirma.html'`, `index.html`'e yönlendirir. `kredi-karsilastirma.html` init'te bunu okuyup offers'ı ezer; özet stat kartları gizlendi.
+- **Ortalama Vade / Vade Sapma / Vadeli Mevduat:** açıklama tablo üstüne alındı, gün kutusu daraltıldı, toolbar tek satır, cafcaflı stat kartları kaldırıldı. Vade Sapma açıklaması yeniden yazıldı (tr+en).
+
+**Performans**
+- **`service-worker.js` stale-while-revalidate'e çevrildi** (aynı-origin GET): önbellekte varsa anında döner, arka planda tazeler → modüller çok daha hızlı açılır. Firestore/CDN (cross-origin) ve non-GET dokunulmaz, kullanıcı verisi bayatlamaz. Cache adı `SW_VERSION`'a bağlı.
+
+### ⏳ 3. OTURUM SONRASI KALAN (frontend'de çözülemez — backend/veri/tasarım)
+1. **Forum'da başka kullanıcıların logosu:** MEVCUT kullanıcının logosu forumda geliyor. Diğer kullanıcılar için avatar yok → **veri kısıtı** (firma-admin diğer kullanıcıların `logoBase64`/`avatarBase64` alanına Firestore kurallarıyla erişemiyor). Kalıcı çözüm: her kullanıcı kendi logosunu forumda görünür bir ortak alana (ör. `userDirectory/{no}.avatarBase64` veya `forumPosts` yazımında `authorAvatar`) yazsın; ya da kurallar okuma izni versin. **Bu oturumda kod tarafı hazır (`pickUserAvatar`/`resolveForumAvatar`/`patchMissingAvatars`), eksik olan veri kaynağı.**
+2. **İlk girişte mobil bildirim izni + sağ-alt pop-up + FCM tutarlılığı:** "1018→admin bildirim geldi, admin→1018 gelmedi" — `pushOnNotification` canlı ama teslimat tutarsız. İlk girişte `Notification.requestPermission()` + FCM token kaydı akışı ve web'de sağ-alt pop-up backend/istemci-token işi. `firebase functions:log --only pushOnNotification` çıktısı gerekli.
+3. **Mobilde brand-row + hero'yu TEK birleşik görsel yapma:** bu oturumda sadece sıkıştırma (kart açıklamaları gizlendi, brand logo 88px) yapıldı. Tam birleşik grafik = tasarım işi (tek SVG/PNG üretimi).
+4. **Misafir beğeni (anonim auth + kurallar):** "isimsiz hesap istemiyorum" ilkesiyle çelişiyor — ürün kararı bekliyor.
+5. **Backend (2026-07-29'da deploy edildi, kullanıcı doğrulasın):** markalı Türkçe şifre-sıfırlama (Resend), Blogger publish. `functions/index.js`'te Blogger bloğu YORUMDA (kullanmıyor); lazımsa yorumdan çıkar + secret'ları tanımla.
+
+## 🟢 2026-07-29 (2. OTONOM OTURUM) — CANLIYA ALINANLAR
+- **Tablet:** Gelir/Gider "büyük boş alan" (flex-basis 440px kartı yükseklik yapıyordu) düzeltildi (`.add-io-row .add-payment-card{flex:0 0 auto}`); Talimat önizleme tablette tam genişlik.
+- **Menü:** "Sosyal" → **"Keşfet"** (TR/EN "Explore"); Finans Sözlüğü Hesaplamalar'dan **Keşfet** altına taşındı; Keşfet + Veri Analizi başlıklarına favori yıldızı; "Logo/Zirve Entegrasyonu" → **"Entegrasyon"**; mobil nav alt-öğe girintisi düzeltildi (alt öğeler başlık altına hizalandı).
+- **Hesap/rozet:** "#kod ad" formatı; firma yoksa mükerrer sol-alt kapsam çubuğu gizlendi.
+- **Ayarlar:** tam ekran yapıldı; içine **Entegrasyon** butonu + **Telefonumu Bağla** eklendi.
+- **Nakit Akış — GRUP (eski "Konsolide") görünümü baştan yazıldı:** "Konsolide"→**"Grup Göster"**; grup görünümü artık firma-kırılım DEĞİL, **gün gün tarih tablosu** (seçili firmaların günlük toplamı); günü tıklayınca kalem kalem açılır (firma adlı, `groupExpanded`); **Haftalık** pill'leri kaldırıldı, ◀▶ ile hafta gezinme (aylık mantığı); **Yıllık** grup = ay-bazlı tablo; **Günlük grup = kategori-bazlı PANORAMA** (Müşteri Çekleri=Çek Tahsilatı, Kredi Kartları, Kredi Taksitleri, Teminat, Komisyon…); toolbar "Grup Göster" kesilmesi düzeltildi (wrap); **Bugün** ve **Kaydet** butonları kaldırıldı (otomatik kayıt var); özet kartlar (Gelir/Gider/Net) toolbar hizasına alındı.
+- **Günlük Panorama sayfası** (`Gunluk_Panorama.html`, menü: Bütçeleme): mevcut Gelir/Gider (cashflow) verisinden kategoriye göre günlük panorama. (İlk sürümde ayrı detaylı giriş vardı; kullanıcı "çift giriş istemiyorum" deyince mevcut veriden çekmeye çevrildi.)
+- **Telefon ile giriş (Firebase Phone Auth, istemci tarafı):** login ekranına "📱 Telefon ile giriş" (+90 önden dolu, 0/90/5 normalize, Enter=gönder); Ayarlar → Telefonumu Bağla (mevcut hesaba `linkWithPhoneNumber`). **Phone provider Firebase Console'da AÇILDI** (Claude tarafından). mmgcreativity.com zaten Authorized domains'te.
+- **Ayşen firma erişimi kök nedeni:** `members.uid` için **collectionGroup index'i yoktu** → sorgu bayat `firmaIds`'e düşüyordu. `firestore.indexes.json`'a fieldOverride eklendi → **kullanıcı `firebase deploy --only firestore:indexes` çalıştırmalı** (kod değişikliği gerekmez).
+
+## ✅ BACKEND — TAMAMLANDI (2026-07-29 sonu, canlıda)
+1. ✅ `firebase deploy --only firestore:indexes` çalıştırıldı → `members.uid` collectionGroup index'i canlıda → Ayşen tüm firmaları görür.
+2. ✅ **Cloud Functions deploy edildi** (10 fonksiyon canlıda): `sendPasswordResetMail`, `pushOnNotification`, `firmaSetSeats/CreateMemberInvite/CreateAdminInvite/AcceptInvite/RemoveMember`, `accountLinkConfirm/SwitchToken/Unlink`.
+3. ✅ **Spam mail çözüldü:** Resend'de **mmgcreativity.com domain VERIFIED** (SPF+DKIM+DMARC DNS kayıtları Netlify `cihangrupfinans` ekibi altındaki mmgcreativity.com DNS zone'una eklendi). `RESEND_API_KEY` secret tanımlandı ve servis hesabına bağlandı. Artık `noreply@mmgcreativity.com`'dan markalı Türkçe mail gider, spam'e düşmez.
+4. ✅ **Mobil push:** `pushOnNotification` canlıda (`notifications/{id}` yazılınca FCM data-only push). İlk deploy'da Eventarc izin yayılması için gecikti, 2. denemede geçti.
+
+### Blogger NOT'U (önemli):
+- `functions/index.js` içindeki **`publishToBlogger` + 4 `BLOGGER_*` defineSecret YORUM SATIRINA ALINDI** — çünkü modül yüklenirken secret değeri arayıp her deploy'da `BLOGGER_CLIENT_ID` soruyordu (kullanıcı Blogger kullanmıyor). Blogger ileride lazım olursa: bloğu yorumdan çıkar + `firebase functions:secrets:set BLOGGER_CLIENT_ID` (ve diğer 3'ü) tanımla.
+- `firebase deploy --only functions` artık sorunsuz çalışır (Blogger devre dışı olduğu için secret sormaz).
+
+## ⏳ KULLANICI TARAFI KALAN (opsiyonel)
+1. **Giriş için mobil onay (2FA):** Firebase Console → Authentication → "SMS Multi-factor Authentication" **Identity Platform upgrade** ister (billing kararı — kullanıcı verecek).
+2. Telefon girişi mevcut hesaba bağlanmak için **Ayarlar → Telefonumu Bağla** (yoksa ayrı boş hesap açar).
+3. Runtime uyarısı: Node.js 20, 2026-10-30'da kullanımdan kalkacak; o tarihe kadar `functions/package.json`'da Node 22'ye + `firebase-functions@latest`'e yükseltmek iyi olur.
+
+## ⚠️ Bir sonraki oturum için not
+- Grup modu **read-only**; monthData geçici swap ile birleştirilir, sonra gerçek veri geri yüklenir (kayıt bozulmaz).
+- Telefon girişi mevcut e-posta hesabına ULAŞMAK için önce **Ayarlar → Telefonumu Bağla** ile linklenmeli (yoksa ayrı boş hesap açar).
 
 ---
 
 ## 1) PROJE & ALTYAPI
-- **Site:** https://mmgcreativity.com  (GitHub Pages özel domain)
-- **Repo:** https://github.com/mmgcreativity/mmgcreativity.github.io  (branch: `main`)
-- **Çalışma klasörü (yerel):** `C:\Users\CihanFinans\OneDrive\0.mmgcreativity\web\html`
-- **Firebase projesi:** `mmgcreativity-31263` (Blaze planı açık) — Firestore + Auth + Functions + FCM push
-- **Frontend:** düz HTML/JS (build yok). Ortak parçalar: `mmg-chat-widget.js` (sohbet), `mmg-undo.js` (Geri Al/Ctrl+Z), `i18n-core.js` (TR/EN).
+- **Site:** https://mmgcreativity.com (GitHub Pages özel domain; ayrıca https://mmgcreativity.github.io)
+- **Repo:** https://github.com/mmgcreativity/mmgcreativity.github.io (branch: `main`)
+- **Çalışma klasörü (yerel):** `C:\Users\muham\OneDrive\0.mmgcreativity\web\html` (OneDrive senkron; bazı dosyalar "cloud-only" olabilir — düzenlemeden önce indirilir)
+- **Firebase projesi:** `mmgcreativity-31263` (Blaze) — Firestore + Auth + Functions + FCM
+- **Frontend:** düz HTML/JS, build YOK. Ortak parçalar: `mmg-chat-widget.js` (sohbet), `mmg-undo.js` (Geri Al/Ctrl+Z), `i18n-core.js` (TR/EN), `mmg-doviz-widget.js` (kur widget'ı), `mmg-feedback-widget.js` (beğeni).
 
-## 2) DEPLOY AKIŞI (web/site)
-1. Dosyayı yerel klasörde düzenle.
-2. https://github.com/mmgcreativity/mmgcreativity.github.io/upload/main aç → değişen dosyaları seç (birden fazla olabilir).
-3. **"Commit changes"** (Doğrudan `main`'e).
-4. **`app-version.json`** içindeki sürümü her deploy'da artır (ör. `2026-07-28-45`) — uygulamanın "güncelleme var, yenile" mantığı buna bakar.
-- GitHub Pages CDN'i her commit'te kendi kendine tazeler; kullanıcı tarafında **Ctrl+F5** ile kesin tazelenir.
+## 2) DEPLOY AKIŞI (statik site)
+Klasör yerelde **git deposu değil** → deploy GitHub web arayüzünden yapılır:
+1. Dosyayı yerelde düzenle.
+2. `service-worker.js` içindeki **`SW_VERSION`**'ı değiştir (ör. tarih+kısa etiket).
+3. https://github.com/mmgcreativity/mmgcreativity.github.io/upload/main → değişen dosyaları seç (aynı adlılar overwrite eder).
+4. **Commit changes** (Doğrudan `main`).
+5. GitHub Pages ~30-60 sn'de derler; kullanıcı **Ctrl+Shift+R** ile tazeler.
+- Not: GitHub yükleme arayüzü Türkçe locale'de dosya adlarını çevirir gibi gösterir (`service-worker.js` → "hizmet-çalışanı.js"); dosya adı BOZULMAZ.
+- **Kayıtlı skill:** `mmg-site-deploy` — bu akışı ve "sırayla, sormadan çalış" tarzını içerir.
 
-## 3) FIREBASE DEPLOY (SENİN BİLGİSAYARINDAN — GitHub'a yüklemek YETMEZ)
-Proje klasöründe (firebase.json'ın olduğu yer) PowerShell:
+## 3) FIREBASE DEPLOY (KULLANICININ BİLGİSAYARINDAN — GitHub'a yüklemek YETMEZ)
+Proje klasöründe (firebase.json'ın olduğu yer):
 ```
-firebase deploy --only firestore:rules     # YAPILDI (28 Tem) — sohbet silme, bildirim, konsolide okuma
-firebase deploy --only functions           # BEKLIYOR — push bildirimi, hesap değiştirme token'ı, Resend şifre maili
+firebase deploy --only functions           # BEKLIYOR (aşağıdaki backend işleri buna bağlı)
+firebase deploy --only firestore:rules     # gerekirse (misafir beğeni/kurallar)
+firebase functions:log --only publishToBlogger   # blog hatasını görmek için
 ```
-- `firestore.rules` ve `functions/index.js` yerel klasörde günceldir; sadece yukarıdaki komutlarla Firebase'e gider.
-- **functions deploy edilene kadar:** kapalı-uygulama push bildirimi, hesap değiştirme (accountSwitchToken/accountLinkConfirm/accountUnlink), markalı şifre sıfırlama maili ÇALIŞMAZ.
+`functions/index.js` ve `firestore.rules` yerelde güncel; sadece bu komutlarla Firebase'e gider.
 
-## 4) BU OTURUMDA CANLIYA ALINANLAR (özet)
-- **KRİTİK FIX:** `mmg-chat-widget.js` içinde eksik bir `}` (wireUp fonksiyonu) tüm sohbet widget'ını kırıyordu → düzeltildi. Chat, bildirim, dürtme, istekler artık çalışır durumda.
-- Chat: İstek sekmesi Gelen/Gönderilen alt başlıkları; "Geri Çek"; "+ Kişi Ekle" artık İstek→Gönderilen altında; dışarı tıklayınca kapanma (iframe blur ile); gönderdiğim istekleri iptal.
-- Hesap değiştirme (çoklu hesap): index.html'de "Hesaplarım" — admin girip kendi diğer hesaplarına şifresiz geçiş; Google ile bağla + şifremi unuttum; listede **#kod · ad** (kod önce). *Backend functions deploy şart.*
-- Talimat: gönderen IBAN otomatik (firma+banka → tek IBAN otomatik, çok IBAN'da ALTA açılır seçim); göndericilerde sadece grup firmaları; aynı adla ikinci kayıt engeli; logo/kaşe düzeni; önizleme 3× netlik.
-- Hazır Metin: "+ Hazır Metin Talimatı Ekle" + var olandan kopyalama; **Kredi Kartı Taahhütnamesi** şablonu (Excel'den).
-- **Yeni sayfa:** `Taksitli_Kredi_Hesaplama.html` (Excel ile birebir doğrulanmış; Excel/PDF çıktı, Sıfırla/Geri Al). index.html kısayol açıklaması `sc_desc_taksitli` (i18n metni eklenmeli).
-- Vadeli Mevduat: banka açılır liste + adil (net getiriye göre) yan-yana kutu karşılaştırma + Excel/PDF çıktı (PDF Türkçe font eklendi).
-- Kredi Karşılaştırma: sonuçlar yan yana kutu; varsayılan **100.000 tutar + 12 ay**.
-- Rotatif: çoklu çekim tablosu + Sıfırla/Geri Al; tekli Sıfırla çokluyu etkilemiyor; İki-tarih bölümü Gelişmiş'ten çıkıp kartın altında, iki tarih de bugün; satırlar **100.000** varsayılan.
-- Nakit Akış: konsolide canlı veri (girilen anında yansıyor); Konsolide butonu araç çubuğunda; mobil düzeltme.
-- İstatistikler: kullanıcı tablosunda sütun-bazlı arama; uygulama kırılımında kişiye tıklayınca giriş zamanları (ileriye dönük kaydediliyor).
-- Geri Al/Ctrl+Z: veri-giriş sayfalarında (`mmg-undo.js`) — Talimat, Vade Sapma, Vadeli dahil.
-- Masaüstü: kart sürükleme (pointer), "Ekle" kutusu sadece kart kalmayınca; firma popup dışarı-tıkla kapanma.
-- Forum: yazar avatarında logo (geniş fallback). Profil: logo fallback genişletildi.
+---
 
-## 5) BEKLEYEN / YAPILMAYAN İŞLER
-1. **Konsolide Nakit Akış** — kullanıcı özel istedi: tek gün değil, **serbest tarih aralığında GÜN GÜN** her firma gelir/gider/net + genel toplam. (Spec kullanıcıdan netleşecek.) **YAPILMADI.**
-2. **Hikâyeler (Story)** — profil Faz 2: 24s hikaye yükleme + süre dolumu + görüntüleyici. Şu an "Yakında" stub. **YAPILMADI.**
-3. **Masaüstü özelleştirilebilir arka plan** — düz renk / hazır şablon / kendi resmini yükleme. **YAPILMADI.**
-4. **Beğeniler gelmiyor** (`Begen_Istatistikleri.html`) — 50 beğeni var ama 1 görünüyor. Dosya yerelde senkronsuzdu (OneDrive cloud-only). Muhtemelen `collectionGroup` okuma kuralı engelliyordu; **firestore:rules deploy sonrası yenileyip kontrol et** — düzelmemişse sorguya/indekse bak.
-5. **Bildirim/dürtme teslimi** — kod+kurallar hazır; **iki taraf da Ctrl+F5 sonrası, YENİ bir koda istek/mesaj** ile test et (zaten bekleyen istek yeni bildirim üretmez). Kapalı-uygulama push için functions deploy şart.
-6. Küçük: index.html'de `sc_desc_taksitli` i18n metni (Taksitli kart açıklaması) eklenebilir.
+## 4) BU OTURUMDA (2026-07-29) CANLIYA ALINANLAR
+**Yeni araçlar & sayfalar**
+- `teminat-mektubu-komisyonu-hesaplama.html` — teminat tutarı/oran/süre → dönem komisyonu + BSMV + toplam.
+- `cek-iskontosu-hesaplama.html` — nominal/oran/gün → iskonto faizi + BSMV + net.
+- `finans-sozlugu.html` — ~56 terimlik aramalı finans/bankacılık sözlüğü.
+- `aylik-taksitli-kredi-hesaplama.html` — **Rotatif tasarımına birebir çevrildi** (sağ döküm + Çoklu Kredi tablosu + Excel/PDF). Formül: aylık faiz × (1+KKDF %15+BSMV %15) → annüite. 7 banka örneğiyle kuruşuna doğrulandı. (Menüde adı "Taksitli Kredi Hesaplama".)
+- `entegrasyon.html` — **Logo & Zirve entegrasyon kılavuzu** (araştırmaya dayalı: j-Platform REST/SOA, İşbaşı REST, Tiger LObjects/SQL, Zirve Express Aktarım/API). 3 seviye + adım adım + talep maili.
+- Yeni araçlar `index.html` Hesaplamalar drawer'ı + `Hesaplama_Araclari.html` sekme/kartlarına (TR/EN) eklendi.
 
-## 6) ÖNEMLİ TEKNİK DERSLER (tekrar hata yapmamak için)
-- **ES module dosyalarını (`mmg-chat-widget.js` vb.) mutlaka MODÜL olarak doğrula:** `cp x.js /tmp/x.mjs && node --check /tmp/x.mjs`. Düz `node --check x.js` eksik `}` gibi hataları MASKELEYEBİLİYOR (bu bir kez tüm chat'i kırdı). Inline HTML scriptlerinde de import satırlarını temizleyip `.mjs` modül denetimi yap.
-- **Sayfa genişliği per-page'dir** — global `max-width` değiştirme. Kart/ızgara sayfaları geniş (1400–1500px), form/hesap sayfaları dar (~1180px) daha iyi.
-- Sohbet widget'ı her sayfada `<script type="module" src="mmg-chat-widget.js"></script>` ile en altta; kendi Firebase'ini kurar (getApps kontrolü).
-- Firebase config (client): apiKey `AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU`, projectId `mmgcreativity-31263`, messagingSenderId `243143536600`.
-- Cloud Functions callable'lar (us-central1): `accountLinkConfirm`, `accountSwitchToken`, `accountUnlink`, `firmaSetSeats/…`, `sendPasswordResetMail`, `publishToBlogger`, `pushOnNotification` (notifications create → FCM push).
+**Menü / index.html**
+- Arama kutusu **menünün en üstünde** (Ana Sayfa'nın üstünde), autofill/kayıtlı-parola kapatıldı (`readonly` + `type=search`), dışarı-tıkla kapanış capture fazında.
+- **Ana Sayfa** artık küçük kare ev ikonu, sağında arama.
+- **Sosyal** ve **Veri Analizi** artık açılır menü (drawer). Bölüm başlıkları (ARAÇLAR/SOSYAL/VERİ ANALİZİ) kaldırıldı.
+- **Işıldama sadece hover + basınca** (`.nav-item:hover, :active`); çekmece başlıkları ve ev ikonu **kalıcı parlamıyor** (`updateDrawerToggleActiveState` → sadece `remove('active')`).
+- Alt menü başlıklarından "Hesaplama" kelimesi kaldırıldı (Rotatif Kredi, Ortalama Vade, Vade Sapması, Vadeli Mevduat Faizi, Taksitli Kredi).
+- Firma bloğu kendi ince satırında (hesap rozetinin üstünde), footer'daki 2. imza kaldırıldı; hero imzası sağ altta, tanıtım+özellik satırları logonun sağ sütununa alındı.
 
-## 7) HEMEN TEST EDİLECEKLER (yeniledikten sonra)
-- [ ] Chat açılıyor mu (her sayfada baloncuk)
-- [ ] Yeni koda istek → karşı tarafa bildirim (iki taraf da yenilenmiş)
-- [ ] Sohbet silme çalışıyor mu
-- [ ] Konsolide: ADERANS/CİHANTAŞ verileri geliyor mu
-- [ ] Beğeniler listesi tam geliyor mu
-- [ ] Vadeli PDF'te Türkçe karakter düzgün mü
+**Kur widget'ı (`mmg-doviz-widget.js`)**
+- Daha önce **hiçbir sayfaya bağlı değildi**. `<script src="mmg-doviz-widget.js" defer>` **9 araç sayfasına** eklendi (Gelirler, Giderler, Hesaplama_Araclari, Kredi_Karti_Vade_Farki, Nakit_Akis, Ortalama_Vade, Rotatif, Talimat_Hazirlama, aylik-taksitli). Hesap makinesinin (#mmgCalcBtn) soluna oturur.
+- Pariteler **USD, EUR** (open.er-api.com) + **Gram Altın** (api.genelpara.com, graceful fallback). Gold kaynağı CORS'ta sorun çıkarırsa sadece USD/EUR görünür — **canlı doğrula**.
+
+**Chat (`mmg-chat-widget.js`)**
+- Sağ altta **"+" yeni sohbet butonu** (yalnız Kişilerim listesinde) → "Kişi Ekle" akışı (kiminle olacağını sorar).
+- Bildirim gövdesinde artık **kod + ad** ("#1018 - AYŞEN…"); `mmgNotify` `fromName` kaydeder; bildirime tıklayınca `openChatFromNotif` ile ilgili 1:1 sohbet açılır (`pairChatId`).
+- `labelForCode` her yerde **"#kod ad"** döndürür; avatar harfi `avatarLetterFromLabel` ile.
+
+**Diğer sayfalar**
+- `Talimat_Hazirlama.html`: alıcıda **"Grup içi" sola alındı ve varsayılan** yapıldı.
+- `KullaniciYonetimi.html`: üye satırı **"#kod ad"** (kod önce, brass renkli).
+- `manifest.json`: **`orientation:"any"`** (tablet yatay kilidi açıldı). Yüklü PWA'da etki için uygulamayı kaldır-yeniden ekle gerekir.
+- Tablet: Nakit Akış/Gelirler/Giderler masthead başlık kelime-kelime kırılması düzeltildi (≤820px dikey istifleme).
+
+## 5) BEKLEYEN İŞLER
+**Frontend (bir sonraki oturumda — bazıları canlı veri/test ister):**
+1. **Günlük Panorama (#9) — EN BÜYÜK.** Excel'deki panoramayı tasarıma uyarla: müşteri/firma çekleri, senetler, kredi kartları, kredi taksitleri, faturalar, teminat mektubu komisyonları → **bugün vadesi gelenler** bölüm bölüm. Giriş yapınca karşılasın + menüde yer. Veri, mevcut **Gelir/Gider** (Firestore: `{scopeCollection}/{scopeId}/cashflow` vb., alanlar `dueDate`, `category`, `vade`) modelinden beslenecek. **Giriş-sonrası canlı veriye erişip test gerektirir; kullanıcı giriş yapmışken yapılmalı.**
+2. **Tablet kalanları (#18):** Gelir/Gider'de açılır menü altındaki büyük boş alan; Talimat önizleme + aksiyon butonlarının tablette dar sola sıkışması.
+3. **Logo/Zirve — canlı (API) entegrasyon:** kılavuz + talep akışı hazır. Gerçek senkron için j-Platform REST konektörü (Cloud Function) veya yerel SQL agent + müşteri API bilgileri gerekir.
+
+**Backend (Firebase — KULLANICI tarafında):**
+4. **Blog gönderilemiyor (#12):** `publishToBlogger` "internal" veriyor. Muhtemel: `BLOGGER_CLIENT_ID/SECRET/REFRESH_TOKEN/BLOG_ID` secret'ları yok ya da fonksiyon deploy edilmemiş. `firebase functions:secrets:set ...` + `firebase deploy --only functions:publishToBlogger`; `firebase functions:log` çıktısı paylaşılırsa koddaki pay düzeltilir.
+5. **Spam görünen mailler (#13):** şablon + SPF/DKIM/DMARC.
+6. **Chat push (#15):** dürtme/mesaj/eklemelerde mobil FCM + web pop-up. `pushOnNotification` tetikleyici + `firebase deploy --only functions`.
+7. **Misafir beğeni verisi (#17):** feedback yalnız giriş yapmış kullanıcıda (`mmgCloud.currentUser`) Firestore'a yazılıyor → reklamdan gelen misafirlerin beğenisi kaydolmuyor. Çözüm: misafir için **anonim auth** + `feedback` Firestore kuralları.
+
+## 6) ÖNEMLİ TEKNİK NOTLAR
+- **ES module JS doğrulaması:** `mmg-chat-widget.js` bir kez eksik `}` yüzünden tüm chat'i kırmıştı. Değişiklikten sonra `node --check mmg-chat-widget.js` çalıştır (bu oturumda hep yapıldı, temiz).
+- **i18n:** `data-i18n` metinleri yükleme anında sözlükten gelir. Görünen metni değiştirirken **HTML + `MMGI18N.registerDict` sözlüğünü birlikte** güncelle, yoksa eski değere döner.
+- **Nav drawer:** yeni açılır menü eklerken `<div class="nav-drawer-wrap"><button data-drawer-toggle …><div class="nav-drawer">…subitem(nav-subitem)…</div></div>` + `wireDrawerToggle('xToggle','xDrawer')` çağrısı şart.
+- **Büyük dosyalar** (Rotatif, Talimat, Nakit ~200-450KB) Read yerine `grep -n`/`sed -n` ile hedefli okunmalı.
+- **Firebase client config:** apiKey `AIzaSyCWzcRqmwhIBqjnYqyMoIrO8zj2p8oj5kU`, projectId `mmgcreativity-31263`, senderId `243143536600`.
+- **Callable functions (us-central1):** `publishToBlogger`, `accountSwitchToken`, `accountLinkConfirm`, `accountUnlink`, `sendPasswordResetMail`, `pushOnNotification`, firma yetki fonksiyonları.
+
+## 7) YENİLEDİKTEN SONRA HIZLI TEST
+- [ ] Menü: Sosyal/Veri Analizi drawer açılıyor mu; ışıldama sadece hover/basınca mı; ev ikonu kalıcı parlamıyor mu
+- [ ] Arama menü üstünde; kayıtlı parola açılmıyor; boşluğa tıkla kapanıyor
+- [ ] Kur widget'ı araç sayfalarında hesap makinesi solunda; USD/EUR/Gram Altın geliyor mu
+- [ ] Chat "+" ile yeni sohbet; bildirimde "#kod ad"; bildirime tıkla → sohbet açılıyor
+- [ ] Taksitli Kredi: 100.000 / %3,29 / 12 ay → Aylık Taksit 10.827,17 TL
+- [ ] Tablet yatay dönüyor mu; başlıklar kırılmıyor mu
+- [ ] Entegrasyon sayfası + menü linki açılıyor mu
