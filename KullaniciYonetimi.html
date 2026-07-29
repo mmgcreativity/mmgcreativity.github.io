@@ -162,7 +162,13 @@
   <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
     <div class="card" id="firmaSelectorCard" style="display:none;">
       <h2 style="margin-bottom:6px;" data-i18n="managed_firma">Firmalarım</h2>
-      <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;"></select>
+      <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; margin-bottom:8px;"></select>
+      <div style="display:flex; gap:6px; margin-bottom:6px;">
+        <input type="text" id="newFirmaName" placeholder="Yeni firma adı" style="flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;">
+        <button type="button" id="addFirmaBtn" style="flex-shrink:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 14px; color:var(--brass,#C6A15B); font-weight:700; cursor:pointer;">+ Ekle</button>
+      </div>
+      <button type="button" id="deleteFirmaBtn" style="width:100%; background:transparent; border:1px solid rgba(226,84,75,0.5); color:var(--red,#E2544B); border-radius:8px; padding:8px 0; font-weight:600; cursor:pointer;">🗑 Seçili Firmayı Sil</button>
+      <div id="firmaCrudMsg" style="font-size:12px; margin-top:6px; min-height:14px;"></div>
     </div>
     <div class="card">
       <h2 data-i18n="my_users_title" style="margin-bottom:8px;">Kullanıcılarım</h2>
@@ -269,7 +275,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, query, where, serverTimestamp
+    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, query, where, serverTimestamp, arrayUnion, arrayRemove
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -618,13 +624,11 @@
       pageWrap.style.display = 'block';
       const selectorCard = document.getElementById('firmaSelectorCard');
       const selector = document.getElementById('firmaSelector');
-      if(myAdminFirmas.length > 1){
-        selectorCard.style.display = 'block';
-        selector.innerHTML = myAdminFirmas.map(f => '<option value="' + f.id + '">' + f.name + '</option>').join('');
-        selector.onchange = () => selectFirma(selector.value);
-      } else {
-        selectorCard.style.display = 'none';
-      }
+      // Firmalarım kartı her zaman görünür (yeni firma ekle / firma sil için); seçici yalnızca 2+ firmada.
+      selectorCard.style.display = 'block';
+      selector.innerHTML = myAdminFirmas.map(f => '<option value="' + f.id + '">' + f.name + '</option>').join('');
+      selector.onchange = () => selectFirma(selector.value);
+      selector.style.display = myAdminFirmas.length > 1 ? 'block' : 'none';
       renderDataGroupCard();
       await selectFirma(myAdminFirmas[0].id);
     } catch(e){
@@ -634,6 +638,61 @@
       document.getElementById('guardSub').textContent = LBL.errorSub;
     }
   });
+
+  // ---- Firma Ekle / Sil (kullanıcı isteği) ----
+  function setFirmaCrudMsg(txt, isErr){
+    const el = document.getElementById('firmaCrudMsg');
+    if(!el) return; el.textContent = txt || ''; el.style.color = isErr ? 'var(--red,#E2544B)' : 'var(--brass,#C6A15B)';
+  }
+  const _addFirmaBtn = document.getElementById('addFirmaBtn');
+  if(_addFirmaBtn){
+    _addFirmaBtn.addEventListener('click', async () => {
+      const inp = document.getElementById('newFirmaName');
+      const name = (inp && inp.value || '').trim();
+      const user = auth.currentUser;
+      if(!user){ setFirmaCrudMsg('Önce giriş yapın.', true); return; }
+      if(!name){ setFirmaCrudMsg('Firma adı girin.', true); return; }
+      _addFirmaBtn.disabled = true; setFirmaCrudMsg('Ekleniyor…', false);
+      try{
+        const firmaRef = doc(collection(db, 'firmaAccounts'));
+        await setDoc(firmaRef, { name: name, createdAt: serverTimestamp(), createdBy: user.uid });
+        await setDoc(doc(db, 'firmaAccounts', firmaRef.id, 'admins', user.uid), { email: user.email || '', addedAt: serverTimestamp() });
+        await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayUnion(firmaRef.id) }, { merge: true });
+        setFirmaCrudMsg('Firma eklendi ✓', false);
+        setTimeout(() => location.reload(), 700);
+      }catch(e){ setFirmaCrudMsg('Eklenemedi, tekrar deneyin.', true); _addFirmaBtn.disabled = false; }
+    });
+  }
+  const _deleteFirmaBtn = document.getElementById('deleteFirmaBtn');
+  if(_deleteFirmaBtn){
+    _deleteFirmaBtn.addEventListener('click', async () => {
+      const user = auth.currentUser;
+      if(!user){ setFirmaCrudMsg('Önce giriş yapın.', true); return; }
+      const sel = document.getElementById('firmaSelector');
+      const targetId = (sel && sel.value) || (myAdminFirmas[0] && myAdminFirmas[0].id);
+      if(!targetId){ setFirmaCrudMsg('Silinecek firma yok.', true); return; }
+      const f = myAdminFirmas.find(x => x.id === targetId);
+      const fname = f ? f.name : targetId;
+      if(!confirm('"' + fname + '" firmasını tamamen silmek istediğinize emin misiniz?\nBu işlem geri alınamaz; firmaya bağlı üyeler ve grup bağlantıları da kaldırılır.')) return;
+      _deleteFirmaBtn.disabled = true; setFirmaCrudMsg('Siliniyor…', false);
+      try{
+        try{ const ms = await getDocs(collection(db, 'firmaAccounts', targetId, 'members')); for(const d of ms.docs){ await deleteDoc(d.ref); } }catch(e){}
+        try{ const as = await getDocs(collection(db, 'firmaAccounts', targetId, 'admins')); for(const d of as.docs){ await deleteDoc(d.ref); } }catch(e){}
+        // Bu firmayı ana firma (hub) olarak kullanan diğer firmaların bağlantısını çöz.
+        try{
+          for(const other of myAdminFirmas){
+            if(other.id !== targetId && other.dataGroupId === targetId){
+              await setDoc(doc(db, 'firmaAccounts', other.id), { dataGroupId: null }, { merge: true });
+            }
+          }
+        }catch(e){}
+        await deleteDoc(doc(db, 'firmaAccounts', targetId));
+        await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayRemove(targetId) }, { merge: true });
+        setFirmaCrudMsg('Firma silindi ✓', false);
+        setTimeout(() => location.reload(), 800);
+      }catch(e){ setFirmaCrudMsg('Silinemedi, tekrar deneyin.', true); _deleteFirmaBtn.disabled = false; }
+    });
+  }
 
   // ---- Kullanıcı Ekle (davet) ----
   document.getElementById('inviteSubmitBtn').addEventListener('click', async () => {
