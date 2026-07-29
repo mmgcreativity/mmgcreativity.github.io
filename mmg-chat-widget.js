@@ -1771,8 +1771,9 @@ import {
       }
       const sentHtml = sentIds.map(id => {
         const s = sentRequestsMap[id];
-        return `<div data-sent-id="${esc(id)}" style="display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--hairline,#2A3448); border-radius:10px; margin-bottom:6px;">
+        return `<div data-sent-id="${esc(id)}" data-to-uid="${esc(s.toUid || '')}" style="display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--hairline,#2A3448); border-radius:10px; margin-bottom:6px;">
           <div style="flex:1; min-width:0; font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>${esc(s.toCode || s.toUid || '???')}</b> koduna istek</div>
+          <button type="button" class="mmg-chat-btn nudge-sent" title="Dürt — karşı tarafa bildirim gönder" style="flex:0 0 auto; background:transparent; border:1px solid rgba(198,161,91,0.55); color:var(--brass,#C6A15B); font-weight:600;">👉 Dürt</button>
           <button type="button" class="mmg-chat-btn decline cancel-sent" style="flex:0 0 auto; background:transparent; border:1px solid rgba(226,84,75,0.55); color:#E2544B; font-weight:600;">Geri Çek</button>
         </div>`;
       }).join('');
@@ -1780,6 +1781,17 @@ import {
       wireSubBar(); wireAddBtn();
       els.body.querySelectorAll('[data-sent-id]').forEach(row => {
         row.querySelector('.cancel-sent').addEventListener('click', () => cancelSentRequest(row.dataset.sentId));
+        const nudgeBtn = row.querySelector('.nudge-sent');
+        if(nudgeBtn){
+          nudgeBtn.addEventListener('click', async () => {
+            const uid = row.dataset.toUid;
+            if(!uid || !window.mmgNotify){ nudgeBtn.textContent = '—'; setTimeout(()=>{ nudgeBtn.textContent = '👉 Dürt'; }, 1200); return; }
+            nudgeBtn.disabled = true;
+            try{ await window.mmgNotify(uid, { type:'nudge', title:'👉 Dürtüldünüz', body:'Bir kullanıcı sizi dürttü — bekleyen sohbet isteğini yanıtlayın.' }); nudgeBtn.textContent = '✅'; }
+            catch(e){ nudgeBtn.textContent = '—'; }
+            setTimeout(()=>{ nudgeBtn.textContent = '👉 Dürt'; nudgeBtn.disabled = false; }, 1400);
+          });
+        }
       });
       return;
     }
