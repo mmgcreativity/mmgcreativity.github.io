@@ -550,6 +550,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="io-toolbar">
       <button type="button" class="io-btn" id="exportExcelBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg><span data-i18n="export_excel">Excel'e Aktar</span></button>
       <button type="button" class="io-btn" id="exportPdfBtn"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px;"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg><span data-i18n="export_pdf">PDF'e Aktar</span></button>
+      <button type="button" class="io-btn" id="aktarKarsilastirmaBtn" title="Bu tablodaki satırları Kredi Karşılaştırma modülüne aktar">📤 <span>Kredi Karşılaştırma'ya Aktar</span></button>
     </div>
     <div class="io-msg" id="ioMsg"></div>
   </section>
@@ -913,6 +914,20 @@ function buildTrancheRows(){
   });
   return rows;
 }
+
+// Bu tablodaki satırları Kredi Karşılaştırma modülüne aktar ve o modülü aç.
+document.getElementById('aktarKarsilastirmaBtn').addEventListener('click', () => {
+  try{
+    const data = (trancheRows || [])
+      .filter(t => t && (t.tutar || t.vade))
+      .map(t => ({ bank:'', amount:+t.tutar || 0, monthlyRate:+t.oran || 0, months:+t.vade || 0, annualFeeRate:0 }));
+    if(!data.length){ const m = document.getElementById('ioMsg'); if(m){ m.textContent = 'Aktarılacak satır yok.'; } return; }
+    localStorage.setItem('mmg_kk_transfer', JSON.stringify(data));
+    localStorage.setItem('mmg_last_open_page', 'kredi-karsilastirma.html');
+    if(window.top && window.top !== window.self) window.top.location.href = 'index.html';
+    else window.location.href = 'kredi-karsilastirma.html';
+  }catch(e){ const m = document.getElementById('ioMsg'); if(m){ m.textContent = 'Aktarım başarısız: ' + e.message; } }
+});
 
 document.getElementById('exportExcelBtn').addEventListener('click', () => {
   if(!requirePremium('Excel\'e aktarma')) return;

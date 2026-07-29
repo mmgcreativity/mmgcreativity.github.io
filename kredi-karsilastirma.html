@@ -493,6 +493,17 @@ let offers = [
   {bank:"", amount:100000, monthlyRate:4.58, months:12, annualFeeRate:1.17},
   {bank:"", amount:100000, monthlyRate:4.08, months:12, annualFeeRate:1.82},
 ];
+// Taksitli Kredi tablosundan "Kredi Karşılaştırma'ya Aktar" ile gelen satırlar (varsa) yüklenir.
+try{
+  const _t = localStorage.getItem('mmg_kk_transfer');
+  if(_t){
+    const arr = JSON.parse(_t);
+    if(Array.isArray(arr) && arr.length){
+      offers = arr.map(o => ({ bank:o.bank||'', amount:+o.amount||0, monthlyRate:+o.monthlyRate||0, months:+o.months||12, annualFeeRate:(o.annualFeeRate!=null?+o.annualFeeRate:0) }));
+    }
+    localStorage.removeItem('mmg_kk_transfer');
+  }
+}catch(e){}
 
 const BSMV_RATE = 0.05;
 let calcMode = 'simple'; // 'simple' | 'compound'
