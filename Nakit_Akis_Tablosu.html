@@ -745,9 +745,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
                 <button type="button" class="nav-arrow-btn" id="nextMonthBtn" title="Sonraki" data-i18n-title="next">▶</button>
               </div>
-              <button type="button" class="ghost-btn" id="gotoTodayBtn">📍 <span data-i18n="goto_today">Bugün</span></button>
+              <button type="button" class="ghost-btn" id="gotoTodayBtn" style="display:none;">📍 <span data-i18n="goto_today">Bugün</span></button>
               <button type="button" class="ghost-btn" id="refreshSyncBtn" data-i18n-title="refresh_sync_hint" title="Gelir/Giderlerden vadesi gelen aktarımları çek">🔄 <span data-i18n="refresh_btn">Yenile</span></button>
-              <button type="button" class="ghost-btn" id="manualSaveBtn">💾 <span data-i18n="save_btn">Kaydet</span></button>
+              <button type="button" class="ghost-btn" id="manualSaveBtn" style="display:none;">💾 <span data-i18n="save_btn">Kaydet</span></button>
               <button type="button" class="ghost-btn" id="clearMonthBtn">🗑 <span data-i18n="clear_btn">Temizle</span></button>
               <button type="button" class="ghost-btn" id="undoClearBtn" style="display:none;">↩ <span data-i18n="undo_btn">Geri Al</span></button>
               <button type="button" class="ghost-btn" id="consolidatedOpenCard" style="display:none;">🏢 <span class="coc-text" data-i18n="consolidate_open">GRUP GÖSTER</span></button>
@@ -1606,6 +1606,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return months;
   }
 
+  // Grup GÜNLÜK: seçili günün kalemlerini Excel'deki gibi kategori bölümlerine grupla (panorama).
+  // (monthData bu noktada birleştirilmiş grup verisi olacak.)
+  function buildGroupDayPanoramaHtml(dk){
+    const day = monthData[dk] || { gider:[], gelir:[] };
+    const GELIR_SEC = [['Çek Tahsilatı','Müşteri Çekleri'],['Senet Tahsilatı','Müşteri Senetleri'],['Nakit Tahsilat','Nakit Tahsilat'],['POS Tahsilatı','POS Tahsilatı'],['Faiz Geliri','Faiz Geliri']];
+    const GIDER_SEC = [['Kredi Kartı','Hesabı Kesilecek Kredi Kartları'],['Kredi / Taksit Ödemesi','Kredi Taksitleri'],['Teminat Mektubu','Teminat Mektupları'],['Komisyon','Komisyonlar'],['Kira','Kira'],['Maaş / Personel','Maaş / Personel'],['Tedarikçi / Stok','Tedarikçi / Stok'],['Vergi / SGK','Vergi / SGK'],['Fatura','Faturalar'],['Diğer Gider','Diğer Gider']];
+    function grp(list){ const m={}; (list||[]).forEach(it=>{ const c=it.category||''; (m[c]=m[c]||[]).push(it); }); return m; }
+    const gMap = grp(day.gider), iMap = grp(day.gelir);
+    function section(title, items, color){
+      let tot = 0;
+      const rows = items.map(it => { tot += (it.amount||0); return '<tr><td style="padding:8px 12px;border-bottom:1px solid var(--hairline);">'+escapeHtml(it.desc||'')+'</td><td style="padding:8px 12px;border-bottom:1px solid var(--hairline);text-align:right;font-family:\'JetBrains Mono\',monospace;color:'+color+';white-space:nowrap;">'+fmtMoney(it.amount)+'</td></tr>'; }).join('');
+      return '<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);border:1px solid var(--hairline);border-radius:10px 10px 0 0;padding:10px 12px;"><span style="font-weight:700;font-size:13.5px;">'+escapeHtml(title)+'</span><span style="font-family:\'JetBrains Mono\',monospace;font-weight:700;color:'+color+';">'+fmtMoney(tot)+'</span></div><table style="width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--hairline);border-top:none;border-radius:0 0 10px 10px;font-size:12.5px;"><tbody>'+rows+'</tbody></table></div>';
+    }
+    let html = ''; const usedG = {}, usedI = {};
+    GELIR_SEC.forEach(([cat,title]) => { if(iMap[cat] && iMap[cat].length){ usedI[cat]=1; html += section(title+' (Tahsilat)', iMap[cat], 'var(--teal)'); } });
+    GIDER_SEC.forEach(([cat,title]) => { if(gMap[cat] && gMap[cat].length){ usedG[cat]=1; html += section(title+' (Ödeme)', gMap[cat], 'var(--red)'); } });
+    Object.keys(iMap).forEach(c => { if(!usedI[c]) html += section((c||'Diğer Gelir')+' (Tahsilat)', iMap[c], 'var(--teal)'); });
+    Object.keys(gMap).forEach(c => { if(!usedG[c]) html += section((c||'Diğer Gider')+' (Ödeme)', gMap[c], 'var(--red)'); });
+    if(!html) html = '<div class="reports-empty">Bu güne ait kayıt yok.</div>';
+    return html;
+  }
+
   // Grup görünümü: özet kartları (seçili firmaların toplamı) + ANA tarih-bazlı tablo
   // (gün gün, seçili firmaların toplamı). Yıllıkta firma kırılım tablosu gösterilir.
   async function renderConsolidatedMain(){
@@ -1664,7 +1686,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       renderPicker(); // hafta/gün seçici (dönem gezinmesi çalışsın)
       const weeks = buildWeeks(selYear, selMonth);
       if(reportTab === 'gunluk'){
-        html = buildDayDetailHtml(reportDay);
+        html = buildGroupDayPanoramaHtml(dayKey(selYear, selMonth, reportDay));
       } else if(reportTab === 'haftalik'){
         const week = weeks[reportWeekIdx] || weeks[0] || [];
         html = week.length ? buildWeekCardHtml(week, reportWeekIdx) : '<div class="reports-empty">Bu haftaya ait gün bulunamadı.</div>';
@@ -2046,7 +2068,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.getElementById('nextMonthBtn').title = isYearly ? NAT.nextYear : NAT.nextMonth;
 
     // "Temizle" yalnızca tek bir ay üzerinde anlamlı
-    document.getElementById('manualSaveBtn').style.display = isYearly ? 'none' : '';
+    document.getElementById('manualSaveBtn').style.display = 'none'; // Kaydet kaldırıldı (otomatik kayıt var)
     document.getElementById('clearMonthBtn').style.display = isYearly ? 'none' : '';
   }
 
@@ -2088,18 +2110,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // Sağdaki 3 özet kartının üst kenarını, üstteki araç çubuğunu atlayıp
   // doğrudan gün/hafta kutusunun üst kenarına hizalar (masaüstünde).
   function alignSummaryCardsTop(){
-    const controls = document.getElementById('secondaryControls');
-    const picker = document.getElementById('reportPicker');
+    // Kullanıcı isteği: özet kartları (Gelir/Gider/Net) üst araç çubuğu (Temizle) ile
+    // AYNI hizada başlasın — tablo hizasına itmiyoruz.
     const side = document.getElementById('contentSide');
-    if(!controls || !side) return;
-    if(window.innerWidth <= 900){ side.style.marginTop = '0px'; return; }
-    const controlsStyle = getComputedStyle(controls);
-    let offset = controls.offsetHeight + parseFloat(controlsStyle.marginBottom || 0);
-    if(picker && picker.offsetHeight > 0){
-      const pickerStyle = getComputedStyle(picker);
-      offset += picker.offsetHeight + parseFloat(pickerStyle.marginBottom || 0);
-    }
-    side.style.marginTop = offset + 'px';
+    if(side) side.style.marginTop = '0px';
   }
   window.addEventListener('resize', alignSummaryCardsTop);
 
