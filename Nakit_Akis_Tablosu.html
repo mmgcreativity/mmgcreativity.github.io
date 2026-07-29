@@ -1538,12 +1538,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     loadMonth(); // kendi verine geri dön
   }
 
-  // Konsolide görünümü ANA alana boya: özet kartları + firma kırılım tablosu (dönem/tarih duyarlı).
+  // Seçili firmaların AÇIK AYINA ait günlük gelir/gider TOPLAMLARINI tek bir monthData
+  // yapısında birleştirir (her gün için gider ve gelir tek "Toplam" kalemine indirgenir).
+  // Böylece normal tarih-bazlı tablo (gün gün) seçili firmaların toplamını gösterir.
+  async function buildGroupCurrentMonthData(checked){
+    const cloud = window.mmgCloud;
+    const activeFid = (cloud && cloud.scopeCollection === 'firmaAccounts') ? cloud.scopeId : null;
+    const curMk = monthKeyOf(selYear, selMonth);
+    const acc = {}; // dk -> {g, i}
+    for(const fid of checked){
+      let data = null;
+      if(fid === activeFid){
+        data = monthData || {}; // aktif firmanın açık ayı: canlı veri
+      } else {
+        try{
+          const snap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid, 'cashflow', curMk));
+          data = snap.exists() ? (snap.data().data || {}) : {};
+        }catch(e){ data = {}; }
+      }
+      Object.keys(data).forEach(dk => {
+        if(dk.slice(0,7) !== curMk) return;
+        const day = data[dk] || {};
+        let g = 0, i = 0;
+        (day.gider||[]).forEach(it => { g += (it.amount||0); });
+        (day.gelir||[]).forEach(it => { i += (it.amount||0); });
+        if(!acc[dk]) acc[dk] = { g:0, i:0 };
+        acc[dk].g += g; acc[dk].i += i;
+      });
+    }
+    const merged = {};
+    Object.keys(acc).forEach(dk => {
+      merged[dk] = {
+        gider: acc[dk].g ? [{ id:'grp', desc:'Toplam', category:'', amount:acc[dk].g }] : [],
+        gelir: acc[dk].i ? [{ id:'grp', desc:'Toplam', category:'', amount:acc[dk].i }] : [],
+        expanded: { gider:false, gelir:false }
+      };
+    });
+    return merged;
+  }
+
+  // Grup görünümü: özet kartları (seçili firmaların toplamı) + ANA tarih-bazlı tablo
+  // (gün gün, seçili firmaların toplamı). Yıllıkta firma kırılım tablosu gösterilir.
   async function renderConsolidatedMain(){
     const weeksC = document.getElementById('weeksContainer');
-    const picker = document.getElementById('reportPicker');
-    if(picker) picker.innerHTML = '';
-    if(weeksC) weeksC.innerHTML = '<div class="reports-empty">Konsolide veriler hesaplanıyor…</div>';
+    if(weeksC) weeksC.innerHTML = '<div class="reports-empty">Grup verileri hesaplanıyor…</div>';
     const r = consRangeActive();
     let periodTag;
     if(r) periodTag = r.from + ' → ' + r.to;
@@ -1553,7 +1591,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     else periodTag = String(selMonth+1).padStart(2,'0') + '.' + selYear;
     let res;
     try{ res = await computeConsolidatedTotals(consolidatedActiveIds); }
-    catch(e){ if(weeksC) weeksC.innerHTML = '<div class="reports-empty">Konsolide edilirken bir hata oluştu.</div>'; return; }
+    catch(e){ if(weeksC) weeksC.innerHTML = '<div class="reports-empty">Grup hesaplanırken bir hata oluştu.</div>'; return; }
     if(!consolidatedMode) return; // arada çıkış yapıldıysa boyama
     document.getElementById('sumGelirLabel').textContent = NAT.income + ' · Grup';
     document.getElementById('sumGiderLabel').textContent = NAT.expense + ' · Grup';
@@ -1566,27 +1604,61 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.getElementById('sumGelirSub').textContent = periodTag;
     document.getElementById('sumGiderSub').textContent = periodTag;
     document.getElementById('sumNetSub').textContent = consolidatedActiveIds.length + ' firma';
-    let html = '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">' +
-      '<span style="font-weight:700;font-size:15px;">🏢 Grup Görünümü</span>' +
-      '<span style="color:var(--muted);font-size:12.5px;">' + escapeHtml(periodTag) + ' · ' + consolidatedActiveIds.length + ' firma</span></div>';
-    html += '<table style="width:100%;border-collapse:collapse;font-size:13.5px;">' +
-      '<thead><tr style="text-align:left;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;">' +
-      '<th style="padding:8px;">Firma</th><th style="padding:8px;">Gelir</th><th style="padding:8px;">Gider</th><th style="padding:8px;">Net</th></tr></thead><tbody>';
-    res.rows.forEach(row => {
-      html += '<tr style="border-top:1px solid var(--hairline);">' +
-        '<td style="padding:8px;font-weight:600;">' + escapeHtml(row.name) + '</td>' +
-        '<td style="padding:8px;color:var(--teal);">' + fmtMoney(row.gelir) + '</td>' +
-        '<td style="padding:8px;color:var(--red);">' + fmtMoney(row.gider) + '</td>' +
-        '<td style="padding:8px;font-weight:700;">' + (row.net>=0?'':'-') + fmtMoney(Math.abs(row.net)) + '</td></tr>';
-    });
-    html += '<tr style="border-top:2px solid var(--hairline);font-weight:800;">' +
-      '<td style="padding:8px;">TOPLAM</td>' +
-      '<td style="padding:8px;color:var(--teal);">' + fmtMoney(res.grandGelir) + '</td>' +
-      '<td style="padding:8px;color:var(--red);">' + fmtMoney(res.grandGider) + '</td>' +
-      '<td style="padding:8px;">' + (res.grandNet>=0?'':'-') + fmtMoney(Math.abs(res.grandNet)) + '</td></tr>';
-    html += '</tbody></table>';
+
+    // ---- Yıllık: firma kırılım tablosu (tarih-bazlı değil) ----
+    if(reportTab === 'yillik'){
+      const picker = document.getElementById('reportPicker'); if(picker) picker.innerHTML = '';
+      let html = '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">' +
+        '<span style="font-weight:700;font-size:15px;">🏢 Grup Görünümü</span>' +
+        '<span style="color:var(--muted);font-size:12.5px;">' + escapeHtml(periodTag) + ' · ' + consolidatedActiveIds.length + ' firma</span></div>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:13.5px;">' +
+        '<thead><tr style="text-align:left;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;">' +
+        '<th style="padding:8px;">Firma</th><th style="padding:8px;">Gelir</th><th style="padding:8px;">Gider</th><th style="padding:8px;">Net</th></tr></thead><tbody>';
+      res.rows.forEach(row => {
+        html += '<tr style="border-top:1px solid var(--hairline);">' +
+          '<td style="padding:8px;font-weight:600;">' + escapeHtml(row.name) + '</td>' +
+          '<td style="padding:8px;color:var(--teal);">' + fmtMoney(row.gelir) + '</td>' +
+          '<td style="padding:8px;color:var(--red);">' + fmtMoney(row.gider) + '</td>' +
+          '<td style="padding:8px;font-weight:700;">' + (row.net>=0?'':'-') + fmtMoney(Math.abs(row.net)) + '</td></tr>';
+      });
+      html += '<tr style="border-top:2px solid var(--hairline);font-weight:800;">' +
+        '<td style="padding:8px;">TOPLAM</td>' +
+        '<td style="padding:8px;color:var(--teal);">' + fmtMoney(res.grandGelir) + '</td>' +
+        '<td style="padding:8px;color:var(--red);">' + fmtMoney(res.grandGider) + '</td>' +
+        '<td style="padding:8px;">' + (res.grandNet>=0?'':'-') + fmtMoney(Math.abs(res.grandNet)) + '</td></tr>';
+      html += '</tbody></table>';
+      if(weeksC) weeksC.innerHTML = html;
+      const rl = document.getElementById('reportsList'); if(rl) rl.innerHTML = '';
+      const bw = document.getElementById('breakdownWrap'); if(bw) bw.style.display = 'none';
+      alignSummaryCardsTop();
+      return;
+    }
+
+    // ---- Günlük / Haftalık / Aylık: tarih-bazlı TABLO, seçili firmaların günlük toplamı ----
+    let merged;
+    try{ merged = await buildGroupCurrentMonthData(consolidatedActiveIds); }
+    catch(e){ if(weeksC) weeksC.innerHTML = '<div class="reports-empty">Grup verisi hesaplanamadı.</div>'; return; }
+    if(!consolidatedMode) return;
+    const realMonthData = monthData;
+    monthData = merged; // geçici: builder'lar grup toplamını okusun
+    let html = '';
+    try{
+      renderPicker(); // hafta/gün seçici (dönem gezinmesi çalışsın)
+      const weeks = buildWeeks(selYear, selMonth);
+      if(reportTab === 'gunluk'){
+        html = buildDayDetailHtml(reportDay);
+      } else if(reportTab === 'haftalik'){
+        const week = weeks[reportWeekIdx] || weeks[0] || [];
+        html = week.length ? buildWeekCardHtml(week, reportWeekIdx) : '<div class="reports-empty">Bu haftaya ait gün bulunamadı.</div>';
+      } else {
+        weeks.forEach((week, wIdx) => { html += buildWeekCardHtml(week, wIdx); });
+        html += buildGrandTotalHtml(weeks);
+      }
+    } finally {
+      monthData = realMonthData; // gerçek veriyi geri yükle (yanlışlıkla grup verisiyle kayıt olmasın)
+    }
+    if(!consolidatedMode) return;
     if(weeksC) weeksC.innerHTML = html;
-    const rl = document.getElementById('reportsList'); if(rl) rl.innerHTML = '';
     const bw = document.getElementById('breakdownWrap'); if(bw) bw.style.display = 'none';
     alignSummaryCardsTop();
   }
