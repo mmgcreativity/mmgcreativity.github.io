@@ -768,6 +768,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition:border-color .15s ease;
   }
   .auth-field input:focus, .auth-field select:focus{ border-color:var(--brass-dim); }
+  /* E-posta küçük harf görünsün; tarayıcı büyük harf getirse de tasarım bozulmasın. */
+  #authEmail{ text-transform:lowercase; }
+  /* Tarayıcı otomatik doldurunca (Chrome/Edge) beyaz arka plan gelmesin — koyu temaya uydur. */
+  .auth-field input:-webkit-autofill,
+  .auth-field input:-webkit-autofill:hover,
+  .auth-field input:-webkit-autofill:focus,
+  .auth-field input:-webkit-autofill:active{
+    -webkit-text-fill-color:var(--text);
+    caret-color:var(--text);
+    -webkit-box-shadow:0 0 0px 1000px var(--surface-2) inset;
+    box-shadow:0 0 0px 1000px var(--surface-2) inset;
+    border:1px solid var(--hairline);
+    transition:background-color 9999s ease-in-out 0s;
+  }
   .auth-error{ color:var(--coral); font-size:12.5px; margin-bottom:14px; display:none; grid-column:1 / -1; }
   .auth-error.show{ display:block; }
   .auth-success{ color:var(--teal); font-size:12.5px; margin-bottom:14px; display:none; grid-column:1 / -1; }
@@ -3267,9 +3281,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     authSuccess.textContent = '';
   }
 
+  // E-posta'yı ASCII küçük harfe indir: autofill/klavye BÜYÜK harf ya da Türkçe "İ"
+  // getirse bile geçerli olsun (type=email, '@' öncesinde 'İ'yi reddediyordu).
+  function mmgNormalizeEmail(s){
+    return (s||'').trim().toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g,'');
+  }
+  (function(){
+    const _e = document.getElementById('authEmail');
+    if(_e){
+      const norm = () => {
+        const v = mmgNormalizeEmail(_e.value);
+        if(v !== _e.value){ const p = _e.selectionStart; _e.value = v; try{ _e.setSelectionRange(p, p); }catch(e){} }
+      };
+      _e.addEventListener('input', norm);
+      _e.addEventListener('change', norm);
+      _e.addEventListener('blur', norm);
+    }
+  })();
+
   forgotPasswordBtn.addEventListener('click', async () => {
     const emailInput = document.getElementById('authEmail');
-    const email = emailInput.value.trim();
+    const email = mmgNormalizeEmail(emailInput.value);
     if(!email){
       showAuthError(MMGI18N.t('auth_err_need_email_reset'));
       emailInput.focus();
@@ -4308,7 +4340,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     hideAuthError();
-    const email = document.getElementById('authEmail').value.trim();
+    const email = mmgNormalizeEmail(document.getElementById('authEmail').value);
     const password = document.getElementById('authPassword').value;
     const remember = document.getElementById('rememberMe').checked;
 
