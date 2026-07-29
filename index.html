@@ -955,6 +955,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       settings_fullscreen_mode:'Tam Ekran Modu', settings_fullscreen_on:'⛶ Tam Ekran', settings_window_mode:'Pencere Modu',
       settings_notifications:'Bildirimler', settings_on:'Açık', settings_off:'Kapalı',
       settings_change_password:'Şifre Değiştir', settings_new_password:'Yeni şifre (en az 6 karakter)',
+      settings_link_phone_label:'Telefonla Giriş (Telefon Bağla)', settings_link_phone:'Telefonumu Bağla', settings_link_phone_hint:'Telefonunu bir kez bağla; sonra giriş ekranından "Telefon ile giriş" ile bu hesaba girebilirsin.', settings_link_phone_verify:'Doğrula ve Bağla',
       settings_new_password_repeat:'Yeni şifre (tekrar)', settings_update_password:'Şifreyi Güncelle', settings_ok:'✓ Tamam',
       settings_forgot_password:'Şifreyi Değiştir', settings_cancel:'Vazgeç', settings_old_password:'Eski şifre',
       pw_err_need_old:'Lütfen eski şifrenizi girin.', pw_updating:'Güncelleniyor…',
@@ -1064,6 +1065,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       settings_fullscreen_mode:'Fullscreen Mode', settings_fullscreen_on:'⛶ Fullscreen', settings_window_mode:'Windowed Mode',
       settings_notifications:'Notifications', settings_on:'On', settings_off:'Off',
       settings_change_password:'Change Password', settings_new_password:'New password (at least 6 characters)',
+      settings_link_phone_label:'Phone Sign-in (Link Phone)', settings_link_phone:'Link My Phone', settings_link_phone_hint:'Link your phone once; then you can sign in to this account via "Sign in with phone".', settings_link_phone_verify:'Verify & Link',
       settings_new_password_repeat:'New password (repeat)', settings_update_password:'Update Password', settings_ok:'✓ OK',
       settings_forgot_password:'Change Password', settings_cancel:'Cancel', settings_old_password:'Current password',
       pw_err_need_old:'Please enter your current password.', pw_updating:'Updating…',
@@ -2794,7 +2796,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup,
     deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup,
     sendPasswordResetEmail, updatePassword, sendEmailVerification, signInWithCustomToken,
-    RecaptchaVerifier, signInWithPhoneNumber
+    RecaptchaVerifier, signInWithPhoneNumber, linkWithPhoneNumber
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, runTransaction, serverTimestamp, increment,
@@ -4381,6 +4383,68 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   })();
 
+  // ---- Ayarlar → Telefonumu Bağla (mevcut hesaba telefon ekle; sonra telefonla giriş bu hesaba girer) ----
+  (function(){
+    const toggle = document.getElementById('mmgLinkPhoneToggleBtn');
+    const form = document.getElementById('mmgLinkPhoneForm');
+    const numInput = document.getElementById('mmgLinkPhoneNumber');
+    const codeInput = document.getElementById('mmgLinkPhoneCode');
+    const sendBtn = document.getElementById('mmgLinkPhoneSendBtn');
+    const step2 = document.getElementById('mmgLinkPhoneStep2');
+    const verifyBtn = document.getElementById('mmgLinkPhoneVerifyBtn');
+    const msg = document.getElementById('mmgLinkPhoneMsg');
+    if(!toggle) return;
+    let confirmationResult = null, recaptcha = null;
+    function ensureRecaptcha(){
+      if(recaptcha) return recaptcha;
+      recaptcha = new RecaptchaVerifier(auth, 'mmgLinkPhoneRecaptcha', { size:'invisible' });
+      return recaptcha;
+    }
+    function mapErr(err){
+      const c = err && err.code ? err.code : '';
+      if(c==='auth/invalid-phone-number') return 'Geçersiz numara.';
+      if(c==='auth/too-many-requests') return 'Çok fazla deneme. Sonra tekrar deneyin.';
+      if(c==='auth/invalid-verification-code') return 'Kod hatalı.';
+      if(c==='auth/code-expired') return 'Kodun süresi doldu, tekrar gönderin.';
+      if(c==='auth/credential-already-in-use' || c==='auth/account-exists-with-different-credential' || c==='auth/phone-number-already-exists') return 'Bu telefon başka bir hesaba bağlı.';
+      if(c==='auth/operation-not-allowed') return "Telefon girişi Firebase'de etkin değil (Console → Authentication → Phone).";
+      if(c==='auth/requires-recent-login') return 'Güvenlik için lütfen çıkıp tekrar giriş yapın, sonra bağlayın.';
+      return 'Hata: ' + (c || (err && err.message) || 'bilinmeyen');
+    }
+    toggle.addEventListener('click', ()=>{
+      if(!auth.currentUser){ msg.textContent='Önce e-posta ile giriş yapın.'; msg.style.color='var(--red,#E2544B)'; form.style.display='block'; return; }
+      form.style.display = (form.style.display==='none' || !form.style.display) ? 'block' : 'none';
+    });
+    sendBtn.addEventListener('click', async ()=>{
+      if(!auth.currentUser){ msg.textContent='Önce e-posta ile giriş yapın.'; msg.style.color='var(--red,#E2544B)'; return; }
+      const phone = (numInput.value||'').replace(/[\s()-]/g,'');
+      if(!/^\+\d{10,15}$/.test(phone)){ msg.textContent='Numarayı +90… biçiminde girin.'; msg.style.color='var(--red,#E2544B)'; return; }
+      sendBtn.disabled=true; msg.textContent='Kod gönderiliyor…'; msg.style.color='var(--muted,#8D96AC)';
+      try{
+        confirmationResult = await linkWithPhoneNumber(auth.currentUser, phone, ensureRecaptcha());
+        step2.style.display='block';
+        msg.textContent='SMS gönderildi. Kodu girin.'; msg.style.color='var(--teal,#3FB68A)';
+      }catch(err){
+        msg.textContent = mapErr(err); msg.style.color='var(--red,#E2544B)';
+        try{ if(recaptcha){ recaptcha.clear(); recaptcha=null; } }catch(e){}
+      }finally{ sendBtn.disabled=false; }
+    });
+    verifyBtn.addEventListener('click', async ()=>{
+      const code = (codeInput.value||'').trim();
+      if(!/^\d{6}$/.test(code)){ msg.textContent='6 haneli kodu girin.'; msg.style.color='var(--red,#E2544B)'; return; }
+      if(!confirmationResult){ msg.textContent='Önce kod gönderin.'; msg.style.color='var(--red,#E2544B)'; return; }
+      verifyBtn.disabled=true; msg.textContent='Bağlanıyor…'; msg.style.color='var(--muted,#8D96AC)';
+      try{
+        await confirmationResult.confirm(code);
+        msg.textContent='✓ Telefon bağlandı. Artık telefonla giriş bu hesaba girer.'; msg.style.color='var(--teal,#3FB68A)';
+        step2.style.display='none';
+      }catch(err){
+        msg.textContent = mapErr(err); msg.style.color='var(--red,#E2544B)';
+        verifyBtn.disabled=false;
+      }
+    });
+  })();
+
   authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     hideAuthError();
@@ -4725,6 +4789,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <button type="submit" class="mmg-lang-btn" id="mmgPasswordSubmitBtn" style="width:100%;" data-i18n="settings_update_password">Şifreyi Güncelle</button>
       <div id="mmgPasswordMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>
     </form>
+
+    <div class="mmg-settings-label" style="margin-top:18px;" data-i18n="settings_link_phone_label">Telefonla Giriş (Telefon Bağla)</div>
+    <button type="button" class="mmg-lang-btn" id="mmgLinkPhoneToggleBtn" style="width:100%; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:6px;">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></svg>
+      <span data-i18n="settings_link_phone">Telefonumu Bağla</span>
+    </button>
+    <div id="mmgLinkPhoneForm" style="margin-bottom:6px; display:none;">
+      <div style="font-size:11px; color:var(--muted,#8D96AC); margin-bottom:8px;" data-i18n="settings_link_phone_hint">Telefonunu bir kez bağla; sonra giriş ekranından "Telefon ile giriş" ile bu hesaba girebilirsin.</div>
+      <input type="tel" id="mmgLinkPhoneNumber" placeholder="+90 5xx xxx xx xx" autocomplete="tel"
+        style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-size:13.5px; margin-bottom:8px; outline:none;">
+      <button type="button" class="mmg-lang-btn" id="mmgLinkPhoneSendBtn" style="width:100%; margin-bottom:8px;" data-i18n="auth_phone_send">Kod Gönder</button>
+      <div id="mmgLinkPhoneStep2" style="display:none;">
+        <input type="text" id="mmgLinkPhoneCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 haneli SMS kodu"
+          style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-size:16px; letter-spacing:4px; margin-bottom:8px; outline:none;">
+        <button type="button" class="mmg-lang-btn" id="mmgLinkPhoneVerifyBtn" style="width:100%;" data-i18n="settings_link_phone_verify">Doğrula ve Bağla</button>
+      </div>
+      <div id="mmgLinkPhoneMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>
+      <div id="mmgLinkPhoneRecaptcha"></div>
+    </div>
 
     <div class="mmg-settings-label" style="margin-top:18px;" data-i18n="nav_entegrasyon">Entegrasyon</div>
     <button type="button" class="mmg-lang-btn" id="mmgSettingsEntegrasyonBtn" style="width:100%; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:6px;">
