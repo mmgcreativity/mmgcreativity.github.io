@@ -203,7 +203,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .nav-subitem .nav-title{ font-size:12.5px; font-weight:600; }
   @media (max-width: 860px){
     .nav-drawer{
-      position:static; margin:2px 0 8px 14px; padding:0 0 0 8px; min-width:0;
+      position:static; margin:2px 0 8px 30px; padding:0 0 0 12px; min-width:0;
       border:none; border-left:2px solid var(--hairline); border-radius:0; box-shadow:none;
       background:transparent; transform:translateX(-10px);
     }
@@ -933,11 +933,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_home:'Ana Sayfa', nav_calc:'Hesaplamalar', nav_rotatif:'Rotatif Kredi', nav_ortalama:'Ortalama Vade',
       nav_kkvf:'Kredi Kartı Vade Farkı', nav_vadesapmasi:'Vade Sapması', nav_vadelimevduat:'Vadeli Mevduat Faizi',
       nav_krediteklif:'Kredi Tekliflerini Karşılaştır', nav_nakitakis:'Nakit Akış', nav_giderler:'Giderler', nav_gelirler:'Gelirler',
-      nav_taksitli:'Taksitli Kredi', nav_teminat:'Teminat Mektubu Komisyonu', nav_cekiskonto:'Çek İskontosu', nav_sozluk:'Finans Sözlüğü', nav_entegrasyon:'Logo/Zirve Entegrasyonu',
+      nav_taksitli:'Taksitli Kredi', nav_teminat:'Teminat Mektubu Komisyonu', nav_cekiskonto:'Çek İskontosu', nav_sozluk:'Finans Sözlüğü', nav_entegrasyon:'Entegrasyon',
       nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları', nav_verigirisi:'Veri Girişi', nav_verigirisi_panel:'Veri Giriş Paneli', nav_label_araclar:'Araçlar',
-      nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Sosyal', nav_label_verigirisi:'Veri Girişi', nav_label_verianalizi:'Veri Analizi',
+      nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Keşfet', nav_label_verigirisi:'Veri Girişi', nav_label_verianalizi:'Veri Analizi',
       nav_talimatlar:'Talimatlar', nav_talimatlar_desc:'İşlemleri', nav_hazirmetin:'Hazır Metin Talimatları',
-      nav_budget:'Bütçeleme', nav_budget_desc:'Araçları',
+      nav_budget:'Bütçeleme', nav_budget_desc:'Araçları', nav_panorama:'Günlük Panorama',
       hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
       hero_desc:'İşletmeler, Bankacılar ve Finans profesyonelleri için geliştirilmiş hepsi bir arada finans platformu',
       hero_features:'Kredi Hesaplama • Ortalama vade • Bütçe Planlama • Talimat hazırlama • Finans rehberi • Forum',
@@ -969,6 +969,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       settings_fullscreen_mode:'Tam Ekran Modu', settings_fullscreen_on:'⛶ Tam Ekran', settings_window_mode:'Pencere Modu',
       settings_notifications:'Bildirimler', settings_on:'Açık', settings_off:'Kapalı',
       settings_change_password:'Şifre Değiştir', settings_new_password:'Yeni şifre (en az 6 karakter)',
+      settings_link_phone_label:'Telefonla Giriş (Telefon Bağla)', settings_link_phone:'Telefonumu Bağla', settings_link_phone_hint:'Telefonunu bir kez bağla; sonra giriş ekranından "Telefon ile giriş" ile bu hesaba girebilirsin.', settings_link_phone_verify:'Doğrula ve Bağla',
       settings_new_password_repeat:'Yeni şifre (tekrar)', settings_update_password:'Şifreyi Güncelle', settings_ok:'✓ Tamam',
       settings_forgot_password:'Şifreyi Değiştir', settings_cancel:'Vazgeç', settings_old_password:'Eski şifre',
       pw_err_need_old:'Lütfen eski şifrenizi girin.', pw_updating:'Güncelleniyor…',
@@ -1003,6 +1004,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       kvkk_modal_title:'KVKK Aydınlatma Metni',
       auth_remember_me:'Oturumu açık tut', auth_forgot_password:'Şifremi unuttum?', auth_or:'veya',
       auth_google:'Google ile devam et', auth_guest:'Misafir olarak gir',
+      auth_phone:'Telefon ile giriş', auth_phone_label:'Telefon numarası (+90…)', auth_phone_send:'Kod Gönder', auth_phone_code_label:'SMS kodu', auth_phone_verify:'Doğrula ve Giriş Yap', auth_phone_back:'← Numarayı değiştir / tekrar gönder',
       auth_not_logged_in:'Giriş yapmadınız', auth_guest_mode:'Misafir modundasınız', auth_user_code:'Kullanıcı Kodu: #',
       no_user_code:'Kullanıcı Kodu atanmamış',
       auth_err_need_email_reset:'Şifre sıfırlama bağlantısı gönderebilmemiz için önce e-posta adresinizi yazın.',
@@ -1041,11 +1043,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_home:'Home', nav_calc:'Calculators', nav_rotatif:'Revolving Loan Calculator', nav_ortalama:'Average Maturity Calculator',
       nav_kkvf:'Credit Card Late Fee', nav_vadesapmasi:'Maturity Deviation Calculator', nav_vadelimevduat:'Time Deposit Interest Calculator',
       nav_krediteklif:'Compare Loan Offers', nav_nakitakis:'Cash Flow', nav_giderler:'Expenses', nav_gelirler:'Income',
-      nav_taksitli:'Installment Loan Calculator', nav_teminat:'Letter of Guarantee Commission', nav_cekiskonto:'Cheque Discount', nav_sozluk:'Finance Glossary', nav_entegrasyon:'Logo/Zirve Integration',
+      nav_taksitli:'Installment Loan Calculator', nav_teminat:'Letter of Guarantee Commission', nav_cekiskonto:'Cheque Discount', nav_sozluk:'Finance Glossary', nav_entegrasyon:'Integration',
       nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools', nav_verigirisi:'Data Entry', nav_verigirisi_panel:'Data Entry Panel', nav_label_araclar:'Tools',
-      nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Social', nav_label_verigirisi:'Data Entry', nav_label_verianalizi:'Data Analysis',
+      nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Explore', nav_label_verigirisi:'Data Entry', nav_label_verianalizi:'Data Analysis',
       nav_talimatlar:'Instructions', nav_talimatlar_desc:'Center', nav_hazirmetin:'Ready-made Text Instructions',
-      nav_budget:'Budgeting', nav_budget_desc:'Tools',
+      nav_budget:'Budgeting', nav_budget_desc:'Tools', nav_panorama:'Daily Panorama',
       hero_title:'Digital Finance Assistant', hero_tagline:'Your digital partner for financial decisions',
       hero_desc:'An all-in-one finance platform built for businesses, bankers and finance professionals',
       hero_features:'Loan Calculation • Average Maturity • Budget Planning • Instruction Preparation • Finance Guide • Forum',
@@ -1077,6 +1079,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       settings_fullscreen_mode:'Fullscreen Mode', settings_fullscreen_on:'⛶ Fullscreen', settings_window_mode:'Windowed Mode',
       settings_notifications:'Notifications', settings_on:'On', settings_off:'Off',
       settings_change_password:'Change Password', settings_new_password:'New password (at least 6 characters)',
+      settings_link_phone_label:'Phone Sign-in (Link Phone)', settings_link_phone:'Link My Phone', settings_link_phone_hint:'Link your phone once; then you can sign in to this account via "Sign in with phone".', settings_link_phone_verify:'Verify & Link',
       settings_new_password_repeat:'New password (repeat)', settings_update_password:'Update Password', settings_ok:'✓ OK',
       settings_forgot_password:'Change Password', settings_cancel:'Cancel', settings_old_password:'Current password',
       pw_err_need_old:'Please enter your current password.', pw_updating:'Updating…',
@@ -1111,6 +1114,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       kvkk_modal_title:'Data Protection (KVKK) Notice',
       auth_remember_me:'Keep me signed in', auth_forgot_password:'Forgot password?', auth_or:'or',
       auth_google:'Continue with Google', auth_guest:'Continue as guest',
+      auth_phone:'Sign in with phone', auth_phone_label:'Phone number (+90…)', auth_phone_send:'Send Code', auth_phone_code_label:'SMS code', auth_phone_verify:'Verify & Sign In', auth_phone_back:'← Change number / resend',
       auth_not_logged_in:'You are not signed in', auth_guest_mode:'You are in guest mode', auth_user_code:'User Code: #',
       no_user_code:'No user code assigned',
       auth_err_need_email_reset:'Please enter your email address first so we can send a password reset link.',
@@ -1220,6 +1224,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span data-i18n="auth_google">Google ile devam et</span>
       </button>
       <button type="button" class="auth-guest" id="guestBtn" data-i18n="auth_guest">Misafir olarak gir</button>
+      <button type="button" class="auth-guest" id="phoneLoginBtn" style="margin-top:8px;">📱 <span data-i18n="auth_phone">Telefon ile giriş</span></button>
+
+      <!-- Telefon ile giriş akışı (Firebase Phone Auth) -->
+      <div id="phoneLoginPanel" style="display:none; margin-top:12px; border-top:1px solid var(--hairline); padding-top:12px;">
+        <div id="phoneStep1">
+          <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px;" data-i18n="auth_phone_label">Telefon numarası (+90…)</label>
+          <input type="tel" id="phoneNumberInput" value="+90 " placeholder="+90 5xx xxx xx xx" autocomplete="tel" style="width:100%; box-sizing:border-box; height:42px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:0 12px; color:var(--text); font-size:14px; outline:none; margin-bottom:8px;">
+          <button type="button" class="auth-submit auth-full" id="phoneSendCodeBtn" data-i18n="auth_phone_send">Kod Gönder</button>
+        </div>
+        <div id="phoneStep2" style="display:none;">
+          <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px;" data-i18n="auth_phone_code_label">SMS kodu</label>
+          <input type="text" id="phoneCodeInput" inputmode="numeric" autocomplete="one-time-code" placeholder="6 haneli kod" style="width:100%; box-sizing:border-box; height:42px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:0 12px; color:var(--text); font-size:16px; letter-spacing:4px; outline:none; margin-bottom:8px;">
+          <button type="button" class="auth-submit auth-full" id="phoneVerifyBtn" data-i18n="auth_phone_verify">Doğrula ve Giriş Yap</button>
+          <button type="button" id="phoneBackBtn" style="width:100%; margin-top:8px; background:none; border:none; color:var(--brass,#C6A15B); font-size:12px; cursor:pointer; text-decoration:underline;" data-i18n="auth_phone_back">← Numarayı değiştir / tekrar gönder</button>
+        </div>
+        <div id="phoneMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>
+        <div id="recaptchaContainer"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1383,10 +1405,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="fav-star" role="button" tabindex="0" data-fav-target="cek-iskontosu-hesaplama.html" data-fav-title="Çek İskontosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_cekiskonto">Çek İskontosu</span></span>
       </button>
-      <button class="nav-item nav-subitem" data-target="finans-sozlugu.html" data-title="Finans Sözlüğü">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="finans-sozlugu.html" data-fav-title="Finans Sözlüğü" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_sozluk">Finans Sözlüğü</span></span>
-      </button>
     </div>
     </div>
 
@@ -1403,6 +1421,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <button class="nav-item nav-subitem" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_nakitakis">Nakit Akış Tablosu</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Gunluk_Panorama.html" data-title="Günlük Panorama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Gunluk_Panorama.html" data-fav-title="Günlük Panorama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_panorama">Günlük Panorama</span></span>
       </button>
       <button class="nav-item nav-subitem" data-target="Gelirler.html" data-title="Gelirler">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
@@ -1437,9 +1459,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <div class="nav-drawer-wrap">
-    <button class="nav-item" id="sosyalToggle" data-drawer-toggle="true" data-title="Sosyal" aria-expanded="false">
+    <button class="nav-item" id="sosyalToggle" data-drawer-toggle="true" data-title="Keşfet" aria-expanded="false">
       <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 19a5.5 5.5 0 0 0-2.6-4.7"/></svg></span>
-      <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_label_sosyal">Sosyal</span></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Forum.html" data-fav-title="Keşfet" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_label_sosyal">Keşfet</span></span>
       <span class="nav-drawer-chevron" id="sosyalChevron">›</span>
     </button>
     <div class="nav-drawer" id="sosyalDrawer" hidden>
@@ -1455,12 +1478,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="fav-star" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_rehber">Rehber</span></span>
       </button>
+      <button class="nav-item nav-subitem" data-target="finans-sozlugu.html" data-title="Finans Sözlüğü">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="finans-sozlugu.html" data-fav-title="Finans Sözlüğü" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_sozluk">Finans Sözlüğü</span></span>
+      </button>
     </div>
     </div>
 
     <div class="nav-drawer-wrap">
     <button class="nav-item" id="veriAnaliziToggle" data-drawer-toggle="true" data-title="Veri Analizi" aria-expanded="false">
       <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="VeriGirisPaneli.html" data-fav-title="Veri Analizi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
       <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_label_verianalizi">Veri Analizi</span></span>
       <span class="nav-drawer-chevron" id="veriAnaliziChevron">›</span>
     </button>
@@ -1484,10 +1512,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     </div>
 
-    <button class="nav-item" data-target="entegrasyon.html" data-title="Logo/Zirve Entegrasyonu">
+    <!-- Entegrasyon ana menüden kaldırıldı; artık yalnızca Ayarlar'dan açılıyor.
+         Öğe DOM'da GİZLİ kalıyor çünkü Ayarlar'daki buton bunu .click() ile tetikliyor. -->
+    <button class="nav-item" data-target="entegrasyon.html" data-title="Entegrasyon" style="display:none;" aria-hidden="true">
       <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/><rect x="6" y="7" width="12" height="6" rx="2"/><path d="M9 13v3a3 3 0 0 0 6 0v-3"/><path d="M12 19v2"/></svg></span>
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="entegrasyon.html" data-fav-title="Logo/Zirve Entegrasyonu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-      <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_entegrasyon">Logo/Zirve Entegrasyonu</span></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="entegrasyon.html" data-fav-title="Entegrasyon" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_entegrasyon">Entegrasyon</span></span>
     </button>
   </nav>
 
@@ -2782,7 +2812,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
     signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup,
     deleteUser, EmailAuthProvider, reauthenticateWithCredential, reauthenticateWithPopup,
-    sendPasswordResetEmail, updatePassword, sendEmailVerification, signInWithCustomToken
+    sendPasswordResetEmail, updatePassword, sendEmailVerification, signInWithCustomToken,
+    RecaptchaVerifier, signInWithPhoneNumber, linkWithPhoneNumber
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, getDocs, runTransaction, serverTimestamp, increment,
@@ -3370,9 +3401,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           if(cachedProfile && cachedProfile.name) uname = cachedProfile.name;
         }catch(e){ /* sessizce geç */ }
       }
-      const displayName = uname || email;
-      nameEl.textContent = no ? ('#' + no) : displayName;
-      dropdownName.textContent = displayName;
+      // Kullanıcı adı yoksa e-postanın @ öncesi kısmını ad olarak kullan (kod'un sağında
+      // her zaman bir ad görünsün — kullanıcı isteği).
+      const ushow = uname || (email ? email.split('@')[0] : '');
+      const displayName = ushow || email;
+      // "#kod ad" biçimi: kod solda, adı sağında.
+      const codeName = no ? ('#' + no + (ushow ? ' ' + ushow : '')) : displayName;
+      nameEl.textContent = codeName;
+      dropdownName.textContent = codeName;
       // Kod (müşteri numarası) henüz yoksa — ör. eski/taşınmış ya da bir giriş
       // yolunda kodu hiç atanmamış hesaplar (rozet o an yalnızca adı gösteriyor) —
       // arka planda güvenilir biçimde bir kod bul/oluştur ve rozeti yeniden çiz.
@@ -4160,12 +4196,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(!wrap) return;
     if(!mmgFirmaMemberships.length){
       wrap.style.display = 'none'; // değiştirilecek firma yok → geçiş menüsü gizli
-      // Firması olmayan kullanıcıda da sol-alt çubuk hangi kapsamda çalışıldığını göstersin:
-      // artık gizlemiyoruz, "Kendi Hesabım" (kişisel veri) olarak etiketliyoruz.
-      if(firmaBar && firmaBarName){
-        firmaBarName.textContent = '👤 Kendi Hesabım';
-        firmaBar.hidden = false;
-      }
+      // Kullanıcı isteği: firma YOKSA sol-alt kapsam çubuğuna (firma değiştirici) gerek yok —
+      // kimlik zaten sağ-üst hesap rozetinde "#kod ad" olarak görünüyor, mükerrer olmasın.
+      if(firmaBar){ firmaBar.hidden = true; }
       return;
     }
     wrap.style.display = 'none'; // firma listesi üst hesap menüsünde GÖSTERİLMİYOR (sol-alt popup'ta)
@@ -4260,6 +4293,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(navBtn) navBtn.style.display = isAdmin ? 'flex' : 'none';
   }
 
+  // "Oturumu açık tut" tercihi kalıcı: bir kez seçince hep tikli açılır. Firebase'in
+  // varsayılan kalıcılığı zaten LOCAL olduğu için tarayıcı kapansa bile oturum korunur.
+  // Tercihi ayrı bir anahtarda tutuyoruz; çıkış yapılsa da silinmiyor.
+  (function(){
+    const rm = document.getElementById('rememberMe');
+    if(!rm) return;
+    const pref = localStorage.getItem('mmg_keep_signed_in');
+    rm.checked = (pref === null) ? true : (pref !== '0');
+    rm.addEventListener('change', () => {
+      localStorage.setItem('mmg_keep_signed_in', rm.checked ? '1' : '0');
+    });
+  })();
+
   guestBtn.addEventListener('click', async () => {
     try{ await signOut(auth); }catch(e){ /* zaten oturum yoksa sessizce geç */ }
     localStorage.setItem('mmg_auth_state', 'guest');
@@ -4336,6 +4382,146 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       googleBtn.disabled = false;
     }
   });
+
+  // ---- Telefon ile Giriş (Firebase Phone Auth — istemci tarafı; Console'da Phone açık olmalı) ----
+  (function(){
+    const phoneBtn = document.getElementById('phoneLoginBtn');
+    const panel = document.getElementById('phoneLoginPanel');
+    const step1 = document.getElementById('phoneStep1');
+    const step2 = document.getElementById('phoneStep2');
+    const numInput = document.getElementById('phoneNumberInput');
+    const codeInput = document.getElementById('phoneCodeInput');
+    const sendBtn = document.getElementById('phoneSendCodeBtn');
+    const verifyBtn = document.getElementById('phoneVerifyBtn');
+    const msg = document.getElementById('phoneMsg');
+    if(!phoneBtn) return;
+    let confirmationResult = null, recaptcha = null;
+    function ensureRecaptcha(){
+      if(recaptcha) return recaptcha;
+      recaptcha = new RecaptchaVerifier(auth, 'recaptchaContainer', { size:'invisible' });
+      return recaptcha;
+    }
+    function mapPhoneErr(err){
+      const c = err && err.code ? err.code : '';
+      if(c==='auth/invalid-phone-number') return 'Geçersiz telefon numarası.';
+      if(c==='auth/missing-phone-number') return 'Telefon numarası girin.';
+      if(c==='auth/too-many-requests') return 'Çok fazla deneme. Bir süre sonra tekrar deneyin.';
+      if(c==='auth/invalid-verification-code') return 'Kod hatalı.';
+      if(c==='auth/code-expired') return 'Kodun süresi doldu, tekrar gönderin.';
+      if(c==='auth/operation-not-allowed') return "Telefon ile giriş Firebase'de etkin değil (Console → Authentication → Sign-in method → Phone).";
+      if(c==='auth/billing-not-enabled') return 'Telefon girişi için Firebase Blaze planı gerekir.';
+      return 'Hata: ' + (c || (err && err.message) || 'bilinmeyen');
+    }
+    phoneBtn.addEventListener('click', ()=>{ panel.style.display = (panel.style.display==='none' || !panel.style.display) ? 'block' : 'none'; });
+    numInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); sendBtn.click(); } });
+    codeInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); verifyBtn.click(); } });
+    const backBtn = document.getElementById('phoneBackBtn');
+    if(backBtn) backBtn.addEventListener('click', ()=>{
+      step2.style.display='none'; step1.style.display='block';
+      confirmationResult = null;
+      try{ if(recaptcha){ recaptcha.clear(); recaptcha=null; } }catch(e){}
+      codeInput.value=''; msg.textContent=''; sendBtn.disabled=false; verifyBtn.disabled=false;
+      try{ numInput.focus(); }catch(e){}
+    });
+    sendBtn.addEventListener('click', async ()=>{
+      let phone = (numInput.value||'').replace(/[\s()-]/g,'');
+      if(/^0\d{10}$/.test(phone)) phone = '+90' + phone.slice(1);
+      else if(/^90\d{10}$/.test(phone)) phone = '+' + phone;
+      else if(/^5\d{9}$/.test(phone)) phone = '+90' + phone;
+      if(!/^\+\d{10,15}$/.test(phone)){ msg.textContent='Numarayı +90… biçiminde girin.'; msg.style.color='var(--red)'; return; }
+      sendBtn.disabled=true; msg.textContent='Kod gönderiliyor…'; msg.style.color='var(--muted)';
+      try{
+        const verifier = ensureRecaptcha();
+        confirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
+        step1.style.display='none'; step2.style.display='block';
+        msg.textContent='SMS gönderildi. Kodu girin.'; msg.style.color='var(--teal)';
+      }catch(err){
+        msg.textContent = mapPhoneErr(err); msg.style.color='var(--red)';
+        try{ if(recaptcha){ recaptcha.clear(); recaptcha=null; } }catch(e){}
+      }finally{ sendBtn.disabled=false; }
+    });
+    verifyBtn.addEventListener('click', async ()=>{
+      const code = (codeInput.value||'').trim();
+      if(!/^\d{6}$/.test(code)){ msg.textContent='6 haneli kodu girin.'; msg.style.color='var(--red)'; return; }
+      if(!confirmationResult){ msg.textContent='Önce kod gönderin.'; msg.style.color='var(--red)'; return; }
+      verifyBtn.disabled=true; msg.textContent='Doğrulanıyor…'; msg.style.color='var(--muted)';
+      try{
+        await confirmationResult.confirm(code);
+        msg.textContent='Giriş başarılı ✓'; msg.style.color='var(--teal)';
+        try{ closeAuthOverlay(); }catch(e){}  // giriş ekranını kapat (onAuthStateChanged kullanıcı dokümanını hazırlar)
+      }catch(err){
+        msg.textContent = mapPhoneErr(err); msg.style.color='var(--red)';
+        verifyBtn.disabled=false;
+      }
+    });
+  })();
+
+  // ---- Ayarlar → Telefonumu Bağla (mevcut hesaba telefon ekle; sonra telefonla giriş bu hesaba girer) ----
+  (function(){
+    const toggle = document.getElementById('mmgLinkPhoneToggleBtn');
+    const form = document.getElementById('mmgLinkPhoneForm');
+    const numInput = document.getElementById('mmgLinkPhoneNumber');
+    const codeInput = document.getElementById('mmgLinkPhoneCode');
+    const sendBtn = document.getElementById('mmgLinkPhoneSendBtn');
+    const step2 = document.getElementById('mmgLinkPhoneStep2');
+    const verifyBtn = document.getElementById('mmgLinkPhoneVerifyBtn');
+    const msg = document.getElementById('mmgLinkPhoneMsg');
+    if(!toggle) return;
+    let confirmationResult = null, recaptcha = null;
+    function ensureRecaptcha(){
+      if(recaptcha) return recaptcha;
+      recaptcha = new RecaptchaVerifier(auth, 'mmgLinkPhoneRecaptcha', { size:'invisible' });
+      return recaptcha;
+    }
+    function mapErr(err){
+      const c = err && err.code ? err.code : '';
+      if(c==='auth/invalid-phone-number') return 'Geçersiz numara.';
+      if(c==='auth/too-many-requests') return 'Çok fazla deneme. Sonra tekrar deneyin.';
+      if(c==='auth/invalid-verification-code') return 'Kod hatalı.';
+      if(c==='auth/code-expired') return 'Kodun süresi doldu, tekrar gönderin.';
+      if(c==='auth/credential-already-in-use' || c==='auth/account-exists-with-different-credential' || c==='auth/phone-number-already-exists') return 'Bu telefon başka bir hesaba bağlı.';
+      if(c==='auth/operation-not-allowed') return "Telefon girişi Firebase'de etkin değil (Console → Authentication → Phone).";
+      if(c==='auth/requires-recent-login') return 'Güvenlik için lütfen çıkıp tekrar giriş yapın, sonra bağlayın.';
+      return 'Hata: ' + (c || (err && err.message) || 'bilinmeyen');
+    }
+    toggle.addEventListener('click', ()=>{
+      if(!auth.currentUser){ msg.textContent='Önce e-posta ile giriş yapın.'; msg.style.color='var(--red,#E2544B)'; form.style.display='block'; return; }
+      form.style.display = (form.style.display==='none' || !form.style.display) ? 'block' : 'none';
+    });
+    numInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); sendBtn.click(); } });
+    codeInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); verifyBtn.click(); } });
+    sendBtn.addEventListener('click', async ()=>{
+      if(!auth.currentUser){ msg.textContent='Önce e-posta ile giriş yapın.'; msg.style.color='var(--red,#E2544B)'; return; }
+      let phone = (numInput.value||'').replace(/[\s()-]/g,'');
+      if(/^0\d{10}$/.test(phone)) phone = '+90' + phone.slice(1);
+      else if(/^90\d{10}$/.test(phone)) phone = '+' + phone;
+      else if(/^5\d{9}$/.test(phone)) phone = '+90' + phone;
+      if(!/^\+\d{10,15}$/.test(phone)){ msg.textContent='Numarayı +90… biçiminde girin.'; msg.style.color='var(--red,#E2544B)'; return; }
+      sendBtn.disabled=true; msg.textContent='Kod gönderiliyor…'; msg.style.color='var(--muted,#8D96AC)';
+      try{
+        confirmationResult = await linkWithPhoneNumber(auth.currentUser, phone, ensureRecaptcha());
+        step2.style.display='block';
+        msg.textContent='SMS gönderildi. Kodu girin.'; msg.style.color='var(--teal,#3FB68A)';
+      }catch(err){
+        msg.textContent = mapErr(err); msg.style.color='var(--red,#E2544B)';
+        try{ if(recaptcha){ recaptcha.clear(); recaptcha=null; } }catch(e){}
+      }finally{ sendBtn.disabled=false; }
+    });
+    verifyBtn.addEventListener('click', async ()=>{
+      const code = (codeInput.value||'').trim();
+      if(!/^\d{6}$/.test(code)){ msg.textContent='6 haneli kodu girin.'; msg.style.color='var(--red,#E2544B)'; return; }
+      if(!confirmationResult){ msg.textContent='Önce kod gönderin.'; msg.style.color='var(--red,#E2544B)'; return; }
+      verifyBtn.disabled=true; msg.textContent='Bağlanıyor…'; msg.style.color='var(--muted,#8D96AC)';
+      try{
+        await confirmationResult.confirm(code);
+        msg.textContent='✓ Telefon bağlandı. Artık telefonla giriş bu hesaba girer.'; msg.style.color='var(--teal,#3FB68A)';
+        step2.style.display='none';
+      }catch(err){
+        msg.textContent = mapErr(err); msg.style.color='var(--red,#E2544B)';
+        verifyBtn.disabled=false;
+      }
+    });
+  })();
 
   authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -4557,7 +4743,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(navBtn0) navBtn0.style.display = 'none';
     document.getElementById('authEmail').value = '';
     document.getElementById('authPassword').value = '';
-    document.getElementById('rememberMe').checked = false;
+    (function(){ const _p = localStorage.getItem('mmg_keep_signed_in'); document.getElementById('rememberMe').checked = (_p === null) ? true : (_p !== '0'); })();
     setAuthMode('login');
     openAuthOverlay();
   }
@@ -4614,13 +4800,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <style>
   #mmgSettingsOverlay{
     position:fixed; inset:0; z-index:920; background:rgba(5,8,14,0.7);
-    display:flex; align-items:center; justify-content:center; padding:20px;
+    display:flex; align-items:stretch; justify-content:stretch; padding:0;
   }
   #mmgSettingsOverlay[hidden]{ display:none; }
+  /* Tam ekran Ayarlar (kullanıcı isteği): panel tüm ekranı kaplar, içerik ortada
+     okunur bir kolonda toplanır. */
   #mmgSettingsPanel{
-    width:100%; max-width:380px; background:var(--surface,#141C2B); border:1px solid var(--hairline,#2A3448);
-    border-radius:16px; box-shadow:0 24px 60px rgba(0,0,0,0.5); padding:22px;
+    width:100%; height:100%; max-width:none; background:var(--surface,#141C2B); border:none;
+    border-radius:0; box-shadow:none; padding:40px 22px calc(40px + env(safe-area-inset-bottom));
+    overflow-y:auto; box-sizing:border-box;
+    display:flex; flex-direction:column; align-items:center;
   }
+  #mmgSettingsPanel > *{ width:100%; max-width:520px; }
   #mmgSettingsPanel h3{ font-family:'Space Grotesk',sans-serif; font-size:17px; color:var(--text,#EAEDF3); margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; }
   #mmgSettingsCloseBtn{ background:none; border:none; color:var(--muted,#8D96AC); cursor:pointer; font-size:16px; }
   #mmgSettingsCloseBtn:hover{ color:var(--text,#EAEDF3); }
@@ -4677,6 +4868,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="mmgPasswordMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>
     </form>
 
+    <div class="mmg-settings-label" style="margin-top:18px;" data-i18n="settings_link_phone_label">Telefonla Giriş (Telefon Bağla)</div>
+    <button type="button" class="mmg-lang-btn" id="mmgLinkPhoneToggleBtn" style="width:100%; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:6px;">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></svg>
+      <span data-i18n="settings_link_phone">Telefonumu Bağla</span>
+    </button>
+    <div id="mmgLinkPhoneForm" style="margin-bottom:6px; display:none;">
+      <div style="font-size:11px; color:var(--muted,#8D96AC); margin-bottom:8px;" data-i18n="settings_link_phone_hint">Telefonunu bir kez bağla; sonra giriş ekranından "Telefon ile giriş" ile bu hesaba girebilirsin.</div>
+      <input type="tel" id="mmgLinkPhoneNumber" value="+90 " placeholder="+90 5xx xxx xx xx" autocomplete="tel"
+        style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-size:13.5px; margin-bottom:8px; outline:none;">
+      <button type="button" class="mmg-lang-btn" id="mmgLinkPhoneSendBtn" style="width:100%; margin-bottom:8px;" data-i18n="auth_phone_send">Kod Gönder</button>
+      <div id="mmgLinkPhoneStep2" style="display:none;">
+        <input type="text" id="mmgLinkPhoneCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 haneli SMS kodu"
+          style="width:100%; box-sizing:border-box; background:var(--surface-2,#1B2536); border:1px solid var(--hairline,#2A3448); border-radius:8px; padding:11px 12px; color:var(--text,#EAEDF3); font-size:16px; letter-spacing:4px; margin-bottom:8px; outline:none;">
+        <button type="button" class="mmg-lang-btn" id="mmgLinkPhoneVerifyBtn" style="width:100%;" data-i18n="settings_link_phone_verify">Doğrula ve Bağla</button>
+      </div>
+      <div id="mmgLinkPhoneMsg" style="font-size:11.5px; margin-top:8px; min-height:14px;"></div>
+      <div id="mmgLinkPhoneRecaptcha"></div>
+    </div>
+
+    <div class="mmg-settings-label" style="margin-top:18px;" data-i18n="nav_entegrasyon">Entegrasyon</div>
+    <button type="button" class="mmg-lang-btn" id="mmgSettingsEntegrasyonBtn" style="width:100%; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:6px;">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h11a4 4 0 0 1 0 8H9a4 4 0 0 1 0-8"/><circle cx="15" cy="11" r="1.6" fill="currentColor" stroke="none"/></svg>
+      <span data-i18n="nav_entegrasyon">Entegrasyon</span>
+    </button>
+
     <button type="button" id="mmgSettingsOkBtn" style="width:100%; margin-top:14px; padding:12px 0; border-radius:9px; border:none; cursor:pointer; background:linear-gradient(120deg, var(--coral,#FF6B4A), var(--brass,#C6A15B) 75%); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;" data-i18n="settings_ok">✓ Tamam</button>
 
   </div>
@@ -4710,6 +4926,16 @@ const auth = getApps().length ? getAuth(getApp()) : null;
   if(closeBtn) closeBtn.addEventListener('click', () => { overlay.hidden = true; });
   const okBtn = document.getElementById('mmgSettingsOkBtn');
   if(okBtn) okBtn.addEventListener('click', () => { overlay.hidden = true; });
+  // Ayarlar içindeki "Entegrasyon" butonu: paneli kapat, Entegrasyon sayfasını
+  // menüdeki nav öğesiyle aynı akışla aç (openTarget'i yeniden kullanır).
+  const settingsEntegrasyonBtn = document.getElementById('mmgSettingsEntegrasyonBtn');
+  if(settingsEntegrasyonBtn){
+    settingsEntegrasyonBtn.addEventListener('click', () => {
+      overlay.hidden = true;
+      const navEl = document.querySelector('.nav-item[data-target="entegrasyon.html"]');
+      if(navEl) navEl.click();
+    });
+  }
   if(overlay) overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.hidden = true; });
   document.querySelectorAll('.mmg-lang-btn[data-lang]').forEach(btn => {
     btn.addEventListener('click', () => {

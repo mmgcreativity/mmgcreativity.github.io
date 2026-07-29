@@ -412,11 +412,11 @@ function mmgApplyTurkishFont(doc){
   .xrow-group .xrow:last-child{ border-bottom:none; }
   /* ---- Gerçek Excel hücresi hissi: etiket | değer | kayıtlı-mini | kaydet-ikonu, hepsi TEK satırda ---- */
   .xcell{
-    display:grid; grid-template-columns:92px 1fr 36px 112px; align-items:center; gap:5px;
+    display:grid; grid-template-columns:72px minmax(0,1fr) 32px 48px; align-items:center; gap:5px;
     border-bottom:none; background:var(--surface-2);
   }
-  .xcell.xcell-full{ grid-template-columns:92px 1fr; }
-  .xcell.xcell-3col{ grid-template-columns:92px 1fr auto; }
+  .xcell.xcell-full{ grid-template-columns:72px minmax(0,1fr); }
+  .xcell.xcell-3col{ grid-template-columns:72px minmax(0,1fr) auto; }
   .xcell:first-child{ border-radius:6px 6px 0 0; }
   .xcell:last-child{ border-radius:0 0 6px 6px; }
   .xcell-label{
@@ -868,8 +868,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <img class="mmg-logo-preview-img" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
                 <span class="mmg-logo-placeholder" style="font-size:9.5px; color:var(--muted); text-align:center; padding:2px; line-height:1.15;">Görüntü Yok</span>
               </div>
+              <span style="display:inline-flex; gap:8px; flex-wrap:nowrap; align-items:center;">
               <button type="button" class="io-btn mmg-logo-upload-btn" style="flex-shrink:0; height:38px; box-sizing:border-box;">⬆ Yükle</button>
               <button type="button" class="io-btn mmg-logo-remove-btn" style="display:none; flex-shrink:0; height:38px; box-sizing:border-box; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
+              </span>
               <input type="file" id="companyLogoInput" accept="image/*" style="display:none;">
             </div>
           </div>
@@ -884,8 +886,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <img class="mmg-stamp-preview-img" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
                 <span class="mmg-stamp-placeholder" style="font-size:9.5px; color:var(--muted); text-align:center; padding:2px; line-height:1.15;">Görüntü Yok</span>
               </div>
+              <span style="display:inline-flex; gap:8px; flex-wrap:nowrap; align-items:center;">
               <button type="button" class="io-btn mmg-stamp-upload-btn" style="flex-shrink:0; height:38px; box-sizing:border-box;">⬆ Yükle</button>
               <button type="button" class="io-btn mmg-stamp-remove-btn" style="display:none; flex-shrink:0; height:38px; box-sizing:border-box; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
+              </span>
               <input type="file" id="stampInput" accept="image/*" style="display:none;">
             </div>
           </div>
@@ -948,8 +952,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <img class="mmg-logo-preview-img" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
                 <span class="mmg-logo-placeholder" style="font-size:9.5px; color:var(--muted); text-align:center; padding:2px; line-height:1.15;">Görüntü Yok</span>
               </div>
+              <span style="display:inline-flex; gap:8px; flex-wrap:nowrap; align-items:center;">
               <button type="button" class="io-btn mmg-logo-upload-btn" style="flex-shrink:0; height:38px; box-sizing:border-box;">⬆ Yükle</button>
               <button type="button" class="io-btn mmg-logo-remove-btn" style="display:none; flex-shrink:0; height:38px; box-sizing:border-box; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
+              </span>
             </div>
           </div>
           <p style="font-size:11.5px; color:var(--muted); text-align:justify; margin-top:auto;">Yüklediğiniz logo, hesabınıza kaydedilir ve hazırladığınız tüm talimat belgelerinin üst kısmında otomatik olarak görünür.</p>
@@ -962,8 +968,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <img class="mmg-stamp-preview-img" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
                 <span class="mmg-stamp-placeholder" style="font-size:9.5px; color:var(--muted); text-align:center; padding:2px; line-height:1.15;">Görüntü Yok</span>
               </div>
+              <span style="display:inline-flex; gap:8px; flex-wrap:nowrap; align-items:center;">
               <button type="button" class="io-btn mmg-stamp-upload-btn" style="flex-shrink:0; height:38px; box-sizing:border-box;">⬆ Yükle</button>
               <button type="button" class="io-btn mmg-stamp-remove-btn" style="display:none; flex-shrink:0; height:38px; box-sizing:border-box; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
+              </span>
             </div>
           </div>
           <p style="font-size:11.5px; color:var(--muted); text-align:justify; margin-top:auto;">Yüklediğiniz kaşe/imza görseli hesabınıza kaydedilir ve hazırladığınız talimat belgelerinde "Kaşe / İmza" alanında otomatik olarak görünür.</p>
@@ -1055,8 +1063,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <img class="mmg-logo-preview-img" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
                 <span class="mmg-logo-placeholder" style="font-size:9.5px; color:var(--muted); text-align:center; padding:2px; line-height:1.15;">Görüntü Yok</span>
               </div>
+              <span style="display:inline-flex; gap:8px; flex-wrap:nowrap; align-items:center;">
               <button type="button" class="io-btn mmg-logo-upload-btn" style="flex-shrink:0; height:38px; box-sizing:border-box;">⬆ Yükle</button>
               <button type="button" class="io-btn mmg-logo-remove-btn" style="display:none; flex-shrink:0; height:38px; box-sizing:border-box; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
+              </span>
             </div>
           </div>
           <p style="font-size:11.5px; color:var(--muted); text-align:justify; margin-top:auto;">Yüklediğiniz logo, hesabınıza kaydedilir ve hazırladığınız tüm talimat belgelerinin üst kısmında otomatik olarak görünür.</p>
@@ -1069,8 +1079,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <img class="mmg-stamp-preview-img" style="width:100%; height:100%; object-fit:contain; display:none;" alt="">
                 <span class="mmg-stamp-placeholder" style="font-size:9.5px; color:var(--muted); text-align:center; padding:2px; line-height:1.15;">Görüntü Yok</span>
               </div>
+              <span style="display:inline-flex; gap:8px; flex-wrap:nowrap; align-items:center;">
               <button type="button" class="io-btn mmg-stamp-upload-btn" style="flex-shrink:0; height:38px; box-sizing:border-box;">⬆ Yükle</button>
               <button type="button" class="io-btn mmg-stamp-remove-btn" style="display:none; flex-shrink:0; height:38px; box-sizing:border-box; border-color:var(--red); color:var(--red);">✕ Kaldır</button>
+              </span>
             </div>
           </div>
           <p style="font-size:11.5px; color:var(--muted); text-align:justify; margin-top:auto;">Yüklediğiniz kaşe/imza görseli hesabınıza kaydedilir ve hazırladığınız talimat belgelerinde "Kaşe / İmza" alanında otomatik olarak görünür.</p>
@@ -1377,24 +1389,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   // Bir IBAN seçicisini, ilişkili firma/alıcı adı kutusundaki metne göre filtreleyip doldurur.
   // Firma adı boşsa (henüz yazılmadıysa) tüm kayıtlı IBAN'lar gösterilir; doluysa sadece o firmaya ait olanlar.
-  function refreshIbanSelectForFirma(ibanSelectId, firmaInputId){
+  function refreshIbanSelectForFirma(ibanSelectId, firmaInputId, bankSelectId){
     const sel = document.getElementById(ibanSelectId);
     const firmaEl = document.getElementById(firmaInputId);
     if(!sel || !firmaEl) return;
     const firmaName = firmaEl.value.trim().toLowerCase();
+    const bankEl = bankSelectId ? document.getElementById(bankSelectId) : null;
+    const bankSel = bankEl ? (bankEl.value || '').trim().toLowerCase() : '';
+    const seen = new Set();
     const matches = savedIbans
       .map((b, i) => ({ ...b, i }))
-      .filter(b => !firmaName || (b.firma && b.firma.trim().toLowerCase() === firmaName));
+      .filter(b => !firmaName || (b.firma && b.firma.trim().toLowerCase() === firmaName))
+      // Seçili banka varken YALNIZCA o bankanın kayıtları gelsin (kullanıcı isteği).
+      .filter(b => !bankSel || ((b.banka || '').trim().toLowerCase() === bankSel))
+      // Aynı IBAN birden fazla kez listelenmesin.
+      .filter(b => {
+        const key = (b.iban || '').toUpperCase().replace(/\s+/g, '');
+        if(!key) return true;
+        if(seen.has(key)) return false;
+        seen.add(key); return true;
+      });
     const prevVal = sel.value;
     sel.innerHTML = '<option value="">📋 Kayıtlı</option>' + matches.map(b => `<option value="${b.i}">${b.label}</option>`).join('');
     if(matches.some(b => String(b.i) === prevVal)) sel.value = prevVal;
   }
 
   function renderIbanSelects(){
-    refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma');
+    refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma', 'fGonderenBanka');
     document.querySelectorAll('.alici-row-block').forEach(row => {
       const idx = row.dataset.idx;
-      refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`);
+      refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`, `fAliciBanka_${idx}`);
     });
   }
 
@@ -1576,10 +1600,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   document.getElementById('fGonderenFirma').addEventListener('input', () => {
-    refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma');
+    refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma', 'fGonderenBanka');
     autoFillGonderenIban();
   });
   document.getElementById('fGonderenBanka').addEventListener('change', autoFillGonderenIban);
+  // Banka değişince "📋 Kayıtlı" listesi de o bankaya göre filtrelensin.
+  document.getElementById('fGonderenBanka').addEventListener('change', () => refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma', 'fGonderenBanka'));
   document.getElementById('fGonderenIban').addEventListener('input', () => {
     const h = document.getElementById('fGonderenIbanHint'); if(h) h.style.display = 'none';
     const c = document.getElementById('fGonderenIbanChooser'); if(c){ c.style.display = 'none'; c.innerHTML = ''; }
@@ -1606,7 +1632,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(!f) return;
     document.getElementById('fGonderenFirma').value = f.name;
     if(f.logo) applyCompanyLogo(f.logo, (f.logoW && f.logoH) ? { w: f.logoW, h: f.logoH } : null);
-    refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma');
+    refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma', 'fGonderenBanka');
     // Kendi/grup firmasının kayıtlı banka/IBAN'ı biliniyorsa banka+IBAN'ı da otomatik doldur.
     const mf = myFirms.find(x => x.name.trim().toLowerCase() === (f.name || '').trim().toLowerCase());
     if(mf){
@@ -1685,7 +1711,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     fillBankOptions(document.getElementById(`fAliciBanka_${idx}`));
     populateAliciFirmaSaved(document.getElementById(`fAliciFirmaSaved_${idx}`));
-    refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`);
+    refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`, `fAliciBanka_${idx}`);
 
     document.getElementById(`saveAliciFirmaBtn_${idx}`).addEventListener('click', () => saveFirmaName(`fAliciAdi_${idx}`, `saveAliciFirmaBtn_${idx}`, savedAliciFirms));
     document.getElementById(`saveAliciIbanBtn_${idx}`).addEventListener('click', () => saveIbanInfo(`fAliciBanka_${idx}`, `fAliciIban_${idx}`, `saveAliciIbanBtn_${idx}`, `fAliciAdi_${idx}`));
@@ -1727,7 +1753,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     adiEl.addEventListener('focus', renderList);
     adiEl.addEventListener('input', renderList);
-    adiEl.addEventListener('input', () => { refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`); });
+    adiEl.addEventListener('input', () => { refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`, `fAliciBanka_${idx}`); });
     adiEl.addEventListener('input', renderPreview);
     adiEl.addEventListener('keydown', (ev) => {
       const items = Array.from(listEl.querySelectorAll('.mmg-ac-item'));
@@ -1781,6 +1807,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     ibanEl.addEventListener('input', renderPreview);
 
     document.getElementById(`fAliciBanka_${idx}`).addEventListener('change', renderPreview);
+    document.getElementById(`fAliciBanka_${idx}`).addEventListener('change', () => refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`, `fAliciBanka_${idx}`));
 
     document.getElementById(`removeAliciRowBtn_${idx}`).addEventListener('click', () => {
       wrap.remove();
@@ -2019,7 +2046,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const ibanEl = document.getElementById('fAliciIban_' + idx);
     if(!adiEl) return;
     adiEl.value = party.name || '';
-    refreshIbanSelectForFirma('fAliciIbanSaved_' + idx, 'fAliciAdi_' + idx);
+    refreshIbanSelectForFirma('fAliciIbanSaved_' + idx, 'fAliciAdi_' + idx, 'fAliciBanka_' + idx);
     const ibans = party.ibans || [];
     if(ibans.length === 1){
       if(ibans[0].bank) setBankSelectValue(bankaEl, ibans[0].bank); else if(bankaEl) bankaEl.value = '';
@@ -2829,7 +2856,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           if(ratio >= (maxWmm/maxHmm)){ logoWmm = maxWmm; logoHmm = maxWmm / ratio; }
           else { logoHmm = maxHmm; logoWmm = maxHmm * ratio; }
         }
-        doc.addImage(companyLogoDataUrl, 'PNG', 14, 12, logoWmm, logoHmm);
+        doc.addImage(companyLogoDataUrl, 'PNG', 14, 26, logoWmm, logoHmm);
       } catch(e){}
     }
     doc.setFontSize(mmgFS(11.5));
@@ -3611,7 +3638,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           if(ratio >= (maxWmm/maxHmm)){ logoWmm = maxWmm; logoHmm = maxWmm / ratio; }
           else { logoHmm = maxHmm; logoWmm = maxHmm * ratio; }
         }
-        doc.addImage(companyLogoDataUrl, 'PNG', 14, 12, logoWmm, logoHmm);
+        doc.addImage(companyLogoDataUrl, 'PNG', 14, 26, logoWmm, logoHmm);
       } catch(e){}
     }
     doc.setFontSize(mmgFS(11.5));
@@ -3905,7 +3932,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           if(ratio >= (maxWmm/maxHmm)){ logoWmm = maxWmm; logoHmm = maxWmm / ratio; }
           else { logoHmm = maxHmm; logoWmm = maxHmm * ratio; }
         }
-        doc.addImage(companyLogoDataUrl, 'PNG', 14, 12, logoWmm, logoHmm);
+        doc.addImage(companyLogoDataUrl, 'PNG', 14, 26, logoWmm, logoHmm);
       } catch(e){}
     }
 
@@ -4520,7 +4547,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   })();
 </script>
 <script type="module" src="mmg-chat-widget.js"></script>
-<script src="mmg-undo.js" defer></script>
 <script src="mmg-doviz-widget.js" defer></script>
 </body>
 </html>

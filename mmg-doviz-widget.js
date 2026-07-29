@@ -28,7 +28,7 @@
     btn.type = 'button';
     btn.title = 'Döviz Kurları';
     btn.setAttribute('aria-label', 'Döviz Kurları');
-    btn.textContent = '💱';
+    btn.innerHTML = '<span class="mmg-doviz-btn-ico">₺</span><span class="mmg-doviz-btn-lbl">KUR</span>';
 
     // --- Panel ---
     const panel = document.createElement('div');
@@ -44,7 +44,6 @@
       '</div>' +
       '<div class="mmg-doviz-foot">' +
         '<span id="mmgDovizUpdated"></span>' +
-        '<a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">exchangerate-api.com</a>' +
       '</div>';
 
     // --- Stil ---
@@ -52,10 +51,12 @@
     style.textContent =
       '#mmgDovizBtn{position:fixed;top:16px;right:66px;z-index:800;width:42px;height:42px;border-radius:11px;' +
         'border:1px solid var(--hairline,#2A3448);background:var(--surface-2,#1B2536);color:var(--brass,#C6A15B);' +
-        'font-size:18px;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,0.35);display:flex;align-items:center;' +
-        'justify-content:center;transition:border-color .15s ease, transform .15s ease;}' +
+        'cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,0.35);display:flex;flex-direction:column;align-items:center;' +
+        'justify-content:center;gap:1px;transition:border-color .15s ease, transform .15s ease;}' +
+      '#mmgDovizBtn .mmg-doviz-btn-ico{font-size:17px;line-height:1;font-weight:700;}' +
+      '#mmgDovizBtn .mmg-doviz-btn-lbl{font-size:7.5px;line-height:1;letter-spacing:.08em;font-weight:700;color:var(--muted,#8D96AC);}' +
       '#mmgDovizBtn:hover{border-color:var(--brass-dim,#8A7440);transform:translateY(-1px);}' +
-      '#mmgDovizPanel{position:fixed;top:64px;right:264px;z-index:801;width:230px;background:var(--surface,#141C2B);' +
+      '#mmgDovizPanel{position:fixed;top:64px;right:66px;z-index:801;width:230px;background:var(--surface,#141C2B);' +
         'border:1px solid var(--hairline,#2A3448);border-radius:14px;padding:14px;box-shadow:0 24px 60px rgba(0,0,0,0.5);' +
         'font-family:\'IBM Plex Mono\',monospace;}' +
       '#mmgDovizPanel[hidden]{display:none;}' +
@@ -71,10 +72,9 @@
       '.mmg-doviz-val{color:var(--brass,#C6A15B);font-size:15px;font-weight:700;}' +
       '.mmg-doviz-loading,.mmg-doviz-err{color:var(--muted,#8D96AC);font-size:12px;text-align:center;padding:14px 4px;}' +
       '.mmg-doviz-err{color:var(--red,#E2544B);}' +
-      '.mmg-doviz-foot{display:flex;align-items:center;justify-content:space-between;margin-top:11px;padding-top:9px;' +
+      '.mmg-doviz-foot{display:flex;align-items:center;justify-content:center;margin-top:11px;padding-top:9px;' +
         'border-top:1px solid var(--hairline,#2A3448);font-size:10px;color:var(--muted,#8D96AC);}' +
-      '.mmg-doviz-foot a{color:var(--brass-dim,#8A7440);text-decoration:none;}' +
-      '.mmg-doviz-foot a:hover{text-decoration:underline;}' +
+      '.mmg-doviz-foot #mmgDovizUpdated{white-space:nowrap;}' +
       '@media (max-width:820px){#mmgDovizPanel{right:8px;left:8px;width:auto;}#mmgDovizBtn{right:58px;}}';
 
     document.body.appendChild(style);
