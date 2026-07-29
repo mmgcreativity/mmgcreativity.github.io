@@ -442,9 +442,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="flag" style="margin-top:8px;" data-i18n="adv_flag">⚠ BSMV oranı ve gün bazları "Gelişmiş ayarlar"dan güncellenebilir; mevzuat değişirse buradan düzenleyin.</div>
         <div class="adv-body" id="advBody">
-          <div class="field">
-            <label><span data-i18n="label_bsmv">BSMV Oranı</span> <span style="color:var(--muted)" data-i18n="label_bsmv_note">(faiz ve komisyon üzerinden alınan vergi)</span></label>
-            <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num" id="qBsmv" value="5" data-decimals="2"><span class="unit">%</span></div>
+          <div class="field-row">
+            <div class="field" style="flex:0 0 auto;">
+              <label><span data-i18n="label_bsmv">BSMV Oranı</span></label>
+              <div class="input-wrap" style="max-width:96px;"><input type="text" inputmode="decimal" class="tr-num" id="qBsmv" value="5" data-decimals="2" style="max-width:56px;"><span class="unit">%</span></div>
+            </div>
+            <div class="field">
+              <label><span data-i18n="label_bilesik">Bileşik Faiz Periyodu</span> <span style="color:var(--muted)" data-i18n="label_bilesik_note">(0 = basit faiz; 1 = günlük)</span></label>
+              <div class="input-wrap"><input type="text" inputmode="decimal" class="tr-num small" id="qBilesikPeriyot" value="0" data-decimals="0"><span class="unit" data-i18n="unit_days">gün</span></div>
+            </div>
           </div>
           <div class="field-row">
             <div class="field">
@@ -645,10 +651,20 @@ function attachTRFormatting(el){
 }
 function num(id){ return parseTR(document.getElementById(id).value); }
 
-function hesapla(tutar, vade, oranPct, komOranPct, bsmvPct, gunBaziFaiz, gunBaziKom){
+function hesapla(tutar, vade, oranPct, komOranPct, bsmvPct, gunBaziFaiz, gunBaziKom, bilesikPeriyot){
   const oran = oranPct/100, komOran = komOranPct/100, bsmv = bsmvPct/100;
   const gbFaiz = gunBaziFaiz || 365, gbKom = gunBaziKom || 365;
-  const faiz = tutar * oran * vade / gbFaiz;
+  // Bileşik faiz: periyot > 0 ise faiz her P günde bir anaparaya eklenir (faizin faizi).
+  // P = 1 → günlük bileşik (her gün işleyen faiz ertesi günün faizine dahil olur). 0/boş → basit faiz.
+  const P = (bilesikPeriyot && bilesikPeriyot > 0) ? bilesikPeriyot : 0;
+  let faiz;
+  if(P > 0 && vade > 0){
+    const perRate = oran * P / gbFaiz;      // her periyodun oranı
+    const nPer = vade / P;                  // periyot sayısı (kesirli son periyot orantılı)
+    faiz = tutar * (Math.pow(1 + perRate, nPer) - 1);
+  } else {
+    faiz = tutar * oran * vade / gbFaiz;    // basit faiz
+  }
   const faizBsmv = faiz * bsmv;
   const komisyon = tutar * komOran * vade / gbKom;
   const komisyonBsmv = komisyon * bsmv;
@@ -662,7 +678,8 @@ function hesapla(tutar, vade, oranPct, komOranPct, bsmvPct, gunBaziFaiz, gunBazi
 function updateQuick(){
   const tutar = num('qTutar'), vade = num('qVade'), oran = num('qOran'), komOran = num('qKomOran'), bsmv = num('qBsmv');
   const gbFaiz = num('qGunBaziFaiz'), gbKom = num('qGunBaziKom');
-  const r = hesapla(tutar, vade, oran, komOran, bsmv, gbFaiz, gbKom);
+  const bilesik = num('qBilesikPeriyot');
+  const r = hesapla(tutar, vade, oran, komOran, bsmv, gbFaiz, gbKom, bilesik);
   document.getElementById('rToplamGeri').textContent = fmtTL(r.toplamGeri);
   document.getElementById('rToplamGeriSub').textContent = fmtTL(tutar) + LBL.ofPrincipal;
   document.getElementById('rFaiz').textContent = fmtTL(r.faiz);
@@ -673,7 +690,7 @@ function updateQuick(){
   document.getElementById('rFark').textContent = fmtTL(r.toplamFark);
   document.getElementById('rEfektif').textContent = fmtPct(r.efektif);
 }
-['qTutar','qVade','qOran','qKomOran','qBsmv','qGunBaziFaiz','qGunBaziKom'].forEach(id=>{
+['qTutar','qVade','qOran','qKomOran','qBsmv','qGunBaziFaiz','qGunBaziKom','qBilesikPeriyot'].forEach(id=>{
   const el = document.getElementById(id);
   attachTRFormatting(el);
   el.addEventListener('input', ()=>{ updateQuick(); if(typeof recalcDisplay==='function' && trancheBody.querySelector('.total-row')) recalcDisplay(); });
@@ -745,7 +762,7 @@ function recalcDisplay(){
   const bsmv = num('qBsmv'), gbFaiz = num('qGunBaziFaiz'), gbKom = num('qGunBaziKom');
   let totals = {tutar:0, faiz:0, faizBsmv:0, komisyon:0, komisyonBsmv:0, toplamGeri:0, toplamFark:0};
   trancheRows.forEach(row=>{
-    const r = hesapla(row.tutar, row.vade, row.oran, row.komOran, bsmv, gbFaiz, gbKom);
+    const r = hesapla(row.tutar, row.vade, row.oran, row.komOran, bsmv, gbFaiz, gbKom, num('qBilesikPeriyot'));
     totals.tutar += row.tutar; totals.faiz += r.faiz; totals.faizBsmv += r.faizBsmv;
     totals.komisyon += r.komisyon; totals.komisyonBsmv += r.komisyonBsmv;
     totals.toplamGeri += r.toplamGeri; totals.toplamFark += r.toplamFark;
@@ -779,7 +796,7 @@ function renderTranches(){
   let totals = {tutar:0, faiz:0, faizBsmv:0, komisyon:0, komisyonBsmv:0, toplamGeri:0, toplamFark:0};
   trancheRows.forEach((row, idx)=>{
     const bsmv = num('qBsmv'), gbFaiz = num('qGunBaziFaiz'), gbKom = num('qGunBaziKom');
-    const r = hesapla(row.tutar, row.vade, row.oran, row.komOran, bsmv, gbFaiz, gbKom);
+    const r = hesapla(row.tutar, row.vade, row.oran, row.komOran, bsmv, gbFaiz, gbKom, num('qBilesikPeriyot'));
     totals.tutar += row.tutar; totals.faiz += r.faiz; totals.faizBsmv += r.faizBsmv;
     totals.komisyon += r.komisyon; totals.komisyonBsmv += r.komisyonBsmv;
     totals.toplamGeri += r.toplamGeri; totals.toplamFark += r.toplamFark;
@@ -896,7 +913,7 @@ function buildTrancheRows(){
   const header = MMG_LANG==='en' ? ['Amount','Term (days)','Rate %','Com. Rate %','Interest','Interest Tax','Commission','Com. Tax','Total Repayment','Total Difference'] : ['Tutar','Vade (gün)','Oran %','Kom.Oran %','Faiz','Faiz BSMV','Komisyon','Kom. BSMV','Toplam Geri Ödeme','Toplam Fark'];
   const rows = [header];
   trancheRows.forEach(row=>{
-    const r = hesapla(row.tutar, row.vade, row.oran, row.komOran, bsmv, gbFaiz, gbKom);
+    const r = hesapla(row.tutar, row.vade, row.oran, row.komOran, bsmv, gbFaiz, gbKom, num('qBilesikPeriyot'));
     rows.push([row.tutar, row.vade, row.oran, row.komOran, r.faiz, r.faizBsmv, r.komisyon, r.komisyonBsmv, r.toplamGeri, r.toplamFark]);
   });
   return rows;
