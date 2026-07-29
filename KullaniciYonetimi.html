@@ -162,12 +162,14 @@
   <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
     <div class="card" id="firmaSelectorCard" style="display:none;">
       <h2 style="margin-bottom:6px;" data-i18n="managed_firma">Firmalarım</h2>
-      <select id="firmaSelector" style="width:100%; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; margin-bottom:8px;"></select>
+      <div style="display:flex; gap:6px; align-items:center; margin-bottom:8px;">
+        <select id="firmaSelector" style="flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;"></select>
+        <button type="button" id="deleteFirmaBtn" title="Seçili firmayı sil" aria-label="Seçili firmayı sil" style="flex:0 0 auto; width:40px; height:38px; display:flex; align-items:center; justify-content:center; background:transparent; border:1px solid rgba(226,84,75,0.45); color:var(--red,#E2544B); border-radius:8px; cursor:pointer; font-size:15px;">🗑</button>
+      </div>
       <div style="display:flex; gap:6px; margin-bottom:6px;">
         <input type="text" id="newFirmaName" placeholder="Yeni firma adı" style="flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;">
         <button type="button" id="addFirmaBtn" style="flex-shrink:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 14px; color:var(--brass,#C6A15B); font-weight:700; cursor:pointer;">+ Ekle</button>
       </div>
-      <button type="button" id="deleteFirmaBtn" style="width:100%; background:transparent; border:1px solid rgba(226,84,75,0.5); color:var(--red,#E2544B); border-radius:8px; padding:8px 0; font-weight:600; cursor:pointer;">🗑 Seçili Firmayı Sil</button>
       <div id="firmaCrudMsg" style="font-size:12px; margin-top:6px; min-height:14px;"></div>
     </div>
     <div class="card">
@@ -459,8 +461,11 @@
   }
   function dataGroupMembersGridHtml(hubId){
     return myAdminFirmas.filter(f => f.id !== hubId).map(f =>
-      '<label class="perm-check"><input type="checkbox" class="data-group-member-check" value="' + f.id + '"' +
-      (f.dataGroupId === hubId ? ' checked' : '') + '> ' + f.name + '</label>'
+      '<div style="display:flex; align-items:center; gap:6px;">' +
+        '<label class="perm-check" style="flex:1; min-width:0;"><input type="checkbox" class="data-group-member-check" value="' + f.id + '"' +
+        (f.dataGroupId === hubId ? ' checked' : '') + '> ' + f.name + '</label>' +
+        '<button type="button" class="dg-del-firma" data-del-firma="' + f.id + '" title="Firmayı tamamen sil" aria-label="Firmayı sil" style="flex:0 0 auto; width:30px; height:30px; background:transparent; border:1px solid rgba(226,84,75,0.4); color:var(--red,#E2544B); border-radius:6px; cursor:pointer; font-size:13px;">🗑</button>' +
+      '</div>'
     ).join('');
   }
   function wireDataGroupSelectAll(){
@@ -505,6 +510,21 @@
     }
     wireDataGroupSelectAll();
   }
+
+  // Grup listesindeki çöp kutuları (delegasyon: grid içeriği yeniden çizilse de çalışır).
+  (function(){
+    const grid = document.getElementById('dataGroupMembersGrid');
+    if(grid){
+      grid.addEventListener('click', (e) => {
+        const btn = e.target.closest('.dg-del-firma');
+        if(!btn) return;
+        e.preventDefault();
+        const fid = btn.dataset.delFirma;
+        const f = myAdminFirmas.find(x => x.id === fid);
+        deleteFirmaById(fid, f ? f.name : fid);
+      });
+    }
+  })();
 
   document.getElementById('dataGroupSaveBtn').addEventListener('click', async () => {
     const errEl = document.getElementById('dataGroupError');
@@ -663,34 +683,38 @@
       }catch(e){ setFirmaCrudMsg('Eklenemedi, tekrar deneyin.', true); _addFirmaBtn.disabled = false; }
     });
   }
+  // Tekrar kullanılabilir firma silme (hem Firmalarım'daki çöp kutusu hem grup listesindeki
+  // çöp kutuları buraya bağlanır). HER silme işleminde "emin misiniz?" onayı sorulur.
+  async function deleteFirmaById(targetId, fname){
+    const user = auth.currentUser;
+    if(!user){ setFirmaCrudMsg('Önce giriş yapın.', true); return; }
+    if(!targetId){ setFirmaCrudMsg('Silinecek firma yok.', true); return; }
+    if(!confirm('"' + (fname || targetId) + '" firmasını tamamen silmek istediğinize emin misiniz?\nBu işlem geri alınamaz; firmaya bağlı üyeler ve grup bağlantıları da kaldırılır.')) return;
+    setFirmaCrudMsg('Siliniyor…', false);
+    try{
+      try{ const ms = await getDocs(collection(db, 'firmaAccounts', targetId, 'members')); for(const d of ms.docs){ await deleteDoc(d.ref); } }catch(e){}
+      try{ const as = await getDocs(collection(db, 'firmaAccounts', targetId, 'admins')); for(const d of as.docs){ await deleteDoc(d.ref); } }catch(e){}
+      // Bu firmayı ana firma (hub) olarak kullanan diğer firmaların bağlantısını çöz.
+      try{
+        for(const other of myAdminFirmas){
+          if(other.id !== targetId && other.dataGroupId === targetId){
+            await setDoc(doc(db, 'firmaAccounts', other.id), { dataGroupId: null }, { merge: true });
+          }
+        }
+      }catch(e){}
+      await deleteDoc(doc(db, 'firmaAccounts', targetId));
+      await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayRemove(targetId) }, { merge: true });
+      setFirmaCrudMsg('Firma silindi ✓', false);
+      setTimeout(() => location.reload(), 800);
+    }catch(e){ setFirmaCrudMsg('Silinemedi, tekrar deneyin.', true); }
+  }
   const _deleteFirmaBtn = document.getElementById('deleteFirmaBtn');
   if(_deleteFirmaBtn){
-    _deleteFirmaBtn.addEventListener('click', async () => {
-      const user = auth.currentUser;
-      if(!user){ setFirmaCrudMsg('Önce giriş yapın.', true); return; }
+    _deleteFirmaBtn.addEventListener('click', () => {
       const sel = document.getElementById('firmaSelector');
       const targetId = (sel && sel.value) || (myAdminFirmas[0] && myAdminFirmas[0].id);
-      if(!targetId){ setFirmaCrudMsg('Silinecek firma yok.', true); return; }
       const f = myAdminFirmas.find(x => x.id === targetId);
-      const fname = f ? f.name : targetId;
-      if(!confirm('"' + fname + '" firmasını tamamen silmek istediğinize emin misiniz?\nBu işlem geri alınamaz; firmaya bağlı üyeler ve grup bağlantıları da kaldırılır.')) return;
-      _deleteFirmaBtn.disabled = true; setFirmaCrudMsg('Siliniyor…', false);
-      try{
-        try{ const ms = await getDocs(collection(db, 'firmaAccounts', targetId, 'members')); for(const d of ms.docs){ await deleteDoc(d.ref); } }catch(e){}
-        try{ const as = await getDocs(collection(db, 'firmaAccounts', targetId, 'admins')); for(const d of as.docs){ await deleteDoc(d.ref); } }catch(e){}
-        // Bu firmayı ana firma (hub) olarak kullanan diğer firmaların bağlantısını çöz.
-        try{
-          for(const other of myAdminFirmas){
-            if(other.id !== targetId && other.dataGroupId === targetId){
-              await setDoc(doc(db, 'firmaAccounts', other.id), { dataGroupId: null }, { merge: true });
-            }
-          }
-        }catch(e){}
-        await deleteDoc(doc(db, 'firmaAccounts', targetId));
-        await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayRemove(targetId) }, { merge: true });
-        setFirmaCrudMsg('Firma silindi ✓', false);
-        setTimeout(() => location.reload(), 800);
-      }catch(e){ setFirmaCrudMsg('Silinemedi, tekrar deneyin.', true); _deleteFirmaBtn.disabled = false; }
+      deleteFirmaById(targetId, f ? f.name : targetId);
     });
   }
 
@@ -1008,9 +1032,8 @@
         rows.push(
           '<div class="member-row" data-uid="' + id + '">' +
             '<div class="member-row-top">' +
-              '<div class="member-info">' +
+              '<div class="member-info member-info-toggle" data-edit="' + id + '" style="cursor:pointer;">' +
                 '<div class="member-name">' + (code ? '<span style="color:var(--brass,#C6A15B); font-weight:700;">#' + code + '</span> ' : '') + (displayName || md.username || (md.email ? md.email.split('@')[0] : '') || 'Kullanıcı') + '</div>' +
-                '<div class="member-sub">' + (md.email || '') + '</div>' +
               '</div>' +
               '<div class="member-row-actions">' +
                 '<button type="button" class="member-icon-btn member-edit-btn" data-edit="' + id + '" title="' + LBL.editPerms + '" aria-label="' + LBL.editPerms + '">✏️</button>' +
@@ -1018,6 +1041,7 @@
               '</div>' +
             '</div>' +
             '<div class="member-perm-panel" id="' + idPrefix + '_panel" hidden>' +
+              (md.email ? '<div class="member-sub" style="padding:2px 2px 10px; font-size:12.5px; color:var(--muted);">✉️ ' + md.email + '</div>' : '') +
               permsBoxHtml +
               firmaAccessBoxHtml +
             '</div>' +
@@ -1055,7 +1079,8 @@
       listEl.querySelectorAll('.member-remove-btn').forEach(btn => {
         btn.addEventListener('click', () => removeMember(btn.dataset.remove));
       });
-      listEl.querySelectorAll('.member-edit-btn').forEach(btn => {
+      // Hem kalem butonu hem de isim alanı (member-info-toggle) panelde detayları (e-posta+yetkiler) açar.
+      listEl.querySelectorAll('[data-edit]').forEach(btn => {
         btn.addEventListener('click', () => {
           const panel = document.getElementById('m_' + btn.dataset.edit + '_panel');
           if(panel) panel.hidden = !panel.hidden;
