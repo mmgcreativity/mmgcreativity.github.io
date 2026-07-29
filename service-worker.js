@@ -10,7 +10,7 @@
  * firebase-messaging-service-worker.js dosyası gerekir; bu dosya onun yerini tutmaz.
  */
 
-const SW_VERSION = '2026-07-29-firma-oneri-mobil';
+const SW_VERSION = '2026-07-29-durt-cooldown-toast';
 
 // Yeni sürüm yayınlanınca hemen devreye girsin (bekleyen SW'yi atla).
 self.addEventListener('install', () => {

@@ -789,6 +789,13 @@ import {
       removeToast();
       if(typeof opts.onClick === 'function') opts.onClick();
     });
+    // Aynı anda en fazla 3 toast göster; fazlası birikince en eskiyi kaldır (yığılma/kötü görüntü önlenir).
+    try{
+      const MAX_TOASTS = 3;
+      while(els.toastContainer.children.length >= MAX_TOASTS){
+        els.toastContainer.firstElementChild.remove();
+      }
+    }catch(e){}
     els.toastContainer.appendChild(toastEl);
     requestAnimationFrame(() => toastEl.classList.add('mmg-chat-toast-in'));
     setTimeout(removeToast, 6000);
@@ -1786,8 +1793,22 @@ import {
           nudgeBtn.addEventListener('click', async () => {
             const uid = row.dataset.toUid;
             if(!uid || !window.mmgNotify){ nudgeBtn.textContent = '—'; setTimeout(()=>{ nudgeBtn.textContent = '👉 Dürt'; }, 1200); return; }
+            // Kullanıcı isteği: 1 dakikada 1 dürtme (kişi bazında cooldown).
+            const nkey = 'mmg_last_nudge_' + uid;
+            const now = Date.now();
+            const last = +(localStorage.getItem(nkey) || 0);
+            if(now - last < 60000){
+              const sec = Math.ceil((60000 - (now - last)) / 1000);
+              nudgeBtn.textContent = sec + ' sn';
+              setTimeout(()=>{ nudgeBtn.textContent = '👉 Dürt'; }, 1500);
+              return;
+            }
             nudgeBtn.disabled = true;
-            try{ await window.mmgNotify(uid, { type:'nudge', title:'👉 Dürtüldünüz', body:'Bir kullanıcı sizi dürttü — bekleyen sohbet isteğini yanıtlayın.' }); nudgeBtn.textContent = '✅'; }
+            try{
+              await window.mmgNotify(uid, { type:'nudge', title:'👉 Dürtüldünüz', body:'Bir kullanıcı sizi dürttü — bekleyen sohbet isteğini yanıtlayın.' });
+              try{ localStorage.setItem(nkey, String(now)); }catch(e){}
+              nudgeBtn.textContent = '✅';
+            }
             catch(e){ nudgeBtn.textContent = '—'; }
             setTimeout(()=>{ nudgeBtn.textContent = '👉 Dürt'; nudgeBtn.disabled = false; }, 1400);
           });

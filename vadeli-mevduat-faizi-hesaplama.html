@@ -365,7 +365,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </header>
 <div class="wrap">
 
-  <div class="grid-top">
+  <div class="grid-top" style="display:none;">
     <div class="stat">
       <div class="label" data-i18n="stat_best_offer">En iyi teklif</div>
       <div class="value gold" id="statBestBank">—</div>
@@ -418,13 +418,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <div class="card" id="resultCard">
-      <button type="button" class="reset-btn card-reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
-      <div class="card-head">
-        <h2><span class="star">&#9733;</span> <span data-i18n="ranking">Sıralama</span></h2>
-      </div>
-      <div class="export-actions" id="exportActions" style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:14px;">
-        <button type="button" class="btn" id="exportExcelBtn">⬇ <span data-i18n="export_excel">Excel</span></button>
-        <button type="button" class="btn" id="exportPdfBtn">⬇ <span data-i18n="export_pdf">PDF</span></button>
+      <div class="card-head" style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
+        <h2 style="margin:0;"><span class="star">&#9733;</span> <span data-i18n="ranking">Sıralama</span></h2>
+        <div class="export-actions" id="exportActions" style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:nowrap;align-items:center;">
+          <button type="button" class="btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
+          <button type="button" class="btn" id="exportExcelBtn">⬇ <span data-i18n="export_excel">Excel</span></button>
+          <button type="button" class="btn" id="exportPdfBtn">⬇ <span data-i18n="export_pdf">PDF</span></button>
+        </div>
       </div>
       <div class="result-cards" id="resultBody"></div>
       <div class="empty" id="emptyState" data-i18n="empty_state">Henüz teklif eklenmedi. Soldan bir teklif ekleyerek başla.</div>
