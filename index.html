@@ -4389,7 +4389,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       try{
         await confirmationResult.confirm(code);
         msg.textContent='Giriş başarılı ✓'; msg.style.color='var(--teal)';
-        // onAuthStateChanged devralır (kullanıcı dokümanı + overlay kapanışı).
+        try{ closeAuthOverlay(); }catch(e){}  // giriş ekranını kapat (onAuthStateChanged kullanıcı dokümanını hazırlar)
       }catch(err){
         msg.textContent = mapPhoneErr(err); msg.style.color='var(--red)';
         verifyBtn.disabled=false;
