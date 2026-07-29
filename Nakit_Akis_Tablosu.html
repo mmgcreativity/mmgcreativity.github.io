@@ -1534,6 +1534,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function exitConsolidatedMode(){
     consolidatedMode = false;
     consolidatedActiveIds = [];
+    groupExpanded = {};
     updateConsolidatedModeUI();
     loadMonth(); // kendi verine geri dön
   }
@@ -1541,12 +1542,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // Seçili firmaların AÇIK AYINA ait günlük gelir/gider TOPLAMLARINI tek bir monthData
   // yapısında birleştirir (her gün için gider ve gelir tek "Toplam" kalemine indirgenir).
   // Böylece normal tarih-bazlı tablo (gün gün) seçili firmaların toplamını gösterir.
+  let groupExpanded = {}; // grup modunda gün-kırılım aç/kapa durumu: { 'YYYY-MM-DD': {gider:bool, gelir:bool} }
   async function buildGroupCurrentMonthData(checked){
     const cloud = window.mmgCloud;
     const activeFid = (cloud && cloud.scopeCollection === 'firmaAccounts') ? cloud.scopeId : null;
     const curMk = monthKeyOf(selYear, selMonth);
-    const acc = {}; // dk -> {g, i}
+    const byDate = {}; // dk -> { gider:[items], gelir:[items] } — kalemler firma adıyla etiketli
     for(const fid of checked){
+      const firma = consolidatedFirmas.find(f => f.id === fid);
+      const fname = firma ? firma.name : fid;
       let data = null;
       if(fid === activeFid){
         data = monthData || {}; // aktif firmanın açık ayı: canlı veri
@@ -1559,19 +1563,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       Object.keys(data).forEach(dk => {
         if(dk.slice(0,7) !== curMk) return;
         const day = data[dk] || {};
-        let g = 0, i = 0;
-        (day.gider||[]).forEach(it => { g += (it.amount||0); });
-        (day.gelir||[]).forEach(it => { i += (it.amount||0); });
-        if(!acc[dk]) acc[dk] = { g:0, i:0 };
-        acc[dk].g += g; acc[dk].i += i;
+        if(!byDate[dk]) byDate[dk] = { gider:[], gelir:[] };
+        (day.gider||[]).forEach((it, ix) => byDate[dk].gider.push({ id:'g_'+fid+'_'+(it.id||ix), desc: fname + (it.desc ? ' — ' + it.desc : ''), category: it.category||'', amount: it.amount||0 }));
+        (day.gelir||[]).forEach((it, ix) => byDate[dk].gelir.push({ id:'i_'+fid+'_'+(it.id||ix), desc: fname + (it.desc ? ' — ' + it.desc : ''), category: it.category||'', amount: it.amount||0 }));
       });
     }
     const merged = {};
-    Object.keys(acc).forEach(dk => {
+    Object.keys(byDate).forEach(dk => {
+      const ge = groupExpanded[dk] || {};
       merged[dk] = {
-        gider: acc[dk].g ? [{ id:'grp', desc:'Toplam', category:'', amount:acc[dk].g }] : [],
-        gelir: acc[dk].i ? [{ id:'grp', desc:'Toplam', category:'', amount:acc[dk].i }] : [],
-        expanded: { gider:false, gelir:false }
+        gider: byDate[dk].gider,
+        gelir: byDate[dk].gelir,
+        expanded: { gider: !!ge.gider, gelir: !!ge.gelir }
       };
     });
     return merged;
@@ -1776,6 +1779,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       refreshSelectUI(); render();
       return;
     }
+    if(reportTab === 'haftalik'){
+      if(reportWeekIdx > 0){ reportWeekIdx--; render(); return; }
+      // ilk haftadan geri → önceki ayın SON haftasına geç
+      if(selMonth === 0){ selMonth = 11; selYear -= 1; } else { selMonth -= 1; }
+      refreshSelectUI();
+      await loadMonth();
+      const nw = buildWeeks(selYear, selMonth);
+      reportWeekIdx = Math.max(0, nw.length - 1);
+      render();
+      return;
+    }
     if(selMonth === 0){ selMonth = 11; selYear -= 1; } else { selMonth -= 1; }
     refreshSelectUI(); loadMonth();
   });
@@ -1791,6 +1805,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
       reportDay = newDay;
       refreshSelectUI(); render();
+      return;
+    }
+    if(reportTab === 'haftalik'){
+      const weeks = buildWeeks(selYear, selMonth);
+      if(reportWeekIdx < weeks.length - 1){ reportWeekIdx++; render(); return; }
+      // son haftadan ileri → sonraki ayın İLK haftasına geç
+      if(selMonth === 11){ selMonth = 0; selYear += 1; } else { selMonth += 1; }
+      refreshSelectUI();
+      await loadMonth();
+      reportWeekIdx = 0;
+      render();
       return;
     }
     if(selMonth === 11){ selMonth = 0; selYear += 1; } else { selMonth += 1; }
@@ -1871,7 +1896,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           '</div>' +
           '<div class="item-row-main">' +
             '<span class="item-amount" style="color:'+ (type==='gider' ? 'var(--red)' : 'var(--teal)') +';">' + fmtMoney(it.amount) + '</span>' +
-            '<button type="button" class="item-del" data-action="delete-item" data-day="'+key+'" data-type="'+type+'" data-id="'+it.id+'">✕</button>' +
+            (consolidatedMode ? '' : '<button type="button" class="item-del" data-action="delete-item" data-day="'+key+'" data-type="'+type+'" data-id="'+it.id+'">✕</button>') +
           '</div>' +
         '</div>';
       });
@@ -2068,17 +2093,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   function renderPicker(){
+    // Kullanıcı isteği: haftalıkta "1. Hafta / 2. Hafta" pill'leri kaldırıldı;
+    // haftalar arası geçiş artık ◀ ▶ oklarıyla (aylıktaki mantık). Hangi haftada
+    // olunduğu hafta kartının başlığında ("5. Hafta · 27-31 Temmuz") görünüyor.
     const picker = document.getElementById('reportPicker');
-    const weeks = buildWeeks(selYear, selMonth);
-    if(reportTab === 'haftalik'){
-      let html = '';
-      weeks.forEach((week, idx) => {
-        html += '<button type="button" class="picker-pill '+(idx===reportWeekIdx?'active':'')+'" data-week="'+idx+'">'+weekOrdinal(idx+1)+'</button>';
-      });
-      picker.innerHTML = html;
-    } else {
-      picker.innerHTML = '';
-    }
+    if(picker) picker.innerHTML = '';
   }
 
   document.getElementById('reportTabs').addEventListener('click', (e) => {
@@ -2643,6 +2662,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const toggleBtn = e.target.closest('[data-action="toggle"]');
     if(toggleBtn){
       const key = toggleBtn.dataset.day, type = toggleBtn.dataset.type;
+      if(consolidatedMode){
+        // Grup modunda gerçek veriye dokunma: aç/kapa durumunu ayrı tut.
+        if(!groupExpanded[key]) groupExpanded[key] = { gider:false, gelir:false };
+        groupExpanded[key][type] = !groupExpanded[key][type];
+        render();
+        return;
+      }
       const day = ensureDay(key);
       day.expanded[type] = !day.expanded[type];
       render();
