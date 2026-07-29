@@ -4353,6 +4353,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       return 'Hata: ' + (c || (err && err.message) || 'bilinmeyen');
     }
     phoneBtn.addEventListener('click', ()=>{ panel.style.display = (panel.style.display==='none' || !panel.style.display) ? 'block' : 'none'; });
+    numInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); sendBtn.click(); } });
+    codeInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); verifyBtn.click(); } });
     sendBtn.addEventListener('click', async ()=>{
       let phone = (numInput.value||'').replace(/[\s()-]/g,'');
       if(/^0\d{10}$/.test(phone)) phone = '+90' + phone.slice(1);
@@ -4418,6 +4420,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(!auth.currentUser){ msg.textContent='Önce e-posta ile giriş yapın.'; msg.style.color='var(--red,#E2544B)'; form.style.display='block'; return; }
       form.style.display = (form.style.display==='none' || !form.style.display) ? 'block' : 'none';
     });
+    numInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); sendBtn.click(); } });
+    codeInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); verifyBtn.click(); } });
     sendBtn.addEventListener('click', async ()=>{
       if(!auth.currentUser){ msg.textContent='Önce e-posta ile giriş yapın.'; msg.style.color='var(--red,#E2544B)'; return; }
       let phone = (numInput.value||'').replace(/[\s()-]/g,'');
