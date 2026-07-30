@@ -107,7 +107,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   aside{
     width:var(--sidebar-w); flex-shrink:0; height:100vh;
     background:var(--surface); border-right:1px solid var(--hairline);
-    display:flex; flex-direction:column; overflow-y:auto;
+    display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden;
     position:fixed; top:0; left:0; z-index:100;
   }
   .brand{
@@ -552,7 +552,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .app-card.dynamic-shortcut:not(.has-desc) p{ display:none; }
   .card-grid.edit-mode .app-card{ cursor:grab; outline:1.5px dashed var(--hairline); touch-action:none; }
   .card-grid.edit-mode .app-card:active{ cursor:grabbing; }
-  .card-grid.edit-mode .app-card.resizable{ resize:both; overflow:auto; min-width:180px; min-height:70px; }
+  .card-grid.edit-mode .app-card.resizable{ resize:none; overflow:hidden; }  /* kart boyutları her zaman eşit — elle boyutlandırma kapalı */
   .app-card.drop-target-before{ box-shadow:-4px 0 0 0 var(--coral); }
   .app-card.drop-target-after{ box-shadow:4px 0 0 0 var(--coral); }
   .card-remove-btn{
@@ -2317,10 +2317,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var t = card.dataset.target;
       if(!t) return;
       if(removed.indexOf(t) !== -1){ card.remove(); return; }
-      if(sizes[t]){
-        if(sizes[t].w) card.style.width = sizes[t].w;
-        if(sizes[t].h) card.style.height = sizes[t].h;
-      }
+      // Kart boyutları HER ZAMAN eşit olsun (kullanıcı isteği): kayıtlı özel boyutları
+      // UYGULAMIYORUZ ve varsa satır-içi boyutu temizliyoruz. Böylece kaleme (düzenleme)
+      // basılsa bile kutular tek tip kalır.
+      card.style.width = ''; card.style.height = '';
     });
   }
 
