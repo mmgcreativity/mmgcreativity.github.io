@@ -167,8 +167,14 @@
         <button type="button" id="deleteFirmaBtn" title="Seçili firmayı sil" aria-label="Seçili firmayı sil" style="flex:0 0 auto; width:40px; height:38px; display:flex; align-items:center; justify-content:center; background:transparent; border:1px solid rgba(226,84,75,0.45); color:var(--red,#E2544B); border-radius:8px; cursor:pointer; font-size:15px;">🗑</button>
       </div>
       <div style="display:flex; gap:6px; margin-bottom:6px;">
-        <input type="text" id="newFirmaName" placeholder="Yeni firma adı" style="flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;">
+        <input type="text" id="newFirmaName" placeholder="Yeni firma adı" style="flex:2; min-width:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;">
+        <input type="text" id="newFirmaCode" placeholder="Kod (ops.)" maxlength="16" title="Boş bırakırsanız otomatik kod atanır. Excel toplu yüklemede firma bu kodla eşleşir." style="flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 10px; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; text-transform:uppercase;">
         <button type="button" id="addFirmaBtn" style="flex-shrink:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 14px; color:var(--brass,#C6A15B); font-weight:700; cursor:pointer;">+ Ekle</button>
+      </div>
+      <div id="firmaCodeEditRow" style="display:none; gap:6px; align-items:center; margin-bottom:6px;">
+        <span style="font-size:12.5px; color:var(--muted); font-weight:600; flex-shrink:0;">Firma Kodu:</span>
+        <input type="text" id="editFirmaCode" placeholder="Kod" maxlength="16" title="Excel toplu yüklemede firma bu kodla eşleşir." style="flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:6px 10px; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">
+        <button type="button" id="saveFirmaCodeBtn" style="flex-shrink:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:6px 12px; color:var(--brass,#C6A15B); font-weight:700; cursor:pointer; font-size:13px;">Kaydet</button>
       </div>
       <div id="firmaCrudMsg" style="font-size:12px; margin-top:6px; min-height:14px;"></div>
     </div>
@@ -573,6 +579,14 @@
     const f = myAdminFirmas.find(x => x.id === fid);
     document.getElementById('firmaHeaderSub').textContent =
       LBL.firmaSubPrefix + (f ? f.name : fid) + LBL.firmaSubSuffix;
+    // Firma kodu düzenleme satırını doldur (seçili firmanın kodu).
+    const codeRow = document.getElementById('firmaCodeEditRow');
+    const codeEdit = document.getElementById('editFirmaCode');
+    if(codeRow && codeEdit){
+      codeRow.style.display = 'flex';
+      codeEdit.value = (f && f.code) ? f.code : '';
+      codeEdit.placeholder = (f && f.code) ? 'Kod' : 'Kod atanmamış';
+    }
     // Kullanıcı isteği: davet formunda yetkiler VARSAYILAN olarak TÜMÜ İŞARETLİ gelsin (üye tam
     // erişimle başlasın; admin istemediğini kaldırır). null yerine {} verince permGridHtml tümünü
     // işaretli üretir ("false değilse işaretli" mantığı). Önceki null → hepsi işaretsiz → üye yetkisiz kalıyordu.
@@ -632,7 +646,7 @@
       for(const fid of firmaIds){
         try{
           const fSnap = await getDoc(doc(db, 'firmaAccounts', fid));
-          if(fSnap.exists()) myAdminFirmas.push({ id: fid, name: fSnap.data().name || fid, dataGroupId: fSnap.data().dataGroupId || null });
+          if(fSnap.exists()) myAdminFirmas.push({ id: fid, name: fSnap.data().name || fid, code: (fSnap.data().firmaCode || '').toString(), dataGroupId: fSnap.data().dataGroupId || null });
         } catch(e){ /* sessizce geç */ }
       }
       if(!myAdminFirmas.length){
@@ -664,22 +678,47 @@
     const el = document.getElementById('firmaCrudMsg');
     if(!el) return; el.textContent = txt || ''; el.style.color = isErr ? 'var(--red,#E2544B)' : 'var(--brass,#C6A15B)';
   }
+  // Firma kodu normalize: sadece A-Z 0-9, büyük harf, boşluk/Türkçe karakter sadeleştirilir.
+  function mmgNormalizeFirmaCode(raw){
+    if(!raw) return '';
+    const map = {'ç':'C','ğ':'G','ı':'I','İ':'I','ö':'O','ş':'S','ü':'U','Ç':'C','Ğ':'G','Ö':'O','Ş':'S','Ü':'U'};
+    return raw.toString().replace(/[çğıİöşüÇĞÖŞÜ]/g, m => map[m] || m)
+             .toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 16);
+  }
+  // İsimden otomatik firma kodu üret (mevcut kodlarla çakışmayacak şekilde).
+  function mmgGenFirmaCode(name){
+    let base = mmgNormalizeFirmaCode(name).slice(0, 6);
+    if(base.length < 3) base = (base + 'FRM').slice(0, 3);
+    const existing = new Set(myAdminFirmas.map(f => (f.code || '').toUpperCase()).filter(Boolean));
+    let code = base + Math.floor(100 + Math.random() * 900); // örn. ACME347
+    let guard = 0;
+    while(existing.has(code) && guard++ < 50){ code = base + Math.floor(100 + Math.random() * 900); }
+    return code;
+  }
   const _addFirmaBtn = document.getElementById('addFirmaBtn');
   if(_addFirmaBtn){
     _addFirmaBtn.addEventListener('click', async () => {
       const inp = document.getElementById('newFirmaName');
+      const codeInp = document.getElementById('newFirmaCode');
       const name = (inp && inp.value || '').trim();
       const user = auth.currentUser;
       if(!user){ setFirmaCrudMsg('Önce giriş yapın.', true); return; }
       if(!name){ setFirmaCrudMsg('Firma adı girin.', true); return; }
+      // Kullanıcı kod girdiyse normalize et; boşsa isimden otomatik üret.
+      let firmaCode = mmgNormalizeFirmaCode(codeInp && codeInp.value || '');
+      if(!firmaCode) firmaCode = mmgGenFirmaCode(name);
+      // Aynı koda sahip başka firmam varsa uyar (Excel eşleşmesi için benzersiz olmalı).
+      if(myAdminFirmas.some(f => (f.code || '').toUpperCase() === firmaCode)){
+        setFirmaCrudMsg('Bu firma kodu zaten kullanımda, farklı bir kod girin.', true); return;
+      }
       _addFirmaBtn.disabled = true; setFirmaCrudMsg('Ekleniyor…', false);
       try{
         const firmaRef = doc(collection(db, 'firmaAccounts'));
-        await setDoc(firmaRef, { name: name, createdAt: serverTimestamp(), createdBy: user.uid });
+        await setDoc(firmaRef, { name: name, firmaCode: firmaCode, createdAt: serverTimestamp(), createdBy: user.uid });
         await setDoc(doc(db, 'firmaAccounts', firmaRef.id, 'admins', user.uid), { email: user.email || '', addedAt: serverTimestamp() });
         await setDoc(doc(db, 'users', user.uid), { adminFirmaIds: arrayUnion(firmaRef.id) }, { merge: true });
-        setFirmaCrudMsg('Firma eklendi ✓', false);
-        setTimeout(() => location.reload(), 700);
+        setFirmaCrudMsg('Firma eklendi ✓  (Kod: ' + firmaCode + ')', false);
+        setTimeout(() => location.reload(), 900);
       }catch(e){ setFirmaCrudMsg('Eklenemedi, tekrar deneyin.', true); _addFirmaBtn.disabled = false; }
     });
   }
@@ -715,6 +754,31 @@
       const targetId = (sel && sel.value) || (myAdminFirmas[0] && myAdminFirmas[0].id);
       const f = myAdminFirmas.find(x => x.id === targetId);
       deleteFirmaById(targetId, f ? f.name : targetId);
+    });
+  }
+
+  // ---- Firma Kodu Kaydet (seçili firma) ----
+  const _saveFirmaCodeBtn = document.getElementById('saveFirmaCodeBtn');
+  if(_saveFirmaCodeBtn){
+    _saveFirmaCodeBtn.addEventListener('click', async () => {
+      const user = auth.currentUser;
+      if(!user){ setFirmaCrudMsg('Önce giriş yapın.', true); return; }
+      if(!firmaId){ setFirmaCrudMsg('Önce firma seçin.', true); return; }
+      const codeEdit = document.getElementById('editFirmaCode');
+      const newCode = mmgNormalizeFirmaCode(codeEdit && codeEdit.value || '');
+      if(!newCode){ setFirmaCrudMsg('Geçerli bir firma kodu girin.', true); return; }
+      // Başka bir firmam aynı kodu kullanıyorsa engelle (Excel eşleşmesi benzersiz olmalı).
+      if(myAdminFirmas.some(f => f.id !== firmaId && (f.code || '').toUpperCase() === newCode)){
+        setFirmaCrudMsg('Bu firma kodu başka firmada kullanımda.', true); return;
+      }
+      _saveFirmaCodeBtn.disabled = true; setFirmaCrudMsg('Kaydediliyor…', false);
+      try{
+        await setDoc(doc(db, 'firmaAccounts', firmaId), { firmaCode: newCode }, { merge: true });
+        const f = myAdminFirmas.find(x => x.id === firmaId); if(f) f.code = newCode;
+        if(codeEdit) codeEdit.value = newCode;
+        setFirmaCrudMsg('Firma kodu kaydedildi ✓  (' + newCode + ')', false);
+      }catch(e){ setFirmaCrudMsg('Kod kaydedilemedi, tekrar deneyin.', true); }
+      _saveFirmaCodeBtn.disabled = false;
     });
   }
 
