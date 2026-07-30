@@ -705,9 +705,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     /* Mobil: kartlarda sadece ana başlık kalsın; açıklama (alt başlık) gizli — yer kazanır. */
     .app-card p{ display:none !important; }
     .app-card h3{ margin-bottom:0; }
-    /* Mobil: marka logosu + başlık çok yer kaplıyordu — küçültülüp hero'ya yaklaştırıldı. */
+    /* Mobil: ayrı marka logosu bloğu (brand-row) ile hero AYNI kimliği iki kez gösterip çok
+       yer kaplıyordu. Mobilde brand-row gizlenir; hero, logoyu içeren TEK kompakt başlık olur. */
+    .brand{ display:none !important; }
+    .brand-row{ display:none !important; }
     .brand-row-logo, .brand-row-fallback{ height:88px !important; width:88px !important; border-radius:20px; font-size:34px; }
     .brand-title{ font-size:15px; }
+    /* Hero = birleşik kompakt görsel: logo + başlık + slogan aynı kartta, dar boşluklar. */
+    .hero{ padding:16px 16px 14px !important; }
+    .hero-top-row{ gap:12px; align-items:center; }
+    .hero-app-icon{ width:56px !important; height:56px !important; border-radius:14px; }
+    .hero-title{ font-size:20px !important; margin-bottom:2px !important; }
+    .hero-tagline{ font-size:12.5px; margin:0 !important; }
+    .hero-desc{ font-size:12px !important; margin-top:8px !important; line-height:1.4 !important; }
+    .hero-features{ font-size:11px !important; margin-top:6px !important; }
+    .hero-credit{ margin-top:10px !important; }
     .card-grid.edit-mode .app-card.resizable{ resize:none; }
     .card-grid.edit-mode .app-card.resizable .card-resize-hint{ display:none; }
     .desktop-toolbar{ position:absolute; top:6px; right:14px; margin:0; justify-content:flex-end; z-index:16; }
@@ -2928,6 +2940,54 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }catch(e){ return false; }
   };
 
+  // ---- İlk girişte sağ-alt bildirim pop-up'ı (bir kez): izni kullanıcı hareketiyle ister.
+  // Notification.requestPermission() bazı tarayıcılarda kullanıcı tıklaması gerektirir; bu
+  // yüzden doğrudan istemek yerine küçük bir kart gösterip butona basınca izin alıyoruz. ----
+  function mmgShowPushPrompt(){
+    try{
+      if(!('Notification' in window)) return;
+      if(Notification.permission !== 'default') return;                  // granted/denied → gösterme
+      if(localStorage.getItem('mmg_push_prompt_dismissed') === '1') return;
+      if(document.getElementById('mmgPushPrompt')) return;                // zaten açık
+      const isEn = (window.MMG_LANG === 'en');
+      const box = document.createElement('div');
+      box.id = 'mmgPushPrompt';
+      box.setAttribute('role', 'dialog');
+      box.style.cssText = 'position:fixed;right:18px;bottom:18px;z-index:99999;max-width:320px;'+
+        'background:#141821;color:#e9edf5;border:1px solid #2a3242;border-radius:14px;'+
+        'box-shadow:0 12px 40px rgba(0,0,0,.5);padding:14px 14px 12px;font-size:14px;'+
+        'animation:mmgPushIn .35s ease;';
+      box.innerHTML =
+        '<div style="display:flex;gap:10px;align-items:flex-start;">'+
+          '<div style="font-size:22px;line-height:1;">🔔</div>'+
+          '<div style="flex:1;">'+
+            '<div style="font-weight:700;margin-bottom:3px;">'+(isEn?'Turn on notifications':'Bildirimleri aç')+'</div>'+
+            '<div style="opacity:.85;line-height:1.35;">'+(isEn?'Get chat &amp; approval alerts on your phone and desktop, even when the app is closed.':'Uygulama kapalıyken bile sohbet ve onay bildirimlerini telefonuna ve masaüstüne al.')+'</div>'+
+          '</div>'+
+          '<button id="mmgPushX" aria-label="Kapat" style="background:none;border:none;color:#8b93a3;font-size:18px;cursor:pointer;line-height:1;padding:0 2px;">×</button>'+
+        '</div>'+
+        '<div style="display:flex;gap:8px;margin-top:11px;justify-content:flex-end;">'+
+          '<button id="mmgPushLater" style="background:none;border:1px solid #2a3242;color:#c3cad6;border-radius:9px;padding:7px 12px;cursor:pointer;font-size:13px;">'+(isEn?'Not now':'Şimdi değil')+'</button>'+
+          '<button id="mmgPushYes" style="background:linear-gradient(135deg,#c9922e,#e6b34d);border:none;color:#1a1205;font-weight:700;border-radius:9px;padding:7px 14px;cursor:pointer;font-size:13px;">'+(isEn?'Turn on':'Aç')+'</button>'+
+        '</div>';
+      if(!document.getElementById('mmgPushPromptStyle')){
+        const st = document.createElement('style'); st.id = 'mmgPushPromptStyle';
+        st.textContent = '@keyframes mmgPushIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}';
+        document.head.appendChild(st);
+      }
+      document.body.appendChild(box);
+      const close = () => { try{ box.remove(); }catch(e){} };
+      const dismiss = () => { try{ localStorage.setItem('mmg_push_prompt_dismissed','1'); }catch(e){} close(); };
+      box.querySelector('#mmgPushX').addEventListener('click', dismiss);
+      box.querySelector('#mmgPushLater').addEventListener('click', dismiss);
+      box.querySelector('#mmgPushYes').addEventListener('click', async () => {
+        const ok = await window.mmgEnablePush();
+        try{ localStorage.setItem('mmg_push_prompt_dismissed','1'); }catch(e){}
+        close();
+      });
+    }catch(e){}
+  }
+
   // ---- Kullanım istatistiği: her araç açılışında sessizce sayaç güncelle ----
   // "usageStats/{sayfaAdı}" belgesinde genel toplam, "usageStats/{sayfaAdı}/openers/{uid}"
   // alt koleksiyonunda ise kullanıcı bazlı toplam tutuluyor. İstatistikler sayfası bunları
@@ -3252,6 +3312,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }catch(firmaErr){ /* firma üyeliği yüklenemezse sessizce geç, geri kalan her şey çalışmaya devam etsin */ }
       // #16 Mobil push: izin daha önce verilmişse token'ı sessizce tazele/kaydet (VAPID boşsa no-op).
       mmgRegisterPushToken(user);
+      // İlk girişte (izin henüz sorulmamışsa) sağ-alt bildirim pop-up'ını göster.
+      setTimeout(() => { try{ mmgShowPushPrompt(); }catch(e){} }, 1500);
       // Zaten oturum açıkken gelen bekleyen davetleri de yakala (sadece giriş anında değil)
     } catch(e){ console.error('[MMG_DEBUG] onAuthStateChanged ana hata:', e); }
   });

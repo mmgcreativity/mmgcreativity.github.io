@@ -496,6 +496,29 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
            d.avatar || d.logo || d.profilResmi || d.logoDataUrl || d.kaseBase64 || null;
   }
 
+  // ---- Firma/Talimat logosu: kullanıcının PDF/Talimat logosu users/{uid} kökünde DEĞİL,
+  // {scope}/{scopeId}/talimat/firmaProfili.logoBase64 altında saklanır (Talimat_Hazirlama.html
+  // ile aynı kapsam mantığı). Forum avatarını buradan da çekiyoruz ki logo forumda görünsün. ----
+  async function resolveScopeLogo(uid, userData){
+    try{
+      let scopeColl = 'users', scopeId = uid;
+      const activeScope = (typeof localStorage !== 'undefined') ? localStorage.getItem('mmg_active_data_scope') : null;
+      if(activeScope && activeScope !== 'personal'){ scopeColl = 'firmaAccounts'; scopeId = activeScope; }
+      else if(activeScope === 'personal'){ /* kişisel: users/uid */ }
+      else if(userData && userData.companyId){
+        scopeColl = 'companies';
+        scopeId = (typeof localStorage !== 'undefined' && localStorage.getItem('mmg_active_company_id')) || userData.companyId;
+      }
+      // grup (dataGroupId) hub çözümü
+      if(scopeColl === 'firmaAccounts' && scopeId){
+        try{ const fS = await getDoc(doc(db, 'firmaAccounts', scopeId)); if(fS.exists() && fS.data().dataGroupId) scopeId = fS.data().dataGroupId; }catch(e){}
+      }
+      const s = await getDoc(doc(db, scopeColl, scopeId, 'talimat', 'firmaProfili'));
+      if(s.exists() && s.data().logoBase64) return s.data().logoBase64;
+    }catch(e){ /* okunamazsa null */ }
+    return null;
+  }
+
   // ---- "İsimsiz" düzeltmesi: gönderi/yanıt kaydında adı boş kalmış kullanıcıların adını,
   // görüntüleme anında hesaptan (profiles/{uid} yoksa users/{uid}) çekip yamar. ----
   const _forumNameCache = {};
@@ -553,6 +576,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         const u = await getDoc(doc(db, 'users', uid));
         if(u.exists()) avatar = pickUserAvatar(u.data());
       }catch(e){ /* okunamazsa null kalır */ }
+    }
+    // Kişisel kapsamdaki Talimat/PDF logosu (users/{uid}/talimat/firmaProfili)
+    if(!avatar){
+      try{ const s = await getDoc(doc(db, 'users', uid, 'talimat', 'firmaProfili')); if(s.exists()) avatar = s.data().logoBase64 || null; }catch(e){}
     }
     _forumAvatarCache[uid] = avatar;
     return avatar;
@@ -1077,7 +1104,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const data = snap.exists() ? snap.data() : {};
       currentIsAdmin = data.isAdmin === true;
       currentUserName = data.displayName || data.username || data.email || LBL.anonymous;
-      currentUserAvatar = pickUserAvatar(data) || user.photoURL || null;
+      currentUserAvatar = pickUserAvatar(data) || (await resolveScopeLogo(user.uid, data)) || user.photoURL || null;
       const composerAvatar = document.getElementById('composerAvatar');
       if(composerAvatar){
         const html = avatarHtml(currentUserName, currentUserAvatar, user.uid).replace('<div class="avatar-circle"', '<div class="avatar-circle" id="composerAvatar"');
