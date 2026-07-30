@@ -415,7 +415,7 @@ function mmgApplyTurkishFont(doc){
     display:grid; grid-template-columns:72px minmax(0,1fr) 32px 48px; align-items:center; gap:5px;
     border-bottom:none; background:var(--surface-2);
   }
-  .xcell.xcell-full{ grid-template-columns:72px minmax(0,1fr); }
+  .xcell.xcell-full{ grid-template-columns:118px minmax(0,1fr); }
   .xcell.xcell-3col{ grid-template-columns:72px minmax(0,1fr) auto; }
   .xcell:first-child{ border-radius:6px 6px 0 0; }
   .xcell:last-child{ border-radius:0 0 6px 6px; }
@@ -3250,10 +3250,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         { id:'glBorclu', label:'Senedin Borçlusu', type:'text' },
         { id:'glSenetNo', label:'Senet No', type:'text' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
-        { id:'glVade', label:'Senet Vade Tarihi', type:'date' }
+        { id:'glVade', label:'Senet Vade Tarihi', type:'date' },
+        { id:'glKisi', label:'Teslim Alacak Kişi', type:'text' }
       ],
       body: v => 'Firmamızca bankanıza verilen ekli senedin takastan çekilmesi rica olunur.',
-      infoRows: v => [['Borçlu', v.glBorclu||'—'], ['Senet No', v.glSenetNo||'—'], ['Tutar', fmtTR(v.glTutar,2)+' TL'], ['Vade', v.glVadeDisp||'—']],
+      infoRows: v => [['Borçlu', v.glBorclu||'—'], ['Senet No', v.glSenetNo||'—'], ['Tutar', fmtTR(v.glTutar,2)+' TL'], ['Vade', v.glVadeDisp||'—'], ['Teslim Alacak Kişi', v.glKisi||'—']],
       fileName: 'senet-takastan-cekme-talimati.pdf',
       shareTitle: 'Senet Takastan Çekme Talimatı'
     },

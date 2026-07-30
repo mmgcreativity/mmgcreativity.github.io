@@ -11,7 +11,7 @@
  * FCM için AYRI bir firebase-messaging-service-worker.js gerekir; bu dosya onun yerini tutmaz.
  */
 
-const SW_VERSION = '2026-07-30-auth-lang-tr-global';
+const SW_VERSION = '2026-07-30-oturum-fix-senet-mobilfirma';
 const CACHE = 'mmg-' + SW_VERSION;
 
 self.addEventListener('install', () => {

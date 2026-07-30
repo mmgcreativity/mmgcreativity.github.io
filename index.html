@@ -3179,19 +3179,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // Yeni giriş yaptıysak: kendi kimliğimizi sunucuda görene kadar kick yok (self-kick koruması).
       if(justClaimed && !mmgSessionConfirmed) return;
       if(remoteSessionId && localSessionId && remoteSessionId !== localSessionId){
-        console.log('[MMG_DEBUG] >>> KICK TETİKLENDİ <<<', {remoteSessionId, localSessionId, field: MMG_SESSION_FIELD});
-        mmgStopWatchingSession();
-        localStorage.removeItem(MMG_SESSION_KEY);
-        localStorage.removeItem(MMG_SESSION_UID_KEY);
-        alert(MMGI18N.t('session_kicked_message'));
-        // ÖNEMLİ: signOut() tamamlanmadan sayfa yenilenirse, Firebase Auth'un yerel
-        // (IndexedDB) oturum kaydı yarım kalmış halde kalabiliyor ve bu da az sonra aynı
-        // tarayıcıdan tekrar giriş yapmaya çalışıldığında başarısız olmasına sebep
-        // olabiliyordu. Bu yüzden signOut'un bitmesini BEKLEYİP öyle yeniliyoruz.
-        signOut(auth).catch(()=>{}).finally(() => {
-          localStorage.setItem('mmg_auth_state', 'guest');
-          window.location.reload();
-        });
+        // Tek-oturum "kick" (zorla çıkış) DAVRANIŞI KALDIRILDI.
+        // Neden: kullanıcı aynı hesabı birden fazla sekmede/pencerede açtığında (ya da hızlı
+        // sayfa geçişlerinde) oturum yanlışlıkla misafire düşüyor ("Misafir modundasınız"),
+        // admin öğeleri kayboluyor ve Firestore yazmaları (ör. referans kodu kaydı) izin
+        // reddiyle başarısız oluyordu. Artık kimseyi dışarı atmıyoruz; yalnızca yerel oturum
+        // kimliğini uzaktakiyle eşitleyip oturumda kalıyoruz (son claim kazanır, çıkış yok).
+        console.log('[MMG_DEBUG] Oturum kimliği güncellendi (kick devre dışı)', {remoteSessionId, localSessionId, field: MMG_SESSION_FIELD});
+        localStorage.setItem(MMG_SESSION_KEY, remoteSessionId);
+        mmgSessionConfirmed = true;
+        return;
       }
     }, () => { /* dinleme hatasında sessizce geç */ });
   }
@@ -5279,6 +5276,30 @@ const auth = getApps().length ? getAuth(getApp()) : null;
     if(document.visibilityState === 'visible') checkVersion();
   });
 })();
+</script>
+
+<script>
+  // Mobilde firma çubuğunu (aktif firma) hero'nun ALTINA taşı; masaüstünde eski yerinde bırak.
+  // (Kullanıcı isteği: mobilde hero en üstte, firma çubuğu hemen altında.)
+  (function(){
+    var fbw = document.querySelector('.mmg-firma-bar-wrap');
+    var main = document.querySelector('main');
+    var hero = main ? main.querySelector('.hero') : null;
+    if(!fbw || !main || !hero) return;
+    var origParent = fbw.parentNode, origNext = fbw.nextSibling;
+    function place(){
+      var mobile = window.matchMedia('(max-width:860px)').matches;
+      if(mobile){
+        if(hero.nextSibling !== fbw) hero.parentNode.insertBefore(fbw, hero.nextSibling);
+      } else {
+        if(fbw.parentNode !== origParent || fbw.nextSibling !== origNext){
+          try{ origParent.insertBefore(fbw, origNext); }catch(e){}
+        }
+      }
+    }
+    place();
+    var t; window.addEventListener('resize', function(){ clearTimeout(t); t = setTimeout(place, 150); });
+  })();
 </script>
 
 </body>
