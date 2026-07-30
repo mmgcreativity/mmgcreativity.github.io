@@ -247,6 +247,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     border-radius:10px; padding:9px 10px 9px 14px; font-size:13px; font-weight:600;
   }
   .bank-chip .bank-chip-text{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bank-chip .party-scope-badge, .bank-chip .scope-assignable{ flex-shrink:0; white-space:nowrap; }
+  .bank-chip > button{ flex-shrink:0; }
+  #bank_firmaSelect{ display:none; }  /* IBAN tek firmaya (aktif) aittir — çoklu-firma seçimi mantıksız, gizlendi */
   .bank-chip button{
     background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; width:20px; height:20px;
     border-radius:50%; display:flex; align-items:center; justify-content:center;
@@ -297,9 +300,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     </div>
 
     <div class="veri-tabs" id="tabBar">
-      <button type="button" class="veri-tab-btn" data-tab="banks" data-i18n="tab_banks">💳 IBAN'larım</button>
+      <button type="button" class="veri-tab-btn active" data-tab="banks" data-i18n="tab_banks">💳 IBAN'larım</button>
       <button type="button" class="veri-tab-btn" data-tab="bankList" data-i18n="tab_bankList">🏦 Çalıştığım Bankalar</button>
-      <button type="button" class="veri-tab-btn active" data-tab="customers" data-i18n="tab_customers">👤 Müşteriler</button>
+      <button type="button" class="veri-tab-btn" data-tab="customers" data-i18n="tab_customers">👤 Müşteriler</button>
       <button type="button" class="veri-tab-btn" data-tab="suppliers" data-i18n="tab_suppliers">🚚 Tedarikçiler</button>
       <button type="button" class="veri-tab-btn" data-tab="counterparties" data-i18n="tab_counterparties">🏛️ Muhataplar</button>
     </div>
@@ -386,9 +389,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     </div>
 
 
-    <div class="veri-tab-panel active" id="panel-customers">
+    <div class="veri-tab-panel" id="panel-customers">
       <div class="card">
-        <h2 data-i18n="add_customer_title">Yeni Müşteri Ekle</h2>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;"><h2 data-i18n="add_customer_title" style="margin:0;">Yeni Müşteri Ekle</h2><button type="button" class="veri-refresh-btn" data-refresh="customers" style="margin-left:auto; background:transparent; border:1px solid var(--hairline); color:var(--muted); border-radius:8px; padding:5px 12px; font-weight:600; cursor:pointer; font-size:12.5px;">↻ Yenile</button></div>
         <div class="auth-field">
           <label data-i18n="party_name_label">Ünvan / Ad Soyad</label>
           <input type="text" id="cust_name" data-i18n-placeholder="party_name_ph" placeholder="ör. ABC İnşaat A.Ş.">
@@ -407,7 +410,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <div class="veri-tab-panel" id="panel-suppliers">
       <div class="card">
-        <h2 data-i18n="add_supplier_title">Yeni Tedarikçi Ekle</h2>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;"><h2 data-i18n="add_supplier_title" style="margin:0;">Yeni Tedarikçi Ekle</h2><button type="button" class="veri-refresh-btn" data-refresh="suppliers" style="margin-left:auto; background:transparent; border:1px solid var(--hairline); color:var(--muted); border-radius:8px; padding:5px 12px; font-weight:600; cursor:pointer; font-size:12.5px;">↻ Yenile</button></div>
         <div class="auth-field">
           <label data-i18n="party_name_label">Ünvan / Ad Soyad</label>
           <input type="text" id="supp_name" data-i18n-placeholder="party_name_ph" placeholder="ör. ABC İnşaat A.Ş.">
@@ -426,7 +429,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <div class="veri-tab-panel" id="panel-counterparties">
       <div class="card">
-        <h2 data-i18n="add_counterparty_title">Yeni Muhatap Ekle</h2>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;"><h2 data-i18n="add_counterparty_title" style="margin:0;">Yeni Muhatap Ekle</h2><button type="button" class="veri-refresh-btn" data-refresh="counterparties" style="margin-left:auto; background:transparent; border:1px solid var(--hairline); color:var(--muted); border-radius:8px; padding:5px 12px; font-weight:600; cursor:pointer; font-size:12.5px;">↻ Yenile</button></div>
         <div class="card-sub" data-i18n="add_counterparty_desc">Teminat mektuplarında muhatap olarak gösterilecek kurum/kişileri buraya kaydedin (ör. ihaleyi açan kurum).</div>
         <div class="auth-field">
           <label data-i18n="party_name_label">Ünvan / Ad Soyad</label>
@@ -443,9 +446,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       <div class="party-list" id="counterpartiesList"></div>
     </div>
 
-    <div class="veri-tab-panel" id="panel-banks">
+    <div class="veri-tab-panel active" id="panel-banks">
       <div class="card">
-        <h2 data-i18n="banks_title">IBAN'larım</h2>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;"><h2 data-i18n="banks_title" style="margin:0;">IBAN'larım</h2><button type="button" class="veri-refresh-btn" data-refresh="banks" style="margin-left:auto; background:transparent; border:1px solid var(--hairline); color:var(--muted); border-radius:8px; padding:5px 12px; font-weight:600; cursor:pointer; font-size:12.5px;">↻ Yenile</button></div>
         <div class="card-sub" data-i18n="banks_desc">Kendi banka hesaplarınızı (banka + IBAN) buraya kaydedin; müşteri/tedarikçi IBAN bilgisi girerken ve talimat hazırlarken öneri olarak çıkar.</div>
         <div class="field-row">
           <div class="auth-field">
@@ -820,6 +823,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }
   }
 
+  // Her kartın sağ üstündeki "↻ Yenile": ilgili listeyi Firestore'dan yeniden yükler
+  // (silme/ekleme sonrası ekran güncel değilse — kullanıcı isteği).
+  document.querySelectorAll('.veri-refresh-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const k = btn.dataset.refresh;
+      const orig = btn.textContent; btn.disabled = true; btn.textContent = '↻ ...';
+      try{ if(k === 'banks'){ await loadBanks(); } else { await loadParties(k); } }
+      catch(e){}
+      btn.disabled = false; btn.textContent = orig;
+    });
+  });
+
   document.querySelectorAll('.veri-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.veri-tab-btn').forEach(b => b.classList.remove('active'));
@@ -1040,14 +1055,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       showMsg('banks_msg', LBL.bankDuplicateIban, true);
       return;
     }
-    const appliesTo = collectFirmaSelection('bank_firmaSelect');
     try{
       const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
       const docData = { name, iban, currency, note, createdAt: serverTimestamp() };
-      if(appliesTo) docData.appliesToFirmaIds = appliesTo;
+      // IBAN HER ZAMAN TEK firmaya (aktif firma) aittir — bir IBAN birden fazla firmaya tanımlanamaz
+      // (kullanıcı: "IBAN bellidir, mantık dışı"). Çoklu-firma seçimi IBAN formunda kaldırıldı.
+      if(scopeCollection === 'firmaAccounts' && scopeId) docData.appliesToFirmaIds = [scopeId];
       await setDoc(docRef('banks', id), docData);
       select.value = ''; ibanInput.value = ''; curInput.value = 'TRY'; noteInput.value = '';
-      resetFirmaSelect('bank_firmaSelect');
       showMsg('banks_msg', LBL.saved, false);
       await loadBanks();
     }catch(e){ showMsg('banks_msg', LBL.saveFailed, true); }
