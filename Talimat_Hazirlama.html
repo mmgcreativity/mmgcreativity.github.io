@@ -1960,6 +1960,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const info = await fetchFirmaGonderenBilgisi(f.id);
         f.banka = info.banka || '';
         f.iban = info.iban || '';
+        f.ibans = info.ibans || [];  // para birimine göre IBAN seçimi için (Döviz talimatı)
         // Firmanın TÜM IBAN'larını kayıtlı listeye ekle (banks + kayitliMuhataplar birleşik).
         (info.ibans && info.ibans.length ? info.ibans : (info.iban ? [{ banka: info.banka, iban: info.iban }] : []))
           .forEach(ib => {
@@ -2185,7 +2186,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     try{
       const mSnap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', firmaId, 'talimat', 'kayitliMuhataplar'));
       if(mSnap.exists()){
-        (mSnap.data().ibans || []).forEach(b => { if(b && b.iban) out.ibans.push({ banka: b.banka || '', iban: b.iban }); });
+        (mSnap.data().ibans || []).forEach(b => { if(b && b.iban) out.ibans.push({ banka: b.banka || '', iban: b.iban, currency: b.currency || b.paraBirimi || '' }); });
       }
     }catch(e){}
     // (b) ÖNEMLİ: Kullanıcının Veri Giriş → "IBAN'larım" ekranında kaydettiği firma banka
@@ -2201,7 +2202,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const af = b.appliesToFirmaIds;
         if(Array.isArray(af) && af.length && !af.includes(firmaId)) return;
         if(b.iban && !out.ibans.some(x => x.iban === b.iban)){
-          out.ibans.push({ banka: b.name || b.banka || '', iban: b.iban });
+          out.ibans.push({ banka: b.name || b.banka || '', iban: b.iban, currency: b.currency || b.paraBirimi || '' });
         }
       });
     }catch(e){}
@@ -3345,7 +3346,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         { id:'glKur', label:'Kur', type:'text', placeholder:'Örn. 53,5160' }
       ],
       body: v => 'Bankanızda bulunan ' + (v.glGonderenIban || '—') + ' nolu hesabımızdan ' + (v.glKur || '—') + ' kur ile ' + fmtTR(v.glTutar,2) + ' ' + (v.glParaBirimi||'') + ' alınarak ' + (v.glAliciIban || '—') + ' nolu hesabımıza aktarılması rica olunur.',
-      infoRows: v => [['Gönderen IBAN', v.glGonderenIban||'—'],['Alıcı IBAN', v.glAliciIban||'—'],['Tutar', fmtTR(v.glTutar,2)+' '+(v.glParaBirimi||'')],['Kur', v.glKur||'—']],
+      infoRows: v => [['Tutar', fmtTR(v.glTutar,2)+' '+(v.glParaBirimi||'')],['Kur', v.glKur||'—'],['Gönderen IBAN', v.glGonderenIban||'—'],['Alıcı IBAN', v.glAliciIban||'—']],
       fileName: 'doviz-alim-talimati.pdf',
       shareTitle: 'Döviz Alım Talimatı'
     },
@@ -3361,7 +3362,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         { id:'glKur', label:'Kur', type:'text', placeholder:'Örn. 53,5160' }
       ],
       body: v => 'Bankanızda bulunan ' + (v.glGonderenIban || '—') + ' nolu hesabımızdan ' + fmtTR(v.glTutar,2) + ' ' + (v.glParaBirimi||'') + ', ' + (v.glKur || '—') + ' kur ile satılarak karşılığında oluşan TL tutarının ' + (v.glAliciIban || '—') + ' nolu hesabımıza aktarılması rica olunur.',
-      infoRows: v => [['Gönderen IBAN', v.glGonderenIban||'—'],['Alıcı IBAN', v.glAliciIban||'—'],['Tutar', fmtTR(v.glTutar,2)+' '+(v.glParaBirimi||'')],['Kur', v.glKur||'—']],
+      infoRows: v => [['Tutar', fmtTR(v.glTutar,2)+' '+(v.glParaBirimi||'')],['Kur', v.glKur||'—'],['Gönderen IBAN', v.glGonderenIban||'—'],['Alıcı IBAN', v.glAliciIban||'—']],
       fileName: 'doviz-satim-talimati.pdf',
       shareTitle: 'Döviz Satım Talimatı'
     },
@@ -3449,10 +3450,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // seçilebilsin diye yanına "📋 Firmam" seçicisi eklenir; seçilince firma adı ve
       // (biliniyorsa) banka otomatik dolar.
       if(f.id === 'glFirma'){
-        return '<div class="xcell"><span class="xcell-label">' + f.label.toUpperCase() + '</span>' +
-          '<input type="text" id="' + f.id + '" placeholder="' + (f.placeholder||'') + '">' +
-          '<span></span>' +
-          '<select class="xcell-mini gl-firma-saved" id="glFirmaSaved" title="Kendi / grup firmanızdan seç"><option value="">📋 Firmam</option></select>' +
+        // Ayrı "📋 Firmam" seçici KALDIRILDI (kullanıcı isteği). Alana tıklayınca/yazınca kendi +
+        // grup firmaların datalist ile otomatik gelir; ad eşleşince banka ve (biliniyorsa) IBAN dolar.
+        return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span>' +
+          '<input type="text" id="' + f.id + '" list="glFirmaList" autocomplete="off" placeholder="' + (f.placeholder||'') + '">' +
+          '<datalist id="glFirmaList"></datalist>' +
           '</div>';
       }
       return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span><input type="text" id="' + f.id + '" placeholder="' + (f.placeholder||'') + '"></div>';
@@ -3507,26 +3509,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     // "📋 Firmam" seçicisini kendi/grup firmalarıyla doldur ve seçimi bağla.
     renderGlFirmaSelects();
-    const gfs = document.getElementById('glFirmaSaved');
-    if(gfs){
-      gfs.addEventListener('change', () => {
-        if(gfs.value === '') return;
-        const f = myFirms.find(x => x.name === gfs.value);
+    // Firma adına yazılan/datalist'ten seçilen değer, kendi/grup firmalarından biriyle EŞLEŞİNCE
+    // banka ve (biliniyorsa) gönderen IBAN otomatik dolar. Para birimi (glParaBirimi) seçiliyse ve
+    // firmanın o para birimine ait IBAN'ı biliniyorsa onu tercih eder (USD/EUR/TL); yoksa varsayılan IBAN.
+    const glFirmaInput = document.getElementById('glFirma');
+    if(glFirmaInput){
+      const applyFirmaMatch = () => {
+        const f = myFirms.find(x => x.name === glFirmaInput.value.trim());
         if(f){
-          const firmaEl = document.getElementById('glFirma');
-          if(firmaEl) firmaEl.value = f.name;
           const bankaEl = document.getElementById('glBanka');
           if(bankaEl && f.banka) setBankSelectValue(bankaEl, f.banka);
-          // Gönderen/lehine taraf kullanıcının kendi firması olduğundan, o firmanın
-          // kayıtlı IBAN'ı biliniyorsa gönderen IBAN alanı da (varsa) otomatik dolsun
-          // (döviz alım/satım, nakit yatırma vb. talimat türleri). Alıcı IBAN'a dokunulmaz.
-          if(f.iban){
-            const senderIbanEl = document.getElementById('glGonderenIban') || document.getElementById('glIban');
-            if(senderIbanEl && !senderIbanEl.value.trim()) senderIbanEl.value = formatIbanValue(f.iban);
+          const senderIbanEl = document.getElementById('glGonderenIban') || document.getElementById('glIban');
+          if(senderIbanEl){
+            var cur = (document.getElementById('glParaBirimi') || {}).value || '';
+            var byCur = null;
+            if(cur && Array.isArray(f.ibans)){
+              var hit = f.ibans.find(function(x){ return x && (x.currency||'').toUpperCase() === cur.toUpperCase(); });
+              if(hit && hit.iban) byCur = hit.iban;
+            }
+            var useIban = byCur || f.iban;
+            if(useIban) senderIbanEl.value = formatIbanValue(useIban);
           }
         }
         renderGenericPreview();
-      });
+      };
+      glFirmaInput.addEventListener('change', applyFirmaMatch);
+      glFirmaInput.addEventListener('input', applyFirmaMatch);
+      // Para birimi değişince de IBAN'ı o para birimine göre güncelle.
+      var pbEl = document.getElementById('glParaBirimi');
+      if(pbEl) pbEl.addEventListener('change', applyFirmaMatch);
     }
 
     renderGenericPreview();
@@ -3535,6 +3546,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // Tüm görünür "📋 Firmam" seçicilerini, kullanıcının kendi/grup firmalarıyla doldurur.
   // myFirms sonradan (scope hazır olunca) yüklendiğinde de çağrılır.
   function renderGlFirmaSelects(){
+    // Firma datalist'ini kendi/grup firmalarıyla doldur (alana tıklayınca/yazınca öneri gelir).
+    const dl = document.getElementById('glFirmaList');
+    if(dl){
+      dl.innerHTML = myFirms.map(f => '<option value="' + escapeHtmlMmg(f.name) + '"></option>').join('');
+    }
+    // Geriye dönük: eski ".gl-firma-saved" seçicileri hâlâ DOM'da varsa doldur (artık kullanılmıyor).
     document.querySelectorAll('.gl-firma-saved').forEach(sel => {
       const cur = sel.value;
       sel.innerHTML = '<option value="">📋 Firmam</option>' +
