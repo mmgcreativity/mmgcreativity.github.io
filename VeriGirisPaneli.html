@@ -767,8 +767,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     return record.appliesToFirmaIds.includes(scopeId);
   }
   function scopeBadgeHtml(record){
-    if(!Array.isArray(record.appliesToFirmaIds) || !record.appliesToFirmaIds.length) return '';
-    return '<div class="party-scope-badge">' + fmt(LBL.firmaScopeBadgeTpl, { n: record.appliesToFirmaIds.length }) + '</div>';
+    const ids = Array.isArray(record.appliesToFirmaIds) ? record.appliesToFirmaIds : [];
+    // Firma atanmamış kayıt TÜM firmalarda görünür — IBAN'ların "karışmasının" sebebi budur.
+    // Bu yüzden her zaman bir firma etiketi gösteriyoruz: atanmışsa firma adı/adları,
+    // atanmamışsa uyarı renginde "🏢 tüm firmalar" (kullanıcı hangi IBAN'ı firmaya
+    // bağlaması gerektiğini görsün).
+    if(!ids.length){
+      return '<div class="party-scope-badge" style="color:var(--amber,#E3A23C);" title="Bu IBAN bir firmaya atanmadığı için her firmada görünür — karışmayı önlemek için firma seç.">🏢 tüm firmalar</div>';
+    }
+    const names = ids.map(id => {
+      const m = groupFirmaMembers.find(f => f.id === id);
+      return m ? m.name : id;
+    });
+    return '<div class="party-scope-badge">🏢 ' + escapeHtml(names.join(', ')) + '</div>';
   }
 
   // Grup üyeliği checkbox listesi: ana firma her zaman işaretli ve kilitli görünür;

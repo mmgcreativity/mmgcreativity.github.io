@@ -2066,7 +2066,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return savedCari.map(p => ({ name: p.name, type: p.type, ibans: p.ibans || [] }));
   }
 
-  const CARI_TUR_ETIKET = { customers: 'Müşteri', suppliers: 'Tedarikçi', counterparties: 'Muhatap', grup: 'Grup Firması' };
+  const CARI_TUR_ETIKET = { customers: 'Müşteri', suppliers: 'Tedarikçi', counterparties: 'Muhatap', grup: '' };
 
   // Bir alıcı satırının "📋 Kayıtlı" seçicisini, satırın moduna (grup içi/dışı) göre doldurur.
   function populateAliciFirmaSaved(sel){
