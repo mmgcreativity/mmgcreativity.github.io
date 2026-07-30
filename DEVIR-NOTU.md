@@ -1,6 +1,6 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-07-30 (3. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-30-kod-durt-mobil'`. **Canlı doğrulandı** (KullaniciYonetimi=userDirectory ✓, mmg-chat-widget=applyCooldown ✓, index=`.app-card p{display:none}` ✓, SW ✓).
+Son güncelleme: **2026-07-30 (3. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-30-forum-logo-push-hero'`. **Canlı doğrulandı** (Forum=resolveScopeLogo ✓, index=mmgShowPushPrompt ✓ + mobil `.brand{display:none}` ✓; önceki batch: KullaniciYonetimi=userDirectory ✓, mmg-chat-widget=applyCooldown ✓, index=`.app-card p{display:none}` ✓).
 
 > ✅ **Sürümleme çözüldü:** "Güncelleme var, yenile" banner'ı (index.html #mmgUpdateBanner) NE app-version.json NE de SW_VERSION'a bakar — index.html'e HEAD atıp ETag/Last-Modified karşılaştırır (tamamen otomatik). `SW_VERSION` sadece cache-bust; `app-version.json` artık okunmuyor ama ikisi senkron tutuluyor. Her deploy'da ikisini de bump'la.
 
@@ -44,12 +44,15 @@ Son güncelleme: **2026-07-30 (3. otonom oturum)** · Son deploy işareti: `serv
 **Performans**
 - **`service-worker.js` stale-while-revalidate'e çevrildi** (aynı-origin GET): önbellekte varsa anında döner, arka planda tazeler → modüller çok daha hızlı açılır. Firestore/CDN (cross-origin) ve non-GET dokunulmaz, kullanıcı verisi bayatlamaz. Cache adı `SW_VERSION`'a bağlı.
 
-### ⏳ 3. OTURUM SONRASI KALAN (frontend'de çözülemez — backend/veri/tasarım)
-1. **Forum'da başka kullanıcıların logosu:** MEVCUT kullanıcının logosu forumda geliyor. Diğer kullanıcılar için avatar yok → **veri kısıtı** (firma-admin diğer kullanıcıların `logoBase64`/`avatarBase64` alanına Firestore kurallarıyla erişemiyor). Kalıcı çözüm: her kullanıcı kendi logosunu forumda görünür bir ortak alana (ör. `userDirectory/{no}.avatarBase64` veya `forumPosts` yazımında `authorAvatar`) yazsın; ya da kurallar okuma izni versin. **Bu oturumda kod tarafı hazır (`pickUserAvatar`/`resolveForumAvatar`/`patchMissingAvatars`), eksik olan veri kaynağı.**
-2. **İlk girişte mobil bildirim izni + sağ-alt pop-up + FCM tutarlılığı:** "1018→admin bildirim geldi, admin→1018 gelmedi" — `pushOnNotification` canlı ama teslimat tutarsız. İlk girişte `Notification.requestPermission()` + FCM token kaydı akışı ve web'de sağ-alt pop-up backend/istemci-token işi. `firebase functions:log --only pushOnNotification` çıktısı gerekli.
-3. **Mobilde brand-row + hero'yu TEK birleşik görsel yapma:** bu oturumda sadece sıkıştırma (kart açıklamaları gizlendi, brand logo 88px) yapıldı. Tam birleşik grafik = tasarım işi (tek SVG/PNG üretimi).
-4. **Misafir beğeni (anonim auth + kurallar):** "isimsiz hesap istemiyorum" ilkesiyle çelişiyor — ürün kararı bekliyor.
-5. **Backend (2026-07-29'da deploy edildi, kullanıcı doğrulasın):** markalı Türkçe şifre-sıfırlama (Resend), Blogger publish. `functions/index.js`'te Blogger bloğu YORUMDA (kullanmıyor); lazımsa yorumdan çıkar + secret'ları tanımla.
+### ✅ 3. OTURUM — İKİNCİ TUR (kalan maddeler frontend'de çözüldü)
+1. **Forum logosu ÇÖZÜLDÜ (frontend):** Kullanıcının PDF/Talimat logosu `users/{uid}` kökünde değil, **`{scope}/{scopeId}/talimat/firmaProfili.logoBase64`** altında saklanıyordu — o yüzden kendi logosu bile forumda gelmiyordu. `Forum.html`'e **`resolveScopeLogo(uid, userData)`** eklendi (Talimat ile aynı kapsam mantığı: `mmg_active_data_scope` → firmaAccounts/hub veya companies veya users/uid). `currentUserAvatar` artık bunu da dener → **kendi logo forumda görünür**. Yeni post/yanıtta `authorAvatar` gömülü kaydedildiği için logo **diğer herkese de yayılır** (ileriye dönük). `resolveForumAvatar` ayrıca `users/{uid}/talimat/firmaProfili`'yi de fallback dener (kişisel kapsamlı kullanıcılar için). *Kalan tek sınır: başka bir firma-kullanıcısının ESKİ (authorAvatar boş) post'unda logo, o kullanıcı foruma girip yeni post atana kadar veya kurallar ortak okuma izni verene kadar gelmeyebilir.*
+2. **İlk-giriş bildirim pop-up'ı EKLENDİ (frontend):** `index.html` → **`mmgShowPushPrompt()`** sağ-altta "🔔 Bildirimleri aç" kartı gösterir (bir kez; `mmg_push_prompt_dismissed` bayrağı). "Aç" → `mmgEnablePush()` (izin ister + FCM token'ı `users/{uid}/fcmTokens`'a yazar). Kullanıcı hareketiyle istendiği için tarayıcı-gesture kısıtı sorun olmaz. *Kalan: teslimat TUTARLILIĞI (1018→admin gelip admin→1018 gelmemesi) `pushOnNotification` backend işi — `firebase functions:log --only pushOnNotification` gerekli.*
+3. **Mobil brand+hero birleştirme YAPILDI:** Mobilde ayrı `.brand`/`.brand-row` logo bloğu **gizlendi** (hero ile aynı kimliği iki kez gösterip yer kaplıyordu); **hero tek kompakt başlık** oldu (app-icon 56px, başlık 20px, dar padding/boşluklar, `Powered by mmgcreativity` pill'i zaten hero'da). *İsteğe bağlı ileri iş: tek birleşik SVG/PNG grafiği (tasarım).*
+
+### ⏳ KALAN (frontend'de çözülemez)
+4. **FCM push TESLİMAT tutarlılığı:** yukarıda #2 — backend log analizi. İzin+token akışı ve pop-up artık hazır.
+5. **Misafir beğeni (anonim auth + kurallar):** "isimsiz hesap istemiyorum" ilkesiyle çelişiyor — ürün kararı bekliyor.
+6. **Backend (2026-07-29'da deploy edildi, kullanıcı doğrulasın):** markalı Türkçe şifre-sıfırlama (Resend), Blogger publish. `functions/index.js`'te Blogger bloğu YORUMDA; lazımsa yorumdan çıkar + secret'ları tanımla.
 
 ## 🟢 2026-07-29 (2. OTONOM OTURUM) — CANLIYA ALINANLAR
 - **Tablet:** Gelir/Gider "büyük boş alan" (flex-basis 440px kartı yükseklik yapıyordu) düzeltildi (`.add-io-row .add-payment-card{flex:0 0 auto}`); Talimat önizleme tablette tam genişlik.
