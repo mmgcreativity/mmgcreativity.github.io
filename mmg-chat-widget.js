@@ -637,14 +637,36 @@ import {
         renderTab();
       });
     }
-    // Dürt: karşı tarafa "dürtme" bildirimi gönder (uygulama-içi; kapalı-uygulama push'u Blaze ister)
+    // Dürt: karşı tarafa "dürtme" bildirimi gönder (uygulama-içi; kapalı-uygulama push'u Blaze ister).
+    // 60 sn cooldown — üst üste (spam) dürtme engellenir; süre boyunca ✅ + pasif kalır.
+    function applyHeaderNudgeCooldown(){
+      if(!els.nudgeBtn) return false;
+      if(!openChatOtherUid){ els.nudgeBtn.disabled = false; els.nudgeBtn.textContent = '👉'; return false; }
+      const nkey = 'mmg_last_nudge_' + openChatOtherUid;
+      const rem = 60000 - (Date.now() - (+(localStorage.getItem(nkey) || 0)));
+      if(rem > 0){
+        els.nudgeBtn.disabled = true;
+        els.nudgeBtn.textContent = '✅';
+        els.nudgeBtn.title = 'Dürtüldü — 1 dk sonra tekrar dürtebilirsiniz';
+        clearTimeout(els.nudgeBtn._cdT);
+        els.nudgeBtn._cdT = setTimeout(applyHeaderNudgeCooldown, rem + 60);
+        return true;
+      }
+      els.nudgeBtn.disabled = false;
+      els.nudgeBtn.textContent = '👉';
+      els.nudgeBtn.title = 'Dürt — karşı tarafa bildirim gönder';
+      return false;
+    }
+    els.applyHeaderNudgeCooldown = applyHeaderNudgeCooldown;
     if(els.nudgeBtn){
       els.nudgeBtn.addEventListener('click', async () => {
         if(!openChatOtherUid) return;
+        if(applyHeaderNudgeCooldown()) return; // cooldown içinde — üst üste dürtme engellendi
         const who = (myChatCode ? ('#' + myChatCode) : 'Bir kullanıcı') + (myName ? ' - ' + myName : '');
+        els.nudgeBtn.disabled = true;
         try{ await window.mmgNotify(openChatOtherUid, { type:'nudge', title:'👉 Dürtüldünüz', body: who + ' sizi dürttü' }); }catch(e){}
-        els.nudgeBtn.textContent = '✅';
-        setTimeout(() => { els.nudgeBtn.textContent = '👉'; }, 1200);
+        try{ localStorage.setItem('mmg_last_nudge_' + openChatOtherUid, String(Date.now())); }catch(e){}
+        applyHeaderNudgeCooldown();
       });
     }
     els.sendBtn.addEventListener('click', sendCurrentMessage);
@@ -1599,6 +1621,7 @@ import {
             '<div style="flex:1; min-width:0; font-size:12.5px;">' +
               '<b>' + esc(inv.groupName || 'Grup') + '</b> → <b>' + esc(inv.toCode || inv.toUid || '?') + '</b> koduna davet' +
             '</div>' +
+            (inv.toUid ? '<button type="button" class="mmg-chat-btn nudge-invite" data-nudge-invite="' + esc(inv.toUid) + '" title="Dürt — karşı tarafa bildirim gönder" style="flex:0 0 auto; background:transparent; border:1px solid rgba(198,161,91,0.55); color:var(--brass,#C6A15B); font-weight:600;">👉 Dürt</button>' : '') +
             '<button type="button" class="mmg-chat-btn decline" data-cancel-invite="' + esc(inv._id) + '" style="flex:0 0 auto; background:transparent; border:1px solid rgba(226,84,75,0.55); color:#E2544B; font-weight:600;">Geri Çek</button>' +
           '</div>'
         ).join('') + '</div>';
@@ -1620,6 +1643,28 @@ import {
       row.addEventListener('click', () => {
         const g = groupsMap[row.dataset.groupId] || {};
         openChat(row.dataset.groupId, { title: (g.name || 'Grup'), isAdminChat: false, collection: 'chatGroups' });
+      });
+    });
+    els.body.querySelectorAll('[data-nudge-invite]').forEach(btn => {
+      const uid = btn.dataset.nudgeInvite;
+      const nkey = 'mmg_last_nudge_' + uid;
+      function cd(){
+        const rem = 60000 - (Date.now() - (+(localStorage.getItem(nkey) || 0)));
+        if(rem > 0){
+          btn.disabled = true; btn.textContent = '✅'; btn.title = 'Dürtüldü — 1 dk sonra tekrar dürtebilirsiniz';
+          setTimeout(() => { btn.disabled = false; btn.textContent = '👉 Dürt'; btn.title = 'Dürt — karşı tarafa bildirim gönder'; }, rem);
+          return true;
+        }
+        return false;
+      }
+      cd();
+      btn.addEventListener('click', async () => {
+        if(!uid || !window.mmgNotify) return;
+        if(cd()) return; // üst üste dürtme engeli (60 sn)
+        btn.disabled = true;
+        try{ await window.mmgNotify(uid, { type:'nudge', title:'👉 Dürtüldünüz', body:'Bir kullanıcı sizi bekleyen grup davetini yanıtlamaya dürttü.' }); }catch(e){}
+        try{ localStorage.setItem(nkey, String(Date.now())); }catch(e){}
+        cd();
       });
     });
     els.body.querySelectorAll('[data-cancel-invite]').forEach(btn => {
@@ -2070,6 +2115,7 @@ import {
     els.footer.hidden = false;
     els.blockBtn.hidden = !openChatOtherUid; // gruplarda gösterilmez, sadece 1:1 sohbette
     if(els.nudgeBtn) els.nudgeBtn.hidden = !openChatOtherUid; // dürtme yalnızca 1:1'de
+    if(els.applyHeaderNudgeCooldown) els.applyHeaderNudgeCooldown(); // açılışta cooldown durumunu yansıt
     els.leaveGroupBtn.hidden = openChatCollection !== 'chatGroups';
     els.deleteBtn.hidden = openChatCollection !== 'chats'; // gruplarda "gruptan ayrıl" kullanılır
     els.title.textContent = info && info.title ? info.title : 'Sohbet';
