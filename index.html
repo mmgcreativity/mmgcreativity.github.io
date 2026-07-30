@@ -2892,6 +2892,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   };
   const fbApp = initializeApp(firebaseConfig);
   const auth = getAuth(fbApp);
+  try{ auth.languageCode = 'tr'; }catch(_lc){}  // Firebase SMS/e-posta metinleri Türkçe gelsin (global, en erken)
   const db = getFirestore(fbApp);
   const functions = getFunctions(fbApp, 'us-central1');
   const googleProvider = new GoogleAuthProvider();
