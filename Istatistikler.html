@@ -273,6 +273,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="usageAppList"></div>
     </div>
 
+    <h2 class="section-title">📝 Talimat Kullanımı</h2>
+    <div class="summary-card" style="padding:20px 24px;">
+      <div class="card-sub" style="margin-bottom:16px; color:var(--muted); font-size:12.5px;">Hangi talimat türü kaç kez oluşturuldu, hangi yöntemle (PDF/Word) ve en çok kim kullanıyor.</div>
+      <div id="talimatUsageSummary" style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px;"></div>
+      <div style="font-weight:700; font-size:13px; margin-bottom:6px;">Talimat türüne göre</div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Talimat Türü</th><th>Toplam</th><th>PDF</th><th>Word</th></tr></thead>
+          <tbody id="talimatUsageByType"></tbody>
+        </table>
+      </div>
+      <div style="font-weight:700; font-size:13px; margin:18px 0 6px;">En çok kullanan kişiler</div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Kullanıcı</th><th>Kullanım</th></tr></thead>
+          <tbody id="talimatUsageByUser"></tbody>
+        </table>
+      </div>
+      <div id="talimatUsageEmpty" style="font-size:12px; color:var(--muted); display:none; margin-top:8px;">Henüz talimat kullanım kaydı yok.</div>
+    </div>
+
     <h2 class="section-title" data-i18n="feedback_title">💬 Beğenme Geri Bildirimleri</h2>
     <div class="summary-grid">
       <div class="summary-card">
@@ -845,10 +866,70 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   }
 
+  // Talimat kullanım istatistiği (talimatUsage koleksiyonu — Talimat_Hazirlama.html her
+  // PDF/Word çıktısında bir olay yazar). Türe göre sayım + PDF/Word kırılımı + en çok kullananlar.
+  async function loadTalimatUsage(){
+    const emptyEl = document.getElementById('talimatUsageEmpty');
+    const byTypeEl = document.getElementById('talimatUsageByType');
+    const byUserEl = document.getElementById('talimatUsageByUser');
+    const sumEl = document.getElementById('talimatUsageSummary');
+    if(!emptyEl || !byTypeEl || !byUserEl || !sumEl) return;
+    let snap;
+    try{ snap = await getDocs(collection(db, 'talimatUsage')); }
+    catch(e){
+      emptyEl.style.display = 'block';
+      emptyEl.textContent = 'Talimat kullanım verisi okunamadı — Firestore kuralları (talimatUsage) henüz deploy edilmemiş olabilir.';
+      byTypeEl.innerHTML = ''; byUserEl.innerHTML = ''; sumEl.innerHTML = '';
+      return;
+    }
+    const rows = [];
+    snap.forEach(d => rows.push(d.data()));
+    if(!rows.length){
+      emptyEl.style.display = 'block'; emptyEl.textContent = 'Henüz talimat kullanım kaydı yok.';
+      byTypeEl.innerHTML = ''; byUserEl.innerHTML = ''; sumEl.innerHTML = '';
+      return;
+    }
+    emptyEl.style.display = 'none';
+    const TUR_LABEL = {
+      'havale-tekli':'Banka Havale/EFT', 'serbest-metin':'Serbest Metin',
+      'senet-takas':'Senet Takastan Çekme', 'cek-takas':'Çek Takastan Çekme',
+      'tm-talep':'Teminat Mektubu Talep', 'dbs':'DBS Talimatı'
+    };
+    const byType = {}; const byUser = {}; let totPdf = 0, totWord = 0;
+    rows.forEach(r => {
+      const t = r.tur || 'bilinmiyor';
+      if(!byType[t]) byType[t] = { total:0, pdf:0, word:0 };
+      byType[t].total++;
+      if(r.method === 'word'){ byType[t].word++; totWord++; } else { byType[t].pdf++; totPdf++; }
+      const u = r.uid || 'bilinmiyor';
+      byUser[u] = (byUser[u] || 0) + 1;
+    });
+    const idToLabel = {};
+    try{
+      const usersSnap = await getDocs(collection(db, 'users'));
+      usersSnap.forEach(d => {
+        const u = d.data();
+        idToLabel[d.id] = (u.customerNumber != null ? ('#' + u.customerNumber + ' ') : '') + (u.username || u.email || d.id);
+      });
+    }catch(e){ /* kullanıcı adı çözülemezse uid gösterilir */ }
+    sumEl.innerHTML =
+      '<div class="summary-card" style="flex:1; min-width:120px;"><div class="summary-label">Toplam Talimat</div><div class="summary-value">' + rows.length + '</div></div>' +
+      '<div class="summary-card" style="flex:1; min-width:120px;"><div class="summary-label">PDF</div><div class="summary-value">' + totPdf + '</div></div>' +
+      '<div class="summary-card" style="flex:1; min-width:120px;"><div class="summary-label">Word</div><div class="summary-value">' + totWord + '</div></div>';
+    const typeRows = Object.keys(byType).sort((a,b) => byType[b].total - byType[a].total);
+    byTypeEl.innerHTML = typeRows.map(t =>
+      '<tr><td>' + escapeHtml(TUR_LABEL[t] || t) + '</td><td>' + byType[t].total + '</td><td>' + byType[t].pdf + '</td><td>' + byType[t].word + '</td></tr>'
+    ).join('');
+    const userRows = Object.keys(byUser).sort((a,b) => byUser[b] - byUser[a]);
+    byUserEl.innerHTML = userRows.map(u =>
+      '<tr><td>' + escapeHtml(idToLabel[u] || u) + '</td><td>' + byUser[u] + '</td></tr>'
+    ).join('');
+  }
+
   async function loadAll(){
     showState('<div class="big">⏳</div>Yükleniyor…');
     try{
-      await Promise.all([loadUsersAndReferrals(), loadFeedback(), loadUsageStats()]);
+      await Promise.all([loadUsersAndReferrals(), loadFeedback(), loadUsageStats(), loadTalimatUsage()]);
       stateArea.innerHTML = '';
       content.hidden = false;
     } catch(e){

@@ -2819,7 +2819,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.getElementById('historyPanel').classList.remove('show');
   });
 
-  async function addHistoryEntry(tur, ozet, veri){
+  // Global talimat kullanım istatistiği: her çıktı (PDF/Word) tek bir olay olarak
+  // 'talimatUsage' koleksiyonuna yazılır. Istatistikler sayfası (admin) bunu toplar:
+  // hangi talimat türü kaç kez, kim (uid), hangi yöntem (pdf/word). Log kritik değildir;
+  // hata verirse sessizce geçilir (indirme akışını asla bozmaz).
+  async function mmgLogTalimatUsage(tur, method){
+    try{
+      const cloud = window.mmgCloud;
+      const user = cloud && cloud.currentUser;
+      if(!user) return; // yalnızca girişli kullanıcı loglanır
+      const id = Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+      await cloud.setDoc(cloud.doc(cloud.db, 'talimatUsage', id), {
+        tur: tur || 'bilinmiyor',
+        method: (method === 'word' ? 'word' : 'pdf'),
+        uid: user.uid,
+        email: user.email || null,
+        firmaId: cloud.scopeId || null,
+        scopeCollection: cloud.scopeCollection || null,
+        createdAt: Date.now(),
+        createdAtStr: new Date().toLocaleString('tr-TR')
+      });
+    }catch(e){ /* istatistik logu kritik değil */ }
+  }
+
+  async function addHistoryEntry(tur, ozet, veri, method){
     const user = window.mmgCloud.currentUser;
     if(!user && !MMG_GATE_DISABLED_FOR_PREVIEW) return; // giriş yapılmadıysa geçmişe kaydedilmez
     const entry = {
@@ -2829,7 +2852,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     talimatHistory.unshift(entry);
     if(talimatHistory.length > 50) talimatHistory = talimatHistory.slice(0, 50);
     renderHistoryList();
-    if(user) await persistHistory();
+    if(user){ mmgLogTalimatUsage(tur, method || 'pdf'); await persistHistory(); }
   }
 
   function loadHistoryEntry(idx){
@@ -3083,7 +3106,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           await withGrupFirmaSwap(firma, async () => {
             const { doc, ozet, veri } = buildHavaleDocx();
             mmgDownloadDocx(doc, 'banka-havale-talimati-' + slugifyMmg(firma.name) + '.docx');
-            addHistoryEntry('havale-tekli', ozet, veri);
+            addHistoryEntry('havale-tekli', ozet, veri, 'word');
             sayac++;
           });
         }
@@ -3095,7 +3118,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const { doc, ozet, veri } = buildHavaleDocx();
       mmgDownloadDocx(doc, 'banka-havale-talimati.docx');
       showIoMsg('Word dosyası indirildi.');
-      addHistoryEntry('havale-tekli', ozet, veri);
+      addHistoryEntry('havale-tekli', ozet, veri, 'word');
     } catch(e){ showIoMsg('Word dosyası oluşturulurken hata oluştu.', true); }
   });
 
@@ -3799,7 +3822,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const { doc, ozet, veri, cfg } = buildGenericDocx();
       mmgDownloadDocx(doc, cfg.fileName.replace(/\.pdf$/i, '.docx'));
       showIoMsgGeneric('Word dosyası indirildi.');
-      addHistoryEntry(currentGenericType, ozet, veri);
+      addHistoryEntry(currentGenericType, ozet, veri, 'word');
     } catch(e){ showIoMsgGeneric('Word dosyası oluşturulurken hata oluştu.', true); }
   });
 
@@ -4077,7 +4100,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const { doc, ozet, veri } = buildSmDocx();
       mmgDownloadDocx(doc, 'serbest-metin-talimati.docx');
       showIoMsgSm('Word dosyası indirildi.');
-      addHistoryEntry('serbest-metin', ozet, veri);
+      addHistoryEntry('serbest-metin', ozet, veri, 'word');
     } catch(e){ showIoMsgSm('Word dosyası oluşturulurken hata oluştu.', true); }
   });
 

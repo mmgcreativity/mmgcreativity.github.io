@@ -103,6 +103,16 @@ service cloud.firestore {
       );
     }
 
+    // ---- Talimat kullanım istatistiği ----
+    // Her PDF/Word talimat çıktısında bir olay yazılır (Talimat_Hazirlama.html mmgLogTalimatUsage).
+    // Girişli kullanıcı yalnızca KENDİ adına (uid) kayıt oluşturabilir; raporu (okuma) sadece admin görür.
+    match /talimatUsage/{usageId} {
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow read: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      allow update, delete: if false;
+    }
+
     // ---- Sohbet Widget'ı ----
     match /chatCodes/{code} {
       allow read: if request.auth != null;
