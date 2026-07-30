@@ -173,14 +173,17 @@ function mmgApplyTurkishFont(doc){
     transition:border-color .15s ease, color .15s ease;
   }
   .reset-btn:hover{ color:var(--red); border-color:var(--red); }
-  .reset-btn.card-reset-btn{ position:absolute; top:14px; right:14px; z-index:3; box-shadow:none; }
+  .reset-btn.card-reset-btn{ position:static; z-index:3; box-shadow:none; align-self:flex-end; margin-bottom:2px; }
+  .card-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:14px; flex-wrap:wrap; }
+  .field.field-inline{ margin-bottom:0; }
+  table.rates tbody tr{ transition:background .14s ease, box-shadow .14s ease; }
+  table.rates tbody tr:hover{ background:rgba(198,161,91,0.14); box-shadow:inset 0 0 0 1px rgba(198,161,91,0.38); }
   @media (max-width:480px){
     .reset-btn.card-reset-btn{ top:10px; right:10px; padding:6px 10px; font-size:11px; }
   }
-  #resultCard{ position:relative; padding-top:54px; max-width:560px; }
+  #resultCard{ position:relative; max-width:560px; }
   @media (max-width:480px){
     .top-actions{ width:100%; }
-    #resultCard{ padding-top:48px; }
   }
   .brand-row{
     display:inline-flex; align-items:center; gap:12px; margin-bottom:18px;
@@ -254,7 +257,7 @@ function mmgApplyTurkishFont(doc){
   .table-section{ margin-top:0; }
   .layout-row{ display:grid; grid-template-columns:220px 1fr; gap:20px; align-items:start; }
   .info-col{ display:flex; flex-direction:column; gap:14px; }
-  .table-desc{ color:var(--muted); font-size:12.5px; line-height:1.4; margin:0; max-width:220px; }
+  .table-desc{ color:var(--muted); font-size:12.5px; line-height:1.4; margin:0 0 14px; max-width:none; }
   .info-col .field{ margin-bottom:0; max-width:220px; }
   @media (max-width:800px){
     .layout-row{ grid-template-columns:1fr; }
@@ -330,15 +333,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <main>
   <section class="table-section">
     <p class="table-desc" data-i18n="table_desc" style="margin:0 0 14px;">Aşağıdaki gün değerleri örnektir. Gerçek vadeyi biliyorsanız tablodan güncelleyin, ortalama vade otomatik hesaplanır.</p>
-    <div class="layout-row">
-      <div class="info-col">
-        <div class="field">
-          <label data-i18n="label_interval">Taksitler kaç günde bir yansıyacak</label>
-          <div class="input-wrap" style="max-width:150px;"><input type="text" inputmode="numeric" class="tr-num" id="qInterval" value="30" data-decimals="0" style="width:100%;"><span class="unit" data-i18n="unit_days">gün</span></div>
-        </div>
-      </div>
+    <div class="table-single">
       <div id="resultCard">
-        <button type="button" class="reset-btn card-reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
+        <div class="card-head">
+          <div class="field field-inline">
+            <label data-i18n="label_interval">Taksitler kaç günde bir yansıyacak</label>
+            <div class="input-wrap" style="max-width:150px;"><input type="text" inputmode="numeric" class="tr-num" id="qInterval" value="30" data-decimals="0" style="width:100%;"><span class="unit" data-i18n="unit_days">gün</span></div>
+          </div>
+          <button type="button" class="reset-btn card-reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
+        </div>
         <table class="rates" id="ratesTable">
           <thead>
             <tr>
