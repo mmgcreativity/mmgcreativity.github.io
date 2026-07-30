@@ -242,13 +242,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .empty-note{ color:var(--muted); font-size:13px; padding:16px 2px; text-align:center; }
 
   .bank-chip-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+  .bank-chip-list{ max-width:860px; }  /* düzenli, ortada bir sütun */
   .bank-chip{
-    display:flex; align-items:center; gap:10px; width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--hairline);
-    border-radius:10px; padding:9px 10px 9px 14px; font-size:13px; font-weight:600;
+    display:grid; grid-template-columns:180px minmax(0,1fr) 46px auto 26px; align-items:center; gap:12px;
+    width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--hairline);
+    border-radius:10px; padding:9px 12px; font-size:13px; font-weight:600;
   }
-  .bank-chip .bank-chip-text{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .bank-chip .party-scope-badge, .bank-chip .scope-assignable{ flex-shrink:0; white-space:nowrap; }
-  .bank-chip > button{ flex-shrink:0; }
+  .bank-chip .bc-bank{ font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bank-chip .bc-iban{ font-family:'IBM Plex Mono',monospace; letter-spacing:.02em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bank-chip .bc-cur{ color:var(--muted); text-align:right; }
+  .bank-chip .party-scope-badge, .bank-chip .scope-assignable{ justify-self:end; white-space:nowrap; }
+  .bank-chip > button{ justify-self:end; flex-shrink:0; }
   #bank_firmaSelect{ display:none; }  /* IBAN tek firmaya (aktif) aittir — çoklu-firma seçimi mantıksız, gizlendi */
   .bank-chip button{
     background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; width:20px; height:20px;
@@ -1007,7 +1011,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const visibleBanks = banksList.filter(visibleForActiveFirma);
     listEl.innerHTML = visibleBanks.length ? visibleBanks.map(b =>
       '<span class="bank-chip">' +
-        '<span class="bank-chip-text">' + escapeHtml(b.name) + (b.iban ? ' · ' + escapeHtml(b.iban) : '') + (b.currency ? ' · ' + escapeHtml(b.currency) : '') + (b.note ? ' · ' + escapeHtml(b.note) : '') + '</span>' +
+        '<span class="bc-bank" title="' + escapeHtml(b.name + (b.note ? ' — ' + b.note : '')) + '">' + escapeHtml(b.name) + '</span>' +
+        '<span class="bc-iban" title="' + escapeHtml(b.iban || '') + '">' + escapeHtml(b.iban || '—') + '</span>' +
+        '<span class="bc-cur">' + escapeHtml(b.currency || '') + '</span>' +
         scopeBadgeHtml(b) +
         '<button type="button" data-remove-bank="' + b.id + '" title="' + LBL.delete + '">✕</button></span>'
     ).join('') : '<div class="empty-note">' + LBL.noRecordsYet + '</div>';

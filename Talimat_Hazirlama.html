@@ -1870,6 +1870,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.getElementById('addAliciRowBtn').addEventListener('click', addAliciRow);
   addAliciRow(); // Başlangıçta bir satır otomatik eklenir
 
+  // Talimat sekmeye/pencereye geri dönülünce Kayıtlı IBAN/firma listelerini TAZELE.
+  // Kullanıcı VeriGiris'te IBAN silip Talimat'a dönünce eski (önbellek) liste görünüyordu
+  // ("sildim ama hâlâ geliyor"). savedIbans loadSavedData ile SIFIRLANIR, loadMyFirms güncel
+  // banka hesaplarını yeniden ekler; silinen IBAN'lar geri gelmez.
+  let _mmgTalimatRefreshT = null;
+  function mmgRefreshTalimatData(){
+    const c = window.mmgCloud;
+    if(!c || !c.currentUser || !c.scopeId) return;
+    clearTimeout(_mmgTalimatRefreshT);
+    _mmgTalimatRefreshT = setTimeout(() => {
+      try{ loadSavedData(c.scopeId).then(() => { loadMyFirms(); }).catch(()=>{}); }catch(e){}
+    }, 150);
+  }
+  document.addEventListener('visibilitychange', () => { if(!document.hidden) mmgRefreshTalimatData(); });
+  window.addEventListener('focus', mmgRefreshTalimatData);
+  window.addEventListener('pageshow', mmgRefreshTalimatData);
+
   document.addEventListener('mmg-scope-ready', (e) => {
     if(window.mmgCloud && window.mmgCloud.currentUser){
       const scopeId = e.detail.scopeId;
