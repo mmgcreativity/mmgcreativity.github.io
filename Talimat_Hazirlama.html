@@ -415,7 +415,11 @@ function mmgApplyTurkishFont(doc){
     display:grid; grid-template-columns:72px minmax(0,1fr) 32px 48px; align-items:center; gap:5px;
     border-bottom:none; background:var(--surface-2);
   }
-  .xcell.xcell-full{ grid-template-columns:118px minmax(0,1fr); }
+  .xcell.xcell-full{ grid-template-columns:72px minmax(0,1fr); }
+  /* Yalnızca generic (Senet/Döviz vb.) formda etiketler uzun (SENEDİN BORÇLUSU, TESLİM ALACAK KİŞİ)
+     olduğundan orada etiket sütunu geniş; Havale formunda dar kalıp BANKA, FİRMA ile aynı hizada olur
+     ve sağdaki kaydet/kopya ikonları sığar (kullanıcı isteği). */
+  #genericFieldsContainer .xcell.xcell-full{ grid-template-columns:118px minmax(0,1fr); }
   .xcell.xcell-3col{ grid-template-columns:72px minmax(0,1fr) auto; }
   .xcell:first-child{ border-radius:6px 6px 0 0; }
   .xcell:last-child{ border-radius:0 0 6px 6px; }

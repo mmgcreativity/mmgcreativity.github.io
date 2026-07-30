@@ -241,11 +241,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .pt-del{ text-align:right; }
   .empty-note{ color:var(--muted); font-size:13px; padding:16px 2px; text-align:center; }
 
-  .bank-chip-list{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .bank-chip-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
   .bank-chip{
-    display:flex; align-items:center; gap:8px; background:var(--surface-2); border:1px solid var(--hairline);
-    border-radius:999px; padding:7px 8px 7px 14px; font-size:13px; font-weight:600;
+    display:flex; align-items:center; gap:10px; width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--hairline);
+    border-radius:10px; padding:9px 10px 9px 14px; font-size:13px; font-weight:600;
   }
+  .bank-chip .bank-chip-text{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .bank-chip button{
     background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; width:20px; height:20px;
     border-radius:50%; display:flex; align-items:center; justify-content:center;
@@ -270,7 +271,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .bulk-preview-table th{ color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; }
   /* Bank/amount body cells: match Vadeli Mevduat offer-table bank-row input font exactly */
   .bulk-preview-table td{ font-family:'Inter',sans-serif; font-size:12px; font-weight:400; }
-  .bulk-preview-wrap{ max-height:260px; overflow-y:auto; margin-top:10px; border:1px solid var(--hairline); border-radius:10px; }
+  .bulk-preview-wrap{ display:none; }  /* Yükleme önizleme tablosuna gerek yok (kullanıcı isteği); özet + Kaydet yeterli. */
   .bulk-summary{ font-size:12.5px; color:var(--muted); margin-top:10px; }
 
   /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
@@ -777,7 +778,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     // atanmamışsa uyarı renginde "🏢 tüm firmalar" (kullanıcı hangi IBAN'ı firmaya
     // bağlaması gerektiğini görsün).
     if(!ids.length){
-      return '<div class="party-scope-badge" style="color:var(--amber,#E3A23C);" title="Bu IBAN bir firmaya atanmadığı için her firmada görünür — karışmayı önlemek için firma seç.">🏢 tüm firmalar</div>';
+      return '<button type="button" class="party-scope-badge scope-assignable" data-assign-id="' + escapeHtml(record.id || '') + '" style="color:var(--amber,#E3A23C); background:transparent; border:1px solid rgba(227,162,60,0.5); border-radius:999px; cursor:pointer; font:inherit; padding:2px 9px;" title="Tıkla: bu kaydı AKTİF firmaya ata — böylece diğer firmalarda görünmez.">🏢 tüm firmalar ▾</button>';
     }
     const names = ids.map(id => {
       const m = groupFirmaMembers.find(f => f.id === id);
@@ -988,8 +989,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const listEl = document.getElementById('banksChipList');
     const visibleBanks = banksList.filter(visibleForActiveFirma);
     listEl.innerHTML = visibleBanks.length ? visibleBanks.map(b =>
-      '<span class="bank-chip">' + escapeHtml(b.name) + (b.iban ? ' · ' + escapeHtml(b.iban) : '') + (b.currency ? ' · ' + escapeHtml(b.currency) : '') + (b.note ? ' · ' + escapeHtml(b.note) : '') + scopeBadgeHtml(b) +
-      '<button type="button" data-remove-bank="' + b.id + '" title="' + LBL.delete + '">✕</button></span>'
+      '<span class="bank-chip">' +
+        '<span class="bank-chip-text">' + escapeHtml(b.name) + (b.iban ? ' · ' + escapeHtml(b.iban) : '') + (b.currency ? ' · ' + escapeHtml(b.currency) : '') + (b.note ? ' · ' + escapeHtml(b.note) : '') + '</span>' +
+        scopeBadgeHtml(b) +
+        '<button type="button" data-remove-bank="' + b.id + '" title="' + LBL.delete + '">✕</button></span>'
     ).join('') : '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
     listEl.querySelectorAll('[data-remove-bank]').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -997,6 +1000,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           await deleteDoc(docRef('banks', btn.dataset.removeBank));
           await loadBanks();
         }catch(e){ showMsg('banks_msg', LBL.deleteFailed, true); }
+      });
+    });
+    // "🏢 tüm firmalar" rozetine tıklayınca: bu IBAN'ı AKTİF firmaya ata → artık diğer
+    // firmalarda görünmez (kullanıcının en çok uğraştığı "tüm gruba ait IBAN geliyor" sorunu).
+    listEl.querySelectorAll('.scope-assignable').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.assignId;
+        if(!id) return;
+        if(!confirm('Bu IBAN yalnızca AKTİF firmaya atansın mı? Böylece diğer firmalarda görünmez.')) return;
+        try{
+          await setDoc(docRef('banks', id), { appliesToFirmaIds: [scopeId] }, { merge: true });
+          await loadBanks();
+        }catch(err){ showMsg('banks_msg', LBL.bankListSaveFailed || 'Atama başarısız.', true); }
       });
     });
     // Öneri (datalist) her zaman TÜM firmaların banka listesinden beslenir — burada
@@ -1494,8 +1511,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         if(ibanKey) seenIbans.add(ibanKey);
         const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
         const docData = { name: r.bank, iban: r.iban, currency: r.currency || 'TRY', note: r.note || '', createdAt: serverTimestamp() };
-        // Firma kolonu doluysa ve eşleşiyorsa, bu IBAN'ı yalnızca o firmaya bağla (appliesToFirmaIds).
-        const fid = r.firmaName ? nameToId[r.firmaName.trim().toLocaleLowerCase('tr-TR')] : null;
+        // Firma kolonu doluysa ve eşleşiyorsa o firmaya; EŞLEŞMEZSE/BOŞSA yüklemenin yapıldığı
+        // AKTİF firmaya bağla. Böylece bulk import ASLA "global (tüm firmalar)" kaydetmez —
+        // kullanıcının "tüm IBAN'lar her firmada görünüyor" sorununun asıl sebebi buydu.
+        let fid = r.firmaName ? nameToId[r.firmaName.trim().toLocaleLowerCase('tr-TR')] : null;
+        if(!fid && scopeCollection === 'firmaAccounts' && scopeId) fid = scopeId;
         if(fid) docData.appliesToFirmaIds = [fid];
         await setDoc(docRef('banks', id), docData);
         count++;

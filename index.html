@@ -216,12 +216,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .nav-subdrawer::before{ content:''; position:absolute; left:-12px; top:0; width:12px; height:100%; }
   .nav-subwrap:hover > .nav-subdrawer, .nav-subwrap:focus-within > .nav-subdrawer{ opacity:1; transform:translateX(0); pointer-events:auto; }
-  @media (max-width:860px){ .nav-subdrawer{ display:none !important; } }
-  /* Mobil: masaüstü "düzenle" (kalem) araç çubuğunu gizle ve menüde alt-menüleri gösterme
-     — sadece ana başlıklar kalsın (kullanıcı isteği). */
+  /* Mobil: flyout alt-menü (Krediler/Vade Hesapları) SAĞA açılan kutu yerine, ana başlığın
+     ALTINDA girintili açılan liste olsun (çakışmayı önler; kullanıcı isteği). Başlığa dokununca açılır. */
+  @media (max-width:860px){
+    .nav-subdrawer{
+      position:static; opacity:1; transform:none; pointer-events:auto;
+      display:none; box-shadow:none; border:none; background:transparent;
+      border-left:2px solid var(--hairline); border-radius:0;
+      margin:2px 0 4px 16px; padding:2px 0 2px 8px; min-width:0;
+    }
+    .nav-subwrap:focus-within > .nav-subdrawer,
+    .nav-subwrap.open > .nav-subdrawer{ display:flex; }
+  }
+  /* Mobil: masaüstü "düzenle" (kalem) araç çubuğunu gizle. Alt-menüler artık mobilde de
+     çalışır (ana başlığa dokununca aşağı açılır — kullanıcı isteği). */
   @media (max-width:860px){
     #desktopEditToggle, #desktopAddWrap, #desktopRemoveToggle, #desktopResetBtn{ display:none !important; }
-    .nav-drawer, .nav-drawer-chevron{ display:none !important; }
+    .nav-drawer-chevron{ display:none !important; }
   }
   @media (max-width: 860px){
     .nav-drawer{
