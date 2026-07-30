@@ -717,7 +717,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .hero-app-icon{ width:56px !important; height:56px !important; border-radius:14px; }
     .hero-title{ font-size:20px !important; margin-bottom:2px !important; }
     .hero-tagline{ font-size:12.5px; margin:0 !important; }
-    .hero-desc{ font-size:12px !important; margin-top:8px !important; line-height:1.4 !important; white-space:normal !important; word-break:break-word; }
+    .hero-desc{ display:none !important; }  /* Mobilde "İşletmeler…" açıklaması gizli (kullanıcı isteği) */
     .hero-features{ font-size:11px !important; margin-top:6px !important; }
     .hero-credit{ margin-top:10px !important; }
     .card-grid.edit-mode .app-card.resizable{ resize:none; }
@@ -2496,6 +2496,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     wirePointerDrag(card);
     card.setAttribute('draggable', 'false'); // native HTML5 sürükleme devre dışı; sürükleme pointer olaylarıyla yapılıyor
+
+    // ÖNEMLİ: Dinamik (sonradan eklenen) kısayol kartları, init'teki `navItems` döngüsüne
+    // dahil olmadığından tıklayınca sayfayı AÇMIYORDU (ör. masaüstüne eklenen "Rotatif Kredi").
+    // Tıkla-aç handler'ını burada bağlıyoruz (düzenleme/kaldırma modunda ve düğmelere tıklayınca açma).
+    card.addEventListener('click', function(e){
+      if(grid.classList.contains('edit-mode') || grid.classList.contains('remove-mode')) return;
+      if(e.target.closest('.card-remove-btn, .card-resize-hint, .fav-star-card')) return;
+      openTarget(card.dataset.target, card.dataset.title);
+    });
   }
 
   // ---- Pointer-tabanlı sürükle-yeniden-sırala ----
