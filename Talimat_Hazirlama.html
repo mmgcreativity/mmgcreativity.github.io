@@ -1598,10 +1598,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(sel) sel.value = String(m.i);
       hide();
     } else {
-      // Birden fazla IBAN → IBAN'ı boş bırak, alta belirgin bir açılır seçim listesi getir.
-      if(hintEl) hintEl.style.display = 'block';
+      // Birden fazla IBAN → İLK IBAN'ı otomatik koy (kullanıcı: "IBAN gelmedi"); "ÇOK ÖNEMLİ"
+      // uyarısı KALDIRILDI (kullanıcı isteği). Farklı IBAN gerekirse alttaki seçiciden değiştirilir.
+      const m0 = pool[0];
+      ibanEl.value = formatIbanValue(m0.iban);
+      const selG = document.getElementById('fGonderenIbanSaved');
+      if(selG) selG.value = String(m0.i);
+      if(hintEl) hintEl.style.display = 'none';
       if(chooserEl){
-        chooserEl.innerHTML = '<option value="">— IBAN seçiniz —</option>' +
+        chooserEl.innerHTML = '<option value="">— Farklı IBAN seç —</option>' +
           pool.map(m => `<option value="${m.i}">${escapeHtmlMmg(m.label || m.iban)}</option>`).join('');
         chooserEl.value = '';
         chooserEl.style.display = 'block';
@@ -1856,6 +1861,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     document.getElementById(`fAliciBanka_${idx}`).addEventListener('change', renderPreview);
     document.getElementById(`fAliciBanka_${idx}`).addEventListener('change', () => refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`, `fAliciBanka_${idx}`));
+    // Banka değişince ESKİ (yanlış) IBAN kalmasın: yeni bankaya ait kayıtlı IBAN varsa onu koy,
+    // yoksa IBAN alanını temizle (kullanıcı: "bankayı değiştiriyorum hâlâ aynı hatalı IBAN kalıyor").
+    document.getElementById(`fAliciBanka_${idx}`).addEventListener('change', () => {
+      const adiEl = document.getElementById(`fAliciAdi_${idx}`);
+      const bankaEl = document.getElementById(`fAliciBanka_${idx}`);
+      const ibanEl = document.getElementById(`fAliciIban_${idx}`);
+      if(!adiEl || !ibanEl) return;
+      const firma = adiEl.value.trim().toLowerCase();
+      const banka = ((bankaEl && bankaEl.value) || '').trim().toLowerCase();
+      const fm = savedIbans.filter(b => b.firma && b.firma.trim().toLowerCase() === firma);
+      const byBank = banka ? fm.filter(b => (b.banka || '').trim().toLowerCase() === banka) : [];
+      if(byBank.length){ ibanEl.value = formatIbanValue(byBank[0].iban); }
+      else { ibanEl.value = ''; }
+      renderPreview();
+    });
 
     document.getElementById(`removeAliciRowBtn_${idx}`).addEventListener('click', () => {
       wrap.remove();

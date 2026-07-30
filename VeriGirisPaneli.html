@@ -229,9 +229,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .pt-main.is-toggle:hover > td{ background:var(--surface); }
   .pt-extra[hidden]{ display:none; }
   .pt-extra > td{ background:var(--surface); }
-  .party-table td.pt-name{ white-space:normal; overflow:visible; }
-  .pt-title{ display:flex; align-items:flex-start; gap:7px; min-width:0; }
-  .pt-title .party-name{ flex:1 1 auto; min-width:0; white-space:normal; overflow-wrap:break-word; }
+  .party-table td.pt-name{ white-space:nowrap; overflow:hidden; }
+  .pt-title{ display:flex; align-items:center; gap:7px; min-width:0; }
+  .pt-title .party-name{ flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .pt-chevron{ color:var(--muted); font-size:10px; flex-shrink:0; display:inline-block; margin-top:3px; transition:transform .18s ease; }
   .pt-main.open .pt-chevron{ transform:rotate(180deg); color:var(--brass); }
   .pt-bank{ font-weight:700; color:var(--brass); }
