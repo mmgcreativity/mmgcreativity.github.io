@@ -250,6 +250,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     aside.mobile-nav-open nav #mmgBottomLeftBar{ margin-top:auto; }
     aside nav > .mmg-firma-bar-wrap,
     aside nav > #mmgBottomLeftBar{ width:100%; }
+    /* Mobil: firma değiştirme listesi, çubuğun ÜSTÜNE taşan absolute popup yerine
+       satır-içi (inline) açılsın — böylece ekranın neresinde olursa olsun görünür.
+       (Eski hâlde çubuk üstteyken popup ekran dışına taşıp "gelmiyor" görünüyordu.) */
+    .mmg-firma-switch-popup{
+      position:static !important; bottom:auto !important; left:auto !important; right:auto !important;
+      margin:6px 0 2px !important; box-shadow:none !important; max-height:240px;
+    }
   }
 
   /* ---------- Favori yıldızı ---------- */
