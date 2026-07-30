@@ -728,8 +728,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   // Grup 2'den az firmadan oluşuyorsa (ya da hiç grup yoksa) bu blok hiç gösterilmez —
   // o durumda zaten tek firma var, seçim anlamsız.
   function firmaSelectRowsHtml(){
+    // Varsayılan olarak YALNIZCA aktif firma işaretli gelir (eskiden HEPSİ işaretliydi; bu yüzden
+    // collectFirmaSelection "hepsi seçili" görüp null dönüyor, appliesToFirmaIds yazılmıyor ve IBAN
+    // TÜM firmalarda görünüyordu — kullanıcı şikâyeti). Artık kayıt yalnızca aktif firmaya atanır;
+    // birden fazla firmaya ait ise kullanıcı diğerlerini elle işaretleyebilir.
     return groupFirmaMembers.map(m =>
-      '<label class="firma-select-row"><input type="checkbox" class="firma-select-check" value="' + m.id + '" checked> ' + escapeHtml(m.name) + '</label>'
+      '<label class="firma-select-row"><input type="checkbox" class="firma-select-check" value="' + m.id + '"' + (m.id === scopeId ? ' checked' : '') + '> ' + escapeHtml(m.name) + '</label>'
     ).join('');
   }
   function renderAllFirmaSelects(){
@@ -759,7 +763,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   function resetFirmaSelect(containerId){
     const container = document.getElementById(containerId);
     if(!container) return;
-    container.querySelectorAll('.firma-select-check').forEach(b => { b.checked = true; });
+    container.querySelectorAll('.firma-select-check').forEach(b => { b.checked = (b.value === scopeId); });
   }
   // Bir kaydın, o an aktif olan firmaya (scopeId) göre görünür olup olmadığını belirler.
   function visibleForActiveFirma(record){
@@ -844,7 +848,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   // tutarlı kalır.
   let customBankNames = null;
   function currentBankNames(){
-    return (customBankNames && customBankNames.length) ? customBankNames : BANKS;
+    // Her zaman alfabetik (Türkçe) sıralı döner; sonradan eklenen bankalar da doğru yere girer.
+    const arr = (customBankNames && customBankNames.length) ? customBankNames : BANKS;
+    return arr.slice().sort((a, b) => String(a).localeCompare(String(b), 'tr'));
   }
   function fillBankSelect(){
     const sel = document.getElementById('bankNameSelect');
@@ -883,12 +889,33 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     editorEl.querySelectorAll('[data-remove-bank-idx]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const idx = parseInt(btn.dataset.removeBankIdx, 10);
-        const newNames = currentBankNames().slice();
+        const cur = currentBankNames().slice();
+        const removed = cur[idx];
+        const newNames = cur.slice();
         newNames.splice(idx, 1);
         const ok = await saveBankListNames(newNames);
-        showMsg('bankList_msg', ok ? LBL.bankListSaved : LBL.bankListRemoveFailed, !ok);
         fillBankSelect();
         renderBankListEditor();
+        const msgEl = document.getElementById('bankList_msg');
+        if(ok && msgEl && removed){
+          // GERİ AL: yanlışlıkla silinen bankayı tek tıkla geri ekle (kullanıcı isteği — veri girişinde hata çok olabiliyor).
+          msgEl.innerHTML = '"' + escapeHtml(removed) + '" silindi. ' +
+            '<button type="button" id="bankUndoBtn" style="margin-left:8px; background:transparent; border:1px solid var(--brass,#C6A15B); color:var(--brass,#C6A15B); border-radius:6px; padding:2px 10px; cursor:pointer; font-weight:600;">↶ Geri Al</button>';
+          msgEl.classList.remove('error'); msgEl.style.display = 'block';
+          const ub = document.getElementById('bankUndoBtn');
+          if(ub) ub.addEventListener('click', async () => {
+            const restore = currentBankNames().slice();
+            if(!restore.some(b => String(b).toLocaleUpperCase('tr-TR') === String(removed).toLocaleUpperCase('tr-TR'))){
+              restore.push(removed);
+              await saveBankListNames(restore);
+              fillBankSelect();
+              renderBankListEditor();
+            }
+            showMsg('bankList_msg', 'Geri alındı ✓', false);
+          });
+        } else if(!ok){
+          showMsg('bankList_msg', LBL.bankListRemoveFailed, true);
+        }
       });
     });
     let renameTimers = {};

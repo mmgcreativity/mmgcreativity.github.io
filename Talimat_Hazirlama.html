@@ -1899,6 +1899,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       sel.appendChild(opt);
     }
     sel.value = opt.value;
+    // ÖNEMLİ: Banka PROGRAMATİK set edilince 'change' olayı kendiliğinden ATEŞLENMEZ; bu yüzden
+    // "📋 Kayıtlı" IBAN listesi o bankaya göre filtrelenmiyordu (kullanıcı: "banka belli ama diğer
+    // bankaların IBAN'ları da geliyor"). Change'i elle tetikliyoruz → liste seçili bankaya filtrelenir.
+    try{ sel.dispatchEvent(new Event('change', { bubbles: true })); }catch(e){}
   }
 
   // ---- YENİ: Kullanıcının kendi + grup firmalarını (gönderici tarafı) yükle ----
