@@ -235,13 +235,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .nav-drawer-chevron{ display:none !important; }
   }
   @media (max-width: 860px){
+    /* Mobilde alt menü ASLA sabit-konumlu flyout olmasın (üst menü maddelerinin ÜSTÜNE binmesin).
+       JS masaüstünde inline left/top yazabildiği için burada !important ile statik konuma zorluyoruz. */
     .nav-drawer{
-      position:static; margin:2px 0 8px 30px; padding:0 0 0 12px; min-width:0;
+      position:static !important; left:auto !important; top:auto !important; right:auto !important;
+      inset:auto !important; z-index:auto !important;
+      margin:2px 0 8px 30px; padding:0 0 0 12px; min-width:0;
       border:none; border-left:2px solid var(--hairline); border-radius:0; box-shadow:none;
       background:transparent; transform:translateX(-10px);
     }
     .nav-drawer.open{ transform:translateX(0); }
     .hero-desc{ white-space:normal; }
+    /* Hesap çubuğu menünün en dibine yaslansın; firma çubuğu hemen üstünde. */
+    aside.mobile-nav-open nav #mmgBottomLeftBar{ margin-top:auto; }
+    aside nav > .mmg-firma-bar-wrap,
+    aside nav > #mmgBottomLeftBar{ width:100%; }
   }
 
   /* ---------- Favori yıldızı ---------- */
@@ -5299,22 +5307,31 @@ const auth = getApps().length ? getAuth(getApp()) : null;
 </script>
 
 <script>
-  // Mobilde firma çubuğunu (aktif firma) hero'nun ALTINA taşı; masaüstünde eski yerinde bırak.
-  // (Kullanıcı isteği: mobilde hero en üstte, firma çubuğu hemen altında.)
+  // Mobilde: aktif firma çubuğu + hesap (Hesabım) çubuğunu, açılır hamburger menüsünün
+  // EN ALTINA taşı. Masaüstünde eski yerlerinde (aside altı) bırak.
+  // Sebep: bu iki çubuk <nav> DIŞINDA olduğundan, mobilde aside en üstte görünüyor ve
+  // "hesabım hep yukarıda" oluyordu. Artık menü kapalıyken görünmezler; menü açılınca en altta çıkarlar.
   (function(){
-    var fbw = document.querySelector('.mmg-firma-bar-wrap');
-    var main = document.querySelector('main');
-    var hero = main ? main.querySelector('.hero') : null;
-    if(!fbw || !main || !hero) return;
-    var origParent = fbw.parentNode, origNext = fbw.nextSibling;
+    var aside = document.querySelector('aside');
+    var nav = aside ? aside.querySelector('nav') : null;
+    var firmaBar = document.querySelector('.mmg-firma-bar-wrap');
+    var acctBar = document.getElementById('mmgBottomLeftBar');
+    if(!aside || !nav) return;
+    // Orijinal (masaüstü) konumlarını yer-imi yorumlarıyla hatırla.
+    var fMarker = document.createComment('mmg-firmabar-home');
+    var aMarker = document.createComment('mmg-acctbar-home');
+    if(firmaBar && firmaBar.parentNode) firmaBar.parentNode.insertBefore(fMarker, firmaBar);
+    if(acctBar && acctBar.parentNode) acctBar.parentNode.insertBefore(aMarker, acctBar);
     function place(){
       var mobile = window.matchMedia('(max-width:860px)').matches;
       if(mobile){
-        if(hero.nextSibling !== fbw) hero.parentNode.insertBefore(fbw, hero.nextSibling);
+        // Menünün (nav) en altına: önce firma satırı, sonra hesap çubuğu (en dipte).
+        if(firmaBar) nav.appendChild(firmaBar);
+        if(acctBar) nav.appendChild(acctBar);
       } else {
-        if(fbw.parentNode !== origParent || fbw.nextSibling !== origNext){
-          try{ origParent.insertBefore(fbw, origNext); }catch(e){}
-        }
+        // Masaüstü: yer-imlerinin hemen ardına geri koy.
+        if(firmaBar && fMarker.parentNode) fMarker.parentNode.insertBefore(firmaBar, fMarker.nextSibling);
+        if(acctBar && aMarker.parentNode) aMarker.parentNode.insertBefore(acctBar, aMarker.nextSibling);
       }
     }
     place();
