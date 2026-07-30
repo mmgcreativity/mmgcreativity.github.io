@@ -466,9 +466,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </div>
         </div>
         <div id="bank_firmaSelect"></div>
-        <button type="button" class="auth-submit" id="addBankBtn" data-i18n="add_bank_btn">Ekle</button>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button type="button" class="auth-submit" id="addBankBtn" data-i18n="add_bank_btn" style="width:auto; flex:0 0 auto; margin:0;">Ekle</button>
+          <button type="button" id="deleteAllBanksBtn" style="margin-left:auto; background:transparent; border:1px solid rgba(226,84,75,0.5); color:var(--red,#E2544B); border-radius:9px; padding:9px 16px; font-weight:600; cursor:pointer;">🗑 Tüm IBAN'ları Sil</button>
+        </div>
         <div class="bank-chip-list" id="banksChipList"></div>
-        <button type="button" id="deleteAllBanksBtn" style="margin-top:10px; width:100%; background:transparent; border:1px solid rgba(226,84,75,0.5); color:var(--red,#E2544B); border-radius:9px; padding:9px 0; font-weight:600; cursor:pointer;">🗑 Tüm IBAN'ları Sil</button>
         <div class="form-msg" id="banks_msg"></div>
       </div>
     </div>
@@ -1194,6 +1196,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }catch(e){ showMsg(btn.dataset.del + '_msg', LBL.deleteFailed, true); }
       });
     });
+    // "🏢 tüm firmalar" rozetine tıklayınca bu cariyi AKTİF firmaya ata (diğer firmalarda görünmez).
+    listEl.querySelectorAll('.scope-assignable').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.assignId;
+        if(!id) return;
+        if(!confirm('Bu kaydı yalnızca AKTİF firmaya ata? Böylece diğer firmalarda görünmez.')) return;
+        try{
+          await setDoc(docRef(kind, id), { appliesToFirmaIds: [scopeId] }, { merge: true });
+          await loadParties(kind);
+        }catch(err){ showMsg(kind + '_msg', LBL.saveFailed, true); }
+      });
+    });
     // Bir IBAN satırına tıklayınca panoya kopyalanır — talimat/mektup hazırlarken
     // hızlıca yapıştırabilmek için.
     listEl.querySelectorAll('[data-copy-iban]').forEach(row => {
@@ -1400,9 +1415,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       let count = 0;
       for(const g of pendingBulkGroups.values()){
         const id = g.kind[0] + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
-        await setDoc(docRef(g.kind, id), {
-          name: g.name, idNumber: g.idNumber || '', ibans: g.ibans, createdAt: serverTimestamp()
-        });
+        const docData = { name: g.name, idNumber: g.idNumber || '', ibans: g.ibans, createdAt: serverTimestamp() };
+        // IBAN'larda olduğu gibi: cari (müşteri/tedarikçi) bulk import da AKTİF firmaya bağlansın
+        // (global "tüm firmalar" olmasın). Manuel eklemede zaten firma-seçici aktif firmaya varsayılı.
+        if(scopeCollection === 'firmaAccounts' && scopeId) docData.appliesToFirmaIds = [scopeId];
+        await setDoc(docRef(g.kind, id), docData);
         count++;
       }
       showMsg('bulkMsg', fmt(LBL.bulkDone, { n: count }), false);
