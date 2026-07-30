@@ -2193,8 +2193,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   // ---- PWA: Ana Ekrana Ekle desteği için service worker kaydı ----
   if('serviceWorker' in navigator){
+    // Yeni service worker devralınca sayfayı BİR KEZ otomatik yenile → kullanıcı hemen
+    // güncel sürümü görür (deploy sonrası "eski sürüm kaldı" sorunu biter). Oturumda tek
+    // sefer + döngü koruması. Yalnızca önceden bir SW kontrolü varken (güncelleme) yenile;
+    // ilk kurulumda gereksiz yenileme yapma.
+    let mmgSwRefreshing = false;
+    const mmgHadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(mmgSwRefreshing || !mmgHadController) return;
+      try{ if(sessionStorage.getItem('mmg_sw_reloaded')) return; sessionStorage.setItem('mmg_sw_reloaded','1'); }catch(e){}
+      mmgSwRefreshing = true;
+      window.location.reload();
+    });
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js').catch(()=>{ /* sessizce geç */ });
+      navigator.serviceWorker.register('service-worker.js').then((reg) => {
+        try{ reg.update(); }catch(e){}
+      }).catch(()=>{ /* sessizce geç */ });
     });
   }
 

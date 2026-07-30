@@ -753,7 +753,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <button type="button" class="xcell-savebtn" id="saveGonderenIbanBtn" title="IBAN bilgisini kaydet">💾</button>
             <select class="xcell-mini" id="fGonderenIbanSaved" title="Kayıtlı IBAN'dan seç"><option value="">📋 Kayıtlı</option></select>
           </div>
-          <div id="fGonderenIbanHint" style="display:none; grid-column:1/-1; margin:2px 0 0; padding:7px 10px; border-radius:8px; background:rgba(226,84,75,0.10); border:1px solid rgba(226,84,75,0.35); color:var(--red); font-size:11.5px; font-weight:700;">⚠️ ÇOK ÖNEMLİ: Bu firma/banka için birden fazla IBAN kayıtlı. Lütfen aşağıdaki listeden doğru IBAN'ı seçin.</div>
+          <div id="fGonderenIbanHint" style="display:none;"></div>
           <select id="fGonderenIbanChooser" title="IBAN seçin" style="display:none; grid-column:1/-1; width:100%; margin:6px 0 0; padding:10px 12px; border-radius:8px; border:2px solid var(--red); background:var(--surface-2); color:var(--text); font-family:'Inter',sans-serif; font-size:13px; font-weight:700; cursor:pointer; outline:none;"></select>
           <div class="xcell xcell-3col">
             <span class="xcell-label">TUTAR</span>
@@ -1588,6 +1588,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       .filter(b => b.firma && b.firma.trim().toLowerCase() === firma);
     if(!firmaMatches.length){ hide(); return; }
     const byBank = banka ? firmaMatches.filter(b => (b.banka || '').trim().toLowerCase() === banka) : firmaMatches;
+    // Banka SEÇİLİYKEN o bankaya ait IBAN yoksa: yanlış bankanın IBAN'ını GÖSTERME, temizle
+    // (kullanıcı: "bankayı değiştiriyorum hâlâ aynı hatalı IBAN kalıyor"). Alıcı tarafıyla aynı davranış.
+    if(banka && byBank.length === 0){
+      ibanEl.value = '';
+      const selc = document.getElementById('fGonderenIbanSaved'); if(selc) selc.value = '';
+      hide();
+      if(typeof renderPreview === 'function') renderPreview();
+      return;
+    }
     const pool = byBank.length ? byBank : firmaMatches;
     if(pool.length === 1){
       // Tek IBAN → doğrudan yerleştir.
