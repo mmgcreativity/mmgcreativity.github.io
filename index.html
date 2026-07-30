@@ -1447,12 +1447,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="fav-star" role="button" tabindex="0" data-fav-target="vadeli-mevduat-faizi-hesaplama.html" data-fav-title="Vadeli Mevduat Faizi Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
             <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_vadelimevduat">Vadeli Mevduat Faizi Hesaplama</span></span>
           </button>
+          <button class="nav-item nav-subitem" data-target="Vade_Sapma_Hesaplama.html" data-title="Vade Sapması Hesaplama">
+            <span class="fav-star" role="button" tabindex="0" data-fav-target="Vade_Sapma_Hesaplama.html" data-fav-title="Vade Sapması Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+            <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_vadesapmasi">Vade Sapması Hesaplama</span></span>
+          </button>
         </div>
       </div>
-      <button class="nav-item nav-subitem" data-target="Vade_Sapma_Hesaplama.html" data-title="Vade Sapması Hesaplama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Vade_Sapma_Hesaplama.html" data-fav-title="Vade Sapması Hesaplama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_vadesapmasi">Vade Sapması Hesaplama</span></span>
-      </button>
       <button class="nav-item nav-subitem" data-target="teminat-mektubu-komisyonu-hesaplama.html" data-title="Teminat Mektubu Komisyonu">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="teminat-mektubu-komisyonu-hesaplama.html" data-fav-title="Teminat Mektubu Komisyonu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_teminat">Teminat Mektubu Komisyonu</span></span>
@@ -3249,6 +3249,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       return;
     }
     try{
+      // --- Bağlı-olmayan telefon (SMS) girişi koruması ---
+      // Firebase'de telefon girişi ile e-posta/Google girişi AYRI kimliklerdir. Numara mevcut
+      // bir hesaba (Ayarlar → "Telefonumu Bağla") bağlanmadıysa, SMS ile girildiğinde verisi
+      // olmayan bomboş bir hesap ("Misafir" görünümü) oluşur. Böyle bir oturumu AÇMIYORUZ:
+      // kullanıcıyı yönlendirip oturumu kapatıyor ve bu boş telefon-hesabını silerek numarayı
+      // ileride bağlanabilir halde serbest bırakıyoruz. Ayırt etme: TÜM sağlayıcılar 'phone' ve
+      // e-posta yoksa → gerçek hesaba bağlı değil. (E-posta/Google hesabına telefon bağlanınca
+      // o hesapta 'password'/'google.com' sağlayıcısı da bulunur; bu kontrol onları etkilemez.)
+      if(!user.email && Array.isArray(user.providerData) && user.providerData.length > 0 &&
+         user.providerData.every(p => p && p.providerId === 'phone')){
+        try{
+          alert('Bu telefon numarası henüz bir hesaba bağlı değil.\n\n'+
+                'Önce e-posta ve şifrenizle giriş yapın, ardından Ayarlar → "Telefonumu Bağla" '+
+                'adımını bir kez tamamlayın. Sonrasında şifrenizi unutsanız bile telefonla giriş '+
+                'yapıp hesabınıza ulaşabilirsiniz.');
+        }catch(_a){}
+        try{ localStorage.setItem('mmg_auth_state', 'guest'); }catch(_b){}
+        try{ await user.delete(); }                               // boş telefon-hesabını sil → numara serbest kalır
+        catch(delErr){ try{ await signOut(auth); }catch(_c){} }    // silinemezse en azından çıkış yap
+        try{ openAuthOverlay(); }catch(_d){}
+        return;
+      }
       const snap = await getDoc(doc(db, 'users', user.uid));
       let data = snap.exists() ? snap.data() : {};
       console.log('[MMG_DEBUG] users/' + user.uid + ' okundu:', { exists: snap.exists(), isAdmin: data.isAdmin, customerNumber: data.customerNumber, username: data.username });
