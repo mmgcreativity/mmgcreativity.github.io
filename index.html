@@ -4563,6 +4563,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       sendBtn.disabled=true; msg.textContent='Kod gönderiliyor…'; msg.style.color='var(--muted)';
       try{
         const verifier = ensureRecaptcha();
+        try{ auth.languageCode = 'tr'; }catch(_lc){}  // SMS metni İngilizce yerine Türkçe gelsin
         confirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
         step1.style.display='none'; step2.style.display='block';
         msg.textContent='SMS gönderildi. Kodu girin.'; msg.style.color='var(--teal)';
@@ -4630,6 +4631,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(!/^\+\d{10,15}$/.test(phone)){ msg.textContent='Numarayı +90… biçiminde girin.'; msg.style.color='var(--red,#E2544B)'; return; }
       sendBtn.disabled=true; msg.textContent='Kod gönderiliyor…'; msg.style.color='var(--muted,#8D96AC)';
       try{
+        try{ auth.languageCode = 'tr'; }catch(_lc){}  // SMS metni İngilizce yerine Türkçe gelsin
         confirmationResult = await linkWithPhoneNumber(auth.currentUser, phone, ensureRecaptcha());
         step2.style.display='block';
         msg.textContent='SMS gönderildi. Kodu girin.'; msg.style.color='var(--teal,#3FB68A)';
