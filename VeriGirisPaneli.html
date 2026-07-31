@@ -1954,8 +1954,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   document.getElementById('downloadPersonnelTemplateBtn').addEventListener('click', () => {
     try{
       const header = [LBL.bulkFirmaCodeCol, LBL.bulkNameCol, PR_TC_COL];
-      const rows = [header, ['1000', 'Ahmet Yılmaz', '12345678901'], ['1000', 'Ayşe Demir', '98765432109'], [],
-        [MMG_LANG==='en' ? '"Company Code" is REQUIRED: enter the code of the company this person belongs to (e.g. 1000). Rows with a missing or unmatched code are SKIPPED.' : '"Firma Kodu" ZORUNLUDUR: personelin ait olduğu firmanın kodunu yazın (örn. 1000). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ.']];
+      const rows = [header, ['1000', 'Ahmet Yılmaz', '12345678901'], ['GRUP', 'Ayşe Demir', '98765432109'], ['1000,1001', 'Mehmet Kaya', '11111111111'], [],
+        [MMG_LANG==='en' ? '"Company Code" is REQUIRED: enter the code of the company this person belongs to (e.g. 1000). Write "GROUP" to assign the person to ALL group companies; separate multiple codes with commas (e.g. 1000,1001). Rows with a missing or unmatched code are SKIPPED.' : '"Firma Kodu" ZORUNLUDUR: personelin ait olduğu firmanın kodunu yazın (örn. 1000). Personel TÜM grup firmalarına aitse "GRUP" yazın; birden çok firma için kodları virgülle ayırın (örn. 1000,1001). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ.']];
       const ws = XLSX.utils.aoa_to_sheet(rows);
       ws['!cols'] = [{wch:14},{wch:30},{wch:16}];
       const wb = XLSX.utils.book_new();
@@ -1983,7 +1983,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         const name = String(row['Ünvan / Ad Soyad'] ?? row['Ünvan'] ?? row['Unvan'] ?? row['Ad Soyad'] ?? row['Name'] ?? '').trim();
         if(!name) continue;
         const tc = String(row['TC Kimlik No'] ?? row['TC'] ?? row['TC No'] ?? row['TC / ID No'] ?? row['ID'] ?? '').trim();
-        const firmaCode = mmgReadRowFirmaCode(row);
+        // HAM oku (normalize ETME): "GRUP" anahtar kelimesi ve virgüllü çoklu kod (1000,1001)
+        // desteklenir; normalizasyon virgülü sildiği için mmgReadRowFirmaCode kullanılmaz.
+        const firmaCode = String(row['Firma Kodu'] ?? row['FirmaKodu'] ?? row['Kod'] ?? row['Company Code'] ?? row['Code'] ?? '').trim();
         rows.push({ name, tc, firmaCode });
       }
       if(!rows.length){ showMsg('personnelBulkMsg', LBL.bulkNoRows, true); return; }
@@ -2018,19 +2020,37 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       let count = 0;
       const codeToId = mmgFirmaCodeToId();
       let prUnmatched = 0; const prUnmatchedNames = new Set();
+      // Aynı AD tekrar yüklenirse YENİ kayıt açılmaz — mevcut kaydın üstüne yazılır
+      // (TC ve firma ataması güncellenir; yeniden yükleme mükerrer personel üretmez).
+      const existingByName = {};
+      try{
+        const exSnap = await getDocs(colRef('personnel'));
+        exSnap.forEach(d => { const p = d.data() || {}; const k = (p.name || '').trim().toLocaleLowerCase('tr'); if(k) existingByName[k] = d.id; });
+      }catch(e){}
       for(const r of pendingPersonnelBulkRows){
         const docData = { name: r.name, tc: r.tc || '', createdAt: serverTimestamp() };
         // KURAL: Excel'de FİRMA KODU ZORUNLU — kodsuz/eşleşmeyen satır kaydedilmez (karışma olmasın).
+        // "GRUP" (veya GROUP/TÜM/HEPSİ/ALL/*) → TÜM grup firmalarına atanır (gruba ait personel).
+        // Virgüllü çoklu kod (1000,1001) → sayılan firmaların hepsine atanır.
         if(scopeCollection === 'firmaAccounts'){
-          const mappedId = r.firmaCode ? codeToId[r.firmaCode] : null;
-          if(!mappedId){
+          const tokens = (r.firmaCode || '').split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+          const isGroup = tokens.some(t => t === '*' || ['GRUP','GROUP','TUM','HEPSI','ALL'].includes(mmgVgNormCode(t)));
+          let mappedIds;
+          if(isGroup){
+            mappedIds = Object.values(codeToId);
+            if(!mappedIds.length && scopeId) mappedIds = [scopeId];
+          } else {
+            mappedIds = Array.from(new Set(tokens.map(t => codeToId[mmgVgNormCode(t)]).filter(Boolean)));
+          }
+          if(!mappedIds.length){
             prUnmatched++;
             prUnmatchedNames.add(r.firmaCode || ((MMG_LANG==='en' ? '(code empty) ' : '(kod boş) ') + (r.name || '')));
             continue;
           }
-          docData.appliesToFirmaIds = [mappedId];
+          docData.appliesToFirmaIds = mappedIds;
         }
-        const id = 'pr_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
+        const id = existingByName[r.name.trim().toLocaleLowerCase('tr')]
+          || ('pr_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count);
         await setDoc(docRef('personnel', id), docData);
         count++;
       }
