@@ -946,17 +946,27 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       // Tedarikçiler: FirmaKodu+Ünvan+TC/Vergi+Banka+IBAN+Döviz (tür=aktif sekme); IBAN'larım: Banka+IBAN; Çalıştığım
       // Bankalar: sadece Banka Adı; Muhataplar: Ünvan+Not). Hepsi aynı konumda (üst satır,
       // orta sütun) görünür, aktif sekmeye göre sadece biri gösterilir.
-      const cardByTab = {
-        customers: 'bulkUploadCard', suppliers: 'bulkUploadCard',
-        banks: 'banksBulkUploadCard', bankList: 'bankListBulkUploadCard', counterparties: 'counterpartiesBulkUploadCard',
-        personnel: 'personnelBulkUploadCard'
-      };
-      ['bulkUploadCard','banksBulkUploadCard','bankListBulkUploadCard','counterpartiesBulkUploadCard','personnelBulkUploadCard'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.style.display = (cardByTab[btn.dataset.tab] === id) ? '' : 'none';
-      });
+      mmgSyncBulkCardToTab(btn.dataset.tab);
     });
   });
+
+  // Aktif sekmeye uygun "Toplu Excel ile Yükle" kartını göster. KRİTİK: bu SAYFA AÇILIŞINDA da
+  // çağrılmalı — önceden yalnız sekme TIKLANINCA çalışıyordu ve ilk açılışta IBAN'larım sekmesi
+  // aktifken CARİ (Müşteri/Tedarikçi) kartı görünüyordu → kullanıcı IBAN Excel'ini farkında
+  // olmadan Müşteriler'e yüklüyordu ("IBAN'lar gelmiyor" şikâyetinin kök nedeni).
+  function mmgSyncBulkCardToTab(tab){
+    const cardByTab = {
+      customers: 'bulkUploadCard', suppliers: 'bulkUploadCard',
+      banks: 'banksBulkUploadCard', bankList: 'bankListBulkUploadCard', counterparties: 'counterpartiesBulkUploadCard',
+      personnel: 'personnelBulkUploadCard'
+    };
+    ['bulkUploadCard','banksBulkUploadCard','bankListBulkUploadCard','counterpartiesBulkUploadCard','personnelBulkUploadCard'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = (cardByTab[tab] === id) ? '' : 'none';
+    });
+  }
+  // İlk açılışta aktif sekmenin kartını göster (varsayılan: IBAN'larım → banks kartı).
+  mmgSyncBulkCardToTab((document.querySelector('.veri-tab-btn.active') || {}).dataset ? document.querySelector('.veri-tab-btn.active').dataset.tab : 'banks');
 
   const BANKS = ['AKBANK','ALBARAKA','ANADOLUBANK','BURGAN BANK','DENİZBANK','EMLAK KATILIM','FİBABANKA','GARANTİ BANKASI','HALKBANK','ING','İŞ BANKASI','KUVEYT TÜRK','ODEA BANK','QNB','ŞEKERBANK','TEB','VAKIF KATILIM','VAKIFBANK','YAPI KREDİ','ZİRAAT BANKASI'];
   // "Çalıştığım Bankalar" sekmesinde admin bu listeyi özelleştirebilir (ekle/çıkar/yeniden
