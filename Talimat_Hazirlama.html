@@ -1893,7 +1893,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return;
       }
       listEl.innerHTML = items.map(p => {
-        const meta = (CARI_TUR_ETIKET[p.type] || '') + (p.ibans && p.ibans.length > 1 ? (' · ' + p.ibans.length + ' IBAN') : '');
+        // "MÜŞTERİ / TEDARİKÇİ" tür etiketi KALDIRILDI (kullanıcı isteği 2026-07-31) — listeyi
+        // gereksiz meşgul ediyordu. Çok IBAN'lı cari uyarısı kalıyor (seçimde işe yarıyor).
+        const meta = (p.ibans && p.ibans.length > 1) ? (p.ibans.length + ' IBAN') : '';
         return '<div class="mmg-ac-item" data-name="' + escapeHtmlMmg(p.name) + '"><span>' + escapeHtmlMmg(p.name) +
           '</span><span class="mmg-ac-meta">' + escapeHtmlMmg(meta) + '</span></div>';
       }).join('');
