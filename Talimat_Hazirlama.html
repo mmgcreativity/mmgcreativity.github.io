@@ -3829,7 +3829,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       row.style.marginBottom = '4px';
       row.style.flexWrap = 'wrap';
       row.innerHTML =
-        '<input type="text" class="mmg-person-input" placeholder="Ad Soyad" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" value="' + (value ? value.replace(/"/g,'&quot;') : '') + '">' +
+        '<div class="mmg-ac-wrap" style="flex:1 1 auto; width:auto; height:auto;"><input type="text" class="mmg-person-input" placeholder="Ad Soyad" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" value="' + (value ? value.replace(/"/g,'&quot;') : '') + '"><div class="mmg-ac-list mmg-person-ac"></div></div>' +
         (withTc ? '<input type="text" class="mmg-person-tc" inputmode="numeric" maxlength="11" placeholder="TC Kimlik No" style="flex:0 0 130px; width:130px;" value="' + (tcValue ? tcValue.replace(/"/g,'&quot;') : '') + '">' : '') +
         '<button type="button" class="xcell-savebtn mmg-person-save" title="Kişiyi kaydet" style="border-left:1px solid var(--hairline);">💾</button>' +
         '<select class="xcell-mini mmg-person-saved" title="Kayıtlı kişiden seç">' + savedOptionsHtml() + '</select>' +
@@ -3844,6 +3844,46 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       input.addEventListener('input', renderGenericPreview);
       input.addEventListener('change', renderGenericPreview);
+      // Ad Soyad kutusuna TIKLAYINCA da isim listesi açılır (kullanıcı isteği):
+      // personeller (🧑, TC'li) + elle kaydedilmiş kişiler, koyu temalı mmg-ac listesi.
+      const acList = row.querySelector('.mmg-person-ac');
+      if(acList){
+        const pClose = () => { acList.classList.remove('open'); acList.innerHTML = ''; };
+        const pRender = (showAll) => {
+          const q = showAll ? '' : input.value.trim().toLocaleLowerCase('tr');
+          const manual = mmgLoadSavedKisiler().filter(n => !mmgPersonnelDb.some(p => p.name === n)).map(n => ({ name: n, tc: '' }));
+          let items = mmgPersonnelDb.map(p => ({ name: p.name, tc: p.tc, pr: true })).concat(manual);
+          if(q) items = items.filter(x => (x.name || '').toLocaleLowerCase('tr').includes(q));
+          items = items.slice(0, 15);
+          if(!items.length){
+            acList.innerHTML = '<div class="mmg-ac-empty">Kayıtlı kişi yok — VeriGiriş → Personeller\'den yükleyin.</div>';
+            acList.classList.add('open');
+            return;
+          }
+          acList.innerHTML = items.map(x =>
+            '<div class="mmg-ac-item" data-name="' + x.name.replace(/"/g,'&quot;') + '"><span>' + (x.pr ? '🧑 ' : '') + x.name + '</span>' +
+            (x.tc ? '<span class="mmg-ac-meta">TC ' + x.tc + '</span>' : '') + '</div>').join('');
+          acList.classList.add('open');
+          Array.from(acList.querySelectorAll('.mmg-ac-item')).forEach(el => {
+            el.addEventListener('mousedown', ev => {
+              ev.preventDefault();
+              const nm = el.getAttribute('data-name') || '';
+              input.value = nm;
+              const pr = mmgPersonnelDb.find(p => p.name === nm);
+              if(pr && pr.tc){
+                if(tcInput){ tcInput.value = pr.tc; }
+                else { const sepTc = document.getElementById('glTckn'); if(sepTc) sepTc.value = pr.tc; }
+              }
+              pClose();
+              renderGenericPreview();
+            });
+          });
+        };
+        input.addEventListener('focus', () => pRender(true));
+        input.addEventListener('click', () => pRender(true));
+        input.addEventListener('input', () => pRender(false));
+        input.addEventListener('blur', () => setTimeout(pClose, 150));
+      }
       if(tcInput){
         tcInput.addEventListener('input', () => {
           tcInput.value = tcInput.value.replace(/[^\d]/g, '').slice(0,11);
