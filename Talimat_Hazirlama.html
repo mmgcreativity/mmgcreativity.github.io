@@ -2257,9 +2257,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   async function fetchFirmaGonderenBilgisi(firmaId){
     const cloud = window.mmgCloud;
     const out = { name: firmaId, banka: '', iban: '', ibans: [], logo: null, logoDims: null, stamp: null, stampDims: null };
+    // KÖK DÜZELTME (ADERANS "IBAN gelmiyor"): grup üyesi firmaların banka kayıtları kendi alt
+    // koleksiyonunda DEĞİL, HUB havuzundadır (firmaAccounts/{dataGroupId}/banks, appliesToFirmaIds
+    // ile etiketli). Önceden hep firmanın KENDİ banks'ı okunuyordu → hub dışındaki her firmada boş.
+    let poolId = firmaId;
     try{
       const fSnap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', firmaId));
-      if(fSnap.exists()) out.name = fSnap.data().name || firmaId;
+      if(fSnap.exists()){
+        out.name = fSnap.data().name || firmaId;
+        if(fSnap.data().dataGroupId) poolId = fSnap.data().dataGroupId;
+      }
     }catch(e){}
     try{
       const pSnap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', firmaId, 'talimat', 'firmaProfili'));
@@ -2276,7 +2283,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // (b) ÖNEMLİ: Kullanıcının Veri Giriş → "IBAN'larım" ekranında kaydettiği firma banka
     // hesapları burada: firmaAccounts/{firmaId}/banks. Talimat IBAN'ı asıl buradan gelmeli.
     try{
-      const bSnap = await cloud.getDocs(cloud.collection(cloud.db, 'firmaAccounts', firmaId, 'banks'));
+      const bSnap = await cloud.getDocs(cloud.collection(cloud.db, 'firmaAccounts', poolId, 'banks'));
       bSnap.forEach(d => {
         const b = d.data() || {};
         // ÖNEMLİ: Veri paylaşım grubunda bankalar ortak havuzda tutulur ve her kayıt
@@ -3282,8 +3289,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     'cek-karne': {
       title: 'Çek Karnesi Teslim Talimatı',
       fields: [
+                { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
         { id:'glBanka', label:'Banka', type:'bank' },
-        { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
         { id:'glKisi', label:'Teslim Alacak Kişi', type:'multi-person' },
         { id:'glTckn', label:'TCKN', type:'text', placeholder:'11 haneli TC Kimlik No' }
       ],
@@ -3295,8 +3302,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     'cek-takas': {
       title: 'Çek Takastan Çekme Talimatı',
       fields: [
-        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glFirma', label:'Firma', type:'text' },
+        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glBorclu', label:'Çekin Borçlusu', type:'text' },
         { id:'glCekNo', label:'Çek No', type:'text' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
@@ -3310,8 +3317,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     'cek-iade': {
       title: 'Çek İade Talimatı',
       fields: [
-        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glFirma', label:'Firma', type:'text' },
+        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glBorclu', label:'Çekin Borçlusu', type:'text' },
         { id:'glCekNo', label:'Çek No', type:'text' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
@@ -3326,8 +3333,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     'senet-teslim': {
       title: 'Senet Teslim Talimatı',
       fields: [
+                { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
         { id:'glBanka', label:'Banka', type:'bank' },
-        { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
         { id:'glBorclu', label:'Senedin Borçlusu', type:'text' },
         { id:'glSenetNo', label:'Senet No', type:'text' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
@@ -3343,8 +3350,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     'senet-tahsil': {
       title: 'Senet Tahsil Talimatı',
       fields: [
-        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glFirma', label:'Firma', type:'text' },
+        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glBorclu', label:'Senedin Borçlusu', type:'text' },
         { id:'glSenetNo', label:'Senet No', type:'text' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
@@ -3358,8 +3365,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     'senet-takas': {
       title: 'Senet Takastan Çekme Talimatı',
       fields: [
-        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glFirma', label:'Firma', type:'text' },
+        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glBorclu', label:'Senedin Borçlusu', type:'text' },
         { id:'glSenetNo', label:'Senet No', type:'text' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
@@ -3374,8 +3381,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     'tm-talep': {
       title: 'Teminat Mektubu Talep Talimatı',
       fields: [
-        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glFirma', label:'Firma', type:'text' },
+        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glMuhatap', label:'Muhatap', type:'text' },
         { id:'glMuhatapAdres', label:'Muhatap Adres', type:'text', placeholder:'Örn. Kızılay Mah. ... Ankara' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
@@ -3393,8 +3400,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     'tm-uzatim': {
       title: 'Teminat Mektubu Süre Uzatım Talimatı',
       fields: [
-        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glFirma', label:'Firma', type:'text' },
+        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glMuhatap', label:'Muhatap', type:'text' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
         { id:'glMektupNo', label:'Mektup No', type:'text' },
@@ -3409,8 +3416,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     'tm-teslim': {
       title: 'Teminat Mektubu Teslim Talimatı',
       fields: [
-        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glFirma', label:'Firma', type:'text' },
+        { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glMuhatap', label:'Muhatap', type:'text' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
         { id:'glMektupNo', label:'Mektup No', type:'text' },
@@ -3428,8 +3435,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // Sıra (kullanıcı isteği): Para Birimi firmanın altında, IBAN'lar EN ALTTA.
       // Firma+Banka seçilince TL (gönderen) ve döviz (alıcı) IBAN'ları otomatik dolar.
       fields: [
+                { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
         { id:'glBanka', label:'Banka', type:'bank' },
-        { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
         { id:'glParaBirimi', label:'Para Birimi', type:'select', options:['EUR','USD','GBP'] },
         { id:'glTutar', label:'Tutar (Döviz)', type:'tutar' },
         { id:'glKur', label:'Kur', type:'text', placeholder:'Örn. 53,5160' },
@@ -3446,8 +3453,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // Sıra (kullanıcı isteği): Para Birimi firmanın altında, IBAN'lar EN ALTTA.
       // Firma+Banka seçilince döviz (gönderen) ve TL (alıcı) IBAN'ları otomatik dolar.
       fields: [
+                { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
         { id:'glBanka', label:'Banka', type:'bank' },
-        { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
         { id:'glParaBirimi', label:'Para Birimi', type:'select', options:['EUR','USD','GBP'] },
         { id:'glTutar', label:'Tutar (Döviz)', type:'tutar' },
         { id:'glKur', label:'Kur', type:'text', placeholder:'Örn. 53,5160' },
@@ -3462,8 +3469,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     'nakit-yatirma': {
       title: 'Nakit Para Yatırma Yetkilendirme Talimatı',
       fields: [
+                { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
         { id:'glBanka', label:'Banka', type:'bank' },
-        { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
         { id:'glIban', label:'Hesap IBAN', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' },
         { id:'glKisi', label:'Yetkili Kişi', type:'multi-person-tc' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
@@ -3477,8 +3484,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     'nakit-cekme': {
       title: 'Nakit Para Çekme Yetkilendirme Talimatı',
       fields: [
+                { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
         { id:'glBanka', label:'Banka', type:'bank' },
-        { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
         { id:'glIban', label:'Hesap IBAN', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' },
         { id:'glKisi', label:'Yetkili Kişi', type:'multi-person-tc' },
         { id:'glTutar', label:'Tutar', type:'tutar' },
@@ -3648,8 +3655,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             const fxHit = pickIban(fxCur);
             const gHit = (currentGenericType === 'doviz-alim') ? tlHit : fxHit;
             const aHit = (currentGenericType === 'doviz-alim') ? fxHit : tlHit;
-            if(gEl2 && gHit) gEl2.value = formatIbanValue(gHit.iban);
-            if(aEl2 && aHit) aEl2.value = formatIbanValue(aHit.iban);
+            // Eşleşme yoksa alanı TEMİZLE — önceki firmanın IBAN'ı asılı kalmasın
+            // (kullanıcı: "Aderans seçtiğim halde Yaşar Cihan verisi geliyor").
+            if(gEl2) gEl2.value = gHit ? formatIbanValue(gHit.iban) : '';
+            if(aEl2) aEl2.value = aHit ? formatIbanValue(aHit.iban) : '';
           }
         }
         renderGenericPreview();
