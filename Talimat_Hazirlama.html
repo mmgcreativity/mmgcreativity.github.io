@@ -3832,7 +3832,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         '<div class="mmg-ac-wrap" style="flex:1 1 auto; width:auto; height:auto;"><input type="text" class="mmg-person-input" placeholder="Ad Soyad" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" value="' + (value ? value.replace(/"/g,'&quot;') : '') + '"><div class="mmg-ac-list mmg-person-ac"></div></div>' +
         (withTc ? '<input type="text" class="mmg-person-tc" inputmode="numeric" maxlength="11" placeholder="TC Kimlik No" style="flex:0 0 130px; width:130px;" value="' + (tcValue ? tcValue.replace(/"/g,'&quot;') : '') + '">' : '') +
         '<button type="button" class="xcell-savebtn mmg-person-save" title="Kişiyi kaydet" style="border-left:1px solid var(--hairline);">💾</button>' +
-        '<select class="xcell-mini mmg-person-saved" title="Kayıtlı kişiden seç">' + savedOptionsHtml() + '</select>' +
         '<button type="button" class="xcell-savebtn mmg-person-remove" title="Satırı kaldır" style="border-left:1px solid var(--hairline); color:var(--red);">✕</button>';
       rowsEl.appendChild(row);
 
@@ -3890,23 +3889,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           renderGenericPreview();
         });
       }
-      savedSelect.addEventListener('change', () => {
-        if(savedSelect.value){
-          input.value = savedSelect.value;
-          // Personelden seçildiyse TC'yi de otomatik doldur: satırda TC kutusu varsa oraya,
-          // yoksa bu talimat türünün AYRI TCKN alanına (örn. Çek Karnesi/Senet Teslim'de glTckn).
-          const pr = mmgPersonnelDb.find(p => p.name === savedSelect.value);
-          if(pr && pr.tc){
-            if(tcInput){ tcInput.value = pr.tc; }
-            else {
-              const sepTc = document.getElementById('glTckn');
-              if(sepTc){ sepTc.value = pr.tc; }
-            }
-          }
-          renderGenericPreview();
-        }
-        savedSelect.value = '';
-      });
+      // "📋 Kayıtlı" seçicisi KALDIRILDI (kullanıcı isteği): kayıtlılar artık Ad Soyad kutusuna
+      // tıklayınca açılan koyu listede gelir, yazdıkça eşleşerek elenir (yukarıdaki pRender).
+      if(savedSelect) savedSelect.addEventListener('change', () => {});
       saveBtn.addEventListener('click', () => {
         const name = input.value.trim();
         if(!name){ return; }
