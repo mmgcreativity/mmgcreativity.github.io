@@ -1512,13 +1512,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   // çünkü IBAN'larım kaydı bir firma/kişi değil, kullanıcının kendi banka hesabıdır.
   document.getElementById('downloadBanksTemplateBtn').addEventListener('click', () => {
     try{
-      const header = ['Firma', LBL.bulkFirmaCodeCol, LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol, LBL.bulkNoteCol];
-      const example1 = ['YAŞAR CİHAN HAZIR BETON', '1000', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY', 'Yozgat şubesi'];
-      const example2 = ['ADERANS MADENCİLİK', '1001', 'Akbank', 'TR111111111111111111111111', 'USD', 'Kars şubesi'];
+      // Firma ADI sütunu kaldırıldı (kullanıcı isteği): eşleştirme YALNIZCA Firma Kodu ile yapılır.
+      const header = [LBL.bulkFirmaCodeCol, LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol, LBL.bulkNoteCol];
+      const example1 = ['1000', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY', 'Yozgat şubesi'];
+      const example2 = ['1001', 'Akbank', 'TR111111111111111111111111', 'USD', 'Kars şubesi'];
       const note = [MMG_LANG==='en' ? '"Company Code" is REQUIRED: enter the code of the company this IBAN belongs to (shown in the User Management Panel, e.g. 1000). Rows with a missing or unmatched code are SKIPPED — nothing gets mixed into the wrong company.' : '"Firma Kodu" ZORUNLUDUR: IBAN\'ın ait olduğu firmanın kodunu yazın (Kullanıcı Yönetim Paneli\'nde görünür, örn. 1000). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ — hiçbir kayıt yanlış firmaya karışmaz.'];
       const rows = [header, example1, example2, [], note];
       const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols'] = [{wch:28},{wch:14},{wch:24},{wch:30},{wch:10},{wch:22}];
+      ws['!cols'] = [{wch:14},{wch:24},{wch:30},{wch:10},{wch:22}];
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, MMG_LANG==='en' ? 'Template' : 'Şablon');
       XLSX.writeFile(wb, 'iban-sablon.xlsx');
