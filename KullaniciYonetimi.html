@@ -281,7 +281,10 @@
   <!-- ADMIN-ONLY: Tüm Kullanıcılar — yalnız site yöneticisi (users/{uid}.isAdmin) görür.
        Normal firma yöneticileri yalnızca kendi firma/kullanıcılarını görür (yukarıdaki kartlar). -->
   <div class="card" id="adminAllUsersCard" style="display:none; margin-top:12px;">
-    <h2 style="margin-bottom:4px;">🛡️ Tüm Kullanıcılar <span style="font-size:12px; color:var(--muted); font-weight:600;">(yalnız site yöneticisi)</span></h2>
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+      <h2 style="margin:0;">🛡️ Tüm Kullanıcılar <span style="font-size:12px; color:var(--muted); font-weight:600;">(yalnız site yöneticisi)</span></h2>
+      <button type="button" id="adminAllUsersRefreshBtn" title="Listeyi yenile" style="margin-left:auto; background:transparent; border:1px solid var(--hairline); color:var(--muted); border-radius:8px; padding:5px 12px; font-weight:600; cursor:pointer; font-size:12.5px;">↻ Yenile</button>
+    </div>
     <div class="card-sub">Platformdaki tüm kayıtlı kullanıcılar. Firma yöneticileri yalnızca kendi kullanıcılarını görür; bu liste yalnızca site yöneticisine açıktır.</div>
     <!-- Kullanıcı Özeti kartları (İstatistikler'den taşındı) — tıkla: tabloyu o gruba filtreler -->
     <div id="kySummaryGrid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:12px 0 4px;">
@@ -869,6 +872,19 @@
     const cb = document.getElementById('kyUserDetailClose');
     if(cb) cb.addEventListener('click', () => { ov.style.display = 'none'; });
   }
+  // Sağ üstteki "↻ Yenile" (kullanıcı isteği 2026-07-31): listeyi Firestore'dan tazeler.
+  (function wireAdminAllUsersRefresh(){
+    const btn = document.getElementById('adminAllUsersRefreshBtn');
+    if(!btn) return;
+    btn.addEventListener('click', async () => {
+      const original = btn.textContent;
+      btn.disabled = true; btn.textContent = '↻ Yenileniyor…';
+      try{ await loadAdminAllUsers(); }
+      catch(e){ /* yükleme hatası zaten tabloda görünüyor */ }
+      btn.disabled = false; btn.textContent = original;
+    });
+  })();
+
   async function loadAdminAllUsers(){
     const empty = document.getElementById('adminAllUsersEmpty');
     const cnt = document.getElementById('adminUserCount');

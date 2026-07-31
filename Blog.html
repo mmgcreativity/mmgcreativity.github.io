@@ -440,7 +440,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           '<div class="blog-post-title">' + titleHtml + (isPending ? '<span class="pending-badge">' + LBL.pendingBadge + '</span>' : '') + '</div>' +
           '<div class="blog-post-actions">' +
             '<button type="button" class="blog-icon-btn share" data-share-id="' + p.id + '" title="' + LBL.share + '">' + SHARE_SVG + '</button>' +
-            ((currentIsAdmin && !isPending) ? '<button type="button" class="blog-icon-btn blogger" data-blogger-id="' + p.id + '" title="' + LBL.bloggerPublish + '">' + BLOGGER_SVG + '</button>' : '') +
+            /* Blogger butonu GİZLENDİ (2026-07-31): backend'deki publishToBlogger fonksiyonu
+               DEVRE DIŞI (functions/index.js'te yorumda — her deploy'da BLOGGER_* secret'ları
+               sorduğu ve Blogger kullanılmadığı için kapatılmıştı). Buton duruyordu, basınca
+               olmayan fonksiyon çağrılıp "internal" hatası veriyordu. Geri açmak için:
+               functions/index.js'teki bloğu yorumdan çıkar + 4 secret'ı tanımla + deploy et,
+               sonra buradaki false'u kaldır. */
+            ((false && currentIsAdmin && !isPending) ? '<button type="button" class="blog-icon-btn blogger" data-blogger-id="' + p.id + '" title="' + LBL.bloggerPublish + '">' + BLOGGER_SVG + '</button>' : '') +
             (opts.approveReject ? (
               '<button type="button" class="approve-btn" data-approve-id="' + p.id + '">' + LBL.approveBtn + '</button>' +
               '<button type="button" class="reject-btn" data-reject-id="' + p.id + '">' + LBL.rejectBtn + '</button>'

@@ -1394,6 +1394,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const seen = new Set(); const out = [];
     (savedIbans || [])
       .filter(b => !onlyDb || b._db)
+      // Gönderen banka listesi de yalnızca firmanın KENDİ hesaplarından (bkz. autoFillGonderenIban).
+      .filter(b => !onlyDb || b._src === 'firma')
       .filter(b => !myNames || b._db || !myNames.has((b.firma || '').trim().toLowerCase()))
       .filter(b => b.firma && b.firma.trim().toLowerCase() === nm)
       .forEach(b => {
@@ -1710,6 +1712,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const _myNames = new Set((myFirms || []).map(f => (f.name || '').trim().toLowerCase()));
     const firmaMatches = savedIbans.map((b, i) => ({ ...b, i }))
       .filter(b => !_onlyDb || b._db)
+      // KÖK DÜZELTME (2026-07-31): GÖNDEREN havuzu YALNIZCA grup firmasının kendi banka
+      // hesaplarından (_src:'firma') beslenir. Bir MÜŞTERİ/TEDARİKÇİ kaydı, grup firmasıyla
+      // AYNI ADI taşıyorsa (ör. "YAŞAR CİHAN HAZIR BETON" hem firma hem cari olarak kayıtlıysa)
+      // ad eşleşmesi yüzünden o carinin IBAN'ı gönderende çıkıyordu → başka firmanın IBAN'ı.
+      // Alıcı tarafı etkilenmez, o zaten cari havuzunu kullanır.
+      .filter(b => !_onlyDb || b._src === 'firma')
       .filter(b => b._db || !_myNames.has((b.firma || '').trim().toLowerCase()))
       .filter(b => b.firma && b.firma.trim().toLowerCase() === firma);
     // ⚠️ ASIL HATA BURADAYDI: eşleşme yoksa eskiden sadece hide() yapılıp çıkılıyordu, önceki
@@ -2220,7 +2228,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             // Dedup YALNIZCA diğer banka (_db) kayıtlarına karşı; legacy (non-_db) aynı IBAN'lı
             // giriş banka kaydının eklenmesini ENGELLEMESİN (yoksa gönderende gerçek IBAN kaybolur).
             if(ib.iban && !savedIbans.some(b => b._db && b.iban === ib.iban && (b.firma||'').trim().toLowerCase() === f.name.trim().toLowerCase())){
-              savedIbans.push({ label: f.name + (ib.banka ? (' — ' + ib.banka) : ''), banka: ib.banka || '', iban: ib.iban, firma: f.name, _db: true });
+              // _src:'firma' → bu kayıt GRUP FİRMASININ kendi banka hesabıdır (gönderen olabilir).
+              savedIbans.push({ label: f.name + (ib.banka ? (' — ' + ib.banka) : ''), banka: ib.banka || '', iban: ib.iban, firma: f.name, _db: true, _src: 'firma' });
             }
           });
       }catch(e){ /* sessizce geç */ }
@@ -2302,7 +2311,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
         p.ibans.forEach(ib => {
           if(savedIbans.some(b => b.iban === ib.iban && b.firma.trim().toLowerCase() === p.name.toLowerCase())) return;
-          savedIbans.push({ label: p.name + (ib.bank ? (' — ' + ib.bank) : ''), banka: ib.bank || '', iban: ib.iban, firma: p.name, _db: true });
+          // _src:'cari' → bu kayıt bir MÜŞTERİ/TEDARİKÇİ/MUHATAP hesabıdır. ALICI tarafında
+          // kullanılır; GÖNDEREN havuzuna ASLA girmemeli. (kullanıcı 2026-07-31: "yine yanlış
+          // IBAN geldi" — cari adı grup firmasının adıyla aynı olunca gönderene sızıyordu.)
+          savedIbans.push({ label: p.name + (ib.bank ? (' — ' + ib.bank) : ''), banka: ib.bank || '', iban: ib.iban, firma: p.name, _db: true, _src: 'cari' });
         });
       });
 
