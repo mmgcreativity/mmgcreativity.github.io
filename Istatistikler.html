@@ -216,56 +216,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div id="content" hidden>
 
-    <h2 class="section-title" data-i18n="user_summary">👥 Kullanıcı Özeti</h2>
-    <div class="summary-grid">
-      <div class="summary-card clickable" data-user-filter="all">
-        <div class="summary-label"><span data-i18n="total_users">Toplam Kullanıcı</span> <span class="tap-hint" data-i18n="tap_hint">tıkla ▾</span></div>
-        <div class="summary-value azure" id="statUserTotal">—</div>
-      </div>
-      <div class="summary-card clickable" data-user-filter="member">
-        <div class="summary-label"><span data-i18n="standard_member">Standart Üye</span> <span class="tap-hint" data-i18n="tap_hint">tıkla ▾</span></div>
-        <div class="summary-value" id="statUserMember">—</div>
-      </div>
-      <div class="summary-card clickable" data-user-filter="premium">
-        <div class="summary-label"><span data-i18n="premium_member">Premium Üye</span> <span class="tap-hint" data-i18n="tap_hint">tıkla ▾</span></div>
-        <div class="summary-value brass" id="statUserPremium">—</div>
-      </div>
-      <div class="summary-card clickable" data-user-filter="referred">
-        <div class="summary-label"><span data-i18n="joined_via_referral">Referansla Katılan</span> <span class="tap-hint" data-i18n="tap_hint">tıkla ▾</span></div>
-        <div class="summary-value" id="statUserReferred">—</div>
-      </div>
-    </div>
-
-    <div id="userDetailWrap" class="user-detail-wrap" hidden>
-      <div class="toolbar">
-        <div class="user-detail-title" id="userDetailTitle" data-i18n="users_label">Kullanıcılar</div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn" id="refreshUsersBtn">↻ <span data-i18n="refresh">Yenile</span></button>
-          <button class="btn" id="closeUserDetailBtn">✕ <span data-i18n="close">Kapat</span></button>
-        </div>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th class="sortable-th" data-sort-key="username"><span data-i18n="th_user">Kullanıcı</span><span class="sort-arrow">▲▼</span></th>
-            <th class="sortable-th" data-sort-key="customerNumber"><span data-i18n="th_customer_no">Müşteri No</span><span class="sort-arrow">▲▼</span></th>
-            <th class="sortable-th" data-sort-key="isPremium"><span data-i18n="th_status">Durum</span><span class="sort-arrow">▲▼</span></th>
-            <th class="sortable-th" data-sort-key="referredBy"><span data-i18n="th_referral">Referans</span><span class="sort-arrow">▲▼</span></th>
-            <th class="sortable-th" data-sort-key="createdAt"><span data-i18n="th_signup_date">Kayıt Tarihi</span><span class="sort-arrow">▲▼</span></th>
-            <th class="sortable-th" data-sort-key="usageTotal"><span data-i18n="th_usage">Kullanım</span><span class="sort-arrow">▲▼</span></th>
-          </tr>
-          <tr class="user-filter-row">
-            <th><input type="text" class="user-col-filter" data-col="username" placeholder="Ara…" autocomplete="off"></th>
-            <th><input type="text" class="user-col-filter" data-col="customerNumber" placeholder="Ara…" autocomplete="off"></th>
-            <th><input type="text" class="user-col-filter" data-col="status" placeholder="Ara…" autocomplete="off"></th>
-            <th><input type="text" class="user-col-filter" data-col="referredBy" placeholder="Ara…" autocomplete="off"></th>
-            <th><input type="text" class="user-col-filter" data-col="date" placeholder="Ara…" autocomplete="off"></th>
-            <th><input type="text" class="user-col-filter" data-col="usage" placeholder="Ara…" autocomplete="off"></th>
-          </tr>
-        </thead>
-        <tbody id="tblUserDetailBody"></tbody>
-      </table>
-    </div>
+    <!-- "Kullanıcı Özeti" kartları + detay tablosu Kullanıcı Yönetim Paneli'ne (KullaniciYonetimi.html)
+         taşındı (kullanıcı isteği, 2026-07-31). JS'teki ilgili fonksiyonlar element yoksa sessizce atlar. -->
 
     <h2 class="section-title" data-i18n="usage_title">📊 En Çok Kullanılan Uygulamalar</h2>
     <div class="summary-card" style="padding:20px 24px;">
@@ -408,10 +360,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const total = allUsers.length;
     const premium = allUsers.filter(u => u.isPremium).length;
     const referred = allUsers.filter(u => !!u.referredBy).length;
-    document.getElementById('statUserTotal').textContent = total;
-    document.getElementById('statUserPremium').textContent = premium;
-    document.getElementById('statUserMember').textContent = total - premium;
-    document.getElementById('statUserReferred').textContent = referred;
+    // Özet kartları KullaniciYonetimi.html'e taşındı — element bu sayfada yoksa atla.
+    const setStat = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+    setStat('statUserTotal', total);
+    setStat('statUserPremium', premium);
+    setStat('statUserMember', total - premium);
+    setStat('statUserReferred', referred);
   }
 
   // ---------------- Kullanıcı Özeti kart tıklama ----------------
@@ -548,7 +502,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
 
   // Satır tıklamalarını tek seferlik "event delegation" ile dinle (her render'da yeniden eklemeye gerek yok)
-  tblUserDetailBody.addEventListener('click', (e) => {
+  if(tblUserDetailBody) tblUserDetailBody.addEventListener('click', (e) => {
     const row = e.target.closest('tr.clickable-row');
     if(!row) return;
     openUserModal(row.dataset.userId);
@@ -602,12 +556,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   });
 
-  closeUserDetailBtn.addEventListener('click', () => {
+  if(closeUserDetailBtn) closeUserDetailBtn.addEventListener('click', () => {
     userDetailWrap.hidden = true;
     document.querySelectorAll('.summary-card.clickable').forEach(c => c.classList.remove('active'));
   });
 
-  document.getElementById('refreshUsersBtn').addEventListener('click', async () => {
+  const refreshUsersBtnEl = document.getElementById('refreshUsersBtn');
+  if(refreshUsersBtnEl) refreshUsersBtnEl.addEventListener('click', async () => {
     const btn = document.getElementById('refreshUsersBtn');
     btn.disabled = true;
     const originalText = btn.textContent;

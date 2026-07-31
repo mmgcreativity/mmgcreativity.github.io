@@ -3556,6 +3556,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
       if(data.customerNumber) localStorage.setItem('mmg_customer_no', String(data.customerNumber));
       if(data.username) localStorage.setItem('mmg_username', data.username);
+      // Avatar/logo + profili HER auth değişiminde buluttan tazele. Hesap GEÇİŞİNDE
+      // (signInWithCustomToken) login-form akışı hiç çalışmadığı için önceki hesabın
+      // avatarı localStorage'da kalıyor ve "logo değişmedi" görünüyordu.
+      try{
+        const freshAvatar = data.avatarBase64 || user.photoURL || null;
+        if(freshAvatar) localStorage.setItem('mmg_avatar', freshAvatar); else localStorage.removeItem('mmg_avatar');
+        setAvatar(freshAvatar);
+        if(data.profile) localStorage.setItem('mmg_profile', JSON.stringify(data.profile)); else localStorage.removeItem('mmg_profile');
+      }catch(e){}
       updateUserBadge(data.customerNumber, data.username);
       // Firma Hesabı (üyelik rozeti + yöneticilik yetkisi): her ikisini de yükle — kendi
       // hata yakalamasıyla, olası bir sorun yukarıdaki temel güncellemeleri asla engellemesin.
@@ -4065,6 +4074,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           const { data } = await httpsCallable(functions, 'accountSwitchToken')({ targetUid: targetUid });
           if(!data || !data.token) throw new Error('token yok');
           await signInWithCustomToken(auth, data.token);
+          // Önceki hesabın kişisel önbelleğini temizle — avatar/logo, profil, firma ve
+          // aktif veri kapsamı yeni hesapta asılı kalmasın (yenidençizim reload'da yapılır).
+          try{
+            ['mmg_avatar','mmg_profile','mmg_username','mmg_customer_no',
+             'mmg_company_id','mmg_company_role','mmg_company_name',
+             'mmg_active_data_scope','mmg_active_company_id','mmg_last_open_page'
+            ].forEach(k => localStorage.removeItem(k));
+          }catch(e){}
           location.reload();
         }catch(err){
           if(mainEl) mainEl.textContent = prevText;

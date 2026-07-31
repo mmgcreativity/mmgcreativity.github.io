@@ -283,6 +283,25 @@
   <div class="card" id="adminAllUsersCard" style="display:none; margin-top:12px;">
     <h2 style="margin-bottom:4px;">🛡️ Tüm Kullanıcılar <span style="font-size:12px; color:var(--muted); font-weight:600;">(yalnız site yöneticisi)</span></h2>
     <div class="card-sub">Platformdaki tüm kayıtlı kullanıcılar. Firma yöneticileri yalnızca kendi kullanıcılarını görür; bu liste yalnızca site yöneticisine açıktır.</div>
+    <!-- Kullanıcı Özeti kartları (İstatistikler'den taşındı) — tıkla: tabloyu o gruba filtreler -->
+    <div id="kySummaryGrid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:12px 0 4px;">
+      <div class="ky-sum-card" data-ky-filter="all" style="cursor:pointer; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:12px 14px;">
+        <div style="font-size:11px; color:var(--muted); font-weight:700; letter-spacing:.4px; text-transform:uppercase;">Toplam Kullanıcı <span style="font-weight:600; opacity:.7;">tıkla ▾</span></div>
+        <div id="kyStatTotal" style="font-size:22px; font-weight:800; color:var(--azure,#4EA3F0); margin-top:4px;">—</div>
+      </div>
+      <div class="ky-sum-card" data-ky-filter="member" style="cursor:pointer; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:12px 14px;">
+        <div style="font-size:11px; color:var(--muted); font-weight:700; letter-spacing:.4px; text-transform:uppercase;">Standart Üye <span style="font-weight:600; opacity:.7;">tıkla ▾</span></div>
+        <div id="kyStatMember" style="font-size:22px; font-weight:800; color:var(--text); margin-top:4px;">—</div>
+      </div>
+      <div class="ky-sum-card" data-ky-filter="premium" style="cursor:pointer; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:12px 14px;">
+        <div style="font-size:11px; color:var(--muted); font-weight:700; letter-spacing:.4px; text-transform:uppercase;">Premium Üye <span style="font-weight:600; opacity:.7;">tıkla ▾</span></div>
+        <div id="kyStatPremium" style="font-size:22px; font-weight:800; color:var(--brass,#C6A15B); margin-top:4px;">—</div>
+      </div>
+      <div class="ky-sum-card" data-ky-filter="referred" style="cursor:pointer; background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px; padding:12px 14px;">
+        <div style="font-size:11px; color:var(--muted); font-weight:700; letter-spacing:.4px; text-transform:uppercase;">Referansla Katılan <span style="font-weight:600; opacity:.7;">tıkla ▾</span></div>
+        <div id="kyStatReferred" style="font-size:22px; font-weight:800; color:var(--text); margin-top:4px;">—</div>
+      </div>
+    </div>
     <div style="display:flex; gap:8px; align-items:center; margin:10px 0; flex-wrap:wrap;">
       <input type="text" id="adminUserSearch" placeholder="🔍 Ara: kod, ad veya e-posta" style="flex:1; min-width:180px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;">
       <span id="adminUserCount" style="font-size:12.5px; color:var(--muted); font-weight:600;"></span>
@@ -291,11 +310,11 @@
       <table style="width:100%; border-collapse:collapse; font-size:13px;">
         <thead>
           <tr>
-            <th style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700; white-space:nowrap;">#Kod</th>
-            <th style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700;">Kullanıcı</th>
-            <th style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700;">E-posta</th>
-            <th style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700;">Durum</th>
-            <th style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700; white-space:nowrap;">Kayıt</th>
+            <th class="ky-sort-th" data-ky-sort="code" style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700; white-space:nowrap; cursor:pointer; user-select:none;">#Kod <span class="ky-sort-arrow" style="font-size:9px; opacity:.6;">▲▼</span></th>
+            <th class="ky-sort-th" data-ky-sort="name" style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700; cursor:pointer; user-select:none;">Kullanıcı <span class="ky-sort-arrow" style="font-size:9px; opacity:.6;">▲▼</span></th>
+            <th class="ky-sort-th" data-ky-sort="email" style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700; cursor:pointer; user-select:none;">E-posta <span class="ky-sort-arrow" style="font-size:9px; opacity:.6;">▲▼</span></th>
+            <th class="ky-sort-th" data-ky-sort="premium" style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700; cursor:pointer; user-select:none;">Durum <span class="ky-sort-arrow" style="font-size:9px; opacity:.6;">▲▼</span></th>
+            <th class="ky-sort-th" data-ky-sort="createdAt" style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700; white-space:nowrap; cursor:pointer; user-select:none;">Kayıt <span class="ky-sort-arrow" style="font-size:9px; opacity:.6;">▲▼</span></th>
           </tr>
           <tr>
             <th style="padding:4px 6px; border-bottom:1px solid var(--hairline);"><input type="text" class="ky-col-filter" id="fltKod" placeholder="Ara…" autocomplete="off" style="width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px; padding:5px 8px; color:var(--text); font-size:12px; font-family:'Inter',sans-serif;"></th>
@@ -664,6 +683,7 @@
   // ---- ADMIN-ONLY: Tüm site kullanıcıları tablosu (yalnız users/{uid}.isAdmin===true) ----
   // Firestore kuralları: admin, tüm users dokümanlarını okuyabilir (collection sorgusu geçerli).
   let allSiteUsers = [];
+  let kySortKey = 'code', kySortDir = 'asc', kyGroupFilter = 'all';
   function escapeHtmlKY(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -681,6 +701,10 @@
     const cf = id => { const el = document.getElementById(id); return (el && el.value || '').trim().toLowerCase(); };
     const fKod = cf('fltKod'), fAd = cf('fltAd'), fEp = cf('fltEposta'), fDr = cf('fltDurum'), fKy = cf('fltKayit');
     const rows = allSiteUsers.filter(u => {
+      // Özet kartı grup filtresi (Toplam/Standart/Premium/Referansla)
+      if(kyGroupFilter === 'member' && u.premium) return false;
+      if(kyGroupFilter === 'premium' && !u.premium) return false;
+      if(kyGroupFilter === 'referred' && !u.referred) return false;
       const durumTxt = (u.premium ? 'premium' : 'standart');
       const dateTxt = fmtDateKY(u.createdAt).toLowerCase();
       if(q && (u.code + ' ' + u.name + ' ' + u.email).toLowerCase().indexOf(q) === -1) return false;
@@ -690,6 +714,22 @@
       if(fDr && durumTxt.indexOf(fDr) === -1) return false;
       if(fKy && dateTxt.indexOf(fKy) === -1) return false;
       return true;
+    });
+    // Başlığa tıklamalı sıralama (ikinci tıklama yönü çevirir)
+    const dir = kySortDir === 'asc' ? 1 : -1;
+    rows.sort((a, b) => {
+      let va, vb;
+      if(kySortKey === 'code'){ va = parseInt(a.code, 10) || 999999; vb = parseInt(b.code, 10) || 999999; }
+      else if(kySortKey === 'premium'){ va = a.premium ? 1 : 0; vb = b.premium ? 1 : 0; }
+      else if(kySortKey === 'createdAt'){ va = a.createdAt || 0; vb = b.createdAt || 0; }
+      else { va = String(a[kySortKey] || '').toLocaleLowerCase('tr'); vb = String(b[kySortKey] || '').toLocaleLowerCase('tr'); }
+      if(va < vb) return -1 * dir;
+      if(va > vb) return 1 * dir;
+      return 0;
+    });
+    document.querySelectorAll('.ky-sort-th').forEach(th => {
+      const ar = th.querySelector('.ky-sort-arrow');
+      if(ar) ar.textContent = th.dataset.kySort === kySortKey ? (kySortDir === 'asc' ? '▲' : '▼') : '▲▼';
     });
     if(cnt) cnt.textContent = rows.length + ' / ' + allSiteUsers.length;
     if(!rows.length){
@@ -727,10 +767,18 @@
           name: nm,
           email: em,
           premium: !!u.isPremium,
+          referred: !!u.referredBy,
           createdAt: (u.createdAt && u.createdAt.toMillis) ? u.createdAt.toMillis() : null
         });
       });
       allSiteUsers.sort((a, b) => (parseInt(a.code, 10) || 999999) - (parseInt(b.code, 10) || 999999));
+      // Kullanıcı Özeti kartları (İstatistikler'den taşındı)
+      const setKy = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+      const kyPrem = allSiteUsers.filter(u => u.premium).length;
+      setKy('kyStatTotal', allSiteUsers.length);
+      setKy('kyStatPremium', kyPrem);
+      setKy('kyStatMember', allSiteUsers.length - kyPrem);
+      setKy('kyStatReferred', allSiteUsers.filter(u => u.referred).length);
       renderAdminAllUsers();
     }catch(e){
       if(empty){ empty.style.display = 'block'; empty.textContent = 'Tüm kullanıcılar okunamadı (yalnız site yöneticisi görebilir).'; }
@@ -741,6 +789,22 @@
     const s = document.getElementById('adminUserSearch');
     if(s) s.addEventListener('input', renderAdminAllUsers);
     document.querySelectorAll('.ky-col-filter').forEach(el => el.addEventListener('input', renderAdminAllUsers));
+    // Özet kartları: tıkla → o gruba filtrele; tekrar tıkla → filtreyi kaldır
+    document.querySelectorAll('.ky-sum-card').forEach(card => card.addEventListener('click', () => {
+      const key = card.dataset.kyFilter;
+      kyGroupFilter = (kyGroupFilter === key) ? 'all' : key;
+      document.querySelectorAll('.ky-sum-card').forEach(c => {
+        c.style.borderColor = (c.dataset.kyFilter === kyGroupFilter && kyGroupFilter !== 'all') ? 'var(--brass,#C6A15B)' : 'var(--hairline)';
+      });
+      renderAdminAllUsers();
+    }));
+    // Başlık sıralama: tıkla → sırala, ikinci tıklama tersine çevirir
+    document.querySelectorAll('.ky-sort-th').forEach(th => th.addEventListener('click', () => {
+      const key = th.dataset.kySort;
+      if(kySortKey === key){ kySortDir = (kySortDir === 'asc') ? 'desc' : 'asc'; }
+      else { kySortKey = key; kySortDir = 'asc'; }
+      renderAdminAllUsers();
+    }));
   })();
 
   onAuthStateChanged(auth, async (user) => {

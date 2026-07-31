@@ -264,6 +264,13 @@ service cloud.firestore {
     match /{path=**}/members/{memberId} {
       allow read: if request.auth != null;
     }
+    // collectionGroup('firmas') sorgusu (KullaniciYonetimi.html "Bekleyen Davetler" —
+    // bir firmaya gönderilmiş davetleri firmaInvites/{kod}/firmas altından toplu bulmak
+    // için). Doğrudan yol kuralı (aşağıda firmaInvites içinde) collectionGroup sorgularını
+    // KAPSAMAZ; index tek başına yetmez, bu kök wildcard kural da şart (members ile aynı desen).
+    match /{path=**}/firmas/{inviteFirmaId} {
+      allow read: if request.auth != null;
+    }
     match /firmaInvites/{code} {
       allow read, write: if request.auth != null;
       // Bir kullanıcı kodu aynı anda birden fazla firmaya kullanıcı olarak davet edilebilsin diye
