@@ -892,7 +892,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       btn.classList.add('active');
       document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
       // Her sekmenin kendi alanına uygun "Toplu Excel ile Yükle" kartı var (Müşteriler/
-      // Tedarikçiler: Tip+Ünvan+TC/Vergi+Banka+IBAN+Döviz; IBAN'larım: Banka+IBAN; Çalıştığım
+      // Tedarikçiler: FirmaKodu+Ünvan+TC/Vergi+Banka+IBAN+Döviz (tür=aktif sekme); IBAN'larım: Banka+IBAN; Çalıştığım
       // Bankalar: sadece Banka Adı; Muhataplar: Ünvan+Not). Hepsi aynı konumda (üst satır,
       // orta sütun) görünür, aktif sekmeye göre sadece biri gösterilir.
       const cardByTab = {
@@ -1465,14 +1465,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
     try{
-      const header = [LBL.bulkTypeCol, LBL.bulkNameCol, LBL.bulkIdCol, LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol, LBL.bulkFirmaCodeCol];
-      const example1 = [LBL.bulkTypeCustomer, 'ABC İnşaat A.Ş.', '1234567890', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY', '1000'];
-      const example2 = [LBL.bulkTypeCustomer, 'ABC İnşaat A.Ş.', '1234567890', 'Ziraat Bankası', 'TR111111111111111111111111', 'USD', '1000'];
-      const example3 = [LBL.bulkTypeSupplier, 'XYZ Ticaret Ltd.', '9876543210', 'Garanti BBVA', 'TR222222222222222222222222', 'EUR', '1000'];
-      const note = [MMG_LANG==='en' ? 'Type must be exactly "Customer" or "Supplier". A party with multiple accounts repeats on several rows with the same Name — even the SAME bank can appear on multiple rows with different IBANs / currencies (TRY, USD, EUR…). "Company Code" is REQUIRED: enter the code of the company this record belongs to (shown in the User Management Panel, e.g. 1000). Rows with a missing or unmatched code are SKIPPED.' : '"Tip" sütunu tam olarak "Müşteri" ya da "Tedarikçi" olmalı. Birden fazla hesabı olan firma için aynı Ünvan\'ı alt alta tekrar edin — AYNI banka bile farklı IBAN / döviz (TRY, USD, EUR…) ile birden çok satırda yer alabilir. "Firma Kodu" ZORUNLUDUR: kaydın ait olduğu firmanın kodunu yazın (Kullanıcı Yönetim Paneli\'nde görünür, örn. 1000). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ.'];
+      // "Tip" sütunu KALDIRILDI (kullanıcı isteği): kayıt türü, yüklemenin yapıldığı AKTİF
+      // SEKMEDEN (Müşteriler/Tedarikçiler) belirlenir. Eski dosyalarda Tip varsa yine okunur.
+      const header = [LBL.bulkFirmaCodeCol, LBL.bulkNameCol, LBL.bulkIdCol, LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol];
+      const example1 = ['1000', 'ABC İnşaat A.Ş.', '1234567890', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY'];
+      const example2 = ['1000', 'ABC İnşaat A.Ş.', '1234567890', 'Ziraat Bankası', 'TR111111111111111111111111', 'USD'];
+      const example3 = ['1000', 'XYZ Ticaret Ltd.', '9876543210', 'Garanti BBVA', 'TR222222222222222222222222', 'EUR'];
+      const note = [MMG_LANG==='en' ? 'Records are saved to the TAB you upload from (Customers or Suppliers). A party with multiple accounts repeats on several rows with the same Name — even the SAME bank can appear on multiple rows with different IBANs / currencies (TRY, USD, EUR…). "Company Code" is REQUIRED: enter the code of the company this record belongs to (shown in the User Management Panel, e.g. 1000). Rows with a missing or unmatched code are SKIPPED.' : 'Kayıtlar, yüklemeyi yaptığınız SEKMEYE (Müşteriler ya da Tedarikçiler) kaydedilir. Birden fazla hesabı olan firma için aynı Ünvan\'ı alt alta tekrar edin — AYNI banka bile farklı IBAN / döviz (TRY, USD, EUR…) ile birden çok satırda yer alabilir. "Firma Kodu" ZORUNLUDUR: kaydın ait olduğu firmanın kodunu yazın (Kullanıcı Yönetim Paneli\'nde görünür, örn. 1000). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ.'];
       const rows = [header, example1, example2, example3, [], note];
       const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols'] = [{wch:12},{wch:28},{wch:16},{wch:20},{wch:30},{wch:10},{wch:14}];
+      ws['!cols'] = [{wch:14},{wch:28},{wch:16},{wch:20},{wch:30},{wch:10}];
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, MMG_LANG==='en' ? 'Template' : 'Şablon');
       XLSX.writeFile(wb, 'veri-girisi-sablon.xlsx');
@@ -1500,7 +1502,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         const typeRaw = String(row['Tip'] ?? row['Type'] ?? '').trim().toLowerCase();
         const name = String(row['Ünvan'] ?? row['Unvan'] ?? row['Name'] ?? '').trim();
         if(!name) continue;
-        const isSupplier = typeRaw.includes('tedarik') || typeRaw.includes('supplier');
+        // Tür: yeni şablonda "Tip" sütunu yok → yüklemenin yapıldığı AKTİF SEKME belirler.
+        // Eski dosyalarda Tip doluysa o değer önceliklidir (geriye dönük uyum).
+        const activeTabKind = (document.querySelector('.veri-tab-btn.active')?.dataset.tab === 'suppliers') ? 'suppliers' : 'customers';
+        const isSupplier = typeRaw ? (typeRaw.includes('tedarik') || typeRaw.includes('supplier')) : (activeTabKind === 'suppliers');
         const kind = isSupplier ? 'suppliers' : 'customers';
         const idNumber = String(row['TC/Vergi No'] ?? row['TC'] ?? row['Vergi No'] ?? row['ID'] ?? row['TC/Tax No'] ?? '').trim();
         const bank = String(row['Banka'] ?? row['Bank'] ?? '').trim();
@@ -1532,9 +1537,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const rows = [];
     groups.forEach(g => {
       const ibansText = g.ibans.map(i => (i.bank||'—') + ' · ' + (i.iban||'—') + ' · ' + i.currency).join('<br>') || '—';
-      rows.push('<tr><td>' + (g.kind === 'suppliers' ? LBL.bulkTypeSupplier : LBL.bulkTypeCustomer) + '</td><td>' + escapeHtml(g.name) + '</td><td>' + escapeHtml(g.idNumber||'—') + '</td><td>' + ibansText + '</td></tr>');
+      rows.push('<tr><td>' + escapeHtml(g.name) + '</td><td>' + escapeHtml(g.idNumber||'—') + '</td><td>' + ibansText + '</td></tr>');
     });
-    table.innerHTML = '<thead><tr><th>' + LBL.bulkTypeCol + '</th><th>' + LBL.bulkNameCol + '</th><th>' + LBL.bulkIdCol + '</th><th>IBAN</th></tr></thead><tbody>' + rows.join('') + '</tbody>';
+    table.innerHTML = '<thead><tr><th>' + LBL.bulkNameCol + '</th><th>' + LBL.bulkIdCol + '</th><th>IBAN</th></tr></thead><tbody>' + rows.join('') + '</tbody>';
     document.getElementById('bulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: rowCount, p: groups.size });
     wrap.style.display = 'block';
   }
