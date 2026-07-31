@@ -1405,9 +1405,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // _db:true) gelir; eski legacy "kayitliMuhataplar" girişleri (düzinelerce IBAN) gönderende
     // gösterilmez. Alıcı (recipient) listesi eskisi gibi tüm kayıtlı kaynaklardan gelir.
     const onlyDb = (ibanSelectId === 'fGonderenIbanSaved') && !!(window.mmgCloud && window.mmgCloud.scopeCollection === 'firmaAccounts');
+    // EK KORUMA: GÖNDEREN listesinde, GRUP FİRMASI adını taşıyan legacy (non-_db) girişler
+    // HİÇBİR kapsamda gösterilmez. Kapsam (hesap geçişi sonrası) kişisel'e düşmüş olsa bile
+    // eski kayitliMuhataplar'daki düzinelerce Akbank IBAN'ı gönderene sızmasın; gerçek banka
+    // kayıtları (_db) her zaman gelir. Kişisel kullanıcıların kendi kayıtları etkilenmez
+    // (onların firması myFirms'te olmadığı için ad eşleşmez).
+    const senderMyNames = (ibanSelectId === 'fGonderenIbanSaved')
+      ? new Set((myFirms || []).map(f => (f.name || '').trim().toLowerCase()))
+      : null;
     const base = savedIbans
       .map((b, i) => ({ ...b, i }))
       .filter(b => !onlyDb || b._db)
+      .filter(b => !senderMyNames || b._db || !senderMyNames.has((b.firma || '').trim().toLowerCase()))
       .filter(b => !firmaName || (b.firma && b.firma.trim().toLowerCase() === firmaName));
     // Seçili banka varken önce o bankanın kayıtları; AMA seçili bankada hiç kayıt yoksa
     // liste BOŞ BIRAKILMAZ (kullanıcı: "kayıtlılar gelmiyor") — firmanın tüm IBAN'ları gösterilir.
@@ -1597,8 +1606,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // Gönderen otomatik-dolumu da YALNIZCA firma banka hesaplarını (banks / _db) dikkate alır;
     // legacy kayitliMuhataplar IBAN'ları gönderen tarafında kullanılmaz.
     const _onlyDb = !!(window.mmgCloud && window.mmgCloud.scopeCollection === 'firmaAccounts');
+    // Grup firması adını taşıyan legacy girişler otomatik-dolumda da HİÇBİR kapsamda kullanılmaz
+    // (refreshIbanSelectForFirma'daki senderMyNames korumasıyla aynı kural).
+    const _myNames = new Set((myFirms || []).map(f => (f.name || '').trim().toLowerCase()));
     const firmaMatches = savedIbans.map((b, i) => ({ ...b, i }))
       .filter(b => !_onlyDb || b._db)
+      .filter(b => b._db || !_myNames.has((b.firma || '').trim().toLowerCase()))
       .filter(b => b.firma && b.firma.trim().toLowerCase() === firma);
     if(!firmaMatches.length){ hide(); return; }
     const byBank = banka ? firmaMatches.filter(b => (b.banka || '').trim().toLowerCase() === banka) : firmaMatches;
