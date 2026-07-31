@@ -4485,7 +4485,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // seçim mmg_active_data_scope içinde saklanır ve araç sayfaları (Gelirler/Giderler/
   // Nakit Akış) bu firmanın PAYLAŞIMLI veri havuzunu kullanır. "Kendi Verilerim" seçiliyse
   // (varsayılan) her şey eskisi gibi kişisel hesaba kaydedilir.
-  let mmgFirmaMemberships = []; // [{id, name, role}]
+  let mmgFirmaMemberships = []; // [{id, name, code, role}]
+
+  // Firma kodu adın BAŞINDA ve listeler kod sırasında (kullanıcı isteği 2026-07-31).
+  // Kod sayısalsa sayı olarak karşılaştırılır; kodu olmayan firmalar en sona.
+  function mmgFirmaCodeSort(a, b){
+    const ca = String((a && a.code) || '').trim(), cb = String((b && b.code) || '').trim();
+    if(ca && !cb) return -1;
+    if(!ca && cb) return 1;
+    if(ca && cb){
+      const na = Number(ca), nb = Number(cb);
+      if(Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
+      const c = ca.localeCompare(cb, 'tr', { numeric: true });
+      if(c) return c;
+    }
+    return String((a && a.name) || '').localeCompare(String((b && b.name) || ''), 'tr');
+  }
+  function mmgFirmaLabelText(f){
+    const code = String((f && f.code) || '').trim();
+    return (code ? code + ' ' : '') + String((f && f.name) || '');
+  }
   async function loadFirmaMemberships(uid){
     mmgFirmaMemberships = [];
     try{
@@ -4537,11 +4556,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           if(fSnap.exists()){
             mmgFirmaMemberships.push({
               id: fid, name: fSnap.data().name || fid,
+              code: (fSnap.data().firmaCode || '').toString(),
               role: adminIds.includes(fid) ? MMGI18N.t('dropdown_user_management') : (MMGI18N.lang==='en' ? 'User' : 'Kullanıcı')
             });
           }
         }catch(e){ /* tek bir firma okunamazsa listeyi bozmadan devam et */ }
       }
+      // Firma listesi HER ZAMAN firma koduna göre sıralı (kullanıcı isteği 2026-07-31).
+      mmgFirmaMemberships.sort(mmgFirmaCodeSort);
     }catch(e){ /* sessizce geç */ }
     renderFirmaBadge();
   }
@@ -4589,10 +4611,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       localStorage.setItem('mmg_active_data_scope', activeScope);
     }
     const activeFirma = mmgFirmaMemberships.find(f => f.id === activeScope);
-    if(currentEl) currentEl.textContent = '🏢 ' + (activeFirma ? activeFirma.name : '');
+    if(currentEl) currentEl.textContent = '🏢 ' + (activeFirma ? mmgFirmaLabelText(activeFirma) : '');
     // Her zaman görünür sol-alt çubuk: hangi firmada işlem yapıldığını sürekli göster.
     if(firmaBar && firmaBarName){
-      firmaBarName.textContent = '🏢 ' + (activeFirma ? activeFirma.name : '');
+      firmaBarName.textContent = '🏢 ' + (activeFirma ? mmgFirmaLabelText(activeFirma) : '');
       firmaBar.hidden = false;
     }
     // Listede sadece DİĞER firmalar görünür (o an aktif olan zaten üstte, canlı
@@ -4605,7 +4627,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       popup.innerHTML = mmgFirmaMemberships.map(f =>
         '<div class="fsp-row' + (f.id === activeScope ? ' active' : '') + '" data-scope="' + f.id + '">' +
           '<span class="fsp-dot" style="background:' + (f.id === activeScope ? 'var(--teal,#3FB68A)' : 'var(--muted,#8D96AC)') + ';"></span>' +
-          '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🏢 ' + f.name + '</span>' +
+          '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🏢 ' +
+            (String(f.code || '').trim() ? '<span style="color:var(--brass,#C6A15B);font-weight:700;">' + f.code + '</span> ' : '') +
+            f.name + '</span>' +
         '</div>'
       ).join('');
       popup.querySelectorAll('[data-scope]').forEach(row => {
