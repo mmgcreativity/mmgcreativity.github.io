@@ -305,6 +305,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     cursor:pointer; border:1px solid var(--hairline); background:transparent; color:var(--text); }
   .mmg-ask-actions button.primary{ background:var(--brass,#C6A15B); border-color:var(--brass,#C6A15B); color:#101725; }
   .mmg-ask-actions button.ghost{ color:var(--muted); }
+
+  /* Liste arama kutusu (kullanıcı isteği 2026-07-31): IBAN'larım, Müşteriler, Tedarikçiler,
+     Muhataplar, Personeller ve Çalıştığım Bankalar listelerinin ÜSTÜNDE, yazdıkça filtreler. */
+  .mmg-list-search{ display:flex; align-items:center; gap:10px; margin:12px 0 8px; }
+  .mmg-list-search input{
+    flex:1 1 auto; min-width:0; background:var(--surface-2); border:1px solid var(--hairline);
+    border-radius:9px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif;
+    font-size:13px; outline:none;
+  }
+  .mmg-list-search input:focus{ border-color:var(--brass-dim,var(--brass)); }
+  .mmg-list-search .mmg-list-count{ flex:0 0 auto; font-size:12px; color:var(--muted); white-space:nowrap; }
   .bulk-summary{ font-size:12.5px; color:var(--muted); margin-top:10px; }
 
   /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
@@ -2347,6 +2358,71 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }catch(e){ /* instance metodu yoksa modülere düş */ }
     return onAuthStateChanged(auth, cb);
   }
+  // ---- Liste araması (kullanıcı isteği 2026-07-31: "IBAN'larımda, müşterilerde,
+  // tedarikçilerde, personellerde, bankalarda arama olsun, sütun üstünde") ----
+  // Her listenin ÜSTÜNE bir arama kutusu koyar ve yazdıkça satırları eler. Render
+  // fonksiyonlarına DOKUNMAZ: listeyi kim yeniden çizerse çizsin, MutationObserver
+  // filtreyi otomatik yeniden uygular. Böylece ekle/sil/yenile akışları bozulmaz.
+  function mmgListSearchNorm(s){
+    return String(s || '')
+      .toLocaleLowerCase('tr')
+      .replace(/[İIı]/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+  function mmgAttachListSearch(containerId, placeholder){
+    const list = document.getElementById(containerId);
+    if(!list || list.dataset.searchWired === '1') return;
+    list.dataset.searchWired = '1';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'mmg-list-search';
+    const input = document.createElement('input');
+    input.type = 'search';
+    input.placeholder = placeholder;
+    input.autocomplete = 'off';
+    const count = document.createElement('span');
+    count.className = 'mmg-list-count';
+    wrap.appendChild(input);
+    wrap.appendChild(count);
+    list.parentNode.insertBefore(wrap, list);
+
+    // Satırın aranabilir metni: görünen yazı + input/select DEĞERLERİ. Değerler şart, çünkü
+    // "Çalıştığım Bankalar" satırlarında banka adı bir <input value> içinde duruyor ve
+    // textContent'te GÖRÜNMEZ.
+    function rowText(el){
+      let t = el.textContent || '';
+      el.querySelectorAll('input, select, textarea').forEach(f => { t += ' ' + (f.value || ''); });
+      return mmgListSearchNorm(t);
+    }
+    function apply(){
+      const q = mmgListSearchNorm(input.value);
+      const rows = Array.from(list.children);
+      let shown = 0;
+      rows.forEach(r => {
+        if(r.nodeType !== 1) return;
+        const ok = !q || rowText(r).includes(q);
+        r.style.display = ok ? '' : 'none';
+        if(ok) shown++;
+      });
+      count.textContent = rows.length ? (q ? shown + ' / ' + rows.length : String(rows.length)) : '';
+    }
+    input.addEventListener('input', apply);
+    // Liste yeniden çizilince (ekle/sil/yenile) filtreyi tekrar uygula.
+    new MutationObserver(() => apply()).observe(list, { childList: true });
+    apply();
+  }
+  function mmgWireAllListSearches(){
+    const en = MMG_LANG === 'en';
+    mmgAttachListSearch('banksChipList',        en ? 'Search IBANs (bank, IBAN, note…)' : 'IBAN ara (banka, IBAN, açıklama…)');
+    mmgAttachListSearch('customersList',        en ? 'Search customers…'                : 'Müşteri ara…');
+    mmgAttachListSearch('suppliersList',        en ? 'Search suppliers…'                : 'Tedarikçi ara…');
+    mmgAttachListSearch('counterpartiesList',   en ? 'Search counterparties…'           : 'Muhatap ara…');
+    mmgAttachListSearch('personnelList',        en ? 'Search personnel (name, ID no…)'  : 'Personel ara (ad, TC…)');
+    mmgAttachListSearch('bankListEditor',       en ? 'Search banks…'                    : 'Banka ara…');
+  }
+
   watchAuthState(async (user) => {
     if(!user){
       showState('<div class="big">🔒</div>' + LBL.loginRequired + LBL.loginRequiredHint);
@@ -2356,6 +2432,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       await resolveScope(user);
       stateArea.innerHTML = '';
       content.hidden = false;
+      mmgWireAllListSearches(); // içerik görünür olduktan SONRA — gizliyken ölçüm/observer sorunlu
       await loadAll();
     } catch(e){
       showState('<div class="big">⚠️</div><b>' + LBL.errorTitle + '</b><br>' + LBL.errorSub);
