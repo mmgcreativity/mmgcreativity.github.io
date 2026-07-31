@@ -1,16 +1,157 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-07-31 (5. otonom oturum SONU — kullanıcı başka bilgisayara geçiyor)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-bekleyen-5is'` (repo ~432 commit).
+Son güncelleme: **2026-08-01 (7. otonom oturum — `C:\Users\muham\...` bilgisayarı)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-08-01-playstore-oylama-bayat-kapsam'` (repo ~470 commit).
+
+> ⚠️ **İKİ BİLGİSAYAR UYARISI (yeni):** Bu proje artık iki makineden yürütülüyor — `C:\Users\muham\...` ve `C:\Users\CihanFinans\...`. 7. oturumda, 6. oturumun (diğer makine) yazdığı devir notu ve `firestore.rules` değişikliği OneDrive üzerinden **oturumun ortasında** geldi. Devir notunu **ASLA baştan yazma, kendi bölümünü EKLE**; yoksa diğer makinenin notlarını silersin. Deploy öncesi `git`/GitHub commit listesine bakıp başka bir oturumun commit atıp atmadığını kontrol et.
 
 ## 🔴 YENİ OTURUMA HIZLI BAŞLANGIÇ (önce bunu oku)
-1. **OneDrive senkron kontrolü ŞART** (`mmg-onedrive-sync-guard` skill): başka bilgisayardasın — yerel klasör bayat olabilir. Deploy öncesi marker kontrolü: `service-worker.js → SW_VERSION = '2026-07-31-bekleyen-5is'` olmalı. Yerel dosya farklıysa GÜNCEL KAYNAK = GitHub repo (`main`); yereldeki eski dosyayı repodan tazele, ASLA eski yerel dosyayı deploy etme.
-2. **Doğrulama bekleyenler (kod tamam, kullanıcı testi bekliyor):**
-   - "← Ana Sayfa" butonları masaüstü kabukta gizleme (i18n-core.js) CANLIDA doğrulandı; kullanıcı ekranında hâlâ görünüyorsa sebep CDN/tarayıcı cache → Ctrl+Shift+R. Hâlâ görünürse SW cache force-temizleme eklenebilir.
-   - Hesap geçişi (INTERNAL): IAM rolü verildi (ekran teyitli) — kullanıcı henüz "çalıştı" demedi, test edilmeli.
-   - Bekleyen davetlerin listede görünmesi (firmas.firmaId index'i canlı) — test edilmeli.
-   - IBAN akışı: kullanıcı "Tüm IBAN'ları Sil → yeni şablonla (Firma Kodu zorunlu) yeniden yükle" akışını henüz uygulamadı; sonuç doğrulanmalı.
+1. **OneDrive senkron kontrolü ŞART** (`mmg-onedrive-sync-guard` skill). Deploy öncesi marker kontrolü: `service-worker.js → SW_VERSION` yukarıdaki değerle aynı olmalı. Yerel dosya farklıysa GÜNCEL KAYNAK = GitHub repo (`main`); yereldeki eski dosyayı repodan tazele, ASLA eski yerel dosyayı deploy etme.
+   ⚠️ 7. oturumda bu tuzak GERÇEKTEN yaşandı: ilk okumada yerel dosyalar bayattı, birkaç saniye sonra senkron bitince değiştiler. Dosyayı okuduktan sonra bile bir kez daha doğrula.
+2. **⛔ KULLANICI TARAFINDA BEKLEYEN — ÖNCELİKLİ:**
+   - **GÜVENLİK:** Google OAuth **client secret 3 kez açığa çıktı** (2 ekran görüntüsü + PowerShell geçmişi). Google Cloud → Clients → "Blogger Publish" → **Reset secret** → `firebase functions:secrets:set BLOGGER_CLIENT_SECRET` → `firebase deploy --only functions:publishToBlogger`. **Resend API anahtarı** da hâlâ yenilenmedi.
+   - **YASAL:** `premium.html` üç sözleşme sayfasına link veriyor, **üçü de canlıda 404**: `mesafeli-satis-sozlesmesi.html`, `iptal-iade.html`, `kvkk.html`. Ödeme sayfasında olmayan sözleşme linkleri. Metinleri kullanıcı sağlamalı — hukuki metin uydurulmadı.
+   - `firebase deploy --only firestore:rules` (bekleyen davet listesi — 6. oturumdan kalan).
+3. **Doğrulama bekleyenler (kod tamam, kullanıcı testi bekliyor):**
+   - ✅ Ana sayfa / "← Ana Sayfa" gizleme: kullanıcı "ana sayfa ok" dedi (6. oturum).
+   - ✅ Hesap geçişi (INTERNAL): ÇALIŞIYOR ("kullanıcı geçişi ok") — ama avatar/logo eski hesapta kalıyordu → 6. oturumda düzeltildi (aşağıda), kullanıcı yeni sürümle tekrar test etmeli.
+   - ⏳ **Bekleyen davet listesi:** index YETMEDİ — kök neden `collectionGroup('firmas')` için kural yoktu; `firestore.rules`'a `{path=**}/firmas` read kuralı eklendi. **KULLANICI ÇALIŞTIRMALI: `firebase deploy --only firestore:rules`** — sonra davetler görünür.
+   - IBAN akışı: "Tüm IBAN'ları Sil → yeni şablonla (Firma Kodu zorunlu) yeniden yükle" hâlâ uygulanmadı; sonuç doğrulanmalı.
 3. **Muhtemel sıradaki istekler:** KUR/hesap-makinesi üst ikonlarının görsel stili (ışıldak) netleşmedi; Personeller sekmesine Excel toplu yükleme; Talimat'ta personel kullanımı.
-4. Çalışma tarzı: `mmg-site-deploy` skill — sormadan, kuyruk bitene kadar; kapanışta HER ZAMAN (1) yayınlananlar (2) bekleyenler listesi ver ("bekleyen yok" deme hatası bu oturumda kullanıcıyı kızdırdı). ⏳ Kullanıcı bekleyen: `firebase deploy --only firestore:indexes` (davet listesi) + IAM signBlob rolü (hesap geçişi). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
+4. Çalışma tarzı: `mmg-site-deploy` skill — sormadan, kuyruk bitene kadar; kapanışta HER ZAMAN (1) yayınlananlar (2) bekleyenler listesi ver ("bekleyen yok" deme hatası kullanıcıyı kızdırdı). **En kritik değişiklik: service worker NETWORK-FIRST** (4. oturum). Şifre sıfırlama maili TAM çalışır (Resend canlı).
+
+## 🟢 2026-08-01 (7. OTONOM OTURUM — `muham` bilgisayarı) — CANLIYA ALINANLAR
+
+**⭐ EN KRİTİK — GÖNDEREN IBAN KÖK HATASI ÇÖZÜLDÜ (`_src` etiketi)**
+- Şikâyet: "yine yanlış IBAN geldi" — YAŞAR CİHAN seçiliyken BURSA CİHAN'ın IBAN'ı geliyordu.
+- Teşhis anı: aynı firma+banka için **gönderende IBAN vardı, alıcıda yoktu** → iki taraf farklı havuzdan besleniyor.
+- Kök neden: `savedIbans` hem grup firmalarının banka hesaplarından hem de **cari (müşteri/tedarikçi) kayıtlarından** doluyor, ikisi de `firma: <ad>` alanıyla yazılıyor. Gönderen tarafı eşleştirmeyi **isimle** yapıyordu. Bir cari, grup firmasıyla AYNI ADI taşıyorsa o carinin IBAN'ı gönderende çıkıyordu — başka firmaya ait olsa bile.
+- Çözüm: kayıtlar kaynağıyla etiketlendi (`_src:'firma'` / `_src:'cari'`); gönderen havuzu (`autoFillGonderenIban`, `mmgBankNamesFor`) yalnızca `_src==='firma'` kabul ediyor. Alıcı tarafı değişmedi.
+
+**IBAN doğruluğu — diğer düzeltmeler**
+- `autoFillGonderenIban`: seçilen firmanın kayıtlı IBAN'ı YOKSA fonksiyon erken çıkıp **önceki firmanın IBAN'ını kutuda bırakıyordu**. Artık temizleniyor. **Elle yazılan IBAN korunur** — yalnız `savedIbans`'ta geçen (otomatik dolmuş) değer silinir.
+- `fillAliciFromParty`: alıcı tarafında birebir aynı hata (`ibans.length === 0` için hiç dal yoktu). Aynı korumayla düzeltildi.
+- **IBAN artık ZORUNLU** (VeriGiriş → IBAN'larım): elle eklemede `TR + 24 rakam` doğrulaması; Excel'de IBAN'sız satır atlanıp raporlanıyor; etiket "(opsiyonel)" → "(zorunlu)". Sebep: IBAN'sız kayıtlar `savedIbans`'a hiç girmiyor ama banka listesini şişirip "banka seçili ama IBAN gelmiyor" sanrısı yaratıyordu.
+
+**Talimat Hazırlama — arayüz sadeleştirme**
+- **7 seçici/disket kaldırıldı:** gönderen IBAN "📋 Kayıtlı", "— Farklı IBAN seç —", "📋 Grup Firması", alıcı IBAN + cari seçicileri, muhatap/firma seçicileri, gönderen ve alıcı 💾 butonları. Hepsi kutuya tıklayınca zaten otomatik-tamamlamada geliyor; kaydetme VeriGiriş'ten yapılıyor.
+- ⚠️ **Kaldırılan her elemanın JS referansı null-guard'landı** (`?.` / `if(!el) return`) — yoksa konsol hatası o bloğun DEVAMINI kırıyor. Yeni eleman kaldıracaksan aynısını yap.
+- Boşalan sütunlar yüzünden FİRMA/IBAN/ALICI satırları `xcell-full`'e çevrildi.
+- **Banka listesi o tarafın bankalarıyla sınırlı** (3 bankası varsa 18 değil 3). İki güvenlik ağı: hiç kaydı yoksa TAM liste; hâlihazırda seçili banka listede yoksa başa eklenir.
+- **Grup dışı cari listesinde yazdıkça filtreleme**, Türkçe karakter duyarsız (`mmgSearchNorm`: "sirketi" → "ŞİRKETİ"). Grup içi mod eskisi gibi hepsini gösterir.
+- "MÜŞTERİ/TEDARİKÇİ" tür etiketi kaldırıldı; kişi listesindeki TC, TC kutusuyla aynı fontta; **bankalar HER ZAMAN Türkçe alfabetik** (`localeCompare('tr')`).
+- **PDF/Word'de IBAN tek satır:** PDF sütunu 64→74mm, punto 9.5→8.6 (yer BANKA 38→32, TUTAR 42→36'dan; toplam yine 182mm). Word sütun genişlikleri sabitlendi.
+
+**⚡ PERFORMANS — grup firmaları ~5 sn → ~1 sn**
+- `loadMyFirms` Firestore okumaları İÇ İÇE ve SIRAYLA await ediliyordu (N firma = N ağ turu). Admin/üyelik blokları paralel, her birinin firma okumaları `Promise.all`; `fetchFirmaGonderenBilgisi` çağrıları da paralel.
+- İsimler hazır olur olmaz liste açılıyor; liste AÇIKKEN firmalar gelirse kendini tazeliyor (`onMyFirmsChanged`). Yüklenirken "Grup firması yok." yerine "Grup firmaları yükleniyor…".
+
+**FİRMA KODU — her yerde ADIN BAŞINDA ve kod sırasında**
+- VeriGiriş, KullanıcıYönetimi, index (aktif firma çubuğu + geçiş listesi), Hazır Metin. Sıralama: kod sayısalsa sayı (1000 < 1010), değilse metin; kodu olmayan en sona.
+- **Firmalarım seçicisi özel dropdown'a çevrildi** — yerli `<option>` içinde iki renk kullanılamadığı için kodun sarı görünmesi başka türlü mümkün değil. `<select>` DOM'da GİZLİ duruyor ve tek doğruluk kaynağı o (seçimde `value` set edilip `change` tetikleniyor), böylece `selectFirma`/silme akışları aynen çalışıyor.
+
+**VeriGiriş — arama ve onay**
+- **6 listeye arama kutusu** (IBAN'larım, Müşteriler, Tedarikçiler, Muhataplar, Personeller, Çalıştığım Bankalar). Render fonksiyonlarına DOKUNULMADI; `MutationObserver` ile liste yeniden çizilince filtre otomatik uygulanıyor. "Çalıştığım Bankalar"da ad `<input value>` içinde olduğu için arama textContent + input değerlerine bakıyor.
+- **IBAN içe aktarım onayı 3 seçenekli pencereye çevrildi** (`mmgAsk`). Eskiden tarayıcı `confirm()`'i vardı ve **"İptal" aslında KAYDEDİYORDU** (üstüne ekle) — işlemden çıkmanın yolu yoktu. Artık "Değiştir (N kaydı sil)" / "Koru, üstüne ekle" / **"Vazgeç"** (gerçekten hiçbir şey yapmaz). Esc ve dışarı tıklama = vazgeç.
+
+**Hazır Metin Talimatları**
+- **Gerçek firma adı ve VKN örnekleri kaldırıldı** (placeholder'larda kullanıcının kendi firması + VKN'si yazıyordu). Yalnız BİÇİM ipuçları kaldı (GG.AA.YYYY, TR__ …, 11 haneli TCKN).
+- Grup firmaları artık HER şablonda: `<datalist>` liste boşken de oluşturuluyor — eskiden boşsa hiç yazılmıyordu, Firestore'dan geç gelen firmaları dolduracak eleman bulunamıyordu. Alan yine serbest metin.
+
+**Blogger — sıfırdan kuruldu ve ÇALIŞIYOR**
+- `publishToBlogger` yorumdan çıkarıldı, `us-central1`'e deploy edildi, 4 secret tanımlı, Blog.html'deki buton geri açıldı. Yazı Blogger'da yayınlandı ✓
+- Kurulum: Blogger API v3 → OAuth "Web application" (redirect `https://developers.google.com/oauthplayground`) → consent External + `../auth/blogger` + **Publish** (test modunda refresh token 7 günde ölür) → Playground'da Access type **Offline**.
+- Tekrarlanırsa iki tuzak: `invalid_client` = Client ID kutusuna JSON'un tamamı yapıştırılmış (sadece değer girilmeli); `Invalid blog id` = secret'a URL'nin tamamı kaydedilmiş (sadece `blogID=` sonrası sayı). **Secret değişince fonksiyon yeniden deploy edilmezse eski değer kullanılmaya devam eder.**
+
+**Diğer**
+- Kalem (düzenle) `position:fixed` → `absolute` (kullanıcı: "böyle hareketli değil"); çerçeve `.home-scroll` — `.tools-section`'ın `overflow:hidden`'ı kırpmasın diye bilerek onun ÜSTÜNDE.
+- Döviz panelinde "Gram Altın" iki satıra kırılıp `/TRY`'yi uzağa itiyordu → `nowrap` + negatif margin.
+- Tüm Kullanıcılar kartına "↻ Yenile".
+- **Play Store rozeti `href="#"` idi (ölü link)** → gerçek linke bağlandı (`com.mmgcreativity.dijitalfinans`, `.well-known/assetlinks.json`'dan) + ayrı **"Bizi Oylayın"** butonu.
+- **Bayat kapsam temizliği:** hiç firma üyeliği yokken `localStorage.mmg_active_data_scope` bir firma id'sinde kalıyordu; VeriGiriş/Talimat erişilemeyen havuza bakıp "veri gelmiyor" görünüyordu → kişisel kapsama düşürülüyor.
+- **Repo temizliği:** `index-DESKTOP-V12JA3F.html` **canlıda 200 dönüyordu** (uygulamanın eski kopyası herkese açıktı) ve `err.txt` silindi.
+
+### ⏳ 7. OTURUM SONU — BENDE/BEKLEMEDE KALANLAR
+
+**Doğrulanamadı (gerçek cihaz/hesap gerekiyor) — DEĞİŞTİRMEDİM:**
+- **Mobilde ana başlık/alt başlık çakışması.** `@media (max-width:860px)` altında `.nav-drawer{position:static !important}` ve `.nav-subdrawer` inline açılma kuralları ZATEN var; `wireDrawerToggle` aynı anda tek çekmece açık bırakıyor. Kalan şüphe: `.nav-subwrap.open` sınıfını ekleyen JS YOK — mobilde 3. seviye yalnız `:focus-within` ile açılıyor, dokunmatikte kararsız olabilir. Gerçek cihazda hangi menüde ne göründüğü görülmeden değiştirmek riskli.
+- **Mobilde firma çubuğuna firmalar gelmiyor.** Tarayıcıda canlı bakıldı (#1004 Cihan Grup FİNANS): `mmgActiveFirmaBar.hidden = true`, üyelik listesi BOŞ — o hesap gerçekten hiçbir firmaya üye/admin değil, mobil-özel hata değil. **Firması OLAN bir hesapla tekrar bakılmalı.**
+
+**Yapılmadı — spec yok:**
+- **PORTFÖY EKLEME (hisse adı / lot / alış fiyatı).** Sitede portföy/hisse ile ilgili HİÇBİR kod yok; tamamen yeni modül. Fiyat kaynağı (canlı borsa verisi mi, elle giriş mi), yeri (yeni sayfa mı, Bütçeleme altında mı), kâr/zarar isteniyor mu belirsiz. Canlı finans uygulamasına tahminle modül eklenmedi.
+- **Her kayıtta admin'e bildirim.** `notifyAdminsOnReferralSignup` YALNIZCA referans kodlu kayıtlarda tetikleniyor (`referralSignups/{id}`). Her kayıt için Auth `onCreate` tetikleyicili yeni fonksiyon gerekiyor — backend işi ve **deploy'u yalnız kullanıcının bilgisayarından** yapılabilir, yazılsa bile test edilemez.
+
+**Yerel klasörde temizlenecek (SİLMEDİM — geri alınamaz):**
+`*-DESKTOP-V12JA3F*` OneDrive çakışma kopyaları (~10), `*.zip` arşivleri (6), `zibD1tAO`, 12 adet `.fuse_hidden*`. `Gunluk_Panorama.html` canlıda ama menüde bağlı değil (bilinçli).
+
+## 🟢 2026-07-31 (6. OTONOM OTURUM — yeni bilgisayar) — CANLIYA ALINANLAR
+**SW `2026-07-31-ozet-sirala-switch`:**
+- **Bekleyen davet KÖK NEDEN:** `firestore.rules`'ta `collectionGroup('firmas')` için kök wildcard kural YOKTU (doğrudan yol kuralı CG sorgusunu kapsamaz; members/openers ile aynı tuzak). `{path=**}/firmas` read kuralı eklendi. ⏳ **Kullanıcı: `firebase deploy --only firestore:rules`** (rules GitHub'a yüklemekle canlıya GİTMEZ).
+- **Hesap geçişinde logo/avatar değişmiyordu:** `signInWithCustomToken` akışında login-form kodu çalışmadığından eski hesabın `mmg_avatar`/`mmg_profile` önbelleği kalıyordu. İki yönlü düzeltme (`index.html`): (a) `onAuthStateChanged` artık avatar+profili HER auth değişiminde buluttan tazeler (`data.avatarBase64 || user.photoURL`); (b) hesap geçişi tıklamasında reload öncesi kişisel önbellek anahtarları temizlenir (avatar, profil, firma, `mmg_active_data_scope`, `mmg_last_open_page`).
+- **Kullanıcı Özeti kartları İstatistikler'den Kullanıcı Yönetim Paneli'ne TAŞINDI** (kullanıcı isteği): `KullaniciYonetimi.html` "Tüm Kullanıcılar" kartının üstünde 4 kart (Toplam/Standart/Premium/Referansla Katılan, `kySummaryGrid`); karta tıkla → tablo o gruba filtrelenir (tekrar tıkla = kaldır, aktif kart brass çerçeve). `Istatistikler.html`'den kartlar + kullanıcı detay tablosu KALDIRILDI (JS'ler element-yoksa-atla guard'lı; `allUsers` yüklemesi referans/kullanım bölümleri için DURUYOR; kullanıcı detay MODALI da duruyor ama artık açan satır yok).
+- **Tüm Kullanıcılar tablosuna başlık tıklamalı SIRALAMA:** #Kod/Kullanıcı/E-posta/Durum/Kayıt başlıkları tıklanır (`.ky-sort-th`), ikinci tıklama yönü çevirir, aktif kolonda ▲/▼ göstergesi. Varsayılan: kod artan.
+
+**SW `2026-07-31-cari-sablon-tipsiz`:**
+- **Cari (Müşteri/Tedarikçi) Excel şablonu:** "Tip" sütunu KALDIRILDI (kullanıcı: "saçma olmuş"); başlık artık `Firma Kodu | Ünvan | TC/Vergi No | Banka | IBAN | Döviz`. Kayıt türünü, yüklemenin yapıldığı **AKTİF SEKME** belirler (Müşteriler sekmesinden → customers, Tedarikçiler → suppliers). Eski dosyalarda Tip doluysa o değer ÖNCELİKLİ (geriye dönük uyum). Önizleme tablosundan Tip kolonu kaldırıldı. (`VeriGirisPaneli.html` downloadTemplateBtn + import + renderBulkPreview.)
+
+**SW `2026-07-31-personel-tc-excel`:**
+- **Personeller sekmesine toplu Excel** (Muhataplar deseniyle): `personnelBulkUploadCard` + Şablonu İndir / Excel Yükle. Şablon: `Firma Kodu | Ünvan / Ad Soyad | TC Kimlik No` (`personeller-sablon.xlsx`); Firma Kodu ZORUNLU, eşleşmeyen satır atlanır+raporlanır; kayıtlar `personnel` koleksiyonuna `appliesToFirmaIds=[kod→id]` ile yazılır.
+- **"Görev / Not" alanı → "TC Kimlik No"** (kullanıcı: "bize TC lazım"): form alanı (input `pr_notes` id'si aynı kaldı, maxlength=11 numeric) artık `tc` alanına yazılır; listede `p.tc || p.notes` gösterilir (eski görev kayıtları kaybolmaz).
+- **Sekme ikonu sadeleşti:** `🧑‍💼` (Windows'ta kişi+çanta olarak İKİ ikon görünüyordu) → `🧑` (tr+en+HTML).
+
+**SW `2026-07-31-talimat-personel` + `2026-07-31-personel-grup`:**
+- **Talimat'ta personel kullanımı CANLI** (`Talimat_Hazirlama.html`): `loadCariDb` artık `personnel` koleksiyonunu da okur (`mmgPersonnelDb`, appliesToFirmaIds filtresiyle); tüm çoklu-kişi alanlarının ("Teslim Alacak Kişi", "Yetkili Kişi") "📋 Kayıtlı" listesinde personeller `🧑 Ad (TC)` olarak önce gelir, seçilince **TC alanı otomatik dolar** (`mmgPersonSavedOptionsHtml`/`mmgRefreshPersonSavedSelects` global). localStorage kayıtlı kişiler de listede durur.
+- **GRUBA AİT PERSONEL** (kullanıcı: "bu personeller gruba ait napıcaz"): Personel Excel'inde Firma Kodu sütununa **"GRUP"** (veya GROUP/TÜM/HEPSİ/ALL/*) yazılırsa personel **tüm grup firmalarına** atanır; **virgüllü çoklu kod** (1000,1001) da desteklenir. Kod ham okunur (normalize virgülü sildiği için `mmgReadRowFirmaCode` kullanılmıyor).
+- **Yeniden yükleme mükerrer üretmez:** personel import artık AD (tr-lowercase) eşleşmesiyle mevcut kaydın ÜSTÜNE yazar (TC + firma ataması güncellenir). Kullanıcının 1000 koduyla yüklediği 12 kişi, GRUP ile tekrar yüklenince çiftlenmeden tüm firmalara atanır.
+
+**SW `2026-07-31-onizleme-modal` → `2026-07-31-doviz-iban-oto` (son 4 tur):**
+- **Personel şablonuna NOTLAR bloğu** (Excel içinde): kod zorunlu, GRUP, virgüllü çoklu kod, aynı adla üzerine yazma — 4 madde halinde.
+- **Toplu yükleme ÖNİZLEME MODALI** (kullanıcı: "12 satır bulundu diyor, önizleme penceresi açılsın"): `.bulk-preview-wrap{display:none}` kuralı duruyor ama önizleme artık `mmgBulkModalShow/Hide` ile ortada büyük MODAL pencerede açılıyor (backdrop'lu). 5 akışın hepsi: cari, IBAN'larım, Çalıştığım Bankalar, Muhataplar, Personeller.
+- **TCKN autofill düzeltmesi** (kullanıcı: "TC gelmiyor"): kişi satırında TC kutusu OLMAYAN talimat türlerinde (Çek Karnesi Teslim, Senet Teslim — TC ayrı `glTckn` alanı) personel seçilince artık `glTckn` da otomatik dolar.
+- **Döviz Alım/Satım** (`Talimat_Hazirlama.html`): alan sırası → Banka, Firma, **Para Birimi (firmanın altında)**, Tutar, Kur, **IBAN'lar EN ALTTA** (etiketler: Alım'da Gönderen=TL/Alıcı=Döviz; Satım'da tersi). Firma+Banka seçilince `applyFirmaMatch` firmanın kayıtlı hesaplarından (`f.ibans[{banka,iban,currency}]`) **TL ve döviz IBAN'larını otomatik doldurur** (önce seçili banka eşleşmesi, yoksa para birimi eşleşen herhangi biri); banka/para birimi değişince yeniden hesaplanır.
+
+**SW `2026-07-31-kayitli-iban-fallback`:**
+- **"Kayıtlılar gelmiyor (IBAN)"** (`refreshIbanSelectForFirma`): seçili BANKA filtresi sıfır sonuç verirse liste artık boş bırakılmıyor → firmanın TÜM kayıtlı IBAN'ları gösteriliyor (senaryo: firmada yalnız VAKIFBANK IBAN var, kullanıcı VAKIF KATILIM seçmiş → liste bomboş kalıyordu). Liste yine boşsa (firmaya atanmış hiç IBAN yok) dropdown'da yol gösteren disabled satır: "Bu firmaya atanmış kayıtlı IBAN yok (VeriGiriş → IBAN'larım'dan Firma Kodu ile yükleyin)". Sıkı af-filtre (8. tur) DEĞİŞMEDİ — asıl veri düzeltmesi hâlâ kullanıcının IBAN'ları yeni şablonla yüklemesi.
+
+**SW `2026-07-31-iban-degistir-modu`:**
+- **IBAN yükleme DEĞİŞTİR modu** (kullanıcı YC IBAN.xlsx yükledi ama listede eski havuzdan kalma düzinelerce Akbank IBAN'ı da geldi — "getirdiği IBAN'lara bak hâlâ"): `banksBulkConfirm` artık dosyada kodu geçen firmaların MEVCUT kayıtlı IBAN'ı varsa soruyor: "önce SİLİNSİN ve yalnızca bu dosyadakiler kalsın mı? Tamam=Değiştir (önerilen) / İptal=Üzerine ekle". Değiştir seçilirse o firmalara atanmış eski banks kayıtları silinip yalnızca Excel'dekiler yazılır → Excel = firmanın tek doğru IBAN listesi. Kullanıcının yapması gereken: YC IBAN.xlsx'i BİR KEZ DAHA yükleyip "Tamam (Değiştir)" demek.
+- Not: Kullanıcının dosyası cari şablonu başlığındaydı (`Firma Kodu|Ünvan|TC/Vergi No|Banka|IBAN|Döviz`) ama IBAN'larım importu kolon ADINA baktığı için sorunsuz çalışır (Ünvan/TC yok sayılır).
+
+**SW `2026-07-31-bulk-kart-ilk-acilis` — ASIL KÖK NEDEN BULUNDU:**
+- **"IBAN'lar gelmiyor / tekrar tekrar kaydediyor" gizemi çözüldü:** Sayfa İLK AÇILIŞTA IBAN'larım sekmesi aktif olsa da sağdaki "Toplu Excel ile Yükle" kartı **CARİ (Müşteri/Tedarikçi) kartıydı** — kart görünürlüğü yalnız sekme TIKLANINCA senkronlanıyordu, açılışta hiç çalışmıyordu (`bulkUploadCard` HTML'de default görünür). Kullanıcı YC IBAN.xlsx'i farkında olmadan MÜŞTERİLER'e yüklüyordu → "23 satır, 1 kayıda gruplandı, 1 kayıt kaydedildi" = tek müşteri (kendi firması!) 23 IBAN'la; banks BOŞ kaldı. Düzeltme: `mmgSyncBulkCardToTab(tab)` fonksiyonu + SAYFA AÇILIŞINDA da çağrı.
+- ⚠️ **Temizlik (kullanıcı yapmalı):** (1) Müşteriler sekmesinde yanlışlıkla oluşan "YAŞAR CİHAN HAZIR BETON SAN. VE TİC. A.Ş." müşteri kayıtlarını (muhtemelen birden fazla) sil. (2) Ctrl+Shift+R sonrası IBAN'larım sekmesindeyken kartın başlığında ŞABLONUN IBAN şablonu olduğundan emin olup YC IBAN.xlsx'i yükle (önizleme başlıkları Firma Kodu|Banka|IBAN|Döviz olmalı, "1 kayıda gruplandı" DEĞİL 23 kayıt) → listede 23 IBAN rozetleriyle görünür. ✅ Kullanıcı doğru karttan yükledi ("23 satır, 23 kayıda gruplandı") — 23 IBAN CANLI (Döviz Alımı'nda Akbank TL IBAN'ı otomatik geldi).
+
+**SW `2026-07-31-banka-secimi-ezilmez`:**
+- **"Başka banka seçiyorum, zorla AKBANK geliyor"** (Döviz Alımı + Çek Karnesi Teslim, tüm generic türler): `applyFirmaMatch` her firma input/change'inde `setBankSelectValue(bankaEl, f.banka)` ile bankayı firmanın İLK IBAN'ının bankasına (AKBANK) geri çeviriyordu → kullanıcının banka seçimi anında eziliyordu. Düzeltme: banka yalnızca **BOŞKEN** otomatik dolar (`!bankaEl.value` şartı); kullanıcı seçimi korunur, döviz IBAN otomatiği seçili bankaya göre hesaplanır.
+- Chrome üzerinden canlı Firestore teşhisi yapıldı (Talimat sayfası `window.mmgCloud` ile): Chrome profili mmgcreativity@gmail.com hesabında ve kişisel kapsamda (adminFirmaIds boş) — kullanıcının uygulaması ayrı pencerede firma kapsamında çalışıyor. `mmg_active_data_scope` hesap geçişi temizliğiyle silinebiliyor; sorun olursa kullanıcı sol-alt kapsam çubuğundan firmayı yeniden seçmeli.
+
+**SW `2026-07-31-doviz-ondeger-eur` + `2026-07-31-firma-datalist-ac`:**
+- **Döviz Alım/Satım Para Birimi öndeğeri EUR** (options sırası EUR,USD,GBP + pick fallback EUR).
+- **Generic talimatlarda firma DEĞİŞTİRİLEMİYORDU** ("sadece Aderans geliyor"): glFirma datalist'i dolu değere göre filtrelendiğinden tıklayınca tek öneri kalıyordu → focus'ta değer geçici boşaltılır (TÜM grup firmaları listelenir), seçim yapılmadan çıkılırsa blur'da eski değer geri gelir (`dataset.prevFirma`).
+- ℹ️ Döviz IBAN otomatiği ÇALIŞIYOR (Vakıf Katılım TL+EUR doğru geldi). "ADERANS'ta IBAN gelmiyor" = VERİ: ADERANS'ın (kod 1001) IBAN'ları henüz yüklenmedi — kullanıcı diğer firmaların IBAN'larını da (kod 1001-1005) aynı Excel'e ekleyip yüklemeli (Değiştir modu firma-bazlı silip yazar).
+
+**SW `2026-07-31-kullanici-detay-modal`:**
+- **KY panel "Tüm Kullanıcılar" satırına tıklayınca kullanıcı DETAY modalı** (`kyOpenUserDetail`): kod, ad, e-posta, telefon, durum, site-admin, referans kodu, premium faydası, yönettiği firma sayısı, kayıt tarihi, UID + **"Ham alanlar"** (users dokümanının tamamı, 200+ karakterlik base64 alanlar kısaltılır). E-postası olmayan kayıtlarda (örn. #1018 FİNANS) turuncu açıklama: alan dokümanda yok — telefonla/eski akışla açılmış ya da yarım kayıt; ham alanlardan gerçek durum görülür. Satırlar cursor:pointer + tbody'de tek event delegation.
+
+**SW `2026-07-31-glfirma-koyu-liste` → `2026-07-31-hub-havuz-iban` (son 2 tur, Talimat):**
+- **glFirma beyaz datalist → sitenin koyu temalı özel listesi** (mmg-ac deseni, gönderen firma alanıyla birebir): odak/tıkta TÜM grup firmaları, seçilince applyFirmaMatch; datalist kaldırıldı.
+- **EN KRİTİK — grup firmasının IBAN'ları gelmiyordu (ADERANS):** `fetchFirmaGonderenBilgisi` bankaları hep `firmaAccounts/{firmaId}/banks`'tan okuyordu; grup üyelerinde veri HUB havuzunda (`dataGroupId`) durur → hub dışındaki HER firmada boş dönüyordu. Düzeltme: `poolId = fData.dataGroupId || firmaId` ile havuzdan oku, af.includes(firmaId) filtresi aynı. (Chrome+mmgCloud canlı teşhisiyle doğrulandı: ADERANS'ın havuzda 18 atanmış IBAN'ı vardı.)
+- **Firma değişince eski firmanın IBAN'ı asılı kalmıyor:** döviz otomatiğinde eşleşme yoksa alan '' yapılır ("Aderans seçtim, Yaşar Cihan verisi geliyor" şikâyetinin ikinci yarısı).
+- **TÜM generic talimatlarda alan sırası: ÖNCE FİRMA SONRA BANKA** (13 tür, iki varyant regex ile toplu değiştirildi).
+
+**SW `2026-07-31-tm-muhatap-oneri` → `2026-07-31-kayitli-select-kalkti` (Talimat):**
+- **Teminat Mektubu MUHATAP alanı VeriGiriş "Muhataplar"a BAĞLANDI** (kullanıcı: "muhatap yükledim gelmiyor" — alan düz metindi, hiçbir kaynağa bağlı değildi): `glMuhatap` mmg-ac koyu listeyle `savedCari(type=counterparties)`'den beslenir, seçilince **Adres (`glMuhatapAdres`) otomatik dolar**, VKN listede rozet. `loadCariDb` cari kayıtlarına `notes` alanı da eklendi.
+- **"Teslim Alacak Kişi" Ad Soyad kutusuna TIKLAYINCA isim listesi** (personeller 🧑+TC + elle kayıtlı kişiler) açılır, yazdıkça elenir; seçilince TC (satır kutusu ya da ayrı glTckn) otomatik dolar.
+- **"📋 Kayıtlı" seçicisi kişi satırlarından KALDIRILDI** (kullanıcı isteği): tek desen — kutuya tıkla=hepsi, yaz=eleme. 💾 kişi kaydet duruyor. ⚠️ Yapı notu: person-row input'u artık `.mmg-ac-wrap` içinde; `mmgRefreshPersonSavedSelects` no-op'a yakın (select kalmadı) ama loadCariDb çağrısı zararsız.
+- Dikkat (bugfix süreci): glFirma/glMuhatap wiring'inde blok kapanışı kayması yaşandı — `pbEl/bkEl2` change listener'ları `applyFirmaMatch` scope'unda (if(glFirmaInput) içinde) olmalı; düzeltildi, `node --check` + canlı doğrulandı.
+- **SW `2026-07-31-kisi-liste-hiza`:** kişi öneri listesi TAM SATIR genişliğinde açılır (`.mmg-person-row{position:relative}` + `.mmg-ac-wrap{position:static}` + liste left/right:0): ad "Ad Soyad" sütununun, TC (meta, flex:0 0 198px) "TC Kimlik No" sütununun altına hizalı.
+
+**SW `2026-07-31-muhatap-vkn-duzenle` (VeriGiriş):**
+- **Muhatap Excel şablonu YENİLENDİ** (kullanıcı: "alakasız"): `Firma Kodu | Muhatap | Muhatap VKN | Adres`; Firma Kodu'nda **GRUP** ve virgüllü çoklu kod desteklenir (personel/cari ile aynı kurallar), NOTLAR bloğu eklendi. VKN → mevcut `idNumber` alanına, Adres → `notes`'a yazılır (liste ve Talimat zaten bunları okuyor, kırılma yok). Aynı adla yeniden yükleme üzerine yazar (çiftlemez).
+- **SATIR İÇİ DÜZENLEME (✎) — "veriler sonradan değiştirilebilsin":** ortak `mmgInlineEditRow` helper'ı; Muhataplar (ad+VKN+adres), Personeller (ad+TC), Müşteri/Tedarikçi (ünvan+TC/Vergi No) satırlarında ✎ ile yerinde mini-form açılır, Kaydet → merge update. IBAN satırları hariç (sil/yeniden yükle).
+- Manuel muhatap formuna **"Muhatap VKN"** alanı (`cp_vkn` → idNumber) eklendi; "Not/Adres" etiketi "Adres" oldu.
+
+**SW `2026-07-31-legacy-gonderen-dislama`:**
+- **"Düzelmedi — hâlâ 15 Akbank IBAN'ı"nın GERÇEK kaynağı:** hub havuzu TEMİZ (canlı teşhis: 41 kayıt = 23 YC + 18 ADERANS, sıfır artık). Listedeki 13 fazladan Akbank IBAN'ı **kişisel kapsamdaki eski `kayitliMuhataplar.ibans`** girişleri: hesap geçişi temizliği `mmg_active_data_scope`'u silince uygulama KİŞİSEL kapsama düşüyor → `onlyDb` kapanıyor → legacy liste gönderene sızıyordu. Düzeltme: GÖNDEREN listesi + `autoFillGonderenIban`, **grup firması adını taşıyan non-_db (legacy) girişleri HER kapsamda dışlar** (kişisel kullanıcılar etkilenmez; firma adları myFirms'te değil). Kalıcı öneri: kullanıcı sol-alt kapsam çubuğundan firmayı yeniden seçmeli; istenirse kişisel legacy ibans dizisi ayrıca temizlenebilir (veri silme — kullanıcı onayı gerekir).
 
 > ✅ **Sürümleme çözüldü:** "Güncelleme var, yenile" banner'ı (index.html #mmgUpdateBanner) NE app-version.json NE de SW_VERSION'a bakar — index.html'e HEAD atıp ETag/Last-Modified karşılaştırır (tamamen otomatik). `SW_VERSION` sadece cache-bust; `app-version.json` artık okunmuyor ama ikisi senkron tutuluyor. Her deploy'da ikisini de bump'la.
 
