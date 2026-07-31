@@ -2114,8 +2114,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             const ex = cariMap.get(key);
             ibans.forEach(ib => { if(!ex.ibans.some(x => x.iban === ib.iban)) ex.ibans.push(ib); });
             if(!ex.idNumber && p.idNumber) ex.idNumber = p.idNumber;
+            if(!ex.notes && p.notes) ex.notes = p.notes;
           } else {
-            cariMap.set(key, { name: ad, type: kind, idNumber: p.idNumber || '', ibans });
+            cariMap.set(key, { name: ad, type: kind, idNumber: p.idNumber || '', notes: p.notes || '', ibans });
           }
         });
       }
@@ -3571,6 +3572,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           '<div class="mmg-ac-wrap"><input type="text" id="' + f.id + '" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" placeholder="' + (f.placeholder||'') + '"><div class="mmg-ac-list" id="glFirmaAcList"></div></div>' +
           '</div>';
       }
+      if(f.id === 'glMuhatap'){
+        // Muhatap alanı VeriGiriş "Muhataplar" veritabanından beslenir (kullanıcı: "muhatap
+        // yükledim gelmiyor" — önceden düz metindi, hiçbir kaynağa bağlı değildi).
+        return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span>' +
+          '<div class="mmg-ac-wrap"><input type="text" id="' + f.id + '" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" placeholder="' + (f.placeholder||'') + '"><div class="mmg-ac-list" id="glMuhatapAcList"></div></div>' +
+          '</div>';
+      }
       return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span><input type="text" id="' + f.id + '" placeholder="' + (f.placeholder||'') + '"></div>';
     }
 
@@ -3709,6 +3717,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(pbEl) pbEl.addEventListener('change', applyFirmaMatch);
       var bkEl2 = document.getElementById('glBanka');
       if(bkEl2) bkEl2.addEventListener('change', applyFirmaMatch);
+    }
+
+    // MUHATAP alanı: VeriGiriş "Muhataplar" veritabanından koyu temalı öneri listesi.
+    // Seçilince muhatap adı + (varsa) ADRES otomatik dolar; VKN listede rozet olarak görünür.
+    const glMuhatapInput = document.getElementById('glMuhatap');
+    const glMuhatapAc = document.getElementById('glMuhatapAcList');
+    if(glMuhatapInput && glMuhatapAc){
+      const mClose = () => { glMuhatapAc.classList.remove('open'); glMuhatapAc.innerHTML = ''; };
+      const mRender = (showAll) => {
+        const q = showAll ? '' : glMuhatapInput.value.trim().toLocaleLowerCase('tr');
+        let items = (savedCari || []).filter(p => p.type === 'counterparties');
+        if(q) items = items.filter(p => (p.name || '').toLocaleLowerCase('tr').includes(q));
+        items = items.slice(0, 15);
+        if(!items.length){
+          glMuhatapAc.innerHTML = '<div class="mmg-ac-empty">Kayıtlı muhatap yok — VeriGiriş → Muhataplar\'dan yükleyin.</div>';
+          glMuhatapAc.classList.add('open');
+          return;
+        }
+        glMuhatapAc.innerHTML = items.map(p =>
+          '<div class="mmg-ac-item" data-name="' + escapeHtmlMmg(p.name) + '"><span>' + escapeHtmlMmg(p.name) + '</span>' +
+          (p.idNumber ? '<span class="mmg-ac-meta">VKN ' + escapeHtmlMmg(p.idNumber) + '</span>' : '') + '</div>').join('');
+        glMuhatapAc.classList.add('open');
+        Array.from(glMuhatapAc.querySelectorAll('.mmg-ac-item')).forEach(el => {
+          el.addEventListener('mousedown', ev => {
+            ev.preventDefault();
+            const p = (savedCari || []).find(x => x.name === el.getAttribute('data-name'));
+            glMuhatapInput.value = p ? p.name : (el.getAttribute('data-name') || '');
+            const adrEl = document.getElementById('glMuhatapAdres');
+            if(adrEl && p && p.notes) adrEl.value = p.notes;
+            mClose();
+            renderGenericPreview();
+          });
+        });
+      };
+      glMuhatapInput.addEventListener('focus', () => mRender(true));
+      glMuhatapInput.addEventListener('click', () => mRender(true));
+      glMuhatapInput.addEventListener('input', () => mRender(false));
+      glMuhatapInput.addEventListener('blur', () => setTimeout(mClose, 150));
     }
 
     renderGenericPreview();
