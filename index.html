@@ -457,6 +457,39 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .frame-wrap{ flex:1; position:relative; background:var(--bg); }
   iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
 
+  /* ---------- Sekmeli (çok-ekranlı) arayüz ---------- */
+  .mmg-tabbar{
+    display:flex; align-items:flex-end; gap:3px; flex:0 0 auto;
+    padding:6px 10px 0; background:var(--surface); border-bottom:1px solid var(--hairline);
+    overflow-x:auto; overflow-y:hidden; scrollbar-width:thin;
+  }
+  .mmg-tabbar::-webkit-scrollbar{ height:6px; }
+  .mmg-tabbar::-webkit-scrollbar-thumb{ background:var(--hairline); border-radius:6px; }
+  .mmg-tab{
+    display:flex; align-items:center; gap:8px; flex:0 0 auto; max-width:210px;
+    padding:8px 10px 8px 13px; cursor:pointer; user-select:none;
+    font-size:12.5px; line-height:1; color:var(--muted);
+    background:var(--surface-2); border:1px solid var(--hairline); border-bottom:none;
+    border-radius:10px 10px 0 0; transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .mmg-tab:hover{ color:var(--text); background:var(--surface); }
+  .mmg-tab.active{
+    color:var(--text); background:var(--bg); border-color:var(--brass);
+    box-shadow:0 -2px 10px rgba(198,161,91,0.12);
+  }
+  .mmg-tab .mmg-tab-title{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:150px; }
+  .mmg-tab .mmg-tab-ico{ font-size:14px; line-height:1; }
+  .mmg-tab .mmg-tab-close{
+    flex:0 0 auto; width:16px; height:16px; display:flex; align-items:center; justify-content:center;
+    border-radius:5px; font-size:12px; color:var(--muted); margin-left:2px;
+  }
+  .mmg-tab .mmg-tab-close:hover{ background:rgba(255,107,74,0.18); color:var(--coral); }
+  .mmg-tab-home{ padding-left:11px; padding-right:11px; }
+  .mmg-tabpanels{ position:absolute; inset:0; }
+  .mmg-tabpanels iframe{ display:none; }
+  .mmg-tabpanels iframe.active{ display:block; }
+  @media (max-width:860px){ .mmg-tabbar{ display:none !important; } }
+
   /* ---------- Home screen ---------- */
   .home{ flex:1; display:flex; flex-direction:column; }
   .home-scroll{ flex:1; display:flex; flex-direction:column; }
@@ -1705,8 +1738,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </aside>
 
 <main>
+  <div class="mmg-tabbar" id="mmg-tabbar" hidden></div>
   <div class="frame-wrap" id="frame-wrap" style="display:none;">
-    <iframe id="app-frame" src=""></iframe>
+    <div class="mmg-tabpanels" id="mmg-tabpanels"></div>
   </div>
 
   <div class="home" id="home-screen">
@@ -1992,7 +2026,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const navItems = document.querySelectorAll('.nav-item:not([data-drawer-toggle]), .app-card');
   const homeScreen = document.getElementById('home-screen');
   const frameWrap = document.getElementById('frame-wrap');
-  const iframe = document.getElementById('app-frame');
+  const tabBar = document.getElementById('mmg-tabbar');
+  const tabPanels = document.getElementById('mmg-tabpanels');
+  // Açık sekmeler (araç sayfaları). Her araç kendi iframe'inde AÇIK KALIR; sekmeler
+  // arasında geçiş yeniden yükleme yapmaz (j-Platform tarzı çok-ekranlı arayüz).
+  const MMG_MAX_TABS = 8;
+  let mmgTabs = [];        // [{target, title}]
+  let mmgActive = 'home';  // 'home' veya bir araç target'ı
+  const mmgFrames = {};    // target -> iframe elemanı (canlı tutulur)
+  function mmgEscAttr(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   // ---- Mobil hamburger menü ----
   const asideEl = document.querySelector('aside');
@@ -2036,19 +2078,82 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // araç sayfasına geri döndürebilmek için, hangi sayfanın açık olduğunu burada takip ediyoruz.
   const MMG_LAST_PAGE_KEY = 'mmg_last_open_page';
 
+  // Bir araç için iframe'i (yoksa) oluşturur ve döndürür; varsa mevcut olanı verir.
+  // İframe kaldırılmadıkça sayfa AÇIK ve durumu korunmuş kalır.
+  function mmgEnsureFrame(target){
+    if(mmgFrames[target]) return mmgFrames[target];
+    const f = document.createElement('iframe');
+    f.dataset.target = target;
+    f.src = target;
+    tabPanels.appendChild(f);
+    mmgFrames[target] = f;
+    return f;
+  }
+  // Hangi panelin görüneceğini ayarla ('home' veya bir araç target'ı).
+  function mmgShowPanel(target){
+    if(target === 'home'){
+      homeScreen.style.display = 'flex';
+      frameWrap.style.display = 'none';
+    } else {
+      homeScreen.style.display = 'none';
+      frameWrap.style.display = 'block';
+      Object.keys(mmgFrames).forEach(function(k){
+        mmgFrames[k].classList.toggle('active', k === target);
+      });
+    }
+  }
+  // Sekme çubuğunu yeniden çiz. Hiç araç sekmesi yoksa çubuk gizlenir.
+  function mmgRenderTabs(){
+    if(!mmgTabs.length){ tabBar.hidden = true; tabBar.innerHTML = ''; return; }
+    tabBar.hidden = false;
+    let html = '<div class="mmg-tab mmg-tab-home' + (mmgActive === 'home' ? ' active' : '') +
+      '" data-tab="home" title="Ana Sayfa"><span class="mmg-tab-ico">⌂</span></div>';
+    html += mmgTabs.map(function(t){
+      const act = (t.target === mmgActive) ? ' active' : '';
+      const label = mmgEscAttr(t.title || t.target);
+      return '<div class="mmg-tab' + act + '" data-tab="' + mmgEscAttr(t.target) + '" title="' + label + '">' +
+             '<span class="mmg-tab-title">' + label + '</span>' +
+             '<span class="mmg-tab-close" data-close="' + mmgEscAttr(t.target) + '" title="Kapat">✕</span></div>';
+    }).join('');
+    tabBar.innerHTML = html;
+  }
+  // Sekme durumunu (yenileme/F5 sonrası geri yükleme için) sakla.
+  function mmgSaveTabState(){
+    try{
+      sessionStorage.setItem('mmg_open_tabs', JSON.stringify(mmgTabs));
+      sessionStorage.setItem('mmg_active_tab', mmgActive);
+    }catch(e){}
+  }
+  // Bir sekmeyi kapat. silent=true iken (kapasite aşımında) odak değiştirmez.
+  function mmgCloseTab(target, silent){
+    const idx = mmgTabs.findIndex(function(t){ return t.target === target; });
+    if(idx === -1) return;
+    mmgTabs.splice(idx, 1);
+    if(mmgFrames[target]){ try{ mmgFrames[target].remove(); }catch(e){} delete mmgFrames[target]; }
+    if(silent){ return; }
+    if(mmgActive === target){
+      const next = mmgTabs[idx] || mmgTabs[idx - 1];
+      if(next){ openTarget(next.target, next.title); }
+      else { openTarget('home', 'Ana Sayfa'); }
+    } else {
+      mmgRenderTabs();
+      mmgSaveTabState();
+    }
+  }
+
   function openTarget(target, title){
     closeMobileNav();
     // Ayarlar ana alanda açıldığı için, başka bir sayfa (Hesabım, araçlar vb.) açılınca
     // Ayarlar paneli de kapansın (kullanıcı isteği: Hesabım'a tıklayınca Ayarlar kapansın).
     try{ var _stOv = document.getElementById('mmgSettingsOverlay'); if(_stOv) _stOv.hidden = true; }catch(e){}
     if(target === 'home'){
-      homeScreen.style.display = 'flex';
-      frameWrap.style.display = 'none';
+      mmgActive = 'home';
+      mmgShowPanel('home');
       setActive('home');
+      mmgRenderTabs();
+      mmgSaveTabState();
       try{ localStorage.removeItem(MMG_LAST_PAGE_KEY); }catch(e){}
-      // "Ana Sayfa"ya her tıklandığında kaydırmayı en tepeye sıfırla — sürükle-bırak
-      // sırasında tarayıcının kendiliğinden kaydırması gibi durumlarda kullanıcının
-      // her zaman güvenilir bir "başa dön" yolu olsun diye.
+      // "Ana Sayfa"ya her tıklandığında kaydırmayı en tepeye sıfırla.
       window.scrollTo(0, 0);
       return;
     }
@@ -2057,17 +2162,47 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // burada sadece bilgi gönderiliyor (bu script Firebase fonksiyonlarına doğrudan erişemiyor).
     try{ document.dispatchEvent(new CustomEvent('mmg-tool-opened', { detail: { target: target, title: title || target } })); }catch(e){}
     // Mobilde iframe içi kaydırma (touch-scroll) güvenilir çalışmadığı için
-    // dar ekranlarda iframe yerine doğrudan tam sayfa geçişi yapılır.
+    // dar ekranlarda sekme yerine doğrudan tam sayfa geçişi yapılır (mevcut davranış korunur).
     if(window.innerWidth <= 860){
       window.location.href = target;
       return;
     }
-    homeScreen.style.display = 'none';
-    frameWrap.style.display = 'block';
-    iframe.src = target;
+    // Masaüstü: sekmeli akış. Zaten açık bir araçsa ona geç; değilse yeni sekme aç.
+    let tab = mmgTabs.find(function(t){ return t.target === target; });
+    if(!tab){
+      // Kapasite dolduysa aktif olmayan en eski sekmeyi sessizce kapat.
+      if(mmgTabs.length >= MMG_MAX_TABS){
+        const victim = mmgTabs.find(function(t){ return t.target !== mmgActive; }) || mmgTabs[0];
+        if(victim) mmgCloseTab(victim.target, true);
+      }
+      tab = { target: target, title: title || target };
+      mmgTabs.push(tab);
+    } else if(title){ tab.title = title; }
+    mmgEnsureFrame(target);
+    mmgActive = target;
+    mmgShowPanel(target);
     setActive(target);
+    mmgRenderTabs();
     try{ localStorage.setItem(MMG_LAST_PAGE_KEY, target); }catch(e){}
+    mmgSaveTabState();
   }
+
+  // Sekme çubuğu tıklamaları: kapatma butonu, ya da sekmeye geçiş.
+  tabBar.addEventListener('click', function(e){
+    const closeEl = e.target.closest('.mmg-tab-close');
+    if(closeEl){ e.stopPropagation(); mmgCloseTab(closeEl.dataset.close); return; }
+    const tabEl = e.target.closest('.mmg-tab');
+    if(!tabEl) return;
+    const t = tabEl.dataset.tab;
+    if(t === 'home'){ openTarget('home', 'Ana Sayfa'); }
+    else { const tab = mmgTabs.find(function(x){ return x.target === t; }); openTarget(t, tab ? tab.title : ''); }
+  });
+  // Orta tık ile sekme kapatma (tarayıcı alışkanlığı).
+  tabBar.addEventListener('auxclick', function(e){
+    if(e.button !== 1) return;
+    const tabEl = e.target.closest('.mmg-tab');
+    if(tabEl && tabEl.dataset.tab && tabEl.dataset.tab !== 'home'){ e.preventDefault(); mmgCloseTab(tabEl.dataset.tab); }
+  });
 
   navItems.forEach(el=>{
     el.addEventListener('click', ()=> openTarget(el.dataset.target, el.dataset.title));
@@ -2186,16 +2321,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     sessionStorage.setItem('mmg_session_started', '1');
   }catch(e){}
   if(mmgFreshEntry){
-    // İlk açılış: son açık araç sayfası hatırlanmasın, ana sayfa gelsin.
+    // İlk açılış: açık sekmeler ve son araç sayfası hatırlanmasın, ana sayfa gelsin.
     try{ localStorage.removeItem(MMG_LAST_PAGE_KEY); }catch(e){}
+    try{ sessionStorage.removeItem('mmg_open_tabs'); sessionStorage.removeItem('mmg_active_tab'); }catch(e){}
   } else if(window.innerWidth > 860){
+    // Aynı oturumda yenileme (F5): açık sekmelerin tamamını ve aktif sekmeyi geri yükle.
     try{
-      const lastPage = localStorage.getItem(MMG_LAST_PAGE_KEY);
-      if(lastPage){
-        openTarget(lastPage, '');
+      const savedTabs = JSON.parse(sessionStorage.getItem('mmg_open_tabs') || '[]');
+      const savedActive = sessionStorage.getItem('mmg_active_tab') || 'home';
+      if(Array.isArray(savedTabs) && savedTabs.length){
+        savedTabs.forEach(function(t){
+          if(t && t.target){ mmgTabs.push({ target: t.target, title: t.title || t.target }); mmgEnsureFrame(t.target); }
+        });
+        const activeValid = (savedActive !== 'home') && mmgTabs.some(function(t){ return t.target === savedActive; });
+        const finalActive = (savedActive === 'home') ? 'home' : (activeValid ? savedActive : mmgTabs[mmgTabs.length - 1].target);
+        mmgActive = finalActive;
+        mmgShowPanel(finalActive);
+        setActive(finalActive);
+        mmgRenderTabs();
+        if(finalActive !== 'home'){ try{ localStorage.setItem(MMG_LAST_PAGE_KEY, finalActive); }catch(e){} }
         mmgRestoredLastPage = true;
       }
     }catch(e){}
+    // Eski tek-sayfa geri yükleme (sekme durumu yoksa) — geriye dönük uyum.
+    if(!mmgRestoredLastPage){
+      try{
+        const lastPage = localStorage.getItem(MMG_LAST_PAGE_KEY);
+        if(lastPage){ openTarget(lastPage, ''); mmgRestoredLastPage = true; }
+      }catch(e){}
+    }
   }
   if(!mmgRestoredLastPage){
     openTarget('home', 'Ana Sayfa');
@@ -3336,6 +3490,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         } catch(backfillErr){ /* kod atanamazsa sessizce geç, rozet ada/e-postaya düşer */ }
       }
       syncUserDirectory(user.uid, data.customerNumber, data.username, user.email);
+      mmgIsSiteAdmin = !!data.isAdmin;
       if(adminBtn){
         if(data.isAdmin){
           adminBtn.style.display = 'flex';
@@ -4361,10 +4516,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // iframe'in adresine benzersiz bir sorgu parametresi ekleyip tarayıcıyı gerçek,
     // farksız kabul edilemeyecek bir URL değişikliğine zorluyoruz.
     try{
-      if(frameWrap.style.display !== 'none' && iframe.src){
-        const base = iframe.src.split('?')[0];
-        iframe.src = base + '?_scope=' + Date.now();
-      }
+      // Birden çok araç sekmesi açık olabilir; hepsi yeni veri kaynağını yansıtsın.
+      const stamp = '?_scope=' + Date.now();
+      Object.keys(mmgFrames).forEach(function(k){
+        const f = mmgFrames[k];
+        if(f && f.src){ const base = f.src.split('?')[0]; f.src = base + stamp; }
+      });
     }catch(e){ /* sessizce geç */ }
   }
   function renderFirmaBadge(){
@@ -4460,6 +4617,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // hesabıyla veri girmesini hiçbir şekilde kısıtlamaz; sadece ek olarak "Kullanıcı
   // Yönetim Paneli"ne erişim kazandırır (yönettiği firma(lar) için).
   let mmgAdminFirmaIds = [];
+  let mmgIsSiteAdmin = false;
   async function loadAdminFirmas(uid){
     mmgAdminFirmaIds = [];
     try{
@@ -4468,9 +4626,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         mmgAdminFirmaIds = snap.data().adminFirmaIds;
       }
     } catch(e){ /* sessizce geç */ }
-    const isAdmin = mmgAdminFirmaIds.length > 0;
+    // Site yöneticisi (isAdmin) VEYA en az bir firmanın yöneticisi ise paneli görebilir.
+    const showPanel = mmgAdminFirmaIds.length > 0 || mmgIsSiteAdmin;
     const navBtn = document.getElementById('navKullaniciYonetimBtn');
-    if(navBtn) navBtn.style.display = isAdmin ? 'flex' : 'none';
+    if(navBtn) navBtn.style.display = showPanel ? 'flex' : 'none';
   }
 
   // "Oturumu açık tut" tercihi kalıcı: bir kez seçince hep tikli açılır. Firebase'in
@@ -4942,10 +5101,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(darkBtn) darkBtn.classList.toggle('active', mode !== 'light');
     if(lightBtn) lightBtn.classList.toggle('active', mode === 'light');
     try{
-      const frameEl = document.getElementById('app-frame');
-      if(frameEl && frameEl.contentWindow){
-        frameEl.contentWindow.postMessage({ mmgTheme: mode }, '*');
-      }
+      // Açık tüm araç iframe'lerine temayı bildir (çok-ekranlı arayüz).
+      document.querySelectorAll('#mmg-tabpanels iframe').forEach(function(frameEl){
+        if(frameEl && frameEl.contentWindow){ frameEl.contentWindow.postMessage({ mmgTheme: mode }, '*'); }
+      });
     }catch(e){}
   }
   window.mmgApplyTheme = applyTheme;

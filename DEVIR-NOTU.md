@@ -1,12 +1,15 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-panel-arama-cikis'` (repo ~424 commit). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
+Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-panel-nav-admin'` (repo ~425 commit). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
 
 > ✅ **Sürümleme çözüldü:** "Güncelleme var, yenile" banner'ı (index.html #mmgUpdateBanner) NE app-version.json NE de SW_VERSION'a bakar — index.html'e HEAD atıp ETag/Last-Modified karşılaştırır (tamamen otomatik). `SW_VERSION` sadece cache-bust; `app-version.json` artık okunmuyor ama ikisi senkron tutuluyor. Her deploy'da ikisini de bump'la.
 
 > ⚠️ **OneDrive senkron tuzağı:** OneDrive çalışmıyorken dosyalar "cloud-only" görünür; bash "Invalid argument" verir, düzenleme kaybolabilir veya ESKİ sürüm yüklenir. Deploy öncesi işaret (marker) kontrolü şart. (Kayıtlı skill: `mmg-onedrive-sync-guard`.) Bu klasörde `DEVIR-NOTU-DESKTOP-V12JA3F.md` gibi "DESKTOP-xxxx" çakışma kopyaları OneDrive'ın ürettiği artıklardır — silinebilir.
 
 ## 🟢 2026-07-31 (5. OTONOM OTURUM) — CANLIYA ALINANLAR
+**Beşinci tur (nav gating) — SW `2026-07-31-panel-nav-admin`:**
+- **"Veri Yönetimi → Kullanıcı Yönetim Paneli" nav öğesi site yöneticisinde görünmüyordu.** Sebep: `navKullaniciYonetimBtn` yalnızca `mmgAdminFirmaIds.length>0` (firma admini) ile açılıyordu; site-admin (yalnız `isAdmin=true`, firma admini değil) için gizli kalıyordu (İstatistikler/Referans ise `data.isAdmin` ile açılıyor). Düzeltme (`index.html`): global `mmgIsSiteAdmin` (onAuthStateChanged'de `data.isAdmin`'den set) eklendi; `loadAdminFirmas` gating'i `mmgAdminFirmaIds.length>0 || mmgIsSiteAdmin` oldu. Bu turda index.html İLK KEZ yeniden deploy edildi (canlı = benim 'kullanici-paneli' sürümümdü; sekmeli-arayüz için ayrı bir index.html deploy'u yoktu). Anasayfa ilk-açılış mantığı korunuyor.
+
 **Dördüncü tur (panel düzeltmeleri) — SW `2026-07-31-panel-arama-cikis`:**
 - İstatistikler'e yanlışlıkla eklenen "🛠 Kullanıcı Yönetim Paneli" butonu KALDIRILDI. Doğru yer zaten var: **index.html Nav → "Veri Yönetimi" çekmecesinde `navKullaniciYonetimBtn`** (firma admini olana gating ile görünür, line ~1611+4629). index.html'e dokunulmadı.
 - `KullaniciYonetimi.html`: **"← Ana Sayfa"** çıkış butonu eklendi (hem pageWrap hem guard ekranına; `mmg_last_open_page` temizlenip index.html'e top-navigate). Admin "Tüm Kullanıcılar" tablosuna **sütun başına arama kutuları** (fltKod/fltAd/fltEposta/fltDurum/fltKayit, `.ky-col-filter`) eklendi; global arama + sütun filtreleri AND mantığıyla birlikte çalışır.
