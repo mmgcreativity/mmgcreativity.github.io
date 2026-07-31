@@ -1,10 +1,58 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-07-30 (3. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-30-forum-logo-push-hero'`. **Canlı doğrulandı** (Forum=resolveScopeLogo ✓, index=mmgShowPushPrompt ✓ + mobil `.brand{display:none}` ✓; önceki batch: KullaniciYonetimi=userDirectory ✓, mmg-chat-widget=applyCooldown ✓, index=`.app-card p{display:none}` ✓).
+Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-begeni-kaldirildi-2'` (repo ~420 commit). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
 
 > ✅ **Sürümleme çözüldü:** "Güncelleme var, yenile" banner'ı (index.html #mmgUpdateBanner) NE app-version.json NE de SW_VERSION'a bakar — index.html'e HEAD atıp ETag/Last-Modified karşılaştırır (tamamen otomatik). `SW_VERSION` sadece cache-bust; `app-version.json` artık okunmuyor ama ikisi senkron tutuluyor. Her deploy'da ikisini de bump'la.
 
 > ⚠️ **OneDrive senkron tuzağı:** OneDrive çalışmıyorken dosyalar "cloud-only" görünür; bash "Invalid argument" verir, düzenleme kaybolabilir veya ESKİ sürüm yüklenir. Deploy öncesi işaret (marker) kontrolü şart. (Kayıtlı skill: `mmg-onedrive-sync-guard`.) Bu klasörde `DEVIR-NOTU-DESKTOP-V12JA3F.md` gibi "DESKTOP-xxxx" çakışma kopyaları OneDrive'ın ürettiği artıklardır — silinebilir.
+
+## 🟢 2026-07-31 (5. OTONOM OTURUM) — CANLIYA ALINANLAR
+- **Beğeni / geri bildirim ("Uygulamayı beğendiniz mi?") KALDIRILDI** (kullanıcı isteği): `mmg-feedback-widget.js` **no-op** yapıldı → tüm sayfalardan soru/popup anında kalktı (dosya, `<script src>` referansları 404 vermesin diye boş bırakıldı; eski sürüm git geçmişinde). `Istatistikler.html`'de "💬 Beğenme Geri Bildirimleri" bölümü (HTML + `render()`/`loadFeedback()`/`tblBody`/`refreshBtn`/filter-btn JS'i + Promise.all çağrısı + kullanılmayan const'lar) tamamen çıkarıldı; sayfa altyazısı "...talimat kullanım istatistikleri" olarak güncellendi (tr+en). SW `2026-07-31-begeni-kaldirildi-2`. Canlı doğrulandı.
+- ⚠️ **Orphan dosya:** repoda `Begen_Istatistikleri.html` hâlâ var ama YERELDE YOK ve index.html menüsünden hiçbir yere BAĞLI DEĞİL (erişilemez eski sayfa). İstenirse GitHub'dan silinebilir; bağlı olmadığı için canlı bir etkisi yok.
+- ℹ️ **Talimat kullanım istatistiği "veri gelmiyor" teşhisi:** Kod/kurallar tam ve canlı; okuma başarılı (admin), 0 kayıt = feature canlıya geçtikten SONRA girişli kullanıcı henüz talimat (PDF/Word) üretmemiş. Sadece İLERİYE dönük sayar (geçmiş talimatlar backfill edilmez). Test: girişliyken bir talimat üret → Istatistikler "↻ Yenile".
+
+## 🟢 2026-07-30 (4. OTONOM OTURUM) — CANLIYA ALINANLAR
+
+**⭐ EN KRİTİK — Service Worker NETWORK-FIRST (deploy'lar artık ANINDA geliyor)**
+- Şikâyet: "deploy ediyorum ama değişiklik cihaza gelmiyor / çoğu iş yok gibi görünüyor." Sebep: SW **stale-while-revalidate** idi → açılışta ESKİ cache'i gösteriyordu.
+- `service-worker.js` yeniden yazıldı: **HTML/JS/CSS/JSON = NETWORK-FIRST** (önce ağdan en güncel, çevrimdışıysa cache'e düşer). Görsel/font = stale-while-revalidate. Artık her açılış güncel kodu çeker.
+- ⚠️ **Oto-yenileme DENENDİ ve KALDIRILDI:** "yeni SW devralınca sayfayı bir kez otomatik yenile" (controllerchange) eklenmişti; **telefonda giriş/SMS akışının ortasına denk gelip oturumu düşürüyordu** ("telefonla gir kayboldu"). Kaldırıldı — network-first zaten güncelliği sağlıyor, zorla yenilemeye gerek yok. Bir daha eklenmesin.
+
+**Firma Kodu (isim-eşleşme sorununu bitiren özellik)**
+- `KullaniciYonetimi.html`: firma açarken **oto kod üretir** (`mmgGenFirmaCode`, isimden + rastgele son ek; `mmgNormalizeFirmaCode` A-Z0-9), kullanıcı **kendi kodunu** da girebilir (`#newFirmaCode`), seçili firmanın kodunu **düzenle/kaydet** (`#firmaCodeEditRow`, `saveFirmaCodeBtn` → `firmaAccounts/{id}.firmaCode`). Aynı kod iki firmada olamaz.
+- `VeriGirisPaneli.html`: **3 Excel şablonuna** (Müşteri/Tedarikçi, IBAN'larım, Muhataplar) "Firma Kodu" sütunu; toplu içe aktarım **önce firma koduyla** eşleşir (`mmgFirmaCodeToId`/`codeToId`), kod yoksa isimle, o da yoksa aktif firmaya. Muhataplar import da artık aktif firmaya bağlanıyor (eskiden global). Firma-seç kutularında firma adının yanında `[KOD]` gösteriliyor.
+
+**Menü / Mobil (`index.html`)**
+- **"Vade Hesapları"** flyout grubu eklendi (Ortalama Vade, Kredi Kartı Vade Farkı, Vadeli Mevduat + Vade Sapması); "Diğer Araçlar" başlığı navdan kaldırıldı.
+- **Mobil hesap/firma çubuğu:** `#mmgBottomLeftBar` (hesap) + `.mmg-firma-bar-wrap` (aktif firma) `<nav>` DIŞINDaydı → mobilde aside en üstte kalıp "hesabım hep yukarıda" oluyordu. Artık JS ile mobilde **`<nav>`'ın en altına** taşınıyor (menü kapalıyken görünmez, açılınca dipte); masaüstünde yer-imi yorumlarıyla eski yerine döner.
+- **Alt menü çakışması:** mobilde `.nav-drawer{position:static !important; inset:auto !important …}` — inline `position:fixed` koordinatları ezilir, alt maddeler ana başlığın altında girintili açılır.
+- **Aktif firma listesi:** çubuğa basınca açılan `#mmgFirmaSwitchPopup` `bottom:100%` (çubuğun üstü) idi; çubuk üstteyken ekran dışına taşıp "gelmiyor" görünüyordu → mobilde **inline** (`position:static !important`) açılır.
+- Hero açıklaması ("İşletmeler…") mobilde gizli (zaten vardı, doğrulandı).
+
+**Talimat (`Talimat_Hazirlama.html`)**
+- Gizli kalmış **"⚠️ ÇOK ÖNEMLİ" IBAN uyarı metni tamamen silindi** (`#fGonderenIbanHint` boş div).
+- **Gönderen tarafı:** banka SEÇİLİYKEN o bankaya ait IBAN yoksa artık yanlış bankanın IBAN'ı kalmıyor, **temizleniyor** (alıcı tarafıyla aynı davranış; `autoFillGonderenIban` içinde `if(banka && byBank.length===0){ ibanEl.value=''… }`).
+
+**Şifre Sıfırlama Maili — TAM ÇALIŞIR (Resend canlı)**
+- Resend kurulumu tamam: domain **mmgcreativity.com VERIFIED** (DNS Netlify'de; DKIM `resend._domainkey`, SPF `include:amazonses.com`, MX eu-west-1), `RESEND_API_KEY` secret tanımlı ve `sendPasswordResetMail`'e bağlı, deploy edildi. Artık `noreply@mmgcreativity.com`'dan gerçek mail gidiyor.
+- Şablon (`functions/index.js` → `resetEmailHtml`) **markalı** ve **site paletiyle** yeniden yazıldı: koyu lacivert #0D1420 degrade zemin (mercan/azure hafif parıltı), kart #141C2B, **3D degradeli mercan buton** (gölge + iç parlaklık), brass "MMG Creativity / Dijital Finans Asistanı".
+- **Logo GÖMÜLÜ (inline/CID):** `functions/index.js`'te `MMG_LOGO_B64` sabiti (96px DFA_icon base64) var; Resend `attachments`'ta `content_id:"mmglogo"` + HTML'de `<img src="cid:mmglogo">` → Outlook "uzak görsel engellendi" demeden gösterir.
+- Sıfırlama **sayfası Türkçe:** üretilen link `lang=tr`'ye çevriliyor (Firebase varsayılan `lang=en` ekliyordu).
+- ⚠️ Bu değişiklikler **backend** — kullanıcı `firebase deploy --only functions:sendPasswordResetMail` ile deploy etti (tasarım onaylandı: "tasarım ok").
+
+**Denetim (önemli teşhis)**
+- Kullanıcı "yaptım dediğin işlerin çoğu yok" dedi. **4 Explore alt-ajanıyla** index/Talimat/VeriGiris/functions+Istatistikler+chat+KullaniciYonetimi satır satır denetlendi → **iddia edilen işlerin HEPSİ kodda kanıtlandı**. Gerçek sebep = SW cache (yukarıda network-first ile çözüldü).
+
+**Telefonla giriş (netleştirildi, kod değişmedi)**
+- Tasarım gereği: telefon numarası bir e-posta hesabına **bağlı değilse** SMS girişi boş "misafir" hesap açar ve `onAuthStateChanged` guard'ı (index.html ~3299) onu **siler + giriş ekranına atar**. Çözüm kullanıcıda: önce e-posta/şifre ile gir → **Ayarlar → Telefonumu Bağla** → sonra telefonla giriş çalışır.
+
+### 📌 4. OTURUM SONU — KALAN İŞLER
+- **Node 20 → 22:** fonksiyon ortamı **30 Ekim 2026**'da kalkıyor. `functions/package.json` `engines.node="22"` + `firebase-functions@latest` → test ederek yükselt (kırıcı değişiklik riski, birlikte yapılmalı).
+- **Fonksiyon bölge uyumu (opsiyonel):** `pushOnNotification` ve `notifyAdminsOnReferralSignup` fonksiyonları `us-central1`, tetikleyicileri `eur3` → küçük gecikme/maliyet. İstenirse `eur3`'e taşınır.
+- **Güvenlik:** ekran görüntülerinde görünen Resend API anahtarını yenile (Resend'de sil + yeni oluştur + `firebase functions:secrets:set RESEND_API_KEY` 3 satırlık `Set-Content` yöntemiyle).
+- **BÜYÜK (ertelendi):** Logo j-Platform tarzı **sekmeli/çok-ekranlı arayüz** — ana sayfada araçların sekmelerde açılıp aralarında geçilmesi. Başlanmadı; `index.html` shell yapısı hazır (`#home-screen`, `#frame-wrap`, `#app-frame`, `openTarget`). Çekirdek kabuğu değiştirir + canlı test gerektirir → ayrı, odaklı oturum. Blind deploy RİSKLİ (canlı finans uygulaması).
+- **`notifyAdminsOnReferralSignup`** fonksiyonu eklendi (referans kaydında adminlere bildirim); kod sahibine bildirim zaten istemci + `pushOnNotification` ile gidiyor.
+- Klasörde `._ck_1.mjs` adlı zararsız geçici dosya kaldı (OneDrive silme izni vermedi) — kullanıcı elle silebilir, deploy'a dahil değil.
 
 ## 🟢 2026-07-30 (3. OTONOM OTURUM) — CANLIYA ALINANLAR
 **Giriş / hesap**
@@ -48,6 +96,11 @@ Son güncelleme: **2026-07-30 (3. otonom oturum)** · Son deploy işareti: `serv
 1. **Forum logosu ÇÖZÜLDÜ (frontend):** Kullanıcının PDF/Talimat logosu `users/{uid}` kökünde değil, **`{scope}/{scopeId}/talimat/firmaProfili.logoBase64`** altında saklanıyordu — o yüzden kendi logosu bile forumda gelmiyordu. `Forum.html`'e **`resolveScopeLogo(uid, userData)`** eklendi (Talimat ile aynı kapsam mantığı: `mmg_active_data_scope` → firmaAccounts/hub veya companies veya users/uid). `currentUserAvatar` artık bunu da dener → **kendi logo forumda görünür**. Yeni post/yanıtta `authorAvatar` gömülü kaydedildiği için logo **diğer herkese de yayılır** (ileriye dönük). `resolveForumAvatar` ayrıca `users/{uid}/talimat/firmaProfili`'yi de fallback dener (kişisel kapsamlı kullanıcılar için). *Kalan tek sınır: başka bir firma-kullanıcısının ESKİ (authorAvatar boş) post'unda logo, o kullanıcı foruma girip yeni post atana kadar veya kurallar ortak okuma izni verene kadar gelmeyebilir.*
 2. **İlk-giriş bildirim pop-up'ı EKLENDİ (frontend):** `index.html` → **`mmgShowPushPrompt()`** sağ-altta "🔔 Bildirimleri aç" kartı gösterir (bir kez; `mmg_push_prompt_dismissed` bayrağı). "Aç" → `mmgEnablePush()` (izin ister + FCM token'ı `users/{uid}/fcmTokens`'a yazar). Kullanıcı hareketiyle istendiği için tarayıcı-gesture kısıtı sorun olmaz. *Kalan: teslimat TUTARLILIĞI (1018→admin gelip admin→1018 gelmemesi) `pushOnNotification` backend işi — `firebase functions:log --only pushOnNotification` gerekli.*
 3. **Mobil brand+hero birleştirme YAPILDI:** Mobilde ayrı `.brand`/`.brand-row` logo bloğu **gizlendi** (hero ile aynı kimliği iki kez gösterip yer kaplıyordu); **hero tek kompakt başlık** oldu (app-icon 56px, başlık 20px, dar padding/boşluklar, `Powered by mmgcreativity` pill'i zaten hero'da). *İsteğe bağlı ileri iş: tek birleşik SVG/PNG grafiği (tasarım).*
+
+### 📌 BACKLOG (kullanıcı istekleri — sonra yapılacak)
+- ✅ **Talimat kullanım istatistiği — TAMAMLANDI & CANLIDA** (2026-07-31 doğrulandı): `Talimat_Hazirlama.html` her PDF/Word çıktısında `mmgLogTalimatUsage(tur, method)` → `talimatUsage` koleksiyonuna yazar (`addHistoryEntry`'nin tüm çağrı noktalarına bağlı: havale-tekli, generic, serbest-metin; PDF ve Word). `Istatistikler.html` → `loadTalimatUsage()` bunu tür bazında (Toplam/PDF/Word) + en çok kullanan kişiler olarak raporlar. `firestore.rules`'ta `talimatUsage` match'i var. Canlı Istatistikler sayfasında "📝 Talimat Kullanımı" bölümü görünüyor.
+- **Mobil düzen (devam):** üst firma logo+kod+ad scope bar'ı açılır menü EN ALTINA taşı (hero üstte kalsın); flyout alt-menüler (Krediler/Vade Hesapları) mobilde ana maddelerle çakışmasın (inline aç). Hero açıklama kesilmesi düzeltildi (`white-space:normal`).
+- **Google Cloud free trial kredisi** (~₺14k, 27 Eki 2026'da yanar): Gemini/Document AI ile "belge→otomatik giriş", j-Platform konektörü gibi işlerde değerlendirilebilir.
 
 ### ⏳ KALAN (frontend'de çözülemez)
 4. **FCM push TESLİMAT tutarlılığı:** yukarıda #2 — backend log analizi. İzin+token akışı ve pop-up artık hazır.
