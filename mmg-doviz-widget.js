@@ -79,8 +79,11 @@
       '.mmg-doviz-rows{display:flex;flex-direction:column;gap:7px;}' +
       '.mmg-doviz-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface-2,#1B2536);' +
         'border:1px solid var(--hairline,#2A3448);border-radius:8px;padding:9px 11px;}' +
-      '.mmg-doviz-pair{display:flex;align-items:center;gap:7px;color:var(--text,#EAEDF3);font-size:13px;font-weight:600;}' +
-      '.mmg-doviz-pair small{color:var(--muted,#8D96AC);font-weight:500;}' +
+      // "Gram Altın" iki satıra kırılınca /TRY ikinci satırın yanında kalıp arada büyük boşluk
+      // oluşuyordu (kullanıcı 2026-07-31). nowrap ile etiket tek satırda tutuluyor; ayrıca
+      // flex gap'i (7px) negatif margin ile ~3px'e indirilip /TRY etikete yaklaştırıldı.
+      '.mmg-doviz-pair{display:flex;align-items:center;gap:7px;color:var(--text,#EAEDF3);font-size:13px;font-weight:600;white-space:nowrap;}' +
+      '.mmg-doviz-pair small{color:var(--muted,#8D96AC);font-weight:500;margin-left:-4px;}' +
       '.mmg-doviz-val{color:var(--brass,#C6A15B);font-size:15px;font-weight:700;}' +
       '.mmg-doviz-loading,.mmg-doviz-err{color:var(--muted,#8D96AC);font-size:12px;text-align:center;padding:14px 4px;}' +
       '.mmg-doviz-err{color:var(--red,#E2544B);}' +
