@@ -559,7 +559,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .card-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(var(--dfa-card-w, 300px), 1fr)); align-items:start; gap:18px; max-width:1400px; position:relative; }
   .card-grid.drag-over{ outline:2px dashed var(--brass); outline-offset:8px; border-radius:16px; background:rgba(198,161,91,0.05); }
   .desktop-toolbar{
-    position:fixed; top:64px; right:24px; z-index:15;
+    /* Kalem (masaüstü düzenle) HER ZAMAN sağ ÜST KÖŞEDE SABİT (kullanıcı isteği — kaymasın). */
+    position:fixed; top:16px; right:24px; z-index:15;
     display:flex; align-items:flex-start; justify-content:flex-end; gap:12px; margin-bottom:0;
   }
   .desktop-edit-btn{
@@ -2097,6 +2098,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         mmgFrames[k].classList.toggle('active', k === target);
       });
     }
+    mmgPlaceTabBar(target);
+  }
+  // Sekme şeridinin YERİ (kullanıcı isteği): anasayfadayken hero'nun ÜSTÜNDE değil ALTINDA
+  // dursun; bir araç açıkken eskisi gibi en üstte. Element taşınarak yapılır (mobil
+  // hesap çubuğu taşıma deseniyle aynı yaklaşım), sekme durumu/olayları bozulmaz.
+  function mmgPlaceTabBar(target){
+    try{
+      const mainEl = document.querySelector('main');
+      if(!mainEl || !tabBar) return;
+      if(target === 'home'){
+        const hero = homeScreen ? homeScreen.querySelector('.hero') : null;
+        if(hero && hero.parentNode && tabBar.previousElementSibling !== hero){
+          hero.parentNode.insertBefore(tabBar, hero.nextSibling);
+        }
+      } else if(mainEl.firstElementChild !== tabBar){
+        mainEl.insertBefore(tabBar, mainEl.firstElementChild);
+      }
+    }catch(e){ /* yerleşim taşınamazsa mevcut konumda kalır */ }
   }
   // Sekme çubuğunu yeniden çiz. Hiç araç sekmesi yoksa çubuk gizlenir.
   function mmgRenderTabs(){

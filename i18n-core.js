@@ -138,4 +138,16 @@
       apply(e.newValue);
     }
   });
+
+  // ---- Masaüstü kabuk (iframe) içinde "← Ana Sayfa" butonlarını gizle ----
+  // Araç sayfaları masaüstünde index.html kabuğunun iframe'inde açılır; sol menüde
+  // zaten Ana Sayfa olduğu için sayfa içi "← Ana Sayfa" butonları MÜKERRERDİR
+  // (kullanıcı isteğiyle kaldırıldı). Sayfa bağımsız/mobil açıldığında buton KALIR.
+  try {
+    if (window.self !== window.top) {
+      var st = document.createElement('style');
+      st.textContent = '.back-link, a[href="index.html"][target="_top"]{ display:none !important; }';
+      (document.head || document.documentElement).appendChild(st);
+    }
+  } catch (e) { /* cross-origin erişim engellenirse sessizce geç */ }
 })();

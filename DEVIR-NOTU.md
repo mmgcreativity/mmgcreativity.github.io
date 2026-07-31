@@ -1,12 +1,20 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-iban-sablon-kod'` (repo ~431 commit). ✅ IAM signBlob + firestore:indexes kullanıcı tarafından tamamlandı; bekleyen kullanıcı işi yok. ⏳ Kullanıcı bekleyen: `firebase deploy --only firestore:indexes` (davet listesi) + IAM signBlob rolü (hesap geçişi). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
+Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-bekleyen-5is'` (repo ~432 commit). ✅ IAM signBlob + firestore:indexes tamam; bekleyen iş listesi boş (ışıldaklı üst-ikon isteği "kaldır" ile değişti, KUR/hesap ikon stili istenirse ayrıca yapılır). ⏳ Kullanıcı bekleyen: `firebase deploy --only firestore:indexes` (davet listesi) + IAM signBlob rolü (hesap geçişi). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
 
 > ✅ **Sürümleme çözüldü:** "Güncelleme var, yenile" banner'ı (index.html #mmgUpdateBanner) NE app-version.json NE de SW_VERSION'a bakar — index.html'e HEAD atıp ETag/Last-Modified karşılaştırır (tamamen otomatik). `SW_VERSION` sadece cache-bust; `app-version.json` artık okunmuyor ama ikisi senkron tutuluyor. Her deploy'da ikisini de bump'la.
 
 > ⚠️ **OneDrive senkron tuzağı:** OneDrive çalışmıyorken dosyalar "cloud-only" görünür; bash "Invalid argument" verir, düzenleme kaybolabilir veya ESKİ sürüm yüklenir. Deploy öncesi işaret (marker) kontrolü şart. (Kayıtlı skill: `mmg-onedrive-sync-guard`.) Bu klasörde `DEVIR-NOTU-DESKTOP-V12JA3F.md` gibi "DESKTOP-xxxx" çakışma kopyaları OneDrive'ın ürettiği artıklardır — silinebilir.
 
 ## 🟢 2026-07-31 (5. OTONOM OTURUM) — CANLIYA ALINANLAR
+**On ikinci tur (bekleyen 5 iş, hepsi) — SW `2026-07-31-bekleyen-5is`:**
+- **(A) Masaüstünde "← Ana Sayfa" butonları kaldırıldı:** `i18n-core.js`'e (57 sayfada yüklü) iframe algısı eklendi — `window.self!==window.top` ise `.back-link` ve `a[href="index.html"][target=_top]` gizlenir. Sayfa bağımsız/mobil açılınca buton KALIR.
+- **(B) Sekme şeridi anasayfada hero'nun ALTINDA:** `mmgShowPanel` → `mmgPlaceTabBar(target)`; home'da tabBar hero'nun hemen sonrasına taşınır, araç açıkken main'in en üstüne döner.
+- **(C) Kalem (masaüstü düzenle) sağ ÜST KÖŞEDE sabit:** `.desktop-toolbar` top:64px→**16px** (position:fixed zaten vardı).
+- **(D) Döviz paneli:** Gram Altın'a yedek kaynak zinciri (truncgil v4 → genelpara; CORS'ta biri düşerse diğeri) + **"+ Parite" butonu** (3 harfli kod sorulur, `mmg_doviz_extra_pairs` localStorage'da kalıcı, satırda ✕ ile kaldırma).
+- **(E) VeriGiriş'e "🧑‍💼 Personeller" sekmesi:** Muhataplar deseniyle birebir — `{scope}/{id}/personnel` koleksiyonu (ad + görev/not), elle ekle/sil/yenile, firma seçimi (boşsa aktif firmaya atanır), kurallar wildcard'la zaten kapsıyor. Bulk/şablon YOK (istenirse eklenir).
+- Ders (kullanıcı uyardı): "bekleyen yok" derken YALNIZCA kullanıcı-tarafı işleri kastetmiştim; bendeki 5 iş duruyordu. Kapanışta HER ZAMAN iki liste ver: (1) yayınlananlar, (2) bende/beklemede olanlar.
+
 **On birinci tur — SW `2026-07-31-iban-sablon-kod`:**
 - **IBAN Excel şablonundan "Firma" (ad) sütunu KALDIRILDI** (kullanıcı isteği): başlık artık `Firma Kodu | Banka | IBAN | Döviz | Açıklama`; örnek satırlarda kod (1000/1001). Eşleştirme zaten yalnız kodla; eski şablonla yüklenen dosyalar da çalışır (Firma sütunu yok sayılır).
 - ✅ **IAM signBlob ÇÖZÜLDÜ (kullanıcı Console'dan verdi, ekran teyitli):** compute servis hesabına "Service Account Token Creator" rolü eklendi ("Policy updated"). Birkaç dk aktifleşme sonrası hesap geçişi (INTERNAL) düzelmiş olmalı. Bekleyen kullanıcı işi KALMADI.

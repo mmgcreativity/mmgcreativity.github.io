@@ -309,6 +309,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       <button type="button" class="veri-tab-btn" data-tab="customers" data-i18n="tab_customers">👤 Müşteriler</button>
       <button type="button" class="veri-tab-btn" data-tab="suppliers" data-i18n="tab_suppliers">🚚 Tedarikçiler</button>
       <button type="button" class="veri-tab-btn" data-tab="counterparties" data-i18n="tab_counterparties">🏛️ Muhataplar</button>
+      <button type="button" class="veri-tab-btn" data-tab="personnel" data-i18n="tab_personnel">🧑‍💼 Personeller</button>
     </div>
 
     <div class="card" id="bulkUploadCard">
@@ -448,6 +449,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div class="form-msg" id="counterparties_msg"></div>
       </div>
       <div class="party-list" id="counterpartiesList"></div>
+    </div>
+
+    <div class="veri-tab-panel" id="panel-personnel">
+      <div class="card">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;"><h2 data-i18n="add_personnel_title" style="margin:0;">Yeni Personel Ekle</h2><button type="button" class="veri-refresh-btn" data-refresh="personnel" style="margin-left:auto; background:transparent; border:1px solid var(--hairline); color:var(--muted); border-radius:8px; padding:5px 12px; font-weight:600; cursor:pointer; font-size:12.5px;">↻ Yenile</button></div>
+        <div class="card-sub" data-i18n="add_personnel_desc">Firmanızda çalışan personelleri buraya kaydedin (ad soyad + görev/not).</div>
+        <div class="auth-field">
+          <label data-i18n="party_name_label">Ünvan / Ad Soyad</label>
+          <input type="text" id="pr_name" data-i18n-placeholder="personnel_name_ph" placeholder="ör. Ahmet Yılmaz">
+        </div>
+        <div class="auth-field">
+          <label data-i18n="personnel_notes_label">Görev / Not (opsiyonel)</label>
+          <input type="text" id="pr_notes" data-i18n-placeholder="personnel_notes_ph" placeholder="ör. Muhasebe sorumlusu">
+        </div>
+        <div id="pr_firmaSelect"></div>
+        <button type="button" class="auth-submit" data-save="personnel" data-i18n="save_personnel_btn">Personeli Kaydet</button>
+        <div class="form-msg" id="personnel_msg"></div>
+      </div>
+      <div class="party-list" id="personnelList"></div>
     </div>
 
     <div class="veri-tab-panel active" id="panel-banks">
@@ -606,7 +626,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       back_home:'← Ana Sayfa',
       bulk_title:'📥 Toplu Excel ile Yükle',
       download_template_btn:'⬇️ Şablonu İndir', upload_excel_btn:'📤 Excel Yükle', bulk_confirm_btn:'Kaydet', bulk_cancel_btn:'İptal',
-      tab_customers:'👤 Müşteriler', tab_suppliers:'🚚 Tedarikçiler', tab_counterparties:'🏛️ Muhataplar', tab_banks:'💳 IBAN\'larım', tab_bankList:'🏦 Çalıştığım Bankalar',
+      tab_customers:'👤 Müşteriler', tab_suppliers:'🚚 Tedarikçiler', tab_counterparties:'🏛️ Muhataplar', tab_personnel:'🧑‍💼 Personeller', tab_banks:'💳 IBAN\'larım', tab_bankList:'🏦 Çalıştığım Bankalar',
+      add_personnel_title:'Yeni Personel Ekle', add_personnel_desc:'Firmanızda çalışan personelleri buraya kaydedin (ad soyad + görev/not).', personnel_notes_label:'Görev / Not (opsiyonel)', personnel_name_ph:'ör. Ahmet Yılmaz', personnel_notes_ph:'ör. Muhasebe sorumlusu', save_personnel_btn:'Personeli Kaydet',
       add_customer_title:'Yeni Müşteri Ekle', add_supplier_title:'Yeni Tedarikçi Ekle',
       party_name_label:'Ünvan / Ad Soyad', party_name_ph:'ör. ABC İnşaat A.Ş.', party_idnum_label:'TC / Vergi No',
       iban_editor_label:'IBAN Bilgileri', add_iban_btn:'+ IBAN Ekle',
@@ -628,7 +649,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       back_home:'← Home',
       bulk_title:'📥 Bulk Upload via Excel',
       download_template_btn:'⬇️ Download Template', upload_excel_btn:'📤 Upload Excel', bulk_confirm_btn:'Save', bulk_cancel_btn:'Cancel',
-      tab_customers:'👤 Customers', tab_suppliers:'🚚 Suppliers', tab_counterparties:'🏛️ Counterparties', tab_banks:'💳 My IBANs', tab_bankList:'🏦 Banks I Work With',
+      tab_customers:'👤 Customers', tab_suppliers:'🚚 Suppliers', tab_counterparties:'🏛️ Counterparties', tab_personnel:'🧑‍💼 Personnel', tab_banks:'💳 My IBANs', tab_bankList:'🏦 Banks I Work With',
+      add_personnel_title:'Add New Personnel', add_personnel_desc:'Save the personnel working at your company (name + role/note).', personnel_notes_label:'Role / Note (optional)', personnel_name_ph:'e.g. John Smith', personnel_notes_ph:'e.g. Accounting lead', save_personnel_btn:'Save Personnel',
       add_customer_title:'Add New Customer', add_supplier_title:'Add New Supplier',
       party_name_label:'Name / Company', party_name_ph:'e.g. ABC Construction Inc.', party_idnum_label:'ID / Tax No',
       iban_editor_label:'IBAN Details', add_iban_btn:'+ Add IBAN',
@@ -766,7 +788,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }).join('');
   }
   function renderAllFirmaSelects(){
-    const containerIds = ['cust_firmaSelect', 'supp_firmaSelect', 'cp_firmaSelect', 'bank_firmaSelect'];
+    const containerIds = ['cust_firmaSelect', 'supp_firmaSelect', 'cp_firmaSelect', 'pr_firmaSelect', 'bank_firmaSelect'];
     const show = scopeCollection === 'firmaAccounts' && groupFirmaMembers.length > 1;
     containerIds.forEach(id => {
       const el = document.getElementById(id);
@@ -852,7 +874,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     btn.addEventListener('click', async () => {
       const k = btn.dataset.refresh;
       const orig = btn.textContent; btn.disabled = true; btn.textContent = '↻ ...';
-      try{ if(k === 'banks'){ await loadBanks(); } else { await loadParties(k); } }
+      try{
+        if(k === 'banks'){ await loadBanks(); }
+        else if(k === 'counterparties'){ await loadCounterparties(); }
+        else if(k === 'personnel'){ await loadPersonnel(); }
+        else { await loadParties(k); }
+      }
       catch(e){}
       btn.disabled = false; btn.textContent = orig;
     });
@@ -1306,9 +1333,74 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const kind = btn.dataset.save;
       const prefix = kind === 'customers' ? 'cust' : (kind === 'suppliers' ? 'supp' : null);
       if(prefix){ saveParty(kind, prefix); }
+      else if(kind === 'personnel'){ savePersonnel(); }
       else { saveCounterparty(); }
     });
   });
+
+  // ---- Personeller (kullanıcı isteği: yeni sekme) — Muhataplar deseniyle birebir ----
+  let personnelCache = [];
+  async function loadPersonnel(){
+    try{
+      const snap = await getDocs(colRef('personnel'));
+      const list = [];
+      snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+      list.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'tr'));
+      personnelCache = list;
+    }catch(e){ personnelCache = []; }
+    renderPersonnel();
+  }
+  function renderPersonnel(){
+    const listEl = document.getElementById('personnelList');
+    if(!listEl) return;
+    const list = personnelCache.filter(visibleForActiveFirma);
+    if(!list.length){
+      listEl.innerHTML = '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
+      return;
+    }
+    listEl.innerHTML = list.map(p =>
+      '<div class="party-row" data-id="' + p.id + '">' +
+        '<div class="party-row-top">' +
+          '<div>' +
+            '<div class="party-name">' + escapeHtml(p.name) + '</div>' +
+            (p.notes ? '<div class="party-idnum">' + escapeHtml(p.notes) + '</div>' : '') +
+          '</div>' +
+          '<div class="party-actions">' +
+            '<button type="button" class="party-icon-btn danger" data-del-pr="' + p.id + '" title="' + LBL.delete + '">✕</button>' +
+          '</div>' +
+        '</div>' +
+        scopeBadgeHtml(p) +
+      '</div>'
+    ).join('');
+    listEl.querySelectorAll('[data-del-pr]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm(LBL.confirmDelete)) return;
+        try{
+          await deleteDoc(docRef('personnel', btn.dataset.delPr));
+          await loadPersonnel();
+        }catch(e){ showMsg('personnel_msg', LBL.deleteFailed, true); }
+      });
+    });
+  }
+  async function savePersonnel(){
+    const nameEl = document.getElementById('pr_name');
+    const notesEl = document.getElementById('pr_notes');
+    const name = nameEl.value.trim();
+    if(!name){ showMsg('personnel_msg', LBL.enterValidName, true); return; }
+    const appliesTo = collectFirmaSelection('pr_firmaSelect');
+    try{
+      const id = 'pr_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+      const docData = { name, notes: notesEl.value.trim(), createdAt: serverTimestamp() };
+      // Elle eklemede kayıt HER ZAMAN bir firmaya atanır (seçim yoksa aktif firma).
+      if(appliesTo) docData.appliesToFirmaIds = appliesTo;
+      else if(scopeCollection === 'firmaAccounts' && scopeId) docData.appliesToFirmaIds = [scopeId];
+      await setDoc(docRef('personnel', id), docData);
+      nameEl.value = ''; notesEl.value = '';
+      resetFirmaSelect('pr_firmaSelect');
+      showMsg('personnel_msg', LBL.saved, false);
+      await loadPersonnel();
+    }catch(e){ showMsg('personnel_msg', LBL.saveFailed, true); }
+  }
 
   let counterpartyCache = [];
   async function loadCounterparties(){
@@ -1505,6 +1597,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     await loadParties('customers');
     await loadParties('suppliers');
     await loadCounterparties();
+    await loadPersonnel();
   }
 
   // ---- IBAN'larım (banks) sekmesi için ayrı Excel şablonu/toplu yükleme ----

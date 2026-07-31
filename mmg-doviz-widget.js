@@ -16,8 +16,19 @@
     { code: 'USD', label: 'USD', flag: '🇺🇸' },
     { code: 'EUR', label: 'EUR', flag: '🇪🇺' }
   ];
-  // Gram Altın ayrı bir kaynaktan çekilir (döviz API'sinde altın yok).
-  const GOLD_URL = 'https://api.genelpara.com/embed/altin.json';
+  // Gram Altın ayrı kaynaktan çekilir (döviz API'sinde altın yok). Birincil kaynak
+  // CORS'ta takılırsa yedek kaynağa düşülür (kullanıcı: "Gram Altın gelmiyor").
+  const GOLD_URLS = [
+    'https://finans.truncgil.com/v4/today.json',
+    'https://api.genelpara.com/embed/altin.json'
+  ];
+  // Kullanıcının kendi eklediği pariteler (örn. GBP, CHF, SAR) — kalıcı.
+  const EXTRA_KEY = 'mmg_doviz_extra_pairs';
+  function getExtraPairs(){
+    try{ const a = JSON.parse(localStorage.getItem(EXTRA_KEY) || '[]'); return Array.isArray(a) ? a : []; }
+    catch(e){ return []; }
+  }
+  function setExtraPairs(a){ try{ localStorage.setItem(EXTRA_KEY, JSON.stringify(a)); }catch(e){} }
 
   function inject(){
     if(document.getElementById('mmgDovizBtn')) return; // tek örnek
@@ -42,8 +53,9 @@
       '<div id="mmgDovizRows" class="mmg-doviz-rows">' +
         '<div class="mmg-doviz-loading">Yükleniyor…</div>' +
       '</div>' +
-      '<div class="mmg-doviz-foot">' +
+      '<div class="mmg-doviz-foot" style="justify-content:space-between;gap:8px;">' +
         '<span id="mmgDovizUpdated"></span>' +
+        '<button type="button" id="mmgDovizAddBtn" title="Parite ekle" style="background:none;border:1px solid var(--hairline,#2A3448);border-radius:6px;color:var(--brass,#C6A15B);cursor:pointer;font-size:10.5px;font-weight:700;padding:3px 8px;">+ Parite</button>' +
       '</div>';
 
     // --- Stil ---
@@ -89,8 +101,10 @@
       return n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
     }
 
+    let lastRates = null; // parite eklerken kod doğrulamak için son kur seti
     function renderRates(data){
       const r = data.rates || {};
+      lastRates = r;
       const tryUsd = r.TRY; // 1 USD kaç TRY
       if(!tryUsd){ renderError(); return; }
       let html = '';
@@ -102,6 +116,19 @@
         html += '<div class="mmg-doviz-row">' +
                   '<span class="mmg-doviz-pair">' + p.flag + ' ' + p.label + '<small>/TRY</small></span>' +
                   '<span class="mmg-doviz-val">' + fmt(val) + '</span>' +
+                '</div>';
+      });
+      // Kullanıcının eklediği pariteler (✕ ile kaldırılabilir).
+      getExtraPairs().forEach(code => {
+        const perUsd = code === 'USD' ? 1 : r[code];
+        if(!perUsd) return;
+        const val = tryUsd / perUsd;
+        html += '<div class="mmg-doviz-row" data-extra="' + code + '">' +
+                  '<span class="mmg-doviz-pair">💱 ' + code + '<small>/TRY</small></span>' +
+                  '<span style="display:flex;align-items:center;gap:8px;">' +
+                    '<span class="mmg-doviz-val">' + fmt(val) + '</span>' +
+                    '<button type="button" class="mmg-doviz-del" data-del="' + code + '" title="Kaldır" style="background:none;border:none;color:var(--muted,#8D96AC);cursor:pointer;font-size:12px;padding:0 2px;">✕</button>' +
+                  '</span>' +
                 '</div>';
       });
       rowsEl.innerHTML = html || '<div class="mmg-doviz-err">Kur bulunamadı</div>';
@@ -116,16 +143,26 @@
       updatedEl.textContent = stamp ? ('Güncel: ' + stamp) : '';
     }
 
-    function parseTRNum(s){ if(typeof s==='number') return s; return parseFloat(String(s==null?'':s).replace(/\./g,'').replace(',','.')); }
-    function renderGold(){
-      fetch(GOLD_URL).then(r=>r.json()).then(d=>{
-        const g = d && (d.GA || d.gram || d['gram-altin'] || d.gramaltin);
-        let v = g ? parseTRNum(g.satis != null ? g.satis : (g['Satış'] != null ? g['Satış'] : g.selling)) : null;
-        if(!v || !isFinite(v)) return;
+    function parseTRNum(s){ if(typeof s==='number') return s; return parseFloat(String(s==null?'':s).replace(/[^0-9.,]/g,'').replace(/\./g,'').replace(',','.')); }
+    function extractGold(d){
+      if(!d) return null;
+      // truncgil v4: { "GRA": {"Selling":..} } veya { "gram-altin": {"Satış":"..."} }; genelpara: { "GA": {"satis":"..."} }
+      const g = d.GRA || d['gram-altin'] || d.GA || d.gram || d.gramaltin;
+      if(!g) return null;
+      const raw = (g.Selling != null ? g.Selling : (g['Satış'] != null ? g['Satış'] : (g.satis != null ? g.satis : g.selling)));
+      const v = parseTRNum(raw);
+      return (v && isFinite(v)) ? v : null;
+    }
+    function renderGold(idx){
+      idx = idx || 0;
+      if(idx >= GOLD_URLS.length) return;
+      fetch(GOLD_URLS[idx]).then(r=>r.json()).then(d=>{
+        const v = extractGold(d);
+        if(!v){ renderGold(idx + 1); return; }
         if(rowsEl.querySelector('.mmg-doviz-gold')) return;
         rowsEl.insertAdjacentHTML('beforeend',
           '<div class="mmg-doviz-row mmg-doviz-gold"><span class="mmg-doviz-pair">🥇 Gram Altın<small>/TRY</small></span><span class="mmg-doviz-val">' + fmt(v) + '</span></div>');
-      }).catch(()=>{});
+      }).catch(()=>{ renderGold(idx + 1); });
     }
     function renderError(){
       rowsEl.innerHTML = '<div class="mmg-doviz-err">Kurlar alınamadı.<br>Bağlantını kontrol et.</div>';
@@ -177,6 +214,31 @@
     closeBtn.addEventListener('click', closePanel);
     document.addEventListener('click', (e) => {
       if(!panel.hidden && !panel.contains(e.target) && e.target !== btn){ closePanel(); }
+    });
+
+    // ---- Kullanıcı-eklemeli pariteler ----
+    // "+ Parite": kod sorulur (örn. GBP, CHF, SAR); geçerliyse kalıcı eklenir. Satırdaki ✕ kaldırır.
+    const addBtn = panel.querySelector('#mmgDovizAddBtn');
+    if(addBtn){
+      addBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const code = (window.prompt('Eklenecek parite kodu (örn. GBP, CHF, SAR, JPY):') || '').trim().toUpperCase();
+        if(!code) return;
+        if(!/^[A-Z]{3}$/.test(code)){ window.alert('Geçersiz kod. 3 harfli döviz kodu girin (örn. GBP).'); return; }
+        if(lastRates && !lastRates[code]){ window.alert('"' + code + '" kuru kaynakta bulunamadı.'); return; }
+        const extras = getExtraPairs();
+        if(extras.indexOf(code) === -1 && !PAIRS.some(p => p.code === code)){
+          extras.push(code); setExtraPairs(extras);
+        }
+        loadRates(false);
+      });
+    }
+    rowsEl.addEventListener('click', (e) => {
+      const del = e.target.closest('.mmg-doviz-del');
+      if(!del) return;
+      e.stopPropagation();
+      setExtraPairs(getExtraPairs().filter(c => c !== del.dataset.del));
+      loadRates(false);
     });
   }
 
