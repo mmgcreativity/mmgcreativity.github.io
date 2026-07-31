@@ -1,6 +1,16 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-bekleyen-5is'` (repo ~432 commit). ✅ IAM signBlob + firestore:indexes tamam; bekleyen iş listesi boş (ışıldaklı üst-ikon isteği "kaldır" ile değişti, KUR/hesap ikon stili istenirse ayrıca yapılır). ⏳ Kullanıcı bekleyen: `firebase deploy --only firestore:indexes` (davet listesi) + IAM signBlob rolü (hesap geçişi). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
+Son güncelleme: **2026-07-31 (5. otonom oturum SONU — kullanıcı başka bilgisayara geçiyor)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-bekleyen-5is'` (repo ~432 commit).
+
+## 🔴 YENİ OTURUMA HIZLI BAŞLANGIÇ (önce bunu oku)
+1. **OneDrive senkron kontrolü ŞART** (`mmg-onedrive-sync-guard` skill): başka bilgisayardasın — yerel klasör bayat olabilir. Deploy öncesi marker kontrolü: `service-worker.js → SW_VERSION = '2026-07-31-bekleyen-5is'` olmalı. Yerel dosya farklıysa GÜNCEL KAYNAK = GitHub repo (`main`); yereldeki eski dosyayı repodan tazele, ASLA eski yerel dosyayı deploy etme.
+2. **Doğrulama bekleyenler (kod tamam, kullanıcı testi bekliyor):**
+   - "← Ana Sayfa" butonları masaüstü kabukta gizleme (i18n-core.js) CANLIDA doğrulandı; kullanıcı ekranında hâlâ görünüyorsa sebep CDN/tarayıcı cache → Ctrl+Shift+R. Hâlâ görünürse SW cache force-temizleme eklenebilir.
+   - Hesap geçişi (INTERNAL): IAM rolü verildi (ekran teyitli) — kullanıcı henüz "çalıştı" demedi, test edilmeli.
+   - Bekleyen davetlerin listede görünmesi (firmas.firmaId index'i canlı) — test edilmeli.
+   - IBAN akışı: kullanıcı "Tüm IBAN'ları Sil → yeni şablonla (Firma Kodu zorunlu) yeniden yükle" akışını henüz uygulamadı; sonuç doğrulanmalı.
+3. **Muhtemel sıradaki istekler:** KUR/hesap-makinesi üst ikonlarının görsel stili (ışıldak) netleşmedi; Personeller sekmesine Excel toplu yükleme; Talimat'ta personel kullanımı.
+4. Çalışma tarzı: `mmg-site-deploy` skill — sormadan, kuyruk bitene kadar; kapanışta HER ZAMAN (1) yayınlananlar (2) bekleyenler listesi ver ("bekleyen yok" deme hatası bu oturumda kullanıcıyı kızdırdı). ⏳ Kullanıcı bekleyen: `firebase deploy --only firestore:indexes` (davet listesi) + IAM signBlob rolü (hesap geçişi). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
 
 > ✅ **Sürümleme çözüldü:** "Güncelleme var, yenile" banner'ı (index.html #mmgUpdateBanner) NE app-version.json NE de SW_VERSION'a bakar — index.html'e HEAD atıp ETag/Last-Modified karşılaştırır (tamamen otomatik). `SW_VERSION` sadece cache-bust; `app-version.json` artık okunmuyor ama ikisi senkron tutuluyor. Her deploy'da ikisini de bump'la.
 
