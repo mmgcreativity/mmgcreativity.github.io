@@ -3545,9 +3545,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(f.id === 'glFirma'){
         // Ayrı "📋 Firmam" seçici KALDIRILDI (kullanıcı isteği). Alana tıklayınca/yazınca kendi +
         // grup firmaların datalist ile otomatik gelir; ad eşleşince banka ve (biliniyorsa) IBAN dolar.
+        // Tarayıcının BEYAZ datalist'i yerine sitenin koyu temalı özel listesi (mmg-ac deseni,
+        // gönderen firma alanıyla birebir aynı görünüm) — kullanıcı: "açılır pencere genele uymuyor".
         return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span>' +
-          '<input type="text" id="' + f.id + '" list="glFirmaList" autocomplete="off" placeholder="' + (f.placeholder||'') + '">' +
-          '<datalist id="glFirmaList"></datalist>' +
+          '<div class="mmg-ac-wrap"><input type="text" id="' + f.id + '" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" placeholder="' + (f.placeholder||'') + '"><div class="mmg-ac-list" id="glFirmaAcList"></div></div>' +
           '</div>';
       }
       return '<div class="xcell xcell-full"><span class="xcell-label">' + f.label.toUpperCase() + '</span><input type="text" id="' + f.id + '" placeholder="' + (f.placeholder||'') + '"></div>';
@@ -3655,22 +3656,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       };
       glFirmaInput.addEventListener('change', applyFirmaMatch);
       glFirmaInput.addEventListener('input', applyFirmaMatch);
-      // Firma DOLUYKEN tıklayınca datalist yalnızca eşleşen tek firmayı gösteriyordu
-      // ("sadece Aderans geliyor") → odakta değeri geçici boşalt ki TÜM grup firmaları
-      // listelensin; kullanıcı seçim yapmadan çıkarsa eski değer geri gelir.
-      glFirmaInput.addEventListener('focus', () => {
-        if(glFirmaInput.value.trim()){
-          glFirmaInput.dataset.prevFirma = glFirmaInput.value;
-          glFirmaInput.value = '';
-        }
-      });
-      glFirmaInput.addEventListener('blur', () => {
-        if(!glFirmaInput.value.trim() && glFirmaInput.dataset.prevFirma){
-          glFirmaInput.value = glFirmaInput.dataset.prevFirma;
-          delete glFirmaInput.dataset.prevFirma;
-          renderGenericPreview();
-        }
-      });
+      // Özel koyu temalı firma listesi (mmg-ac): tıklayınca/odakta TÜM grup firmaları gelir
+      // (dolu değer listeyi filtrelemez), seçilince applyFirmaMatch çalışır.
+      const glAcList = document.getElementById('glFirmaAcList');
+      function glAcClose(){ if(glAcList){ glAcList.classList.remove('open'); glAcList.innerHTML = ''; } }
+      function glAcRender(showAll){
+        if(!glAcList) return;
+        const q = showAll ? '' : glFirmaInput.value.trim().toLocaleLowerCase('tr');
+        let items = (myFirms || []).slice();
+        if(q) items = items.filter(x => (x.name || '').toLocaleLowerCase('tr').includes(q));
+        items = items.slice(0, 12);
+        if(!items.length){ glAcList.innerHTML = '<div class="mmg-ac-empty">Grup firması yok.</div>'; glAcList.classList.add('open'); return; }
+        glAcList.innerHTML = items.map(x => '<div class="mmg-ac-item" data-name="' + escapeHtmlMmg(x.name) + '"><span>' + escapeHtmlMmg(x.name) + '</span></div>').join('');
+        glAcList.classList.add('open');
+        Array.from(glAcList.querySelectorAll('.mmg-ac-item')).forEach(el => {
+          el.addEventListener('mousedown', ev => {
+            ev.preventDefault();
+            glFirmaInput.value = el.getAttribute('data-name') || '';
+            glAcClose();
+            applyFirmaMatch();
+          });
+        });
+      }
+      glFirmaInput.addEventListener('focus', () => glAcRender(true));
+      glFirmaInput.addEventListener('click', () => glAcRender(true));
+      glFirmaInput.addEventListener('input', () => glAcRender(false));
+      glFirmaInput.addEventListener('blur', () => setTimeout(glAcClose, 150));
       // Para birimi / banka değişince de IBAN'ları yeniden hesapla.
       var pbEl = document.getElementById('glParaBirimi');
       if(pbEl) pbEl.addEventListener('change', applyFirmaMatch);
