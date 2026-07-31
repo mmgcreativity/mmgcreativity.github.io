@@ -3720,10 +3720,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       savedSelect.addEventListener('change', () => {
         if(savedSelect.value){
           input.value = savedSelect.value;
-          // Personelden seçildiyse TC'yi de otomatik doldur.
-          if(tcInput){
-            const pr = mmgPersonnelDb.find(p => p.name === savedSelect.value);
-            if(pr && pr.tc) tcInput.value = pr.tc;
+          // Personelden seçildiyse TC'yi de otomatik doldur: satırda TC kutusu varsa oraya,
+          // yoksa bu talimat türünün AYRI TCKN alanına (örn. Çek Karnesi/Senet Teslim'de glTckn).
+          const pr = mmgPersonnelDb.find(p => p.name === savedSelect.value);
+          if(pr && pr.tc){
+            if(tcInput){ tcInput.value = pr.tc; }
+            else {
+              const sepTc = document.getElementById('glTckn');
+              if(sepTc){ sepTc.value = pr.tc; }
+            }
           }
           renderGenericPreview();
         }
