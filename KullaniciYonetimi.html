@@ -739,7 +739,7 @@
     }
     if(empty) empty.style.display = 'none';
     body.innerHTML = rows.map(u =>
-      '<tr>' +
+      '<tr class="ky-user-row" data-uid="' + escapeHtmlKY(u.id) + '" style="cursor:pointer;" title="Detay için tıkla">' +
         '<td style="padding:7px 8px; border-bottom:1px solid var(--hairline); color:var(--brass,#C6A15B); font-weight:700; white-space:nowrap;">' + (u.code ? '#' + escapeHtmlKY(u.code) : '—') + '</td>' +
         '<td style="padding:7px 8px; border-bottom:1px solid var(--hairline);">' + (escapeHtmlKY(u.name) || '—') + '</td>' +
         '<td style="padding:7px 8px; border-bottom:1px solid var(--hairline); color:var(--muted);">' + (escapeHtmlKY(u.email) || '—') + '</td>' +
@@ -747,6 +747,51 @@
         '<td style="padding:7px 8px; border-bottom:1px solid var(--hairline); color:var(--muted); white-space:nowrap;">' + fmtDateKY(u.createdAt) + '</td>' +
       '</tr>'
     ).join('');
+  }
+
+  // ---- Kullanıcı DETAY modalı (satıra tıklayınca users dokümanının tüm alanları) ----
+  function kyOpenUserDetail(uid){
+    const u = allSiteUsers.find(x => x.id === uid);
+    if(!u) return;
+    let ov = document.getElementById('kyUserDetailOverlay');
+    if(!ov){
+      ov = document.createElement('div');
+      ov.id = 'kyUserDetailOverlay';
+      ov.style.cssText = 'position:fixed; inset:0; z-index:10000; background:rgba(5,9,16,.7); display:flex; align-items:center; justify-content:center; padding:20px;';
+      ov.addEventListener('click', e => { if(e.target === ov) ov.style.display = 'none'; });
+      document.body.appendChild(ov);
+    }
+    const row = (l, v) => '<div style="display:flex; gap:12px; padding:7px 0; border-bottom:1px solid var(--hairline); font-size:13px;">' +
+      '<span style="flex:0 0 150px; color:var(--muted); font-weight:600;">' + l + '</span>' +
+      '<span style="word-break:break-all;">' + v + '</span></div>';
+    const benefit = u.premiumBenefit
+      ? (u.premiumBenefit.type === 'free' ? ('Ücretsiz premium (' + escapeHtmlKY(u.premiumBenefit.code || '') + ')') : ('%' + (u.premiumBenefit.discountPercent || 0) + ' indirim (' + escapeHtmlKY(u.premiumBenefit.code || '') + ')'))
+      : '—';
+    // E-posta yoksa SEBEBİ açıkla: dokümanda hangi alanlar var, hangileri eksik.
+    const emailNote = u.email ? '' :
+      '<div style="margin-top:6px; font-size:12px; color:var(--amber,#E3A23C);">⚠️ Bu kayıtta e-posta alanı YOK. Muhtemel sebep: hesap e-postayla değil (telefonla/eski akışla) oluşmuş ya da kayıt yarım kalmış. Aşağıdaki "Ham alanlar"da dokümanda gerçekte ne olduğu görülüyor.</div>';
+    const rawPretty = escapeHtmlKY(JSON.stringify(u.raw, null, 2));
+    ov.innerHTML =
+      '<div style="background:var(--surface,#141C2B); border:1px solid var(--hairline); border-radius:14px; box-shadow:0 18px 60px rgba(0,0,0,.55); width:min(620px,94vw); max-height:84vh; overflow:auto; padding:18px 20px;">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">' +
+          '<div style="font-size:16px; font-weight:800;">' + (u.code ? '#' + escapeHtmlKY(u.code) + ' · ' : '') + (escapeHtmlKY(u.name) || '(isimsiz)') + '</div>' +
+          '<button type="button" id="kyUserDetailClose" style="background:transparent; border:1px solid var(--hairline); color:var(--muted); border-radius:8px; padding:4px 10px; cursor:pointer; font-weight:700;">✕</button>' +
+        '</div>' +
+        row('E-posta', escapeHtmlKY(u.email) || '—') + emailNote +
+        row('Telefon', escapeHtmlKY(u.phone) || '—') +
+        row('Durum', u.premium ? '<span style="color:var(--brass,#C6A15B); font-weight:700;">Premium</span>' : 'Standart') +
+        row('Site yöneticisi', u.admin ? 'Evet' : 'Hayır') +
+        row('Referans kodu', escapeHtmlKY(u.referredBy) || '—') +
+        row('Premium faydası', benefit) +
+        row('Yönettiği firma sayısı', String(u.adminFirmaIds.length)) +
+        row('Kayıt tarihi', fmtDateKY(u.createdAt)) +
+        row('UID', '<span style="font-family:monospace; font-size:11px;">' + escapeHtmlKY(u.id) + '</span>') +
+        '<div style="margin-top:12px; font-size:12px; color:var(--muted); font-weight:700;">Ham alanlar (users dokümanı)</div>' +
+        '<pre style="background:var(--surface-2,#0F1624); border:1px solid var(--hairline); border-radius:8px; padding:10px; font-size:11px; overflow:auto; max-height:220px; white-space:pre-wrap; word-break:break-all;">' + rawPretty + '</pre>' +
+      '</div>';
+    ov.style.display = 'flex';
+    const cb = document.getElementById('kyUserDetailClose');
+    if(cb) cb.addEventListener('click', () => { ov.style.display = 'none'; });
   }
   async function loadAdminAllUsers(){
     const empty = document.getElementById('adminAllUsersEmpty');
@@ -761,14 +806,27 @@
         // Boş/eksik kayıt (ad VE e-posta yok) listeye GELMESİN. Veriyi SİLMİYORUZ —
         // kod ileride birine atanabilir; sadece gösterimde atlanır.
         if(!nm && !em) return;
+        // Ham dokümanı da sakla (detay modalı için) — dev base64 alanlar hariç.
+        const raw = {};
+        Object.keys(u).forEach(k => {
+          const v = u[k];
+          if(typeof v === 'string' && v.length > 200) { raw[k] = '(uzun veri, ' + v.length + ' karakter)'; return; }
+          raw[k] = v;
+        });
         allSiteUsers.push({
           id: d.id,
           code: (u.customerNumber != null ? String(u.customerNumber) : ''),
           name: nm,
           email: em,
           premium: !!u.isPremium,
+          admin: u.isAdmin === true,
           referred: !!u.referredBy,
-          createdAt: (u.createdAt && u.createdAt.toMillis) ? u.createdAt.toMillis() : null
+          referredBy: u.referredBy || '',
+          phone: u.phone || u.phoneNumber || (u.profile && u.profile.phone) || '',
+          premiumBenefit: u.premiumBenefit || null,
+          adminFirmaIds: Array.isArray(u.adminFirmaIds) ? u.adminFirmaIds : [],
+          createdAt: (u.createdAt && u.createdAt.toMillis) ? u.createdAt.toMillis() : null,
+          raw
         });
       });
       allSiteUsers.sort((a, b) => (parseInt(a.code, 10) || 999999) - (parseInt(b.code, 10) || 999999));
@@ -805,6 +863,12 @@
       else { kySortKey = key; kySortDir = 'asc'; }
       renderAdminAllUsers();
     }));
+    // Satır tıklama → kullanıcı detay modalı (event delegation, her render'da yeniden bağlamaya gerek yok).
+    const kyBody = document.getElementById('adminAllUsersBody');
+    if(kyBody) kyBody.addEventListener('click', (e) => {
+      const tr = e.target.closest('tr.ky-user-row');
+      if(tr && tr.dataset.uid) kyOpenUserDetail(tr.dataset.uid);
+    });
   })();
 
   onAuthStateChanged(auth, async (user) => {
