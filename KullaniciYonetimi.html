@@ -487,6 +487,54 @@
     return String((a && a.name) || '').localeCompare(String((b && b.name) || ''), 'tr');
   }
   function mmgFirmasSorted(){ return myAdminFirmas.slice().sort(mmgFirmaCodeSort); }
+
+  // Firmalarım seçicisi: yerli <option> İÇİNDE İKİ RENK KULLANILAMAZ (tarayıcı kısıtı), bu yüzden
+  // kodun sarı görünmesi için (kullanıcı isteği 2026-07-31) <select>'in üstüne kendi açılır
+  // listemizi çiziyoruz. <select> DOM'da KALIYOR (gizli) ve tek doğruluk kaynağı o: seçim
+  // yapılınca value'su set edilip 'change' tetikleniyor, böylece mevcut selectFirma / silme
+  // butonu gibi tüm kodlar aynen çalışmaya devam ediyor.
+  function mmgRenderFirmaDropdown(sorted, selectEl){
+    const host = selectEl && selectEl.parentElement;
+    if(!host) return;
+    let box = document.getElementById('firmaSelectorCustom');
+    if(!box){
+      box = document.createElement('div');
+      box.id = 'firmaSelectorCustom';
+      box.style.cssText = 'position:relative; flex:1; min-width:0;';
+      host.insertBefore(box, selectEl);
+    }
+    const cur = sorted.find(f => f.id === selectEl.value) || sorted[0];
+    box.innerHTML =
+      '<button type="button" id="firmaSelectorBtn" style="width:100%; text-align:left; display:flex; align-items:center; gap:8px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:\'Inter\',sans-serif; font-size:14px; cursor:pointer;">' +
+        '<span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + (cur ? mmgFirmaLabelHtml(cur) : '') + '</span>' +
+        '<span style="flex:0 0 auto; color:var(--muted);">▾</span>' +
+      '</button>' +
+      '<div id="firmaSelectorList" style="display:none; position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:60; background:var(--surface,#141C2B); border:1px solid var(--hairline); border-radius:8px; box-shadow:0 18px 44px rgba(0,0,0,.5); max-height:280px; overflow:auto;">' +
+        sorted.map(f =>
+          '<div class="firma-opt" data-id="' + escapeHtmlKY(f.id) + '" style="padding:9px 12px; cursor:pointer; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + mmgFirmaLabelHtml(f) + '</div>'
+        ).join('') +
+      '</div>';
+    const btn = box.querySelector('#firmaSelectorBtn');
+    const list = box.querySelector('#firmaSelectorList');
+    const close = () => { list.style.display = 'none'; };
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      list.style.display = (list.style.display === 'none') ? 'block' : 'none';
+    });
+    box.querySelectorAll('.firma-opt').forEach(el => {
+      el.addEventListener('mouseenter', () => { el.style.background = 'var(--surface-2)'; });
+      el.addEventListener('mouseleave', () => { el.style.background = 'transparent'; });
+      el.addEventListener('click', () => {
+        close();
+        selectEl.value = el.dataset.id;
+        selectEl.dispatchEvent(new Event('change')); // mevcut akış (selectFirma) tetiklenir
+        mmgRenderFirmaDropdown(sorted, selectEl);    // buton etiketini tazele
+      });
+    });
+    document.addEventListener('click', close);
+    selectEl.style.display = 'none';       // yerli seçici hep gizli, sadece durum tutucu
+    box.style.display = sorted.length > 1 ? 'block' : 'none';
+  }
   // <option> gibi düz metin yerler için (HTML etiketi taşımaz).
   function mmgFirmaLabelText(f){
     const code = String((f && f.code) || '').trim();
@@ -586,7 +634,7 @@
       setupWrap.style.display = 'none';
       fixedNote.style.display = 'block';
       const hubFirma = myAdminFirmas.find(f => f.id === existingHub);
-      document.getElementById('dataGroupHubName').textContent = hubFirma ? mmgFirmaLabelText(hubFirma) : existingHub;
+      document.getElementById('dataGroupHubName').innerHTML = hubFirma ? mmgFirmaLabelHtml(hubFirma) : escapeHtmlKY(existingHub);
       document.getElementById('dataGroupMembersGrid').innerHTML = dataGroupMembersGridHtml(existingHub);
     } else {
       setupWrap.style.display = 'block';
@@ -951,7 +999,8 @@
       const _sortedFirmas = mmgFirmasSorted();
       selector.innerHTML = _sortedFirmas.map(f => '<option value="' + f.id + '">' + escapeHtmlKY(mmgFirmaLabelText(f)) + '</option>').join('');
       selector.onchange = () => selectFirma(selector.value);
-      selector.style.display = myAdminFirmas.length > 1 ? 'block' : 'none';
+      selector.value = _sortedFirmas[0].id;
+      mmgRenderFirmaDropdown(_sortedFirmas, selector); // kodu sarı gösteren özel açılır liste
       renderDataGroupCard();
       await selectFirma(_sortedFirmas[0].id);
       if(isSiteAdmin){
@@ -1069,6 +1118,15 @@
         await setDoc(doc(db, 'firmaAccounts', firmaId), { firmaCode: newCode }, { merge: true });
         const f = myAdminFirmas.find(x => x.id === firmaId); if(f) f.code = newCode;
         if(codeEdit) codeEdit.value = newCode;
+        // Kod değişti → açılır liste etiketi ve SIRALAMA anında tazelensin (sayfa yenilemeden).
+        const _sel = document.getElementById('firmaSelector');
+        if(_sel){
+          const _sorted = mmgFirmasSorted();
+          _sel.innerHTML = _sorted.map(x => '<option value="' + x.id + '">' + escapeHtmlKY(mmgFirmaLabelText(x)) + '</option>').join('');
+          _sel.value = firmaId;
+          mmgRenderFirmaDropdown(_sorted, _sel);
+        }
+        renderDataGroupCard();
         setFirmaCrudMsg('Firma kodu kaydedildi ✓  (' + newCode + ')', false);
       }catch(e){ setFirmaCrudMsg('Kod kaydedilemedi, tekrar deneyin.', true); }
       _saveFirmaCodeBtn.disabled = false;
