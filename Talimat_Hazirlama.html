@@ -3420,14 +3420,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     },
     'doviz-alim': {
       title: 'Döviz Alım Talimatı',
+      // Sıra (kullanıcı isteği): Para Birimi firmanın altında, IBAN'lar EN ALTTA.
+      // Firma+Banka seçilince TL (gönderen) ve döviz (alıcı) IBAN'ları otomatik dolar.
       fields: [
         { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
-        { id:'glGonderenIban', label:'Gönderen IBAN', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' },
-        { id:'glAliciIban', label:'Alıcı IBAN', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' },
-        { id:'glTutar', label:'Tutar (Döviz)', type:'tutar' },
         { id:'glParaBirimi', label:'Para Birimi', type:'select', options:['USD','EUR','GBP'] },
-        { id:'glKur', label:'Kur', type:'text', placeholder:'Örn. 53,5160' }
+        { id:'glTutar', label:'Tutar (Döviz)', type:'tutar' },
+        { id:'glKur', label:'Kur', type:'text', placeholder:'Örn. 53,5160' },
+        { id:'glGonderenIban', label:'Gönderen IBAN (TL)', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' },
+        { id:'glAliciIban', label:'Alıcı IBAN (Döviz)', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' }
       ],
       body: v => 'Bankanızda bulunan ' + (v.glGonderenIban || '—') + ' nolu hesabımızdan ' + (v.glKur || '—') + ' kur ile ' + fmtTR(v.glTutar,2) + ' ' + (v.glParaBirimi||'') + ' alınarak ' + (v.glAliciIban || '—') + ' nolu hesabımıza aktarılması rica olunur.',
       infoRows: v => [['Tutar', fmtTR(v.glTutar,2)+' '+(v.glParaBirimi||'')],['Kur', v.glKur||'—'],['Gönderen IBAN', v.glGonderenIban||'—'],['Alıcı IBAN', v.glAliciIban||'—']],
@@ -3436,14 +3438,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     },
     'doviz-satim': {
       title: 'Döviz Satım Talimatı',
+      // Sıra (kullanıcı isteği): Para Birimi firmanın altında, IBAN'lar EN ALTTA.
+      // Firma+Banka seçilince döviz (gönderen) ve TL (alıcı) IBAN'ları otomatik dolar.
       fields: [
         { id:'glBanka', label:'Banka', type:'bank' },
         { id:'glFirma', label:'Firma', type:'text', placeholder:'Örn. Örnek Ticaret A.Ş.' },
-        { id:'glGonderenIban', label:'Gönderen IBAN', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' },
-        { id:'glAliciIban', label:'Alıcı IBAN', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' },
-        { id:'glTutar', label:'Tutar (Döviz)', type:'tutar' },
         { id:'glParaBirimi', label:'Para Birimi', type:'select', options:['USD','EUR','GBP'] },
-        { id:'glKur', label:'Kur', type:'text', placeholder:'Örn. 53,5160' }
+        { id:'glTutar', label:'Tutar (Döviz)', type:'tutar' },
+        { id:'glKur', label:'Kur', type:'text', placeholder:'Örn. 53,5160' },
+        { id:'glGonderenIban', label:'Gönderen IBAN (Döviz)', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' },
+        { id:'glAliciIban', label:'Alıcı IBAN (TL)', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' }
       ],
       body: v => 'Bankanızda bulunan ' + (v.glGonderenIban || '—') + ' nolu hesabımızdan ' + fmtTR(v.glTutar,2) + ' ' + (v.glParaBirimi||'') + ', ' + (v.glKur || '—') + ' kur ile satılarak karşılığında oluşan TL tutarının ' + (v.glAliciIban || '—') + ' nolu hesabımıza aktarılması rica olunur.',
       infoRows: v => [['Tutar', fmtTR(v.glTutar,2)+' '+(v.glParaBirimi||'')],['Kur', v.glKur||'—'],['Gönderen IBAN', v.glGonderenIban||'—'],['Alıcı IBAN', v.glAliciIban||'—']],
@@ -3614,14 +3618,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var useIban = byCur || f.iban;
             if(useIban) senderIbanEl.value = formatIbanValue(useIban);
           }
+          // Döviz Alım/Satım (kullanıcı isteği): Firma + Banka seçiliyse TL ve döviz IBAN'ları
+          // firmanın kayıtlı hesaplarından OTOMATİK dolar. Alım: gönderen=TL, alıcı=döviz;
+          // Satım: gönderen=döviz, alıcı=TL. Önce seçili bankanın hesabı, yoksa herhangi biri.
+          if(currentGenericType === 'doviz-alim' || currentGenericType === 'doviz-satim'){
+            const gEl2 = document.getElementById('glGonderenIban');
+            const aEl2 = document.getElementById('glAliciIban');
+            const bankaSel = ((document.getElementById('glBanka') || {}).value || '').trim();
+            const fxCur = (((document.getElementById('glParaBirimi') || {}).value) || 'USD').toUpperCase();
+            const normB = s => String(s || '').toLocaleUpperCase('tr').replace(/\s+/g, ' ').trim();
+            const list = Array.isArray(f.ibans) ? f.ibans : [];
+            const pickIban = wantCur => {
+              const isTL = wantCur === 'TRY';
+              const curOk = x => { const c = String(x.currency || 'TRY').toUpperCase(); return isTL ? (c === 'TRY' || c === 'TL' || c === '') : c === wantCur; };
+              const bankOk = x => bankaSel && (normB(x.banka).includes(normB(bankaSel)) || normB(bankaSel).includes(normB(x.banka)));
+              return list.find(x => x && x.iban && curOk(x) && bankOk(x))
+                  || list.find(x => x && x.iban && curOk(x))
+                  || null;
+            };
+            const tlHit = pickIban('TRY');
+            const fxHit = pickIban(fxCur);
+            const gHit = (currentGenericType === 'doviz-alim') ? tlHit : fxHit;
+            const aHit = (currentGenericType === 'doviz-alim') ? fxHit : tlHit;
+            if(gEl2 && gHit) gEl2.value = formatIbanValue(gHit.iban);
+            if(aEl2 && aHit) aEl2.value = formatIbanValue(aHit.iban);
+          }
         }
         renderGenericPreview();
       };
       glFirmaInput.addEventListener('change', applyFirmaMatch);
       glFirmaInput.addEventListener('input', applyFirmaMatch);
-      // Para birimi değişince de IBAN'ı o para birimine göre güncelle.
+      // Para birimi / banka değişince de IBAN'ları yeniden hesapla.
       var pbEl = document.getElementById('glParaBirimi');
       if(pbEl) pbEl.addEventListener('change', applyFirmaMatch);
+      var bkEl2 = document.getElementById('glBanka');
+      if(bkEl2) bkEl2.addEventListener('change', applyFirmaMatch);
     }
 
     renderGenericPreview();
