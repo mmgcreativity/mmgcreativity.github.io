@@ -278,7 +278,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .bulk-preview-table th{ color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; }
   /* Bank/amount body cells: match Vadeli Mevduat offer-table bank-row input font exactly */
   .bulk-preview-table td{ font-family:'Inter',sans-serif; font-size:12px; font-weight:400; }
-  .bulk-preview-wrap{ display:none; }  /* Yükleme önizleme tablosuna gerek yok (kullanıcı isteği); özet + Kaydet yeterli. */
+  /* Önizleme artık MODAL pencerede açılır (kullanıcı isteği, 2026-07-31): tablo modal içinde görünür. */
+  .bulk-preview-wrap{ display:none; }
+  .bulk-preview-modal{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10000;
+    background:var(--surface, #141C2B); border:1px solid var(--hairline); border-radius:14px;
+    box-shadow:0 18px 60px rgba(0,0,0,.55); padding:16px 18px; width:min(860px, 94vw);
+    max-height:82vh; overflow:auto; }
+  .bulk-preview-modal .bulk-preview-wrap{ display:block; max-height:56vh; overflow:auto; margin-bottom:10px; }
+  .bulk-preview-modal .bulk-preview-table{ width:100%; border-collapse:collapse; }
+  .bulk-preview-modal .bulk-preview-table th, .bulk-preview-modal .bulk-preview-table td{
+    text-align:left; padding:6px 8px; border-bottom:1px solid var(--hairline); }
+  #mmgBulkModalBackdrop{ position:fixed; inset:0; z-index:9999; background:rgba(5,9,16,.66); display:none; }
   .bulk-summary{ font-size:12.5px; color:var(--muted); margin-top:10px; }
 
   /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
@@ -734,6 +744,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   // Excel satırından firma kodunu oku (TR/EN başlık varyantları).
   function mmgReadRowFirmaCode(row){
     return mmgVgNormCode(String(row['Firma Kodu'] ?? row['FirmaKodu'] ?? row['Kod'] ?? row['Company Code'] ?? row['Code'] ?? '').trim());
+  }
+
+  // ---- Toplu yükleme ÖNİZLEME MODALI (kullanıcı isteği: "tüm bu durumlarda önizleme
+  // penceresi açılsın") — dar yan karttaki önizleme, ortada büyük bir pencere olarak açılır.
+  function mmgBulkModalShow(wrapEl){
+    const wrap = (typeof wrapEl === 'string') ? document.getElementById(wrapEl) : wrapEl;
+    if(!wrap) return;
+    wrap.classList.add('bulk-preview-modal');
+    wrap.style.display = 'block';
+    let bd = document.getElementById('mmgBulkModalBackdrop');
+    if(!bd){
+      bd = document.createElement('div');
+      bd.id = 'mmgBulkModalBackdrop';
+      document.body.appendChild(bd);
+    }
+    bd.style.display = 'block';
+  }
+  function mmgBulkModalHide(wrapEl){
+    const wrap = (typeof wrapEl === 'string') ? document.getElementById(wrapEl) : wrapEl;
+    if(wrap){ wrap.classList.remove('bulk-preview-modal'); wrap.style.display = 'none'; }
+    const bd = document.getElementById('mmgBulkModalBackdrop');
+    if(bd) bd.style.display = 'none';
   }
 
   async function resolveScope(user){
@@ -1562,12 +1594,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     });
     table.innerHTML = '<thead><tr><th>' + LBL.bulkNameCol + '</th><th>' + LBL.bulkIdCol + '</th><th>IBAN</th></tr></thead><tbody>' + rows.join('') + '</tbody>';
     document.getElementById('bulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: rowCount, p: groups.size });
-    wrap.style.display = 'block';
+    mmgBulkModalShow(wrap);
   }
 
   document.getElementById('bulkCancelBtn').addEventListener('click', () => {
     pendingBulkGroups = null;
-    document.getElementById('bulkPreviewWrap').style.display = 'none';
+    mmgBulkModalHide('bulkPreviewWrap');
   });
 
   document.getElementById('bulkConfirmBtn').addEventListener('click', async () => {
@@ -1606,7 +1638,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       }
       showMsg('bulkMsg', cariMsg, cariUnmatched > 0);
       pendingBulkGroups = null;
-      document.getElementById('bulkPreviewWrap').style.display = 'none';
+      mmgBulkModalHide('bulkPreviewWrap');
       await loadParties('customers');
       await loadParties('suppliers');
     } catch(e){
@@ -1687,12 +1719,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const trs = rows.map(r => '<tr><td>' + escapeHtml(r.firmaName||'—') + '</td><td>' + escapeHtml(r.firmaCode||'—') + '</td><td>' + escapeHtml(r.bank||'—') + '</td><td>' + escapeHtml(r.iban||'—') + '</td><td>' + escapeHtml(r.currency||'TRY') + '</td><td>' + escapeHtml(r.note||'') + '</td></tr>');
     table.innerHTML = '<thead><tr><th>Firma</th><th>' + LBL.bulkFirmaCodeCol + '</th><th>' + LBL.bulkBankCol + '</th><th>' + LBL.bulkIbanCol + '</th><th>' + LBL.bulkCurrencyCol + '</th><th>' + LBL.bulkNoteCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
     document.getElementById('banksBulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: rows.length, p: rows.length });
-    wrap.style.display = 'block';
+    mmgBulkModalShow(wrap);
   }
 
   document.getElementById('banksBulkCancelBtn').addEventListener('click', () => {
     pendingBanksBulkRows = null;
-    document.getElementById('banksBulkPreviewWrap').style.display = 'none';
+    mmgBulkModalHide('banksBulkPreviewWrap');
   });
 
   document.getElementById('banksBulkConfirmBtn').addEventListener('click', async () => {
@@ -1743,7 +1775,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       }
       showMsg('banksBulkMsg', msgTxt, unmatched > 0);
       pendingBanksBulkRows = null;
-      document.getElementById('banksBulkPreviewWrap').style.display = 'none';
+      mmgBulkModalHide('banksBulkPreviewWrap');
       await loadBanks();
     } catch(e){
       showMsg('banksBulkMsg', LBL.saveFailed, true);
@@ -1807,12 +1839,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const trs = names.map(n => '<tr><td>' + escapeHtml(n) + '</td></tr>');
     table.innerHTML = '<thead><tr><th>' + LBL.bulkBankNameOnlyCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
     document.getElementById('bankListBulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: names.length, p: names.length });
-    wrap.style.display = 'block';
+    mmgBulkModalShow(wrap);
   }
 
   document.getElementById('bankListBulkCancelBtn').addEventListener('click', () => {
     pendingBankListBulkNames = null;
-    document.getElementById('bankListBulkPreviewWrap').style.display = 'none';
+    mmgBulkModalHide('bankListBulkPreviewWrap');
   });
 
   document.getElementById('bankListBulkConfirmBtn').addEventListener('click', async () => {
@@ -1831,7 +1863,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       if(!ok) throw new Error('save failed');
       showMsg('bankListBulkMsg', fmt(LBL.bulkDone, { n: count }), false);
       pendingBankListBulkNames = null;
-      document.getElementById('bankListBulkPreviewWrap').style.display = 'none';
+      mmgBulkModalHide('bankListBulkPreviewWrap');
     } catch(e){
       showMsg('bankListBulkMsg', LBL.saveFailed, true);
     } finally {
@@ -1895,12 +1927,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const trs = rows.map(r => '<tr><td>' + escapeHtml(r.name) + '</td><td>' + escapeHtml(r.notes||'—') + '</td><td>' + escapeHtml(r.firmaCode||'—') + '</td></tr>');
     table.innerHTML = '<thead><tr><th>' + LBL.bulkNameCol + '</th><th>' + LBL.bulkNotesCol + '</th><th>' + LBL.bulkFirmaCodeCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
     document.getElementById('counterpartiesBulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: rows.length, p: rows.length });
-    wrap.style.display = 'block';
+    mmgBulkModalShow(wrap);
   }
 
   document.getElementById('counterpartiesBulkCancelBtn').addEventListener('click', () => {
     pendingCounterpartiesBulkRows = null;
-    document.getElementById('counterpartiesBulkPreviewWrap').style.display = 'none';
+    mmgBulkModalHide('counterpartiesBulkPreviewWrap');
   });
 
   document.getElementById('counterpartiesBulkConfirmBtn').addEventListener('click', async () => {
@@ -1938,7 +1970,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       }
       showMsg('counterpartiesBulkMsg', cpMsg, cpUnmatched > 0);
       pendingCounterpartiesBulkRows = null;
-      document.getElementById('counterpartiesBulkPreviewWrap').style.display = 'none';
+      mmgBulkModalHide('counterpartiesBulkPreviewWrap');
       await loadCounterparties();
     } catch(e){
       showMsg('counterpartiesBulkMsg', LBL.saveFailed, true);
@@ -1954,8 +1986,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   document.getElementById('downloadPersonnelTemplateBtn').addEventListener('click', () => {
     try{
       const header = [LBL.bulkFirmaCodeCol, LBL.bulkNameCol, PR_TC_COL];
-      const rows = [header, ['1000', 'Ahmet Yılmaz', '12345678901'], ['GRUP', 'Ayşe Demir', '98765432109'], ['1000,1001', 'Mehmet Kaya', '11111111111'], [],
-        [MMG_LANG==='en' ? '"Company Code" is REQUIRED: enter the code of the company this person belongs to (e.g. 1000). Write "GROUP" to assign the person to ALL group companies; separate multiple codes with commas (e.g. 1000,1001). Rows with a missing or unmatched code are SKIPPED.' : '"Firma Kodu" ZORUNLUDUR: personelin ait olduğu firmanın kodunu yazın (örn. 1000). Personel TÜM grup firmalarına aitse "GRUP" yazın; birden çok firma için kodları virgülle ayırın (örn. 1000,1001). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ.']];
+      const notes = MMG_LANG==='en' ? [
+        ['NOTES:'],
+        ['1) "Company Code" is REQUIRED: enter the code of the company this person belongs to (e.g. 1000). Rows with a missing or unmatched code are SKIPPED.'],
+        ['2) If the person belongs to ALL group companies, write "GROUP" in the Company Code column.'],
+        ['3) For several (but not all) companies, separate the codes with commas, e.g. 1000,1001.'],
+        ['4) Re-uploading the same NAME does NOT duplicate the person: the existing record is overwritten (TC and company assignment are updated).']
+      ] : [
+        ['NOTLAR:'],
+        ['1) "Firma Kodu" ZORUNLUDUR: personelin ait olduğu firmanın kodunu yazın (örn. 1000). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ.'],
+        ['2) Personel TÜM grup firmalarına aitse Firma Kodu sütununa "GRUP" yazın.'],
+        ['3) Birden çok (ama hepsi değil) firma için kodları virgülle ayırın (örn. 1000,1001).'],
+        ['4) Aynı AD ile yeniden yükleme kaydı ÇİFTLEMEZ: mevcut kaydın üstüne yazılır (TC ve firma ataması güncellenir).']
+      ];
+      const rows = [header, ['1000', 'Ahmet Yılmaz', '12345678901'], ['GRUP', 'Ayşe Demir', '98765432109'], ['1000,1001', 'Mehmet Kaya', '11111111111'], []].concat(notes);
       const ws = XLSX.utils.aoa_to_sheet(rows);
       ws['!cols'] = [{wch:14},{wch:30},{wch:16}];
       const wb = XLSX.utils.book_new();
@@ -2002,12 +2046,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const trs = rows.map(r => '<tr><td>' + escapeHtml(r.firmaCode||'—') + '</td><td>' + escapeHtml(r.name) + '</td><td>' + escapeHtml(r.tc||'—') + '</td></tr>');
     table.innerHTML = '<thead><tr><th>' + LBL.bulkFirmaCodeCol + '</th><th>' + LBL.bulkNameCol + '</th><th>' + PR_TC_COL + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
     document.getElementById('personnelBulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: rows.length, p: rows.length });
-    wrap.style.display = 'block';
+    mmgBulkModalShow(wrap);
   }
 
   document.getElementById('personnelBulkCancelBtn').addEventListener('click', () => {
     pendingPersonnelBulkRows = null;
-    document.getElementById('personnelBulkPreviewWrap').style.display = 'none';
+    mmgBulkModalHide('personnelBulkPreviewWrap');
   });
 
   document.getElementById('personnelBulkConfirmBtn').addEventListener('click', async () => {
@@ -2063,7 +2107,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       }
       showMsg('personnelBulkMsg', prMsg, prUnmatched > 0);
       pendingPersonnelBulkRows = null;
-      document.getElementById('personnelBulkPreviewWrap').style.display = 'none';
+      mmgBulkModalHide('personnelBulkPreviewWrap');
       await loadPersonnel();
     } catch(e){
       showMsg('personnelBulkMsg', LBL.saveFailed, true);
