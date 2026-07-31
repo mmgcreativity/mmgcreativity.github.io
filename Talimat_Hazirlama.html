@@ -3655,6 +3655,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       };
       glFirmaInput.addEventListener('change', applyFirmaMatch);
       glFirmaInput.addEventListener('input', applyFirmaMatch);
+      // Firma DOLUYKEN tıklayınca datalist yalnızca eşleşen tek firmayı gösteriyordu
+      // ("sadece Aderans geliyor") → odakta değeri geçici boşalt ki TÜM grup firmaları
+      // listelensin; kullanıcı seçim yapmadan çıkarsa eski değer geri gelir.
+      glFirmaInput.addEventListener('focus', () => {
+        if(glFirmaInput.value.trim()){
+          glFirmaInput.dataset.prevFirma = glFirmaInput.value;
+          glFirmaInput.value = '';
+        }
+      });
+      glFirmaInput.addEventListener('blur', () => {
+        if(!glFirmaInput.value.trim() && glFirmaInput.dataset.prevFirma){
+          glFirmaInput.value = glFirmaInput.dataset.prevFirma;
+          delete glFirmaInput.dataset.prevFirma;
+          renderGenericPreview();
+        }
+      });
       // Para birimi / banka değişince de IBAN'ları yeniden hesapla.
       var pbEl = document.getElementById('glParaBirimi');
       if(pbEl) pbEl.addEventListener('change', applyFirmaMatch);
