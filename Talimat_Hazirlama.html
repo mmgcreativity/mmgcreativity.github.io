@@ -2079,8 +2079,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           return await Promise.all(ids.filter(Boolean).map(async fid => {
             try{
               const fs = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid));
-              return { id: fid, name: (fs.exists() && fs.data().name) || fid };
-            }catch(e){ return { id: fid, name: fid }; }
+              return { id: fid, name: (fs.exists() && fs.data().name) || fid, code: (fs.exists() && fs.data().firmaCode) || '' };
+            }catch(e){ return { id: fid, name: fid, code: '' }; }
           }));
         }catch(e){ return []; }
       })();
@@ -2099,7 +2099,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           const res = await Promise.all(targets.map(async t => {
             try{
               const fs = await cloud.getDoc(cloud.doc(cloud.db, t.coll, t.fid));
-              return fs.exists() ? { id: t.fid, name: fs.data().name || t.fid } : null;
+              return fs.exists() ? { id: t.fid, name: fs.data().name || t.fid, code: fs.data().firmaCode || '' } : null;
             }catch(e){ return null; }
           }));
           return res.filter(Boolean);
@@ -2112,10 +2112,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(cloud.scopeCollection === 'firmaAccounts' && cloud.scopeId && !map.has(cloud.scopeId)){
       try{
         const fs = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', cloud.scopeId));
-        map.set(cloud.scopeId, { id: cloud.scopeId, name: (fs.exists() && fs.data().name) || cloud.scopeId });
+        map.set(cloud.scopeId, { id: cloud.scopeId, name: (fs.exists() && fs.data().name) || cloud.scopeId, code: (fs.exists() && fs.data().firmaCode) || '' });
       }catch(e){ /* sessizce geç */ }
     }
     myFirms = Array.from(map.values());
+
+    // FİRMA KODU SIRASI (kullanıcı isteği 2026-07-31): liste eskiden okunma sırasındaydı.
+    // groupFirmalar'dan gelen kayıtlarda kod yok → eksik kodlar PARALEL tamamlanır (ağ turu 1).
+    const _missing = myFirms.filter(f => !f.code);
+    if(_missing.length){
+      await Promise.all(_missing.map(async f => {
+        try{
+          const fs = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', f.id));
+          if(fs.exists()) f.code = fs.data().firmaCode || '';
+        }catch(e){ /* kod okunamazsa isme göre sıralanır */ }
+      }));
+    }
+    // Kodlar sayısalsa sayı olarak (1000 < 1003 < 1010), değilse metin olarak karşılaştırılır.
+    // Kodu OLMAYAN firmalar en sona, kendi aralarında isme göre.
+    myFirms.sort((a, b) => {
+      const ca = String(a.code || '').trim(), cb = String(b.code || '').trim();
+      if(ca && !cb) return -1;
+      if(!ca && cb) return 1;
+      if(ca && cb){
+        const na = Number(ca), nb = Number(cb);
+        if(Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
+        const c = ca.localeCompare(cb, 'tr', { numeric: true });
+        if(c) return c;
+      }
+      return String(a.name || '').localeCompare(String(b.name || ''), 'tr');
+    });
     // İSİMLER HAZIR → listeyi HEMEN aç. Aşağıdaki banka/IBAN zenginleştirmesi (her firma için
     // ayrı okuma) bitmeden beklemeye gerek yok; kullanıcı firmayı zaten isimden seçiyor.
     myFirmsReady = true;

@@ -289,6 +289,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .bulk-preview-modal .bulk-preview-table th, .bulk-preview-modal .bulk-preview-table td{
     text-align:left; padding:6px 8px; border-bottom:1px solid var(--hairline); }
   #mmgBulkModalBackdrop{ position:fixed; inset:0; z-index:9999; background:rgba(5,9,16,.66); display:none; }
+
+  /* 3 seçenekli onay penceresi. Tarayıcının confirm()'i yalnızca Tamam/İptal verdiği için
+     "Değiştir / Üstüne ekle / Vazgeç" üç seçeneği ikiye sıkıştırılmıştı ve "İptal" aslında
+     KAYDEDİYORDU (kullanıcı 2026-07-31: "BU NE ŞİMDİ"). Artık gerçek bir vazgeç seçeneği var. */
+  #mmgAskBackdrop{ position:fixed; inset:0; z-index:10000; background:rgba(5,9,16,.7); display:none;
+    align-items:center; justify-content:center; padding:20px; }
+  #mmgAskBackdrop.open{ display:flex; }
+  .mmg-ask-box{ background:var(--surface,#141C2B); border:1px solid var(--hairline); border-radius:14px;
+    box-shadow:0 18px 60px rgba(0,0,0,.55); padding:20px 22px; width:min(520px, 94vw); }
+  .mmg-ask-title{ font-weight:700; font-size:16px; color:var(--text); margin-bottom:10px; }
+  .mmg-ask-text{ font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:18px; }
+  .mmg-ask-actions{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
+  .mmg-ask-actions button{ border-radius:9px; padding:9px 16px; font-size:13px; font-weight:600;
+    cursor:pointer; border:1px solid var(--hairline); background:transparent; color:var(--text); }
+  .mmg-ask-actions button.primary{ background:var(--brass,#C6A15B); border-color:var(--brass,#C6A15B); color:#101725; }
+  .mmg-ask-actions button.ghost{ color:var(--muted); }
   .bulk-summary{ font-size:12.5px; color:var(--muted); margin-top:10px; }
 
   /* Mobilde geri butonu basslikla cakismasin: sabit yerine akisa al (Rehber gibi). */
@@ -765,6 +781,52 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }
     bd.style.display = 'block';
   }
+  // Çok seçenekli onay penceresi. choices: [{ key, label, style }] → seçilen key ile resolve olur.
+  // Backdrop'a tıklama / Esc = ilk 'ghost' (vazgeç) seçeneği; hiçbir şey yapılmaz.
+  function mmgAsk(title, text, choices){
+    return new Promise(resolve => {
+      let bd = document.getElementById('mmgAskBackdrop');
+      if(!bd){
+        bd = document.createElement('div');
+        bd.id = 'mmgAskBackdrop';
+        document.body.appendChild(bd);
+      }
+      const cancelKey = (choices.find(c => c.style === 'ghost') || choices[choices.length - 1]).key;
+      bd.innerHTML =
+        '<div class="mmg-ask-box" role="dialog" aria-modal="true">' +
+          '<div class="mmg-ask-title"></div>' +
+          '<div class="mmg-ask-text"></div>' +
+          '<div class="mmg-ask-actions"></div>' +
+        '</div>';
+      bd.querySelector('.mmg-ask-title').textContent = title;
+      // Metin satır satır yazılır (textContent ile — XSS yok).
+      const textEl = bd.querySelector('.mmg-ask-text');
+      String(text).split('\n').forEach((line, i) => {
+        if(i) textEl.appendChild(document.createElement('br'));
+        textEl.appendChild(document.createTextNode(line));
+      });
+      const actions = bd.querySelector('.mmg-ask-actions');
+      const done = (key) => {
+        document.removeEventListener('keydown', onKey);
+        bd.classList.remove('open');
+        bd.innerHTML = '';
+        resolve(key);
+      };
+      choices.forEach(c => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        if(c.style) b.className = c.style;
+        b.textContent = c.label;
+        b.addEventListener('click', () => done(c.key));
+        actions.appendChild(b);
+      });
+      function onKey(e){ if(e.key === 'Escape') done(cancelKey); }
+      document.addEventListener('keydown', onKey);
+      bd.addEventListener('click', e => { if(e.target === bd) done(cancelKey); });
+      bd.classList.add('open');
+    });
+  }
+
   function mmgBulkModalHide(wrapEl){
     const wrap = (typeof wrapEl === 'string') ? document.getElementById(wrapEl) : wrapEl;
     if(wrap){ wrap.classList.remove('bulk-preview-modal'); wrap.style.display = 'none'; }
@@ -1829,10 +1891,29 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         pendingBanksBulkRows.forEach(r => { const tf = r.firmaCode ? codeToId[r.firmaCode] : null; if(tf) targetIds.add(tf); });
         const oldOnes = targetIds.size ? banksList.filter(b => Array.isArray(b.appliesToFirmaIds) && b.appliesToFirmaIds.some(id => targetIds.has(id))) : [];
         if(oldOnes.length){
-          const doReplace = confirm(MMG_LANG==='en'
-            ? 'This file\'s companies already have ' + oldOnes.length + ' saved IBAN(s). DELETE them first so only the IBANs in this file remain?\n\nOK = Replace (recommended) · Cancel = Add on top'
-            : 'Bu dosyadaki firmaların kayıtlı ' + oldOnes.length + ' IBAN\'ı zaten var. Önce SİLİNSİN ve yalnızca bu dosyadaki IBAN\'lar kalsın mı?\n\nTamam = Değiştir (önerilen) · İptal = Üzerine ekle');
-          if(doReplace){
+          const n = oldOnes.length, m = pendingBanksBulkRows.length;
+          const answer = await mmgAsk(
+            MMG_LANG==='en' ? 'Existing IBANs found' : 'Bu firmaların kayıtlı IBAN\'ları var',
+            MMG_LANG==='en'
+              ? 'The companies in this file already have ' + n + ' saved IBAN(s), and the file contains ' + m + ' row(s).\nWhat should happen to the existing ones?'
+              : 'Bu dosyadaki firmaların sistemde zaten ' + n + ' kayıtlı IBAN\'ı var. Dosyada ise ' + m + ' satır bulunuyor.\nMevcut kayıtlar ne olsun?',
+            MMG_LANG==='en' ? [
+              { key:'replace', label:'Replace (delete the ' + n + ')', style:'primary' },
+              { key:'append',  label:'Keep and add on top' },
+              { key:'cancel',  label:'Cancel', style:'ghost' }
+            ] : [
+              { key:'replace', label:'Değiştir (' + n + ' kaydı sil)', style:'primary' },
+              { key:'append',  label:'Koru, üstüne ekle' },
+              { key:'cancel',  label:'Vazgeç', style:'ghost' }
+            ]
+          );
+          // GERÇEK vazgeç: hiçbir şey silinmez, hiçbir şey kaydedilmez, önizleme açık kalır.
+          if(answer === 'cancel'){
+            btn.disabled = false;
+            btn.textContent = original;
+            return;
+          }
+          if(answer === 'replace'){
             for(const b of oldOnes){
               try{ await deleteDoc(docRef('banks', b.id)); }catch(e){}
             }

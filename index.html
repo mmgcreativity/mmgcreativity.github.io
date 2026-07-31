@@ -492,7 +492,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   /* ---------- Home screen ---------- */
   .home{ flex:1; display:flex; flex-direction:column; }
-  .home-scroll{ flex:1; display:flex; flex-direction:column; }
+  /* Kalem (düzenle) artık ekrana yapışık DEĞİL, sayfayla birlikte kayıyor (kullanıcı isteği
+     2026-07-31). Bunun için konumlandırma çerçevesi burası: .tools-section'ın overflow:hidden'ı
+     kalemi kırpmasın diye containing block bilerek ONUN ÜSTÜNDE tutuldu. */
+  .home-scroll{ flex:1; display:flex; flex-direction:column; position:relative; }
   .home footer{ margin-top:auto; }
 
   .hero{
@@ -559,8 +562,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .card-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(var(--dfa-card-w, 300px), 1fr)); align-items:start; gap:18px; max-width:1400px; position:relative; }
   .card-grid.drag-over{ outline:2px dashed var(--brass); outline-offset:8px; border-radius:16px; background:rgba(198,161,91,0.05); }
   .desktop-toolbar{
-    /* Kalem (masaüstü düzenle) HER ZAMAN sağ ÜST KÖŞEDE SABİT (kullanıcı isteği — kaymasın). */
-    position:fixed; top:16px; right:24px; z-index:15;
+    /* Sağ ÜST KÖŞEDE, ama fixed DEĞİL: sayfayla birlikte kayar, içeriğin üstünde yüzmez
+       (kullanıcı isteği 2026-07-31: "böyle hareketli değil"). Çerçeve: .home-scroll. */
+    position:absolute; top:16px; right:24px; z-index:15;
     display:flex; align-items:flex-start; justify-content:flex-end; gap:12px; margin-bottom:0;
   }
   .desktop-edit-btn{
