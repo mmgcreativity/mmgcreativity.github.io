@@ -752,7 +752,30 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   let effectiveScopeId = null;
   let isFirmaAdmin = false;
   let currentUid = null;
-  let groupFirmaMembers = []; // [{id, name}] — Aynı veri havuzunu (effectiveScopeId) paylaşan TÜM firmalar
+  let groupFirmaMembers = []; // [{id, name, code}] — Aynı veri havuzunu (effectiveScopeId) paylaşan TÜM firmalar
+
+  // Firma sıralaması: kod sayısalsa sayı olarak (1000 < 1003 < 1010), değilse metin olarak.
+  // Kodu OLMAYAN firmalar en sona, kendi aralarında isme göre. (kullanıcı isteği 2026-07-31)
+  function mmgFirmaCodeSort(a, b){
+    const ca = String((a && a.code) || '').trim(), cb = String((b && b.code) || '').trim();
+    if(ca && !cb) return -1;
+    if(!ca && cb) return 1;
+    if(ca && cb){
+      const na = Number(ca), nb = Number(cb);
+      if(Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
+      const c = ca.localeCompare(cb, 'tr', { numeric: true });
+      if(c) return c;
+    }
+    return String((a && a.name) || '').localeCompare(String((b && b.name) || ''), 'tr');
+  }
+  // Firma etiketi: kod ADIN BAŞINDA (kullanıcı isteği 2026-07-31 — eskiden sonda geliyordu).
+  function mmgFirmaLabelHtml(m){
+    const code = String((m && m.code) || '').trim();
+    const codeTag = code
+      ? '<span style="color:var(--brass,#C6A15B);font-weight:700;">' + escapeHtml(code) + '</span> '
+      : '';
+    return codeTag + escapeHtml((m && m.name) || '');
+  }
   let groupHubId = null; // Verinin fiziksel olarak tutulduğu firma (= effectiveScopeId)
   let myAdminFirmaIds = []; // Bu kullanıcının admin olduğu TÜM firma id'leri (sadece isFirmaAdmin hesaplamak için)
 
@@ -894,6 +917,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         if(hubSnap.exists()) groupFirmaMembers.push({ id: effectiveScopeId, name: hubSnap.data().name || effectiveScopeId, code: (hubSnap.data().firmaCode || '').toString() });
         const membersSnap = await getDocs(query(collection(db, 'firmaAccounts'), where('dataGroupId', '==', effectiveScopeId)));
         membersSnap.forEach(d => groupFirmaMembers.push({ id: d.id, name: d.data().name || d.id, code: (d.data().firmaCode || '').toString() }));
+        // HER ZAMAN firma koduna göre sırala (kullanıcı isteği 2026-07-31). Tek yer burası:
+        // aşağıdaki tüm listeler (kapsam listesi, firma seçim kutuları) bu diziyi okuyor.
+        groupFirmaMembers.sort(mmgFirmaCodeSort);
       }catch(e){ /* sessizce geç */ }
     }
 
@@ -910,10 +936,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     // collectFirmaSelection "hepsi seçili" görüp null dönüyor, appliesToFirmaIds yazılmıyor ve IBAN
     // TÜM firmalarda görünüyordu — kullanıcı şikâyeti). Artık kayıt yalnızca aktif firmaya atanır;
     // birden fazla firmaya ait ise kullanıcı diğerlerini elle işaretleyebilir.
-    return groupFirmaMembers.map(m => {
-      const codeTag = m.code ? ' <span style="color:var(--brass,#C6A15B);font-size:11.5px;font-weight:700;">[' + escapeHtml(m.code) + ']</span>' : '';
-      return '<label class="firma-select-row"><input type="checkbox" class="firma-select-check" value="' + m.id + '"' + (m.id === scopeId ? ' checked' : '') + '> ' + escapeHtml(m.name) + codeTag + '</label>';
-    }).join('');
+    return groupFirmaMembers.slice().sort(mmgFirmaCodeSort).map(m =>
+      '<label class="firma-select-row"><input type="checkbox" class="firma-select-check" value="' + m.id + '"' + (m.id === scopeId ? ' checked' : '') + '> ' + mmgFirmaLabelHtml(m) + '</label>'
+    ).join('');
   }
   function renderAllFirmaSelects(){
     const containerIds = ['cust_firmaSelect', 'supp_firmaSelect', 'cp_firmaSelect', 'pr_firmaSelect', 'bank_firmaSelect'];
@@ -958,10 +983,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     if(!ids.length){
       return '<button type="button" class="party-scope-badge scope-assignable" data-assign-id="' + escapeHtml(record.id || '') + '" style="color:var(--amber,#E3A23C); background:transparent; border:1px solid rgba(227,162,60,0.5); border-radius:999px; cursor:pointer; font:inherit; padding:2px 9px;" title="Tıkla: bu kaydı AKTİF firmaya ata — böylece diğer firmalarda görünmez.">🏢 tüm firmalar ▾</button>';
     }
-    const names = ids.map(id => {
-      const m = groupFirmaMembers.find(f => f.id === id);
-      return m ? m.name : id;
-    });
+    // Rozette de kod adın BAŞINDA (kullanıcı isteği 2026-07-31) ve firmalar kod sırasında.
+    const members = ids
+      .map(id => groupFirmaMembers.find(f => f.id === id) || { id, name: id, code: '' })
+      .sort(mmgFirmaCodeSort);
+    const names = members.map(m => (String(m.code || '').trim() ? m.code + ' ' : '') + m.name);
     return '<div class="party-scope-badge">🏢 ' + escapeHtml(names.join(', ')) + '</div>';
   }
 
@@ -981,8 +1007,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }
     const hubId = groupHubId;
     gridEl.innerHTML = '<div style="margin-top:8px;">' + LBL.scopeGroupedIntro + '</div>' +
-      '<ul class="scope-firma-list">' + groupFirmaMembers.map(m =>
-        '<li>' + escapeHtml(m.name) + (m.id === hubId ? ' <span class="scope-group-hub-note">' + LBL.scopeGroupHubNote + '</span>' : '') + '</li>'
+      '<ul class="scope-firma-list">' + groupFirmaMembers.slice().sort(mmgFirmaCodeSort).map(m =>
+        '<li>' + mmgFirmaLabelHtml(m) + (m.id === hubId ? ' <span class="scope-group-hub-note">' + LBL.scopeGroupHubNote + '</span>' : '') + '</li>'
       ).join('') + '</ul>';
   }
 
