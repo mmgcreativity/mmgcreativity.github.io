@@ -1289,7 +1289,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     try{
       const id = kind[0] + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
       const docData = { name, ibans, createdAt: serverTimestamp() };
+      // Elle eklemede kayıt HER ZAMAN bir firmaya atanır: seçim yapılmadıysa/hepsi seçiliyse
+      // otomatik AKTİF firmaya (kullanıcı isteği — atanmamış "global" kayıt hiç oluşmasın).
       if(appliesTo) docData.appliesToFirmaIds = appliesTo;
+      else if(scopeCollection === 'firmaAccounts' && scopeId) docData.appliesToFirmaIds = [scopeId];
       await setDoc(docRef(kind, id), docData);
       nameEl.value = '';
       clearIbanRows(prefix);
@@ -1357,7 +1360,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     try{
       const id = 'cp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
       const docData = { name, notes: notesEl.value.trim(), createdAt: serverTimestamp() };
+      // Elle eklemede kayıt HER ZAMAN bir firmaya atanır (seçim yoksa aktif firma).
       if(appliesTo) docData.appliesToFirmaIds = appliesTo;
+      else if(scopeCollection === 'firmaAccounts' && scopeId) docData.appliesToFirmaIds = [scopeId];
       await setDoc(docRef('counterparties', id), docData);
       nameEl.value = ''; notesEl.value = '';
       resetFirmaSelect('cp_firmaSelect');
@@ -1369,10 +1374,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
     try{
       const header = [LBL.bulkTypeCol, LBL.bulkNameCol, LBL.bulkIdCol, LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol, LBL.bulkFirmaCodeCol];
-      const example1 = [LBL.bulkTypeCustomer, 'ABC İnşaat A.Ş.', '1234567890', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY', ''];
-      const example2 = [LBL.bulkTypeCustomer, 'ABC İnşaat A.Ş.', '1234567890', 'Ziraat Bankası', 'TR111111111111111111111111', 'USD', ''];
-      const example3 = [LBL.bulkTypeSupplier, 'XYZ Ticaret Ltd.', '9876543210', 'Garanti BBVA', 'TR222222222222222222222222', 'EUR', ''];
-      const note = [MMG_LANG==='en' ? 'Type must be exactly "Customer" or "Supplier". A party with multiple accounts repeats on several rows with the same Name — even the SAME bank can appear on multiple rows with different IBANs / currencies (TRY, USD, EUR…). "Company Code" is optional: if you manage more than one company, enter that company\'s code so the record is attached to the right one (leave blank to use the active company).' : '"Tip" sütunu tam olarak "Müşteri" ya da "Tedarikçi" olmalı. Birden fazla hesabı olan firma için aynı Ünvan\'ı alt alta tekrar edin — AYNI banka bile farklı IBAN / döviz (TRY, USD, EUR…) ile birden çok satırda yer alabilir. "Firma Kodu" isteğe bağlıdır: birden fazla firma yönetiyorsanız kaydın hangi firmaya bağlanacağını kodla belirtin (boş bırakılırsa aktif firmaya bağlanır).'];
+      const example1 = [LBL.bulkTypeCustomer, 'ABC İnşaat A.Ş.', '1234567890', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY', '1000'];
+      const example2 = [LBL.bulkTypeCustomer, 'ABC İnşaat A.Ş.', '1234567890', 'Ziraat Bankası', 'TR111111111111111111111111', 'USD', '1000'];
+      const example3 = [LBL.bulkTypeSupplier, 'XYZ Ticaret Ltd.', '9876543210', 'Garanti BBVA', 'TR222222222222222222222222', 'EUR', '1000'];
+      const note = [MMG_LANG==='en' ? 'Type must be exactly "Customer" or "Supplier". A party with multiple accounts repeats on several rows with the same Name — even the SAME bank can appear on multiple rows with different IBANs / currencies (TRY, USD, EUR…). "Company Code" is REQUIRED: enter the code of the company this record belongs to (shown in the User Management Panel, e.g. 1000). Rows with a missing or unmatched code are SKIPPED.' : '"Tip" sütunu tam olarak "Müşteri" ya da "Tedarikçi" olmalı. Birden fazla hesabı olan firma için aynı Ünvan\'ı alt alta tekrar edin — AYNI banka bile farklı IBAN / döviz (TRY, USD, EUR…) ile birden çok satırda yer alabilir. "Firma Kodu" ZORUNLUDUR: kaydın ait olduğu firmanın kodunu yazın (Kullanıcı Yönetim Paneli\'nde görünür, örn. 1000). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ.'];
       const rows = [header, example1, example2, example3, [], note];
       const ws = XLSX.utils.aoa_to_sheet(rows);
       ws['!cols'] = [{wch:12},{wch:28},{wch:16},{wch:20},{wch:30},{wch:10},{wch:14}];
@@ -1454,22 +1459,34 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const original = btn.textContent;
     btn.textContent = LBL.bulkSaving;
     try{
-      let count = 0;
+      let count = 0, cariUnmatched = 0;
+      const cariUnmatchedNames = new Set();
       const codeToId = mmgFirmaCodeToId();
       for(const g of pendingBulkGroups.values()){
-        const id = g.kind[0] + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
         const docData = { name: g.name, idNumber: g.idNumber || '', ibans: g.ibans, createdAt: serverTimestamp() };
-        // IBAN'larda olduğu gibi: cari (müşteri/tedarikçi) bulk import da AKTİF firmaya bağlansın
-        // (global "tüm firmalar" olmasın). Firma Kodu verilmişse ilgili firmaya bağla; yoksa aktif firma.
+        // KURAL (kullanıcı isteği): Excel'de FİRMA KODU ZORUNLU — kodsuz ya da eşleşmeyen satır
+        // KAYDEDİLMEZ (karışıklık olmasın). Elle eklemede kod istenmez; otomatik aktif firmaya atanır.
         if(scopeCollection === 'firmaAccounts'){
           const mappedId = g.firmaCode ? codeToId[g.firmaCode] : null;
-          if(mappedId) docData.appliesToFirmaIds = [mappedId];
-          else if(scopeId) docData.appliesToFirmaIds = [scopeId];
+          if(!mappedId){
+            cariUnmatched++;
+            cariUnmatchedNames.add(g.firmaCode || (MMG_LANG==='en' ? '(code empty) ' + g.name : '(kod boş) ' + g.name));
+            continue;
+          }
+          docData.appliesToFirmaIds = [mappedId];
         }
+        const id = g.kind[0] + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
         await setDoc(docRef(g.kind, id), docData);
         count++;
       }
-      showMsg('bulkMsg', fmt(LBL.bulkDone, { n: count }), false);
+      let cariMsg = fmt(LBL.bulkDone, { n: count });
+      if(cariUnmatched){
+        const list = Array.from(cariUnmatchedNames).slice(0, 5).join(', ');
+        cariMsg += ' — ⚠️ ' + cariUnmatched + (MMG_LANG==='en'
+          ? ' record(s) skipped: Company Code missing/unmatched (' + list + '). Company Code column is REQUIRED; fill it with a code from your group and re-upload.'
+          : ' kayıt atlandı: Firma Kodu boş/eşleşmedi (' + list + '). Firma Kodu sütunu ZORUNLU; grubunuzdaki bir firmanın kodunu yazıp yeniden yükleyin.');
+      }
+      showMsg('bulkMsg', cariMsg, cariUnmatched > 0);
       pendingBulkGroups = null;
       document.getElementById('bulkPreviewWrap').style.display = 'none';
       await loadParties('customers');
@@ -1496,9 +1513,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   document.getElementById('downloadBanksTemplateBtn').addEventListener('click', () => {
     try{
       const header = ['Firma', LBL.bulkFirmaCodeCol, LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol, LBL.bulkNoteCol];
-      const example1 = ['YAŞAR CİHAN HAZIR BETON', '', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY', 'Yozgat şubesi'];
-      const example2 = ['ADERANS MADENCİLİK', '', 'Akbank', 'TR111111111111111111111111', 'USD', 'Kars şubesi'];
-      const note = [MMG_LANG==='en' ? '"Company Code" is the reliable way to attach an IBAN to the right company (name spelling can differ). If code is filled it is used; otherwise the name is matched; if neither matches, the active company is used.' : '"Firma Kodu" IBAN\'ı doğru firmaya bağlamanın en güvenilir yoludur (isim yazımı farklı olabilir). Kod doluysa kod kullanılır; değilse isim eşleştirilir; ikisi de eşleşmezse aktif firmaya bağlanır.'];
+      const example1 = ['YAŞAR CİHAN HAZIR BETON', '1000', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY', 'Yozgat şubesi'];
+      const example2 = ['ADERANS MADENCİLİK', '1001', 'Akbank', 'TR111111111111111111111111', 'USD', 'Kars şubesi'];
+      const note = [MMG_LANG==='en' ? '"Company Code" is REQUIRED: enter the code of the company this IBAN belongs to (shown in the User Management Panel, e.g. 1000). Rows with a missing or unmatched code are SKIPPED — nothing gets mixed into the wrong company.' : '"Firma Kodu" ZORUNLUDUR: IBAN\'ın ait olduğu firmanın kodunu yazın (Kullanıcı Yönetim Paneli\'nde görünür, örn. 1000). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ — hiçbir kayıt yanlış firmaya karışmaz.'];
       const rows = [header, example1, example2, [], note];
       const ws = XLSX.utils.aoa_to_sheet(rows);
       ws['!cols'] = [{wch:28},{wch:14},{wch:24},{wch:30},{wch:10},{wch:22}];
@@ -1576,21 +1593,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       for(const r of pendingBanksBulkRows){
         const ibanKey = (r.iban||'').toUpperCase().replace(/\s+/g,'');
         if(ibanKey && seenIbans.has(ibanKey)){ skipped++; continue; }
-        // Önce FİRMA KODU (isim yazım farklarından etkilenmez), sonra firma adı.
-        let fid = r.firmaCode ? codeToId[r.firmaCode] : null;
-        if(!fid && r.firmaName) fid = nameToId[r.firmaName.trim().toLocaleLowerCase('tr-TR')];
-        // KRİTİK (kullanıcı isteği — "Excel'de firma belli, KARIŞMASIN"):
-        // Satırda firma adı/kodu YAZILMIŞ ama hiçbir firmayla eşleşmediyse, satırı SESSİZCE
-        // aktif firmaya YIĞMA — bu, tüm IBAN'ların yanlış firmaya (örn. YAŞAR CİHAN) bağlanıp
-        // "düzinelerce IBAN geliyor" sorununu yaratıyordu. Böyle satırları ATLA ve RAPORLA;
-        // kullanıcı Excel'deki firma adını/kodunu düzeltip yeniden yükler.
-        if(!fid && (r.firmaCode || r.firmaName)){
-          unmatched++;
-          unmatchedNames.add(r.firmaCode || r.firmaName);
-          continue;
+        // KURAL (kullanıcı isteği): Excel'de FİRMA KODU ZORUNLU. Kod boşsa ya da grubunuzdaki
+        // hiçbir firmanın koduyla eşleşmiyorsa satır KAYDEDİLMEZ (atla + raporla) — böylece
+        // IBAN'lar asla yanlış firmaya yığılmaz/karışmaz. (Elle eklemede kod istenmez; kayıt
+        // otomatik aktif firmaya atanır.)
+        let fid = null;
+        if(scopeCollection === 'firmaAccounts'){
+          fid = r.firmaCode ? codeToId[r.firmaCode] : null;
+          if(!fid){
+            unmatched++;
+            unmatchedNames.add(r.firmaCode || ((MMG_LANG==='en' ? '(code empty) ' : '(kod boş) ') + (r.firmaName || r.iban || '')));
+            continue;
+          }
         }
-        // Firma kolonu tamamen BOŞ ise bilinçli olarak aktif firmaya bağla (tek-firma senaryosu).
-        if(!fid && scopeCollection === 'firmaAccounts' && scopeId) fid = scopeId;
         if(ibanKey) seenIbans.add(ibanKey);
         const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
         const docData = { name: r.bank, iban: r.iban, currency: r.currency || 'TRY', note: r.note || '', createdAt: serverTimestamp() };
@@ -1603,8 +1618,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       if(unmatched){
         const namesList = Array.from(unmatchedNames).slice(0, 5).join(', ');
         msgTxt += ' — ⚠️ ' + unmatched + (MMG_LANG==='en'
-          ? ' row(s) skipped: company not matched (' + namesList + '). Fix the company name/code in Excel (must match a company in your group) and re-upload.'
-          : ' satır atlandı: firma eşleşmedi (' + namesList + '). Excel\'deki firma adını/kodunu grubunuzdaki firmayla birebir eşleşecek şekilde düzeltip yeniden yükleyin.');
+          ? ' row(s) skipped: Company Code missing/unmatched (' + namesList + '). Company Code column is REQUIRED; fill it with a code from your group and re-upload.'
+          : ' satır atlandı: Firma Kodu boş/eşleşmedi (' + namesList + '). Firma Kodu sütunu ZORUNLU; grubunuzdaki bir firmanın kodunu yazıp yeniden yükleyin.');
       }
       showMsg('banksBulkMsg', msgTxt, unmatched > 0);
       pendingBanksBulkRows = null;
@@ -1711,8 +1726,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   document.getElementById('downloadCounterpartiesTemplateBtn').addEventListener('click', () => {
     try{
       const header = [LBL.bulkNameCol, LBL.bulkNotesCol, LBL.bulkFirmaCodeCol];
-      const rows = [header, ['Karayolları Genel Müdürlüğü', 'Ankara, ihale no: 2025/123', ''], ['ABC Belediyesi', '', ''], [],
-        [MMG_LANG==='en' ? '"Company Code" is optional: if you manage more than one company, enter that company\'s code to attach the record to the right one (leave blank to use the active company).' : '"Firma Kodu" isteğe bağlıdır: birden fazla firma yönetiyorsanız kaydın hangi firmaya bağlanacağını kodla belirtin (boş bırakılırsa aktif firmaya bağlanır).']];
+      const rows = [header, ['Karayolları Genel Müdürlüğü', 'Ankara, ihale no: 2025/123', '1000'], ['ABC Belediyesi', '', '1000'], [],
+        [MMG_LANG==='en' ? '"Company Code" is REQUIRED: enter the code of the company this record belongs to (e.g. 1000). Rows with a missing or unmatched code are SKIPPED.' : '"Firma Kodu" ZORUNLUDUR: kaydın ait olduğu firmanın kodunu yazın (örn. 1000). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ.']];
       const ws = XLSX.utils.aoa_to_sheet(rows);
       ws['!cols'] = [{wch:32},{wch:36},{wch:14}];
       const wb = XLSX.utils.book_new();
@@ -1777,19 +1792,31 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     try{
       let count = 0;
       const codeToId = mmgFirmaCodeToId();
+      let cpUnmatched = 0; const cpUnmatchedNames = new Set();
       for(const r of pendingCounterpartiesBulkRows){
-        const id = 'cp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
         const docData = { name: r.name, notes: r.notes || '', createdAt: serverTimestamp() };
-        // Muhataplar da AKTİF firmaya bağlansın (global "tüm firmalar" olmasın); Firma Kodu verilmişse o firmaya.
+        // KURAL: Excel'de FİRMA KODU ZORUNLU — kodsuz/eşleşmeyen satır kaydedilmez (karışma olmasın).
         if(scopeCollection === 'firmaAccounts'){
           const mappedId = r.firmaCode ? codeToId[r.firmaCode] : null;
-          if(mappedId) docData.appliesToFirmaIds = [mappedId];
-          else if(scopeId) docData.appliesToFirmaIds = [scopeId];
+          if(!mappedId){
+            cpUnmatched++;
+            cpUnmatchedNames.add(r.firmaCode || ((MMG_LANG==='en' ? '(code empty) ' : '(kod boş) ') + (r.name || '')));
+            continue;
+          }
+          docData.appliesToFirmaIds = [mappedId];
         }
+        const id = 'cp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
         await setDoc(docRef('counterparties', id), docData);
         count++;
       }
-      showMsg('counterpartiesBulkMsg', fmt(LBL.bulkDone, { n: count }), false);
+      let cpMsg = fmt(LBL.bulkDone, { n: count });
+      if(cpUnmatched){
+        const list = Array.from(cpUnmatchedNames).slice(0, 5).join(', ');
+        cpMsg += ' — ⚠️ ' + cpUnmatched + (MMG_LANG==='en'
+          ? ' row(s) skipped: Company Code missing/unmatched (' + list + '). Company Code column is REQUIRED.'
+          : ' satır atlandı: Firma Kodu boş/eşleşmedi (' + list + '). Firma Kodu sütunu ZORUNLU.');
+      }
+      showMsg('counterpartiesBulkMsg', cpMsg, cpUnmatched > 0);
       pendingCounterpartiesBulkRows = null;
       document.getElementById('counterpartiesBulkPreviewWrap').style.display = 'none';
       await loadCounterparties();

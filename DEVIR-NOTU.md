@@ -1,12 +1,18 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-iban-import-eslesme'` (repo ~429 commit). ⏳ Kullanıcı bekleyen: `firebase deploy --only firestore:indexes` (davet listesi) + IAM signBlob rolü (hesap geçişi). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
+Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-firmakodu-zorunlu'` (repo ~430 commit). ⏳ Kullanıcı bekleyen: IAM signBlob rolü (hesap geçişi INTERNAL). ⏳ Kullanıcı bekleyen: `firebase deploy --only firestore:indexes` (davet listesi) + IAM signBlob rolü (hesap geçişi). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
 
 > ✅ **Sürümleme çözüldü:** "Güncelleme var, yenile" banner'ı (index.html #mmgUpdateBanner) NE app-version.json NE de SW_VERSION'a bakar — index.html'e HEAD atıp ETag/Last-Modified karşılaştırır (tamamen otomatik). `SW_VERSION` sadece cache-bust; `app-version.json` artık okunmuyor ama ikisi senkron tutuluyor. Her deploy'da ikisini de bump'la.
 
 > ⚠️ **OneDrive senkron tuzağı:** OneDrive çalışmıyorken dosyalar "cloud-only" görünür; bash "Invalid argument" verir, düzenleme kaybolabilir veya ESKİ sürüm yüklenir. Deploy öncesi işaret (marker) kontrolü şart. (Kayıtlı skill: `mmg-onedrive-sync-guard`.) Bu klasörde `DEVIR-NOTU-DESKTOP-V12JA3F.md` gibi "DESKTOP-xxxx" çakışma kopyaları OneDrive'ın ürettiği artıklardır — silinebilir.
 
 ## 🟢 2026-07-31 (5. OTONOM OTURUM) — CANLIYA ALINANLAR
+**Onuncu tur (Firma Kodu ZORUNLU) — SW `2026-07-31-firmakodu-zorunlu`:**
+- **Excel'de Firma Kodu artık 3 içe aktarımda da ZORUNLU** (`VeriGirisPaneli.html`, firma kapsamında): Müşteri/Tedarikçi, IBAN'larım, Muhataplar. Kod boş ya da eşleşmeyen satır **KAYDEDİLMEZ** (atla + "⚠️ N satır atlandı: Firma Kodu boş/eşleşmedi (…)" raporu). IBAN'da isim-fallback ve aktif-firma-fallback kaldırıldı — tek doğruluk kaynağı KOD.
+- **Elle eklemede kod istenmez, otomatik atanır:** cari + muhatap manuel kayıtları `appliesTo` boşsa artık otomatik `[scopeId]` (aktif firma) alır; IBAN manuel kaydı zaten öyleydi. Atanmamış "global" kayıt artık hiçbir yoldan oluşamaz.
+- 3 Excel şablonunun örnek satırlarına kod örneği (1000/1001) kondu; notlar "Firma Kodu ZORUNLUDUR… eşleşmeyen satır KAYDEDİLMEZ" olarak güncellendi.
+- ✅ Kullanıcı `firebase deploy --only firestore:indexes` çalıştırdı (firmas.firmaId index'i CANLI) → bekleyen davetler artık panelde görünür. Kalan tek kullanıcı işi: IAM signBlob (hesap geçişi).
+
 **Dokuzuncu tur (IBAN import eşleşme) — SW `2026-07-31-iban-import-eslesme`:**
 - **IBAN Excel içe aktarımında "karışma"nın ASIL kaynağı bulundu:** satırdaki firma adı/kodu grup firmalarıyla eşleşmeyince kod satırı SESSİZCE AKTİF firmaya bağlıyordu → tüm IBAN'lar tek firmaya (YAŞAR CİHAN) yığılıp gönderen listesinde düzinelerce görünüyordu. Düzeltme (`VeriGirisPaneli.html` banksBulkConfirm): firma YAZILMIŞ ama eşleşmemişse satır **ATLANIR ve uyarıyla raporlanır** (ilk 5 eşleşmeyen ad gösterilir); yalnızca firma kolonu tamamen BOŞ satırlar aktif firmaya bağlanır. Kullanıcının akışı: Tüm IBAN'ları Sil → Excel'de firma adı/kodu düzelt → yeniden yükle → her IBAN kendi firmasında.
 
