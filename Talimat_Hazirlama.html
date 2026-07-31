@@ -758,10 +758,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="xcell-label">IBAN</span>
             <input type="text" id="fGonderenIban" placeholder="TR__ ____ ____ ____ ____ ____ __" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
             <button type="button" class="xcell-savebtn" id="saveGonderenIbanBtn" title="IBAN bilgisini kaydet">💾</button>
-            <select class="xcell-mini" id="fGonderenIbanSaved" title="Kayıtlı IBAN'dan seç"><option value="">📋 Kayıtlı</option></select>
           </div>
           <div id="fGonderenIbanHint" style="display:none;"></div>
-          <select id="fGonderenIbanChooser" title="IBAN seçin" style="display:none; grid-column:1/-1; width:100%; margin:6px 0 0; padding:10px 12px; border-radius:8px; border:2px solid var(--red); background:var(--surface-2); color:var(--text); font-family:'Inter',sans-serif; font-size:13px; font-weight:700; cursor:pointer; outline:none;"></select>
+          <!-- KALDIRILDI (kullanıcı isteği 2026-07-31): "📋 Kayıtlı" mini seçici (#fGonderenIbanSaved)
+               ve "— Farklı IBAN seç —" kırmızı seçici (#fGonderenIbanChooser). Kayıtlı IBAN'lar zaten
+               IBAN kutusuna tıklayınca otomatik-tamamlama listesinde geliyor. JS referansları null-guard'lı. -->
           <div class="xcell xcell-3col">
             <span class="xcell-label">TUTAR</span>
             <div style="position:relative; display:flex; align-items:center; border-left:1px solid var(--hairline);">
@@ -1011,7 +1012,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="xcell-label" id="fSmMuhatapAdiLabel">BANKA ADI</span>
             <input type="text" id="fSmMuhatapAdi" placeholder="Örn. Akbank" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
             <button type="button" class="xcell-savebtn" id="saveSmMuhatapBtn" title="Muhatabı kaydet">💾</button>
-            <select class="xcell-mini" id="fSmMuhatapSaved" title="Kayıtlı muhataptan seç"><option value="">📋 Kayıtlı</option></select>
+<!-- #fSmMuhatapSaved KALDIRILDI (kullanıcı isteği 2026-07-31) -->
           </div>
         </div>
         <div class="field">
@@ -1024,7 +1025,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="xcell-label">FİRMA / AD</span>
             <input type="text" id="fSmFirma" placeholder="Örn. Örnek Ticaret A.Ş." autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
             <button type="button" class="xcell-savebtn" id="saveSmFirmaBtn" title="Kaydet">💾</button>
-            <select class="xcell-mini" id="fSmFirmaSaved" title="Kayıtlı firma/isimden seç"><option value="">📋 Kayıtlı</option></select>
+<!-- #fSmFirmaSaved KALDIRILDI (kullanıcı isteği 2026-07-31) -->
           </div>
         </div>
 
@@ -1671,7 +1672,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
 
   // Çoklu IBAN durumunda alta açılan seçim listesi: kullanıcı seçince IBAN'ı yerleştir ve listeyi gizle.
-  document.getElementById('fGonderenIbanChooser').addEventListener('change', (e) => {
+  document.getElementById('fGonderenIbanChooser')?.addEventListener('change', (e) => {
     if(e.target.value === '') return;
     const b = savedIbans[+e.target.value];
     if(!b) return;
@@ -1735,7 +1736,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     autoFillGonderenIban();
     renderPreview();
   });
-  document.getElementById('fGonderenIbanSaved').addEventListener('change', (e) => {
+  document.getElementById('fGonderenIbanSaved')?.addEventListener('change', (e) => {
     if(e.target.value === '') return;
     const b = savedIbans[+e.target.value];
     setBankSelectValue(document.getElementById('fGonderenBanka'), b.banka);
@@ -1785,7 +1786,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="mmg-ac-list" id="aliciAcList_${idx}"></div>
           </div>
           <button type="button" class="xcell-savebtn" id="saveAliciFirmaBtn_${idx}" title="Firma bilgisini kaydet">💾</button>
-          <select class="xcell-mini alici-firma-saved" id="fAliciFirmaSaved_${idx}" title="Kayıtlı listeden seç"><option value="">📋 Kayıtlı Cari</option></select>
+<!-- #fAliciFirmaSaved_${idx} KALDIRILDI (kullanıcı isteği 2026-07-31) -->
         </div>
         <div class="xcell xcell-3col">
           <span class="xcell-label">BANKA</span>
@@ -1796,7 +1797,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span class="xcell-label">IBAN</span>
           <input type="text" id="fAliciIban_${idx}" placeholder="TR__ ____ ____ ____ ____ ____ __" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
           <button type="button" class="xcell-savebtn" id="saveAliciIbanBtn_${idx}" title="IBAN bilgisini kaydet">💾</button>
-          <select class="xcell-mini alici-iban-saved" id="fAliciIbanSaved_${idx}" title="Kayıtlı IBAN'dan seç"><option value="">📋 Kayıtlı</option></select>
+<!-- #fAliciIbanSaved_${idx} KALDIRILDI (kullanıcı isteği 2026-07-31) -->
         </div>
       </div>
     `;
@@ -1884,13 +1885,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
     });
 
-    document.getElementById(`fAliciFirmaSaved_${idx}`).addEventListener('change', (e) => {
+    document.getElementById(`fAliciFirmaSaved_${idx}`)?.addEventListener('change', (e) => {
       if(e.target.value === '') return;
       const party = acDataset().find(p => p.name === e.target.value) || { name: e.target.value, ibans: [] };
       fillAliciFromParty(idx, party);
       e.target.value = '';
     });
-    document.getElementById(`fAliciIbanSaved_${idx}`).addEventListener('change', (e) => {
+    document.getElementById(`fAliciIbanSaved_${idx}`)?.addEventListener('change', (e) => {
       if(e.target.value === '') return;
       const b = savedIbans[+e.target.value];
       setBankSelectValue(document.getElementById(`fAliciBanka_${idx}`), b.banka);
@@ -2207,7 +2208,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     } else if(ibans.length > 1){
       // Birden fazla IBAN: kullanıcı seçsin. IBAN alanını boşalt, kayıtlı IBAN listesini aç.
       if(ibanEl) ibanEl.value = '';
-      const ibSel = document.getElementById('fAliciIbanSaved_' + idx);
+      // "📋 Kayıtlı" seçici KALDIRILDI (2026-07-31) → odağı IBAN kutusuna ver; kayıtlı IBAN'lar
+      // kutuya tıklanınca otomatik-tamamlama listesinde çıkıyor. IBAN'ı OTOMATİK DOLDURMUYORUZ:
+      // çok IBAN'lı alıcıda yanlış hesaba para gitmesin, kullanıcı bilinçli seçsin.
+      const ibSel = document.getElementById('fAliciIbanSaved_' + idx) || ibanEl;
       if(ibSel){ try{ ibSel.focus(); }catch(e){} }
     }
     renderPreview();
@@ -4151,6 +4155,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function renderMuhatapSelect(){
     const sel = document.getElementById('fSmMuhatapSaved');
+    if(!sel) return; // seçici KALDIRILDI (2026-07-31) — kayıtlı muhataplar kutuya tıklayınca geliyor
     sel.innerHTML = '<option value="">📋 Kayıtlı</option>' +
       savedMuhataplar.map((m, i) => `<option value="${i}">${MUHATAP_TUR_LABELS[m.tur].replace(' ADI','')}: ${m.ad}</option>`).join('');
   }
@@ -4195,7 +4200,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   });
 
-  document.getElementById('fSmMuhatapSaved').addEventListener('change', (e) => {
+  document.getElementById('fSmMuhatapSaved')?.addEventListener('change', (e) => {
     if(e.target.value === '') return;
     const m = savedMuhataplar[+e.target.value];
     document.getElementById('fSmMuhatapTur').value = m.tur;
@@ -4224,6 +4229,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   function renderSmFirmaSelect(){
     const sel = document.getElementById('fSmFirmaSaved');
+    if(!sel) return; // seçici KALDIRILDI (2026-07-31) — kayıtlı firmalar kutuya tıklayınca geliyor
     sel.innerHTML = '<option value="">📋 Kayıtlı</option>' +
       mmgLoadSavedFirmalar().map(n => '<option value="' + n.replace(/"/g,'&quot;') + '">' + n + '</option>').join('');
   }
@@ -4241,7 +4247,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     flashButton(btnId, true, 'Kaydedildi.');
   });
 
-  document.getElementById('fSmFirmaSaved').addEventListener('change', (e) => {
+  document.getElementById('fSmFirmaSaved')?.addEventListener('change', (e) => {
     if(e.target.value === '') return;
     document.getElementById('fSmFirma').value = e.target.value;
     e.target.value = '';
