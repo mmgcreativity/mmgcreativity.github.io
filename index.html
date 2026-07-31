@@ -1065,6 +1065,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       sc_desc_krediteklif:'Farklı bankaların kredi tekliflerini yan yana karşılaştırın.',
       sc_desc_kullanici:'Firmanıza bağlı kullanıcıları ekleyin ve yetkilerini yönetin.',
       footer_follow_us:'Bizi Takip Edin', footer_powered_by:'Powered by', footer_download_now:'Hemen İndirin',
+      footer_rate_us_small:'Beğendiyseniz', footer_rate_us:'Bizi Oylayın',
       footer_about:'Hakkında', footer_privacy:'Gizlilik Politikası', footer_terms:'Kullanım Şartları',
       close:'Kapat',
       settings_title:'Ayarlar', settings_lang_label:'Dil / Language',
@@ -1176,6 +1177,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       sc_desc_krediteklif:'Compare loan offers from different banks side by side.',
       sc_desc_kullanici:'Add users linked to your company and manage their permissions.',
       footer_follow_us:'Follow Us', footer_powered_by:'Powered by', footer_download_now:'Download Now',
+      footer_rate_us_small:'Enjoying it?', footer_rate_us:'Rate Us',
       footer_about:'About', footer_privacy:'Privacy Policy', footer_terms:'Terms of Use',
       close:'Close',
       settings_title:'Settings', settings_lang_label:'Dil / Language',
@@ -2004,9 +2006,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <svg viewBox="0 0 448 512" fill="#fff"><path d="M446.6 222.7c-1.8-45.5-3.4-83.3-59.5-83.3l-83-1c-9.8 0-14.7-6.9-14.7-14.7 0 0 .1-52.1-1-70.4C283.7 3.2 246.7 0 202.5 0 122.6 0 0 6.9 0 166.4v179.2C0 505.1 122.6 512 202.5 512s202.5-6.9 202.5-166.4c0 0 42.9 3.2 41.6-122.9zM155.5 108.9c22.6 0 40.9 18.3 40.9 40.9s-18.3 40.9-40.9 40.9-40.9-18.3-40.9-40.9 18.3-40.9 40.9-40.9zm137 294.2H155.5c-22.6 0-40.9-18.3-40.9-40.9s18.3-40.9 40.9-40.9h137c22.6 0 40.9 18.3 40.9 40.9s-18.3 40.9-40.9 40.9z"/></svg>
             </a>
           </div>
-          <a href="#" class="app-badge app-badge-small">
+          <!-- Play Store rozeti: href="#" ölü linkti (2026-07-31 düzeltildi). Paket adı
+               .well-known/assetlinks.json'dan: com.mmgcreativity.dijitalfinans
+               Kullanıcı isteği: indirmenin yanında PUANLAMA çağrısı da olsun. -->
+          <a href="https://play.google.com/store/apps/details?id=com.mmgcreativity.dijitalfinans"
+             target="_blank" rel="noopener" class="app-badge app-badge-small" title="Google Play'de aç — indirin ve bizi puanlayın">
             <svg viewBox="0 0 24 24"><path d="M3.6 2.6a1 1 0 0 0-.6.9v17a1 1 0 0 0 .6.9l9.7-9.4-9.7-9.4z" fill="#00d2ff"/><path d="M13.3 12l3-2.9 3.9 2.2c.9.5.9 1.4 0 1.9l-3.9 2.2-3-2.4z" fill="#ffd200"/><path d="M13.3 12L3.6 2.6c.2 0 .5 0 .7.1l11 6.3-2 2.9z" fill="#00e676"/><path d="M13.3 12l2 2.9-11 6.3c-.2.1-.5.1-.7.1L13.3 12z" fill="#ff3d57"/></svg>
             <span class="app-badge-text"><span data-i18n="footer_download_now">Hemen İndirin</span><b>Google Play</b></span>
+          </a>
+          <!-- Doğrudan puanlama: Play Store'da yorum/puan bölümünü açar. -->
+          <a href="https://play.google.com/store/apps/details?id=com.mmgcreativity.dijitalfinans&showAllReviews=true"
+             target="_blank" rel="noopener" class="app-badge app-badge-small" title="Google Play'de bizi puanlayın">
+            <svg viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.4-5.8-3-5.8 3 1.1-6.4L2.6 9.4l6.5-.9z" fill="#FFC107"/></svg>
+            <span class="app-badge-text"><span data-i18n="footer_rate_us_small">Beğendiyseniz</span><b data-i18n="footer_rate_us">Bizi Oylayın</b></span>
           </a>
           </div>
         </div>
@@ -4595,6 +4607,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const firmaBarName = document.getElementById('mmgActiveFirmaName');
     if(!wrap) return;
     if(!mmgFirmaMemberships.length){
+      // BAYAT KAPSAM TEMİZLİĞİ (2026-07-31): Hiç firma üyeliği yokken localStorage'da hâlâ bir
+      // firma id'si duruyorsa (üyelikten çıkarılmış ya da firma silinmiş olabilir), VeriGiriş /
+      // Talimat gibi sayfalar bu id'yi kapsam olarak kullanmaya devam edip erişilemeyen bir
+      // havuza bakıyor ve "veri gelmiyor" görünüyordu. Artık kişisel kapsama düşürülüyor.
+      const _stale = localStorage.getItem('mmg_active_data_scope');
+      if(_stale && _stale !== 'personal'){
+        localStorage.setItem('mmg_active_data_scope', 'personal');
+      }
       wrap.style.display = 'none'; // değiştirilecek firma yok → geçiş menüsü gizli
       // Kullanıcı isteği: firma YOKSA sol-alt kapsam çubuğuna (firma değiştirici) gerek yok —
       // kimlik zaten sağ-üst hesap rozetinde "#kod ad" olarak görünüyor, mükerrer olmasın.
