@@ -153,6 +153,7 @@
 <body>
 
 <div class="page-wrap" id="pageWrap" style="display:none;">
+  <a href="index.html" target="_top" onclick="try{localStorage.removeItem('mmg_last_open_page');}catch(e){}" style="display:inline-flex; align-items:center; gap:6px; text-decoration:none; color:var(--muted); font-size:13.5px; font-weight:600; margin-bottom:12px; padding:6px 10px; border:1px solid var(--hairline); border-radius:8px;">← Ana Sayfa</a>
   <div class="page-header">
     <div class="page-title" data-i18n="page_title">👥 Kullanıcı Yönetim Paneli</div>
     <div class="page-sub" id="firmaHeaderSub" data-i18n="page_sub_default">Firma hesabınıza bağlı kullanıcıları buradan ekleyip yönetebilirsiniz.</div>
@@ -296,6 +297,13 @@
             <th style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700;">Durum</th>
             <th style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700; white-space:nowrap;">Kayıt</th>
           </tr>
+          <tr>
+            <th style="padding:4px 6px; border-bottom:1px solid var(--hairline);"><input type="text" class="ky-col-filter" id="fltKod" placeholder="Ara…" autocomplete="off" style="width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px; padding:5px 8px; color:var(--text); font-size:12px; font-family:'Inter',sans-serif;"></th>
+            <th style="padding:4px 6px; border-bottom:1px solid var(--hairline);"><input type="text" class="ky-col-filter" id="fltAd" placeholder="Ara…" autocomplete="off" style="width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px; padding:5px 8px; color:var(--text); font-size:12px; font-family:'Inter',sans-serif;"></th>
+            <th style="padding:4px 6px; border-bottom:1px solid var(--hairline);"><input type="text" class="ky-col-filter" id="fltEposta" placeholder="Ara…" autocomplete="off" style="width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px; padding:5px 8px; color:var(--text); font-size:12px; font-family:'Inter',sans-serif;"></th>
+            <th style="padding:4px 6px; border-bottom:1px solid var(--hairline);"><input type="text" class="ky-col-filter" id="fltDurum" placeholder="Ara…" autocomplete="off" style="width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px; padding:5px 8px; color:var(--text); font-size:12px; font-family:'Inter',sans-serif;"></th>
+            <th style="padding:4px 6px; border-bottom:1px solid var(--hairline);"><input type="text" class="ky-col-filter" id="fltKayit" placeholder="Ara…" autocomplete="off" style="width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--hairline); border-radius:6px; padding:5px 8px; color:var(--text); font-size:12px; font-family:'Inter',sans-serif;"></th>
+          </tr>
         </thead>
         <tbody id="adminAllUsersBody"></tbody>
       </table>
@@ -307,6 +315,7 @@
 <div class="guard-wrap" id="guardWrap" style="display:none;">
   <h2 id="guardTitle" data-i18n="guard_title_default">Bu sayfa sadece firma hesapları içindir</h2>
   <p id="guardSub" data-i18n="guard_sub_default">Bir kullanıcı hesabıyla giriş yaptınız. Bu paneli görmek için firma hesabınızla giriş yapmanız gerekir.</p>
+  <a href="index.html" target="_top" onclick="try{localStorage.removeItem('mmg_last_open_page');}catch(e){}" style="display:inline-flex; align-items:center; gap:6px; text-decoration:none; color:var(--muted); font-size:13.5px; font-weight:600; margin-top:14px; padding:6px 12px; border:1px solid var(--hairline); border-radius:8px;">← Ana Sayfa</a>
 </div>
 
 <script type="module">
@@ -669,7 +678,19 @@
     const searchEl = document.getElementById('adminUserSearch');
     if(!body) return;
     const q = ((searchEl && searchEl.value) || '').trim().toLowerCase();
-    const rows = allSiteUsers.filter(u => !q || (u.code + ' ' + u.name + ' ' + u.email).toLowerCase().indexOf(q) !== -1);
+    const cf = id => { const el = document.getElementById(id); return (el && el.value || '').trim().toLowerCase(); };
+    const fKod = cf('fltKod'), fAd = cf('fltAd'), fEp = cf('fltEposta'), fDr = cf('fltDurum'), fKy = cf('fltKayit');
+    const rows = allSiteUsers.filter(u => {
+      const durumTxt = (u.premium ? 'premium' : 'standart');
+      const dateTxt = fmtDateKY(u.createdAt).toLowerCase();
+      if(q && (u.code + ' ' + u.name + ' ' + u.email).toLowerCase().indexOf(q) === -1) return false;
+      if(fKod && (u.code || '').toLowerCase().indexOf(fKod) === -1) return false;
+      if(fAd && (u.name || '').toLowerCase().indexOf(fAd) === -1) return false;
+      if(fEp && (u.email || '').toLowerCase().indexOf(fEp) === -1) return false;
+      if(fDr && durumTxt.indexOf(fDr) === -1) return false;
+      if(fKy && dateTxt.indexOf(fKy) === -1) return false;
+      return true;
+    });
     if(cnt) cnt.textContent = rows.length + ' / ' + allSiteUsers.length;
     if(!rows.length){
       body.innerHTML = '';
@@ -714,6 +735,7 @@
   (function wireAdminUserSearch(){
     const s = document.getElementById('adminUserSearch');
     if(s) s.addEventListener('input', renderAdminAllUsers);
+    document.querySelectorAll('.ky-col-filter').forEach(el => el.addEventListener('input', renderAdminAllUsers));
   })();
 
   onAuthStateChanged(auth, async (user) => {
