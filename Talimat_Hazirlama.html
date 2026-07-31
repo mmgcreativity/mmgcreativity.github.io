@@ -1615,9 +1615,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(chooserEl){ chooserEl.style.display = 'none'; chooserEl.innerHTML = ''; }
     };
     if(!firmaEl || !ibanEl) return;
+    // Firma değişti ama yeni firmanın kayıtlı IBAN'ı yok → ÖNCEKİ firmanın IBAN'ı kutuda KALMASIN
+    // (kullanıcı 2026-07-31: "Bursa Cihan'a geçince önceki IBAN kaldı"). Yanlış hesaba para
+    // gitme riski olduğu için bu bir GÜVENLİK düzeltmesi. ELLE yazılmış IBAN'a DOKUNULMAZ:
+    // yalnızca kayıtlı (savedIbans) bir IBAN, yani otomatik dolmuş olan temizlenir.
+    const _normIb = s => (s || '').toUpperCase().replace(/\s+/g, '');
+    const clearIfAutoFilled = () => {
+      const cur = _normIb(ibanEl.value);
+      if(!cur) return;
+      if(savedIbans.some(b => _normIb(b.iban) === cur)){
+        ibanEl.value = '';
+        const s = document.getElementById('fGonderenIbanSaved'); if(s) s.value = '';
+        if(typeof renderPreview === 'function') renderPreview();
+      }
+    };
     const firma = firmaEl.value.trim().toLowerCase();
     const banka = ((bankaEl && bankaEl.value) || '').trim().toLowerCase();
-    if(!firma){ hide(); return; }
+    if(!firma){ clearIfAutoFilled(); hide(); return; }
     // Gönderen otomatik-dolumu da YALNIZCA firma banka hesaplarını (banks / _db) dikkate alır;
     // legacy kayitliMuhataplar IBAN'ları gönderen tarafında kullanılmaz.
     const _onlyDb = !!(window.mmgCloud && window.mmgCloud.scopeCollection === 'firmaAccounts');
@@ -1628,7 +1642,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       .filter(b => !_onlyDb || b._db)
       .filter(b => b._db || !_myNames.has((b.firma || '').trim().toLowerCase()))
       .filter(b => b.firma && b.firma.trim().toLowerCase() === firma);
-    if(!firmaMatches.length){ hide(); return; }
+    // ⚠️ ASIL HATA BURADAYDI: eşleşme yoksa eskiden sadece hide() yapılıp çıkılıyordu, önceki
+    // firmanın IBAN'ı kutuda kalıyordu. Artık otomatik dolmuş IBAN temizleniyor.
+    if(!firmaMatches.length){ clearIfAutoFilled(); hide(); return; }
     const byBank = banka ? firmaMatches.filter(b => (b.banka || '').trim().toLowerCase() === banka) : firmaMatches;
     // Banka SEÇİLİYKEN o bankaya ait IBAN yoksa: yanlış bankanın IBAN'ını GÖSTERME, temizle
     // (kullanıcı: "bankayı değiştiriyorum hâlâ aynı hatalı IBAN kalıyor"). Alıcı tarafıyla aynı davranış.
