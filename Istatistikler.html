@@ -294,43 +294,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="talimatUsageEmpty" style="font-size:12px; color:var(--muted); display:none; margin-top:8px;">Henüz talimat kullanım kaydı yok.</div>
     </div>
 
-    <h2 class="section-title" data-i18n="feedback_title">💬 Beğenme Geri Bildirimleri</h2>
-    <div class="summary-grid">
-      <div class="summary-card">
-        <div class="summary-label" data-i18n="total_feedback">Toplam Geri Bildirim</div>
-        <div class="summary-value" id="statTotal">—</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-label" data-i18n="liked">👍 Beğendi</div>
-        <div class="summary-value good" id="statLiked">—</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-label" data-i18n="disliked">👎 Beğenmedi</div>
-        <div class="summary-value bad" id="statDisliked">—</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-label" data-i18n="satisfaction_rate">Memnuniyet Oranı</div>
-        <div class="summary-value" id="statRate">—</div>
-      </div>
-    </div>
-
-    <div class="toolbar">
-      <div class="filter-row">
-        <button class="filter-btn active" data-filter="all" data-i18n="filter_all">Tümü</button>
-        <button class="filter-btn" data-filter="liked" data-i18n="liked">👍 Beğendi</button>
-        <button class="filter-btn" data-filter="disliked" data-i18n="disliked">👎 Beğenmedi</button>
-        <button class="filter-btn" data-filter="comment" data-i18n="comments_only">Sadece yorumlu</button>
-      </div>
-      <button class="btn" id="refreshBtn">↻ <span data-i18n="refresh">Yenile</span></button>
-    </div>
-
-    <table>
-      <thead>
-        <tr><th data-i18n="th_date">Tarih</th><th data-i18n="th_user">Kullanıcı</th><th data-i18n="th_page">Sayfa</th><th data-i18n="th_like">Beğeni</th><th data-i18n="th_comment">Yorum</th></tr>
-      </thead>
-      <tbody id="tblBody"></tbody>
-    </table>
-    <div style="font-size:11.5px; color:var(--muted); margin-top:8px;" data-i18n="row_click_hint">💡 Bir satıra tıklayarak geri bildirimi verenin hesap bilgilerini görebilirsiniz.</div>
   </div>
 </main>
 
@@ -373,8 +336,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   const stateArea = document.getElementById('stateArea');
   const content = document.getElementById('content');
-  const tblBody = document.getElementById('tblBody');
-  const refreshBtn = document.getElementById('refreshBtn');
 
   let MMG_LANG = 'tr';
   try{ MMG_LANG = localStorage.getItem('mmg_lang') || 'tr'; }catch(e){}
@@ -401,9 +362,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     adminHint:'Hesabınızı admin yapmak için Firebase Console → Firestore Database → <b>users</b> koleksiyonu → sizin UID\'niz olan belge → <b>isAdmin</b> alanını <b>true</b> (boolean) olarak ekleyin.</span>',
     showUsersPrefix:' kullanıcıyı'
   };
-
-  let allEntries = [];
-  let currentFilter = 'all';
 
   function showState(html){
     content.hidden = true;
@@ -455,58 +413,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.getElementById('statUserMember').textContent = total - premium;
     document.getElementById('statUserReferred').textContent = referred;
   }
-
-  // ---------------- Beğenme Geri Bildirimleri ----------------
-  function render(){
-    const filtered = allEntries.filter(e => {
-      if(currentFilter === 'liked') return e.liked === true;
-      if(currentFilter === 'disliked') return e.liked === false;
-      if(currentFilter === 'comment') return !!(e.comment && e.comment.trim());
-      return true;
-    });
-
-    tblBody.innerHTML = filtered.length ? filtered.map(e => {
-      const likeHtml = e.liked === true
-        ? '<span class="like-badge good">👍 Beğendi</span>'
-        : e.liked === false
-          ? '<span class="like-badge bad">👎 Beğenmedi</span>'
-          : '<span class="comment-empty">—</span>';
-      const commentHtml = e.comment && e.comment.trim()
-        ? '<span class="comment-text">' + escapeHtml(e.comment) + '</span>'
-        : '<span class="comment-empty">Yorum yok</span>';
-      const pageHtml = e.page ? '<span class="page-tag">' + escapeHtml(e.page) + '</span>' : '<span class="comment-empty">—</span>';
-
-      const matchedUser = e.userId ? allUsers.find(u => u.id === e.userId) : null;
-      const userLabel = matchedUser ? (matchedUser.username || matchedUser.email || (MMG_LANG==='en'?'(unnamed)':'(isimsiz)')) : (e.userEmail || (e.userId ? LBL.deletedAccount : (MMG_LANG==='en'?'Unknown':'Bilinmiyor')));
-      const userHtml = '<span class="page-tag">' + escapeHtml(userLabel) + '</span>';
-      const rowAttrs = e.userId ? ' class="clickable-row" data-user-id="' + escapeHtml(e.userId) + '"' : '';
-
-      return '<tr' + rowAttrs + '><td class="date-cell">' + fmtDate(e.ratedAt) + '</td><td>' + userHtml + '</td><td>' + pageHtml + '</td><td>' + likeHtml + '</td><td>' + commentHtml + '</td></tr>';
-    }).join('') : '<tr><td colspan="5" style="text-align:center; color:var(--muted); padding:30px;">Bu filtreye uyan kayıt yok.</td></tr>';
-
-    const total = allEntries.length;
-    const liked = allEntries.filter(e => e.liked === true).length;
-    const disliked = allEntries.filter(e => e.liked === false).length;
-    document.getElementById('statTotal').textContent = total;
-    document.getElementById('statLiked').textContent = liked;
-    document.getElementById('statDisliked').textContent = disliked;
-    document.getElementById('statRate').textContent = total ? Math.round((liked/total)*100) + '%' : '—';
-  }
-
-  tblBody.addEventListener('click', (e) => {
-    const row = e.target.closest('tr.clickable-row');
-    if(!row) return;
-    openUserModal(row.dataset.userId);
-  });
-
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentFilter = btn.dataset.filter;
-      render();
-    });
-  });
 
   // ---------------- Kullanıcı Özeti kart tıklama ----------------
   const userDetailWrap = document.getElementById('userDetailWrap');
@@ -716,27 +622,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   });
 
-  async function loadFeedback(){
-    const snap = await getDocs(collection(db, 'feedback'));
-    allEntries = [];
-    snap.forEach(docSnap => {
-      const d = docSnap.data();
-      // userId alanı eski kayıtlarda bulunmayabilir; bu durumda belge ID'sinden
-      // ("uid_zamandamgası" formatında) geriye dönük olarak çıkarmayı deniyoruz.
-      const fallbackUserId = docSnap.id.includes('_') ? docSnap.id.split('_')[0] : null;
-      allEntries.push({
-        userId: d.userId || fallbackUserId || null,
-        userEmail: d.userEmail || null,
-        liked: typeof d.liked === 'boolean' ? d.liked : null,
-        comment: d.comment || '',
-        page: d.page || '',
-        ratedAt: d.ratedAt || ''
-      });
-    });
-    allEntries.sort((a,b) => new Date(b.ratedAt) - new Date(a.ratedAt));
-    render();
-  }
-
   // ---------------- Kullanım İstatistikleri (en çok kullanılan uygulamalar + kullanıcı başına kullanım) ----------------
   // Bir uygulamaya tıklanınca: o uygulamayı HANGİ kullanıcı KAÇ kez açmış (çoktan aza).
   function fmtOpenTime(iso){
@@ -929,7 +814,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   async function loadAll(){
     showState('<div class="big">⏳</div>Yükleniyor…');
     try{
-      await Promise.all([loadUsersAndReferrals(), loadFeedback(), loadUsageStats(), loadTalimatUsage()]);
+      await Promise.all([loadUsersAndReferrals(), loadUsageStats(), loadTalimatUsage()]);
       stateArea.innerHTML = '';
       content.hidden = false;
     } catch(e){
@@ -943,7 +828,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   }
 
-  refreshBtn.addEventListener('click', loadAll);
   document.getElementById('refreshAllBtn').addEventListener('click', async () => {
     const btn = document.getElementById('refreshAllBtn');
     btn.disabled = true;
