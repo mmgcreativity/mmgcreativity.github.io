@@ -1378,6 +1378,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const list = sortBanksTr((CUSTOM_BANKS && CUSTOM_BANKS.length) ? CUSTOM_BANKS : BANKS);
     selectEl.innerHTML = '<option value="">Seçiniz</option>' + list.map(b => `<option value="${b}">${b}</option>`).join('');
   }
+
+  // ---- Banka listesini SEÇİLİ FİRMAYA/ALICIYA göre daralt (kullanıcı isteği 2026-07-31:
+  // "Uluç Cihan'ın 3 bankası var, tüm listenin gelmesine gerek yok") ----
+  // Talimat ekranında banka seçmenin amacı, o tarafın MEVCUT hesaplarından birini seçmek;
+  // yeni IBAN girişi VeriGiriş'ten yapılıyor (disket butonları da o yüzden kaldırıldı).
+  // GÜVENLİK AĞLARI: (1) o tarafa ait hiç kayıt yoksa TAM liste gösterilir, yoksa kutu
+  // kullanılamaz hale gelir; (2) hâlihazırda seçili olan banka listede yoksa başa eklenir,
+  // böylece mevcut bir talimatın bankası sessizce kaybolmaz.
+  function mmgBankNamesFor(entityName, isSender){
+    const nm = String(entityName || '').trim().toLowerCase();
+    if(!nm) return [];
+    const onlyDb = isSender && !!(window.mmgCloud && window.mmgCloud.scopeCollection === 'firmaAccounts');
+    const myNames = isSender ? new Set((myFirms || []).map(f => (f.name || '').trim().toLowerCase())) : null;
+    const seen = new Set(); const out = [];
+    (savedIbans || [])
+      .filter(b => !onlyDb || b._db)
+      .filter(b => !myNames || b._db || !myNames.has((b.firma || '').trim().toLowerCase()))
+      .filter(b => b.firma && b.firma.trim().toLowerCase() === nm)
+      .forEach(b => {
+        const bank = (b.banka || '').trim();
+        if(!bank) return;
+        const key = bank.toLocaleLowerCase('tr');
+        if(seen.has(key)) return;
+        seen.add(key); out.push(bank);
+      });
+    return out;
+  }
+  // explicitNames verilirse (ör. listeden seçilen alıcının kendi IBAN'ları) doğrudan o kullanılır.
+  function mmgApplyBankFilter(bankSelectId, entityInputId, isSender, explicitNames){
+    const sel = document.getElementById(bankSelectId);
+    const inp = document.getElementById(entityInputId);
+    if(!sel || !inp) return;
+    const prev = sel.value;
+    const names = (explicitNames && explicitNames.length)
+      ? explicitNames.filter(Boolean)
+      : mmgBankNamesFor(inp.value, isSender);
+    let list = names.length ? sortBanksTr(names)
+                            : sortBanksTr((CUSTOM_BANKS && CUSTOM_BANKS.length) ? CUSTOM_BANKS : BANKS);
+    const norm = s => String(s || '').trim().toLocaleLowerCase('tr');
+    if(prev && !list.some(b => norm(b) === norm(prev))) list = [prev].concat(list);
+    sel.innerHTML = '<option value="">Seçiniz</option>' + list.map(b => `<option value="${b}">${b}</option>`).join('');
+    sel.value = prev;
+  }
   document.addEventListener('mmg-scope-ready', async () => {
     try{
       const cloud = window.mmgCloud;
@@ -1711,6 +1754,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   document.getElementById('fGonderenFirma').addEventListener('input', () => {
     refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma', 'fGonderenBanka');
+    mmgApplyBankFilter('fGonderenBanka', 'fGonderenFirma', true); // banka listesi = bu firmanın bankaları
     autoFillGonderenIban();
   });
   document.getElementById('fGonderenBanka').addEventListener('change', autoFillGonderenIban);
@@ -1745,6 +1789,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function pick(f){
       inp.value = f.name || '';
       if(f.logo) applyCompanyLogo(f.logo, (f.logoW && f.logoH) ? { w:f.logoW, h:f.logoH } : null);
+      // Firma seçilir seçilmez banka listesini o firmanın bankalarına daralt; setBankSelectValue
+      // ondan SONRA çalışsın ki seçilecek banka listede mevcut olsun.
+      mmgApplyBankFilter('fGonderenBanka', 'fGonderenFirma', true);
       if(f.banka) setBankSelectValue(document.getElementById('fGonderenBanka'), f.banka);
       if(f.iban) document.getElementById('fGonderenIban').value = formatIbanValue(f.iban);
       refreshIbanSelectForFirma('fGonderenIbanSaved', 'fGonderenFirma', 'fGonderenBanka');
@@ -1914,7 +1961,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     adiEl.addEventListener('focus', () => renderList(true));
     adiEl.addEventListener('click', () => renderList(true));
     adiEl.addEventListener('input', () => renderList(false));
-    adiEl.addEventListener('input', () => { refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`, `fAliciBanka_${idx}`); });
+    adiEl.addEventListener('input', () => {
+      refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`, `fAliciBanka_${idx}`);
+      mmgApplyBankFilter(`fAliciBanka_${idx}`, `fAliciAdi_${idx}`, false); // alıcının bankaları
+    });
     adiEl.addEventListener('input', renderPreview);
     adiEl.addEventListener('keydown', (ev) => {
       const items = Array.from(listEl.querySelectorAll('.mmg-ac-item'));
@@ -2189,6 +2239,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(!auto && myFirms.length) auto = myFirms[0];
         if(auto){
           firmaEl.value = auto.name || '';
+          mmgApplyBankFilter('fGonderenBanka', 'fGonderenFirma', true); // açılıştaki otomatik firma için de daralt
           if(auto.banka) setBankSelectValue(document.getElementById('fGonderenBanka'), auto.banka);
           if(auto.iban && ibanEl) ibanEl.value = formatIbanValue(auto.iban);
         }
@@ -2316,6 +2367,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     adiEl.value = party.name || '';
     refreshIbanSelectForFirma('fAliciIbanSaved_' + idx, 'fAliciAdi_' + idx, 'fAliciBanka_' + idx);
     const ibans = party.ibans || [];
+    // Banka listesi = SEÇİLEN ALICININ bankaları (kullanıcı isteği 2026-07-31). Alıcının kendi
+    // kayıtları elimizde olduğu için doğrudan onlardan besliyoruz; boşsa isimden aranır,
+    // o da boşsa tam liste (kutu kullanılamaz kalmasın).
+    mmgApplyBankFilter('fAliciBanka_' + idx, 'fAliciAdi_' + idx, false, ibans.map(x => x.bank || x.banka || ''));
     if(ibans.length === 1){
       if(ibans[0].bank) setBankSelectValue(bankaEl, ibans[0].bank); else if(bankaEl) bankaEl.value = '';
       if(ibanEl) ibanEl.value = formatIbanValue(ibans[0].iban);
