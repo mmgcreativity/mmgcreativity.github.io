@@ -469,12 +469,40 @@
   let maxUsersCurrent = 0;   // seçili firmanın kullanıcı limiti (0 = limit yok)
   let lastMemberCount = 0;   // seçili firmadaki aktif üye sayısı (loadMembers doldurur)
   let lastPendingCount = 0;  // seçili firmadaki bekleyen davet sayısı (loadMembers doldurur)
-  let myAdminFirmas = []; // [{id, name}]
+  let myAdminFirmas = []; // [{id, name, code, dataGroupId}]
+
+  // Firma listeleri HER YERDE firma koduna göre sıralı ve kod adın BAŞINDA gösterilir
+  // (kullanıcı isteği 2026-07-31). Kod sayısalsa sayı olarak karşılaştırılır (1000 < 1010);
+  // kodu olmayan firmalar en sona, kendi aralarında isme göre.
+  function mmgFirmaCodeSort(a, b){
+    const ca = String((a && a.code) || '').trim(), cb = String((b && b.code) || '').trim();
+    if(ca && !cb) return -1;
+    if(!ca && cb) return 1;
+    if(ca && cb){
+      const na = Number(ca), nb = Number(cb);
+      if(Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
+      const c = ca.localeCompare(cb, 'tr', { numeric: true });
+      if(c) return c;
+    }
+    return String((a && a.name) || '').localeCompare(String((b && b.name) || ''), 'tr');
+  }
+  function mmgFirmasSorted(){ return myAdminFirmas.slice().sort(mmgFirmaCodeSort); }
+  // <option> gibi düz metin yerler için (HTML etiketi taşımaz).
+  function mmgFirmaLabelText(f){
+    const code = String((f && f.code) || '').trim();
+    return (code ? code + ' ' : '') + String((f && f.name) || '');
+  }
+  // Etiketli (renkli kod) gösterim için.
+  function mmgFirmaLabelHtml(f){
+    const code = String((f && f.code) || '').trim();
+    const tag = code ? '<span style="color:var(--brass,#C6A15B);font-weight:700;">' + escapeHtmlKY(code) + '</span> ' : '';
+    return tag + escapeHtmlKY(String((f && f.name) || ''));
+  }
 
   function inviteFirmaMultiGridHtml(){
-    return myAdminFirmas.map(f =>
+    return mmgFirmasSorted().map(f =>
       '<label class="perm-check"><input type="checkbox" class="invite-firma-check" value="' + f.id + '"' +
-      (f.id === firmaId ? ' checked' : '') + '> ' + f.name + '</label>'
+      (f.id === firmaId ? ' checked' : '') + '> ' + mmgFirmaLabelHtml(f) + '</label>'
     ).join('');
   }
   function wireInviteFirmaSelectAll(){
@@ -519,15 +547,15 @@
     return null;
   }
   function dataGroupHubGridHtml(){
-    return myAdminFirmas.map(f =>
-      '<label class="perm-check"><input type="radio" name="dataGroupHubRadio" class="data-group-hub-radio" value="' + f.id + '"> ' + f.name + '</label>'
+    return mmgFirmasSorted().map(f =>
+      '<label class="perm-check"><input type="radio" name="dataGroupHubRadio" class="data-group-hub-radio" value="' + f.id + '"> ' + mmgFirmaLabelHtml(f) + '</label>'
     ).join('');
   }
   function dataGroupMembersGridHtml(hubId){
-    return myAdminFirmas.filter(f => f.id !== hubId).map(f =>
+    return mmgFirmasSorted().filter(f => f.id !== hubId).map(f =>
       '<div style="display:flex; align-items:center; gap:6px;">' +
         '<label class="perm-check" style="flex:1; min-width:0;"><input type="checkbox" class="data-group-member-check" value="' + f.id + '"' +
-        (f.dataGroupId === hubId ? ' checked' : '') + '> ' + f.name + '</label>' +
+        (f.dataGroupId === hubId ? ' checked' : '') + '> ' + mmgFirmaLabelHtml(f) + '</label>' +
         '<button type="button" class="dg-del-firma" data-del-firma="' + f.id + '" title="Firmayı tamamen sil" aria-label="Firmayı sil" style="flex:0 0 auto; width:30px; height:30px; background:transparent; border:1px solid rgba(226,84,75,0.4); color:var(--red,#E2544B); border-radius:6px; cursor:pointer; font-size:13px;">🗑</button>' +
       '</div>'
     ).join('');
@@ -558,7 +586,7 @@
       setupWrap.style.display = 'none';
       fixedNote.style.display = 'block';
       const hubFirma = myAdminFirmas.find(f => f.id === existingHub);
-      document.getElementById('dataGroupHubName').textContent = hubFirma ? hubFirma.name : existingHub;
+      document.getElementById('dataGroupHubName').textContent = hubFirma ? mmgFirmaLabelText(hubFirma) : existingHub;
       document.getElementById('dataGroupMembersGrid').innerHTML = dataGroupMembersGridHtml(existingHub);
     } else {
       setupWrap.style.display = 'block';
@@ -919,11 +947,13 @@
       const selector = document.getElementById('firmaSelector');
       // Firmalarım kartı her zaman görünür (yeni firma ekle / firma sil için); seçici yalnızca 2+ firmada.
       selectorCard.style.display = 'block';
-      selector.innerHTML = myAdminFirmas.map(f => '<option value="' + f.id + '">' + f.name + '</option>').join('');
+      // Firmalarım açılır listesi: kod sırasında ve kod adın başında.
+      const _sortedFirmas = mmgFirmasSorted();
+      selector.innerHTML = _sortedFirmas.map(f => '<option value="' + f.id + '">' + escapeHtmlKY(mmgFirmaLabelText(f)) + '</option>').join('');
       selector.onchange = () => selectFirma(selector.value);
       selector.style.display = myAdminFirmas.length > 1 ? 'block' : 'none';
       renderDataGroupCard();
-      await selectFirma(myAdminFirmas[0].id);
+      await selectFirma(_sortedFirmas[0].id);
       if(isSiteAdmin){
         document.getElementById('adminAllUsersCard').style.display = 'block';
         loadAdminAllUsers();
