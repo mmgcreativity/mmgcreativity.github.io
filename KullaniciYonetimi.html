@@ -276,6 +276,32 @@
     </div>
   </div>
   </div>
+
+  <!-- ADMIN-ONLY: Tüm Kullanıcılar — yalnız site yöneticisi (users/{uid}.isAdmin) görür.
+       Normal firma yöneticileri yalnızca kendi firma/kullanıcılarını görür (yukarıdaki kartlar). -->
+  <div class="card" id="adminAllUsersCard" style="display:none; margin-top:12px;">
+    <h2 style="margin-bottom:4px;">🛡️ Tüm Kullanıcılar <span style="font-size:12px; color:var(--muted); font-weight:600;">(yalnız site yöneticisi)</span></h2>
+    <div class="card-sub">Platformdaki tüm kayıtlı kullanıcılar. Firma yöneticileri yalnızca kendi kullanıcılarını görür; bu liste yalnızca site yöneticisine açıktır.</div>
+    <div style="display:flex; gap:8px; align-items:center; margin:10px 0; flex-wrap:wrap;">
+      <input type="text" id="adminUserSearch" placeholder="🔍 Ara: kod, ad veya e-posta" style="flex:1; min-width:180px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;">
+      <span id="adminUserCount" style="font-size:12.5px; color:var(--muted); font-weight:600;"></span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700; white-space:nowrap;">#Kod</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700;">Kullanıcı</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700;">E-posta</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700;">Durum</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid var(--hairline); color:var(--muted); font-weight:700; white-space:nowrap;">Kayıt</th>
+          </tr>
+        </thead>
+        <tbody id="adminAllUsersBody"></tbody>
+      </table>
+    </div>
+    <div id="adminAllUsersEmpty" style="font-size:12.5px; color:var(--muted); display:none; margin-top:8px;"></div>
+  </div>
 </div>
 
 <div class="guard-wrap" id="guardWrap" style="display:none;">
@@ -626,6 +652,70 @@
     await loadPendingInvites();
   }
 
+  // ---- ADMIN-ONLY: Tüm site kullanıcıları tablosu (yalnız users/{uid}.isAdmin===true) ----
+  // Firestore kuralları: admin, tüm users dokümanlarını okuyabilir (collection sorgusu geçerli).
+  let allSiteUsers = [];
+  function escapeHtmlKY(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function fmtDateKY(ms){
+    if(!ms) return '—';
+    try{ return new Date(ms).toLocaleDateString('tr-TR'); }catch(e){ return '—'; }
+  }
+  function renderAdminAllUsers(){
+    const body = document.getElementById('adminAllUsersBody');
+    const empty = document.getElementById('adminAllUsersEmpty');
+    const cnt = document.getElementById('adminUserCount');
+    const searchEl = document.getElementById('adminUserSearch');
+    if(!body) return;
+    const q = ((searchEl && searchEl.value) || '').trim().toLowerCase();
+    const rows = allSiteUsers.filter(u => !q || (u.code + ' ' + u.name + ' ' + u.email).toLowerCase().indexOf(q) !== -1);
+    if(cnt) cnt.textContent = rows.length + ' / ' + allSiteUsers.length;
+    if(!rows.length){
+      body.innerHTML = '';
+      if(empty){ empty.style.display = 'block'; empty.textContent = allSiteUsers.length ? 'Eşleşen kullanıcı yok.' : 'Kayıtlı kullanıcı yok.'; }
+      return;
+    }
+    if(empty) empty.style.display = 'none';
+    body.innerHTML = rows.map(u =>
+      '<tr>' +
+        '<td style="padding:7px 8px; border-bottom:1px solid var(--hairline); color:var(--brass,#C6A15B); font-weight:700; white-space:nowrap;">' + (u.code ? '#' + escapeHtmlKY(u.code) : '—') + '</td>' +
+        '<td style="padding:7px 8px; border-bottom:1px solid var(--hairline);">' + (escapeHtmlKY(u.name) || '—') + '</td>' +
+        '<td style="padding:7px 8px; border-bottom:1px solid var(--hairline); color:var(--muted);">' + (escapeHtmlKY(u.email) || '—') + '</td>' +
+        '<td style="padding:7px 8px; border-bottom:1px solid var(--hairline);">' + (u.premium ? '<span style="color:var(--brass,#C6A15B); font-weight:700;">Premium</span>' : 'Standart') + '</td>' +
+        '<td style="padding:7px 8px; border-bottom:1px solid var(--hairline); color:var(--muted); white-space:nowrap;">' + fmtDateKY(u.createdAt) + '</td>' +
+      '</tr>'
+    ).join('');
+  }
+  async function loadAdminAllUsers(){
+    const empty = document.getElementById('adminAllUsersEmpty');
+    const cnt = document.getElementById('adminUserCount');
+    try{
+      const usersSnap = await getDocs(collection(db, 'users'));
+      allSiteUsers = [];
+      usersSnap.forEach(d => {
+        const u = d.data() || {};
+        allSiteUsers.push({
+          id: d.id,
+          code: (u.customerNumber != null ? String(u.customerNumber) : ''),
+          name: u.username || (u.profile && u.profile.name) || '',
+          email: u.email || '',
+          premium: !!u.isPremium,
+          createdAt: (u.createdAt && u.createdAt.toMillis) ? u.createdAt.toMillis() : null
+        });
+      });
+      allSiteUsers.sort((a, b) => (parseInt(a.code, 10) || 999999) - (parseInt(b.code, 10) || 999999));
+      renderAdminAllUsers();
+    }catch(e){
+      if(empty){ empty.style.display = 'block'; empty.textContent = 'Tüm kullanıcılar okunamadı (yalnız site yöneticisi görebilir).'; }
+      if(cnt) cnt.textContent = '';
+    }
+  }
+  (function wireAdminUserSearch(){
+    const s = document.getElementById('adminUserSearch');
+    if(s) s.addEventListener('input', renderAdminAllUsers);
+  })();
+
   onAuthStateChanged(auth, async (user) => {
     const guardWrap = document.getElementById('guardWrap');
     const pageWrap = document.getElementById('pageWrap');
@@ -638,8 +728,18 @@
     }
     try{
       const snap = await getDoc(doc(db, 'users', user.uid));
+      const isSiteAdmin = snap.exists() && snap.data().isAdmin === true;
       const firmaIds = (snap.exists() && Array.isArray(snap.data().adminFirmaIds)) ? snap.data().adminFirmaIds : [];
       if(!firmaIds.length){
+        if(isSiteAdmin){
+          // Site yöneticisi: firması olmasa bile paneli açıp TÜM kullanıcıları görebilir.
+          guardWrap.style.display = 'none';
+          pageWrap.style.display = 'block';
+          const grid = pageWrap.querySelector('.two-col-grid'); if(grid) grid.style.display = 'none';
+          document.getElementById('adminAllUsersCard').style.display = 'block';
+          loadAdminAllUsers();
+          return;
+        }
         guardWrap.style.display = 'block';
         pageWrap.style.display = 'none';
         document.getElementById('guardTitle').textContent = LBL.notAdminYetTitle;
@@ -669,6 +769,10 @@
       selector.style.display = myAdminFirmas.length > 1 ? 'block' : 'none';
       renderDataGroupCard();
       await selectFirma(myAdminFirmas[0].id);
+      if(isSiteAdmin){
+        document.getElementById('adminAllUsersCard').style.display = 'block';
+        loadAdminAllUsers();
+      }
     } catch(e){
       guardWrap.style.display = 'block';
       pageWrap.style.display = 'none';

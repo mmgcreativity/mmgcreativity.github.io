@@ -1,12 +1,16 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-kullanici-paneli'` (repo ~422 commit). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
+Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-panel-tum-kullanicilar'` (repo ~423 commit). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
 
 > ✅ **Sürümleme çözüldü:** "Güncelleme var, yenile" banner'ı (index.html #mmgUpdateBanner) NE app-version.json NE de SW_VERSION'a bakar — index.html'e HEAD atıp ETag/Last-Modified karşılaştırır (tamamen otomatik). `SW_VERSION` sadece cache-bust; `app-version.json` artık okunmuyor ama ikisi senkron tutuluyor. Her deploy'da ikisini de bump'la.
 
 > ⚠️ **OneDrive senkron tuzağı:** OneDrive çalışmıyorken dosyalar "cloud-only" görünür; bash "Invalid argument" verir, düzenleme kaybolabilir veya ESKİ sürüm yüklenir. Deploy öncesi işaret (marker) kontrolü şart. (Kayıtlı skill: `mmg-onedrive-sync-guard`.) Bu klasörde `DEVIR-NOTU-DESKTOP-V12JA3F.md` gibi "DESKTOP-xxxx" çakışma kopyaları OneDrive'ın ürettiği artıklardır — silinebilir.
 
 ## 🟢 2026-07-31 (5. OTONOM OTURUM) — CANLIYA ALINANLAR
+**Üçüncü tur (admin tüm kullanıcılar) — SW `2026-07-31-panel-tum-kullanicilar`:**
+- **Kullanıcı Yönetim Paneli'nde admin-only "🛡️ Tüm Kullanıcılar" tablosu** (`KullaniciYonetimi.html`): `users/{uid}.isAdmin===true` ise girişte `getDocs(collection('users'))` ile TÜM site kullanıcıları (arama + #kod + ad + e-posta + durum + kayıt) listelenir. Normal firma yöneticileri DEĞİŞMEDEN yalnızca kendi firma/kullanıcılarını görür. Firması olmayan site-admin de paneli açıp bu tabloyu görebilir (firma grid'i gizlenir). İstatistikler'deki "🛠 Kullanıcı Yönetim Paneli" bağlantısı buraya götürür.
+- ⚠️ **index.html'e DOKUNULMADI:** oturum sırasında `service-worker.js`/`app-version.json` dışarıdan `2026-07-31-sekmeli-arayuz` olarak değiştirilmişti (muhtemelen sekmeli arayüz için ayrı çalışma). Onu ezmemek için bu turda yalnızca `KullaniciYonetimi.html` + SW + app-version deploy edildi; index.html YENİDEN YÜKLENMEDİ. Sekmeli arayüz deploy edilirken SW_VERSION tekrar bump edilmeli.
+
 **İkinci tur (Kullanıcı Yönetim Paneli + anasayfa) — SW `2026-07-31-kullanici-paneli`:**
 - **İlk açılışta HER ZAMAN anasayfa** (`index.html`): `sessionStorage['mmg_session_started']` ile ilk giriş (yeni sekme/PWA açılışı) tespit edilir → `mmg_last_open_page` temizlenir, `home` açılır. Aynı oturum içindeki F5'te (masaüstü) açık araç yine geri yüklenir.
 - **Firma kodu ZORUNLU** (`KullaniciYonetimi.html` +Ekle): boşsa uyarı verir, otomatik üretim kaldırıldı; input placeholder "Kod (zorunlu)".
