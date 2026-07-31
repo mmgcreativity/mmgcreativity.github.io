@@ -2177,8 +2177,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // F5/sayfa yenileme sonrası: masaüstünde iframe ile açılan bir araç sayfası varsa
   // onu geri yükle; yoksa (ya da mobildeyse, çünkü orada zaten gerçek sayfa URL'i kullanılıyor)
   // normal şekilde ana sayfayı göster.
+  // İlk giriş (yeni sekme / uygulama açılışı) HER ZAMAN Ana Sayfa'da başlar (kullanıcı isteği).
+  // Yalnızca AYNI oturum içindeki bir yenilemede (F5) ve masaüstünde, açık aracı geri yükleriz.
   let mmgRestoredLastPage = false;
-  if(window.innerWidth > 860){
+  let mmgFreshEntry = true;
+  try{
+    mmgFreshEntry = !sessionStorage.getItem('mmg_session_started');
+    sessionStorage.setItem('mmg_session_started', '1');
+  }catch(e){}
+  if(mmgFreshEntry){
+    // İlk açılış: son açık araç sayfası hatırlanmasın, ana sayfa gelsin.
+    try{ localStorage.removeItem(MMG_LAST_PAGE_KEY); }catch(e){}
+  } else if(window.innerWidth > 860){
     try{
       const lastPage = localStorage.getItem(MMG_LAST_PAGE_KEY);
       if(lastPage){

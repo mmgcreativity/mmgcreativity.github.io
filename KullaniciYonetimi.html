@@ -168,7 +168,7 @@
       </div>
       <div style="display:flex; gap:6px; margin-bottom:6px;">
         <input type="text" id="newFirmaName" placeholder="Yeni firma adı" style="flex:2; min-width:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px;">
-        <input type="text" id="newFirmaCode" placeholder="Kod (ops.)" maxlength="16" title="Boş bırakırsanız otomatik kod atanır. Excel toplu yüklemede firma bu kodla eşleşir." style="flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 10px; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; text-transform:uppercase;">
+        <input type="text" id="newFirmaCode" placeholder="Kod (zorunlu)" maxlength="16" title="Firma kodu zorunludur. Excel toplu yüklemede firma bu kodla eşleşir; benzersiz olmalı." style="flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 10px; color:var(--text); font-family:'Inter',sans-serif; font-size:13px; text-transform:uppercase;">
         <button type="button" id="addFirmaBtn" style="flex-shrink:0; background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px; padding:8px 14px; color:var(--brass,#C6A15B); font-weight:700; cursor:pointer;">+ Ekle</button>
       </div>
       <div id="firmaCodeEditRow" style="display:none; gap:6px; align-items:center; margin-bottom:6px;">
@@ -227,6 +227,10 @@
       <div class="auth-field">
         <label data-i18n="user_code_label">Kullanıcının Kodu</label>
         <input type="text" id="inviteCode" inputmode="numeric" placeholder="ör. 1016" maxlength="12">
+        <div style="display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap;">
+          <button type="button" id="inviteQueryBtn" class="mmg-invite-collapse-toggle">🔍 Sorgula</button>
+          <span id="inviteQueryResult" style="font-size:13px; font-weight:600;"></span>
+        </div>
       </div>
       <div class="auth-field" id="inviteFirmaMultiWrap" style="display:none; margin-bottom:8px;">
         <div class="member-sub-box">
@@ -315,7 +319,7 @@
     confirmRemoveUser:'Are you sure you want to remove this user from the company?',
     confirmCancelInvite:'Are you sure you want to cancel this invite?',
     usersLoadFailed:'Users could not be loaded.',
-    pendingKindUser:'user', pendingKindAdmin:'admin', inviteSentBadge:'Invite Sent',
+    pendingKindUser:'user', pendingKindAdmin:'admin', inviteSentBadge:'Invite Sent', invitePendingStage:'not accepted yet',
     dataGroupPickHub:'Please select a main company first.',
     dataGroupSaved:'Data sharing group saved ✓',
     dataGroupSaveFailed:'Could not be saved, please try again.',
@@ -341,7 +345,7 @@
     confirmRemoveUser:'Bu kullanıcıyı firmadan kaldırmak istediğinize emin misiniz?',
     confirmCancelInvite:'Bu daveti iptal etmek istediğinize emin misiniz?',
     usersLoadFailed:'Kullanıcılar yüklenemedi.',
-    pendingKindUser:'kullanıcı', pendingKindAdmin:'yönetici', inviteSentBadge:'Davet Gönderildi',
+    pendingKindUser:'kullanıcı', pendingKindAdmin:'yönetici', inviteSentBadge:'Davet Gönderildi', invitePendingStage:'kişi henüz kabul etmedi',
     dataGroupPickHub:'Lütfen önce bir ana firma seçin.',
     dataGroupSaved:'Veri paylaşım grubu kaydedildi ✓',
     dataGroupSaveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
@@ -704,9 +708,9 @@
       const user = auth.currentUser;
       if(!user){ setFirmaCrudMsg('Önce giriş yapın.', true); return; }
       if(!name){ setFirmaCrudMsg('Firma adı girin.', true); return; }
-      // Kullanıcı kod girdiyse normalize et; boşsa isimden otomatik üret.
+      // Firma kodu ZORUNLU (kullanıcı isteği): boş bırakılamaz, otomatik üretilmez.
       let firmaCode = mmgNormalizeFirmaCode(codeInp && codeInp.value || '');
-      if(!firmaCode) firmaCode = mmgGenFirmaCode(name);
+      if(!firmaCode){ setFirmaCrudMsg('Firma kodu zorunlu. Lütfen bir kod girin (örn. 1000).', true); if(codeInp) codeInp.focus(); return; }
       // Aynı koda sahip başka firmam varsa uyar (Excel eşleşmesi için benzersiz olmalı).
       if(myAdminFirmas.some(f => (f.code || '').toUpperCase() === firmaCode)){
         setFirmaCrudMsg('Bu firma kodu zaten kullanımda, farklı bir kod girin.', true); return;
@@ -783,6 +787,75 @@
   }
 
   // ---- Kullanıcı Ekle (davet) ----
+  // ---- Davet öncesi "Sorgula": kod girilince kişinin adını MASKELİ göster (a**** b***) ----
+  // Böylece yanlış koda davet gitmesi önlenir; davet göndermeden önce doğrulama zorunludur.
+  let inviteVerifiedCode = null;   // sorgulanıp onaylanan kod
+  let inviteVerifiedName = null;   // sorgulanan kişinin (maskesiz) adı — sadece dahili kullanım
+  function mmgMaskName(name){
+    if(!name) return '';
+    return String(name).trim().split(/\s+/).map(w => {
+      if(w.length <= 1) return w;
+      return w[0] + '*'.repeat(Math.max(2, w.length - 1));
+    }).join(' ');
+  }
+  // Göreli zaman ("3 gün önce" / "2 saat önce") — davetin ne zaman gönderildiğini göstermek için.
+  function mmgRelTime(ms){
+    if(!ms) return '';
+    const diff = Date.now() - ms;
+    if(diff < 0) return '';
+    const dk = Math.floor(diff / 60000);
+    if(dk < 1) return 'az önce';
+    if(dk < 60) return dk + ' dk önce';
+    const sa = Math.floor(dk / 60);
+    if(sa < 24) return sa + ' saat önce';
+    const gun = Math.floor(sa / 24);
+    if(gun < 30) return gun + ' gün önce';
+    const ay = Math.floor(gun / 30);
+    return ay + ' ay önce';
+  }
+  const _inviteCodeEl = document.getElementById('inviteCode');
+  const _inviteQueryBtn = document.getElementById('inviteQueryBtn');
+  const _inviteQueryResult = document.getElementById('inviteQueryResult');
+  function resetInviteVerify(){
+    inviteVerifiedCode = null; inviteVerifiedName = null;
+    if(_inviteQueryResult){ _inviteQueryResult.textContent = ''; _inviteQueryResult.style.color = ''; }
+  }
+  if(_inviteCodeEl){ _inviteCodeEl.addEventListener('input', resetInviteVerify); }
+  if(_inviteQueryBtn){
+    _inviteQueryBtn.addEventListener('click', async () => {
+      const code = (_inviteCodeEl.value || '').trim();
+      if(!code || !/^[0-9]+$/.test(code)){
+        _inviteQueryResult.style.color = 'var(--red,#E2544B)';
+        _inviteQueryResult.textContent = 'Geçerli bir kod girin.';
+        return;
+      }
+      _inviteQueryBtn.disabled = true;
+      const orig = _inviteQueryBtn.textContent;
+      _inviteQueryBtn.textContent = 'Sorgulanıyor…';
+      try{
+        const dirSnap = await getDoc(doc(db, 'userDirectory', code));
+        if(!dirSnap.exists()){
+          resetInviteVerify();
+          _inviteQueryResult.style.color = 'var(--red,#E2544B)';
+          _inviteQueryResult.textContent = 'Bu koda ait kullanıcı bulunamadı.';
+        } else {
+          const dd = dirSnap.data() || {};
+          const nm = dd.username || (dd.email ? dd.email.split('@')[0] : '') || '';
+          inviteVerifiedCode = code;
+          inviteVerifiedName = nm;
+          _inviteQueryResult.style.color = 'var(--teal,#3FB68A)';
+          _inviteQueryResult.textContent = '✓ ' + (mmgMaskName(nm) || ('#' + code)) + ' — doğruysa daveti gönderin.';
+        }
+      }catch(e){
+        _inviteQueryResult.style.color = 'var(--red,#E2544B)';
+        _inviteQueryResult.textContent = 'Sorgulanamadı, tekrar deneyin.';
+      } finally {
+        _inviteQueryBtn.disabled = false;
+        _inviteQueryBtn.textContent = orig;
+      }
+    });
+  }
+
   document.getElementById('inviteSubmitBtn').addEventListener('click', async () => {
     const errEl = document.getElementById('inviteError');
     const okEl = document.getElementById('inviteSuccess');
@@ -791,6 +864,12 @@
     const code = codeInput.value.trim();
     if(!code || !/^[0-9]+$/.test(code)){
       errEl.textContent = LBL.enterValidCode;
+      errEl.classList.add('show');
+      return;
+    }
+    // Yanlış kişiye davet gitmesin: önce "Sorgula" ile doğrulanmış olmalı.
+    if(inviteVerifiedCode !== code){
+      errEl.textContent = 'Önce "🔍 Sorgula" ile kişiyi doğrulayın.';
       errEl.classList.add('show');
       return;
     }
@@ -847,6 +926,7 @@
       okEl.textContent = LBL.inviteSent;
       okEl.classList.add('show');
       codeInput.value = '';
+      resetInviteVerify();
       await loadMembers();
       await loadPendingInvites();
     } catch(e){
@@ -1003,7 +1083,7 @@
       let pendingInvites = [];
       try{
         const inviteSnap = await getDocs(query(collectionGroup(db, 'firmas'), where('firmaId', '==', firmaId)));
-        inviteSnap.forEach(d => pendingInvites.push({ code: d.ref.parent.parent.id, path: d.ref.path, permissions: d.data().permissions || {} }));
+        inviteSnap.forEach(d => { const dd = d.data() || {}; pendingInvites.push({ code: d.ref.parent.parent.id, path: d.ref.path, permissions: dd.permissions || {}, createdAt: (dd.createdAt && dd.createdAt.toMillis) ? dd.createdAt.toMillis() : null }); });
         await Promise.all(pendingInvites.map(async (inv) => {
           try{
             const dirSnap = await getDoc(doc(db, 'userDirectory', inv.code));
@@ -1048,7 +1128,15 @@
         if(!m.code || !m.displayName){
           try{
             const dq = await getDocs(query(collection(db, 'userDirectory'), where('uid', '==', m.id)));
-            if(!dq.empty){ const dd = dq.docs[0]; if(!m.code) m.code = dd.id; if(!m.displayName) m.displayName = (dd.data().username || null); }
+            if(!dq.empty){
+              // Bir kullanıcının kodu değiştiyse eski userDirectory kaydı silinemeden kalabilir
+              // (kurallar delete'e izin vermiyor) → aynı uid için birden çok kayıt olur ve yanlış/eski
+              // kod gösterilirdi (ör. sema kod 1022 iken 1021 geliyordu). En güncel = en yüksek sayısal
+              // kodu seçerek doğru kodu gösteriyoruz.
+              const dd = dq.docs.slice().sort((a, b) => (parseInt(b.id, 10) || 0) - (parseInt(a.id, 10) || 0))[0];
+              if(!m.code) m.code = dd.id;
+              if(!m.displayName) m.displayName = (dd.data().username || null);
+            }
           }catch(e){}
         }
       }));
@@ -1128,6 +1216,8 @@
                 '<div class="member-name">' + inv.label + '</div>' +
                 '<div class="member-sub">' +
                   '#' + inv.code + ' &middot; <span class="invite-pending-badge">' + LBL.inviteSentBadge + '</span>' +
+                  (inv.createdAt ? ' <span style="color:var(--muted); font-size:11.5px;">&middot; ' + mmgRelTime(inv.createdAt) + '</span>' : '') +
+                  ' <span style="color:var(--muted); font-size:11.5px;">&middot; ' + LBL.invitePendingStage + '</span>' +
                 '</div>' +
               '</div>' +
               '<div class="member-row-actions">' +
