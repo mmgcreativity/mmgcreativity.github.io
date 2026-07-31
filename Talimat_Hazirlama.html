@@ -458,7 +458,12 @@ function mmgApplyTurkishFont(doc){
   .mmg-person-row .mmg-ac-wrap{ position:static; }
   .mmg-person-row .mmg-ac-list{ left:0; right:0; top:100%; }
   .mmg-person-row .mmg-ac-item span:first-child{ flex:1 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .mmg-person-row .mmg-ac-item .mmg-ac-meta{ flex:0 0 198px; text-align:left; }
+  /* TC, üstteki "TC Kimlik No" kutusuyla AYNI fontta görünsün (kullanıcı isteği 2026-07-31):
+     monospace/uppercase/10px yerine .xcell input ile birebir Inter 14px. */
+  .mmg-person-row .mmg-ac-item .mmg-ac-meta{
+    flex:0 0 198px; text-align:left;
+    font-family:'Inter',sans-serif; font-size:14px; text-transform:none; letter-spacing:normal;
+  }
   .xcell-group{ border:1px solid var(--hairline); border-radius:6px; overflow:visible; margin-bottom:8px; }
   .xcell-title{
     font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15.5px; color:var(--text);
