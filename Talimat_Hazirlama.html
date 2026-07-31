@@ -753,7 +753,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="xcell">
             <span class="xcell-label">FİRMA</span>
             <div class="mmg-ac-wrap"><input type="text" id="fGonderenFirma" placeholder="Örn. Örnek Ticaret A.Ş." autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off"><div class="mmg-ac-list" id="fGonderenFirmaAcList"></div></div>
-            <select class="xcell-mini" id="fGonderenFirmaSaved" title="Grup firmasından seç"><option value="">📋 Grup Firması</option></select>
+<!-- #fGonderenFirmaSaved ("📋 Grup Firması") KALDIRILDI (kullanıcı isteği 2026-07-31):
+                 grup firmaları FİRMA kutusuna tıklayınca otomatik-tamamlama listesinde geliyor. -->
           </div>
           <div class="xcell xcell-full">
             <span class="xcell-label">BANKA</span>
@@ -1399,7 +1400,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // Elle kaydedilen rastgele isimler (savedGonderenFirms) burada gösterilmez.
     const gonderenOpts = '<option value="">📋 Grup Firması</option>' +
       myFirms.map((f, i) => `<option value="${i}">${escapeHtmlMmg(f.name)}</option>`).join('');
-    document.getElementById('fGonderenFirmaSaved').innerHTML = gonderenOpts;
+    const gfSel = document.getElementById('fGonderenFirmaSaved');
+    if(gfSel) gfSel.innerHTML = gonderenOpts; // seçici KALDIRILDI (2026-07-31) — guard şart
     // Alıcı "📋 Kayıtlı" seçicileri, her satırın moduna (grup içi/dışı) göre doldurulur.
     document.querySelectorAll('.alici-firma-saved').forEach(sel => { populateAliciFirmaSaved(sel); });
   }
@@ -1725,7 +1727,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     inp.addEventListener('blur', () => setTimeout(closeL, 150));
   })();
 
-  document.getElementById('fGonderenFirmaSaved').addEventListener('change', (e) => {
+  document.getElementById('fGonderenFirmaSaved')?.addEventListener('change', (e) => {
     if(e.target.value === '') return;
     const f = myFirms[+e.target.value];
     if(!f) return;
