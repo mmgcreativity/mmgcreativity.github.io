@@ -750,7 +750,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="form-card" style="margin-bottom:16px; padding-top:14px;">
         <div class="xcell-title" style="margin-top:0; padding-left:24px;">Gönderen Bilgileri</div>
         <div class="xcell-group">
-          <div class="xcell">
+          <!-- Sağdaki seçici/disket sütunları kaldırıldığı için FİRMA ve IBAN satırları artık
+               BANKA gibi xcell-full: kutu satırın tamamını kaplar, sağda boşluk kalmaz. -->
+          <div class="xcell xcell-full">
             <span class="xcell-label">FİRMA</span>
             <div class="mmg-ac-wrap"><input type="text" id="fGonderenFirma" placeholder="Örn. Örnek Ticaret A.Ş." autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off"><div class="mmg-ac-list" id="fGonderenFirmaAcList"></div></div>
 <!-- #fGonderenFirmaSaved ("📋 Grup Firması") KALDIRILDI (kullanıcı isteği 2026-07-31):
@@ -760,10 +762,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="xcell-label">BANKA</span>
             <select id="fGonderenBanka"></select>
           </div>
-          <div class="xcell">
+          <div class="xcell xcell-full">
             <span class="xcell-label">IBAN</span>
             <input type="text" id="fGonderenIban" placeholder="TR__ ____ ____ ____ ____ ____ __" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
-            <button type="button" class="xcell-savebtn" id="saveGonderenIbanBtn" title="IBAN bilgisini kaydet">💾</button>
+<!-- 💾 #saveGonderenIbanBtn KALDIRILDI (kullanıcı isteği 2026-07-31): IBAN kaydetme
+                 VeriGiriş → IBAN'larım'dan yapılıyor, burada mükerrerdi. -->
           </div>
           <div id="fGonderenIbanHint" style="display:none;"></div>
           <!-- KALDIRILDI (kullanıcı isteği 2026-07-31): "📋 Kayıtlı" mini seçici (#fGonderenIbanSaved)
@@ -1354,8 +1357,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // kullanılır; hiç kaydedilmemişse yukarıdaki varsayılan BANKS listesi aynen kullanılmaya
   // devam eder (geriye dönük uyumluluk, hiçbir şey bozulmaz).
   let CUSTOM_BANKS = null;
+  // Banka listesi HER ZAMAN Türkçe harf sırasında gösterilir (kullanıcı isteği 2026-07-31:
+  // "ANADOLUBANK'ı yeni ekledim, en altta kaldı"). Sıralama RENDER anında yapılır; böylece
+  // "Çalıştığım Bankalar"a sonradan eklenen bankalar da otomatik doğru yere oturur.
+  // localeCompare('tr') şart: Ç/Ğ/İ/Ö/Ş/Ü Türkçe alfabedeki yerine göre sıralanır.
+  function sortBanksTr(list){
+    return (list || []).slice().sort((a, b) => String(a).localeCompare(String(b), 'tr', { sensitivity: 'base' }));
+  }
   function fillBankOptions(selectEl){
-    const list = (CUSTOM_BANKS && CUSTOM_BANKS.length) ? CUSTOM_BANKS : BANKS;
+    const list = sortBanksTr((CUSTOM_BANKS && CUSTOM_BANKS.length) ? CUSTOM_BANKS : BANKS);
     selectEl.innerHTML = '<option value="">Seçiniz</option>' + list.map(b => `<option value="${b}">${b}</option>`).join('');
   }
   document.addEventListener('mmg-scope-ready', async () => {
@@ -1393,6 +1403,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // myFirms:  [{ id, name, banka, iban }]  — kullanıcının yetkili olduğu firmalar.
   // savedCari:[{ name, type, idNumber, ibans:[{bank,iban,currency}] }]  — kayıtlı cariler.
   let myFirms = [];
+  // Grup firmaları Firestore'dan gelene kadar liste "Grup firması yok." diyordu (kullanıcı
+  // 2026-07-31: "çok geç geliyor, neredeyse 5 sn"). Artık yükleniyor durumu ayırt ediliyor ve
+  // isimler gelince AÇIK olan öneri listesi kendini tazeliyor.
+  let myFirmsReady = false;
+  const myFirmsListeners = [];
+  function onMyFirmsChanged(fn){ myFirmsListeners.push(fn); }
+  function emitMyFirmsChanged(){ myFirmsListeners.forEach(fn => { try{ fn(); }catch(e){} }); }
   let savedCari = [];
 
   function renderFirmaSelects(){
@@ -1588,7 +1605,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   // Gönderen firma önerileri grup firmalarına sabitlendiği için elle firma adı kaydetme kaldırıldı.
-  document.getElementById('saveGonderenIbanBtn').addEventListener('click', () => saveIbanInfo('fGonderenBanka','fGonderenIban','saveGonderenIbanBtn','fGonderenFirma'));
+  document.getElementById('saveGonderenIbanBtn')?.addEventListener('click', () => saveIbanInfo('fGonderenBanka','fGonderenIban','saveGonderenIbanBtn','fGonderenFirma'));
 
   const gonderenTutarEl = document.getElementById('fGonderenTutar');
   gonderenTutarEl.addEventListener('input', () => {
@@ -1730,7 +1747,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       let items = (myFirms || []).slice();
       if(q) items = items.filter(f => (f.name || '').toLocaleLowerCase('tr').includes(q));
       items = items.slice(0, 12);
-      if(!items.length){ listEl.innerHTML = '<div class="mmg-ac-empty">Grup firması yok.</div>'; listEl.classList.add('open'); return; }
+      if(!items.length){
+        // Henüz yüklenmediyse "yok" DEME — yanıltıcı oluyordu.
+        listEl.innerHTML = '<div class="mmg-ac-empty">' + (myFirmsReady ? 'Grup firması yok.' : 'Grup firmaları yükleniyor…') + '</div>';
+        listEl.classList.add('open');
+        return;
+      }
       listEl.innerHTML = items.map(f => '<div class="mmg-ac-item" data-name="' + escapeHtmlMmg(f.name) + '"><span>' + escapeHtmlMmg(f.name) + '</span></div>').join('');
       listEl.classList.add('open');
       Array.from(listEl.querySelectorAll('.mmg-ac-item')).forEach(el => {
@@ -1741,6 +1763,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     inp.addEventListener('click', () => render(true));
     inp.addEventListener('input', () => render(false));
     inp.addEventListener('blur', () => setTimeout(closeL, 150));
+    // Firmalar geç gelirse, liste AÇIKKEN kendini tazelesin (kullanıcı kutuyu kapatıp
+    // yeniden açmak zorunda kalmasın).
+    onMyFirmsChanged(() => { if(listEl.classList.contains('open')) render(!inp.value.trim()); });
   })();
 
   document.getElementById('fGonderenFirmaSaved')?.addEventListener('change', (e) => {
@@ -2026,33 +2051,46 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     (cloud.groupFirmalar || []).forEach(f => { if(f && f.id) map.set(f.id, { id: f.id, name: (f.name || f.id) }); });
     const user = cloud.currentUser;
     if(user){
-      // (2) Yönettiği firmalar
-      try{
-        const uSnap = await cloud.getDoc(cloud.doc(cloud.db, 'users', user.uid));
-        const ids = (uSnap.exists() && Array.isArray(uSnap.data().adminFirmaIds)) ? uSnap.data().adminFirmaIds : [];
-        for(const fid of ids){
-          if(!fid || map.has(fid)) continue;
-          try{
-            const fs = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid));
-            map.set(fid, { id: fid, name: (fs.exists() && fs.data().name) || fid });
-          }catch(e){ map.set(fid, { id: fid, name: fid }); }
-        }
-      }catch(e){ /* sessizce geç */ }
-      // (3) Üye olduğu firmalar (firmaAccounts/{id}/members/{uid} veya companies/{id}/members/{uid})
-      try{
-        const memSnap = await cloud.getDocs(cloud.query(cloud.collectionGroup(cloud.db, 'members'), cloud.where('uid', '==', user.uid)));
-        for(const d of memSnap.docs){
-          const segs = d.ref.path.split('/'); // [coll, id, 'members', uid]
-          if(segs.length < 2) continue;
-          const coll = segs[0]; const fid = segs[1];
-          if(coll !== 'firmaAccounts' && coll !== 'companies') continue;
-          if(map.has(fid)) continue;
-          try{
-            const fs = await cloud.getDoc(cloud.doc(cloud.db, coll, fid));
-            if(fs.exists()) map.set(fid, { id: fid, name: fs.data().name || fid });
-          }catch(e){ /* sessizce geç */ }
-        }
-      }catch(e){ /* index yoksa sessizce geç */ }
+      // PERFORMANS (2026-07-31): bu iki blok eskiden İÇ İÇE ve SIRAYLA await ediyordu —
+      // her firma için ayrı bir gidiş-dönüş, N firma = N tur beklemesi (kullanıcı: ~5 sn).
+      // Artık (2) ve (3) birbirine paralel, her birinin firma okumaları da Promise.all ile
+      // toplu. Ağ turu sayısı N'den ~2'ye iniyor. Sonuçlar map'e SIRAYLA yazılıyor ki
+      // önceliklendirme (önce admin, sonra üyelik) aynı kalsın, yarış durumu olmasın.
+      const adminTask = (async () => {
+        try{
+          const uSnap = await cloud.getDoc(cloud.doc(cloud.db, 'users', user.uid));
+          const ids = (uSnap.exists() && Array.isArray(uSnap.data().adminFirmaIds)) ? uSnap.data().adminFirmaIds : [];
+          return await Promise.all(ids.filter(Boolean).map(async fid => {
+            try{
+              const fs = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', fid));
+              return { id: fid, name: (fs.exists() && fs.data().name) || fid };
+            }catch(e){ return { id: fid, name: fid }; }
+          }));
+        }catch(e){ return []; }
+      })();
+      const memberTask = (async () => {
+        try{
+          const memSnap = await cloud.getDocs(cloud.query(cloud.collectionGroup(cloud.db, 'members'), cloud.where('uid', '==', user.uid)));
+          const targets = [];
+          memSnap.docs.forEach(d => {
+            const segs = d.ref.path.split('/'); // [coll, id, 'members', uid]
+            if(segs.length < 2) return;
+            const coll = segs[0]; const fid = segs[1];
+            if(coll !== 'firmaAccounts' && coll !== 'companies') return;
+            if(targets.some(t => t.fid === fid)) return;
+            targets.push({ coll, fid });
+          });
+          const res = await Promise.all(targets.map(async t => {
+            try{
+              const fs = await cloud.getDoc(cloud.doc(cloud.db, t.coll, t.fid));
+              return fs.exists() ? { id: t.fid, name: fs.data().name || t.fid } : null;
+            }catch(e){ return null; }
+          }));
+          return res.filter(Boolean);
+        }catch(e){ return []; /* index yoksa sessizce geç */ }
+      })();
+      const [adminFirms, memberFirms] = await Promise.all([adminTask, memberTask]);
+      adminFirms.concat(memberFirms).forEach(f => { if(f && f.id && !map.has(f.id)) map.set(f.id, f); });
     }
     // (4) Aktif firmaAccounts kapsamının kendisi
     if(cloud.scopeCollection === 'firmaAccounts' && cloud.scopeId && !map.has(cloud.scopeId)){
@@ -2062,14 +2100,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }catch(e){ /* sessizce geç */ }
     }
     myFirms = Array.from(map.values());
+    // İSİMLER HAZIR → listeyi HEMEN aç. Aşağıdaki banka/IBAN zenginleştirmesi (her firma için
+    // ayrı okuma) bitmeden beklemeye gerek yok; kullanıcı firmayı zaten isimden seçiyor.
+    myFirmsReady = true;
+    emitMyFirmsChanged();
 
     // Gönderen firma önerileri doğrudan myFirms (grup firmaları) üzerinden gösterilir;
     // ayrıca savedGonderenFirms'e kopyalamaya gerek yok (renderFirmaSelects myFirms okur).
 
     // Her firma için kayıtlı gönderen banka/IBAN bilgisini çek (firma seçilince otomatik dolsun)
-    for(const f of myFirms){
+    // PERFORMANS: eskiden her firma için fetchFirmaGonderenBilgisi SIRAYLA await ediliyordu.
+    // Artık hepsi paralel; savedIbans'a yazma işi sonuçlar geldikten sonra SIRAYLA yapılıyor
+    // ki tekilleştirme (dedup) davranışı ve sıralama birebir aynı kalsın.
+    const _infos = await Promise.all(myFirms.map(async f => {
+      try{ return { f, info: await fetchFirmaGonderenBilgisi(f.id) }; }
+      catch(e){ return { f, info: null }; }
+    }));
+    for(const { f, info } of _infos){
+      if(!info) continue;
       try{
-        const info = await fetchFirmaGonderenBilgisi(f.id);
         f.banka = info.banka || '';
         f.iban = info.iban || '';
         f.ibans = info.ibans || [];  // para birimine göre IBAN seçimi için (Döviz talimatı)
