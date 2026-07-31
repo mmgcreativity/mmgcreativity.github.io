@@ -1405,12 +1405,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // _db:true) gelir; eski legacy "kayitliMuhataplar" girişleri (düzinelerce IBAN) gönderende
     // gösterilmez. Alıcı (recipient) listesi eskisi gibi tüm kayıtlı kaynaklardan gelir.
     const onlyDb = (ibanSelectId === 'fGonderenIbanSaved') && !!(window.mmgCloud && window.mmgCloud.scopeCollection === 'firmaAccounts');
-    const matches = savedIbans
+    const base = savedIbans
       .map((b, i) => ({ ...b, i }))
       .filter(b => !onlyDb || b._db)
-      .filter(b => !firmaName || (b.firma && b.firma.trim().toLowerCase() === firmaName))
-      // Seçili banka varken YALNIZCA o bankanın kayıtları gelsin (kullanıcı isteği).
-      .filter(b => !bankSel || ((b.banka || '').trim().toLowerCase() === bankSel))
+      .filter(b => !firmaName || (b.firma && b.firma.trim().toLowerCase() === firmaName));
+    // Seçili banka varken önce o bankanın kayıtları; AMA seçili bankada hiç kayıt yoksa
+    // liste BOŞ BIRAKILMAZ (kullanıcı: "kayıtlılar gelmiyor") — firmanın tüm IBAN'ları gösterilir.
+    const bankFiltered = bankSel ? base.filter(b => ((b.banka || '').trim().toLowerCase() === bankSel)) : base;
+    const matches = (bankFiltered.length ? bankFiltered : base)
       // Aynı IBAN birden fazla kez listelenmesin.
       .filter(b => {
         const ibanKey = (b.iban || '').toUpperCase().replace(/\s+/g, '');
@@ -1422,7 +1424,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
     const prevVal = sel.value;
     // Etikete IBAN'ı ekle ki aynı firma/bankadaki farklı hesaplar ayırt edilebilsin.
-    sel.innerHTML = '<option value="">📋 Kayıtlı</option>' + matches.map(b => {
+    // Liste boşsa yol gösteren ipucu: IBAN'lar VeriGiriş'te bu firmaya atanmış olmalı.
+    const emptyHint = matches.length ? '' :
+      '<option value="" disabled>— Bu firmaya atanmış kayıtlı IBAN yok (VeriGiriş → IBAN\'larım\'dan Firma Kodu ile yükleyin) —</option>';
+    sel.innerHTML = '<option value="">📋 Kayıtlı</option>' + emptyHint + matches.map(b => {
       const ib = (b.iban || '').trim();
       const extra = ib ? ' · ' + ib + (b.currency ? ' ' + b.currency : '') : '';
       return `<option value="${b.i}">${b.label}${extra}</option>`;
