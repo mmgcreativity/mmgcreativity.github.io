@@ -470,7 +470,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <input type="text" id="cp_name" data-i18n-placeholder="counterparty_name_ph" placeholder="ör. Karayolları Genel Müdürlüğü">
         </div>
         <div class="auth-field">
-          <label data-i18n="notes_label">Not / Adres (opsiyonel)</label>
+          <label>Muhatap VKN (opsiyonel)</label>
+          <input type="text" id="cp_vkn" inputmode="numeric" maxlength="11" placeholder="ör. 1234567890">
+        </div>
+        <div class="auth-field">
+          <label data-i18n="notes_label">Adres (opsiyonel)</label>
           <input type="text" id="cp_notes" data-i18n-placeholder="counterparty_notes_ph" placeholder="ör. Ankara, ihale no: 2025/123">
         </div>
         <div id="cp_firmaSelect"></div>
@@ -1292,7 +1296,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           '<td class="pt-bank">' + (first ? escapeHtml(first.bank || '—') : '') + '</td>' +
           '<td class="pt-iban"' + (first ? ' data-copy-iban="' + escapeHtml((first.iban||'').replace(/\s+/g,'')) + '"' : '') + '>' + (first ? escapeHtml(first.iban || '—') : '') + '</td>' +
           '<td class="pt-cur">' + (first ? escapeHtml(first.currency || 'TRY') : '') + '</td>' +
-          '<td class="pt-del"><button type="button" class="party-icon-btn danger" data-del="' + kind + '" data-id="' + p.id + '" title="' + LBL.delete + '">✕</button></td>' +
+          '<td class="pt-del"><button type="button" class="party-icon-btn" data-edit-party="' + kind + '" data-id="' + p.id + '" title="Düzenle">✎</button>' +
+          '<button type="button" class="party-icon-btn danger" data-del="' + kind + '" data-id="' + p.id + '" title="' + LBL.delete + '">✕</button></td>' +
         '</tr>';
       // Firmaya tıklayınca aynı kolonlarda alt alta açılan diğer banka hesapları
       const extraRows = rest.map(i =>
@@ -1323,6 +1328,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           await deleteDoc(docRef(btn.dataset.del, btn.dataset.id));
           await loadParties(btn.dataset.del);
         }catch(e){ showMsg(btn.dataset.del + '_msg', LBL.deleteFailed, true); }
+      });
+    });
+    // ✎ Düzenle (cari): Ünvan + TC/Vergi No sonradan değiştirilebilir (IBAN'lar sil/yeniden yükle ile).
+    listEl.querySelectorAll('[data-edit-party]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const k = btn.dataset.editParty;
+        const p = partyCache[k].find(x => x.id === btn.dataset.id);
+        const rowEl = btn.closest('tr');
+        if(!p || !rowEl) return;
+        const cell = rowEl.querySelector('.pt-name');
+        if(!cell) return;
+        mmgInlineEditRow(cell, k, p.id, [
+          { key:'name', label:'Ünvan', value:p.name || '' },
+          { key:'idNumber', label:'TC/Vergi No', value:p.idNumber || '' }
+        ], () => loadParties(k), k + '_msg');
       });
     });
     // "🏢 tüm firmalar" rozetine tıklayınca bu cariyi AKTİF firmaya ata (diğer firmalarda görünmez).
@@ -1428,6 +1449,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             ((p.tc || p.notes) ? '<div class="party-idnum">' + escapeHtml(p.tc || p.notes) + '</div>' : '') +
           '</div>' +
           '<div class="party-actions">' +
+            '<button type="button" class="party-icon-btn" data-edit-pr="' + p.id + '" title="Düzenle">✎</button>' +
             '<button type="button" class="party-icon-btn danger" data-del-pr="' + p.id + '" title="' + LBL.delete + '">✕</button>' +
           '</div>' +
         '</div>' +
@@ -1441,6 +1463,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           await deleteDoc(docRef('personnel', btn.dataset.delPr));
           await loadPersonnel();
         }catch(e){ showMsg('personnel_msg', LBL.deleteFailed, true); }
+      });
+    });
+    // ✎ Düzenle: ad + TC sonradan değiştirilebilir.
+    listEl.querySelectorAll('[data-edit-pr]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = personnelCache.find(x => x.id === btn.dataset.editPr);
+        const rowEl = listEl.querySelector('.party-row[data-id="' + btn.dataset.editPr + '"]');
+        if(!p || !rowEl) return;
+        mmgInlineEditRow(rowEl, 'personnel', p.id, [
+          { key:'name', label:'Ünvan / Ad Soyad', value:p.name || '' },
+          { key:'tc', label:'TC Kimlik No', value:p.tc || p.notes || '' }
+        ], loadPersonnel, 'personnel_msg');
       });
     });
   }
@@ -1486,10 +1520,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         '<div class="party-row-top">' +
           '<div>' +
             '<div class="party-name">' + escapeHtml(p.name) + '</div>' +
-            (p.idNumber ? '<div class="party-idnum">' + escapeHtml(p.idNumber) + '</div>' : '') +
+            (p.idNumber ? '<div class="party-idnum">VKN: ' + escapeHtml(p.idNumber) + '</div>' : '') +
             (p.notes ? '<div class="party-idnum">' + escapeHtml(p.notes) + '</div>' : '') +
           '</div>' +
           '<div class="party-actions">' +
+            '<button type="button" class="party-icon-btn" data-edit-cp="' + p.id + '" title="Düzenle">✎</button>' +
             '<button type="button" class="party-icon-btn danger" data-del-cp="' + p.id + '" title="' + LBL.delete + '">✕</button>' +
           '</div>' +
         '</div>' +
@@ -1505,6 +1540,46 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }catch(e){ showMsg('counterparties_msg', LBL.deleteFailed, true); }
       });
     });
+    // ✎ Düzenle: satır yerinde küçük forma dönüşür (ad + VKN + adres), Kaydet → merge update.
+    listEl.querySelectorAll('[data-edit-cp]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = counterpartyCache.find(x => x.id === btn.dataset.editCp);
+        const rowEl = listEl.querySelector('.party-row[data-id="' + btn.dataset.editCp + '"]');
+        if(!p || !rowEl) return;
+        mmgInlineEditRow(rowEl, 'counterparties', p.id, [
+          { key:'name', label:'Muhatap', value:p.name || '' },
+          { key:'idNumber', label:'Muhatap VKN', value:p.idNumber || '' },
+          { key:'notes', label:'Adres', value:p.notes || '' }
+        ], loadCounterparties, 'counterparties_msg');
+      });
+    });
+  }
+
+  // ---- Ortak: satır içi düzenleme mini-formu (kullanıcı isteği: "veriler sonradan
+  // değiştirilebilsin, mesela muhatabın VKN'sini sonradan girebilmeliyim") ----
+  function mmgInlineEditRow(rowEl, collName, docId, fields, reloadFn, msgId){
+    const orig = rowEl.innerHTML;
+    rowEl.innerHTML =
+      '<div style="display:flex; flex-direction:column; gap:6px; width:100%;">' +
+      fields.map((f, i) =>
+        '<label style="font-size:11px; color:var(--muted); font-weight:600;">' + escapeHtml(f.label) +
+        '<input type="text" class="mmg-ie-input" data-ie-idx="' + i + '" value="' + escapeHtml(f.value) + '" style="display:block; width:100%; box-sizing:border-box; margin-top:2px; background:var(--surface-2); border:1px solid var(--hairline); border-radius:7px; padding:7px 10px; color:var(--text); font-size:13px; font-family:\'Inter\',sans-serif;"></label>'
+      ).join('') +
+      '<div style="display:flex; gap:8px; margin-top:4px;">' +
+        '<button type="button" class="mmg-ie-save" style="background:var(--brass,#C6A15B); color:#141C2B; border:0; border-radius:7px; padding:7px 16px; font-weight:700; cursor:pointer;">Kaydet</button>' +
+        '<button type="button" class="mmg-ie-cancel" style="background:transparent; color:var(--muted); border:1px solid var(--hairline); border-radius:7px; padding:7px 14px; font-weight:600; cursor:pointer;">Vazgeç</button>' +
+      '</div></div>';
+    rowEl.querySelector('.mmg-ie-cancel').addEventListener('click', () => { rowEl.innerHTML = orig; reloadFn(); });
+    rowEl.querySelector('.mmg-ie-save').addEventListener('click', async () => {
+      const upd = {};
+      rowEl.querySelectorAll('.mmg-ie-input').forEach(inp => { upd[fields[+inp.dataset.ieIdx].key] = inp.value.trim(); });
+      if(!upd[fields[0].key]){ alert('Ad boş olamaz.'); return; }
+      try{
+        await setDoc(docRef(collName, docId), upd, { merge: true });
+        showMsg(msgId, LBL.saved, false);
+        await reloadFn();
+      }catch(e){ showMsg(msgId, LBL.saveFailed, true); }
+    });
   }
   async function saveCounterparty(){
     const nameEl = document.getElementById('cp_name');
@@ -1514,7 +1589,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const appliesTo = collectFirmaSelection('cp_firmaSelect');
     try{
       const id = 'cp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-      const docData = { name, notes: notesEl.value.trim(), createdAt: serverTimestamp() };
+      const vknEl = document.getElementById('cp_vkn');
+      const docData = { name, idNumber: (vknEl ? vknEl.value.trim() : ''), notes: notesEl.value.trim(), createdAt: serverTimestamp() };
       // Elle eklemede kayıt HER ZAMAN bir firmaya atanır (seçim yoksa aktif firma).
       if(appliesTo) docData.appliesToFirmaIds = appliesTo;
       else if(scopeCollection === 'firmaAccounts' && scopeId) docData.appliesToFirmaIds = [scopeId];
@@ -1906,11 +1982,26 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   // Müşteri/Tedarikçi şablonundan farklı, daha basit bir şablon.
   document.getElementById('downloadCounterpartiesTemplateBtn').addEventListener('click', () => {
     try{
-      const header = [LBL.bulkNameCol, LBL.bulkNotesCol, LBL.bulkFirmaCodeCol];
-      const rows = [header, ['Karayolları Genel Müdürlüğü', 'Ankara, ihale no: 2025/123', '1000'], ['ABC Belediyesi', '', '1000'], [],
-        [MMG_LANG==='en' ? '"Company Code" is REQUIRED: enter the code of the company this record belongs to (e.g. 1000). Rows with a missing or unmatched code are SKIPPED.' : '"Firma Kodu" ZORUNLUDUR: kaydın ait olduğu firmanın kodunu yazın (örn. 1000). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ.']];
+      // Yeni şablon (kullanıcı isteği): Firma Kodu (GRUP/virgüllü kod destekli) | Muhatap | Muhatap VKN | Adres.
+      const header = [LBL.bulkFirmaCodeCol, (MMG_LANG==='en'?'Counterparty':'Muhatap'), (MMG_LANG==='en'?'Counterparty Tax No':'Muhatap VKN'), (MMG_LANG==='en'?'Address':'Adres')];
+      const notes = MMG_LANG==='en' ? [
+        ['NOTES:'],
+        ['1) "Company Code" is REQUIRED (e.g. 1000). Rows with a missing or unmatched code are SKIPPED.'],
+        ['2) Write "GROUP" to assign the counterparty to ALL group companies; separate multiple codes with commas (e.g. 1000,1001).'],
+        ['3) Re-uploading the same NAME does not duplicate: the existing record is overwritten (tax no, address and company assignment are updated).']
+      ] : [
+        ['NOTLAR:'],
+        ['1) "Firma Kodu" ZORUNLUDUR (örn. 1000). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ.'],
+        ['2) Muhatap TÜM grup firmalarına aitse Firma Kodu sütununa "GRUP" yazın; birden çok firma için kodları virgülle ayırın (örn. 1000,1001).'],
+        ['3) Aynı AD ile yeniden yükleme kaydı ÇİFTLEMEZ: mevcut kaydın üstüne yazılır (VKN, adres ve firma ataması güncellenir).']
+      ];
+      const rows = [header,
+        ['1000', 'Karayolları Genel Müdürlüğü', '1234567890', 'Ankara, ihale no: 2025/123'],
+        ['GRUP', 'BURSA 1. İCRA DAİRESİ MÜDÜRLÜĞÜ', '', 'Bursa'],
+        ['1000,1001', 'ABC Belediyesi', '9876543210', ''],
+        []].concat(notes);
       const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols'] = [{wch:32},{wch:36},{wch:14}];
+      ws['!cols'] = [{wch:14},{wch:36},{wch:16},{wch:36}];
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, MMG_LANG==='en' ? 'Template' : 'Şablon');
       XLSX.writeFile(wb, 'muhataplar-sablon.xlsx');
@@ -1934,11 +2025,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
       const rows = [];
       for(const row of json){
-        const name = String(row['Ünvan'] ?? row['Unvan'] ?? row['Name'] ?? '').trim();
+        const name = String(row['Muhatap'] ?? row['Counterparty'] ?? row['Ünvan'] ?? row['Unvan'] ?? row['Name'] ?? '').trim();
         if(!name) continue;
-        const notes = String(row['Not/Adres'] ?? row['Not'] ?? row['Notes/Address'] ?? row['Notes'] ?? '').trim();
-        const firmaCode = mmgReadRowFirmaCode(row);
-        rows.push({ name, notes, firmaCode });
+        const vkn = String(row['Muhatap VKN'] ?? row['VKN'] ?? row['Vergi No'] ?? row['TC/Vergi No'] ?? row['Counterparty Tax No'] ?? row['Tax No'] ?? '').trim();
+        const notes = String(row['Adres'] ?? row['Address'] ?? row['Not/Adres'] ?? row['Not'] ?? row['Notes/Address'] ?? row['Notes'] ?? '').trim();
+        // HAM oku: GRUP anahtar kelimesi + virgüllü çoklu kod desteklenir (normalize virgülü siler).
+        const firmaCode = String(row['Firma Kodu'] ?? row['FirmaKodu'] ?? row['Kod'] ?? row['Company Code'] ?? row['Code'] ?? '').trim();
+        rows.push({ name, vkn, notes, firmaCode });
       }
 
       if(!rows.length){ showMsg('counterpartiesBulkMsg', LBL.bulkNoRows, true); return; }
@@ -1953,8 +2046,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   function renderCounterpartiesBulkPreview(rows){
     const wrap = document.getElementById('counterpartiesBulkPreviewWrap');
     const table = document.getElementById('counterpartiesBulkPreviewTable');
-    const trs = rows.map(r => '<tr><td>' + escapeHtml(r.name) + '</td><td>' + escapeHtml(r.notes||'—') + '</td><td>' + escapeHtml(r.firmaCode||'—') + '</td></tr>');
-    table.innerHTML = '<thead><tr><th>' + LBL.bulkNameCol + '</th><th>' + LBL.bulkNotesCol + '</th><th>' + LBL.bulkFirmaCodeCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
+    const trs = rows.map(r => '<tr><td>' + escapeHtml(r.firmaCode||'—') + '</td><td>' + escapeHtml(r.name) + '</td><td>' + escapeHtml(r.vkn||'—') + '</td><td>' + escapeHtml(r.notes||'—') + '</td></tr>');
+    table.innerHTML = '<thead><tr><th>' + LBL.bulkFirmaCodeCol + '</th><th>' + (MMG_LANG==='en'?'Counterparty':'Muhatap') + '</th><th>VKN</th><th>' + (MMG_LANG==='en'?'Address':'Adres') + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
     document.getElementById('counterpartiesBulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: rows.length, p: rows.length });
     mmgBulkModalShow(wrap);
   }
@@ -1974,19 +2067,35 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       let count = 0;
       const codeToId = mmgFirmaCodeToId();
       let cpUnmatched = 0; const cpUnmatchedNames = new Set();
+      // Aynı AD tekrar yüklenirse üzerine yaz (VKN/adres/atama güncellenir, çiftlenmez).
+      const cpExistingByName = {};
+      try{
+        const exSnap = await getDocs(colRef('counterparties'));
+        exSnap.forEach(d => { const p = d.data() || {}; const k = (p.name || '').trim().toLocaleLowerCase('tr'); if(k) cpExistingByName[k] = d.id; });
+      }catch(e){}
       for(const r of pendingCounterpartiesBulkRows){
-        const docData = { name: r.name, notes: r.notes || '', createdAt: serverTimestamp() };
-        // KURAL: Excel'de FİRMA KODU ZORUNLU — kodsuz/eşleşmeyen satır kaydedilmez (karışma olmasın).
+        const docData = { name: r.name, idNumber: r.vkn || '', notes: r.notes || '', createdAt: serverTimestamp() };
+        // KURAL: FİRMA KODU ZORUNLU. "GRUP" (GROUP/TÜM/HEPSİ/ALL/*) → tüm grup firmaları;
+        // virgüllü çoklu kod (1000,1001) → sayılan firmalar. Eşleşmeyen satır kaydedilmez.
         if(scopeCollection === 'firmaAccounts'){
-          const mappedId = r.firmaCode ? codeToId[r.firmaCode] : null;
-          if(!mappedId){
+          const tokens = (r.firmaCode || '').split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+          const isGroup = tokens.some(t => t === '*' || ['GRUP','GROUP','TUM','HEPSI','ALL'].includes(mmgVgNormCode(t)));
+          let mappedIds;
+          if(isGroup){
+            mappedIds = Object.values(codeToId);
+            if(!mappedIds.length && scopeId) mappedIds = [scopeId];
+          } else {
+            mappedIds = Array.from(new Set(tokens.map(t => codeToId[mmgVgNormCode(t)]).filter(Boolean)));
+          }
+          if(!mappedIds.length){
             cpUnmatched++;
             cpUnmatchedNames.add(r.firmaCode || ((MMG_LANG==='en' ? '(code empty) ' : '(kod boş) ') + (r.name || '')));
             continue;
           }
-          docData.appliesToFirmaIds = [mappedId];
+          docData.appliesToFirmaIds = mappedIds;
         }
-        const id = 'cp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
+        const id = cpExistingByName[r.name.trim().toLocaleLowerCase('tr')]
+          || ('cp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count);
         await setDoc(docRef('counterparties', id), docData);
         count++;
       }
