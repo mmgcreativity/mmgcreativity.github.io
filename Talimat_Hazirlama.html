@@ -3611,7 +3611,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const f = myFirms.find(x => x.name === glFirmaInput.value.trim());
         if(f){
           const bankaEl = document.getElementById('glBanka');
-          if(bankaEl && f.banka) setBankSelectValue(bankaEl, f.banka);
+          // Banka yalnızca BOŞKEN otomatik dolar — kullanıcının seçtiği banka EZİLMEZ
+          // (önceden her değişiklikte firmanın ilk bankasına (örn. AKBANK) geri dönüyordu).
+          if(bankaEl && f.banka && !bankaEl.value) setBankSelectValue(bankaEl, f.banka);
           const senderIbanEl = document.getElementById('glGonderenIban') || document.getElementById('glIban');
           if(senderIbanEl){
             var cur = (document.getElementById('glParaBirimi') || {}).value || '';
