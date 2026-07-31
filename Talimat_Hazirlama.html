@@ -1401,8 +1401,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const bankEl = bankSelectId ? document.getElementById(bankSelectId) : null;
     const bankSel = bankEl ? (bankEl.value || '').trim().toLowerCase() : '';
     const seen = new Set();
+    // GÖNDEREN IBAN listesi YALNIZCA firma banka hesaplarından (banks / VeriGiriş "IBAN'larım",
+    // _db:true) gelir; eski legacy "kayitliMuhataplar" girişleri (düzinelerce IBAN) gönderende
+    // gösterilmez. Alıcı (recipient) listesi eskisi gibi tüm kayıtlı kaynaklardan gelir.
+    const onlyDb = (ibanSelectId === 'fGonderenIbanSaved') && !!(window.mmgCloud && window.mmgCloud.scopeCollection === 'firmaAccounts');
     const matches = savedIbans
       .map((b, i) => ({ ...b, i }))
+      .filter(b => !onlyDb || b._db)
       .filter(b => !firmaName || (b.firma && b.firma.trim().toLowerCase() === firmaName))
       // Seçili banka varken YALNIZCA o bankanın kayıtları gelsin (kullanıcı isteği).
       .filter(b => !bankSel || ((b.banka || '').trim().toLowerCase() === bankSel))
@@ -1584,7 +1589,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const firma = firmaEl.value.trim().toLowerCase();
     const banka = ((bankaEl && bankaEl.value) || '').trim().toLowerCase();
     if(!firma){ hide(); return; }
+    // Gönderen otomatik-dolumu da YALNIZCA firma banka hesaplarını (banks / _db) dikkate alır;
+    // legacy kayitliMuhataplar IBAN'ları gönderen tarafında kullanılmaz.
+    const _onlyDb = !!(window.mmgCloud && window.mmgCloud.scopeCollection === 'firmaAccounts');
     const firmaMatches = savedIbans.map((b, i) => ({ ...b, i }))
+      .filter(b => !_onlyDb || b._db)
       .filter(b => b.firma && b.firma.trim().toLowerCase() === firma);
     if(!firmaMatches.length){ hide(); return; }
     const byBank = banka ? firmaMatches.filter(b => (b.banka || '').trim().toLowerCase() === banka) : firmaMatches;
@@ -2018,7 +2027,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         // Firmanın TÜM IBAN'larını kayıtlı listeye ekle (banks + kayitliMuhataplar birleşik).
         (info.ibans && info.ibans.length ? info.ibans : (info.iban ? [{ banka: info.banka, iban: info.iban }] : []))
           .forEach(ib => {
-            if(ib.iban && !savedIbans.some(b => b.iban === ib.iban && (b.firma||'').trim().toLowerCase() === f.name.trim().toLowerCase())){
+            // Dedup YALNIZCA diğer banka (_db) kayıtlarına karşı; legacy (non-_db) aynı IBAN'lı
+            // giriş banka kaydının eklenmesini ENGELLEMESİN (yoksa gönderende gerçek IBAN kaybolur).
+            if(ib.iban && !savedIbans.some(b => b._db && b.iban === ib.iban && (b.firma||'').trim().toLowerCase() === f.name.trim().toLowerCase())){
               savedIbans.push({ label: f.name + (ib.banka ? (' — ' + ib.banka) : ''), banka: ib.banka || '', iban: ib.iban, firma: f.name, _db: true });
             }
           });
@@ -2236,13 +2247,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(d.stampBase64){ out.stamp = d.stampBase64; out.stampDims = (d.stampW && d.stampH) ? { w:d.stampW, h:d.stampH } : null; }
       }
     }catch(e){}
-    // (a) Eski/talimat kayıtlı muhatap IBAN'ları
-    try{
-      const mSnap = await cloud.getDoc(cloud.doc(cloud.db, 'firmaAccounts', firmaId, 'talimat', 'kayitliMuhataplar'));
-      if(mSnap.exists()){
-        (mSnap.data().ibans || []).forEach(b => { if(b && b.iban) out.ibans.push({ banka: b.banka || '', iban: b.iban, currency: b.currency || b.paraBirimi || '' }); });
-      }
-    }catch(e){}
+    // (a) DEVRE DIŞI: Eski/legacy "kayitliMuhataplar.ibans" GÖNDEREN IBAN'ı için ARTIK OKUNMUYOR.
+    // Sebep: bu dizi eski toplu içe aktarımlarla düzinelerce IBAN'la dolabiliyor ve VeriGiriş →
+    // "IBAN'larım" ekranındaki silme buna dokunmadığı için "sildim ama hâlâ geliyor" oluyordu.
+    // Gönderen IBAN'ı ARTIK YALNIZCA firma banka hesaplarından (banks) gelir (tek doğruluk kaynağı).
     // (b) ÖNEMLİ: Kullanıcının Veri Giriş → "IBAN'larım" ekranında kaydettiği firma banka
     // hesapları burada: firmaAccounts/{firmaId}/banks. Talimat IBAN'ı asıl buradan gelmeli.
     try{

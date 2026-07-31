@@ -716,11 +716,16 @@
       allSiteUsers = [];
       usersSnap.forEach(d => {
         const u = d.data() || {};
+        const nm = u.username || (u.profile && u.profile.name) || '';
+        const em = u.email || '';
+        // Boş/eksik kayıt (ad VE e-posta yok) listeye GELMESİN. Veriyi SİLMİYORUZ —
+        // kod ileride birine atanabilir; sadece gösterimde atlanır.
+        if(!nm && !em) return;
         allSiteUsers.push({
           id: d.id,
           code: (u.customerNumber != null ? String(u.customerNumber) : ''),
-          name: u.username || (u.profile && u.profile.name) || '',
-          email: u.email || '',
+          name: nm,
+          email: em,
           premium: !!u.isPremium,
           createdAt: (u.createdAt && u.createdAt.toMillis) ? u.createdAt.toMillis() : null
         });

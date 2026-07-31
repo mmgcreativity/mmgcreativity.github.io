@@ -1,12 +1,17 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-menu-flyout-fix'` (repo ~426 commit). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
+Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-iban-gonderen-fix'` (repo ~427 commit). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
 
 > ✅ **Sürümleme çözüldü:** "Güncelleme var, yenile" banner'ı (index.html #mmgUpdateBanner) NE app-version.json NE de SW_VERSION'a bakar — index.html'e HEAD atıp ETag/Last-Modified karşılaştırır (tamamen otomatik). `SW_VERSION` sadece cache-bust; `app-version.json` artık okunmuyor ama ikisi senkron tutuluyor. Her deploy'da ikisini de bump'la.
 
 > ⚠️ **OneDrive senkron tuzağı:** OneDrive çalışmıyorken dosyalar "cloud-only" görünür; bash "Invalid argument" verir, düzenleme kaybolabilir veya ESKİ sürüm yüklenir. Deploy öncesi işaret (marker) kontrolü şart. (Kayıtlı skill: `mmg-onedrive-sync-guard`.) Bu klasörde `DEVIR-NOTU-DESKTOP-V12JA3F.md` gibi "DESKTOP-xxxx" çakışma kopyaları OneDrive'ın ürettiği artıklardır — silinebilir.
 
 ## 🟢 2026-07-31 (5. OTONOM OTURUM) — CANLIYA ALINANLAR
+**Yedinci tur (IBAN gönderen kök çözüm) — SW `2026-07-31-iban-gonderen-fix`:**
+- **Talimat "Gönderen IBAN" düzinelerce IBAN gösteriyordu** ("sildim ama geliyor"). Kök neden: gönderen listesi hem VeriGiriş'in yönettiği `firmaAccounts/{firmaId}/banks` (3-4) HEM DE legacy `talimat/kayitliMuhataplar.ibans` dizisinden (toplu içe aktarımla düzinelerce) besleniyordu; VeriGiriş silmesi yalnız `banks`'i temizlediği için legacy dizi kalıyordu. Çözüm (`Talimat_Hazirlama.html`): (a) `fetchFirmaGonderenBilgisi` artık kayitliMuhataplar okumaz, gönderen IBAN'ı YALNIZCA `banks`'ten. (b) `refreshIbanSelectForFirma` gönderen (`fGonderenIbanSaved`) için **yalnız `_db` (banks) girişleri** gösterir — SADECE firma kapsamında (`scopeCollection==='firmaAccounts'`); kişisel kapsam eski davranışta (regresyon yok). (c) `autoFillGonderenIban` da firma kapsamında yalnız `_db`. (d) `loadMyFirms` dedup'ı artık yalnız diğer `_db`'ye karşı (legacy aynı-IBAN gerçek banka kaydını gizlemesin). Alıcı (recipient) listesi değişmedi.
+- ⚠️ Legacy `kayitliMuhataplar.ibans` verisi SİLİNMEDİ (alıcı tarafında hâlâ görünebilir); istenirse VeriGiriş "Tüm IBAN'ları Sil" bunu da temizleyecek şekilde genişletilebilir.
+- **#1023 gibi boş kayıt gizleme** (KullaniciYonetimi Admin tablosu): ad VE e-posta yoksa listede gösterilmez (veri silinmez, kod ileride atanabilir).
+
 **Altıncı tur (menü/flyout hızlı düzeltmeler) — SW `2026-07-31-menu-flyout-fix`:**
 - **Flyout boş-sekme hatası:** alt-menülü flyout başlıkları ("Krediler", "Vade Hesapları") `data-target` taşımadığı için tıklanınca `openTarget(undefined)` → saçma boş sekme açıyordu. `openTarget` başına `if(!target) return;` guard'ı eklendi.
 - Firma kodu input placeholder'ından "(zorunlu)" kaldırıldı ("Kod"). Validasyon (zorunluluk) duruyor.
