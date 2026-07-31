@@ -1734,12 +1734,31 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const original = btn.textContent;
     btn.textContent = LBL.bulkSaving;
     try{
+      const codeToId = mmgFirmaCodeToId();
+      // DEĞİŞTİR MODU (kullanıcı isteği: "sildim sanıyordum, eski IBAN'lar hâlâ geliyor"):
+      // Dosyada kodu geçen firmaların MEVCUT IBAN kayıtları önce silinebilir; böylece
+      // yüklenen Excel o firmaların TEK doğru listesi olur, eski havuz artıkları kalmaz.
+      if(scopeCollection === 'firmaAccounts'){
+        const targetIds = new Set();
+        pendingBanksBulkRows.forEach(r => { const tf = r.firmaCode ? codeToId[r.firmaCode] : null; if(tf) targetIds.add(tf); });
+        const oldOnes = targetIds.size ? banksList.filter(b => Array.isArray(b.appliesToFirmaIds) && b.appliesToFirmaIds.some(id => targetIds.has(id))) : [];
+        if(oldOnes.length){
+          const doReplace = confirm(MMG_LANG==='en'
+            ? 'This file\'s companies already have ' + oldOnes.length + ' saved IBAN(s). DELETE them first so only the IBANs in this file remain?\n\nOK = Replace (recommended) · Cancel = Add on top'
+            : 'Bu dosyadaki firmaların kayıtlı ' + oldOnes.length + ' IBAN\'ı zaten var. Önce SİLİNSİN ve yalnızca bu dosyadaki IBAN\'lar kalsın mı?\n\nTamam = Değiştir (önerilen) · İptal = Üzerine ekle');
+          if(doReplace){
+            for(const b of oldOnes){
+              try{ await deleteDoc(docRef('banks', b.id)); }catch(e){}
+            }
+            banksList = banksList.filter(b => !oldOnes.some(o => o.id === b.id));
+          }
+        }
+      }
       // Mevcut ve bu partideki IBAN'ları izle; aynı IBAN'ı bir daha ekleme.
       const seenIbans = new Set(banksList.map(b => (b.iban||'').toUpperCase().replace(/\s+/g,'')).filter(Boolean));
-      // Firma adı → id ve firma kodu → id eşlemeleri (Excel'deki kolonlara göre IBAN'ı doğru firmaya bağla).
+      // Firma adı → id eşlemesi (Excel'deki kolonlara göre IBAN'ı doğru firmaya bağla).
       const nameToId = {};
       (groupFirmaMembers || []).forEach(m => { nameToId[(m.name||'').trim().toLocaleLowerCase('tr-TR')] = m.id; });
-      const codeToId = mmgFirmaCodeToId();
       let count = 0, skipped = 0, unmatched = 0;
       const unmatchedNames = new Set();
       for(const r of pendingBanksBulkRows){
