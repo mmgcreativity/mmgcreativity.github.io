@@ -2114,6 +2114,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
       });
 
+      // 🧑 Personeller (VeriGiriş "Personeller" sekmesi) → "Teslim Alacak Kişi" vb. çoklu-kişi
+      // alanlarının "📋 Kayıtlı" listesine eklenir; seçilince TC alanı da otomatik dolar.
+      try{
+        const prSnap = await cloud.getDocs(cloud.collection(cloud.db, coll, baseId, 'personnel'));
+        const prList = [];
+        prSnap.forEach(d => {
+          const p = d.data() || {};
+          const ad = (p.name || '').trim();
+          if(!ad) return;
+          if(Array.isArray(p.appliesToFirmaIds) && p.appliesToFirmaIds.length && !p.appliesToFirmaIds.includes(activeFirmaId)) return;
+          prList.push({ name: ad, tc: String(p.tc || '').trim() });
+        });
+        prList.sort((a,b) => a.name.localeCompare(b.name, 'tr'));
+        mmgPersonnelDb = prList;
+        mmgRefreshPersonSavedSelects();
+      }catch(e){ /* personnel koleksiyonu yoksa sessizce geç */ }
+
       renderFirmaSelects();
       renderIbanSelects();
     }catch(e){ /* sessizce geç: veritabanı yoksa veya erişilemiyorsa sessizce atlanır */ }
@@ -3646,15 +3663,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
   }
 
+  // VeriGiriş Personelleri (ad + TC) — loadCariDb doldurur; kayıtlı-kişi listesinde önce gelir.
+  let mmgPersonnelDb = [];
+  function mmgPersonSavedOptionsHtml(){
+    const esc = s => String(s).replace(/"/g,'&quot;');
+    let html = '<option value="">📋 Kayıtlı</option>';
+    html += mmgPersonnelDb.map(p =>
+      '<option value="' + esc(p.name) + '">🧑 ' + esc(p.name) + (p.tc ? ' (' + esc(p.tc) + ')' : '') + '</option>').join('');
+    html += mmgLoadSavedKisiler().filter(n => !mmgPersonnelDb.some(p => p.name === n))
+      .map(n => '<option value="' + esc(n) + '">' + esc(n) + '</option>').join('');
+    return html;
+  }
+  function mmgRefreshPersonSavedSelects(){
+    document.querySelectorAll('.mmg-person-saved').forEach(sel => {
+      const cur = sel.value;
+      sel.innerHTML = mmgPersonSavedOptionsHtml();
+      sel.value = cur;
+    });
+  }
+
   function mmgInitPersonField(fieldId, withTc){
     const rowsEl = document.getElementById(fieldId + 'Rows');
     const addBtn = document.getElementById(fieldId + 'AddBtn');
     if(!rowsEl || !addBtn) return;
 
-    function savedOptionsHtml(){
-      return '<option value="">📋 Kayıtlı</option>' +
-        mmgLoadSavedKisiler().map(n => '<option value="' + n.replace(/"/g,'&quot;') + '">' + n + '</option>').join('');
-    }
+    function savedOptionsHtml(){ return mmgPersonSavedOptionsHtml(); }
 
     function addRow(value, tcValue){
       const rowId = fieldId + '_row_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
@@ -3685,18 +3718,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
       }
       savedSelect.addEventListener('change', () => {
-        if(savedSelect.value){ input.value = savedSelect.value; renderGenericPreview(); }
+        if(savedSelect.value){
+          input.value = savedSelect.value;
+          // Personelden seçildiyse TC'yi de otomatik doldur.
+          if(tcInput){
+            const pr = mmgPersonnelDb.find(p => p.name === savedSelect.value);
+            if(pr && pr.tc) tcInput.value = pr.tc;
+          }
+          renderGenericPreview();
+        }
         savedSelect.value = '';
       });
       saveBtn.addEventListener('click', () => {
         const name = input.value.trim();
         if(!name){ return; }
         mmgAddSavedKisi(name);
-        document.querySelectorAll('.mmg-person-saved').forEach(sel => {
-          const cur = sel.value;
-          sel.innerHTML = savedOptionsHtml();
-          sel.value = cur;
-        });
+        mmgRefreshPersonSavedSelects();
       });
       removeBtn.addEventListener('click', () => {
         row.remove();
