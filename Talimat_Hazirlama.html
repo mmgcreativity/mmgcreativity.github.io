@@ -1361,6 +1361,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // "ANADOLUBANK'ı yeni ekledim, en altta kaldı"). Sıralama RENDER anında yapılır; böylece
   // "Çalıştığım Bankalar"a sonradan eklenen bankalar da otomatik doğru yere oturur.
   // localeCompare('tr') şart: Ç/Ğ/İ/Ö/Ş/Ü Türkçe alfabedeki yerine göre sıralanır.
+  // Arama normalizasyonu: kullanıcı "sirketi" yazınca "ŞİRKETİ" de bulunsun. Türkçe kutunun
+  // dışına çıkmadan (İ/I/ı, Ş, Ğ, Ü, Ö, Ç) sadeleştirir ve küçük harfe indirir.
+  function mmgSearchNorm(s){
+    return String(s || '')
+      .toLocaleLowerCase('tr')
+      .replace(/[İIı]/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
   function sortBanksTr(list){
     return (list || []).slice().sort((a, b) => String(a).localeCompare(String(b), 'tr', { sensitivity: 'base' }));
   }
@@ -1865,12 +1875,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function acDataset(){ return getAliciDataset(wrap.dataset.mode); }
     function closeList(){ listEl.classList.remove('open'); listEl.innerHTML = ''; acActive = -1; }
     function renderList(showAll){
-      // Odaklanınca (showAll) kutudaki mevcut metne bakmadan TÜM grup firmalarını göster;
-      // sadece kullanıcı yazdıkça filtrele (kullanıcı isteği: seçtikten sonra tekrar tıklayınca hepsi gelsin).
-      const q = showAll ? '' : adiEl.value.trim().toLocaleLowerCase('tr');
+      // GRUP İÇİ: firma sayısı az → odaklanınca kutudaki metne bakmadan HEPSİNİ göster
+      // (kullanıcı isteği: seçtikten sonra tekrar tıklayınca hepsi gelsin).
+      // GRUP DIŞI (CARİ): yüzlerce kayıt var → kutuda metin varsa odaklanınca da ONA GÖRE
+      // ELE (kullanıcı isteği 2026-07-31: "grup dışındaki carilere arama olsun, yazdıkça elesin").
+      const isIci = wrap.dataset.mode === 'ici';
+      const raw = (showAll && isIci) ? '' : adiEl.value.trim();
+      const q = mmgSearchNorm(raw);
       let items = acDataset();
-      if(q) items = items.filter(p => p.name.toLocaleLowerCase('tr').includes(q));
-      items = items.slice(0, 12);
+      if(q) items = items.filter(p => mmgSearchNorm(p.name).includes(q));
+      items = items.slice(0, isIci ? 12 : 25);
       acActive = -1;
       if(!items.length){
         listEl.innerHTML = '<div class="mmg-ac-empty">' +
