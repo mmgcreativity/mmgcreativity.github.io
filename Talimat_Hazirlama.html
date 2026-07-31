@@ -2262,7 +2262,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         // ait (ya da tümüne ait = boş) hesapları al; yoksa tüm grup firmalarının Akbank
         // hesapları seçili firma altında görünür (kullanıcı şikâyeti).
         const af = b.appliesToFirmaIds;
-        if(Array.isArray(af) && af.length && !af.includes(firmaId)) return;
+        // SIKI FİLTRE: YALNIZCA bu firmaya AÇIKÇA atanmış hesaplar gösterilir. Atanmamış
+        // (af boş/null = eski "global" içe aktarımlar) veya başka firmaya ait hesaplar gönderen
+        // listesine GELMEZ — kullanıcı: "tek Akbank IBAN'ı gelsin", grup havuzu karışmasın.
+        // (Atanmamış IBAN'ı görünür yapmak için VeriGiriş → IBAN'larım'da "🏢 tüm firmalar"
+        //  rozetine tıklayıp aktif firmaya atayın.)
+        if(!Array.isArray(af) || !af.length || !af.includes(firmaId)) return;
         if(b.iban && !out.ibans.some(x => x.iban === b.iban)){
           out.ibans.push({ banka: b.name || b.banka || '', iban: b.iban, currency: b.currency || b.paraBirimi || '' });
         }

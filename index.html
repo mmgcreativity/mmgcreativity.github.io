@@ -2102,8 +2102,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function mmgRenderTabs(){
     if(!mmgTabs.length){ tabBar.hidden = true; tabBar.innerHTML = ''; return; }
     tabBar.hidden = false;
-    let html = '<div class="mmg-tab mmg-tab-home' + (mmgActive === 'home' ? ' active' : '') +
-      '" data-tab="home" title="Ana Sayfa"><span class="mmg-tab-ico">⌂</span></div>';
+    // Sekme şeridindeki Ana Sayfa (⌂) ikonu KALDIRILDI: sol menüde (hamburger) zaten Ana Sayfa
+    // var, masaüstünde mükerrer olmasın (kullanıcı isteği). Ana Sayfa'ya sol menüden dönülür.
+    let html = '';
     html += mmgTabs.map(function(t){
       const act = (t.target === mmgActive) ? ' active' : '';
       const label = mmgEscAttr(t.title || t.target);
