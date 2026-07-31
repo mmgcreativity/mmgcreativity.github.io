@@ -247,11 +247,25 @@
       const hubId = fData.dataGroupId || scopeId;
       const hubSnap = hubId === scopeId ? fSnap : await getDoc(doc(db, 'firmaAccounts', hubId));
       const members = new Map();
-      members.set(hubId, hubSnap.exists() ? (hubSnap.data().name || hubId) : hubId);
-      if(!members.has(scopeId)) members.set(scopeId, fData.name || scopeId);
+      const put = (id, name, code) => { if(!members.has(id)) members.set(id, { id, name: name || id, code: (code || '').toString() }); };
+      put(hubId, hubSnap.exists() ? hubSnap.data().name : hubId, hubSnap.exists() ? hubSnap.data().firmaCode : '');
+      put(scopeId, fData.name, fData.firmaCode);
       const qSnap = await getDocs(query(collection(db, 'firmaAccounts'), where('dataGroupId', '==', hubId)));
-      qSnap.forEach(d => members.set(d.id, d.data().name || d.id));
-      window.mmgGroupFirmalar = Array.from(members, ([id, name]) => ({ id, name }));
+      qSnap.forEach(d => put(d.id, d.data().name, d.data().firmaCode));
+      // Firma koduna göre sırala (kullanıcı isteği 2026-07-31). Listede yalnızca AD gösterilir —
+      // seçilen değer doğrudan talimat metnine yazıldığı için kod metne karışmamalı.
+      window.mmgGroupFirmalar = Array.from(members.values()).sort(function(a, b){
+        const ca = String(a.code || '').trim(), cb = String(b.code || '').trim();
+        if(ca && !cb) return -1;
+        if(!ca && cb) return 1;
+        if(ca && cb){
+          const na = Number(ca), nb = Number(cb);
+          if(isFinite(na) && isFinite(nb) && na !== nb) return na - nb;
+          const c = ca.localeCompare(cb, 'tr', { numeric: true });
+          if(c) return c;
+        }
+        return String(a.name || '').localeCompare(String(b.name || ''), 'tr');
+      });
       document.dispatchEvent(new CustomEvent('mmg-group-firmalar-ready'));
     }catch(e){ /* sessizce geç: grup yoksa ya da erişilemiyorsa sadece kayıtlı liste kullanılır */ }
   });
@@ -302,24 +316,29 @@
   }
   const F = {
     banka: bankSelectField('banka'),
-    firma: { key:'firma', label:'Firma Adı', type:'text', placeholder:'Örn. Yaşar Cihan Hazır Beton San. ve Tic. A.Ş.', source:'mmg_saved_firmalar' },
-    vkn: { key:'vkn', label:'Vergi Kimlik No (VKN)', type:'text', placeholder:'Örn. 9390827810' },
-    isim: { key:'isim', label:'Ad Soyad', type:'text', placeholder:'Örn. Ahmet Yılmaz', source:'mmg_saved_kisiler' },
+    // ÖRNEKLER KALDIRILDI (kullanıcı isteği 2026-07-31): placeholder'larda gerçek firma adı
+    // ve VKN yazıyordu (Yaşar Cihan Hazır Beton + 9390827810). Kullanıcının kendi firmasının
+    // bilgisi örnek olarak başkalarının ekranında görünmemeli. Alan adları zaten yeterince açık,
+    // "Örn. …" metinlerine gerek yok. Yalnızca BİÇİM belirten ipuçları (GG.AA.YYYY, TR__ …,
+    // 11 haneli TCKN, 0532 …) korundu — onlar veri değil, format bilgisi.
+    firma: { key:'firma', label:'Firma Adı', type:'text', placeholder:'', source:'mmg_saved_firmalar' },
+    vkn: { key:'vkn', label:'Vergi Kimlik No (VKN)', type:'text', placeholder:'10 haneli VKN' },
+    isim: { key:'isim', label:'Ad Soyad', type:'text', placeholder:'', source:'mmg_saved_kisiler' },
     tckn: { key:'tckn', label:'TC Kimlik No', type:'text', placeholder:'11 haneli TCKN' },
-    tutar: { key:'tutar', label:'Tutar (TL)', type:'text', placeholder:'Örn. 1.000.000' },
+    tutar: { key:'tutar', label:'Tutar (TL)', type:'text', placeholder:'' },
     kullaniciNo: { key:'kullaniciNo', label:'Kullanıcı No', type:'text', placeholder:'İnternet şubesi kullanıcı numarası' },
-    kartSon4: { key:'kartSon4', label:'Kartın Son 4 Hanesi', type:'text', placeholder:'Örn. 8177 (birden fazlaysa virgülle ayırın)' },
-    eskiGsm: { key:'eskiGsm', label:'Eski GSM No', type:'text', placeholder:'0532 000 00 00' },
-    yeniGsm: { key:'yeniGsm', label:'Yeni GSM No', type:'text', placeholder:'0532 000 00 00' },
-    mail: { key:'mail', label:'E-posta Adresi', type:'text', placeholder:'ornek@eposta.com' },
-    faturaNo: { key:'faturaNo', label:'Fatura / Sözleşme No', type:'text', placeholder:'Örn. 1234567' },
-    kurumAdi: { key:'kurumAdi', label:'Kurum/Şirket Adı', type:'text', placeholder:'Örn. Buski, TTNet, Turkcell' },
-    cekSenetNo: { key:'cekSenetNo', label:'Çek/Senet No', type:'text', placeholder:'Örn. 9179955' },
+    kartSon4: { key:'kartSon4', label:'Kartın Son 4 Hanesi', type:'text', placeholder:'Birden fazlaysa virgülle ayırın' },
+    eskiGsm: { key:'eskiGsm', label:'Eski GSM No', type:'text', placeholder:'05__ ___ __ __' },
+    yeniGsm: { key:'yeniGsm', label:'Yeni GSM No', type:'text', placeholder:'05__ ___ __ __' },
+    mail: { key:'mail', label:'E-posta Adresi', type:'text', placeholder:'' },
+    faturaNo: { key:'faturaNo', label:'Fatura / Sözleşme No', type:'text', placeholder:'' },
+    kurumAdi: { key:'kurumAdi', label:'Kurum/Şirket Adı', type:'text', placeholder:'' },
+    cekSenetNo: { key:'cekSenetNo', label:'Çek/Senet No', type:'text', placeholder:'' },
     vade: { key:'vade', label:'Vade Tarihi', type:'text', placeholder:'GG.AA.YYYY' },
-    plaka: { key:'plaka', label:'Araç Plakası', type:'text', placeholder:'Örn. 16 AB 123' },
+    plaka: { key:'plaka', label:'Araç Plakası', type:'text', placeholder:'' },
     iban: { key:'iban', label:'Yeni IBAN', type:'text', placeholder:'TR__ ____ ____ ____ ____ ____ __' },
     hesapNo: { key:'hesapNo', label:'Hesap No', type:'text', placeholder:'' },
-    oran: { key:'oran', label:'Faiz Oranı', type:'text', placeholder:'Örn. %42,5+1,1' }
+    oran: { key:'oran', label:'Faiz Oranı', type:'text', placeholder:'' }
   };
 
   const TEMPLATES = [
@@ -628,14 +647,19 @@
       }
       if(f.source){
         let saved = readSavedList(f.source);
+        // Firma alanında ÖNCE grup firmaları (kod sırasında), sonra elle kaydedilmiş isimler.
         if(f.key === 'firma' && Array.isArray(window.mmgGroupFirmalar) && window.mmgGroupFirmalar.length){
           const grupAdlari = window.mmgGroupFirmalar.map(function(g){ return g.name; });
           saved = grupAdlari.concat(saved.filter(function(s){ return grupAdlari.indexOf(s) === -1; }));
         }
         const dlId = 'dl_' + f.key;
-        const dl = saved.length ? '<datalist id="' + dlId + '">' + saved.map(function(s){ return '<option value="' + String(s).replace(/"/g,'&quot;') + '">'; }).join('') + '</datalist>' : '';
-        return '<div class="modal-field"><label>' + f.label + (saved.length ? ' <span style="color:var(--teal); font-weight:400;">· kayıtlılardan seçebilirsiniz</span>' : '') + '</label>' +
-          '<input type="text" data-key="' + f.key + '" placeholder="' + (f.placeholder||'') + '" list="' + dlId + '">' + dl + '</div>';
+        // datalist HER ZAMAN oluşturulur (kullanıcı isteği 2026-07-31: "grup firmaları gelsin").
+        // Eskiden liste BOŞSA hiç <datalist> yazılmıyordu; grup firmaları Firestore'dan GEÇ
+        // geldiği için aşağıdaki 'mmg-group-firmalar-ready' dinleyicisi dolduracak elemanı
+        // bulamıyor ve firmalar hiç görünmüyordu. Alan yine serbest metin — elle de yazılır.
+        const dl = '<datalist id="' + dlId + '">' + saved.map(function(s){ return '<option value="' + String(s).replace(/"/g,'&quot;') + '">'; }).join('') + '</datalist>';
+        return '<div class="modal-field"><label>' + f.label + '<span class="mmg-src-hint" data-hint-for="' + f.key + '" style="color:var(--teal); font-weight:400;">' + (saved.length ? ' · kayıtlılardan seçebilirsiniz' : '') + '</span></label>' +
+          '<input type="text" data-key="' + f.key + '" placeholder="' + (f.placeholder||'') + '" list="' + dlId + '" autocomplete="off">' + dl + '</div>';
       }
       return '<div class="modal-field"><label>' + f.label + '</label><input type="text" data-key="' + f.key + '" placeholder="' + (f.placeholder||'') + '"></div>';
     }).join('');
@@ -782,6 +806,9 @@
     const grupAdlari = (window.mmgGroupFirmalar || []).map(function(g){ return g.name; });
     saved = grupAdlari.concat(saved.filter(function(s){ return grupAdlari.indexOf(s) === -1; }));
     dl.innerHTML = saved.map(function(s){ return '<option value="' + String(s).replace(/"/g,'&quot;') + '">'; }).join('');
+    // Firmalar geç geldiyse etiketin yanındaki ipucu da o an belirsin.
+    const hint = document.querySelector('.mmg-src-hint[data-hint-for="firma"]');
+    if(hint && saved.length) hint.textContent = ' · kayıtlılardan seçebilirsiniz';
   });
 </script>
 
