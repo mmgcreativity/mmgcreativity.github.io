@@ -1571,24 +1571,42 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const nameToId = {};
       (groupFirmaMembers || []).forEach(m => { nameToId[(m.name||'').trim().toLocaleLowerCase('tr-TR')] = m.id; });
       const codeToId = mmgFirmaCodeToId();
-      let count = 0, skipped = 0;
+      let count = 0, skipped = 0, unmatched = 0;
+      const unmatchedNames = new Set();
       for(const r of pendingBanksBulkRows){
         const ibanKey = (r.iban||'').toUpperCase().replace(/\s+/g,'');
         if(ibanKey && seenIbans.has(ibanKey)){ skipped++; continue; }
+        // Önce FİRMA KODU (isim yazım farklarından etkilenmez), sonra firma adı.
+        let fid = r.firmaCode ? codeToId[r.firmaCode] : null;
+        if(!fid && r.firmaName) fid = nameToId[r.firmaName.trim().toLocaleLowerCase('tr-TR')];
+        // KRİTİK (kullanıcı isteği — "Excel'de firma belli, KARIŞMASIN"):
+        // Satırda firma adı/kodu YAZILMIŞ ama hiçbir firmayla eşleşmediyse, satırı SESSİZCE
+        // aktif firmaya YIĞMA — bu, tüm IBAN'ların yanlış firmaya (örn. YAŞAR CİHAN) bağlanıp
+        // "düzinelerce IBAN geliyor" sorununu yaratıyordu. Böyle satırları ATLA ve RAPORLA;
+        // kullanıcı Excel'deki firma adını/kodunu düzeltip yeniden yükler.
+        if(!fid && (r.firmaCode || r.firmaName)){
+          unmatched++;
+          unmatchedNames.add(r.firmaCode || r.firmaName);
+          continue;
+        }
+        // Firma kolonu tamamen BOŞ ise bilinçli olarak aktif firmaya bağla (tek-firma senaryosu).
+        if(!fid && scopeCollection === 'firmaAccounts' && scopeId) fid = scopeId;
         if(ibanKey) seenIbans.add(ibanKey);
         const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
         const docData = { name: r.bank, iban: r.iban, currency: r.currency || 'TRY', note: r.note || '', createdAt: serverTimestamp() };
-        // Önce FİRMA KODU (isim yazım farklarından etkilenmez), sonra firma adı; ikisi de eşleşmezse/boşsa
-        // yüklemenin yapıldığı AKTİF firmaya bağla. Böylece bulk import ASLA "global (tüm firmalar)"
-        // kaydetmez — kullanıcının "tüm IBAN'lar her firmada görünüyor" sorununun asıl sebebi buydu.
-        let fid = r.firmaCode ? codeToId[r.firmaCode] : null;
-        if(!fid && r.firmaName) fid = nameToId[r.firmaName.trim().toLocaleLowerCase('tr-TR')];
-        if(!fid && scopeCollection === 'firmaAccounts' && scopeId) fid = scopeId;
         if(fid) docData.appliesToFirmaIds = [fid];
         await setDoc(docRef('banks', id), docData);
         count++;
       }
-      showMsg('banksBulkMsg', fmt(LBL.bulkDone, { n: count }) + (skipped ? ' (' + skipped + ' ' + (MMG_LANG==='en'?'duplicate skipped':'tekrar atlandı') + ')' : ''), false);
+      let msgTxt = fmt(LBL.bulkDone, { n: count });
+      if(skipped) msgTxt += ' (' + skipped + ' ' + (MMG_LANG==='en'?'duplicate skipped':'tekrar atlandı') + ')';
+      if(unmatched){
+        const namesList = Array.from(unmatchedNames).slice(0, 5).join(', ');
+        msgTxt += ' — ⚠️ ' + unmatched + (MMG_LANG==='en'
+          ? ' row(s) skipped: company not matched (' + namesList + '). Fix the company name/code in Excel (must match a company in your group) and re-upload.'
+          : ' satır atlandı: firma eşleşmedi (' + namesList + '). Excel\'deki firma adını/kodunu grubunuzdaki firmayla birebir eşleşecek şekilde düzeltip yeniden yükleyin.');
+      }
+      showMsg('banksBulkMsg', msgTxt, unmatched > 0);
       pendingBanksBulkRows = null;
       document.getElementById('banksBulkPreviewWrap').style.display = 'none';
       await loadBanks();

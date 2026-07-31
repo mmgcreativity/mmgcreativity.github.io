@@ -1,12 +1,15 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-iban-strict-tabhome'` (repo ~428 commit). ⏳ Kullanıcı bekleyen: `firebase deploy --only firestore:indexes` (davet listesi) + IAM signBlob rolü (hesap geçişi). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
+Son güncelleme: **2026-07-31 (5. otonom oturum)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-07-31-iban-import-eslesme'` (repo ~429 commit). ⏳ Kullanıcı bekleyen: `firebase deploy --only firestore:indexes` (davet listesi) + IAM signBlob rolü (hesap geçişi). **En kritik değişiklik: service worker artık NETWORK-FIRST** (aşağıda 4. oturum). Şifre sıfırlama maili TAM çalışır durumda (Resend canlı).
 
 > ✅ **Sürümleme çözüldü:** "Güncelleme var, yenile" banner'ı (index.html #mmgUpdateBanner) NE app-version.json NE de SW_VERSION'a bakar — index.html'e HEAD atıp ETag/Last-Modified karşılaştırır (tamamen otomatik). `SW_VERSION` sadece cache-bust; `app-version.json` artık okunmuyor ama ikisi senkron tutuluyor. Her deploy'da ikisini de bump'la.
 
 > ⚠️ **OneDrive senkron tuzağı:** OneDrive çalışmıyorken dosyalar "cloud-only" görünür; bash "Invalid argument" verir, düzenleme kaybolabilir veya ESKİ sürüm yüklenir. Deploy öncesi işaret (marker) kontrolü şart. (Kayıtlı skill: `mmg-onedrive-sync-guard`.) Bu klasörde `DEVIR-NOTU-DESKTOP-V12JA3F.md` gibi "DESKTOP-xxxx" çakışma kopyaları OneDrive'ın ürettiği artıklardır — silinebilir.
 
 ## 🟢 2026-07-31 (5. OTONOM OTURUM) — CANLIYA ALINANLAR
+**Dokuzuncu tur (IBAN import eşleşme) — SW `2026-07-31-iban-import-eslesme`:**
+- **IBAN Excel içe aktarımında "karışma"nın ASIL kaynağı bulundu:** satırdaki firma adı/kodu grup firmalarıyla eşleşmeyince kod satırı SESSİZCE AKTİF firmaya bağlıyordu → tüm IBAN'lar tek firmaya (YAŞAR CİHAN) yığılıp gönderen listesinde düzinelerce görünüyordu. Düzeltme (`VeriGirisPaneli.html` banksBulkConfirm): firma YAZILMIŞ ama eşleşmemişse satır **ATLANIR ve uyarıyla raporlanır** (ilk 5 eşleşmeyen ad gösterilir); yalnızca firma kolonu tamamen BOŞ satırlar aktif firmaya bağlanır. Kullanıcının akışı: Tüm IBAN'ları Sil → Excel'de firma adı/kodu düzelt → yeniden yükle → her IBAN kendi firmasında.
+
 **Sekizinci tur — SW `2026-07-31-iban-strict-tabhome`:**
 - **IBAN gönderen SIKI filtre:** `fetchFirmaGonderenBilgisi` banks okuması artık YALNIZCA aktif firmaya AÇIKÇA atanmış (`appliesToFirmaIds` içeren) hesapları alır; **af-null "global" ve başka firma IBAN'ları GELMEZ**. (Yedinci turda kayitliMuhataplar zaten kaldırıldı; düzinelerce IBAN'ın asıl kaynağı grup HUB'ındaki af-null banks kayıtlarıydı — VeriGiriş sıkı filtreliyor, Talimat af-null'ı gösteriyordu.) ⚠️ Atanmamış IBAN görünsün istenirse VeriGiriş → IBAN'larım'da "🏢 tüm firmalar" rozetine tıklayıp aktif firmaya atanmalı. Test: Ctrl+Shift+R (iframe cache!).
 - **Sekme şeridi Ana Sayfa (⌂) ikonu KALDIRILDI** (mmgRenderTabs `html=''`) — sol menüde zaten var, masaüstünde mükerrerdi.
