@@ -452,6 +452,13 @@ function mmgApplyTurkishFont(doc){
   .mmg-person-row .mmg-person-remove{ flex:0 0 34px; width:34px; }
   .mmg-person-row .mmg-person-input, .mmg-person-row .mmg-person-tc, .mmg-person-row .mmg-person-saved{ height:32px; padding-top:0; padding-bottom:0; }
   .mmg-person-row .xcell-savebtn{ height:32px; padding:0; align-self:stretch; }
+  /* Kişi öneri listesi TÜM SATIR genişliğinde açılır (kullanıcı isteği): Ad Soyad kendi
+     sütununun, TC kendi sütununun altına hizalanır. Wrap static olunca liste satıra bağlanır. */
+  .mmg-person-row{ position:relative; }
+  .mmg-person-row .mmg-ac-wrap{ position:static; }
+  .mmg-person-row .mmg-ac-list{ left:0; right:0; top:100%; }
+  .mmg-person-row .mmg-ac-item span:first-child{ flex:1 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mmg-person-row .mmg-ac-item .mmg-ac-meta{ flex:0 0 198px; text-align:left; }
   .xcell-group{ border:1px solid var(--hairline); border-radius:6px; overflow:visible; margin-bottom:8px; }
   .xcell-title{
     font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15.5px; color:var(--text);
