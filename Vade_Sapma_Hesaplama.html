@@ -172,6 +172,39 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .f-field.f-del-wrap{ align-self:stretch; display:flex; align-items:center; }
   .f-del-wrap label{ display:none; }
   .f-del-wrap .row-del{ align-self:center; }
+
+  /* ---- Kapama ayarları (sıra + bölme) ---- */
+  .kapama-ayar{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px;
+    padding:10px 12px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px;
+  }
+  .ka-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .ka-label{ font-size:11.5px; color:var(--muted); font-weight:600; flex:0 0 132px; }
+  .ka-select{
+    flex:1 1 220px; min-width:0; background:var(--bg); color:var(--text);
+    border:1px solid var(--hairline); border-radius:8px; padding:7px 9px;
+    font-family:inherit; font-size:12.5px;
+  }
+  .ka-select:focus{ outline:none; border-color:var(--brass); }
+  .ka-hint{ font-size:11px; color:var(--muted); line-height:1.5; }
+
+  /* ---- Tahsilat satırı kapama sonucu (kaç gün erken/geç + neyi kapattı) ---- */
+  .c-sonuc{
+    flex:1 1 100%; display:flex; flex-wrap:wrap; align-items:center; gap:6px;
+    margin-top:6px; padding-top:7px; border-top:1px dashed var(--hairline); font-size:11.5px;
+  }
+  .c-sonuc[hidden]{ display:none; }
+  .cs-badge{
+    flex:0 0 auto; font-size:10.5px; font-weight:700; letter-spacing:.02em;
+    border-radius:5px; padding:2px 7px; white-space:nowrap;
+  }
+  .cs-erken{ color:#3FB68A; background:rgba(63,182,138,0.14); border:1px solid rgba(63,182,138,0.4); }
+  .cs-gec  { color:#E2544B; background:rgba(226,84,75,0.14);  border:1px solid rgba(226,84,75,0.4); }
+  .cs-tam  { color:var(--brass); background:rgba(198,161,91,0.14); border:1px solid rgba(198,161,91,0.4); }
+  .cs-none { color:var(--muted); background:rgba(141,150,172,0.12); border:1px solid var(--hairline); }
+  .cs-detay{ color:var(--muted); }
+  .cs-artan{ color:#E3A23C; }
+  .cs-ayrac{ color:var(--hairline); }
   .row-del:hover{ color:var(--red); background:rgba(226,84,75,0.1); }
 
 
@@ -272,6 +305,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="panel-title cek" data-i18n="checks_title">🧾 Tahsilat (Çek/Senet/DBS vs.)</div>
       </div>
       <div class="panel-desc" data-i18n="checks_desc">Tahsil ettiğiniz çek, senet, DBS vb. ödemelerin vade tarihi ve tutarlarını girin.</div>
+
+      <!-- KAPAMA AYARLARI — hangi faturadan başlanacağı ve tahsilatın bölünüp bölünmeyeceği.
+           Muhasebede standart varsayılan FIFO'dur (en eski borç önce kapanır). -->
+      <div class="kapama-ayar">
+        <div class="ka-row">
+          <label class="ka-label" for="kapamaYontem">Kapama sırası</label>
+          <select id="kapamaYontem" class="ka-select">
+            <option value="fifo" selected>FIFO — en eski faturadan başla</option>
+            <option value="lifo">LIFO — en yeni faturadan başla</option>
+            <option value="kumulatif">Kümülatif — eşleştirme yapma, ortalama vadeleri karşılaştır</option>
+          </select>
+        </div>
+        <div class="ka-row" id="kapamaBolmeRow">
+          <label class="ka-label" for="kapamaBolme">Tahsilat bölünsün mü?</label>
+          <select id="kapamaBolme" class="ka-select">
+            <option value="bol" selected>Bölünsün — bir tahsilat birden fazla faturayı kapatabilir</option>
+            <option value="bolme">Bölünmesin — bir tahsilat yalnızca tek faturaya yazılır</option>
+          </select>
+        </div>
+        <div class="ka-hint" id="kapamaHint">Sapma, kapatılan tutarlarla ağırlıklandırılarak hesaplanır.</div>
+      </div>
+
       <div class="row-table" id="cekRows"></div>
       <button type="button" class="add-btn cek" id="addCekBtn" data-i18n="add_check">+ Çek Ekle</button>
       <div class="subtotal-line"><span data-i18n="total_check_amount">Toplam Çek Tutarı</span><b id="cekToplam" class="mono">0,00</b></div>
@@ -520,9 +575,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     row.className = 'entry-row cek-row';
     row.dataset.id = id;
     row.innerHTML =
-      '<div class="f-field c-tarih-wrap"><label>Çek Tarihi</label><div class="c-tarih-box"></div></div>' +
-      '<div class="f-field c-tutar-wrap"><label>Çek Tutarı</label><input type="text" inputmode="decimal" class="c-tutar" value="0,00"></div>' +
-      '<button type="button" class="row-del c-del" title="Satırı sil">✕</button>';
+      '<div class="f-field c-tarih-wrap"><label>Vade Tarihi</label><div class="c-tarih-box"></div></div>' +
+      '<div class="f-field c-tutar-wrap"><label>Tutar</label><input type="text" inputmode="decimal" class="c-tutar" value="0,00"></div>' +
+      '<button type="button" class="row-del c-del" title="Satırı sil">✕</button>' +
+      // Kapama sonucu: kaç gün erken/geç ve hangi faturayı kapattığı (recalc doldurur).
+      '<div class="c-sonuc" hidden></div>';
     cekRowsEl.appendChild(row);
 
     wireDateBox(row.querySelector('.c-tarih-box'), cekData[id].tarih, (val)=>{ cekData[id].tarih = val; recalc(); });
@@ -540,6 +597,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.getElementById('addFaturaBtn').addEventListener('click', ()=>addFaturaRow());
   document.getElementById('addCekBtn').addEventListener('click', ()=>addCekRow());
 
+  // Kapama ayarları değişince yeniden hesapla.
+  ['kapamaYontem','kapamaBolme'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('change', recalc);
+  });
+
+  // ---------- ENTER = TAB ----------
+  // Kullanıcı isteği: "Enter'a basınca da veriler girilsin, illa Tab'a basmam gerekmesin."
+  // Enter, önce alanın değerini işler (change/blur tetikler) sonra bir sonraki alana geçer.
+  // Not: <select> ve butonlarda Enter'ın kendi işlevi korunur.
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Enter') return;
+    const el = e.target;
+    if(!el || !el.matches || !el.matches('input')) return;
+    if(el.type === 'checkbox' || el.type === 'radio' || el.type === 'button' || el.type === 'submit') return;
+    e.preventDefault();
+    // Değeri işlet: blur → mevcut 'blur' dinleyicileri parse edip recalc'ı çağırıyor.
+    el.blur();
+    // Odaklanabilir tüm alanları sırayla topla, bir sonrakine geç.
+    const odaklar = Array.prototype.filter.call(
+      document.querySelectorAll('input, select, textarea, button'),
+      function(x){ return !x.disabled && x.offsetParent !== null && x.tabIndex !== -1; }
+    );
+    const i = odaklar.indexOf(el);
+    const sonraki = (i > -1 && odaklar[i+1]) ? odaklar[i+1] : null;
+    if(sonraki){ sonraki.focus(); if(sonraki.select) { try{ sonraki.select(); }catch(_){} } }
+    recalc();
+  });
+
 
   // ---------- hesaplama ----------
   function computeDueDate(id){
@@ -551,6 +637,69 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       return addDays(endOfMonth(tarihDate), gun);
     }
     return addDays(tarihDate, gun);
+  }
+
+  /* ====================================================================
+     KAPAMA (EŞLEŞTİRME) MOTORU
+     Muhasebesel mantık: tahsilatlar faturaları kapatır; her kapama için
+     "tahsilatın vadesi − faturanın vadesi" gün farkı çıkarılır.
+       fark < 0 → tahsilat vadesinden ÖNCE gelmiş (erken)  → iyi
+       fark = 0 → tam gününde
+       fark > 0 → vadesinden SONRA gelmiş (geç)            → kötü
+     Sonuç sapma, kapatılan TUTARLA AĞIRLIKLANDIRILIR:
+       Σ(kapatılan tutar × gün farkı) / Σ(kapatılan tutar)
+     Ağırlıklandırılmazsa 1.000 ₺'lik 30 gün gecikme ile 1.000.000 ₺'lik
+     1 gün gecikme eşit sayılır — finansal olarak yanlış olur.
+
+     Sıra seçenekleri: FIFO (en eski fatura önce — muhasebede standart),
+     LIFO (en yeni önce), Kümülatif (eşleştirme yok, ortalamalar karşılaştırılır).
+     Bölme seçeneği: bir tahsilat birden fazla faturaya bölünebilir ya da
+     yalnızca tek faturaya yazılır (bölünmezse kalan tutar açık kalır).
+     ==================================================================== */
+  function kapamaYap(faturalar, tahsilatlar, yontem, bolme){
+    // faturalar: [{no, due, tutar}]  tahsilatlar: [{no, date, tutar}]
+    const fa = faturalar.map(f => ({ no:f.no, due:f.due, kalan:f.tutar, tutar:f.tutar }));
+    // Sıralama: FIFO = vade tarihi artan (en eski önce), LIFO = azalan.
+    fa.sort((a,b) => yontem === 'lifo' ? (daySerial(b.due) - daySerial(a.due))
+                                       : (daySerial(a.due) - daySerial(b.due)));
+    // Tahsilatlar her zaman vade sırasına göre işlenir (gerçek hayatta da böyle gelir).
+    const th = tahsilatlar.map(t => ({ no:t.no, date:t.date, kalan:t.tutar, tutar:t.tutar, eslesme:[] }))
+                          .sort((a,b) => daySerial(a.date) - daySerial(b.date));
+
+    let agirlikliGun = 0, kapatilanToplam = 0;
+
+    th.forEach(t => {
+      for(const f of fa){
+        if(t.kalan <= 0) break;
+        if(f.kalan <= 0) continue;
+        let miktar;
+        if(bolme === 'bolme'){
+          // Bölünmesin: tahsilat yalnızca TAM sığdığı bir faturaya yazılır.
+          if(t.kalan > f.kalan) continue;      // sığmıyorsa bu faturayı atla
+          miktar = t.kalan;
+        } else {
+          miktar = Math.min(t.kalan, f.kalan);
+        }
+        if(miktar <= 0) continue;
+        const gunFarki = daySerial(t.date) - daySerial(f.due);
+        t.eslesme.push({ faturaNo:f.no, miktar:miktar, gun:gunFarki });
+        t.kalan -= miktar;
+        f.kalan -= miktar;
+        agirlikliGun += miktar * gunFarki;
+        kapatilanToplam += miktar;
+        if(bolme === 'bolme') break;           // tek faturaya yazıldı, bitti
+      }
+    });
+
+    return {
+      tahsilatlar: th,
+      faturalar: fa,
+      kapatilanToplam: kapatilanToplam,
+      // + = ortalama kaç gün GEÇ, − = kaç gün ERKEN
+      ortalamaSapma: kapatilanToplam > 0 ? (agirlikliGun / kapatilanToplam) : null,
+      acikFatura: fa.reduce((s,f) => s + Math.max(0, f.kalan), 0),
+      kullanilmayanTahsilat: th.reduce((s,t) => s + Math.max(0, t.kalan), 0)
+    };
   }
 
   function recalc(){
@@ -625,8 +774,101 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       devSubEl.className = 'deviation-sub';
       statFaturaVadeEl.textContent = '—';
       statCekVadeEl.textContent = '—';
+      document.querySelectorAll('#cekRows .c-sonuc').forEach(el => { el.hidden = true; });
       return;
     }
+
+    // ---- KAPAMA (EŞLEŞTİRME) ----
+    const yontemEl = document.getElementById('kapamaYontem');
+    const bolmeEl  = document.getElementById('kapamaBolme');
+    const yontem = yontemEl ? yontemEl.value : 'fifo';
+    const bolme  = bolmeEl  ? bolmeEl.value  : 'bol';
+    const bolmeRow = document.getElementById('kapamaBolmeRow');
+    if(bolmeRow) bolmeRow.style.display = (yontem === 'kumulatif') ? 'none' : '';
+
+    if(yontem !== 'kumulatif'){
+      // Fatura ve tahsilat listelerini ekrandaki SIRAYA göre numaralandır (kullanıcı
+      // "Fatura #2" dediğimizde ekrandaki 2. satırı görsün).
+      const faturaList = [];
+      document.querySelectorAll('#faturaRows .entry-row').forEach((row, i) => {
+        const d = faturaData[row.dataset.id]; if(!d) return;
+        const due = computeDueDate(row.dataset.id);
+        if(due && d.tutar > 0) faturaList.push({ no:i+1, due:due, tutar:d.tutar });
+      });
+      const tahsilatRows = [];
+      const tahsilatList = [];
+      document.querySelectorAll('#cekRows .entry-row').forEach((row, i) => {
+        const d = cekData[row.dataset.id]; if(!d) return;
+        const dt = parseDateInput(d.tarih);
+        tahsilatRows.push({ row:row, no:i+1 });
+        if(dt && d.tutar > 0) tahsilatList.push({ no:i+1, date:dt, tutar:d.tutar });
+      });
+
+      const sonuc = kapamaYap(faturaList, tahsilatList, yontem, bolme);
+
+      // Her tahsilat satırının altına: kaç gün erken/geç + neyi kapattığı
+      const byNo = {};
+      sonuc.tahsilatlar.forEach(t => { byNo[t.no] = t; });
+      tahsilatRows.forEach(tr => {
+        const el = tr.row.querySelector('.c-sonuc');
+        if(!el) return;
+        const t = byNo[tr.no];
+        if(!t || !t.eslesme.length){
+          if(t && t.kalan > 0 && t.tutar > 0){
+            el.hidden = false;
+            el.innerHTML = '<span class="cs-badge cs-none">eşleşmedi</span>' +
+                           '<span class="cs-detay">Kapatacak uygun fatura bulunamadı' +
+                           (bolme === 'bolme' ? ' (bölünmesin seçili — tam sığan fatura yok)' : '') + '</span>';
+          } else { el.hidden = true; }
+          return;
+        }
+        el.hidden = false;
+        const parcalar = t.eslesme.map(e => {
+          const g = e.gun;
+          const cls = g > 0 ? 'cs-gec' : (g < 0 ? 'cs-erken' : 'cs-tam');
+          const txt = g > 0 ? (g + ' gün geç') : (g < 0 ? (Math.abs(g) + ' gün erken') : 'tam gününde');
+          return '<span class="cs-badge ' + cls + '">' + txt + '</span>' +
+                 '<span class="cs-detay">Fatura #' + e.faturaNo + ' · ' + fmtTR(e.miktar) + ' ₺</span>';
+        }).join('<span class="cs-ayrac">•</span>');
+        const artan = t.kalan > 0 ? '<span class="cs-ayrac">•</span><span class="cs-detay cs-artan">kalan ' + fmtTR(t.kalan) + ' ₺ eşleşmedi</span>' : '';
+        el.innerHTML = parcalar + artan;
+      });
+
+      // Sonuç kartı: ağırlıklı ortalama sapma
+      if(sonuc.ortalamaSapma !== null){
+        const gf = Math.round(sonuc.ortalamaSapma);   // + geç, − erken
+        statFaturaVadeEl.textContent = fmtDateTR(new Date(Math.round(faturaAgirlikliTop / faturaAgirlikToplam) * 86400000));
+        statCekVadeEl.textContent    = fmtDateTR(new Date(Math.round(cekAgirlikliTop / cekAgirlikToplam) * 86400000));
+        // Ekranda gösterim, kümülatif yöntemle AYNI işaret kuralını kullanır:
+        // + = erken/vadesinde (iyi, yeşil), − = gecikme (kötü, kırmızı)
+        const gosterim = -gf;
+        devValueEl.textContent = (gosterim > 0 ? '+' : '') + gosterim + LBL.days;
+        if(gosterim < 0){
+          devValueEl.className = 'deviation-value neg';
+          devSubEl.textContent = LBL.overdue + Math.abs(gosterim) + LBL.overdueDelaySuffix;
+          devSubEl.className = 'deviation-sub neg';
+        } else if(gosterim === 0){
+          devValueEl.className = 'deviation-value pos';
+          devSubEl.textContent = LBL.onTime;
+          devSubEl.className = 'deviation-sub pos';
+        } else {
+          devValueEl.className = 'deviation-value pos';
+          devSubEl.textContent = LBL.earlyPrefix + gosterim + LBL.earlySuffix;
+          devSubEl.className = 'deviation-sub pos';
+        }
+        const hint = document.getElementById('kapamaHint');
+        if(hint){
+          hint.textContent = 'Kapatılan: ' + fmtTR(sonuc.kapatilanToplam) + ' ₺' +
+            (sonuc.acikFatura > 0 ? ' · Açık fatura: ' + fmtTR(sonuc.acikFatura) + ' ₺' : '') +
+            (sonuc.kullanilmayanTahsilat > 0 ? ' · Kullanılmayan tahsilat: ' + fmtTR(sonuc.kullanilmayanTahsilat) + ' ₺' : '');
+        }
+      }
+      return;
+    }
+    // yontem === 'kumulatif' → aşağıdaki klasik ortalama vade karşılaştırması çalışır
+    document.querySelectorAll('#cekRows .c-sonuc').forEach(el => { el.hidden = true; });
+    const hintEl = document.getElementById('kapamaHint');
+    if(hintEl) hintEl.textContent = 'Kümülatif: fatura bazında eşleştirme yapılmaz; toplam borcun ve toplam tahsilatın ağırlıklı ortalama vadeleri karşılaştırılır.';
 
     const faturaOrtSerial = faturaAgirlikliTop / faturaAgirlikToplam;
     const cekOrtSerial = cekAgirlikliTop / cekAgirlikToplam;
