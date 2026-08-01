@@ -1,6 +1,6 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-08-01 (10. oturum — `muham` bilgisayarı, güvenlik rotasyonu + widget/menü işleri, 10 commit)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-08-01-widget-hepsi-aninda'` (repo **494 commit**).
+Son güncelleme: **2026-08-02 (11. oturum — `muham` bilgisayarı, 4 yeni modül + mobil menü düzeltmesi)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-08-02-yeni-moduller'` (repo **527 commit**).
 
 > 🚨 **EN KRİTİK KEŞİF (10. oturum): mmgcreativity.com FIREBASE'DEN DEĞİL, GITHUB PAGES'TEN YAYINLANIYOR.**
 > Kaynak repo: **`mmgcreativity/mmgcreativity.github.io`** (`CNAME` → mmgcreativity.com). `firebase deploy --only hosting` YALNIZCA `mmgcreativity-31263.web.app` adresini günceller — **canlı siteye HİÇBİR etkisi yoktur**. 10. oturumda saatlerce "deploy ediyorum ama değişiklik gelmiyor" yaşandı; sebebi buydu.
@@ -27,8 +27,49 @@ Son güncelleme: **2026-08-01 (10. oturum — `muham` bilgisayarı, güvenlik ro
    - ✅ Hesap geçişi (INTERNAL): ÇALIŞIYOR ("kullanıcı geçişi ok") — ama avatar/logo eski hesapta kalıyordu → 6. oturumda düzeltildi (aşağıda), kullanıcı yeni sürümle tekrar test etmeli.
    - ⏳ **Bekleyen davet listesi:** index YETMEDİ — kök neden `collectionGroup('firmas')` için kural yoktu; `firestore.rules`'a `{path=**}/firmas` read kuralı eklendi. **KULLANICI ÇALIŞTIRMALI: `firebase deploy --only firestore:rules`** — sonra davetler görünür.
    - IBAN akışı: "Tüm IBAN'ları Sil → yeni şablonla (Firma Kodu zorunlu) yeniden yükle" hâlâ uygulanmadı; sonuç doğrulanmalı.
+3.5. **11. OTURUMDAN KALAN (2026-08-02):**
+   - ⏳ **Yeni 4 modül kullanıcı testi bekliyor:** Tahsilat Makbuzu, Stok Takip, Risk Yönetimi, Portföy. Kod canlıda ve dumanı-testi geçti (Stok'ta ürün+hareket girip stok/maliyet doğrulandı, test verisi temizlendi), ama kullanıcı henüz gerçek veriyle denemedi.
+   - ⚠️ **`companies` kapsamı bulut yazma hatası:** `firestore.rules`, `companies/{id}` altına `members` dışında yazmaya izin vermiyor; ama `Gelirler.html`/`Giderler.html` gibi ESKİ sayfalar oraya yazmaya çalışıyor olabilir. Ya rules'a `companies/{id}/{document=**}` yazma kuralı eklenmeli ya da bu sayfalar `firmaAccounts`'a taşınmalı. **Karar kullanıcıya sorulmalı.**
+   - 🧹 **Yerel klasör temizliği (kullanıcı yapmalı):** OneDrive çakışma kopyaları `app-version-DESKTOP-V12JA3F-2.json`, `firestore-DESKTOP-V12JA3F.rules`, `index-DESKTOP-V12JA3F-3.html`, `service-worker-DESKTOP-V12JA3F-2.js` + 4 eski zip (`index-guncelleme.zip`, `mmgcreativity-guncel.zip`, `mobil-aciklama.zip`, `nakitakis-verikaybi-fix.zip`). Bunlar deploy edilmiyor ama kafa karıştırıyor.
+   - 💤 **Premium:** kullanıcı kararıyla Play Store yayınına kadar ERTELENDİ (aşağıdaki PREMIUM DURUMU bölümü).
+   - ⏳ Spec bekleyen: her kayıtta admin'e bildirim.
 4. **Muhtemel sıradaki istekler:** KUR/hesap-makinesi üst ikonlarının görsel stili (ışıldak) netleşmedi; Personeller sekmesine Excel toplu yükleme; Talimat'ta personel kullanımı.
 5. Çalışma tarzı: `mmg-site-deploy` skill — sormadan, kuyruk bitene kadar; kapanışta HER ZAMAN (1) yayınlananlar (2) bekleyenler listesi ver ("bekleyen yok" deme hatası kullanıcıyı kızdırdı). **En kritik değişiklik: service worker NETWORK-FIRST** (4. oturum). Şifre sıfırlama maili TAM çalışır (Resend canlı).
+
+## 🟢 2026-08-02 (11. OTURUM — `muham` bilgisayarı) — 4 YENİ MODÜL + MOBİL MENÜ DÜZELTMESİ (commit 527)
+
+**Yayınlanan sürüm:** `SW_VERSION = '2026-08-02-yeni-moduller'` (app-version.json ile aynı). Canlıda doğrulandı.
+
+### Yeni ortak altyapı (3 dosya — bundan sonraki modüller bunları kullansın)
+| Dosya | İş |
+|---|---|
+| `mmg-cloud-init.js` | `type="module"`. Firebase app/auth/db kurulumu + **veri kapsamı** (kişisel `users/{uid}` / firma `firmaAccounts/{id}`) tek yerden. `mmg-auth-ready` ve `mmg-scope-ready` olaylarını yayar. Gelirler/Giderler'deki ~90 satırlık kopyala-yapıştır bloğun yerini alır. |
+| `mmg-store.js` | `MMGStore('ad')` → yerel-önce, bulut-sonra depo. Yerelden ANINDA okur, buluttan yalnızca `updatedAt` daha yeniyse tazeler. Bulut yolu: `{kapsam}/{id}/mmgModules/{ad}`. Ayrıca ortak yardımcılar: `uid/fmt/parse/today/trDate`. |
+| `mmg-module.css` | Yeni modüllerin ortak görünümü (panel, tablo, KPI, rozet, sekme). Mevcut hesaplama sayfalarıyla aynı renk değişkenleri. |
+
+⚠️ `mmg-cloud-init.js` içindeki `canWrite()`, kapsam **`companies`** ise buluta YAZMAZ. Sebep: `firestore.rules`, `companies/{id}` altında `members` dışında hiçbir alt koleksiyona yazma izni vermiyor. **Bu ESKİ sistemde gerçek bir hata:** `Gelirler.html` gibi sayfalar `companies/{id}/gelirler` yazmayı deniyor ve sessizce reddediliyor olabilir. Kullanıcı "veri kayboldu" derse ilk buraya bak.
+
+### Yeni modüller (4 sayfa)
+1. **`Tahsilat_Makbuzu.html`** — Seri–sıra numaralı makbuz. Nakit/Havale/Çek/Senet/DBS/Kredi Kartı/Mahsup. Çek-senet-DBS seçilince banka, çek no, vade, keşideci alanları açılır. **Tutar yazıyla** (Türkçe kurallarına uygun: "BİRBİN" değil "BİN"; kuruş `# … TL … KR #` biçiminde) — 11 senaryoda test edildi. Yazdır/PDF (yazdırma diyaloğu üzerinden, Türkçe karakter sorunu olmasın diye jsPDF metni kullanılmıyor), firma bilgisi hatırlanır, sıra no otomatik artar, mükerrer seri-sıra uyarısı verir.
+2. **`Stok_Takip.html`** — Ürün kartı (kod/ad/birim/KDV/alış/satış/kritik/depo/barkod), Giriş–Çıkış–Sayım hareketleri, ürün ekstresi, Excel/PDF. **Maliyet yöntemi: hareketli ağırlıklı ortalama.** Girişte ortalama yeniden hesaplanır, çıkışta ortalama değişmez ve SMM birikir, sayımda stok girilen değere eşitlenir. Negatif stok uyarısı ve kritik seviye rozeti var. Node ile 4 senaryoda doğrulandı.
+3. **`Risk_Yonetimi.html`** — Müşteri kartı (limit, tanınan vade), risk kalemleri (Açık Hesap/Çek/Senet/DBS/Teminat/Fatura), **alacak yaşlandırma** (vadesi gelmedi / 1-30 / 31-60 / 61-90 / 90+) ve **risk skoru**. Skor 0–100: limit kullanımı %40 + vadesi geçen oranı %35 + karşılıksız geçmişi %25, 90 günü aşan gecikmede +10. Limit tanımlanmamışsa nötr 20 puan verilir ve satırda "limitsiz" rozeti çıkar.
+4. **`Portfoy.html`** — Hisse alış/satış/temettü elle girişi. **İki maliyet yöntemi seçilebilir: FIFO (varsayılan, vergi uygulamasında yaygın) ve ağırlıklı ortalama.** Komisyon alışta maliyete eklenir, satışta hasılattan düşülür. Açık pozisyonlarda güncel fiyat elle girilir (cihazda saklanır) → gerçekleşmemiş K/Z. **Kâr/Zarar Ekstresi** sekmesinde tarih aralığı + sembol filtresiyle gerçekleşen K/Z, temettü ve dönem getirisi. Node ile FIFO/ortalama/komisyon/aşırı-satış senaryolarında doğrulandı.
+
+Menüde yeni ana başlık: **İşletme Yönetimi** (Stok Takip · Risk Yönetimi · Portföy). Tahsilat Makbuzu, **Talimatlar** menüsüne eklendi. TR+EN i18n anahtarları yazıldı.
+
+### Mobil menü — kullanıcının şikâyeti çözüldü
+Şikâyet: *"mobilde menüler karışık geliyor, ana menü alt menü bir arada, hatta bazı menüler hiç yok mesela vade sapma yok."*
+**Kök neden:** Ana sayfadaki `#cardGrid` elle yazılmış **12 kartlık düz bir listeydi**; sol menüde 23 hedef vardı, yani **12 sayfanın hiç kartı yoktu** (Vade Sapma, Çek İskontosu, Teminat Mektubu, Kredi Karşılaştırma, Finans Sözlüğü…). Üstelik kategori kartı ("Hesaplama Araçları") ile tekil araçlar ("Gelirler") aynı düzlemdeydi — mobilde tek sütuna düşünce "karışık" görünüyordu.
+**Çözüm:** Izgara, sol menüdeki kategorilerle **birebir aynı başlıklar** altında gruplandı (`.card-sec`) ve menüdeki her sayfaya kart açıldı → 12 kart **26 karta** çıktı.
+⚠️ `sortCardGrid()` de yeniden yazıldı: eski hâli tüm kartları `grid.appendChild` ile sona taşıyordu, bu başlıkları tepede öbekleyip grupları dağıtırdı. Yeni hâli favorileri en üstte **"★ Favoriler"** bölümünde toplar, gerisini kendi kategorisinde bırakır; kullanıcının sonradan eklediği kısayollar en sonda **"Eklediklerim"** başlığı altına gider. Bölümdeki tüm kartlar gizliyse başlık da gizlenir (`.card-sec[hidden]`).
+
+### Google Play rozeti
+Yıldızlar tek `★★★★★` metni yerine 5 ayrı `<i>` oldu; `display:flex + width:100% + space-between` ile **"Google Play" yazısının tam genişliğine** yayılıyor (soldan ve sağdan birebir hizalı). Boyut 9px → 11px (12,5px'lik yazıyla orantılı).
+
+### Bu oturumda ÖĞRENİLEN (tekrar etme)
+- Chrome MCP ile test ederken `confirm()` diyaloğu **CDP'yi kilitler**; `left_click` 30 sn sonra timeout verir. Silme butonlarını test etmek gerekiyorsa önce `javascript_tool` ile `window.confirm = () => true` yap.
+- Chrome MCP'de `left_click` **ref ile** bazen tetiklenmiyor; koordinatla tıklamak güvenilir.
+- Canlı `app-version.json` bir önceki deploy'da güncellenmemişti (SW güncelken JSON bayattı). **Her deploy'a app-version.json'ı da dâhil et.**
 
 ## 🟢 2026-08-01 (10. OTURUM — `muham` bilgisayarı) — GÜVENLİK ROTASYONU + WIDGET/MENÜ İŞLERİ (10 commit, 472→494)
 
