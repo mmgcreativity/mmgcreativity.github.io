@@ -1,6 +1,6 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-08-01 (8. oturum — `C:\Users\CihanFinans\...` bilgisayarı, yalnız ortam düzeltmesi; kod değişikliği 7. otonom oturumdan)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-08-01-playstore-oylama-bayat-kapsam'` (repo ~470 commit).
+Son güncelleme: **2026-08-01 (8. oturum — `C:\Users\CihanFinans\...` bilgisayarı, yalnız ortam düzeltmesi; kod değişikliği 7. otonom oturumdan)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-08-01-hesap-silme-datasafety'` (repo ~472 commit).
 
 > 📁 **KLASÖR ADI DEĞİŞTİ (2026-08-01):** Yerel çalışma klasörü artık `…\0.mmgcreativity\web\`**`site`** — eskiden `web\html` idi. Sebep: Cowork, `web\html\Scheduled` yolunu "korumalı konum" olarak kayıtlı tuttuğu için (klasör fiziksel olarak YOK, bayat kayıt) `html` ve tüm üst klasörleri bağlanamıyordu; junction ile atlatma da işe yaramadı (gerçek yolu çözüyor). Klasör `site` olarak yeniden adlandırılınca sorun bitti. OneDrive değişikliği diğer makineye de yansıtır → `C:\Users\muham\OneDrive\0.mmgcreativity\web\site`. Yayına etkisi YOK (deploy GitHub web arayüzünden dosya yükleyerek yapılıyor). Eski adı geri koyarsan bağlama sorunu geri gelir.
 
@@ -19,8 +19,8 @@ Son güncelleme: **2026-08-01 (8. oturum — `C:\Users\CihanFinans\...` bilgisay
    - ✅ Hesap geçişi (INTERNAL): ÇALIŞIYOR ("kullanıcı geçişi ok") — ama avatar/logo eski hesapta kalıyordu → 6. oturumda düzeltildi (aşağıda), kullanıcı yeni sürümle tekrar test etmeli.
    - ⏳ **Bekleyen davet listesi:** index YETMEDİ — kök neden `collectionGroup('firmas')` için kural yoktu; `firestore.rules`'a `{path=**}/firmas` read kuralı eklendi. **KULLANICI ÇALIŞTIRMALI: `firebase deploy --only firestore:rules`** — sonra davetler görünür.
    - IBAN akışı: "Tüm IBAN'ları Sil → yeni şablonla (Firma Kodu zorunlu) yeniden yükle" hâlâ uygulanmadı; sonuç doğrulanmalı.
-3. **Muhtemel sıradaki istekler:** KUR/hesap-makinesi üst ikonlarının görsel stili (ışıldak) netleşmedi; Personeller sekmesine Excel toplu yükleme; Talimat'ta personel kullanımı.
-4. Çalışma tarzı: `mmg-site-deploy` skill — sormadan, kuyruk bitene kadar; kapanışta HER ZAMAN (1) yayınlananlar (2) bekleyenler listesi ver ("bekleyen yok" deme hatası kullanıcıyı kızdırdı). **En kritik değişiklik: service worker NETWORK-FIRST** (4. oturum). Şifre sıfırlama maili TAM çalışır (Resend canlı).
+4. **Muhtemel sıradaki istekler:** KUR/hesap-makinesi üst ikonlarının görsel stili (ışıldak) netleşmedi; Personeller sekmesine Excel toplu yükleme; Talimat'ta personel kullanımı.
+5. Çalışma tarzı: `mmg-site-deploy` skill — sormadan, kuyruk bitene kadar; kapanışta HER ZAMAN (1) yayınlananlar (2) bekleyenler listesi ver ("bekleyen yok" deme hatası kullanıcıyı kızdırdı). **En kritik değişiklik: service worker NETWORK-FIRST** (4. oturum). Şifre sıfırlama maili TAM çalışır (Resend canlı).
 
 ## 🟢 2026-08-01 (8. OTURUM — `CihanFinans` bilgisayarı) — ORTAM DÜZELTMESİ
 
@@ -86,6 +86,56 @@ Son güncelleme: **2026-08-01 (8. oturum — `C:\Users\CihanFinans\...` bilgisay
 
 **Deploy edilecek dosyalar:** `index.html`, `premium.html`, `service-worker.js`, `app-version.json`, `mesafeli-satis-sozlesmesi.html`, `iptal-iade.html`, `kvkk.html`, `gizlilik-politikasi.html`, `hesap-silme.html`, `DEVIR-NOTU.md`
 **Yüklenmeyecek:** `PLAY-DATA-SAFETY.md` (iç belge), `_ARSIV/`
+
+### ✅ DEPLOY EDİLDİ + PLAY CONSOLE'A GİRİLDİ (2026-08-01, Chrome eklentisiyle)
+
+- 10 dosya GitHub'a yüklendi (2 commit; ikincisi: gizlilik politikası tarihi 1 Ağustos'a çekildi, premium footer'daki `&amp;` düzeltildi). Canlı doğrulandı: 5 sayfa da açılıyor.
+- **Chrome eklentisi notu:** eklenti **cihangrupfinans@gmail.com** ile giriş yapılmalı (Cowork oturumuyla aynı hesap), yoksa tarayıcı bağlı görünmez. Play Console ise **mmgcreativity@gmail.com** hesabında → Chrome'da ikinci Google hesabı eklendi, Console `/u/1/` altında.
+- **Play Console yolu (bulması zor):** İzleyin ve geliştirin → **Politika ve programlar → Uygulama içeriği**. `/app-content` doğrudan URL'i çalışmıyor, app-list'e atıyor.
+- App ID: `4973910964601792158` · Dev ID: `5592612192845288272`
+- Uygulama içeriğinde **10 beyan zaten tamamlanmış**, "Tamamlanması gerekenler" listesi boş.
+
+**⭐ DÜZELTİLEN KRİTİK HATA — Veri güvenliği formu**
+- **Hesap silme URL'si** ve **Veri silme URL'si** alanlarının İKİSİ de `gizlilik-politikasi.html`'i gösteriyordu. O sayfada silme adımları yok → Google'ın şartını karşılamıyor, tek başına red sebebi.
+- İkisi de `https://mmgcreativity.com/hesap-silme.html` yapıldı ve **KAYDEDİLDİ**.
+- ⏳ Değişiklik kaydedildi ama **Yayınlama özeti'nden Google'a GÖNDERİLMEDİ**. Adım 4'teki 3 alt form bitince gönderilmeli (gönderim sırası: alt formlar → Paylaşıldı düzeltmesi → Kaydet → Yayınlama özeti → incelemeye gönder).
+
+**✅ VERİ TÜRLERİ (adım 3) TAMAMLANDI ve DÜZELTİLDİ**
+- 🔧 **Render sorunu ÇÖZÜLDÜ:** `resize_window` ile pencere **1600×1000** yapılınca yatay kayma bitti, onay kutuları net okunuyor. **Console'da çalışmaya başlamadan önce İLK İŞ bu olmalı.** (Resize sonrası ilk `screenshot` bir kez CDP timeout verebilir; 5 sn bekleyip tekrar dene.)
+- ℹ️ Kategori başlığındaki ifade **"N/M veri türü seçildi"** biçiminde (seçili/toplam). Kayma varken sadece "M veri türü seçildi" görünüp yanıltıyordu.
+- **Düzeltilen iki eksik beyan:**
+  - **Kişisel bilgiler 4/9 → 6/9:** eksik olan **Kullanıcı kimlikleri** (Firebase uid, #kod, `userDirectory`) ve **Diğer bilgiler** (TC Kimlik No + VKN) işaretlendi.
+  - **Finansal bilgiler 2/4 → 3/4:** eksik olan **Kullanıcı ödeme bilgileri** (kullanıcının kaydettiği IBAN / banka hesapları) işaretlendi. Kredi puanı boş kaldı (doğru).
+- **Doğru olduğu teyit edilenler (dokunulmadı):** Konum 0/2, Sağlık ve fitness 0/2, Ses dosyaları 0/3, Takvim 0/1, Kişiler 0/1, Web'e göz atma 0/1 — hepsi boş ✓. Mesajlar 2/3, Fotoğraflar ve videolar 1/2, Dosyalar ve dokümanlar 1/1, Uygulama etkinliği 2/5, Uygulama bilgileri ve performansı 2/3, **Cihaz veya diğer kimlikler 1/1** ✓.
+- Değişiklikler **"Taslağı kaydet" ile KAYDEDİLDİ** ("Değişiklikleriniz kaydedildi" doğrulandı). Form henüz gönderilebilir durumda DEĞİL (aşağıya bak).
+
+**⛔ SIRADAKİ OTURUMUN İLK İŞİ — adım 4'te 3 alt form "Başlamadı"**
+Yeni işaretlenen 3 veri türü, **4. adım (Veri kullanımı ve işleme)** ekranında `Başlamadı` durumunda. Bunlar doldurulmadan form GÖNDERİLEMEZ:
+1. Kişisel bilgiler → **Kullanıcı kimlikleri** → `Başlat`
+2. Kişisel bilgiler → **Diğer bilgiler** → `Başlat`
+3. Finansal bilgiler → **Kullanıcı ödeme bilgileri** → `Başlat`
+
+Üçü için de doğru cevaplar: **"Toplandı" EVET · "Paylaşıldı" HAYIR** (bu veriler AdSense/Analytics'e gitmiyor, yalnız Firebase'de duruyor) · zorunlu/isteğe bağlı: uid zorunlu, TCKN/VKN ve IBAN isteğe bağlı · amaç: "Uygulama işlevselliği" (+ hesap yönetimi).
+
+**⚠️ HÂLÂ ÇÖZÜLMEDİ — AdSense/Analytics paylaşım çelişkisi**
+- Önizlemede **"Üçüncü taraflarla veri paylaşımı yok"** yazıyor. Ama **AdSense** (`ca-pub-7339763610555735`) ve **Google Analytics** (`G-WVWJ4VZE0C`, `G-X8HEZRNWWS`) reklam kimliği + etkileşim verisini üçüncü tarafa gönderiyor. Google APK'yı otomatik tarıyor → bu çelişki red sebebi.
+- Düzeltme: 4. adımda **Uygulama etkinliği → Uygulama etkileşimleri** ve **Cihaz veya diğer kimlikler** için "Paylaşıldı" işaretlenmeli. `gizlilik-politikasi.html` ve `kvkk.html` bu paylaşımı zaten yazıyor (8. oturumda eklendi), yani metin tarafı hazır — eksik olan yalnız form.
+
+**⏳ Play Console'da HENÜZ BAKILMAYAN beyanlar:** Gizlilik politikası URL'i, Reklam, Hedef kitle ve içerik, Finans ile ilgili özellikler, Reklam Kimliği (AD_ID izni), Oturum açma bilgileri.
+
+### ⭐ MÜKERRER MÜŞTERİ KODU YARIŞI ÇÖZÜLDÜ — SW `2026-08-01-mukerrer-kod-yarisi-fix`
+
+- **Şikâyet:** "Murat Doğan diye kullanıcı açtık, adamda **1027** görünüyor, panelde **1028**."
+- **Kök neden (yarış durumu):** `createUserWithEmailAndPassword` çağrılır çağrılmaz `onAuthStateChanged` tetikleniyor. O anda kayıt akışı `users/{uid}` dokümanını HENÜZ yazmamış oluyor → oradaki backfill (`if(!data.customerNumber)`) dokümanı boş görüp **`getNextCustomerNumber()` ile İKİNCİ bir numara** üretiyor ve yazıyor. Kayıt akışı da kendi ürettiği numarayı `localStorage`'a + rozete yazıyor. Sonuç: sayaçtan **iki numara** yanıyor, `userDirectory`'de aynı uid için **iki kayıt** oluşuyor, kullanıcının ekranı ile panel farklı kod gösteriyor.
+- **Aynı hata ikinci bir yerde daha vardı:** `mmgEnsureCustomerNumber()` (geç açılan sekme/backfill yolu) — orada da doküman yoksa numara üretiliyordu.
+- **Düzeltme (`index.html`, 3 nokta):**
+  1. `onAuthStateChanged` backfill'i artık `if(!data.customerNumber && snap.exists() && !window.mmgSignupInProgress)` — **doküman HİÇ YOKSA numara üretmez** (o bir yeni kayıttır, kodu kayıt akışı yazacak). Backfill yalnızca "doküman var ama alan yok" olan GERÇEK eski hesaplarda çalışır.
+  2. `mmgEnsureCustomerNumber()` aynı korumayı aldı (`docExists` değişkeni eklendi); üretmediyse `mmgCustomerNoBackfillTried` geri açılıyor ki kayıt bitince tekrar denensin.
+  3. `window.mmgSignupInProgress` bayrağı: `createUserWithEmailAndPassword`'dan hemen ÖNCE `true`, `users/{uid}` yazıldıktan sonra `false`. Kayıt yarıda kesilirse asılı kalmasın diye **15 sn'lik `setTimeout` güvenlik ağı** var.
+- ⚠️ **Geriye dönük veri:** Murat Doğan'ın `users/{uid}.customerNumber` alanı **1028** (panelin gösterdiği doğru değer). Cihazındaki 1027 bayat `localStorage.mmg_customer_no` değeri — **çıkış yapıp tekrar girince 1028'e döner**. `userDirectory/1027` artık kaydı duruyor (kurallar delete'e izin vermiyor); kod çözümü "en yüksek sayısal kod"u seçtiği için zarar vermiyor. Sayaçtan 1 numara boşa yandı, kozmetik.
+- 🔎 Aynı belirtiyi gösteren eski kayıtlar varsa (`userDirectory`'de aynı uid'ye ait iki doküman) hepsi bu yarıştan kaynaklanıyor; artık yenisi oluşmayacak.
+
+**⏰ Üretime başvuru:** 12 test kullanıcısı kesintisiz 12 gündür kayıtlı, **14 gün şartı ~3 Ağustos'ta doluyor** → "Üretime başvur" butonu o zaman açılır.
 
 - Bu bölümden önceki ortam düzeltmesinde kod/deploy tarafında değişiklik YAPILMAMIŞTI.
 

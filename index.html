@@ -3512,7 +3512,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       mmgEnsureSessionOwnership(user.uid);
       // Eski/taşınmış hesaplarda müşteri kodu hiç atanmamış olabilir — bu durumda
       // şimdi bir tane atayıp kaydediyoruz, böylece rozet e-posta yerine kod gösterebilsin.
-      if(!data.customerNumber){
+      // ⚠️ İKİ ŞARTA DİKKAT (2026-08-01 mükerrer kod düzeltmesi):
+      //   snap.exists()  → doküman HİÇ YOKSA bu yeni bir kayıttır; kayıt akışı kodu birazdan
+      //                    kendisi yazacak. Burada üretmek sayaçtan ikinci bir numara yakar.
+      //   !mmgSignupInProgress → kayıt akışı sürüyorsa hiç karışma.
+      // Backfill artık YALNIZCA "doküman var ama customerNumber alanı yok" olan gerçek
+      // eski hesaplar için çalışır.
+      if(!data.customerNumber && snap.exists() && !window.mmgSignupInProgress){
         try{
           const newNo = await getNextCustomerNumber();
           await setDoc(doc(db, 'users', user.uid), { customerNumber: newNo }, { merge: true });
@@ -3808,18 +3814,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(!user) return;                                      // henüz oturum hazır değil
     mmgCustomerNoBackfillTried = true;
     try{
-      let no = null, uname = null;
+      let no = null, uname = null, docExists = false;
       try{
         const snap = await getDoc(doc(db, 'users', user.uid));
+        docExists = snap.exists();
         if(snap.exists()){
           no = snap.data().customerNumber || null;
           uname = snap.data().username || null;
         }
       }catch(readErr){ /* profil okunamazsa yine de üretmeyi dene */ }
-      if(!no){
+      // Yukarıdaki onAuthStateChanged backfill'iyle aynı koruma: doküman hiç yoksa
+      // (= kayıt akışı sürüyor) ya da kayıt bayrağı açıksa numara ÜRETME; yoksa
+      // aynı kullanıcıya iki ayrı kod çıkar (bkz. 2026-08-01 mükerrer kod düzeltmesi).
+      if(!no && docExists && !window.mmgSignupInProgress){
         no = await getNextCustomerNumber();
         await setDoc(doc(db, 'users', user.uid), { customerNumber: no }, { merge: true });
       }
+      if(!no) mmgCustomerNoBackfillTried = false;   // kayıt bitince tekrar denenebilsin
       if(no){
         localStorage.setItem('mmg_customer_no', String(no));
         if(uname) localStorage.setItem('mmg_username', uname);
@@ -4973,6 +4984,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           return;
         }
         mmgJustAuthenticatedThisTab = true;
+        // 2026-08-01 — MÜKERRER KOD YARIŞI: createUser çağrılır çağrılmaz onAuthStateChanged
+        // tetikleniyor ve users/{uid} dokümanı HENÜZ YAZILMADIĞI için oradaki backfill
+        // "kodu yok" sanıp İKİNCİ bir müşteri numarası üretiyordu (kullanıcıda 1027,
+        // panelde 1028 görünmesinin sebebi buydu). Bu bayrak, kayıt akışı users/{uid}
+        // dokümanını yazana kadar backfill'i susturur.
+        window.mmgSignupInProgress = true;
+        // Güvenlik ağı: kayıt yarıda kesilirse (kullanıcı adı alınmış, ağ hatası vb.)
+        // bayrak asılı kalıp gerçek eski hesapların backfill'ini engellemesin.
+        setTimeout(function(){ window.mmgSignupInProgress = false; }, 15000);
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         // Kullanıcı adı benzersizliği: "usernames/{kucukharfli-ad}" dokümanını
         // rezerve etmeye çalış. Doküman zaten varsa (başka biri bu adı önce
@@ -5031,6 +5051,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           premiumBenefit: premiumBenefit,
           createdAt: serverTimestamp()
         });
+        // users/{uid} artık customerNumber ile birlikte yazıldı → backfill'in susturulmasına
+        // gerek kalmadı, bayrağı indir (bkz. mmgSignupInProgress).
+        window.mmgSignupInProgress = false;
         try{ gtag('event', 'sign_up', { method: 'password' }); }catch(e){}
         // Referans istatistiği: hangi kodun kaç kişi getirdiğini ve kimleri getirdiğini kaydet
         if(referralCode){
