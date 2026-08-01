@@ -95,10 +95,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   /* Fatura paneli içeriği kadar (sabit), kalan genişliğin TAMAMI tahsilat paneline gider
      (kullanıcı: "faturaları daralt, tahsilatları genişlet" — fatura tarafında boşluk vardı,
      tahsilat tarafındaki kapama açıklamaları ise sıkışıyordu). */
-  .cols{ display:grid; grid-template-columns:600px minmax(0,1fr); gap:24px; align-items:start; }
+  .cols{ display:grid; grid-template-columns:564px minmax(0,1fr); gap:20px; align-items:start; }
   @media (max-width:1120px){ .cols{ grid-template-columns:1fr; } }
 
-  .panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:22px; }
+    /* İç dolgu 22→14px ve hücre araları 8→6px: panel içindeki ölü boşluk alındı
+     (kullanıcı: "bu boşluklar beni çok sinir ediyor, yok et ve daralt"). */
+  .panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:18px 14px; }
   .panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
   .panel-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; }
   .panel-title.fatura{ color:var(--azure); }
@@ -111,7 +113,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      Artık Excel gibi: başlıklar BİR KEZ üstte (.tbl-head), satırlar yalnızca hücre. */
   .row-table{ display:flex; flex-direction:column; gap:0; }
   .tbl-head{
-    display:flex; flex-wrap:nowrap; gap:8px; align-items:center;
+    display:flex; flex-wrap:nowrap; gap:6px; align-items:center;
     padding:0 34px 6px 0; border-bottom:1px solid var(--hairline); margin-bottom:2px;
   }
   .tbl-head .th{
@@ -138,7 +140,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .tbl-head .th.c-tutar-wrap{ flex:0 0 122px; }
 
   .entry-row{
-    display:flex; flex-wrap:nowrap; align-items:center; gap:8px;
+    display:flex; flex-wrap:nowrap; align-items:center; gap:6px;
     background:transparent; border:none; border-bottom:1px solid var(--hairline);
     border-radius:0; padding:2px 0;
   }
