@@ -311,7 +311,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .io-msg{ font-size:12px; margin-top:8px; min-height:0; }
   .io-msg.ok{ color:var(--teal); }
   .io-msg.err{ color:var(--coral); }
-  .ka-hint{ grid-column:1 / -1; font-size:10.5px; color:var(--muted); line-height:1.5; }
 
   /* ---- Tahsilat satırı kapama sonucu (kaç gün erken/geç + neyi kapattı) ---- */
   /* Kapama açıklamaları, ✕ düğmesinin sağında VERİ GİRİŞ KUTUSU görünümünde bir
@@ -495,7 +494,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <option value="bolme">Bölünmesin — tek faturaya</option>
           </select>
         </div>
-        <div class="ka-hint" id="kapamaHint">Sapma, kapatılan tutarlarla ağırlıklandırılır.</div>
       </div>
 
     <div class="io-toolbar">
@@ -1285,19 +1283,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           devSubEl.textContent = LBL.earlyPrefix + gosterim + LBL.earlySuffix;
           devSubEl.className = 'deviation-sub pos';
         }
-        const hint = document.getElementById('kapamaHint');
-        if(hint){
-          hint.textContent = 'Kapatılan: ' + fmtTR(sonuc.kapatilanToplam) + ' ₺' +
-            (sonuc.acikFatura > 0 ? ' · Açık fatura: ' + fmtTR(sonuc.acikFatura) + ' ₺' : '') +
-            (sonuc.kullanilmayanTahsilat > 0 ? ' · Kullanılmayan tahsilat: ' + fmtTR(sonuc.kullanilmayanTahsilat) + ' ₺' : '');
-        }
       }
       return;
     }
     // yontem === 'kumulatif' → aşağıdaki klasik ortalama vade karşılaştırması çalışır
     document.querySelectorAll('#cekRows .c-sonuc').forEach(el => { el.innerHTML = ''; });
-    const hintEl = document.getElementById('kapamaHint');
-    if(hintEl) hintEl.textContent = 'Kümülatif: fatura bazında eşleştirme yapılmaz; toplam borcun ve toplam tahsilatın ağırlıklı ortalama vadeleri karşılaştırılır.';
 
     const faturaOrtSerial = faturaAgirlikliTop / faturaAgirlikToplam;
     const cekOrtSerial = cekAgirlikliTop / cekAgirlikToplam;
