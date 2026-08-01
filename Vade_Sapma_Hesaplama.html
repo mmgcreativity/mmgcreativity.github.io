@@ -92,8 +92,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   main{ max-width:1480px; margin:0 auto; padding:28px 24px 24px; }
 
-  .cols{ display:grid; grid-template-columns:1.18fr 1fr; gap:24px; align-items:start; }
-  @media (max-width:940px){ .cols{ grid-template-columns:1fr; } }
+  /* Fatura paneli içeriği kadar (sabit), kalan genişliğin TAMAMI tahsilat paneline gider
+     (kullanıcı: "faturaları daralt, tahsilatları genişlet" — fatura tarafında boşluk vardı,
+     tahsilat tarafındaki kapama açıklamaları ise sıkışıyordu). */
+  .cols{ display:grid; grid-template-columns:600px minmax(0,1fr); gap:24px; align-items:start; }
+  @media (max-width:1120px){ .cols{ grid-template-columns:1fr; } }
 
   .panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:22px; }
   .panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
