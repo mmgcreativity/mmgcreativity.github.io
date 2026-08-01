@@ -222,11 +222,11 @@
 </section>
 
 <div class="trust">
-  <p data-i18n="trust_note">Ödemeler PayTR güvenli altyapısıyla işlenir · İstediğiniz zaman iptal edebilirsiniz</p>
+  <p data-i18n="trust_note">Abonelik Google Play üzerinden satın alınır · İstediğiniz zaman Google Play hesabınızdan iptal edebilirsiniz</p>
 </div>
 
 <footer class="legal">
-  <a href="mesafeli-satis-sozlesmesi.html" data-i18n="legal1">Mesafeli satış sözleşmesi</a> ·
+  <a href="mesafeli-satis-sozlesmesi.html" data-i18n="legal1">Satış ve ödeme koşulları</a> ·
   <a href="iptal-iade.html" data-i18n="legal2">İptal &amp; iade</a> ·
   <a href="kvkk.html" data-i18n="legal3">KVKK aydınlatma metni</a>
 </footer>
@@ -256,9 +256,13 @@
   }
 
   function startSubscription(){
-    // TODO: Cloudflare Worker uzerinden PayTR abonelik baslatma endpoint'ine yonlendirilecek.
-    // Ornek: window.location.href = `https://YOUR-WORKER.workers.dev/create-subscription?plan=${currentPlan}`;
-    alert((mmgLang === 'en' ? 'Payment integration is not connected yet. Plan: ' : 'Odeme entegrasyonu henuz baglanmadi. Plan: ') + currentPlan);
+    // 2026-08-01: PayTR basvurusu reddedildi, web uzerinden satis YOK.
+    // Abonelik yalnizca Google Play Billing uzerinden satilacak; bu buton Android
+    // uygulamasinda in-app satin alma akisini tetikleyecek. Tarayicida Play sayfasina yonlendirilir.
+    alert(mmgLang === 'en'
+      ? 'Premium is sold only through Google Play. Opening the Play Store page.'
+      : 'Premium yalnizca Google Play uzerinden satiliyor. Play Store sayfasi aciliyor.');
+    window.open('https://play.google.com/store/apps/details?id=com.mmgcreativity.dijitalfinans', '_blank', 'noopener');
   }
 </script>
 <script>
@@ -273,8 +277,8 @@
       f2_title:'Sınırsız nakit akış tablosu', f2_desc:'Geçmiş dönemleri, gelir/gider kırılımlarını sınırsız görüntüleyin.',
       f3_title:'Gelişmiş hesaplama araçları', f3_desc:'Tüm finansal hesaplama modüllerine tam erişim.',
       f4_title:'Öncelikli talimat hazırlama', f4_desc:'Talimat şablonlarınızı daha hızlı oluşturun ve kaydedin.',
-      trust_note:'Ödemeler PayTR güvenli altyapısıyla işlenir · İstediğiniz zaman iptal edebilirsiniz',
-      legal1:'Mesafeli satış sözleşmesi', legal2:'İptal &amp; iade', legal3:'KVKK aydınlatma metni'
+      trust_note:'Abonelik Google Play üzerinden satın alınır · İstediğiniz zaman Google Play hesabınızdan iptal edebilirsiniz',
+      legal1:'Satış ve ödeme koşulları', legal2:'İptal &amp; iade', legal3:'KVKK aydınlatma metni'
     },
     en: {
       back_to_panel:'&larr; Back to panel', hero_title_a:'The full version of', hero_title_b:'managing your finances',
@@ -285,8 +289,8 @@
       f2_title:'Unlimited cash flow table', f2_desc:'View past periods and income/expense breakdowns without limit.',
       f3_title:'Advanced calculation tools', f3_desc:'Full access to all financial calculation modules.',
       f4_title:'Priority instruction preparation', f4_desc:'Create and save your instruction templates faster.',
-      trust_note:'Payments are processed securely via PayTR · Cancel anytime',
-      legal1:'Distance sales agreement', legal2:'Cancellation & refunds', legal3:'Privacy notice'
+      trust_note:'Subscriptions are purchased through Google Play · Cancel anytime from your Google Play account',
+      legal1:'Sales & payment terms', legal2:'Cancellation & refunds', legal3:'Privacy notice'
     }
   });
 

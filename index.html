@@ -1064,7 +1064,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       sc_desc_vadelimevduat:'Vadeli mevduatınızın getirisini faiz ve stopaj sonrası hesaplayın.',
       sc_desc_krediteklif:'Farklı bankaların kredi tekliflerini yan yana karşılaştırın.',
       sc_desc_kullanici:'Firmanıza bağlı kullanıcıları ekleyin ve yetkilerini yönetin.',
-      footer_follow_us:'Bizi Takip Edin', footer_powered_by:'Powered by', footer_download_now:'Hemen İndirin',
+      footer_follow_us:'Bizi Takip Edin', footer_powered_by:'Powered by', footer_download_now:'İndirin ve Oylayın',
       footer_rate_us_small:'Beğendiyseniz', footer_rate_us:'Bizi Oylayın',
       footer_about:'Hakkında', footer_privacy:'Gizlilik Politikası', footer_terms:'Kullanım Şartları',
       close:'Kapat',
@@ -1176,7 +1176,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       sc_desc_vadelimevduat:'Calculate your time-deposit return after interest and withholding tax.',
       sc_desc_krediteklif:'Compare loan offers from different banks side by side.',
       sc_desc_kullanici:'Add users linked to your company and manage their permissions.',
-      footer_follow_us:'Follow Us', footer_powered_by:'Powered by', footer_download_now:'Download Now',
+      footer_follow_us:'Follow Us', footer_powered_by:'Powered by', footer_download_now:'Download & Rate Us',
       footer_rate_us_small:'Enjoying it?', footer_rate_us:'Rate Us',
       footer_about:'About', footer_privacy:'Privacy Policy', footer_terms:'Terms of Use',
       close:'Close',
@@ -1374,9 +1374,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Gizlilik Politikası</a> üzerinden ulaşabilirsiniz.
       </div>
       <div class="welcome-law-box">
-        💳 <strong>Abonelik ve Ödeme Güvencesi:</strong> Premium abonelik ödemeleriniz, banka düzeyinde güvenlik
-        sertifikasına sahip <strong>PayTR</strong> güvenli ödeme altyapısı üzerinden alınır. Kart bilgileriniz bizim
-        sunucularımızda tutulmaz; istediğiniz zaman aboneliğinizi iptal edebilirsiniz.
+        💳 <strong>Abonelik ve Ödeme Güvencesi:</strong> Premium abonelik satın alma işlemleri yalnızca
+        <strong>Google Play</strong> üzerinden yapılır ve ödeme Google Play Billing altyapısı tarafından işlenir.
+        Kart bilgileriniz bizim sunucularımızda tutulmaz; aboneliğinizi istediğiniz zaman Google Play hesabınızdan iptal edebilirsiniz.
       </div>
 
       <div class="welcome-select-all">
@@ -1421,7 +1421,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <h4>3. İşleme Amaçları</h4>
       <p>Verileriniz; hesabınızın oluşturulması, hizmetin sunulması, finansal hesaplama araçlarının çalıştırılması, abonelik/ödeme işlemlerinin yürütülmesi ve yasal yükümlülüklerin yerine getirilmesi amacıyla işlenir.</p>
       <h4>4. Verilerin Aktarımı</h4>
-      <p>Verileriniz, barındırma hizmeti aldığımız Google Firebase ve ödeme işlemleri için PayTR dışında, açık rızanız veya bir firma/ekip bağlantınız olmadıkça üçüncü kişilerle paylaşılmaz.</p>
+      <p>Verileriniz, barındırma hizmeti aldığımız Google Firebase ve abonelik ödemelerinin işlendiği Google Play Billing dışında, açık rızanız veya bir firma/ekip bağlantınız olmadıkça üçüncü kişilerle paylaşılmaz.</p>
       <h4>5. Saklama Süresi</h4>
       <p>Verileriniz, hesabınız aktif olduğu sürece ve ilgili mevzuatta öngörülen zamanaşımı süreleri boyunca saklanır; hesap silme talebinizle birlikte mevzuatın izin verdiği ölçüde silinir/anonimleştirilir.</p>
       <h4>6. Haklarınız</h4>
@@ -2008,17 +2008,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
           <!-- Play Store rozeti: href="#" ölü linkti (2026-07-31 düzeltildi). Paket adı
                .well-known/assetlinks.json'dan: com.mmgcreativity.dijitalfinans
-               Kullanıcı isteği: indirmenin yanında PUANLAMA çağrısı da olsun. -->
+               2026-08-01: ayrı "Bizi Oylayın" butonu KALDIRILDI (aynı yeri açıyordu);
+               tek rozet kaldı, yazı "İndirin ve Oylayın" + sonda yıldız ikonu. -->
           <a href="https://play.google.com/store/apps/details?id=com.mmgcreativity.dijitalfinans"
              target="_blank" rel="noopener" class="app-badge app-badge-small" title="Google Play'de aç — indirin ve bizi puanlayın">
             <svg viewBox="0 0 24 24"><path d="M3.6 2.6a1 1 0 0 0-.6.9v17a1 1 0 0 0 .6.9l9.7-9.4-9.7-9.4z" fill="#00d2ff"/><path d="M13.3 12l3-2.9 3.9 2.2c.9.5.9 1.4 0 1.9l-3.9 2.2-3-2.4z" fill="#ffd200"/><path d="M13.3 12L3.6 2.6c.2 0 .5 0 .7.1l11 6.3-2 2.9z" fill="#00e676"/><path d="M13.3 12l2 2.9-11 6.3c-.2.1-.5.1-.7.1L13.3 12z" fill="#ff3d57"/></svg>
-            <span class="app-badge-text"><span data-i18n="footer_download_now">Hemen İndirin</span><b>Google Play</b></span>
-          </a>
-          <!-- Doğrudan puanlama: Play Store'da yorum/puan bölümünü açar. -->
-          <a href="https://play.google.com/store/apps/details?id=com.mmgcreativity.dijitalfinans&showAllReviews=true"
-             target="_blank" rel="noopener" class="app-badge app-badge-small" title="Google Play'de bizi puanlayın">
-            <svg viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.4-5.8-3-5.8 3 1.1-6.4L2.6 9.4l6.5-.9z" fill="#FFC107"/></svg>
-            <span class="app-badge-text"><span data-i18n="footer_rate_us_small">Beğendiyseniz</span><b data-i18n="footer_rate_us">Bizi Oylayın</b></span>
+            <span class="app-badge-text"><span data-i18n="footer_download_now">İndirin ve Oylayın</span><b>Google Play</b></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.4-5.8-3-5.8 3 1.1-6.4L2.6 9.4l6.5-.9z" fill="#FFC107"/></svg>
           </a>
           </div>
         </div>

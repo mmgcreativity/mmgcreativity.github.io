@@ -1,6 +1,8 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-08-01 (7. otonom oturum — `C:\Users\muham\...` bilgisayarı)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-08-01-playstore-oylama-bayat-kapsam'` (repo ~470 commit).
+Son güncelleme: **2026-08-01 (8. oturum — `C:\Users\CihanFinans\...` bilgisayarı, yalnız ortam düzeltmesi; kod değişikliği 7. otonom oturumdan)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-08-01-playstore-oylama-bayat-kapsam'` (repo ~470 commit).
+
+> 📁 **KLASÖR ADI DEĞİŞTİ (2026-08-01):** Yerel çalışma klasörü artık `…\0.mmgcreativity\web\`**`site`** — eskiden `web\html` idi. Sebep: Cowork, `web\html\Scheduled` yolunu "korumalı konum" olarak kayıtlı tuttuğu için (klasör fiziksel olarak YOK, bayat kayıt) `html` ve tüm üst klasörleri bağlanamıyordu; junction ile atlatma da işe yaramadı (gerçek yolu çözüyor). Klasör `site` olarak yeniden adlandırılınca sorun bitti. OneDrive değişikliği diğer makineye de yansıtır → `C:\Users\muham\OneDrive\0.mmgcreativity\web\site`. Yayına etkisi YOK (deploy GitHub web arayüzünden dosya yükleyerek yapılıyor). Eski adı geri koyarsan bağlama sorunu geri gelir.
 
 > ⚠️ **İKİ BİLGİSAYAR UYARISI (yeni):** Bu proje artık iki makineden yürütülüyor — `C:\Users\muham\...` ve `C:\Users\CihanFinans\...`. 7. oturumda, 6. oturumun (diğer makine) yazdığı devir notu ve `firestore.rules` değişikliği OneDrive üzerinden **oturumun ortasında** geldi. Devir notunu **ASLA baştan yazma, kendi bölümünü EKLE**; yoksa diğer makinenin notlarını silersin. Deploy öncesi `git`/GitHub commit listesine bakıp başka bir oturumun commit atıp atmadığını kontrol et.
 
@@ -9,7 +11,8 @@ Son güncelleme: **2026-08-01 (7. otonom oturum — `C:\Users\muham\...` bilgisa
    ⚠️ 7. oturumda bu tuzak GERÇEKTEN yaşandı: ilk okumada yerel dosyalar bayattı, birkaç saniye sonra senkron bitince değiştiler. Dosyayı okuduktan sonra bile bir kez daha doğrula.
 2. **⛔ KULLANICI TARAFINDA BEKLEYEN — ÖNCELİKLİ:**
    - **GÜVENLİK:** Google OAuth **client secret 3 kez açığa çıktı** (2 ekran görüntüsü + PowerShell geçmişi). Google Cloud → Clients → "Blogger Publish" → **Reset secret** → `firebase functions:secrets:set BLOGGER_CLIENT_SECRET` → `firebase deploy --only functions:publishToBlogger`. **Resend API anahtarı** da hâlâ yenilenmedi.
-   - **YASAL:** `premium.html` üç sözleşme sayfasına link veriyor, **üçü de canlıda 404**: `mesafeli-satis-sozlesmesi.html`, `iptal-iade.html`, `kvkk.html`. Ödeme sayfasında olmayan sözleşme linkleri. Metinleri kullanıcı sağlamalı — hukuki metin uydurulmadı.
+   - **ÖDEME MODELİ:** Satış **yalnızca Google Play Billing** ile olacak (PayTR başvurusu reddedildi, sitede web satışı YOK). Kullanıcı vergiden muaf gerçek kişi, firma değil — sözleşme metinlerinde ünvan/MERSİS kullanma.
+   - **YASAL:** 3 sözleşme sayfası 8. oturumda OLUŞTURULDU (`mesafeli-satis-sozlesmesi.html`, `iptal-iade.html`, `kvkk.html`) — deploy edilince 404 biter. Kimlik bilgileri dolduruldu (Muhammed Mutlu Güler, Nilüfer/Bursa). **Kalan tek iş:** metinlerin bir hukukçuya okutulması — Play Store'da satış açılmadan önce.
    - `firebase deploy --only firestore:rules` (bekleyen davet listesi — 6. oturumdan kalan).
 3. **Doğrulama bekleyenler (kod tamam, kullanıcı testi bekliyor):**
    - ✅ Ana sayfa / "← Ana Sayfa" gizleme: kullanıcı "ana sayfa ok" dedi (6. oturum).
@@ -18,6 +21,73 @@ Son güncelleme: **2026-08-01 (7. otonom oturum — `C:\Users\muham\...` bilgisa
    - IBAN akışı: "Tüm IBAN'ları Sil → yeni şablonla (Firma Kodu zorunlu) yeniden yükle" hâlâ uygulanmadı; sonuç doğrulanmalı.
 3. **Muhtemel sıradaki istekler:** KUR/hesap-makinesi üst ikonlarının görsel stili (ışıldak) netleşmedi; Personeller sekmesine Excel toplu yükleme; Talimat'ta personel kullanımı.
 4. Çalışma tarzı: `mmg-site-deploy` skill — sormadan, kuyruk bitene kadar; kapanışta HER ZAMAN (1) yayınlananlar (2) bekleyenler listesi ver ("bekleyen yok" deme hatası kullanıcıyı kızdırdı). **En kritik değişiklik: service worker NETWORK-FIRST** (4. oturum). Şifre sıfırlama maili TAM çalışır (Resend canlı).
+
+## 🟢 2026-08-01 (8. OTURUM — `CihanFinans` bilgisayarı) — ORTAM DÜZELTMESİ
+
+- **Cowork klasörü bağlanamıyordu.** Hata: `web\html` "korumalı konum (`web\html\Scheduled`) ile çakışıyor". Teşhis: `dir /a` ile bakıldı, **`Scheduled` klasörü fiziksel olarak YOK**; aktif zamanlanmış görev de yok → Cowork tarafında bayat kayıt. `0.mmgcreativity` ve `web` gibi üst klasörler de aynı sebeple reddediliyordu.
+- **Denenip işe YARAMAYANLAR:** junction (`mklink /J C:\mmgweb …` ve Masaüstü altına junction) — Cowork gerçek yolu çözüp yine engelliyor; Claude uygulamasını kapat-aç — kayıt kalıcı.
+- **ÇÖZÜM:** klasör `web\html` → `web\site` olarak yeniden adlandırıldı, bağlantı sorunsuz kuruldu. Junction'lar temizlendi.
+
+### Aynı oturumda yapılan işler — SW `2026-08-01-tek-playstore-rozeti`
+
+**Play Store rozeti tekilleştirildi (`index.html`)**
+- Kullanıcı: "bu ikisi aynı yeri açıyor, soldaki kalsın". Ayrı **"Bizi Oylayın"** rozeti KALDIRILDI (7. oturumda eklenmişti; `showAllReviews=true` parametresi Play Store'da artık ayrı bir ekran açmıyor, aynı ürün sayfasına düşüyordu).
+- Kalan tek rozet: Play ikonu + `İndirin ve Oylayın` / **Google Play** + sonda sarı **yıldız** SVG'si. i18n: `footer_download_now` tr `'İndirin ve Oylayın'`, en `'Download & Rate Us'`. `footer_rate_us*` anahtarları sözlükte DURUYOR (başka sayfada kullanılıyor olabilir diye silinmedi).
+
+**3 sözleşme sayfası oluşturuldu (canlıdaki 404'ler için)**
+- `mesafeli-satis-sozlesmesi.html`, `iptal-iade.html`, `kvkk.html` — `gizlilik-politikasi.html` ile birebir aynı koyu tema/CSS, `premium.html` footer'ındaki dosya adlarıyla birebir eşleşiyor.
+- İçerik premium.html'den alınan GERÇEK verilerle yazıldı: 999₺/ay, 799₺/ay (yıllık 9.588₺), PayTR, 4 premium özelliği, `mmgcreativity@gmail.com`.
+- ⛔ **KULLANICI DOLDURMALI:** mesafeli satış ve KVKK sayfalarında satıcı/veri sorumlusu kimliği kırmızı-kesikli `[Ticari ünvan]`, `[Açık adres]`, `[Vergi dairesi/no]`, `[MERSİS no]`, `[Telefon]` kutuları olarak bırakıldı (uydurulmadı). Ödeme akışı açılmadan önce bunlar doldurulmalı ve metinler bir hukukçuya okutulmalı.
+- İptal/iade sayfasındaki süreler (14 gün iyi niyet iadesi, yenileme sonrası 7 gün, 7 iş günü sonuçlandırma, 2–10 iş günü banka süresi) **öneri niteliğinde**; kullanıcı kendi politikasına göre değiştirebilir.
+- 3 sayfaya da `<meta name="robots" content="noindex">` konuldu (taslak alanlar dolana kadar aramada çıkmasın).
+
+**Yerel klasör temizliği (SİLİNMEDİ, taşındı)**
+- `site\_ARSIV\` klasörü açıldı; şunlar oraya TAŞINDI (32 dosya): 14 adet `*-DESKTOP-V12JA3F*` OneDrive çakışma kopyası, 12 adet `.fuse_hidden*`, `._ck_1`, `err.txt`, 4 zip (`chat-guncelleme`, `degisiklikler-2026-07-28-11/12/13`).
+- `.firebaserc`, `.firebase/`, `functions/` ve tüm canlı dosyalar DOKUNULMADI. `_ARSIV` GitHub'a yüklenmemeli.
+- Hâlâ duran: `zibD1tAO` (94 KB, uzantısız — ne olduğu belirsiz, dokunulmadı).
+
+### ⭐ ÖDEME MODELİ DEĞİŞTİ — PayTR TAMAMEN KALKTI, SATIŞ SADECE GOOGLE PLAY — SW `2026-08-01-playstore-satis-paytr-kalkti`
+
+- **Kullanıcı bilgisi (kritik):** PayTR başvurusu **REDDEDİLDİ**, web üzerinden satış OLMAYACAK. Premium yalnızca **Google Play Billing** ile satılacak. Kullanıcı **firma değil, vergiden muaf gerçek kişi** — ünvan/MERSİS/VKN yok.
+- **Sitedeki tüm PayTR referansları kaldırıldı:**
+  - `index.html` hoş geldin ekranı "Abonelik ve Ödeme Güvencesi" kutusu → Google Play Billing.
+  - `index.html` KVKK özet bloğu "ödeme işlemleri için PayTR" → "Google Play Billing".
+  - `premium.html` `trust_note` (tr+en) → "Abonelik Google Play üzerinden satın alınır".
+  - `premium.html` `startSubscription()` → PayTR/Cloudflare Worker TODO'su silindi; artık Play Store ürün sayfasını açıyor. **Android tarafında bu buton in-app satın alma akışını tetikleyecek — henüz bağlanmadı.**
+  - `premium.html` footer link etiketi `legal1` → "Satış ve ödeme koşulları" (tr) / "Sales & payment terms" (en).
+- **`mesafeli-satis-sozlesmesi.html` BAŞTAN YAZILDI** (dosya adı korundu, premium.html linki kırılmasın): artık "Satış ve Ödeme Koşulları". Ana mesaj: **bu sitede satış yapılmaz**, satıcı ve tahsilat Google; kart bilgisi hiçbir aşamada bize gelmez. Google Play Hizmet Şartları'na link verildi. Uygulamanın yatırım/vergi danışmanlığı OLMADIĞI da eklendi.
+- **`iptal-iade.html` BAŞTAN YAZILDI:** Google Play iptal adımları (Play → Ödemeler ve abonelikler → Abonelikler), **ilk 48 saat Google'dan doğrudan iade / sonrasında geliştiriciye başvuru** ayrımı, GPA. ile başlayan sipariş no ile e-posta başvurusu, geliştirici olarak iade başlatacağımız 4 durum, Google tarafında 3–5 iş günü işlem süresi.
+- **`kvkk.html` güncellendi:** veri sorumlusu artık `[Ad Soyad]` — MMG Creativity (vergiden muaf gerçek kişi) + `[İletişim adresi]`; PayTR aktarım maddesi → Google Play Billing; "fatura/mali kayıt 10 yıl" maddesi kaldırıldı (fatura Google'da) → "abonelik durumu + sipariş kimliği, abonelik bitiminden 1 yıl sonra silinir".
+- ✅ **KİMLİK BİLGİLERİ DOLDURULDU** (SW `2026-08-01-sozlesme-kimlik-dolduruldu`): `mesafeli-satis-sozlesmesi.html` + `kvkk.html` → **Muhammed Mutlu Güler — MMG Creativity**, adres **Alaaddinbey Mah. 244. İsimsiz Sok. No: 6/1, Nilüfer / BURSA**. Placeholder kalmadı; 3 sayfadan `<meta name="robots" content="noindex">` kaldırıldı (artık aramada çıkabilirler). `.fill` CSS kuralı kullanılmıyor ama zararsız, duruyor.
+- ⚠️ Bu adres canlı sitede **herkese açık** olacak (KVKK başvurusu için yazılı adres zorunlu). Ev adresiyse ve gizlemek istersen alternatif bir tebligat adresi ya da yalnız il/ilçe + e-posta yazılabilir — hukuki risk kullanıcının değerlendirmesinde.
+- ⚠️ Metinler **hukukçuya okutulmadı**; Play Store'da satış açılmadan önce gözden geçirilmeli.
+
+### PLAY STORE HAZIRLIĞI — SW `2026-08-01-hesap-silme-datasafety`
+
+**İade koşulları GEVŞETİLDİ (kullanıcı: "Google müsaade ettiği kadar gevşet")**
+- İlk sürümde web satışı varsayılarak yazılan taahhütler (14 gün iyi niyet iadesi, orantılı iade, 7 gün yenileme iadesi, "7 iş günü içinde sonuçlandırılır", "3–5 iş günü") **KALDIRILDI**. Bunları Google istemiyor; satıcı Google olduğu için tüketici mevzuatı yükü de büyük ölçüde onda.
+- Yeni metin: Google'ın 48 saatlik penceresi anlatılıyor, **sonrası "geliştiricinin takdirinde"**, iade garantisi verilmiyor, iade YAPILMAYAN 4 durum sayılıyor, sonda "yasal haklarınız saklıdır". Daha fazla gevşetmek tüketici mevzuatı açısından riskli olur.
+
+**`hesap-silme.html` OLUŞTURULDU — Play için ZORUNLU**
+- Google, giriş gerektirmeyen **public bir "Account deletion URL"** istiyor. `Hesabim.html`'deki uygulama içi silme giriş istediği için yetmiyordu. Bu tek başına red sebebidir.
+- Sayfa: uygulama içi silme adımları + e-posta ile talep, hangi verilerin silindiği/1 yıl daha tutulduğu, grup firması verisinin yöneticide kaldığı uyarısı, aboneliğin ayrıca iptal edilmesi gerektiği.
+- **Play Console → Data safety → Account deletion URL alanına `https://mmgcreativity.com/hesap-silme.html` girilmeli.**
+
+**`PLAY-DATA-SAFETY.md` OLUŞTURULDU** (sitede yayınlanmaz, form doldurma kılavuzu)
+- Kod taramasıyla çıkarılan tam eşleştirme: hangi Data Safety kategorisinde ne beyan edilecek, kaynağı hangi koleksiyon/alan.
+- Öne çıkanlar: **Personal info** (ad, e-posta, uid, telefon, adres, **TC Kimlik No + VKN**), **Financial info** (IBAN → "User payment info"; gelir-gider → "Other financial info"; abonelik → "Purchase history"), **Messages** (sohbet+forum), **Photos** (avatar/logo/kaşe base64), **App activity** (Analytics'e paylaşılıyor), **Device or other IDs** (FCM jetonu + AdSense reklam kimliği → paylaşılıyor).
+- Toplanmayanlar netleştirildi: konum, sağlık, ses, rehber, dosya (Excel tarayıcıda parse ediliyor, dosya sunucuya gitmiyor).
+- Red riski sıralaması: (1) account deletion URL, (2) AD_ID izni TWA manifest'inde bildirilmemiş olması, (3) form↔politika uyuşmazlığı, (4) IBAN'ın finansal veri olarak beyan edilmemesi, (5) TCKN'nin hassas veri muamelesi.
+
+**Gizlilik metinleri Data Safety ile hizalandı**
+- `gizlilik-politikasi.html` → "1. Topladığımız Bilgiler" listesi genişletildi: IBAN/banka hesabı, TC Kimlik No/VKN, logo-kaşe-avatar, uygulama içi mesajlar, FCM jetonu, Analytics + reklam kimliği, Play abonelik verisi + "reklam amacıyla kullanılmaz/satılmaz" taahhüdü.
+- `kvkk.html` → aktarım listesine **Google Analytics** ve **Google AdSense** eklendi (premium'da reklam betiği hiç yüklenmiyor notuyla); "Kullanım ve reklam verileri" maddesi FCM jetonu + reklam kimliğini kapsayacak şekilde güncellendi; haklar bölümünden `hesap-silme.html`'e link verildi.
+- ⚠️ Beyan ile metin arasındaki uyuşmazlık reddin 1 numaralı sebebi — ileride SDK/reklam ağı eklenirse ÜÇÜ birden güncellenmeli (`gizlilik-politikasi.html`, `kvkk.html`, Play formu).
+
+**Deploy edilecek dosyalar:** `index.html`, `premium.html`, `service-worker.js`, `app-version.json`, `mesafeli-satis-sozlesmesi.html`, `iptal-iade.html`, `kvkk.html`, `gizlilik-politikasi.html`, `hesap-silme.html`, `DEVIR-NOTU.md`
+**Yüklenmeyecek:** `PLAY-DATA-SAFETY.md` (iç belge), `_ARSIV/`
+
+- Bu bölümden önceki ortam düzeltmesinde kod/deploy tarafında değişiklik YAPILMAMIŞTI.
 
 ## 🟢 2026-08-01 (7. OTONOM OTURUM — `muham` bilgisayarı) — CANLIYA ALINANLAR
 
@@ -348,7 +418,7 @@ Son güncelleme: **2026-08-01 (7. otonom oturum — `C:\Users\muham\...` bilgisa
 ## 1) PROJE & ALTYAPI
 - **Site:** https://mmgcreativity.com (GitHub Pages özel domain; ayrıca https://mmgcreativity.github.io)
 - **Repo:** https://github.com/mmgcreativity/mmgcreativity.github.io (branch: `main`)
-- **Çalışma klasörü (yerel):** `C:\Users\muham\OneDrive\0.mmgcreativity\web\html` (OneDrive senkron; bazı dosyalar "cloud-only" olabilir — düzenlemeden önce indirilir)
+- **Çalışma klasörü (yerel):** `…\OneDrive\0.mmgcreativity\web\site` — `muham` makinesinde `C:\Users\muham\…`, `CihanFinans` makinesinde `C:\Users\CihanFinans\…` (OneDrive senkron; bazı dosyalar "cloud-only" olabilir — düzenlemeden önce indirilir). **2026-08-01'e kadar bu klasörün adı `html` idi** (yukarıdaki klasör-adı notuna bak).
 - **Firebase projesi:** `mmgcreativity-31263` (Blaze) — Firestore + Auth + Functions + FCM
 - **Frontend:** düz HTML/JS, build YOK. Ortak parçalar: `mmg-chat-widget.js` (sohbet), `mmg-undo.js` (Geri Al/Ctrl+Z), `i18n-core.js` (TR/EN), `mmg-doviz-widget.js` (kur widget'ı), `mmg-feedback-widget.js` (beğeni).
 
