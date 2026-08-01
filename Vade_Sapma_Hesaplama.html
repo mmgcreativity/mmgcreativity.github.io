@@ -314,10 +314,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .ka-hint{ grid-column:1 / -1; font-size:10.5px; color:var(--muted); line-height:1.5; }
 
   /* ---- Tahsilat satırı kapama sonucu (kaç gün erken/geç + neyi kapattı) ---- */
+  /* Kapama açıklamaları, ✕ düğmesinin sağında VERİ GİRİŞ KUTUSU görünümünde bir
+     alanda toplanır (kullanıcı isteği): satırdaki input'larla aynı zemin, kenarlık,
+     köşe yarıçapı ve en az aynı yükseklik. */
   .c-sonuc{
-    flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px;
-    margin:0; padding:2px 0 2px 10px; border-left:1px dashed var(--hairline);
-    font-size:11px; overflow:hidden;
+    flex:1 1 auto; min-width:0; display:flex; flex-direction:column; justify-content:center; gap:2px;
+    margin:0; padding:4px 9px; font-size:11px; overflow:hidden;
+    background:var(--bg); border:1px solid var(--hairline); border-radius:7px;
+    min-height:28px; box-sizing:border-box;
   }
   .cs-satir{ display:flex; align-items:center; gap:7px; min-width:0; white-space:nowrap; line-height:18px; }
   .cs-satir .cs-detay{ overflow:hidden; text-overflow:ellipsis; }
