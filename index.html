@@ -3590,16 +3590,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         try{ openAuthOverlay(); }catch(_d){}
         return;
       }
-      // "Oturum askıda kalıyor" bug'ı (kullanıcı 2026-08-01): Firebase ID token'ı sekme uzun
-      // süre açık/uykuda kaldığında sessizce bayatlayabiliyor; bu durumda users/{uid} okuması
-      // HATA VERMEDEN eski/boş veri döndürüyor, isAdmin ve kod gibi alanlar haksız yere
-      // kayboluyordu (çıkış-giriş token'ı tazelediği için "düzeliyor" gibi görünüyordu).
-      // Önlem: token zorla tazelenir + doküman önbellek yerine sunucudan okunur.
-      try{ await user.getIdToken(true); }catch(_refreshErr){ /* tazeleme başarısızsa normal akış sürer */ }
-      let snap;
-      try{ snap = await getDocFromServer(doc(db, 'users', user.uid)); }
-      catch(_serverErr){ snap = await getDoc(doc(db, 'users', user.uid)); }
+      // "Oturum askıda kalıyor" bug'ı (2026-08-01): Firebase ID token'ı sekme uzun süre
+      // açık/uykuda kaldığında sessizce bayatlar; users/{uid} okuması HATA VERMEDEN
+      // eski/boş veri döndürür ve isAdmin/kod gibi alanlar haksız yere kaybolur.
+      //
+      // ⚠️ İLK ÇÖZÜM YAVAŞTI: `await getIdToken(true)` + `getDocFromServer` açılışta İKİ
+      // zorunlu ağ turu ekliyordu → firma listesi ~5 sn'de geliyordu (kullanıcı bildirdi).
+      // Yeni yaklaşım: ÖNCE HIZLI YOL (önbellekten oku, arayüz hemen çizilsin), SONRA
+      // arka planda token tazelenip doküman sunucudan doğrulanır; fark varsa sayfa
+      // sessizce güncellenir. Böylece hem hızlı hem doğru.
+      let snap = await getDoc(doc(db, 'users', user.uid));
       let data = snap.exists() ? snap.data() : {};
+      // Arka plan doğrulaması — açılışı BLOKLAMAZ.
+      (async () => {
+        try{
+          await user.getIdToken(true);
+          const fresh = await getDocFromServer(doc(db, 'users', user.uid));
+          const f = fresh.exists() ? fresh.data() : {};
+          const degisti = (f.isAdmin !== data.isAdmin) ||
+                          (f.customerNumber !== data.customerNumber) ||
+                          (f.username !== data.username) ||
+                          (JSON.stringify(f.adminFirmaIds || []) !== JSON.stringify(data.adminFirmaIds || []));
+          if(degisti){
+            console.log('[MMG_DEBUG] bayat token/önbellek tespit edildi, arayüz tazeleniyor');
+            try{ updateUserBadge(f.customerNumber, f.username); }catch(e){}
+            try{ mmgIsSiteAdmin = (f.isAdmin === true); loadAdminFirmas(user.uid); }catch(e){}
+            try{ renderMyAccountsList(); }catch(e){}
+          }
+        }catch(e){ /* ağ yoksa hızlı yolda okunan veriyle devam */ }
+      })();
       console.log('[MMG_DEBUG] users/' + user.uid + ' okundu:', { exists: snap.exists(), isAdmin: data.isAdmin, customerNumber: data.customerNumber, username: data.username });
       mmgEnsureSessionOwnership(user.uid);
       // Eski/taşınmış hesaplarda müşteri kodu hiç atanmamış olabilir — bu durumda

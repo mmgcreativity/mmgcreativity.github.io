@@ -723,18 +723,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       // YANLIŞ (eski/boş) veri döndürüyor ve isAdmin kontrolü haksız yere false çıkıyor —
       // çıkış yapıp tekrar girince token tazelendiği için "düzeliyor" gibi görünüyordu.
       // Önlem: admin kontrolünden önce token'ı zorla tazele + önbellek yerine sunucudan oku.
-      try{ await user.getIdToken(true); }catch(_refreshErr){ /* tazeleme başarısızsa yine dene */ }
+      // ÖNCE HIZLI YOL: önbellekten oku, sayfa hemen çizilsin (zorunlu ağ turu YOK —
+      // eskiden getIdToken(true)+getDocFromServer açılışı gereksiz yere yavaşlatıyordu).
       try{
-        const snap = await getDocFromServer(doc(db, 'users', user.uid));
+        const snap = await getDoc(doc(db, 'users', user.uid));
         currentIsAdmin = snap.exists() && snap.data().isAdmin === true;
-      }catch(e){
-        // Sunucuya ulaşılamazsa (ör. anlık ağ kopması) önbellekten dene — admin butonunun
-        // geçici bir ağ hatası yüzünden haksız yere kaybolmaması için tek seferlik yedek yol.
+      }catch(e){ currentIsAdmin = false; }
+      // SONRA arka planda doğrula: token bayatsa tazele, sunucudan oku, fark varsa tazele.
+      (async () => {
         try{
-          const snap2 = await getDoc(doc(db, 'users', user.uid));
-          currentIsAdmin = snap2.exists() && snap2.data().isAdmin === true;
-        }catch(e2){ currentIsAdmin = false; }
-      }
+          await user.getIdToken(true);
+          const fresh = await getDocFromServer(doc(db, 'users', user.uid));
+          const isAdm = fresh.exists() && fresh.data().isAdmin === true;
+          if(isAdm !== currentIsAdmin){ currentIsAdmin = isAdm; renderFeed(); watchFeed(); }
+        }catch(e){ /* ağ yoksa önbellekteki değerle devam */ }
+      })();
     }
     // Composer artık girişli her kullanıcıya açık; sadece admin'in yazısı direkt yayınlanır,
     // diğerlerininki onaya düşer. Giriş yapılmamışsa "Yeni Blog Yayınla" sekmesinde uyarı göster.
