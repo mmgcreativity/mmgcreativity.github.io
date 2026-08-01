@@ -147,7 +147,7 @@ Bu oturumda **kod/deploy değişikliği YAPILMADI** — sadece Play Console'da C
 - `.firebaserc`, `.firebase/`, `functions/` ve tüm canlı dosyalar DOKUNULMADI. `_ARSIV` GitHub'a yüklenmemeli.
 - Hâlâ duran: `zibD1tAO` (94 KB, uzantısız — ne olduğu belirsiz, dokunulmadı).
 
-### ⭐ ÖDEME MODELİ — SATIŞ SADECE GOOGLE PLAY — SW `2026-08-01-playstore-satis-paytr-kalkti`
+### ⭐ ÖDEME MODELİ — SATIŞ SADECE GOOGLE PLAY — SW `2026-08-01-playstore-satis`
 
 - **Kullanıcı bilgisi (kritik):** Web üzerinden satış OLMAYACAK. Premium yalnızca **Google Play Billing** ile satılacak. Kullanıcı **firma değil, vergiden muaf gerçek kişi** — ünvan/MERSİS/VKN yok.
 - **Sitedeki eski ödeme sağlayıcısı referansları kaldırıldı:**
