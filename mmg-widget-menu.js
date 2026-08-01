@@ -54,9 +54,11 @@
   // biniyorlardı; absolute ile sayfa kaydırıldıkça yukarı kayıp giderler.
   try{
     var pos = document.createElement('style');
-    pos.textContent =
-      '#mmgDovizBtn, #mmgCalcBtn{ position:absolute !important; }' +
-      '#mmgDovizPanel, #mmgCalcPanel{ position:absolute !important; }';
+    // ⚠️ YALNIZCA BUTONLAR. Paneller (#mmgDovizPanel / #mmgCalcPanel) kendi CSS'lerinde
+    // fixed'e göre konumlandırılmış; absolute'a zorlanınca hesap makinesi paneli sayfanın
+    // sol üstüne kaçıyordu (kullanıcı bildirdi). Paneller fixed kalır — zaten geçici
+    // açılır kutular, sayfayla birlikte kaymalarına gerek yok.
+    pos.textContent = '#mmgDovizBtn, #mmgCalcBtn{ position:absolute !important; }';
     (document.head || document.documentElement).appendChild(pos);
   }catch(e){}
 

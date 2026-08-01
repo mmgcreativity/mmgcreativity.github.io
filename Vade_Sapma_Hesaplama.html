@@ -260,7 +260,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="panel-head">
         <div class="panel-title fatura" data-i18n="invoices_title">📄 Faturalar</div>
       </div>
-      <div class="panel-desc" data-i18n-html="invoices_desc">Fatura tarihi, çalışma koşulu (<b>vade faturanın tarihine mi, ay sonuna mı</b>) ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.</div>
+      <div class="panel-desc" data-i18n-html="invoices_desc">Fatura tarihi, çalışma koşulu ve vade gün sayısını girin, vade tarihi otomatik hesaplanır.</div>
       <div class="row-table" id="faturaRows"></div>
       <button type="button" class="add-btn fatura" id="addFaturaBtn" data-i18n="add_invoice">+ Fatura Ekle</button>
       <div class="subtotal-line"><span data-i18n="total_invoice_amount">Toplam Fatura Tutarı</span><b id="faturaToplam" class="mono">0,00</b></div>
@@ -269,9 +269,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- ÇEK PANELİ -->
     <div class="panel">
       <div class="panel-head">
-        <div class="panel-title cek" data-i18n="checks_title">🧾 Çekler</div>
+        <div class="panel-title cek" data-i18n="checks_title">🧾 Tahsilat (Çek/Senet/DBS vs.)</div>
       </div>
-      <div class="panel-desc" data-i18n="checks_desc">Tahsil ettiğiniz / vadesi gelen çeklerin tarih ve tutarlarını girin.</div>
+      <div class="panel-desc" data-i18n="checks_desc">Tahsil ettiğiniz çek, senet, DBS vb. ödemelerin vade tarihi ve tutarlarını girin.</div>
       <div class="row-table" id="cekRows"></div>
       <button type="button" class="add-btn cek" id="addCekBtn" data-i18n="add_check">+ Çek Ekle</button>
       <div class="subtotal-line"><span data-i18n="total_check_amount">Toplam Çek Tutarı</span><b id="cekToplam" class="mono">0,00</b></div>
@@ -688,9 +688,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       page_title:'Vade Sapma Hesaplama',
       page_subtitle:'Fatura vadeleriniz ile tahsil ettiğiniz çeklerin vadelerini karşılaştırın; ortalama kaç gün sapma olduğunu ve karşılama oranını görün.',
       reset_btn:'Sıfırla', back_home:'← Ana Sayfa',
-      invoices_title:'📄 Faturalar', invoices_desc:'Fatura tarihi, çalışma koşulu (<b>vade faturanın tarihine mi, ay sonuna mı</b>) ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.',
+      invoices_title:'📄 Faturalar', invoices_desc:'Fatura tarihi, çalışma koşulu ve vade gün sayısını girin, vade tarihi otomatik hesaplanır.',
       add_invoice:'+ Fatura Ekle', total_invoice_amount:'Toplam Fatura Tutarı',
-      checks_title:'🧾 Çekler', checks_desc:'Tahsil ettiğiniz / vadesi gelen çeklerin tarih ve tutarlarını girin.',
+      checks_title:'🧾 Tahsilat (Çek/Senet/DBS vs.)', checks_desc:'Tahsil ettiğiniz çek, senet, DBS vb. ödemelerin vade tarihi ve tutarlarını girin.',
       add_check:'+ Çek Ekle', total_check_amount:'Toplam Çek Tutarı',
       deviation_label:'Vade Sapması', deviation_sub:'Hesaplamak için fatura ve çek bilgilerini girin',
       stat_invoice_avg:'Fatura Ort. Vadesi', stat_check_avg:'Çek Ort. Vadesi', stat_coverage:'Karşılama Oranı', stat_uncovered:'Karşılanmayan Tutar',
@@ -702,7 +702,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       reset_btn:'Reset', back_home:'← Home',
       invoices_title:'📄 Invoices', invoices_desc:'Enter the invoice date, terms (<b>whether the due date is based on the invoice date or month-end</b>) and the number of due days — the due date is calculated automatically.',
       add_invoice:'+ Add Invoice', total_invoice_amount:'Total Invoice Amount',
-      checks_title:'🧾 Checks', checks_desc:'Enter the date and amount of checks you collect / that are due.',
+      checks_title:'🧾 Collections (cheque/note/DBS etc.)', checks_desc:'Enter the due date and amount of the cheques, notes, DBS etc. you collect.',
       add_check:'+ Add Check', total_check_amount:'Total Check Amount',
       deviation_label:'Maturity Deviation', deviation_sub:'Enter invoice and check data to calculate',
       stat_invoice_avg:'Avg. Invoice Maturity', stat_check_avg:'Avg. Check Maturity', stat_coverage:'Coverage Ratio', stat_uncovered:'Uncovered Amount',
