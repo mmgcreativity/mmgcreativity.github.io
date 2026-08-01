@@ -71,7 +71,7 @@
       '</div>' +
       '<div class="mmg-doviz-foot" style="justify-content:space-between;gap:8px;">' +
         '<span id="mmgDovizUpdated"></span>' +
-        '<button type="button" id="mmgDovizAddBtn" title="Parite ekle" style="background:none;border:1px solid var(--hairline,#2A3448);border-radius:6px;color:var(--brass,#C6A15B);cursor:pointer;font-size:10.5px;font-weight:700;padding:3px 8px;">+ Parite</button>' +
+        '<button type="button" id="mmgDovizAddBtn" title="Parite ekle" style="background:none;border:1px solid var(--hairline,#2A3448);border-radius:6px;color:var(--brass,#C6A15B);cursor:pointer;font-size:10.5px;font-weight:700;padding:3px 8px;">+ EKLE</button>' +
       '</div>' +
       // Liste PANELİN İÇİNDE, başlık ile alt çubuk arasına oturur (kullanıcı: "kesik geliyor").
       // Yukarı doğru açılan mutlak konumlu eski liste panel/ekran dışına taşıp kırpılıyordu.
