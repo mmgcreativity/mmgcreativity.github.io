@@ -140,7 +140,19 @@ Yeni işaretlenen 3 veri türü, **4. adım (Veri kullanımı ve işleme)** ekra
 - **`firestore.rules`** → `userDirectory/{code}` match'ine **`allow delete: if request.auth != null && resource.data.uid == request.auth.uid;`** eklendi. Silmede `request.resource` null olduğu için mevcut `write` kuralı delete'i engelliyordu; artık kullanıcı YALNIZCA kendi uid'ine ait dizin kaydını silebilir. ⏳ **KULLANICI ÇALIŞTIRMALI: `firebase deploy --only firestore:rules`** (bekleyen diğer rules değişikliğiyle aynı komutta gider).
 - **`index.html`** → yeni `mmgCleanupGhostDirectoryEntries(uid, customerNumber)`; `syncUserDirectory`'nin sonunda çağrılıyor. `where('uid','==',uid)` ile kendi dizin kayıtlarını sorgular, **geçerli kod dışındaki** her kaydı siler. Oturum başına bir kez çalışır (`mmgGhostCleanupDone`), tamamen sessizdir, hata alırsa hiçbir akışı bozmaz.
 - ⚠️ **Sıra önemli:** rules deploy edilmeden temizlik çalışmaz (delete izni yok, sessizce geçer). Rules canlıya alındıktan sonra her kullanıcı bir kez giriş yaptığında kendi artıkları otomatik silinir. Murat için: rules deploy → Murat giriş yapsın → `userDirectory/1027` silinir.
-- ℹ️ Sayaçtaki 1027 boşluğu kapanmaz (sayaç yalnız ileri gider) — ama artık o kod hiçbir kayda çözülmez, gerçekten boşta kalır.
+- ℹ️ Sayaçtaki 1027 boşluğu kapanmaz (sayaç yalnız ileri gider) — ama artık o kod hiçbir kayda çözülmez, gerçekten boşta kalır. **Boştaki kodu birine atamak için aşağıdaki "Kod değiştir" panelini kullan.**
+- ✅ Kullanıcı `firebase deploy --only firestore:rules` çalıştırdı, "Deploy complete!" — hayalet temizliği artık aktif.
+
+**🔧 KULLANICI YÖNETİM PANELİNE "KOD DEĞİŞTİR" EKLENDİ — SW `2026-08-01-kod-degistir-paneli`**
+- Kullanıcı: boştaki kodu (ör. 1027) birine atamak için Firebase Console'a girmek zorunda kalmasın diye.
+- **Yer:** KullanıcıYönetimi → "🛡️ Tüm Kullanıcılar" tablosunda bir satıra tıkla → açılan **detay modalının altında** "Müşteri kodunu değiştir" alanı (kutu + Kaydet). Yalnız site yöneticisi görür, çünkü o tablo zaten site-admin'e özel.
+- **Akış (`kyWireCodeChange`, sıra önemli):** (1) yeni kod boşta mı — `userDirectory/{yeniKod}` başka uid'e aitse ve yüklü kullanıcı listesinde çakışma varsa DURUR; (2) onay sorar; (3) `users/{uid}.customerNumber` (Number olarak) yazar; (4) `userDirectory/{yeniKod}` yazar; (5) eski `userDirectory/{eskiKod}` kaydını — hâlâ o uid'e aitse — siler; (6) listeyi tazeler.
+- 3. adım geçip 4. adım patlarsa kullanıcı kodsuz KALMAZ; dizin kaydı eksik kalır ve kullanıcı bir kez giriş yapınca `syncUserDirectory` kendisi yazar.
+- **`firestore.rules` iki yerde genişletildi (dar kapsamlı):**
+  - `match /users/{userId}` için **ayrı ve dar bir `allow update`**: site yöneticisi, `diff().affectedKeys().hasOnly(['customerNumber'])` şartıyla YALNIZCA bu alanı değiştirebilir. `isAdmin`, `isPremium`, e-posta vb. bu kuralla değiştirilemez. (Mevcut `users/{userId}/{document=**}` write kuralı aynen duruyor.)
+  - `userDirectory/{code}` write + delete: site yöneticisi başkasının kaydını da yazabilir/silebilir.
+- ⏳ **Bu rules değişikliği için `firebase deploy --only firestore:rules` TEKRAR çalıştırılmalı** (bir öncekinde bu iki kural henüz yoktu). Çalıştırılmazsa panel "Kaydedilemedi: permission-denied" der.
+- ⚠️ Sayaç (`meta/counters.userCount`) BİLEREK ellenmiyor — geri çekmek mevcut kodlarla çakışma yaratır. Panel yalnızca mevcut/boştaki bir kodu atar.
 
 **⏰ Üretime başvuru:** 12 test kullanıcısı kesintisiz 12 gündür kayıtlı, **14 gün şartı ~3 Ağustos'ta doluyor** → "Üretime başvur" butonu o zaman açılır.
 

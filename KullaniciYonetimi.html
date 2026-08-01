@@ -865,12 +865,81 @@
         row('Yönettiği firma sayısı', String(u.adminFirmaIds.length)) +
         row('Kayıt tarihi', fmtDateKY(u.createdAt)) +
         row('UID', '<span style="font-family:monospace; font-size:11px;">' + escapeHtmlKY(u.id) + '</span>') +
+        // ---- Müşteri kodu değiştirme (yalnız site yöneticisi) ----
+        // 2026-08-01: mükerrer kod yarışından kalan boşlukları/yanlış kodları Firebase
+        // Console'a girmeden düzeltebilmek için. İki yazma birlikte yapılır:
+        //   users/{uid}.customerNumber  +  userDirectory/{yeniKod}
+        // ve eski userDirectory kaydı silinir. Kurallar bu üçünü site yöneticisine açar.
+        '<div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--hairline);">' +
+          '<div style="font-size:12px; color:var(--muted); font-weight:700; margin-bottom:6px;">Müşteri kodunu değiştir</div>' +
+          '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">' +
+            '<input id="kyCodeInput" type="number" inputmode="numeric" value="' + escapeHtmlKY(u.code || '') + '" ' +
+              'style="width:120px; background:var(--surface-2,#0F1624); border:1px solid var(--hairline); color:var(--text,#EAEDF3); border-radius:8px; padding:8px 10px; font-size:14px; font-weight:700;">' +
+            '<button type="button" id="kyCodeSaveBtn" style="background:var(--brass,#C6A15B); border:none; color:#101725; border-radius:8px; padding:9px 16px; cursor:pointer; font-weight:800; font-size:13px;">Kaydet</button>' +
+            '<span id="kyCodeMsg" style="font-size:12px; color:var(--muted);"></span>' +
+          '</div>' +
+          '<div style="margin-top:6px; font-size:11.5px; color:var(--muted);">Kod başka bir kullanıcıda kullanılıyorsa kaydedilmez. Kullanıcının cihazında yeni kod, çıkış yapıp tekrar girdiğinde görünür.</div>' +
+        '</div>' +
         '<div style="margin-top:12px; font-size:12px; color:var(--muted); font-weight:700;">Ham alanlar (users dokümanı)</div>' +
         '<pre style="background:var(--surface-2,#0F1624); border:1px solid var(--hairline); border-radius:8px; padding:10px; font-size:11px; overflow:auto; max-height:220px; white-space:pre-wrap; word-break:break-all;">' + rawPretty + '</pre>' +
       '</div>';
     ov.style.display = 'flex';
     const cb = document.getElementById('kyUserDetailClose');
     if(cb) cb.addEventListener('click', () => { ov.style.display = 'none'; });
+    kyWireCodeChange(u);
+  }
+
+  // Müşteri kodu değiştirme mantığı (site yöneticisi). Sıra ÖNEMLİ:
+  //  1) yeni kod boşta mı? (userDirectory/{yeniKod} başka bir uid'e aitse DUR)
+  //  2) users/{uid}.customerNumber güncelle
+  //  3) userDirectory/{yeniKod} yaz
+  //  4) userDirectory/{eskiKod} sil (varsa ve hâlâ bu uid'e aitse)
+  // 2. adım başarılı olup 3. adım patlarsa kullanıcı kodsuz kalmaz; dizin kaydı eksik
+  // kalır ve kullanıcı bir kez giriş yapınca syncUserDirectory kendisi yazar.
+  function kyWireCodeChange(u){
+    const inp = document.getElementById('kyCodeInput');
+    const btn = document.getElementById('kyCodeSaveBtn');
+    const msg = document.getElementById('kyCodeMsg');
+    if(!inp || !btn || !msg) return;
+    const say = (t, ok) => { msg.textContent = t; msg.style.color = ok ? 'var(--green,#4ADE80)' : 'var(--amber,#E3A23C)'; };
+    btn.addEventListener('click', async () => {
+      const oldCode = String(u.code || '').trim();
+      const newCode = String(inp.value || '').trim();
+      if(!newCode || !/^\d+$/.test(newCode)){ say('Kod yalnızca rakamlardan oluşmalı.', false); return; }
+      if(newCode === oldCode){ say('Kod zaten bu.', false); return; }
+      btn.disabled = true; say('Kontrol ediliyor…', true);
+      try{
+        // 1) Çakışma kontrolü — hem dizinden hem yüklü kullanıcı listesinden bak.
+        const dirSnap = await getDoc(doc(db, 'userDirectory', newCode));
+        if(dirSnap.exists() && dirSnap.data().uid && dirSnap.data().uid !== u.id){
+          say('Bu kod başka bir kullanıcıda kullanılıyor.', false); btn.disabled = false; return;
+        }
+        const clash = (allSiteUsers || []).find(x => x.id !== u.id && String(x.code || '') === newCode);
+        if(clash){ say('Bu kod zaten "' + (clash.name || clash.email || clash.id) + '" kullanıcısında.', false); btn.disabled = false; return; }
+        if(!confirm('Müşteri kodu ' + (oldCode || '—') + ' → ' + newCode + ' olarak değiştirilsin mi?')){ btn.disabled = false; say('', true); return; }
+        say('Kaydediliyor…', true);
+        // 2) users/{uid}
+        await setDoc(doc(db, 'users', u.id), { customerNumber: Number(newCode) }, { merge: true });
+        // 3) userDirectory/{yeniKod}
+        await setDoc(doc(db, 'userDirectory', newCode), {
+          uid: u.id, username: u.name || '', email: u.email || ''
+        });
+        // 4) eski dizin kaydını temizle (başkasına aitse dokunma)
+        if(oldCode && oldCode !== newCode){
+          try{
+            const oldSnap = await getDoc(doc(db, 'userDirectory', oldCode));
+            if(oldSnap.exists() && oldSnap.data().uid === u.id) await deleteDoc(doc(db, 'userDirectory', oldCode));
+          }catch(delErr){ /* silinemezse kritik değil, hayalet temizliği kullanıcı girişinde de çalışır */ }
+        }
+        u.code = newCode;
+        say('✓ Kaydedildi. Liste yenileniyor…', true);
+        try{ await loadAdminAllUsers(); }catch(e){}
+        say('✓ Kod ' + newCode + ' olarak güncellendi.', true);
+      }catch(e){
+        say('Kaydedilemedi: ' + (e && e.code ? e.code : 'bilinmeyen hata') + ' (kurallar deploy edildi mi?)', false);
+      }
+      btn.disabled = false;
+    });
   }
   // Sağ üstteki "↻ Yenile" (kullanıcı isteği 2026-07-31): listeyi Firestore'dan tazeler.
   (function wireAdminAllUsersRefresh(){

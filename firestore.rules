@@ -7,6 +7,16 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.switchOwnerUid == userId);
       allow write: if request.auth != null && request.auth.uid == userId;
     }
+    // ---- Site yöneticisi: müşteri kodu (customerNumber) düzeltme ----
+    // 2026-08-01. Mükerrer kod yarışı yüzünden oluşan boşlukları/yanlış kodları
+    // panelden düzeltebilmek için. KASITLI OLARAK DAR: yalnızca üst düzey users/{uid}
+    // dokümanı, yalnızca update, yalnızca 'customerNumber' alanı. Başka hiçbir alan
+    // (isPremium, isAdmin, e-posta vb.) bu kuralla değiştirilemez.
+    match /users/{userId} {
+      allow update: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['customerNumber']);
+    }
     match /meta/counters {
       allow read, write: if request.auth != null;
     }
@@ -124,12 +134,21 @@ service cloud.firestore {
     // kullanıcıların özel profiline erişmeden sadece görünen adını görebilmesi için kullanılır.
     match /userDirectory/{code} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      // Kullanıcı kendi kaydını yazar; SİTE YÖNETİCİSİ ise kod düzeltme paneli için
+      // başkasının dizin kaydını da yazabilir (2026-08-01).
+      allow write: if request.auth != null && (
+        request.resource.data.uid == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+      );
       // 2026-08-01 — HAYALET KAYIT TEMİZLİĞİ: mükerrer kod yarışı (bkz. DEVIR-NOTU)
       // aynı uid için birden fazla dizin kaydı bırakmıştı. Silmede request.resource null
-      // olduğu için yukarıdaki write kuralı delete'i engelliyordu; artık kullanıcı
-      // YALNIZCA kendi uid'ine ait dizin kayıtlarını silebilir.
-      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      // olduğu için yukarıdaki write kuralı delete'i engelliyordu. Kullanıcı kendi
+      // kayıtlarını, site yöneticisi ise (kod değiştirirken eski kaydı temizlemek için)
+      // her kaydı silebilir.
+      allow delete: if request.auth != null && (
+        resource.data.uid == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+      );
     }
     // Kullanıcı adı rezervasyonu: aynı kullanıcı adıyla ikinci kez kayıt
     // olunamasın diye, doküman ID'si kullanıcı adının küçük harfli hali.
