@@ -563,7 +563,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // NOT: Tutar kutusu 99.999.999,00 SIĞACAK ŞEKİLDE boyutlandırıldı (hizalama referansı).
   // Bu bir ÜST SINIR DEĞİLDİR — daha büyük tutarlar da girilebilir, metin kutu içinde kayar.
   function attachTRFormatting(el){
-    el.addEventListener('focus', ()=>{ el.select(); });
+    // Fareyle tıklandığında imleç tıklanan yere gelmeli, metin tümden seçilmemeli
+    // (kullanıcı: "mouse'un tıkladığı yere çubuk gelsin, yazı mavileşmesin").
+    // Tümünü seçme yalnızca KLAVYEYLE (Tab/Enter) gelindiğinde yapılır.
+    let fareyleGeldi = false;
+    el.addEventListener('mousedown', ()=>{ fareyleGeldi = true; });
+    el.addEventListener('focus', ()=>{
+      if(fareyleGeldi){ fareyleGeldi = false; return; }
+      try{ el.select(); }catch(e){}
+    });
     el.addEventListener('input', ()=>{
       const pos = el.selectionStart;
       const before = el.value;
@@ -628,7 +636,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function wireDateBox(wrapEl, initialValue, onChange){
     wrapEl.innerHTML =
       '<div class="date-box">' +
-        '<input type="text" class="date-text" inputmode="numeric" placeholder="gg.aa.yyyy" maxlength="10" autocomplete="off">' +
+        '<input type="text" class="date-text" inputmode="numeric" placeholder="gg.aa.yyyy" autocomplete="off">' +
         '<button type="button" class="date-pick-btn" tabindex="-1" aria-label="Takvimden seç">' + CALENDAR_ICON_SVG + '</button>' +
         '<input type="date" class="date-native-hidden" tabindex="-1" aria-hidden="true">' +
       '</div>';
@@ -638,15 +646,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     if(initialValue) textEl.value = initialValue;
 
-    // Kutu doluyken (10 karakter, maxlength dolu) yeni tarih yazılamıyordu — önce elle
-    // silmek gerekiyordu (kullanıcı: "tarih kutusu doluyken tekrar tarih giremiyorum,
-    // üstüne yazmıyor"). Odaklanınca tümünü seçiyoruz; yazılan ilk rakam seçimi değiştirir.
-    textEl.addEventListener('focus', ()=>{ try{ textEl.select(); }catch(e){} });
-    // Fare ile tıklamada tarayıcı seçimi kaldırabildiği için tıklamada da seçiyoruz.
-    textEl.addEventListener('mouseup', (e)=>{
-      if(textEl.selectionStart === textEl.selectionEnd && textEl.value.length >= 10){
-        e.preventDefault(); try{ textEl.select(); }catch(err){}
-      }
+    // Fareyle tıklayınca imleç tıklanan yere gelir, metin seçilmez; klavyeyle (Tab/Enter)
+    // gelindiğinde ise tümü seçilir ki doğrudan üzerine yazılabilsin.
+    let tarihFareyle = false;
+    textEl.addEventListener('mousedown', ()=>{ tarihFareyle = true; });
+    textEl.addEventListener('focus', ()=>{
+      if(tarihFareyle){ tarihFareyle = false; return; }
+      try{ textEl.select(); }catch(e){}
     });
 
     textEl.addEventListener('input', ()=>{
@@ -753,9 +759,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     row.innerHTML =
       '<span class="row-no"></span><div class="f-field c-tarih-wrap"><div class="c-tarih-box"></div></div>' +
       '<div class="f-field c-tutar-wrap"><input type="text" inputmode="decimal" class="c-tutar" value="0,00"></div>' +
-      '<button type="button" class="row-del c-del" title="Satırı sil">✕</button>' +
       // Kapama sonucu: kaç gün erken/geç ve hangi faturayı kapattığı (recalc doldurur).
-      '<div class="c-sonuc"></div>';
+      '<div class="c-sonuc"></div>' +
+      // ✕ EN SAĞDA (kullanıcı isteği)
+      '<button type="button" class="row-del c-del" title="Satırı sil">✕</button>';
     cekRowsEl.appendChild(row);
 
     wireDateBox(row.querySelector('.c-tarih-box'), cekData[id].tarih, (val)=>{ cekData[id].tarih = val; recalc(); });
@@ -1249,7 +1256,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           // Kalan/eşleşmeyen kısım ayrı satırda zaten bildiriliyor.
           return '<div class="cs-satir">' +
                    '<span class="cs-badge ' + cls + '">' + txt + '</span>' +
-                   '<span class="cs-detay">Fatura #' + e.faturaNo + '</span>' +
+                   '<span class="cs-detay">' + e.faturaNo + '. Fatura</span>' +
                  '</div>';
         }).join('');
         const artan = t.kalan > 0 ? '<div class="cs-satir"><span class="cs-detay cs-artan">kalan ' + fmtTR(t.kalan) + ' ₺ eşleşmedi</span></div>' : '';
