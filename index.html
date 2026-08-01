@@ -492,6 +492,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .mmg-tab .mmg-tab-close:hover{ background:rgba(255,107,74,0.18); color:var(--coral); }
   .mmg-tab-home{ padding-left:11px; padding-right:11px; }
+  /* En soldaki "tüm sekmeleri kapat" düğmesi (kullanıcı isteği). */
+  .mmg-tab-closeall{
+    padding:8px 11px; font-size:15px; line-height:1; color:var(--muted);
+    background:transparent; border-color:transparent; cursor:pointer;
+  }
+  .mmg-tab-closeall:hover{ color:var(--coral); background:rgba(255,107,74,0.14); border-color:var(--hairline); }
   .mmg-tabpanels{ position:absolute; inset:0; }
   .mmg-tabpanels iframe{ display:none; }
   .mmg-tabpanels iframe.active{ display:block; }
@@ -720,6 +726,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .app-badge-text{ display:flex; flex-direction:column; line-height:1.2; }
   .app-badge-text span{ font-size:9.5px; color:var(--muted); }
   .app-badge-text b{ font-family:'Space Grotesk',sans-serif; font-size:13px; }
+  /* "Google Play" yazısının altındaki 5 yıldız — 5 puan vermeyi temsil eder.
+     Eski tek yıldız ikonu ~18px idi; bunlar onun yarısı kadar (9px). */
+  .app-badge-text .app-badge-stars{
+    font-size:9px; line-height:1; letter-spacing:1px; color:#FFC107; margin-top:2px;
+  }
 
   .legal-links{
     display:flex; flex-wrap:wrap; gap:18px;
@@ -2022,8 +2033,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <a href="https://play.google.com/store/apps/details?id=com.mmgcreativity.dijitalfinans"
              target="_blank" rel="noopener" class="app-badge app-badge-small" title="Google Play'de aç — indirin ve bizi puanlayın">
             <svg viewBox="0 0 24 24"><path d="M3.6 2.6a1 1 0 0 0-.6.9v17a1 1 0 0 0 .6.9l9.7-9.4-9.7-9.4z" fill="#00d2ff"/><path d="M13.3 12l3-2.9 3.9 2.2c.9.5.9 1.4 0 1.9l-3.9 2.2-3-2.4z" fill="#ffd200"/><path d="M13.3 12L3.6 2.6c.2 0 .5 0 .7.1l11 6.3-2 2.9z" fill="#00e676"/><path d="M13.3 12l2 2.9-11 6.3c-.2.1-.5.1-.7.1L13.3 12z" fill="#ff3d57"/></svg>
-            <span class="app-badge-text"><span data-i18n="footer_download_now">İndirin ve Oylayın</span><b>Google Play</b></span>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.4-5.8-3-5.8 3 1.1-6.4L2.6 9.4l6.5-.9z" fill="#FFC107"/></svg>
+            <span class="app-badge-text">
+              <span data-i18n="footer_download_now">İndirin ve Oylayın</span>
+              <b>Google Play</b>
+              <!-- 2026-08-01: Sağdaki tek büyük yıldız kaldırıldı; yerine "Google Play"
+                   yazısının ALTINA 5 yıldız kondu (5 yıldız vermeyi temsilen).
+                   Boyut: eski yıldızın yarısı kadar (~9px). -->
+              <span class="app-badge-stars" aria-label="5 yıldız verin">★★★★★</span>
+            </span>
           </a>
           </div>
         </div>
@@ -2150,6 +2167,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // Sekme şeridindeki Ana Sayfa (⌂) ikonu KALDIRILDI: sol menüde (hamburger) zaten Ana Sayfa
     // var, masaüstünde mükerrer olmasın (kullanıcı isteği). Ana Sayfa'ya sol menüden dönülür.
     let html = '';
+    // EN SOLDA "hepsini kapat" düğmesi (kullanıcı isteği): çok sekme açıkken tek tek
+    // kapatmak yerine hepsini birden kapatıp Ana Sayfa'ya döner.
+    html += '<div class="mmg-tab mmg-tab-closeall" id="mmgCloseAllTabs" title="Tüm sekmeleri kapat" ' +
+            'role="button" tabindex="0" aria-label="Tüm sekmeleri kapat">⊗</div>';
     html += mmgTabs.map(function(t){
       const act = (t.target === mmgActive) ? ' active' : '';
       const label = mmgEscAttr(t.title || t.target);
@@ -2235,6 +2256,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   // Sekme çubuğu tıklamaları: kapatma butonu, ya da sekmeye geçiş.
   tabBar.addEventListener('click', function(e){
+    // En soldaki ⊗ — TÜM sekmeleri kapat ve Ana Sayfa'ya dön (kullanıcı isteği).
+    if(e.target.closest('#mmgCloseAllTabs')){
+      e.stopPropagation();
+      mmgTabs.slice().forEach(function(t){ mmgCloseTab(t.target, true); });
+      mmgTabs.length = 0;
+      openTarget('home', 'Ana Sayfa');
+      mmgRenderTabs();
+      mmgSaveTabState();
+      return;
+    }
     const closeEl = e.target.closest('.mmg-tab-close');
     if(closeEl){ e.stopPropagation(); mmgCloseTab(closeEl.dataset.close); return; }
     const tabEl = e.target.closest('.mmg-tab');
@@ -4790,6 +4821,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       popup.hidden = true;
     }
   }, true);
+  // ⚠️ IFRAME BOŞLUĞU: Masaüstünde araçlar iframe'de açılıyor. Bir iframe'in İÇİNE
+  // tıklandığında bu olay ÜST belgeye HİÇ ulaşmaz — yukarıdaki capture dinleyicisi
+  // bile görmez — ve popup açık kalırdı (kullanıcı: "boşa tıklayınca kapanmıyor").
+  // iframe'e tıklandığında üst pencere odağı kaybettiği için 'blur' ile kapatıyoruz.
+  // Aynı sebeple açık nav çekmecelerini ve 3. seviye alt menüleri de kapatıyoruz.
+  window.addEventListener('blur', () => {
+    const popup = document.getElementById('mmgFirmaSwitchPopup');
+    if(popup && !popup.hidden) popup.hidden = true;
+    document.querySelectorAll('.nav-subwrap.open').forEach(w => w.classList.remove('open'));
+    document.querySelectorAll('.nav-drawer.open').forEach(d => {
+      d.classList.remove('open'); d.hidden = true;
+      const t = d.previousElementSibling; if(t) t.setAttribute('aria-expanded', 'false');
+    });
+  });
 
   // ================== Firma Yöneticiliği (rol tabanlı, ayrı giriş YOK) ==================
   // Firma artık ayrı bir hesap türü değil — normal bir kullanıcı, bir ya da birden

@@ -1,6 +1,13 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-08-01 (9. oturum — `CihanFinans` bilgisayarı, Play Console Veri güvenliği formu tamamlandı ve Google'a gönderildi; kod/deploy değişikliği YOK)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-08-01-hesap-silme-datasafety'` (repo ~472 commit, değişmedi).
+Son güncelleme: **2026-08-01 (10. oturum — `muham` bilgisayarı, güvenlik rotasyonu + widget/menü işleri, 10 commit)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-08-01-widget-hepsi-aninda'` (repo **494 commit**).
+
+> 🚨 **EN KRİTİK KEŞİF (10. oturum): mmgcreativity.com FIREBASE'DEN DEĞİL, GITHUB PAGES'TEN YAYINLANIYOR.**
+> Kaynak repo: **`mmgcreativity/mmgcreativity.github.io`** (`CNAME` → mmgcreativity.com). `firebase deploy --only hosting` YALNIZCA `mmgcreativity-31263.web.app` adresini günceller — **canlı siteye HİÇBİR etkisi yoktur**. 10. oturumda saatlerce "deploy ediyorum ama değişiklik gelmiyor" yaşandı; sebebi buydu.
+> **Statik dosya (html/js/json) yayınlamanın TEK yolu: GitHub reposuna dosya yüklemek** (repo → Add file → Upload files → Commit). GitHub Pages derlemesi 1–3 dk sürer; `https://mmgcreativity.com/app-version.json` ile doğrula.
+> Firebase yalnızca **Firestore kuralları** (`firebase deploy --only firestore:rules`), **indexler** ve **Cloud Functions** için gereklidir — bunlar hangi statik dosya sunulursa sunulsun canlıya gider.
+
+> 📁 **KLASÖR ADI NOTU:** 9. oturum notunda yerel klasörün `web\site` olarak yeniden adlandırıldığı yazıyor; 10. oturumda `muham` makinesinde klasör hâlâ **`web\html`** olarak görüldü ve tüm çalışma orada yapıldı. İki makine arasında ad farkı varsa senkron öncesi teyit et.
 
 > 📁 **KLASÖR ADI DEĞİŞTİ (2026-08-01):** Yerel çalışma klasörü artık `…\0.mmgcreativity\web\`**`site`** — eskiden `web\html` idi. Sebep: Cowork, `web\html\Scheduled` yolunu "korumalı konum" olarak kayıtlı tuttuğu için (klasör fiziksel olarak YOK, bayat kayıt) `html` ve tüm üst klasörleri bağlanamıyordu; junction ile atlatma da işe yaramadı (gerçek yolu çözüyor). Klasör `site` olarak yeniden adlandırılınca sorun bitti. OneDrive değişikliği diğer makineye de yansıtır → `C:\Users\muham\OneDrive\0.mmgcreativity\web\site`. Yayına etkisi YOK (deploy GitHub web arayüzünden dosya yükleyerek yapılıyor). Eski adı geri koyarsan bağlama sorunu geri gelir.
 
@@ -11,8 +18,8 @@ Son güncelleme: **2026-08-01 (9. oturum — `CihanFinans` bilgisayarı, Play Co
 1. **OneDrive senkron kontrolü ŞART** (`mmg-onedrive-sync-guard` skill). Deploy öncesi marker kontrolü: `service-worker.js → SW_VERSION` yukarıdaki değerle aynı olmalı. Yerel dosya farklıysa GÜNCEL KAYNAK = GitHub repo (`main`); yereldeki eski dosyayı repodan tazele, ASLA eski yerel dosyayı deploy etme.
    ⚠️ 7. oturumda bu tuzak GERÇEKTEN yaşandı: ilk okumada yerel dosyalar bayattı, birkaç saniye sonra senkron bitince değiştiler. Dosyayı okuduktan sonra bile bir kez daha doğrula.
 2. **⛔ KULLANICI TARAFINDA BEKLEYEN — ÖNCELİKLİ:**
-   - **GÜVENLİK:** Google OAuth **client secret 3 kez açığa çıktı** (2 ekran görüntüsü + PowerShell geçmişi). Google Cloud → Clients → "Blogger Publish" → **Reset secret** → `firebase functions:secrets:set BLOGGER_CLIENT_SECRET` → `firebase deploy --only functions:publishToBlogger`. **Resend API anahtarı** da hâlâ yenilenmedi.
-   - **ÖDEME MODELİ:** Satış **yalnızca Google Play Billing** ile olacak (PayTR başvurusu reddedildi, sitede web satışı YOK). Kullanıcı vergiden muaf gerçek kişi, firma değil — sözleşme metinlerinde ünvan/MERSİS kullanma.
+   - ✅ **GÜVENLİK — 10. OTURUMDA TAMAMEN KAPANDI.** Google OAuth client secret yenilendi (yeni sürüm Secret Manager'da v3, `publishToBlogger` yeniden deploy edildi, eski secret Cloud Console'da devre dışı bırakılıp silindi). **Resend API anahtarı** da yenilendi (`RESEND_API_KEY` v3, `sendPasswordResetMail` yeniden deploy edildi; kullanılmayan 3 eski key Resend panelinden silindi). ⚠️ Ayrıca `firebase-debug.log` dosyasının `functions:secrets:set` komutunun API gövdesini **base64 olarak logladığı** tespit edildi — dosya silindi. **Bir daha secret set ederken bu log dosyasının oluştuğunu unutma; hiçbir zip/commit'e dahil etme.**
+   - **ÖDEME MODELİ:** Satış **yalnızca Google Play Billing** ile olacak; sitede web üzerinden satış YOK. Kullanıcı vergiden muaf gerçek kişi, firma değil — sözleşme metinlerinde ünvan/MERSİS kullanma.
    - **YASAL:** 3 sözleşme sayfası 8. oturumda OLUŞTURULDU (`mesafeli-satis-sozlesmesi.html`, `iptal-iade.html`, `kvkk.html`) — deploy edilince 404 biter. Kimlik bilgileri dolduruldu (Muhammed Mutlu Güler, Nilüfer/Bursa). **Kalan tek iş:** metinlerin bir hukukçuya okutulması — Play Store'da satış açılmadan önce.
    - `firebase deploy --only firestore:rules` (bekleyen davet listesi — 6. oturumdan kalan).
 3. **Doğrulama bekleyenler (kod tamam, kullanıcı testi bekliyor):**
@@ -22,6 +29,61 @@ Son güncelleme: **2026-08-01 (9. oturum — `CihanFinans` bilgisayarı, Play Co
    - IBAN akışı: "Tüm IBAN'ları Sil → yeni şablonla (Firma Kodu zorunlu) yeniden yükle" hâlâ uygulanmadı; sonuç doğrulanmalı.
 4. **Muhtemel sıradaki istekler:** KUR/hesap-makinesi üst ikonlarının görsel stili (ışıldak) netleşmedi; Personeller sekmesine Excel toplu yükleme; Talimat'ta personel kullanımı.
 5. Çalışma tarzı: `mmg-site-deploy` skill — sormadan, kuyruk bitene kadar; kapanışta HER ZAMAN (1) yayınlananlar (2) bekleyenler listesi ver ("bekleyen yok" deme hatası kullanıcıyı kızdırdı). **En kritik değişiklik: service worker NETWORK-FIRST** (4. oturum). Şifre sıfırlama maili TAM çalışır (Resend canlı).
+
+## 🟢 2026-08-01 (10. OTURUM — `muham` bilgisayarı) — GÜVENLİK ROTASYONU + WIDGET/MENÜ İŞLERİ (10 commit, 472→494)
+
+**⭐ EN KRİTİK — YAYIN YOLU YANLIŞ BİLİNİYORDU (yukarıdaki 🚨 kutusuna bak)**
+Canlı site GitHub Pages'ten geliyor; `firebase deploy --only hosting` sadece `.web.app`'i güncelliyordu. Bu oturumun ilk yarısı bu yüzden boşa gitti. Bundan sonra statik dosyalar **GitHub reposuna yüklenerek** yayınlanacak.
+
+**⚠️ 10. OTURUMDA YAPILAN HATA — TEKRARLANMASIN**
+`mmg-onedrive-sync-guard` kuralı (bu notun 1. maddesi) **atlandı**: OneDrive senkron değilken HTML'lere yazıldı. Sonuç: (a) yerelde olmayan 3 sözleşme sayfası "yok" sanılıp yeniden yazıldı ve 8. oturumun gerçek sürümlerinin üzerine geçti (sonradan silindi), (b) OneDrive senkron gelince `index.html` / `service-worker.js` / `app-version.json` düzenlemeleri **sessizce ezildi** ve baştan uygulanmak zorunda kalındı. **HTML'e dokunmadan önce mutlaka `SW_VERSION` ile GitHub'daki değeri karşılaştır.**
+
+**GÜVENLİK — secret rotasyonu tamamlandı**
+- `BLOGGER_CLIENT_SECRET` yenilendi (Secret Manager v3), `publishToBlogger` yeniden deploy edildi, eski secret Cloud Console'da devre dışı bırakılıp silindi.
+- `RESEND_API_KEY` yenilendi (v3), `sendPasswordResetMail` yeniden deploy edildi; kullanılmayan 3 eski Resend key'i silindi.
+- **`firebase-debug.log` tuzağı bulundu:** `firebase functions:secrets:set` komutunun API gövdesini **base64 olarak loglar**. Dosya silindi; bir daha commit/zip'e dahil edilmemeli.
+
+**Blog — misafir modunda okunabilir**
+- `firestore.rules` → `blogPosts` okuma kuralı `request.auth != null` şartını **yayınlanmış** yazılar için kaldırdı: `status=='published'` olanlar girişsiz de okunabiliyor. `pending` yazılar hâlâ yalnız yazan kişi + admin. (Deploy edildi.)
+
+**Oturum "askıda kalma" bug'ı çözüldü (`index.html` + `Blog.html`)**
+- Sekme uzun süre açık/uykuda kalınca Firebase ID token'ı sessizce bayatlıyor; `users/{uid}` okuması **hata vermeden** eski/boş veri döndürüyor → `isAdmin`, kod, kullanıcı adı haksız yere kayboluyor, Blogger butonu gidiyordu. Çıkış-giriş token'ı tazelediği için "düzeliyor" sanılıyordu.
+- Düzeltme: her `onAuthStateChanged`'de `user.getIdToken(true)` ile token zorla tazelenir + doküman `getDocFromServer` ile **önbellek yerine sunucudan** okunur (sunucuya ulaşılamazsa `getDoc`'a düşer).
+- Ayrıca çıkışta bayat `mmg_auth_state` temizleniyor → girişsizken rozet "giriş yapılmış" göstermiyor (bilinçli `guest` modu korunuyor).
+
+**Hesap geçişi TEK YÖNLÜ (güvenlik açığı kapatıldı)**
+- `functions/index.js → accountSwitchToken` çağıranın admin olmasını **kontrol etmiyordu**: bağlı bir alt hesap, `switchOwnerUid` üzerinden admin hesabına dahil geçiş token'ı alabiliyordu. Artık `caller.isAdmin !== true` → `permission-denied`. (Deploy edildi, canlıda doğrulandı.)
+- Arayüz: admin olmayan hesapla girildiğinde "Hesaplarım" listesi **hiç gösterilmiyor**.
+
+**Nav 3. kademe tıklamayla açılıyor (`index.html`)**
+- "Krediler" / "Vade Hesapları" başlıkları `data-target` taşımadığı için tıklama hiçbir şey yapmıyordu. Kök neden sanılandan farklıydı: bu başlıklar da `.nav-subitem` sınıfı taşıyor ve **"alt öge seçildi → flyout'u kapat"** handler'ı onlara da çalışıp menüyü anında kapatıyordu. Handler artık `.nav-subwrap` başlıklarını atlıyor; `.open` sınıfı masaüstünde de geçerli, chevron 90° dönüyor, hover davranışı korundu.
+
+**Döviz (KUR) paneli**
+- Panel 230→280px, satır yükseklikleri azaltıldı.
+- "+ Parite" → **"+ EKLE"**; kör `prompt()` yerine tıklanabilir liste (10 yaygın kod + özel kod kutusu). Liste panel dışına taşıp kırpılıyordu → panelin İÇİNE, başlık ile alt çubuk arasına alındı.
+- **Ons Altın** eklendi (döviz API'sinde yok; Gram Altın gibi altın kaynağından çekilir), **Avustralya Doları** çıkarıldı.
+
+**Widget'lar (KUR + Hesap Makinesi + Chat) — konum, kapsam, aç/kapat**
+- Hesap makinesi ortak dosyaya çıkarıldı: **`mmg-calc-widget.js`** (eskiden her araç sayfasının içine ayrı ayrı gömülüydü).
+- Konum: `position:fixed` → **`absolute`**. Kullanıcı isteği: "ekranın değil SAYFANIN sağ üstünde dursun, kaydırınca gitsin". (Önce kabuğa/`index.html`'e taşındı, sonra bu istek üzerine geri alındı — kabukta yüklenmezler.)
+- **Hesaplamalar altındaki 9 sayfanın hepsinde** var artık (5'inde hiç yoktu).
+- **`mmg-widget-menu.js` (yeni):** boş alana sağ tık → "Widget'lar" menüsü → **Hepsi / Kurlar / Hesap Makinesi / Chat** ayrı ayrı aç-kapat, tercih `localStorage`'da kalıcı.
+  - ⚠️ Gizleme **CSS ile** yapılıyor; çünkü bazı sayfalarda widget ortak dosyadan değil sayfanın kendi HTML'inden geliyor ve o kopya localStorage'a bakmıyor.
+  - ⚡ **Yeniden yükleme YOK** — ilk sürüm `location.reload()` kullanıyordu; ~3 sn sürüyor ve ilk-açılış mantığı yüzünden **giriş/ana ekrana düşürüyordu**. Artık widget'lar her zaman oluşturulur, tek bir `<style>` etiketiyle gizlenir → tıklama anında etki eder, menü açık kalır. iframe/üst pencere `storage` olayıyla senkronlanır.
+- Metin/form/link/buton üzerinde sağ tık **tarayıcının kendi menüsünü** bozmaz (kopyala-yapıştır korunur).
+
+**Chat — "+ Grup Oluştur" kaldırıldı**
+- Liste başındaki satır silindi; panelin sağ alt köşesindeki ortak **"+" (FAB)** Grup sekmesindeyken "Yeni grup oluştur" işlevi görüyor. Boş liste metni de buna göre güncellendi.
+
+### ⏳ 10. OTURUM SONU — BEKLEYENLER
+**Spec bekleyen (kullanıcı bilgi verecek):**
+- **Premium fiyatları** — tutar netleşmedi ("belli olunca yazarım"). Netleşince `premium.html` + sözleşme sayfalarındaki tutarlar birlikte güncellenmeli.
+- **Portföy modülü** (hisse adı / lot / alış fiyatı) — 7. oturumdan beri açık; fiyat kaynağı (canlı borsa mı elle giriş mi), yeri ve kâr/zarar isteği belirsiz.
+- **Her kayıtta admin'e bildirim** — Auth `onCreate` tetikleyicili yeni fonksiyon gerekiyor (şu an yalnız referans kodlu kayıtlarda bildirim var).
+
+**Yerelde temizlenecek (SİLİNMEDİ):** 4 adet `*-DESKTOP-V12JA3F*` OneDrive çakışma kopyası, 4 zip arşivi.
+
+**Kullanıcı tarafında kapanan:** OAuth + Resend secret rotasyonu ✅ · eski secret/key'lerin silinmesi ✅ · IBAN akışı testi ✅ · mobil menü/firma çubuğu testi ✅ · 3 sözleşme sayfası canlıda ✅
 
 ## 🟢 2026-08-01 (9. OTURUM — `CihanFinans` bilgisayarı) — PLAY CONSOLE VERİ GÜVENLİĞİ TAMAMLANDI VE GÖNDERİLDİ
 
@@ -75,7 +137,7 @@ Bu oturumda **kod/deploy değişikliği YAPILMADI** — sadece Play Console'da C
 
 **3 sözleşme sayfası oluşturuldu (canlıdaki 404'ler için)**
 - `mesafeli-satis-sozlesmesi.html`, `iptal-iade.html`, `kvkk.html` — `gizlilik-politikasi.html` ile birebir aynı koyu tema/CSS, `premium.html` footer'ındaki dosya adlarıyla birebir eşleşiyor.
-- İçerik premium.html'den alınan GERÇEK verilerle yazıldı: 999₺/ay, 799₺/ay (yıllık 9.588₺), PayTR, 4 premium özelliği, `mmgcreativity@gmail.com`.
+- İçerik premium.html'den alınan GERÇEK verilerle yazıldı: 999₺/ay, 799₺/ay (yıllık 9.588₺), 4 premium özelliği, `mmgcreativity@gmail.com`.
 - ⛔ **KULLANICI DOLDURMALI:** mesafeli satış ve KVKK sayfalarında satıcı/veri sorumlusu kimliği kırmızı-kesikli `[Ticari ünvan]`, `[Açık adres]`, `[Vergi dairesi/no]`, `[MERSİS no]`, `[Telefon]` kutuları olarak bırakıldı (uydurulmadı). Ödeme akışı açılmadan önce bunlar doldurulmalı ve metinler bir hukukçuya okutulmalı.
 - İptal/iade sayfasındaki süreler (14 gün iyi niyet iadesi, yenileme sonrası 7 gün, 7 iş günü sonuçlandırma, 2–10 iş günü banka süresi) **öneri niteliğinde**; kullanıcı kendi politikasına göre değiştirebilir.
 - 3 sayfaya da `<meta name="robots" content="noindex">` konuldu (taslak alanlar dolana kadar aramada çıkmasın).
@@ -85,18 +147,18 @@ Bu oturumda **kod/deploy değişikliği YAPILMADI** — sadece Play Console'da C
 - `.firebaserc`, `.firebase/`, `functions/` ve tüm canlı dosyalar DOKUNULMADI. `_ARSIV` GitHub'a yüklenmemeli.
 - Hâlâ duran: `zibD1tAO` (94 KB, uzantısız — ne olduğu belirsiz, dokunulmadı).
 
-### ⭐ ÖDEME MODELİ DEĞİŞTİ — PayTR TAMAMEN KALKTI, SATIŞ SADECE GOOGLE PLAY — SW `2026-08-01-playstore-satis-paytr-kalkti`
+### ⭐ ÖDEME MODELİ — SATIŞ SADECE GOOGLE PLAY — SW `2026-08-01-playstore-satis-paytr-kalkti`
 
-- **Kullanıcı bilgisi (kritik):** PayTR başvurusu **REDDEDİLDİ**, web üzerinden satış OLMAYACAK. Premium yalnızca **Google Play Billing** ile satılacak. Kullanıcı **firma değil, vergiden muaf gerçek kişi** — ünvan/MERSİS/VKN yok.
-- **Sitedeki tüm PayTR referansları kaldırıldı:**
+- **Kullanıcı bilgisi (kritik):** Web üzerinden satış OLMAYACAK. Premium yalnızca **Google Play Billing** ile satılacak. Kullanıcı **firma değil, vergiden muaf gerçek kişi** — ünvan/MERSİS/VKN yok.
+- **Sitedeki eski ödeme sağlayıcısı referansları kaldırıldı:**
   - `index.html` hoş geldin ekranı "Abonelik ve Ödeme Güvencesi" kutusu → Google Play Billing.
-  - `index.html` KVKK özet bloğu "ödeme işlemleri için PayTR" → "Google Play Billing".
+  - `index.html` KVKK özet bloğunda ödeme işlemleri artık "Google Play Billing" olarak geçiyor.
   - `premium.html` `trust_note` (tr+en) → "Abonelik Google Play üzerinden satın alınır".
-  - `premium.html` `startSubscription()` → PayTR/Cloudflare Worker TODO'su silindi; artık Play Store ürün sayfasını açıyor. **Android tarafında bu buton in-app satın alma akışını tetikleyecek — henüz bağlanmadı.**
+  - `premium.html` `startSubscription()` → eski ödeme sağlayıcısı/Cloudflare Worker TODO'su silindi; artık Play Store ürün sayfasını açıyor. **Android tarafında bu buton in-app satın alma akışını tetikleyecek — henüz bağlanmadı.**
   - `premium.html` footer link etiketi `legal1` → "Satış ve ödeme koşulları" (tr) / "Sales & payment terms" (en).
 - **`mesafeli-satis-sozlesmesi.html` BAŞTAN YAZILDI** (dosya adı korundu, premium.html linki kırılmasın): artık "Satış ve Ödeme Koşulları". Ana mesaj: **bu sitede satış yapılmaz**, satıcı ve tahsilat Google; kart bilgisi hiçbir aşamada bize gelmez. Google Play Hizmet Şartları'na link verildi. Uygulamanın yatırım/vergi danışmanlığı OLMADIĞI da eklendi.
 - **`iptal-iade.html` BAŞTAN YAZILDI:** Google Play iptal adımları (Play → Ödemeler ve abonelikler → Abonelikler), **ilk 48 saat Google'dan doğrudan iade / sonrasında geliştiriciye başvuru** ayrımı, GPA. ile başlayan sipariş no ile e-posta başvurusu, geliştirici olarak iade başlatacağımız 4 durum, Google tarafında 3–5 iş günü işlem süresi.
-- **`kvkk.html` güncellendi:** veri sorumlusu artık `[Ad Soyad]` — MMG Creativity (vergiden muaf gerçek kişi) + `[İletişim adresi]`; PayTR aktarım maddesi → Google Play Billing; "fatura/mali kayıt 10 yıl" maddesi kaldırıldı (fatura Google'da) → "abonelik durumu + sipariş kimliği, abonelik bitiminden 1 yıl sonra silinir".
+- **`kvkk.html` güncellendi:** veri sorumlusu artık `[Ad Soyad]` — MMG Creativity (vergiden muaf gerçek kişi) + `[İletişim adresi]`; aktarım maddesi → Google Play Billing; "fatura/mali kayıt 10 yıl" maddesi kaldırıldı (fatura Google'da) → "abonelik durumu + sipariş kimliği, abonelik bitiminden 1 yıl sonra silinir".
 - ✅ **KİMLİK BİLGİLERİ DOLDURULDU** (SW `2026-08-01-sozlesme-kimlik-dolduruldu`): `mesafeli-satis-sozlesmesi.html` + `kvkk.html` → **Muhammed Mutlu Güler — MMG Creativity**, adres **Alaaddinbey Mah. 244. İsimsiz Sok. No: 6/1, Nilüfer / BURSA**. Placeholder kalmadı; 3 sayfadan `<meta name="robots" content="noindex">` kaldırıldı (artık aramada çıkabilirler). `.fill` CSS kuralı kullanılmıyor ama zararsız, duruyor.
 - ⚠️ Bu adres canlı sitede **herkese açık** olacak (KVKK başvurusu için yazılı adres zorunlu). Ev adresiyse ve gizlemek istersen alternatif bir tebligat adresi ya da yalnız il/ilçe + e-posta yazılabilir — hukuki risk kullanıcının değerlendirmesinde.
 - ⚠️ Metinler **hukukçuya okutulmadı**; Play Store'da satış açılmadan önce gözden geçirilmeli.
@@ -201,7 +263,7 @@ Yeni işaretlenen 3 veri türü, **4. adım (Veri kullanımı ve işleme)** ekra
 - `gizlilik-politikasi.html` üst barındaki "İletişim →" bağlantısı **"Hesap ve Veri Silme →"** ile değiştirildi (iletişim zaten sayfa sonunda var).
 
 **Denetimde kontrol edilip TEMİZ çıkanlar**
-- Canlı `*.html` dosyalarında **PayTR geçmiyor** (yalnız `_ARSIV` kopyasında ve `premium.html`'deki "PayTR reddetti" açıklama satırında).
+- Canlı `*.html` dosyalarında eski ödeme sağlayıcısı adı **geçmiyor** (yalnız `_ARSIV` kopyasında kalmıştı).
 - 5 yeni/güncellenmiş yasal sayfa canlıda açılıyor; `premium.html` footer'ındaki 3 link birebir dosya adlarıyla eşleşiyor, 404 yok.
 - Sözleşme sayfalarında doldurulmamış `[...]` placeholder **kalmadı**; `noindex` etiketleri kaldırıldı.
 - `_ARSIV/` ve `PLAY-DATA-SAFETY.md` GitHub'a **yüklenmedi** (doğru).
