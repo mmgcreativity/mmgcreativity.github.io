@@ -31,6 +31,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -58,7 +61,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .mono{font-family:'IBM Plex Mono',monospace;}
 
   header.masthead{
-    max-width:1180px; margin:0 auto; padding:36px 24px 24px;
+    max-width:1480px; margin:0 auto; padding:36px 24px 24px;
     display:flex; justify-content:space-between; align-items:flex-end;
     border-bottom:1px solid var(--hairline); flex-wrap:wrap; gap:16px;
   }
@@ -87,7 +90,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .top-actions{ width:100%; }
   }
 
-  main{ max-width:1180px; margin:0 auto; padding:28px 24px 24px; }
+  main{ max-width:1480px; margin:0 auto; padding:28px 24px 24px; }
 
   .cols{ display:grid; grid-template-columns:1.18fr 1fr; gap:24px; align-items:start; }
   @media (max-width:940px){ .cols{ grid-template-columns:1fr; } }
@@ -292,6 +295,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .mmg-sel-opt:hover{ background:var(--surface); }
   .mmg-sel-opt[aria-selected="true"]{ color:var(--brass); font-weight:600; }
+  .io-toolbar{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+  .io-btn{
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:8px;
+    color:var(--text); font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;
+    padding:9px 14px; cursor:pointer; transition:border-color .15s ease, background .15s ease;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .io-btn:hover{ border-color:var(--brass-dim); background:var(--surface); }
+  .io-msg{ font-size:12px; margin-top:8px; min-height:0; }
+  .io-msg.ok{ color:var(--teal); }
+  .io-msg.err{ color:var(--coral); }
   .ka-hint{ grid-column:1 / -1; font-size:10.5px; color:var(--muted); line-height:1.5; }
 
   /* ---- Tahsilat satırı kapama sonucu (kaç gün erken/geç + neyi kapattı) ---- */
@@ -426,7 +440,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- BİLGİ PANELİ -->
   <div class="info-panel">
-    <button type="button" class="reset-btn card-reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
     <div class="deviation-label" data-i18n="deviation_label">Vade Sapması</div>
     <div class="deviation-value neutral" id="devValue">—</div>
     <div class="deviation-sub" id="devSub" data-i18n="deviation_sub">Hesaplamak için fatura ve çek bilgilerini girin</div>
@@ -470,6 +483,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="ka-hint" id="kapamaHint">Sapma, kapatılan tutarlarla ağırlıklandırılır.</div>
       </div>
+
+    <div class="io-toolbar">
+      <button type="button" class="io-btn" id="exportExcelBtn"><svg width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#20744A"/><path d="M7 7l4 5-4 5h2.4l2.8-3.6L15 17h2.4l-4-5 4-5H15l-2.8 3.6L9.4 7H7z" fill="#fff"/></svg>Excel'e Aktar</button>
+      <button type="button" class="io-btn" id="exportPdfBtn"><svg width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#D93831"/><text x="12" y="16.5" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>PDF'e Aktar</button>
+      <button type="button" class="io-btn" id="shareBtn">🔗 Paylaş</button>
+    </div>
+    <div class="io-msg" id="ioMsg"></div>
 
     <div class="flag" data-i18n="deviation_flag">⚠ Vade sapması, fatura ve çek tutarlarına göre ağırlıklı ortalama tarihler üzerinden hesaplanır. Negatif (−) değer vadenin geçtiğini / gecikmeyi, sıfır veya pozitif (+) değer erken ya da tam vadesinde ödemeyi gösterir.</div>
   </div>
@@ -603,6 +623,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const nativeEl = wrapEl.querySelector('.date-native-hidden');
 
     if(initialValue) textEl.value = initialValue;
+
+    // Kutu doluyken (10 karakter, maxlength dolu) yeni tarih yazılamıyordu — önce elle
+    // silmek gerekiyordu (kullanıcı: "tarih kutusu doluyken tekrar tarih giremiyorum,
+    // üstüne yazmıyor"). Odaklanınca tümünü seçiyoruz; yazılan ilk rakam seçimi değiştirir.
+    textEl.addEventListener('focus', ()=>{ try{ textEl.select(); }catch(e){} });
+    // Fare ile tıklamada tarayıcı seçimi kaldırabildiği için tıklamada da seçiyoruz.
+    textEl.addEventListener('mouseup', (e)=>{
+      if(textEl.selectionStart === textEl.selectionEnd && textEl.value.length >= 10){
+        e.preventDefault(); try{ textEl.select(); }catch(err){}
+      }
+    });
 
     textEl.addEventListener('input', ()=>{
       const pos = textEl.selectionStart;
@@ -796,6 +827,104 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         recalc();
       }
     }, true);
+  });
+
+  /* ================= ÇIKTI ALMA: Excel / PDF / Paylaş =================
+     Ekrandaki iki tabloyu (Faturalar + Tahsilatlar) ve sonuç özetini dışa aktarır.
+     Kapama sonucu (kaç gün erken/geç, hangi faturayı kapattı) da satır satır gider. */
+  function ioMsg(text, ok){
+    const el = document.getElementById('ioMsg');
+    if(!el) return;
+    el.textContent = text || '';
+    el.className = 'io-msg' + (text ? (ok ? ' ok' : ' err') : '');
+    if(text) setTimeout(function(){ if(el.textContent === text){ el.textContent=''; el.className='io-msg'; } }, 4000);
+  }
+
+  // Ekrandaki veriyi tablo dizilerine çevirir (hem Excel hem PDF bunu kullanır).
+  function ciktiVerisi(){
+    const faturalar = [['#','Tarih','Çalışma Şekli','Gün','Tutar','Vade Tarihi']];
+    document.querySelectorAll('#faturaRows .entry-row').forEach(function(row, i){
+      const d = faturaData[row.dataset.id]; if(!d) return;
+      const due = computeDueDate(row.dataset.id);
+      faturalar.push([ i+1, d.tarih || '', (d.yontem === 'aysonu' ? 'Ay Sonu +' : 'Fatura +'),
+                       d.gun, fmtTR(d.tutar || 0), due ? fmtDateTR(due) : '' ]);
+    });
+    const tahsilatlar = [['#','Vade','Tutar','Kapama Sonucu']];
+    document.querySelectorAll('#cekRows .entry-row').forEach(function(row, i){
+      const d = cekData[row.dataset.id]; if(!d) return;
+      const sonucEl = row.querySelector('.c-sonuc');
+      const sonuc = (sonucEl && !sonucEl.hidden)
+        ? Array.prototype.map.call(sonucEl.querySelectorAll('.cs-satir'),
+            function(x){ return x.textContent.replace(/\s+/g,' ').trim(); }).join(' | ')
+        : '';
+      tahsilatlar.push([ i+1, d.tarih || '', fmtTR(d.tutar || 0), sonuc ]);
+    });
+    const ozet = [
+      ['Vade Sapması', document.getElementById('devValue').textContent],
+      ['Açıklama', document.getElementById('devSub').textContent],
+      ['Fatura Ort. Vadesi', document.getElementById('statFaturaVade').textContent],
+      ['Tahsilat Ort. Vadesi', document.getElementById('statCekVade').textContent],
+      ['Karşılama Oranı', document.getElementById('statKarsilama').textContent],
+      ['Karşılanmayan Tutar', document.getElementById('statFark').textContent],
+      ['Toplam Fatura Tutarı', document.getElementById('faturaToplam').textContent],
+      ['Toplam Tahsilat Tutarı', document.getElementById('cekToplam').textContent],
+      ['Kapama Sırası', (function(){ const b=document.querySelector('#kapamaYontem'); return b ? b.options[b.selectedIndex].textContent : ''; })()],
+      ['Tahsilat Bölünsün mü', (function(){ const b=document.querySelector('#kapamaBolme'); return b ? b.options[b.selectedIndex].textContent : ''; })()]
+    ];
+    return { faturalar: faturalar, tahsilatlar: tahsilatlar, ozet: ozet };
+  }
+
+  const bugunStr = (function(){ const d=new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); })();
+
+  const excelBtn = document.getElementById('exportExcelBtn');
+  if(excelBtn) excelBtn.addEventListener('click', function(){
+    try{
+      if(typeof XLSX === 'undefined'){ ioMsg('Excel kitaplığı yüklenemedi.', false); return; }
+      const v = ciktiVerisi();
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(v.faturalar), 'Faturalar');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(v.tahsilatlar), 'Tahsilatlar');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Özet','Değer']].concat(v.ozet)), 'Özet');
+      XLSX.writeFile(wb, 'vade-sapma-' + bugunStr + '.xlsx');
+      ioMsg('Excel dosyası indirildi.', true);
+    }catch(e){ ioMsg('Excel oluşturulamadı: ' + e.message, false); }
+  });
+
+  const pdfBtn = document.getElementById('exportPdfBtn');
+  if(pdfBtn) pdfBtn.addEventListener('click', function(){
+    try{
+      if(!window.jspdf){ ioMsg('PDF kitaplığı yüklenemedi.', false); return; }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+      const v = ciktiVerisi();
+      doc.setFontSize(15); doc.text('Vade Sapma Hesaplama', 14, 16);
+      doc.setFontSize(9);  doc.text('Tarih: ' + fmtDateTR(new Date()), 14, 22);
+      doc.autoTable({ startY:27, head:[v.faturalar[0]], body:v.faturalar.slice(1),
+                      styles:{fontSize:8}, headStyles:{fillColor:[62,143,224]}, margin:{left:14,right:14} });
+      doc.autoTable({ startY: doc.lastAutoTable.finalY + 6, head:[v.tahsilatlar[0]], body:v.tahsilatlar.slice(1),
+                      styles:{fontSize:8}, headStyles:{fillColor:[198,161,91]}, margin:{left:14,right:14} });
+      doc.autoTable({ startY: doc.lastAutoTable.finalY + 6, head:[['Özet','Değer']], body:v.ozet,
+                      styles:{fontSize:8}, headStyles:{fillColor:[90,90,90]}, margin:{left:14,right:14} });
+      doc.save('vade-sapma-' + bugunStr + '.pdf');
+      ioMsg('PDF dosyası indirildi.', true);
+    }catch(e){ ioMsg('PDF oluşturulamadı: ' + e.message, false); }
+  });
+
+  const shareBtn = document.getElementById('shareBtn');
+  if(shareBtn) shareBtn.addEventListener('click', async function(){
+    const v = ciktiVerisi();
+    const metin = 'Vade Sapma Hesaplama\n' +
+      v.ozet.map(function(r){ return r[0] + ': ' + r[1]; }).join('\n') +
+      '\n\n' + location.href;
+    try{
+      if(navigator.share){ await navigator.share({ title:'Vade Sapma Hesaplama', text:metin }); return; }
+      await navigator.clipboard.writeText(metin);
+      ioMsg('Özet panoya kopyalandı.', true);
+    }catch(e){
+      if(e && e.name === 'AbortError') return;   // kullanıcı paylaşımı iptal etti
+      ioMsg('Paylaşılamadı: ' + e.message, false);
+    }
   });
 
   // ---------- OK TUŞLARIYLA HÜCRELER ARASI HAREKET (Excel gibi) ----------
@@ -1103,15 +1232,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           const g = e.gun;
           const cls = g > 0 ? 'cs-gec' : (g < 0 ? 'cs-erken' : 'cs-tam');
           const txt = g > 0 ? (g + ' gün geç') : (g < 0 ? (Math.abs(g) + ' gün erken') : 'tam gününde');
-          // Tutar zaten soldaki kutuda yazıyor; TAM kapamada tekrar yazmıyoruz
-          // (kullanıcı: "tutar belli, sağa bir daha yazmana gerek yok").
-          // Yalnızca KISMİ kapamada (tahsilat birden fazla faturaya bölündüğünde)
-          // hangi faturaya ne kadar gittiği bilgisi gerekli olduğu için gösterilir.
-          const kismi = t.eslesme.length > 1 || e.miktar !== t.tutar;
+          // Tutar YAZILMAZ — soldaki kutuda zaten görünüyor (kullanıcı isteği:
+          // "Fatura #1 yazman yeterli, tutarını yazmana gerek yok").
+          // Kalan/eşleşmeyen kısım ayrı satırda zaten bildiriliyor.
           return '<div class="cs-satir">' +
                    '<span class="cs-badge ' + cls + '">' + txt + '</span>' +
-                   '<span class="cs-detay">Fatura #' + e.faturaNo +
-                     (kismi ? ' · ' + fmtTR(e.miktar) + ' ₺' : '') + '</span>' +
+                   '<span class="cs-detay">Fatura #' + e.faturaNo + '</span>' +
                  '</div>';
         }).join('');
         const artan = t.kalan > 0 ? '<div class="cs-satir"><span class="cs-detay cs-artan">kalan ' + fmtTR(t.kalan) + ' ₺ eşleşmedi</span></div>' : '';
@@ -1195,7 +1321,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     addCekRow();
     recalc();
   }
-  ['resetPageBtn','resetTopBtn'].forEach(function(id){
+  ['resetTopBtn'].forEach(function(id){
     const b = document.getElementById(id);
     if(b) b.addEventListener('click', () => {
       if(confirm(LBL.resetConfirm)){ resetAll(); }
