@@ -323,7 +323,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     min-height:28px; box-sizing:border-box;
   }
   .cs-satir{ display:flex; align-items:center; gap:7px; min-width:0; white-space:nowrap; line-height:18px; }
-  .cs-satir .cs-detay{ overflow:hidden; text-overflow:ellipsis; }
+  .cs-satir .cs-detay{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
   /* Rozetler: metin uzunluğu değiştikçe boyları/enleri farklı görünüyordu
      (kullanıcı: "bi büyük bi küçük"). Sabit yükseklik + sabit taban genişlik ile
      hepsi aynı ölçüde ve yanındaki yazıyla aynı hizada duruyor. */
@@ -1239,9 +1239,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const t = byNo[tr.no];
         if(!t || !t.eslesme.length){
           if(t && t.kalan > 0 && t.tutar > 0){
-            el.innerHTML = '<div class="cs-satir"><span class="cs-badge cs-none">eşleşmedi</span>' +
+            el.innerHTML = '<div class="cs-satir">' +
                            '<span class="cs-detay">Kapatacak uygun fatura bulunamadı' +
-                           (bolme === 'bolme' ? ' (bölünmesin seçili — tam sığan fatura yok)' : '') + '</span></div>';
+                           (bolme === 'bolme' ? ' (bölünmesin seçili — tam sığan fatura yok)' : '') + '</span>' +
+                           '<span class="cs-badge cs-none">eşleşmedi</span></div>';
           } else { el.innerHTML = ''; }
           return;
         }
@@ -1252,9 +1253,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           // Kutu genişledikten sonra tutar da yazılıyor (kullanıcı: "yeterince boşluk oldu,
           // 1. Fatura'dan sonra tutarını da yazabilirsin") — hangi faturaya ne kadar
           // gittiği özellikle bölünmüş kapamalarda gerekli bilgi.
+          // Rozet SONA alındı (kullanıcı isteği): önce hangi faturayı ne kadar kapattığı,
+          // sonra kaç gün erken/geç olduğu.
           return '<div class="cs-satir">' +
-                   '<span class="cs-badge ' + cls + '">' + txt + '</span>' +
                    '<span class="cs-detay">' + e.faturaNo + '. Fatura · ' + fmtTR(e.miktar) + ' ₺</span>' +
+                   '<span class="cs-badge ' + cls + '">' + txt + '</span>' +
                  '</div>';
         }).join('');
         const artan = t.kalan > 0 ? '<div class="cs-satir"><span class="cs-detay cs-artan">kalan ' + fmtTR(t.kalan) + ' ₺ eşleşmedi</span></div>' : '';
