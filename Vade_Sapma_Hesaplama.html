@@ -390,6 +390,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="subtitle" data-i18n="page_subtitle">Fatura vadeleriniz ile tahsil ettiğiniz çeklerin vadelerini karşılaştırın; ortalama kaç gün sapma olduğunu ve karşılama oranını görün.</div>
   </div>
   <div class="top-actions">
+    <!-- Sıfırla sayfanın SAĞ ÜSTÜNDE de dursun (kullanıcı isteği); sonuç panelindeki
+         buton da yerinde kalıyor, ikisi de aynı resetAll() akışını çalıştırır. -->
+    <button type="button" class="reset-btn" id="resetTopBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
     <a href="index.html" target="_top" class="back-link" data-i18n="back_home">← Ana Sayfa</a>
   </div>
 </header>
@@ -1192,10 +1195,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     addCekRow();
     recalc();
   }
-  document.getElementById('resetPageBtn').addEventListener('click', () => {
-    if(confirm(LBL.resetConfirm)){
-      resetAll();
-    }
+  ['resetPageBtn','resetTopBtn'].forEach(function(id){
+    const b = document.getElementById(id);
+    if(b) b.addEventListener('click', () => {
+      if(confirm(LBL.resetConfirm)){ resetAll(); }
+    });
   });
 
   addFaturaRow();
