@@ -466,11 +466,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const pos = el.selectionStart;
       const before = el.value;
       el.value = formatTRLive(el.value);
-      if(capTutar(el)){ recalc(); return; }
+      if(capTutar(el)){ setTimeout(recalc, 0); return; }
       const diff = el.value.length - before.length;
       const newPos = Math.max(0, (pos||0) + diff);
       try { el.setSelectionRange(newPos, newPos); } catch(e){}
-      recalc();
+      // setTimeout: bu dinleyici, satırın veri modelini güncelleyen 'input' dinleyicisinden
+      // ÖNCE eklendiği için doğrudan recalc() çağrısı BİR TUŞ GERİDEN hesaplıyordu
+      // (1.000.000 yazınca toplam 100.000 görünüyordu). Sıraya alınca güncel veriyle çalışır.
+      setTimeout(recalc, 0);
     });
     el.addEventListener('blur', ()=>{
       const v = Math.min(parseTR(el.value), MAX_TUTAR);
@@ -730,14 +733,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.addEventListener('keydown', function(e){
     if(e.key !== 'Enter') return;
     const el = e.target;
-    if(!el || !el.matches || !el.matches('input')) return;
+    // input VE select — eskiden yalnızca input kapsanıyordu, bu yüzden "Çalışma Şekli"
+    // açılır kutusunda Enter tarayıcının varsayılan davranışını yapıp LİSTEYİ AÇIYOR,
+    // gezinme orada takılıyordu (kullanıcı bildirdi).
+    if(!el || !el.matches || !el.matches('input, select')) return;
     if(el.type === 'checkbox' || el.type === 'radio' || el.type === 'button' || el.type === 'submit') return;
     e.preventDefault();
+    e.stopPropagation();
     // Değeri işlet: blur → mevcut 'blur' dinleyicileri parse edip recalc'ı çağırıyor.
     el.blur();
     // Odaklanabilir tüm alanları sırayla topla, bir sonrakine geç.
+    // ⚠️ SADECE VERİ ALANLARI — butonlar HARİÇ.
+    // Eskiden 'button' da listedeydi: Enter odağı satırın ✕ (sil) butonuna taşıyor,
+    // Enter'ın keyup'ı o butonu tıklamış sayılıp SATIRI SİLİYORDU. Kullanıcı "yazıp
+    // Enter'a bastım, geri al çalışmıyor" diyordu — aslında satır siliniyordu.
     const odaklar = Array.prototype.filter.call(
-      document.querySelectorAll('input, select, textarea, button'),
+      document.querySelectorAll('input, select, textarea'),
       function(x){ return !x.disabled && x.offsetParent !== null && x.tabIndex !== -1; }
     );
     const i = odaklar.indexOf(el);
