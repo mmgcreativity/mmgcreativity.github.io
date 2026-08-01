@@ -12,7 +12,7 @@
  * FCM için AYRI firebase-messaging-service-worker.js gerekir; bu dosya onun yerini tutmaz.
  */
 
-const SW_VERSION = '2026-08-01-fatura-metni-sade';
+const SW_VERSION = '2026-08-01-tahsilat-sonuc-saga';
 const CACHE = 'mmg-' + SW_VERSION;
 
 self.addEventListener('install', () => {
