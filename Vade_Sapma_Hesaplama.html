@@ -245,6 +245,41 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     background-repeat:no-repeat;
   }
   .ka-select:focus{ outline:none; border-color:var(--brass-dim); }
+  /* ---- ÖZEL AÇILIR LİSTE ----
+     Yerli <select>'in açılan listesini işletim sistemi çiziyor (beyaz zemin, mavi vurgu);
+     CSS ile değiştirilemiyor. Bu yüzden site paletinde kendi listemizi çiziyoruz.
+     Yerli <select> DOM'da GİZLİ duruyor ve TEK DOĞRULUK KAYNAĞI o: seçimde value set edilip
+     'change' tetikleniyor, böylece mevcut recalc bağlantıları aynen çalışıyor. */
+  .mmg-sel{ position:relative; width:100%; }
+  .mmg-sel > select{ display:none !important; }
+  .mmg-sel-btn{
+    width:100%; text-align:left; cursor:pointer;
+    background:var(--bg); color:var(--text);
+    border:1px solid var(--hairline); border-radius:7px;
+    height:28px; padding:0 26px 0 9px;
+    font-family:'Inter',sans-serif; font-size:13px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    background-image:linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+                     linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position:calc(100% - 15px) 12px, calc(100% - 10px) 12px;
+    background-size:5px 5px, 5px 5px; background-repeat:no-repeat;
+  }
+  .mmg-sel-btn:hover{ border-color:var(--brass-dim); }
+  .mmg-sel.open .mmg-sel-btn{ border-color:var(--brass); }
+  .mmg-sel-list{
+    position:absolute; z-index:900; left:0; right:0; top:calc(100% + 4px);
+    background:var(--surface-2); border:1px solid var(--hairline); border-radius:9px;
+    box-shadow:0 16px 40px rgba(0,0,0,0.5); padding:4px; max-height:220px; overflow-y:auto;
+  }
+  .mmg-sel-list[hidden]{ display:none; }
+  .mmg-sel-opt{
+    display:block; width:100%; text-align:left; cursor:pointer;
+    background:none; border:none; border-radius:6px; padding:7px 9px;
+    color:var(--text); font-family:'Inter',sans-serif; font-size:13px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .mmg-sel-opt:hover{ background:var(--bg); }
+  .mmg-sel-opt[aria-selected="true"]{ color:var(--brass); font-weight:600; }
   .ka-hint{ grid-column:1 / -1; font-size:10.5px; color:var(--muted); line-height:1.5; }
 
   /* ---- Tahsilat satırı kapama sonucu (kaç gün erken/geç + neyi kapattı) ---- */
@@ -662,6 +697,51 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   document.getElementById('addFaturaBtn').addEventListener('click', ()=>addFaturaRow());
   document.getElementById('addCekBtn').addEventListener('click', ()=>addCekRow());
+
+  // ---- Yerli <select>'leri site paletindeki özel listeye çevir ----
+  function mmgOzelSecici(sel){
+    if(!sel || sel.dataset.mmgSel) return;
+    sel.dataset.mmgSel = '1';
+    const wrap = document.createElement('div');
+    wrap.className = 'mmg-sel';
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(sel);
+
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'mmg-sel-btn';
+    const list = document.createElement('div');
+    list.className = 'mmg-sel-list'; list.hidden = true; list.setAttribute('role','listbox');
+    wrap.appendChild(btn); wrap.appendChild(list);
+
+    function tazele(){
+      const o = sel.options[sel.selectedIndex];
+      btn.textContent = o ? o.textContent : '';
+      btn.title = btn.textContent;
+      list.innerHTML = Array.prototype.map.call(sel.options, function(op, i){
+        return '<button type="button" class="mmg-sel-opt" role="option" data-i="' + i + '" aria-selected="' +
+               (i === sel.selectedIndex) + '">' + op.textContent + '</button>';
+      }).join('');
+    }
+    function kapat(){ list.hidden = true; wrap.classList.remove('open'); }
+    function ac(){
+      document.querySelectorAll('.mmg-sel.open').forEach(function(w){
+        if(w !== wrap){ w.classList.remove('open'); const l = w.querySelector('.mmg-sel-list'); if(l) l.hidden = true; }
+      });
+      tazele(); list.hidden = false; wrap.classList.add('open');
+    }
+    btn.addEventListener('click', function(e){ e.stopPropagation(); list.hidden ? ac() : kapat(); });
+    list.addEventListener('click', function(e){
+      const o = e.target.closest('[data-i]'); if(!o) return;
+      e.stopPropagation();
+      sel.selectedIndex = parseInt(o.dataset.i, 10);
+      sel.dispatchEvent(new Event('change', { bubbles: true }));   // mevcut recalc bağlantısı çalışsın
+      tazele(); kapat();
+    });
+    document.addEventListener('click', kapat);
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') kapat(); });
+    tazele();
+  }
+  ['kapamaYontem','kapamaBolme'].forEach(function(id){ mmgOzelSecici(document.getElementById(id)); });
 
   // Kapama ayarları değişince yeniden hesapla.
   ['kapamaYontem','kapamaBolme'].forEach(function(id){
