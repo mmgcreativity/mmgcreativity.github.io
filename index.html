@@ -4352,6 +4352,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         uid: uid, username: username || '', email: email || ''
       });
     }catch(e){ /* dizin güncellenemezse sessizce geç, kritik bir işlev değil */ }
+    mmgCleanupGhostDirectoryEntries(uid, customerNumber);
+  }
+
+  // ---- Hayalet dizin kaydı temizliği (2026-08-01) ----
+  // Mükerrer müşteri kodu yarışı (bkz. DEVIR-NOTU) aynı uid için userDirectory'de
+  // birden fazla kayıt bırakmıştı; ör. Murat Doğan hem 1027 hem 1028 altında görünüyordu.
+  // Yarışın kendisi düzeltildi ama ESKİ hayalet kayıtlar duruyor. Burada, kullanıcı her
+  // giriş yaptığında kendi uid'ine ait ama GEÇERLİ kodundan farklı olan dizin kayıtları
+  // siliniyor. Kurallar yalnızca kendi kaydının silinmesine izin veriyor (allow delete).
+  // Sessiz ve gürültüsüz çalışır; başarısız olursa hiçbir akışı bozmaz.
+  let mmgGhostCleanupDone = false;
+  async function mmgCleanupGhostDirectoryEntries(uid, customerNumber){
+    if(mmgGhostCleanupDone || !uid || !customerNumber) return;
+    mmgGhostCleanupDone = true;
+    try{
+      const validCode = String(customerNumber);
+      const snap = await getDocs(query(collection(db, 'userDirectory'), where('uid', '==', uid)));
+      for(const d of snap.docs){
+        if(d.id === validCode) continue;               // geçerli kaydı asla silme
+        try{ await deleteDoc(d.ref); }catch(delErr){ /* izin yoksa/kural eskiyse geç */ }
+      }
+    }catch(e){ /* sorgu yapılamazsa sessizce geç */ }
   }
 
   // ---- Firma / Ekip: yeni bir firma hesabı kurar, kuran kişi 'owner' (sahibi) olur ----

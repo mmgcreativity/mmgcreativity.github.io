@@ -135,6 +135,13 @@ Yeni işaretlenen 3 veri türü, **4. adım (Veri kullanımı ve işleme)** ekra
 - ⚠️ **Geriye dönük veri:** Murat Doğan'ın `users/{uid}.customerNumber` alanı **1028** (panelin gösterdiği doğru değer). Cihazındaki 1027 bayat `localStorage.mmg_customer_no` değeri — **çıkış yapıp tekrar girince 1028'e döner**. `userDirectory/1027` artık kaydı duruyor (kurallar delete'e izin vermiyor); kod çözümü "en yüksek sayısal kod"u seçtiği için zarar vermiyor. Sayaçtan 1 numara boşa yandı, kozmetik.
 - 🔎 Aynı belirtiyi gösteren eski kayıtlar varsa (`userDirectory`'de aynı uid'ye ait iki doküman) hepsi bu yarıştan kaynaklanıyor; artık yenisi oluşmayacak.
 
+**🧹 HAYALET DİZİN KAYITLARI TEMİZLENİYOR — SW `2026-08-01-hayalet-dizin-temizligi`**
+- Kullanıcı: "hayalet kayıt istemiyorum". Yarış düzeltildi ama ESKİ artıklar (ör. `userDirectory/1027` → Murat'ın uid'i) duruyordu. Riski: KullanıcıYönetimi davet akışındaki **"🔍 Sorgula"** `userDirectory/{kod}` okuduğu için #1027 sorgulanınca Murat çıkıyor, yanlış kodla doğru kişiye davet gidebiliyordu.
+- **`firestore.rules`** → `userDirectory/{code}` match'ine **`allow delete: if request.auth != null && resource.data.uid == request.auth.uid;`** eklendi. Silmede `request.resource` null olduğu için mevcut `write` kuralı delete'i engelliyordu; artık kullanıcı YALNIZCA kendi uid'ine ait dizin kaydını silebilir. ⏳ **KULLANICI ÇALIŞTIRMALI: `firebase deploy --only firestore:rules`** (bekleyen diğer rules değişikliğiyle aynı komutta gider).
+- **`index.html`** → yeni `mmgCleanupGhostDirectoryEntries(uid, customerNumber)`; `syncUserDirectory`'nin sonunda çağrılıyor. `where('uid','==',uid)` ile kendi dizin kayıtlarını sorgular, **geçerli kod dışındaki** her kaydı siler. Oturum başına bir kez çalışır (`mmgGhostCleanupDone`), tamamen sessizdir, hata alırsa hiçbir akışı bozmaz.
+- ⚠️ **Sıra önemli:** rules deploy edilmeden temizlik çalışmaz (delete izni yok, sessizce geçer). Rules canlıya alındıktan sonra her kullanıcı bir kez giriş yaptığında kendi artıkları otomatik silinir. Murat için: rules deploy → Murat giriş yapsın → `userDirectory/1027` silinir.
+- ℹ️ Sayaçtaki 1027 boşluğu kapanmaz (sayaç yalnız ileri gider) — ama artık o kod hiçbir kayda çözülmez, gerçekten boşta kalır.
+
 **⏰ Üretime başvuru:** 12 test kullanıcısı kesintisiz 12 gündür kayıtlı, **14 gün şartı ~3 Ağustos'ta doluyor** → "Üretime başvur" butonu o zaman açılır.
 
 - Bu bölümden önceki ortam düzeltmesinde kod/deploy tarafında değişiklik YAPILMAMIŞTI.
