@@ -75,9 +75,30 @@ Canlı site GitHub Pages'ten geliyor; `firebase deploy --only hosting` sadece `.
 **Chat — "+ Grup Oluştur" kaldırıldı**
 - Liste başındaki satır silindi; panelin sağ alt köşesindeki ortak **"+" (FAB)** Grup sekmesindeyken "Yeni grup oluştur" işlevi görüyor. Boş liste metni de buna göre güncellendi.
 
+### 💳 PREMIUM DURUMU — SATIN ALMA ZİNCİRİ HENÜZ YOK (10. oturumda tespit edildi)
+
+**KARAR (kullanıcı, 10. oturum): Önce uygulama Play Store'da yayınlansın; premium işlerine ONDAN SONRA bakılacak. Şimdilik bu başlıkta iş yapma.**
+
+Yayın sonrası ele alınmak üzere durum tespiti:
+
+**✅ Hazır olanlar**
+- `users/{uid}.isPremium` alanı ve buna bağlı reklam gizleme / premium özellik açma mantığı `index.html`'de çalışıyor.
+- `firestore.rules` `isPremium`'un kullanıcı tarafından değiştirilmesini engelliyor (doğru kurgu).
+- `premium.html` arayüzü, aylık/yıllık plan gösterimi ve 3 sözleşme sayfası canlıda.
+- Play Console **Veri güvenliği** formu gönderildi (9. oturum), Google incelemesinde.
+
+**❌ Eksikler — premium satışı açılmadan ÖNCE yapılması şart**
+1. **Google Play satın alma doğrulaması YOK.** `functions/index.js` içinde `androidpublisher` / `purchaseToken` / abonelik doğrulama kodu **sıfır**. Yani kullanıcı Play'den satın alsa bile `isPremium`'u `true` yapacak hiçbir mekanizma yok. Şu an `isPremium` yalnızca referans programındaki "ücretsiz premium" faydasıyla elle set ediliyor (`index.html` ~5202).
+2. **`premium.html` → "Premium'a geç" satın alma BAŞLATMIYOR** — yalnızca Play Store ürün sayfasını açıyor (`startSubscription()`). Gerçek akış Android uygulamasında in-app purchase ile tetiklenmeli.
+3. **Abonelik yaşam döngüsü YOK:** yenileme, iptal, süre dolumu, iade → `isPremium` bunlara göre güncellenmiyor. **Play RTDN (Real-Time Developer Notifications)** webhook'u kurulmamış.
+4. **Fiyatlar netleşmedi** (kullanıcı "belli olunca yazarım" dedi) ve Play Console'da abonelik ürünü/product ID tanımlı mı bilinmiyor.
+5. **Sözleşme metinleri hukukçu onayından geçmedi.**
+
+**Yayın sonrası yapılacak sıra (öneri):** Play Console'da abonelik ürünü tanımla → Android tarafında in-app purchase akışını bağla → `verifyPlayPurchase` Cloud Function'ı yaz (purchaseToken → androidpublisher API → `isPremium=true`) → RTDN webhook'u ile yenileme/iptal/iade senkronu → fiyatları `premium.html` + sözleşme sayfalarına işle → hukukçu onayı.
+
 ### ⏳ 10. OTURUM SONU — BEKLEYENLER
 **Spec bekleyen (kullanıcı bilgi verecek):**
-- **Premium fiyatları** — tutar netleşmedi ("belli olunca yazarım"). Netleşince `premium.html` + sözleşme sayfalarındaki tutarlar birlikte güncellenmeli.
+- **Premium** — ⛔ **BEKLETİLİYOR.** Kullanıcı kararı: önce uygulama Play Store'da yayınlansın, premium işleri ondan sonra. Detaylı durum tespiti için yukarıdaki **💳 PREMIUM DURUMU** bölümüne bak (satın alma doğrulaması, RTDN, fiyatlar, hukukçu onayı).
 - **Portföy modülü** (hisse adı / lot / alış fiyatı) — 7. oturumdan beri açık; fiyat kaynağı (canlı borsa mı elle giriş mi), yeri ve kâr/zarar isteği belirsiz.
 - **Her kayıtta admin'e bildirim** — Auth `onCreate` tetikleyicili yeni fonksiyon gerekiyor (şu an yalnız referans kodlu kayıtlarda bildirim var).
 
