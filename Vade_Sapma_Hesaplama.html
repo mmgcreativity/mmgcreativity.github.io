@@ -146,7 +146,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     outline:none; transition:border-color .15s ease; width:100%; height:28px;
   }
   .f-field input:focus, .f-field select:focus{ border-color:var(--brass-dim); }
-  .f-field select{ cursor:pointer; }
+  .f-field select{
+    cursor:pointer; appearance:none; -webkit-appearance:none; padding-right:22px;
+    background-image:linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+                     linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position:calc(100% - 13px) 12px, calc(100% - 8px) 12px;
+    background-size:5px 5px, 5px 5px;
+    background-repeat:no-repeat;
+  }
   /* Açılır listeler sitenin KOYU temasına uysun. Yerli <select> açılınca işletim
      sisteminin beyaz listesi çıkıyordu (kullanıcı: "genele uydur tasarımı").
      Chrome/Edge <option> üzerinde arka plan ve renk kabul ediyor. */
@@ -158,12 +165,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .ka-select option:checked{
     background-color:var(--brass-dim); color:#0D1420; font-weight:600;
   }
-  .ka-select{ appearance:none; -webkit-appearance:none; padding-right:26px;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%238D96AC' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-    background-repeat:no-repeat; background-position:right 9px center; }
-  .f-field select{ appearance:none; -webkit-appearance:none; padding-right:22px;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%238D96AC' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-    background-repeat:no-repeat; background-position:right 6px center; }
   /* Veri girilen (sayısal) alanlar Vadeli Mevduat sayfasindaki gibi JetBrains Mono 600 kullanir;
      Calisma Sekli secimi (select) ise Vadeli Mevduat'taki banka secimi gibi Inter kullanir. */
   .f-field input.date-text,
@@ -231,11 +232,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .ka-row{ display:flex; flex-direction:column; align-items:stretch; gap:3px; min-width:0; }
   .ka-label{ font-size:9.5px; letter-spacing:.03em; text-transform:uppercase; color:var(--muted); font-weight:700; }
   .ka-select{
-    width:100%; min-width:0; text-overflow:ellipsis; background:var(--bg); color:var(--text);
-    border:1px solid var(--hairline); border-radius:8px; padding:7px 9px;
-    font-family:inherit; font-size:12.5px;
+    width:100%; min-width:0; text-overflow:ellipsis;
+    background:var(--bg); color:var(--text);
+    border:1px solid var(--hairline); border-radius:7px;
+    height:28px; padding:0 26px 0 9px;              /* satır kutularıyla aynı yükseklik */
+    font-family:'Inter',sans-serif; font-size:12px; cursor:pointer;
+    appearance:none; -webkit-appearance:none;
+    background-image:linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+                     linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position:calc(100% - 15px) 12px, calc(100% - 10px) 12px;
+    background-size:5px 5px, 5px 5px;
+    background-repeat:no-repeat;
   }
-  .ka-select:focus{ outline:none; border-color:var(--brass); }
+  .ka-select:focus{ outline:none; border-color:var(--brass-dim); }
   .ka-hint{ grid-column:1 / -1; font-size:10.5px; color:var(--muted); line-height:1.5; }
 
   /* ---- Tahsilat satırı kapama sonucu (kaç gün erken/geç + neyi kapattı) ---- */
