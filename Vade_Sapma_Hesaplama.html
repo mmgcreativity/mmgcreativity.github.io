@@ -124,7 +124,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .entry-row{
     display:flex; flex-wrap:nowrap; align-items:center; gap:8px;
     background:transparent; border:none; border-bottom:1px solid var(--hairline);
-    border-radius:0; padding:4px 0;
+    border-radius:0; padding:2px 0;
   }
   .entry-row:last-child{ border-bottom:none; }
   .entry-row:hover{ background:rgba(255,255,255,0.015); }
@@ -139,7 +139,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .f-field input, .f-field select{
     background:var(--bg); border:1px solid var(--hairline); border-radius:7px;
     padding:0 8px; color:var(--text); font-family:'Inter',sans-serif; font-size:12px;
-    outline:none; transition:border-color .15s ease; width:100%; height:34px;
+    outline:none; transition:border-color .15s ease; width:100%; height:28px;
   }
   .f-field input:focus, .f-field select:focus{ border-color:var(--brass-dim); }
   .f-field select{ cursor:pointer; }
@@ -187,31 +187,35 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:600; color:var(--brass);
     background:rgba(198,161,91,0.1); border:1px solid rgba(198,161,91,0.25); border-radius:7px;
     padding:0 4px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    height:34px; display:flex; align-items:center; justify-content:center;
+    height:28px; display:flex; align-items:center; justify-content:center;
   }
   .row-del{
     background:none; border:none; color:var(--muted); cursor:pointer; font-size:15px;
     padding:0 6px; line-height:1; border-radius:6px; transition:color .15s ease, background .15s ease;
-    flex:0 0 auto; align-self:center; width:30px; height:34px; display:flex; align-items:center; justify-content:center;
+    flex:0 0 auto; align-self:center; width:30px; height:28px; display:flex; align-items:center; justify-content:center;
   }
   .f-field.f-del-wrap{ align-self:stretch; display:flex; align-items:center; }
   .f-del-wrap label{ display:none; }
   .f-del-wrap .row-del{ align-self:center; }
 
   /* ---- Kapama ayarları (sıra + bölme) ---- */
+  /* Kapama ayarları: ortalamaların ALTINDA, iki seçici YAN YANA (kullanıcı isteği:
+     "bu kadar uzun çubuğa gerek yok"). Dar ekranda alt alta iner. */
   .kapama-ayar{
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px;
-    padding:12px; margin:14px 0 4px; display:flex; flex-direction:column; gap:8px;
+    padding:10px 12px; margin:12px 0 0;
+    display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; align-items:end;
   }
-  .ka-row{ display:flex; flex-direction:column; align-items:stretch; gap:4px; }
-  .ka-label{ font-size:10px; letter-spacing:.03em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  @media (max-width:520px){ .kapama-ayar{ grid-template-columns:1fr; } }
+  .ka-row{ display:flex; flex-direction:column; align-items:stretch; gap:3px; min-width:0; }
+  .ka-label{ font-size:9.5px; letter-spacing:.03em; text-transform:uppercase; color:var(--muted); font-weight:700; }
   .ka-select{
-    width:100%; min-width:0; background:var(--bg); color:var(--text);
+    width:100%; min-width:0; text-overflow:ellipsis; background:var(--bg); color:var(--text);
     border:1px solid var(--hairline); border-radius:8px; padding:7px 9px;
     font-family:inherit; font-size:12.5px;
   }
   .ka-select:focus{ outline:none; border-color:var(--brass); }
-  .ka-hint{ font-size:11px; color:var(--muted); line-height:1.5; }
+  .ka-hint{ grid-column:1 / -1; font-size:10.5px; color:var(--muted); line-height:1.5; }
 
   /* ---- Tahsilat satırı kapama sonucu (kaç gün erken/geç + neyi kapattı) ---- */
   .c-sonuc{
@@ -234,7 +238,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
   .add-btn{
-    margin-top:14px; width:100%; padding:11px; border-radius:9px; border:1px dashed var(--hairline);
+    margin-top:10px; width:100%; padding:8px; border-radius:9px; border:1px dashed var(--hairline);
     background:none; color:var(--muted); font-family:'Inter',sans-serif; font-weight:600; font-size:13px;
     cursor:pointer; transition:border-color .15s ease, color .15s ease;
   }
@@ -344,6 +348,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="deviation-value neutral" id="devValue">—</div>
     <div class="deviation-sub" id="devSub" data-i18n="deviation_sub">Hesaplamak için fatura ve çek bilgilerini girin</div>
 
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="l" data-i18n="stat_invoice_avg">Fatura Ort. Vadesi</div>
+        <div class="v brass" id="statFaturaVade">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="l" data-i18n="stat_check_avg">Tahsilat Ort. Vadesi</div>
+        <div class="v brass" id="statCekVade">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="l" data-i18n="stat_coverage">Karşılama Oranı</div>
+        <div class="v" id="statKarsilama">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="l" data-i18n="stat_uncovered">Karşılanmayan Tutar</div>
+        <div class="v" id="statFark">—</div>
+      </div>
+    </div>
+
       <!-- KAPAMA AYARLARI — hangi faturadan başlanacağı ve tahsilatın bölünüp bölünmeyeceği.
            Muhasebede standart varsayılan FIFO'dur (en eski borç önce kapanır). -->
       <div class="kapama-ayar">
@@ -364,26 +387,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="ka-hint" id="kapamaHint">Sapma, kapatılan tutarlarla ağırlıklandırılarak hesaplanır.</div>
       </div>
-
-
-    <div class="stat-grid">
-      <div class="stat-card">
-        <div class="l" data-i18n="stat_invoice_avg">Fatura Ort. Vadesi</div>
-        <div class="v brass" id="statFaturaVade">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="l" data-i18n="stat_check_avg">Tahsilat Ort. Vadesi</div>
-        <div class="v brass" id="statCekVade">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="l" data-i18n="stat_coverage">Karşılama Oranı</div>
-        <div class="v" id="statKarsilama">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="l" data-i18n="stat_uncovered">Karşılanmayan Tutar</div>
-        <div class="v" id="statFark">—</div>
-      </div>
-    </div>
 
     <div class="flag" data-i18n="deviation_flag">⚠ Vade sapması, fatura ve çek tutarlarına göre ağırlıklı ortalama tarihler üzerinden hesaplanır. Negatif (−) değer vadenin geçtiğini / gecikmeyi, sıfır veya pozitif (+) değer erken ya da tam vadesinde ödemeyi gösterir.</div>
   </div>
