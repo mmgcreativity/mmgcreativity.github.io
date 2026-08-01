@@ -2373,6 +2373,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
   document.querySelectorAll('.nav-subitem').forEach(item => {
     item.addEventListener('click', () => {
+      // 3. seviye BAŞLIKLARI (ör. "Krediler", "Vade Hesapları") da nav-subitem sınıfı
+      // taşıyor ama bunlar bir araç açmaz, yalnızca alt kutuyu açar. Eskiden bu handler
+      // onlara da çalışıp flyout'u ANINDA kapatıyordu → alt kutu hiç görünmüyordu
+      // (kullanıcı: "2. kademeye tıklayınca 3. kademe gelmiyor"). Başlıkları atla.
+      if(item.parentElement && item.parentElement.classList.contains('nav-subwrap')) return;
       const drawer = item.closest('.nav-drawer');
       const wrap = item.closest('.nav-drawer-wrap');
       const toggle = wrap ? wrap.querySelector('[data-drawer-toggle]') : null;
