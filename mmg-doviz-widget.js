@@ -22,6 +22,20 @@
     'https://finans.truncgil.com/v4/today.json',
     'https://api.genelpara.com/embed/altin.json'
   ];
+  // "+Parite" listesinde gösterilecek yaygın kodlar (kullanıcı isteği: kör prompt yerine
+  // tıklanabilir liste). Zaten eklenmiş/temel (USD,EUR) olanlar listede işaretli/pasif görünür.
+  const COMMON_EXTRA = [
+    { code:'GBP', label:'İngiliz Sterlini', flag:'🇬🇧' },
+    { code:'CHF', label:'İsviçre Frangı',  flag:'🇨🇭' },
+    { code:'JPY', label:'Japon Yeni',      flag:'🇯🇵' },
+    { code:'SAR', label:'Suudi Riyali',    flag:'🇸🇦' },
+    { code:'AED', label:'BAE Dirhemi',     flag:'🇦🇪' },
+    { code:'CNY', label:'Çin Yuanı',       flag:'🇨🇳' },
+    { code:'RUB', label:'Rus Rublesi',     flag:'🇷🇺' },
+    { code:'CAD', label:'Kanada Doları',   flag:'🇨🇦' },
+    { code:'AUD', label:'Avustralya Doları', flag:'🇦🇺' },
+    { code:'KWD', label:'Kuveyt Dinarı',   flag:'🇰🇼' }
+  ];
   // Kullanıcının kendi eklediği pariteler (örn. GBP, CHF, SAR) — kalıcı.
   const EXTRA_KEY = 'mmg_doviz_extra_pairs';
   function getExtraPairs(){
@@ -53,9 +67,10 @@
       '<div id="mmgDovizRows" class="mmg-doviz-rows">' +
         '<div class="mmg-doviz-loading">Yükleniyor…</div>' +
       '</div>' +
-      '<div class="mmg-doviz-foot" style="justify-content:space-between;gap:8px;">' +
+      '<div class="mmg-doviz-foot" style="justify-content:space-between;gap:8px;position:relative;">' +
         '<span id="mmgDovizUpdated"></span>' +
         '<button type="button" id="mmgDovizAddBtn" title="Parite ekle" style="background:none;border:1px solid var(--hairline,#2A3448);border-radius:6px;color:var(--brass,#C6A15B);cursor:pointer;font-size:10.5px;font-weight:700;padding:3px 8px;">+ Parite</button>' +
+        '<div id="mmgDovizAddList" class="mmg-doviz-add-list" hidden></div>' +
       '</div>';
 
     // --- Stil ---
@@ -68,7 +83,9 @@
       '#mmgDovizBtn .mmg-doviz-btn-ico{font-size:17px;line-height:1;font-weight:700;}' +
       '#mmgDovizBtn .mmg-doviz-btn-lbl{font-size:7.5px;line-height:1;letter-spacing:.08em;font-weight:700;color:var(--muted,#8D96AC);}' +
       '#mmgDovizBtn:hover{border-color:var(--brass-dim,#8A7440);transform:translateY(-1px);}' +
-      '#mmgDovizPanel{position:fixed;top:64px;right:66px;z-index:801;width:230px;background:var(--surface,#141C2B);' +
+      // Panel genişliği 230px→280px (kullanıcı: "çakışma oluyor" — dar panelde uzun kur
+      // değerleri/etiketler kenara sıkışıp arkadaki sayfa içeriğiyle çakışıyordu).
+      '#mmgDovizPanel{position:fixed;top:64px;right:66px;z-index:801;width:280px;background:var(--surface,#141C2B);' +
         'border:1px solid var(--hairline,#2A3448);border-radius:14px;padding:14px;box-shadow:0 24px 60px rgba(0,0,0,0.5);' +
         'font-family:\'IBM Plex Mono\',monospace;}' +
       '#mmgDovizPanel[hidden]{display:none;}' +
@@ -76,9 +93,10 @@
         'color:var(--muted,#8D96AC);text-transform:uppercase;letter-spacing:.06em;}' +
       '#mmgDovizCloseBtn{background:none;border:none;color:var(--muted,#8D96AC);cursor:pointer;font-size:13px;padding:2px 4px;}' +
       '#mmgDovizCloseBtn:hover{color:var(--text,#EAEDF3);}' +
-      '.mmg-doviz-rows{display:flex;flex-direction:column;gap:7px;}' +
+      '.mmg-doviz-rows{display:flex;flex-direction:column;gap:5px;}' +
+      // Kutu yüksekliği azaltıldı (kullanıcı isteği): padding 9px/11px → 6px/10px.
       '.mmg-doviz-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface-2,#1B2536);' +
-        'border:1px solid var(--hairline,#2A3448);border-radius:8px;padding:9px 11px;}' +
+        'border:1px solid var(--hairline,#2A3448);border-radius:8px;padding:6px 10px;}' +
       // "Gram Altın" iki satıra kırılınca /TRY ikinci satırın yanında kalıp arada büyük boşluk
       // oluşuyordu (kullanıcı 2026-07-31). nowrap ile etiket tek satırda tutuluyor; ayrıca
       // flex gap'i (7px) negatif margin ile ~3px'e indirilip /TRY etikete yaklaştırıldı.
@@ -90,6 +108,23 @@
       '.mmg-doviz-foot{display:flex;align-items:center;justify-content:center;margin-top:11px;padding-top:9px;' +
         'border-top:1px solid var(--hairline,#2A3448);font-size:10px;color:var(--muted,#8D96AC);}' +
       '.mmg-doviz-foot #mmgDovizUpdated{white-space:nowrap;}' +
+      // "+ Parite" tıklanınca açılan liste: kör prompt yerine tıklanabilir seçenekler.
+      '.mmg-doviz-add-list{position:absolute;bottom:calc(100% + 6px);right:0;width:200px;max-height:260px;overflow-y:auto;' +
+        'background:var(--surface-2,#1B2536);border:1px solid var(--hairline,#2A3448);border-radius:10px;' +
+        'box-shadow:0 14px 34px rgba(0,0,0,0.45);padding:6px;z-index:802;}' +
+      '.mmg-doviz-add-list[hidden]{display:none;}' +
+      '.mmg-doviz-add-item{display:flex;align-items:center;gap:7px;width:100%;background:none;border:none;' +
+        'color:var(--text,#EAEDF3);font-size:12.5px;font-weight:600;text-align:left;padding:7px 8px;border-radius:7px;' +
+        'cursor:pointer;font-family:inherit;}' +
+      '.mmg-doviz-add-item:hover{background:var(--surface,#141C2B);}' +
+      '.mmg-doviz-add-item[disabled]{opacity:0.4;cursor:default;}' +
+      '.mmg-doviz-add-item[disabled]:hover{background:none;}' +
+      '.mmg-doviz-add-item small{color:var(--muted,#8D96AC);font-weight:500;margin-left:auto;}' +
+      '.mmg-doviz-add-custom{display:flex;gap:6px;margin-top:4px;padding-top:6px;border-top:1px solid var(--hairline,#2A3448);}' +
+      '.mmg-doviz-add-custom input{flex:1;min-width:0;background:var(--surface,#141C2B);border:1px solid var(--hairline,#2A3448);' +
+        'border-radius:6px;color:var(--text,#EAEDF3);font-size:12px;padding:5px 7px;font-family:inherit;text-transform:uppercase;}' +
+      '.mmg-doviz-add-custom button{flex:0 0 auto;background:var(--brass,#C6A15B);border:none;border-radius:6px;color:#0D1420;' +
+        'font-size:11.5px;font-weight:700;padding:5px 9px;cursor:pointer;}' +
       '@media (max-width:820px){#mmgDovizPanel{right:8px;left:8px;width:auto;}#mmgDovizBtn{right:58px;}}';
 
     document.body.appendChild(style);
@@ -205,7 +240,7 @@
     }
 
     function openPanel(){ panel.hidden = false; loadRates(false); }
-    function closePanel(){ panel.hidden = true; }
+    function closePanel(){ panel.hidden = true; const al = panel.querySelector('#mmgDovizAddList'); if(al) al.hidden = true; }
 
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -220,20 +255,56 @@
     });
 
     // ---- Kullanıcı-eklemeli pariteler ----
-    // "+ Parite": kod sorulur (örn. GBP, CHF, SAR); geçerliyse kalıcı eklenir. Satırdaki ✕ kaldırır.
-    const addBtn = panel.querySelector('#mmgDovizAddBtn');
-    if(addBtn){
+    // "+ Parite": artık kör prompt yerine tıklanabilir bir liste açılır (kullanıcı isteği:
+    // "ne ekleyebileceğine dair bir liste çıkmalı"). Yaygın kodlar tek tıkla eklenir; listede
+    // olmayan özel bir kod için altta küçük bir metin kutusu var.
+    const addBtn  = panel.querySelector('#mmgDovizAddBtn');
+    const addList = panel.querySelector('#mmgDovizAddList');
+
+    function addExtraCode(code){
+      code = (code || '').trim().toUpperCase();
+      if(!code) return;
+      if(!/^[A-Z]{3}$/.test(code)){ window.alert('Geçersiz kod. 3 harfli döviz kodu girin (örn. GBP).'); return; }
+      if(lastRates && !lastRates[code]){ window.alert('"' + code + '" kuru kaynakta bulunamadı.'); return; }
+      const extras = getExtraPairs();
+      if(extras.indexOf(code) === -1 && !PAIRS.some(p => p.code === code)){
+        extras.push(code); setExtraPairs(extras);
+      }
+      addList.hidden = true;
+      loadRates(false);
+    }
+
+    function renderAddList(){
+      const extras = getExtraPairs();
+      const added = (code) => extras.indexOf(code) !== -1 || PAIRS.some(p => p.code === code);
+      let html = COMMON_EXTRA.map(c => {
+        const isAdded = added(c.code);
+        return '<button type="button" class="mmg-doviz-add-item" data-add="' + c.code + '"' +
+               (isAdded ? ' disabled' : '') + '>' + c.flag + ' ' + c.code +
+               '<small>' + (isAdded ? 'eklendi' : c.label) + '</small></button>';
+      }).join('');
+      html += '<div class="mmg-doviz-add-custom">' +
+                '<input type="text" id="mmgDovizCustomCode" maxlength="3" placeholder="Özel kod (SAR)">' +
+                '<button type="button" id="mmgDovizCustomAdd">Ekle</button>' +
+              '</div>';
+      addList.innerHTML = html;
+    }
+
+    if(addBtn && addList){
       addBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const code = (window.prompt('Eklenecek parite kodu (örn. GBP, CHF, SAR, JPY):') || '').trim().toUpperCase();
-        if(!code) return;
-        if(!/^[A-Z]{3}$/.test(code)){ window.alert('Geçersiz kod. 3 harfli döviz kodu girin (örn. GBP).'); return; }
-        if(lastRates && !lastRates[code]){ window.alert('"' + code + '" kuru kaynakta bulunamadı.'); return; }
-        const extras = getExtraPairs();
-        if(extras.indexOf(code) === -1 && !PAIRS.some(p => p.code === code)){
-          extras.push(code); setExtraPairs(extras);
+        if(!addList.hidden){ addList.hidden = true; return; }
+        renderAddList();
+        addList.hidden = false;
+      });
+      addList.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = e.target.closest('[data-add]');
+        if(item && !item.disabled){ addExtraCode(item.dataset.add); return; }
+        if(e.target.id === 'mmgDovizCustomAdd'){
+          const input = addList.querySelector('#mmgDovizCustomCode');
+          addExtraCode(input ? input.value : '');
         }
-        loadRates(false);
       });
     }
     rowsEl.addEventListener('click', (e) => {

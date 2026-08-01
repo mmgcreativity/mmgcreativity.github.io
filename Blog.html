@@ -232,7 +232,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, collection, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp
+    getFirestore, doc, getDoc, getDocFromServer, collection, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
   import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 
@@ -718,10 +718,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     currentIsAdmin = false;
     const composerCard = document.getElementById('composerCard');
     if(user){
+      // "Oturum askıda kalıyor" bug'ı: Firebase'in ID token'ı sekme uzun süre açık/uykuda
+      // kaldığında sessizce bayatlayabiliyor; bu durumda users/{uid} okuması hatasız ama
+      // YANLIŞ (eski/boş) veri döndürüyor ve isAdmin kontrolü haksız yere false çıkıyor —
+      // çıkış yapıp tekrar girince token tazelendiği için "düzeliyor" gibi görünüyordu.
+      // Önlem: admin kontrolünden önce token'ı zorla tazele + önbellek yerine sunucudan oku.
+      try{ await user.getIdToken(true); }catch(_refreshErr){ /* tazeleme başarısızsa yine dene */ }
       try{
-        const snap = await getDoc(doc(db, 'users', user.uid));
+        const snap = await getDocFromServer(doc(db, 'users', user.uid));
         currentIsAdmin = snap.exists() && snap.data().isAdmin === true;
-      }catch(e){ currentIsAdmin = false; }
+      }catch(e){
+        // Sunucuya ulaşılamazsa (ör. anlık ağ kopması) önbellekten dene — admin butonunun
+        // geçici bir ağ hatası yüzünden haksız yere kaybolmaması için tek seferlik yedek yol.
+        try{
+          const snap2 = await getDoc(doc(db, 'users', user.uid));
+          currentIsAdmin = snap2.exists() && snap2.data().isAdmin === true;
+        }catch(e2){ currentIsAdmin = false; }
+      }
     }
     // Composer artık girişli her kullanıcıya açık; sadece admin'in yazısı direkt yayınlanır,
     // diğerlerininki onaya düşer. Giriş yapılmamışsa "Yeni Blog Yayınla" sekmesinde uyarı göster.
