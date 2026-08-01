@@ -114,7 +114,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .tbl-head .th.f-tarih-wrap{ flex:0 0 106px; }
   .tbl-head .th.f-yontem-wrap{ flex:0 0 100px; }
-  .tbl-head .th.f-gun-wrap{ flex:0 0 64px; }
+  .tbl-head .th.f-gun-wrap{ flex:0 0 48px; }
   .tbl-head .th.f-tutar-wrap{ flex:0 0 122px; }
   .tbl-head .th.f-due-wrap{ flex:0 0 92px; }
   .tbl-head .th.f-del-wrap{ flex:0 0 auto; }
@@ -147,6 +147,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .f-field input:focus, .f-field select:focus{ border-color:var(--brass-dim); }
   .f-field select{ cursor:pointer; }
+  /* Açılır listeler sitenin KOYU temasına uysun. Yerli <select> açılınca işletim
+     sisteminin beyaz listesi çıkıyordu (kullanıcı: "genele uydur tasarımı").
+     Chrome/Edge <option> üzerinde arka plan ve renk kabul ediyor. */
+  .f-field select option,
+  .ka-select option{
+    background-color:var(--surface-2); color:var(--text);
+  }
+  .f-field select option:checked,
+  .ka-select option:checked{
+    background-color:var(--brass-dim); color:#0D1420; font-weight:600;
+  }
+  .ka-select{ appearance:none; -webkit-appearance:none; padding-right:26px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%238D96AC' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat; background-position:right 9px center; }
+  .f-field select{ appearance:none; -webkit-appearance:none; padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%238D96AC' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat; background-position:right 6px center; }
   /* Veri girilen (sayısal) alanlar Vadeli Mevduat sayfasindaki gibi JetBrains Mono 600 kullanir;
      Calisma Sekli secimi (select) ise Vadeli Mevduat'taki banka secimi gibi Inter kullanir. */
   .f-field input.date-text,
@@ -164,7 +181,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      kutu metnin sonuna hizali ve derli toplu olacak sekilde daraltildi; bosalan yer esnek
      Fatura Tutari kolonuna akar. Diger sabit kolonlarin hizasi degismez. */
   .f-field.f-yontem-wrap{ flex:0 0 100px; }
-  .f-field.f-gun-wrap{ flex:0 0 64px; }
+  .f-field.f-gun-wrap{ flex:0 0 48px; }
   .f-field.f-tutar-wrap{ flex:0 0 122px; }   /* 99.999.999,00 tam sığar */
   .f-field.f-due-wrap{ flex:0 0 92px; }
   .f-field.f-del-wrap{ flex:0 0 auto; }
@@ -330,7 +347,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="panel-title fatura" data-i18n="invoices_title">📄 Faturalar</div>
       </div>
       <div class="panel-desc" data-i18n-html="invoices_desc">Fatura tarihi, çalışma koşulu ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.</div>
-      <div class="tbl-head tbl-head-fatura"><span class="th f-tarih-wrap">Tarih</span><span class="th f-yontem-wrap">Çalışma Şekli</span><span class="th f-gun-wrap">Vade (Gün)</span><span class="th f-tutar-wrap">Tutar</span><span class="th f-due-wrap">Vade Tarihi</span><span class="th f-del-wrap"></span></div><div class="row-table" id="faturaRows"></div>
+      <div class="tbl-head tbl-head-fatura"><span class="th f-tarih-wrap">Tarih</span><span class="th f-yontem-wrap">Çalışma Şekli</span><span class="th f-gun-wrap">Gün</span><span class="th f-tutar-wrap">Tutar</span><span class="th f-due-wrap">Vade Tarihi</span><span class="th f-del-wrap"></span></div><div class="row-table" id="faturaRows"></div>
       <button type="button" class="add-btn fatura" id="addFaturaBtn" data-i18n="add_invoice">+ Fatura Ekle</button>
       <div class="subtotal-line"><span data-i18n="total_invoice_amount">Toplam Fatura Tutarı</span><b id="faturaToplam" class="mono">0,00</b></div>
     </div>
