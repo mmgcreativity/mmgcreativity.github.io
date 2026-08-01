@@ -579,16 +579,16 @@ exports.accountSwitchToken = onCall(CALL_OPTS, async (request) => {
 
   const callerSnap = await db().doc("users/" + uid).get();
   const caller = callerSnap.exists ? callerSnap.data() : {};
-  const adminUid = caller.isAdmin === true ? uid : caller.switchOwnerUid;
-  if (!adminUid) {
-    throw new HttpsError("permission-denied", "Bu hesap bir geçiş grubuna ait değil.");
+  // GÜVENLİK (kullanıcı isteği): hesap geçişi TEK YÖNLÜ — yalnızca ADMIN hesabı bir geçiş
+  // başlatabilir. Bağlı (admin olmayan) hesaplar ne admin'e ne de birbirine geçemez; bu
+  // kontrol daha önce eksikti ve caller admin olmasa bile switchOwnerUid üzerinden aynı
+  // gruptaki HERHANGİ bir hesaba (admin dahil) geçiş token'ı alınabiliyordu.
+  if (caller.isAdmin !== true) {
+    throw new HttpsError("permission-denied", "Hesap geçişi yalnızca yönetici (admin) hesabından başlatılabilir.");
   }
+  const adminUid = uid;
 
-  const adminSnap = await db().doc("users/" + adminUid).get();
-  if (!adminSnap.exists || adminSnap.data().isAdmin !== true) {
-    throw new HttpsError("permission-denied", "Geçiş grubu sahibi bulunamadı.");
-  }
-  const linked = Array.isArray(adminSnap.data().linkedAccounts) ? adminSnap.data().linkedAccounts : [];
+  const linked = Array.isArray(caller.linkedAccounts) ? caller.linkedAccounts : [];
   const group = [adminUid].concat(linked.map((x) => x && x.uid).filter(Boolean));
   if (group.indexOf(targetUid) === -1) {
     throw new HttpsError("permission-denied", "Bu hesaba geçme yetkiniz yok.");
