@@ -41,13 +41,20 @@
     (document.head || document.documentElement).appendChild(pos);
   }catch(e){}
 
-  // Chat widget'ı kendi dosyasında gizlilik kontrolü yapmıyor olabilir; tercih
-  // gizliyse burada CSS ile kapatıyoruz (balon + panel + bildirim balonu).
+  // ---- Gizleme: CSS ile, KAYNAKTAN BAĞIMSIZ ----
+  // Bazı araç sayfalarında Hesap Makinesi (ve KUR) ortak dosyadan değil, sayfanın
+  // KENDİ HTML'ine gömülü olarak geliyor; o kopyalar localStorage tercihine bakmaz
+  // (kullanıcı: "widget'ları kaldırmayı denedim ama hesap makinesi kalkmadı").
+  // Bu yüzden gizleme burada CSS ile yapılıyor — widget nerede tanımlı olursa olsun kalkar.
   try{
-    if(isHidden('mmg_widget_chat_hidden')){
-      var ch = document.createElement('style');
-      ch.textContent = '#mmgChatBubble, #mmgChatPanel, #mmgChatToastContainer{ display:none !important; }';
-      (document.head || document.documentElement).appendChild(ch);
+    var hide = [];
+    if(isHidden('mmg_widget_kur_hidden'))  hide.push('#mmgDovizBtn', '#mmgDovizPanel');
+    if(isHidden('mmg_widget_calc_hidden')) hide.push('#mmgCalcBtn',  '#mmgCalcPanel');
+    if(isHidden('mmg_widget_chat_hidden')) hide.push('#mmgChatBubble', '#mmgChatPanel', '#mmgChatToastContainer');
+    if(hide.length){
+      var hs = document.createElement('style');
+      hs.textContent = hide.join(', ') + '{ display:none !important; }';
+      (document.head || document.documentElement).appendChild(hs);
     }
   }catch(e){}
 
