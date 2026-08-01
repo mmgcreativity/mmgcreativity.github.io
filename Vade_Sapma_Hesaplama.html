@@ -325,7 +325,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .cs-satir{ display:flex; align-items:center; gap:7px; min-width:0; white-space:nowrap; line-height:18px; }
   .cs-satir .cs-detay{ overflow:hidden; text-overflow:ellipsis; }
-  .c-sonuc[hidden]{ display:none; }
   /* Rozetler: metin uzunluğu değiştikçe boyları/enleri farklı görünüyordu
      (kullanıcı: "bi büyük bi küçük"). Sabit yükseklik + sabit taban genişlik ile
      hepsi aynı ölçüde ve yanındaki yazıyla aynı hizada duruyor. */
@@ -756,7 +755,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       '<div class="f-field c-tutar-wrap"><input type="text" inputmode="decimal" class="c-tutar" value="0,00"></div>' +
       '<button type="button" class="row-del c-del" title="Satırı sil">✕</button>' +
       // Kapama sonucu: kaç gün erken/geç ve hangi faturayı kapattığı (recalc doldurur).
-      '<div class="c-sonuc" hidden></div>';
+      '<div class="c-sonuc"></div>';
     cekRowsEl.appendChild(row);
 
     wireDateBox(row.querySelector('.c-tarih-box'), cekData[id].tarih, (val)=>{ cekData[id].tarih = val; recalc(); });
@@ -1194,7 +1193,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       devValueEl.className = 'deviation-value neutral';
       devSubEl.textContent = LBL.enterDataHint;
       devSubEl.className = 'deviation-sub';
-      document.querySelectorAll('#cekRows .c-sonuc').forEach(el => { el.hidden = true; });
+      document.querySelectorAll('#cekRows .c-sonuc').forEach(el => { el.innerHTML = ''; });
       return;
     }
 
@@ -1235,14 +1234,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const t = byNo[tr.no];
         if(!t || !t.eslesme.length){
           if(t && t.kalan > 0 && t.tutar > 0){
-            el.hidden = false;
             el.innerHTML = '<div class="cs-satir"><span class="cs-badge cs-none">eşleşmedi</span>' +
                            '<span class="cs-detay">Kapatacak uygun fatura bulunamadı' +
                            (bolme === 'bolme' ? ' (bölünmesin seçili — tam sığan fatura yok)' : '') + '</span></div>';
-          } else { el.hidden = true; }
+          } else { el.innerHTML = ''; }
           return;
         }
-        el.hidden = false;
         const parcalar = t.eslesme.map(e => {
           const g = e.gun;
           const cls = g > 0 ? 'cs-gec' : (g < 0 ? 'cs-erken' : 'cs-tam');
@@ -1291,7 +1288,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       return;
     }
     // yontem === 'kumulatif' → aşağıdaki klasik ortalama vade karşılaştırması çalışır
-    document.querySelectorAll('#cekRows .c-sonuc').forEach(el => { el.hidden = true; });
+    document.querySelectorAll('#cekRows .c-sonuc').forEach(el => { el.innerHTML = ''; });
     const hintEl = document.getElementById('kapamaHint');
     if(hintEl) hintEl.textContent = 'Kümülatif: fatura bazında eşleştirme yapılmaz; toplam borcun ve toplam tahsilatın ağırlıklı ortalama vadeleri karşılaştırılır.';
 
