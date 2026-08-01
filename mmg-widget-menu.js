@@ -58,7 +58,19 @@
     // fixed'e göre konumlandırılmış; absolute'a zorlanınca hesap makinesi paneli sayfanın
     // sol üstüne kaçıyordu (kullanıcı bildirdi). Paneller fixed kalır — zaten geçici
     // açılır kutular, sayfayla birlikte kaymalarına gerek yok.
-    pos.textContent = '#mmgDovizBtn, #mmgCalcBtn{ position:absolute !important; }';
+    // Butonlar sayfayla kayar (absolute); PANELLER ise butonların hemen ALTINDA ve
+    // SAĞDA sabit açılır. Bazı sayfalarda panel sol üste kaçıyordu (kullanıcı:
+    // "hesap makinesi yine solda, sağdaki widget'ların solunda açtır") — burada
+    // tek yerden kesin konum veriliyor ki hangi sayfada olursa olsun aynı yerde açılsın.
+    pos.textContent =
+      '#mmgDovizBtn, #mmgCalcBtn{ position:absolute !important; }' +
+      '#mmgCalcPanel{ position:fixed !important; top:64px !important; right:16px !important;' +
+        ' left:auto !important; bottom:auto !important; }' +
+      '#mmgDovizPanel{ position:fixed !important; top:64px !important; right:66px !important;' +
+        ' left:auto !important; bottom:auto !important; }' +
+      '@media (max-width:520px){' +
+        '#mmgCalcPanel, #mmgDovizPanel{ right:8px !important; left:8px !important; width:auto !important; }' +
+      '}';
     (document.head || document.documentElement).appendChild(pos);
   }catch(e){}
 
