@@ -571,6 +571,14 @@ import {
     if(els.newBtn){
       els.newBtn.addEventListener('click', () => {
         if(!currentUser) return;
+        // Grup sekmesindeyken "+" YENİ GRUP oluşturur (eski "+ Grup Oluştur" satırının
+        // yerini aldı — kullanıcı isteği). Diğer sekmelerde yeni sohbet/kişi ekler.
+        if(activeTab === 'groups'){
+          groupsSubView = 'newGroup';
+          pendingGroupMembers = [];
+          renderTab();
+          return;
+        }
         activeTab = 'friends'; friendsSubView = 'add';
         renderTab();
       });
@@ -1225,8 +1233,14 @@ import {
   function renderTab(){
     if(openChatId) return; // bir sohbet açıkken sekme gövdesi değişmesin
     syncMainView();
-    // "+" yeni sohbet butonu yalnızca Kişilerim listesinde görünsün.
-    if(els.newBtn) els.newBtn.hidden = !(currentUser && activeTab === 'friends' && friendsSubView === 'list' && mainView !== 'bildirim');
+    // "+" butonu: Kişilerim listesinde "yeni sohbet", Grup listesinde "yeni grup oluştur".
+    if(els.newBtn){
+      const onFriends = activeTab === 'friends' && friendsSubView === 'list';
+      const onGroups  = activeTab === 'groups'  && groupsSubView  === 'list';
+      els.newBtn.hidden = !(currentUser && (onFriends || onGroups) && mainView !== 'bildirim');
+      els.newBtn.title = onGroups ? 'Yeni grup oluştur' : 'Yeni sohbet başlat';
+      els.newBtn.setAttribute('aria-label', els.newBtn.title);
+    }
     if(activeTab === 'admin') return renderAdminTab();
     if(activeTab === 'friends') return renderFriendsTab();
     if(activeTab === 'groups') return renderGroupsTab();
@@ -1608,7 +1622,7 @@ import {
           <div class="mmg-chat-list-sub">${esc(r.sub)}</div>
         </div>
       </div>`).join('')
-      : `<div class="mmg-chat-empty">Henüz bir grubunuz yok.<br>"+ Grup Oluştur" ile yeni bir grup kurabilirsiniz.</div>`;
+      : `<div class="mmg-chat-empty">Henüz bir grubunuz yok.<br>Sağ alttaki <b>+</b> ile yeni bir grup kurabilirsiniz.</div>`;
 
     // Gönderdiğim bekleyen grup davetleri (geri çekilebilir) — kullanıcı isteği.
     const sentInv = Object.keys(sentGroupInvitesMap).map(id => sentGroupInvitesMap[id]);
@@ -1627,18 +1641,12 @@ import {
         ).join('') + '</div>';
     }
 
+    // "+ Grup Oluştur" satırı KALDIRILDI (kullanıcı isteği) — yerine panelin sağ alt
+    // köşesindeki ortak "+" (mmgChatNewBtn / .mmg-chat-fab) kullanılıyor; Grup sekmesinde
+    // bu buton "Yeni grup oluştur" işlevi görür (bkz. renderTab + newBtn tıklama).
     els.body.innerHTML = `
-      <div class="mmg-chat-list-item" id="mmgNewGroupBtn" style="justify-content:center; font-weight:700; color:var(--brass,#C6A15B);">
-        + Grup Oluştur
-      </div>
       ${listHtml}
       ${sentHtml}`;
-
-    document.getElementById('mmgNewGroupBtn').addEventListener('click', () => {
-      groupsSubView = 'newGroup';
-      pendingGroupMembers = [];
-      renderTab();
-    });
     els.body.querySelectorAll('.mmg-chat-list-item[data-group-id]').forEach(row => {
       row.addEventListener('click', () => {
         const g = groupsMap[row.dataset.groupId] || {};

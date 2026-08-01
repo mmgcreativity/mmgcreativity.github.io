@@ -5605,6 +5605,16 @@ const auth = getApps().length ? getAuth(getApp()) : null;
 <script src="mmg-feedback-widget.js"></script>
 
 <script type="module" src="mmg-chat-widget.js"></script>
+<!-- KUR + Hesap Makinesi widget'ları artık DIŞ KABUKTA (burada) yükleniyor.
+     Eskiden her araç sayfasının içindeydiler; masaüstünde araçlar iframe'de
+     açıldığı için iframe'in sağ üstüne sabitlenip sayfa içeriğiyle çakışıyorlardı
+     (kullanıcı: "aşağı geldi kaydırınca"). Burada yüklendiklerinde pencerenin
+     gerçek sağ üstünde, hangi araç açık olursa olsun aynı yerde dururlar ve
+     "Hesaplamalar" altındaki TÜM sayfalarda otomatik olarak bulunurlar.
+     mmg-widget-menu.js: boş alana sağ tıkla → widget'ları kaldır/göster. -->
+<script src="mmg-doviz-widget.js"></script>
+<script src="mmg-calc-widget.js"></script>
+<script src="mmg-widget-menu.js"></script>
 <style>
   #mmgUpdateBanner{
     position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(120%); z-index:3000;

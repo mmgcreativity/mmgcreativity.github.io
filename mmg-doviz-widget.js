@@ -48,6 +48,8 @@
 
   function inject(){
     if(document.getElementById('mmgDovizBtn')) return; // tek örnek
+    // Kullanıcı widget'ları kapattıysa hiç basma (sağ tık menüsünden açılıp kapanır).
+    try{ if(localStorage.getItem('mmg_widgets_hidden') === '1') return; }catch(e){}
 
     // --- Buton (Hesap Makinesi butonunun hemen soluna) ---
     const btn = document.createElement('button');
