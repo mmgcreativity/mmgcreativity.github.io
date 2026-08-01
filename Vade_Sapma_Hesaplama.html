@@ -252,9 +252,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      'change' tetikleniyor, böylece mevcut recalc bağlantıları aynen çalışıyor. */
   .mmg-sel{ position:relative; width:100%; }
   .mmg-sel > select{ display:none !important; }
+  /* Kapalı kutudaki metin, listedeki SEÇİLİ satırla birebir aynı görünsün
+     (kullanıcı: "açılır gelen satırlar gibi olsun seçili satır da"). */
   .mmg-sel-btn{
     width:100%; text-align:left; cursor:pointer;
-    background:var(--bg); color:var(--text);
+    background:var(--bg); color:var(--brass); font-weight:600;
     border:1px solid var(--hairline); border-radius:7px;
     height:28px; padding:0 26px 0 9px;
     font-family:'Inter',sans-serif; font-size:13px;
