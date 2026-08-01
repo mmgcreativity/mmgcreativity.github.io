@@ -1,12 +1,13 @@
 # DEVİR NOTU — Dijital Finans Asistanı (mmgcreativity.com)
 
-Son güncelleme: **2026-08-01 (8. oturum — `C:\Users\CihanFinans\...` bilgisayarı, yalnız ortam düzeltmesi; kod değişikliği 7. otonom oturumdan)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-08-01-hesap-silme-datasafety'` (repo ~472 commit).
+Son güncelleme: **2026-08-01 (9. oturum — `CihanFinans` bilgisayarı, Play Console Veri güvenliği formu tamamlandı ve Google'a gönderildi; kod/deploy değişikliği YOK)** · Son deploy işareti: `service-worker.js → SW_VERSION = '2026-08-01-hesap-silme-datasafety'` (repo ~472 commit, değişmedi).
 
 > 📁 **KLASÖR ADI DEĞİŞTİ (2026-08-01):** Yerel çalışma klasörü artık `…\0.mmgcreativity\web\`**`site`** — eskiden `web\html` idi. Sebep: Cowork, `web\html\Scheduled` yolunu "korumalı konum" olarak kayıtlı tuttuğu için (klasör fiziksel olarak YOK, bayat kayıt) `html` ve tüm üst klasörleri bağlanamıyordu; junction ile atlatma da işe yaramadı (gerçek yolu çözüyor). Klasör `site` olarak yeniden adlandırılınca sorun bitti. OneDrive değişikliği diğer makineye de yansıtır → `C:\Users\muham\OneDrive\0.mmgcreativity\web\site`. Yayına etkisi YOK (deploy GitHub web arayüzünden dosya yükleyerek yapılıyor). Eski adı geri koyarsan bağlama sorunu geri gelir.
 
 > ⚠️ **İKİ BİLGİSAYAR UYARISI (yeni):** Bu proje artık iki makineden yürütülüyor — `C:\Users\muham\...` ve `C:\Users\CihanFinans\...`. 7. oturumda, 6. oturumun (diğer makine) yazdığı devir notu ve `firestore.rules` değişikliği OneDrive üzerinden **oturumun ortasında** geldi. Devir notunu **ASLA baştan yazma, kendi bölümünü EKLE**; yoksa diğer makinenin notlarını silersin. Deploy öncesi `git`/GitHub commit listesine bakıp başka bir oturumun commit atıp atmadığını kontrol et.
 
 ## 🔴 YENİ OTURUMA HIZLI BAŞLANGIÇ (önce bunu oku)
+0. **✅ PLAY CONSOLE VERİ GÜVENLİĞİ FORMU TAMAMLANDI (9. oturum, 2026-08-01)** — adım 4'teki 3 eksik alt form (Kullanıcı kimlikleri, Diğer bilgiler, Kullanıcı ödeme bilgileri) dolduruldu; Uygulama etkinliği + Cihaz veya diğer kimlikler için "Paylaşıldı" düzeltmesi yapıldı (AdSense/Analytics çelişkisi bitti); Reklam Kimliği (AD_ID), Finans ile ilgili özellikler, Oturum açma bilgileri, Gizlilik politikası URL'i zaten doğru doluydu, tek tek doğrulandı. Değişiklik **Yayınlama özeti'nden Google'a GÖNDERİLDİ** ("İncelenmekte olan değişiklikler" listesinde görünüyor). **Bu konuda YENİDEN İŞ YOK** — detay için aşağıdaki 9. oturum bölümüne bak. Google'ın incelemesi genelde 7 gün sürer.
 1. **OneDrive senkron kontrolü ŞART** (`mmg-onedrive-sync-guard` skill). Deploy öncesi marker kontrolü: `service-worker.js → SW_VERSION` yukarıdaki değerle aynı olmalı. Yerel dosya farklıysa GÜNCEL KAYNAK = GitHub repo (`main`); yereldeki eski dosyayı repodan tazele, ASLA eski yerel dosyayı deploy etme.
    ⚠️ 7. oturumda bu tuzak GERÇEKTEN yaşandı: ilk okumada yerel dosyalar bayattı, birkaç saniye sonra senkron bitince değiştiler. Dosyayı okuduktan sonra bile bir kez daha doğrula.
 2. **⛔ KULLANICI TARAFINDA BEKLEYEN — ÖNCELİKLİ:**
@@ -21,6 +22,44 @@ Son güncelleme: **2026-08-01 (8. oturum — `C:\Users\CihanFinans\...` bilgisay
    - IBAN akışı: "Tüm IBAN'ları Sil → yeni şablonla (Firma Kodu zorunlu) yeniden yükle" hâlâ uygulanmadı; sonuç doğrulanmalı.
 4. **Muhtemel sıradaki istekler:** KUR/hesap-makinesi üst ikonlarının görsel stili (ışıldak) netleşmedi; Personeller sekmesine Excel toplu yükleme; Talimat'ta personel kullanımı.
 5. Çalışma tarzı: `mmg-site-deploy` skill — sormadan, kuyruk bitene kadar; kapanışta HER ZAMAN (1) yayınlananlar (2) bekleyenler listesi ver ("bekleyen yok" deme hatası kullanıcıyı kızdırdı). **En kritik değişiklik: service worker NETWORK-FIRST** (4. oturum). Şifre sıfırlama maili TAM çalışır (Resend canlı).
+
+## 🟢 2026-08-01 (9. OTURUM — `CihanFinans` bilgisayarı) — PLAY CONSOLE VERİ GÜVENLİĞİ TAMAMLANDI VE GÖNDERİLDİ
+
+Bu oturumda **kod/deploy değişikliği YAPILMADI** — sadece Play Console'da Chrome eklentisiyle manuel form doldurma işi. Bağlam 8. oturumun devir notundan alındı.
+
+**1) Adım 4'teki 3 eksik alt form dolduruldu (Kişisel bilgiler 6/6, Finansal bilgiler 3/3 oldu)**
+- **Kullanıcı kimlikleri** (Firebase uid, #kod, `userDirectory`): Toplandı=Evet, Paylaşıldı=Hayır, kısa süreli değil, **zorunlu** (uid olmadan hesap çalışmaz), amaç: Uygulama işlevselliği + Hesap yönetimi.
+- **Diğer bilgiler** (TC Kimlik No + VKN): Toplandı=Evet, Paylaşıldı=Hayır, kısa süreli değil, **isteğe bağlı**, amaç: Uygulama işlevselliği.
+- **Kullanıcı ödeme bilgileri** (kayıtlı IBAN/banka hesapları): Toplandı=Evet, Paylaşıldı=Hayır, kısa süreli değil, **isteğe bağlı**, amaç: Uygulama işlevselliği.
+- Üçü de tek tek "Kaydet" ile kaydedildi, durumları "Başlamadı" → "Tamamlandı" oldu.
+
+**2) AdSense/Analytics paylaşım çelişkisi ÇÖZÜLDÜ**
+- **Uygulama etkinliği → Uygulama işlemleri**: "Paylaşıldı" işaretlendi (önceden işaretsizdi); paylaşım amacı olarak **Analiz** seçildi (Google Analytics'e gidiyor).
+- **Cihaz veya diğer kimlikler**: "Paylaşıldı" işaretlendi; paylaşım amacı olarak **Reklam veya pazarlama** seçildi (AdSense reklam kimliği kullanıyor).
+- Önizleme ekranında "Paylaşılan veriler" bölümü artık bu iki veri türünü doğru gösteriyor; `gizlilik-politikasi.html` ve `kvkk.html` (8. oturumda güncellenmişti) ile form artık tutarlı.
+
+**3) Kalan beyanlar kontrol edildi — hepsi zaten doğru doluydu, değişiklik gerekmedi**
+- **Reklam Kimliği (AD_ID):** "Evet" reklam kimliği kullanıyor, amaçlar (Uygulama işlevselliği, Analiz, Geliştirici iletişimleri, Reklam veya pazarlama, Hesap yönetimi) işaretli, Android 13 manifest AD_ID izni uyarı kutusu onaylı.
+- **Gizlilik politikası URL'i:** `https://mmgcreativity.com/gizlilik-politikasi.html` — doğru.
+- **Finans ile ilgili özellikler:** "Uygulamamda finans ile ilgili özellik sağlanmıyor" işaretli — doğru (uygulama kişisel gelir-gider takip aracı, banka/kredi/ödeme hizmeti sağlamıyor).
+- **Oturum açma bilgileri, Reklam, Hedef kitle ve içerik, Sağlık uygulamaları, İçerik derecelendirmeleri, Resmi kurum uygulamaları:** hepsi "Tamamlandı" durumunda, 19 Tem 2026'dan beri değişmemiş; bu oturumda içerik değiştirilmedi.
+
+**4) Değişiklik Google'a GÖNDERİLDİ**
+- Veri güvenliği formu Önizleme adımından "Kaydet" ile kaydedildi → Yayın özeti sayfasında "Veri Güvenliği anketi dolduruldu" değişikliği belirdi → **"1 değişikliği incelemeye gönder" ile Google'a gönderildi**, onay diyaloğunda "Değişikliği incelemeye gönder" tıklandı.
+- Yayın özeti artık "İncelenmekte olan değişiklikler" durumunda gösteriyor. Google incelemesi genelde 7 gün sürer (uzayabilir).
+
+**⚠️ Render/tıklama notu (sıradaki oturum için):** Console sayfaları arada `Page.captureScreenshot` CDP timeout veriyor — 3-5 sn bekleyip tekrar screenshot almak çözüyor. Bazı "İleri"/"Kaydet" butonlarında koordinat tıklaması scroll ofseti yüzünden kaçırıyor; `find` tool ile elementin `ref`'ini bulup tıklamak daha güvenilir.
+
+### ⏳ 9. OTURUM SONU — BEKLEYENLER
+
+**Kullanıcı tarafında (bu oturumun kapsamı dışında, unutulmasın diye tekrar not edildi):**
+- **GÜVENLİK:** Google OAuth client secret sıfırlama (`Blogger Publish` → Reset secret → `firebase functions:secrets:set BLOGGER_CLIENT_SECRET` → `firebase deploy --only functions:publishToBlogger`) + **Resend API anahtarı yenileme** — hâlâ yapılmadı.
+- **YASAL:** `mesafeli-satis-sozlesmesi.html`, `iptal-iade.html`, `kvkk.html` metinlerinin bir hukukçuya okutulması — Play Store'da satış açılmadan önce.
+- `firebase deploy --only firestore:rules` — bekleyen davet listesi + hayalet dizin kaydı temizliği için (6.-7. oturumdan kalan, henüz çalıştırılmadı).
+
+**Play Console tarafında:**
+- Google'ın Veri güvenliği incelemesi sonucu beklenmeli (7 gün ± ). Red gelirse en olası sebepler zaten `PLAY-DATA-SAFETY.md`'de sıralanmıştı (hesap silme URL'i zaten düzeltilmişti — 8. oturum).
+- 14 test kullanıcısı ~3 Ağustos'ta 14 günü dolduracak → "Üretime başvur" butonu o zaman açılacak (7. oturumdan kalan bilgi).
 
 ## 🟢 2026-08-01 (8. OTURUM — `CihanFinans` bilgisayarı) — ORTAM DÜZELTMESİ
 
@@ -153,6 +192,46 @@ Yeni işaretlenen 3 veri türü, **4. adım (Veri kullanımı ve işleme)** ekra
   - `userDirectory/{code}` write + delete: site yöneticisi başkasının kaydını da yazabilir/silebilir.
 - ⏳ **Bu rules değişikliği için `firebase deploy --only firestore:rules` TEKRAR çalıştırılmalı** (bir öncekinde bu iki kural henüz yoktu). Çalıştırılmazsa panel "Kaydedilemedi: permission-denied" der.
 - ⚠️ Sayaç (`meta/counters.userCount`) BİLEREK ellenmiyor — geri çekmek mevcut kodlarla çakışma yaratır. Panel yalnızca mevcut/boştaki bir kodu atar.
+
+### 🔍 8. OTURUM KAPANIŞ DENETİMİ (kullanıcı isteği: "eksik kalanları tara")
+
+**Denetimde BULUNAN ve DÜZELTİLEN eksik — SW `2026-08-01-footer-yasal-linkler`**
+- ⚠️ `kvkk.html` ve `hesap-silme.html` **yalnızca `premium.html` footer'ından** erişilebiliyordu. Premium sayfasına hiç gitmeyen kullanıcı ne KVKK metnini ne de hesap silme yolunu bulabiliyordu. Google Play, veri silme yolunun kullanıcıya açık olmasını bekler.
+- Düzeltme: `index.html` → `.legal-links` footer'ına **KVKK Aydınlatma Metni** ve **Hesap ve Veri Silme** eklendi; i18n anahtarları `footer_kvkk` / `footer_delete_account` (tr+en) tanımlandı.
+- `gizlilik-politikasi.html` üst barındaki "İletişim →" bağlantısı **"Hesap ve Veri Silme →"** ile değiştirildi (iletişim zaten sayfa sonunda var).
+
+**Denetimde kontrol edilip TEMİZ çıkanlar**
+- Canlı `*.html` dosyalarında **PayTR geçmiyor** (yalnız `_ARSIV` kopyasında ve `premium.html`'deki "PayTR reddetti" açıklama satırında).
+- 5 yeni/güncellenmiş yasal sayfa canlıda açılıyor; `premium.html` footer'ındaki 3 link birebir dosya adlarıyla eşleşiyor, 404 yok.
+- Sözleşme sayfalarında doldurulmamış `[...]` placeholder **kalmadı**; `noindex` etiketleri kaldırıldı.
+- `_ARSIV/` ve `PLAY-DATA-SAFETY.md` GitHub'a **yüklenmedi** (doğru).
+- `firestore.rules` kullanıcı tarafından deploy edildi ("Deploy complete!") → hayalet dizin temizliği aktif; 6. oturumdan kalan `{path=**}/firmas` davet kuralı da böylece canlıya gitti, **bekleyen davet listesi maddesi kapandı**.
+
+**Denetimde görülen ama BİLEREK dokunulmayanlar**
+- `footer_rate_us` / `footer_rate_us_small` i18n anahtarları artık `index.html`'de kullanılmıyor (rozet tekilleştirildi) ama sözlükte duruyor — başka sayfada kullanılıyor olabilir, silmek risk.
+- Sözleşme sayfalarındaki `.fill` CSS kuralı artık kullanılmıyor (placeholder kalmadı) — zararsız.
+- `zibD1tAO` (94 KB, uzantısız) yerel klasörde duruyor; ne olduğu belirsiz, `_ARSIV`'a bile taşınmadı.
+- Yeni yasal sayfalar **yalnızca Türkçe**; sitenin TR/EN anahtarı bu sayfalarda yok. `gizlilik-politikasi.html` de öyle olduğu için tutarlı, ama Play'de İngilizce mağaza girişi açılırsa çeviri gerekir.
+
+**⛔ 8. OTURUM SONU — BEKLEYENLER**
+
+*Kullanıcıda:*
+1. **`firebase deploy --only firestore:rules` TEKRAR** — kod değiştirme paneli için eklenen iki izin (users customerNumber update + userDirectory admin write/delete) henüz canlıda değil. Çalıştırılmazsa panel "permission-denied" verir.
+2. **Murat Doğan bir kez giriş yapsın** → `userDirectory/1027` hayaleti otomatik silinir.
+3. **Google OAuth client secret** sıfırlama + **Resend API anahtarı** yenileme (3 oturumdur açık, GÜVENLİK).
+4. Sözleşme metinlerinin **hukukçuya okutulması** (satış açılmadan önce).
+5. **TWA manifest'inde `com.google.android.gms.permission.AD_ID` izni** bildirilmiş mi kontrol — AdSense reklamı için gerekli, doğrulanamadı.
+
+*Play Console'da (bir sonraki oturum):*
+6. Veri güvenliği adım 4'teki **3 alt form** (Kullanıcı kimlikleri, Diğer bilgiler, Kullanıcı ödeme bilgileri) → Toplandı EVET / Paylaşıldı HAYIR.
+7. **AdSense/Analytics paylaşım çelişkisi** → Uygulama etkinliği + Cihaz kimlikleri için "Paylaşıldı".
+8. Formu **Yayınlama özeti'nden Google'a gönder**.
+9. Bakılmamış beyanlar: Gizlilik politikası URL'i, Reklam, Hedef kitle, Reklam Kimliği, Finans özellikleri, Oturum açma bilgileri.
+10. **~3 Ağustos'ta "Üretime başvur"** açılınca başvuru.
+
+*Kodda (spec bekleyen, dokunulmadı):*
+11. **Play Billing entegrasyonu YOK.** `premium.html` → `startSubscription()` şu an yalnızca Play Store ürün sayfasını açıyor. Android tarafında gerçek in-app satın alma akışı + abonelik durumunun Firestore'a yazılması yazılmadı. **Satış açılmadan önce yapılması gereken en büyük iş bu.**
+12. Portföy modülü (spec yok), her kayıtta admin bildirimi (backend), mobil menü çakışması (gerçek cihaz gerekiyor) — 7. oturumdan devam.
 
 **⏰ Üretime başvuru:** 12 test kullanıcısı kesintisiz 12 gündür kayıtlı, **14 gün şartı ~3 Ağustos'ta doluyor** → "Üretime başvur" butonu o zaman açılır.
 
