@@ -99,13 +99,38 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .panel-title.cek{ color:var(--brass); }
   .panel-desc{ color:var(--muted); font-size:12.5px; margin-bottom:16px; line-height:1.5; }
 
-  .row-table{ display:flex; flex-direction:column; gap:8px; }
-  .entry-row{
-    display:flex; flex-wrap:nowrap; align-items:flex-end; gap:8px; background:var(--surface-2);
-    border:1px solid var(--hairline); border-radius:10px; padding:10px 10px;
+  /* ---- TABLO GÖRÜNÜMÜ (2026-08-01) ----
+     Eskiden her satır ayrı bir "kart" (kenarlık + dolgu) idi ve her satırda başlıklar
+     tekrar ediyordu → kutu içinde kutu, çok boşluk, hantal görünüm (kullanıcı bildirdi).
+     Artık Excel gibi: başlıklar BİR KEZ üstte (.tbl-head), satırlar yalnızca hücre. */
+  .row-table{ display:flex; flex-direction:column; gap:0; }
+  .tbl-head{
+    display:flex; flex-wrap:nowrap; gap:8px; align-items:center;
+    padding:0 34px 6px 0; border-bottom:1px solid var(--hairline); margin-bottom:2px;
   }
+  .tbl-head .th{
+    font-size:9.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted);
+    font-weight:700; white-space:nowrap;
+  }
+  .tbl-head .th.f-tarih-wrap{ flex:0 0 106px; }
+  .tbl-head .th.f-yontem-wrap{ flex:0 0 118px; }
+  .tbl-head .th.f-gun-wrap{ flex:0 0 78px; }
+  .tbl-head .th.f-tutar-wrap{ flex:1 1 132px; min-width:132px; }
+  .tbl-head .th.f-due-wrap{ flex:0 0 92px; }
+  .tbl-head .th.f-del-wrap{ flex:0 0 auto; }
+  .tbl-head .th.c-tarih-wrap{ flex:0 0 106px; }
+  .tbl-head .th.c-tutar-wrap{ flex:1 1 140px; min-width:140px; }
+
+  .entry-row{
+    display:flex; flex-wrap:nowrap; align-items:center; gap:8px;
+    background:transparent; border:none; border-bottom:1px solid var(--hairline);
+    border-radius:0; padding:4px 0;
+  }
+  .entry-row:last-child{ border-bottom:none; }
+  .entry-row:hover{ background:rgba(255,255,255,0.015); }
   @media (max-width:720px){
     .entry-row{ flex-wrap:wrap; }
+    .tbl-head{ display:none; }          /* dar ekranda başlık şeridi gizlenir */
   }
   .f-field label{
     display:block; font-size:9.5px; letter-spacing:.03em; text-transform:uppercase; color:var(--muted);
@@ -176,12 +201,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   /* ---- Kapama ayarları (sıra + bölme) ---- */
   .kapama-ayar{
     background:var(--surface-2); border:1px solid var(--hairline); border-radius:10px;
-    padding:10px 12px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px;
+    padding:12px; margin:14px 0 4px; display:flex; flex-direction:column; gap:8px;
   }
-  .ka-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .ka-label{ font-size:11.5px; color:var(--muted); font-weight:600; flex:0 0 132px; }
+  .ka-row{ display:flex; flex-direction:column; align-items:stretch; gap:4px; }
+  .ka-label{ font-size:10px; letter-spacing:.03em; text-transform:uppercase; color:var(--muted); font-weight:700; }
   .ka-select{
-    flex:1 1 220px; min-width:0; background:var(--bg); color:var(--text);
+    width:100%; min-width:0; background:var(--bg); color:var(--text);
     border:1px solid var(--hairline); border-radius:8px; padding:7px 9px;
     font-family:inherit; font-size:12.5px;
   }
@@ -294,7 +319,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="panel-title fatura" data-i18n="invoices_title">📄 Faturalar</div>
       </div>
       <div class="panel-desc" data-i18n-html="invoices_desc">Fatura tarihi, çalışma koşulu (<b>vade faturanın tarihine mi, ay sonuna mı</b>) ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.</div>
-      <div class="row-table" id="faturaRows"></div>
+      <div class="tbl-head tbl-head-fatura"><span class="th f-tarih-wrap">Tarih</span><span class="th f-yontem-wrap">Çalışma Şekli</span><span class="th f-gun-wrap">Vade (Gün)</span><span class="th f-tutar-wrap">Tutar</span><span class="th f-due-wrap">Vade Tarihi</span><span class="th f-del-wrap"></span></div><div class="row-table" id="faturaRows"></div>
       <button type="button" class="add-btn fatura" id="addFaturaBtn" data-i18n="add_invoice">+ Fatura Ekle</button>
       <div class="subtotal-line"><span data-i18n="total_invoice_amount">Toplam Fatura Tutarı</span><b id="faturaToplam" class="mono">0,00</b></div>
     </div>
@@ -305,6 +330,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="panel-title cek" data-i18n="checks_title">🧾 Tahsilat (Çek/Senet/DBS vs.)</div>
       </div>
       <div class="panel-desc" data-i18n="checks_desc">Tahsil ettiğiniz çek, senet, DBS vb. ödemelerin vade tarihi ve tutarlarını girin.</div>
+      <div class="tbl-head tbl-head-cek"><span class="th c-tarih-wrap">Vade</span><span class="th c-tutar-wrap">Tutar</span><span class="th f-del-wrap"></span></div><div class="row-table" id="cekRows"></div>
+      <button type="button" class="add-btn cek" id="addCekBtn" data-i18n="add_check">+ Tahsilat Ekle</button>
+      <div class="subtotal-line"><span data-i18n="total_check_amount">Toplam Tahsilat Tutarı</span><b id="cekToplam" class="mono">0,00</b></div>
+    </div>
+
+  </div>
+
+  <!-- BİLGİ PANELİ -->
+  <div class="info-panel">
+    <button type="button" class="reset-btn card-reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
+    <div class="deviation-label" data-i18n="deviation_label">Vade Sapması</div>
+    <div class="deviation-value neutral" id="devValue">—</div>
+    <div class="deviation-sub" id="devSub" data-i18n="deviation_sub">Hesaplamak için fatura ve çek bilgilerini girin</div>
 
       <!-- KAPAMA AYARLARI — hangi faturadan başlanacağı ve tahsilatın bölünüp bölünmeyeceği.
            Muhasebede standart varsayılan FIFO'dur (en eski borç önce kapanır). -->
@@ -327,19 +365,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="ka-hint" id="kapamaHint">Sapma, kapatılan tutarlarla ağırlıklandırılarak hesaplanır.</div>
       </div>
 
-      <div class="row-table" id="cekRows"></div>
-      <button type="button" class="add-btn cek" id="addCekBtn" data-i18n="add_check">+ Tahsilat Ekle</button>
-      <div class="subtotal-line"><span data-i18n="total_check_amount">Toplam Tahsilat Tutarı</span><b id="cekToplam" class="mono">0,00</b></div>
-    </div>
-
-  </div>
-
-  <!-- BİLGİ PANELİ -->
-  <div class="info-panel">
-    <button type="button" class="reset-btn card-reset-btn" id="resetPageBtn">↺ <span data-i18n="reset_btn">Sıfırla</span></button>
-    <div class="deviation-label" data-i18n="deviation_label">Vade Sapması</div>
-    <div class="deviation-value neutral" id="devValue">—</div>
-    <div class="deviation-sub" id="devSub" data-i18n="deviation_sub">Hesaplamak için fatura ve çek bilgilerini girin</div>
 
     <div class="stat-grid">
       <div class="stat-card">
@@ -538,17 +563,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     row.className = 'entry-row fatura-row';
     row.dataset.id = id;
     row.innerHTML =
-      '<div class="f-field f-tarih-wrap"><label>Fatura Tarihi</label><div class="f-tarih-box"></div></div>' +
-      '<div class="f-field f-yontem-wrap"><label>Çalışma Şekli</label>' +
+      '<div class="f-field f-tarih-wrap"><div class="f-tarih-box"></div></div>' +
+      '<div class="f-field f-yontem-wrap">' +
         '<select class="f-yontem" title="Vade, faturanın tarihine mi (Fatura +) yoksa ayının sonuna mı (Ay sonu +) eklenecek?">' +
           '<option value="fatura">Fatura +</option>' +
           '<option value="aysonu">Ay sonu +</option>' +
         '</select>' +
       '</div>' +
-      '<div class="f-field f-gun-wrap"><label>Vade (Gün)</label><input type="text" inputmode="numeric" class="f-gun" value="' + faturaData[id].gun + '"></div>' +
-      '<div class="f-field f-tutar-wrap"><label>Fatura Tutarı</label><input type="text" inputmode="decimal" class="f-tutar" value="0,00"></div>' +
-      '<div class="f-field f-due-wrap"><label>Vade Tarihi</label><div class="due-badge f-due">—</div></div>' +
-      '<div class="f-field f-del-wrap"><label>&nbsp;</label><button type="button" class="row-del f-del" title="Satırı sil">✕</button></div>';
+      '<div class="f-field f-gun-wrap"><input type="text" inputmode="numeric" class="f-gun" value="' + faturaData[id].gun + '"></div>' +
+      '<div class="f-field f-tutar-wrap"><input type="text" inputmode="decimal" class="f-tutar" value="0,00"></div>' +
+      '<div class="f-field f-due-wrap"><div class="due-badge f-due">—</div></div>' +
+      '<div class="f-field f-del-wrap"><button type="button" class="row-del f-del" title="Satırı sil">✕</button></div>';
     faturaRowsEl.appendChild(row);
 
     wireDateBox(row.querySelector('.f-tarih-box'), faturaData[id].tarih, (val)=>{ faturaData[id].tarih = val; recalc(); });
@@ -575,8 +600,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     row.className = 'entry-row cek-row';
     row.dataset.id = id;
     row.innerHTML =
-      '<div class="f-field c-tarih-wrap"><label>Vade Tarihi</label><div class="c-tarih-box"></div></div>' +
-      '<div class="f-field c-tutar-wrap"><label>Tutar</label><input type="text" inputmode="decimal" class="c-tutar" value="0,00"></div>' +
+      '<div class="f-field c-tarih-wrap"><div class="c-tarih-box"></div></div>' +
+      '<div class="f-field c-tutar-wrap"><input type="text" inputmode="decimal" class="c-tutar" value="0,00"></div>' +
       '<button type="button" class="row-del c-del" title="Satırı sil">✕</button>' +
       // Kapama sonucu: kaç gün erken/geç ve hangi faturayı kapattığı (recalc doldurur).
       '<div class="c-sonuc" hidden></div>';
