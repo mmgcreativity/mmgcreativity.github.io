@@ -24,7 +24,9 @@
   ];
   // "+Parite" listesinde gösterilecek yaygın kodlar (kullanıcı isteği: kör prompt yerine
   // tıklanabilir liste). Zaten eklenmiş/temel (USD,EUR) olanlar listede işaretli/pasif görünür.
+  // gold:true olanlar döviz API'sinde YOKTUR — altın kaynağından (GOLD_URLS) çekilir.
   const COMMON_EXTRA = [
+    { code:'ONS', label:'Ons Altın',       flag:'🥇', gold:true },
     { code:'GBP', label:'İngiliz Sterlini', flag:'🇬🇧' },
     { code:'CHF', label:'İsviçre Frangı',  flag:'🇨🇭' },
     { code:'JPY', label:'Japon Yeni',      flag:'🇯🇵' },
@@ -33,9 +35,9 @@
     { code:'CNY', label:'Çin Yuanı',       flag:'🇨🇳' },
     { code:'RUB', label:'Rus Rublesi',     flag:'🇷🇺' },
     { code:'CAD', label:'Kanada Doları',   flag:'🇨🇦' },
-    { code:'AUD', label:'Avustralya Doları', flag:'🇦🇺' },
     { code:'KWD', label:'Kuveyt Dinarı',   flag:'🇰🇼' }
   ];
+  const GOLD_CODES = COMMON_EXTRA.filter(c => c.gold).map(c => c.code);
   // Kullanıcının kendi eklediği pariteler (örn. GBP, CHF, SAR) — kalıcı.
   const EXTRA_KEY = 'mmg_doviz_extra_pairs';
   function getExtraPairs(){
@@ -67,11 +69,13 @@
       '<div id="mmgDovizRows" class="mmg-doviz-rows">' +
         '<div class="mmg-doviz-loading">Yükleniyor…</div>' +
       '</div>' +
-      '<div class="mmg-doviz-foot" style="justify-content:space-between;gap:8px;position:relative;">' +
+      '<div class="mmg-doviz-foot" style="justify-content:space-between;gap:8px;">' +
         '<span id="mmgDovizUpdated"></span>' +
         '<button type="button" id="mmgDovizAddBtn" title="Parite ekle" style="background:none;border:1px solid var(--hairline,#2A3448);border-radius:6px;color:var(--brass,#C6A15B);cursor:pointer;font-size:10.5px;font-weight:700;padding:3px 8px;">+ Parite</button>' +
-        '<div id="mmgDovizAddList" class="mmg-doviz-add-list" hidden></div>' +
-      '</div>';
+      '</div>' +
+      // Liste PANELİN İÇİNDE, başlık ile alt çubuk arasına oturur (kullanıcı: "kesik geliyor").
+      // Yukarı doğru açılan mutlak konumlu eski liste panel/ekran dışına taşıp kırpılıyordu.
+      '<div id="mmgDovizAddList" class="mmg-doviz-add-list" hidden></div>';
 
     // --- Stil ---
     const style = document.createElement('style');
@@ -85,7 +89,7 @@
       '#mmgDovizBtn:hover{border-color:var(--brass-dim,#8A7440);transform:translateY(-1px);}' +
       // Panel genişliği 230px→280px (kullanıcı: "çakışma oluyor" — dar panelde uzun kur
       // değerleri/etiketler kenara sıkışıp arkadaki sayfa içeriğiyle çakışıyordu).
-      '#mmgDovizPanel{position:fixed;top:64px;right:66px;z-index:801;width:280px;background:var(--surface,#141C2B);' +
+      '#mmgDovizPanel{position:fixed;top:64px;right:66px;z-index:801;width:280px;min-height:230px;background:var(--surface,#141C2B);' +
         'border:1px solid var(--hairline,#2A3448);border-radius:14px;padding:14px;box-shadow:0 24px 60px rgba(0,0,0,0.5);' +
         'font-family:\'IBM Plex Mono\',monospace;}' +
       '#mmgDovizPanel[hidden]{display:none;}' +
@@ -109,7 +113,9 @@
         'border-top:1px solid var(--hairline,#2A3448);font-size:10px;color:var(--muted,#8D96AC);}' +
       '.mmg-doviz-foot #mmgDovizUpdated{white-space:nowrap;}' +
       // "+ Parite" tıklanınca açılan liste: kör prompt yerine tıklanabilir seçenekler.
-      '.mmg-doviz-add-list{position:absolute;bottom:calc(100% + 6px);right:0;width:200px;max-height:260px;overflow-y:auto;' +
+      // Panelin İÇİNE, başlığın altı ile alt çubuğun üstü arasına yerleşir; taşan kısım
+      // kendi içinde kaydırılır. Böylece ekran/panel dışına taşıp kırpılması imkânsız.
+      '.mmg-doviz-add-list{position:absolute;left:12px;right:12px;top:40px;bottom:44px;overflow-y:auto;' +
         'background:var(--surface-2,#1B2536);border:1px solid var(--hairline,#2A3448);border-radius:10px;' +
         'box-shadow:0 14px 34px rgba(0,0,0,0.45);padding:6px;z-index:802;}' +
       '.mmg-doviz-add-list[hidden]{display:none;}' +
@@ -158,6 +164,7 @@
       });
       // Kullanıcının eklediği pariteler (✕ ile kaldırılabilir).
       getExtraPairs().forEach(code => {
+        if(GOLD_CODES.indexOf(code) !== -1) return; // altın satırları renderGold içinde çizilir
         const perUsd = code === 'USD' ? 1 : r[code];
         if(!perUsd) return;
         const val = tryUsd / perUsd;
@@ -182,24 +189,48 @@
     }
 
     function parseTRNum(s){ if(typeof s==='number') return s; return parseFloat(String(s==null?'':s).replace(/[^0-9.,]/g,'').replace(/\./g,'').replace(',','.')); }
-    function extractGold(d){
-      if(!d) return null;
-      // truncgil v4: { "GRA": {"Selling":..} } veya { "gram-altin": {"Satış":"..."} }; genelpara: { "GA": {"satis":"..."} }
-      const g = d.GRA || d['gram-altin'] || d.GA || d.gram || d.gramaltin;
+    // Altın kaynağından tek bir kalemi çıkarır. Kaynaklar farklı anahtar/biçim kullanıyor:
+    // truncgil v4: { "GRA": {"Selling":..} } / { "gram-altin": {"Satış":"..."} } / { "ONS": {...} }
+    // genelpara:   { "GA": {"satis":"..."} } / { "ONS": {"satis":"..."} }
+    function pickNum(g){
       if(!g) return null;
       const raw = (g.Selling != null ? g.Selling : (g['Satış'] != null ? g['Satış'] : (g.satis != null ? g.satis : g.selling)));
       const v = parseTRNum(raw);
       return (v && isFinite(v)) ? v : null;
     }
+    function extractGold(d){
+      if(!d) return null;
+      return pickNum(d.GRA || d['gram-altin'] || d.GA || d.gram || d.gramaltin);
+    }
+    function extractOns(d){
+      if(!d) return null;
+      return pickNum(d.ONS || d['ons-altin'] || d.ons || d.ONSALTIN || d.onsaltin);
+    }
+    // Gram Altın her zaman gösterilir; Ons Altın yalnızca kullanıcı "+ Parite"den eklediyse.
     function renderGold(idx){
       idx = idx || 0;
       if(idx >= GOLD_URLS.length) return;
+      const wantOns = getExtraPairs().indexOf('ONS') !== -1;
       fetch(GOLD_URLS[idx]).then(r=>r.json()).then(d=>{
         const v = extractGold(d);
         if(!v){ renderGold(idx + 1); return; }
-        if(rowsEl.querySelector('.mmg-doviz-gold')) return;
-        rowsEl.insertAdjacentHTML('beforeend',
-          '<div class="mmg-doviz-row mmg-doviz-gold"><span class="mmg-doviz-pair">🥇 Gram Altın<small>/TRY</small></span><span class="mmg-doviz-val">' + fmt(v) + '</span></div>');
+        if(!rowsEl.querySelector('.mmg-doviz-gold')){
+          rowsEl.insertAdjacentHTML('beforeend',
+            '<div class="mmg-doviz-row mmg-doviz-gold"><span class="mmg-doviz-pair">🥇 Gram Altın<small>/TRY</small></span><span class="mmg-doviz-val">' + fmt(v) + '</span></div>');
+        }
+        if(wantOns && !rowsEl.querySelector('.mmg-doviz-ons')){
+          const o = extractOns(d);
+          if(o){
+            rowsEl.insertAdjacentHTML('beforeend',
+              '<div class="mmg-doviz-row mmg-doviz-ons" data-extra="ONS">' +
+                '<span class="mmg-doviz-pair">🥇 Ons Altın<small>/USD</small></span>' +
+                '<span style="display:flex;align-items:center;gap:8px;">' +
+                  '<span class="mmg-doviz-val">' + fmt(o) + '</span>' +
+                  '<button type="button" class="mmg-doviz-del" data-del="ONS" title="Kaldır" style="background:none;border:none;color:var(--muted,#8D96AC);cursor:pointer;font-size:12px;padding:0 2px;">✕</button>' +
+                '</span>' +
+              '</div>');
+          }
+        }
       }).catch(()=>{ renderGold(idx + 1); });
     }
     function renderError(){

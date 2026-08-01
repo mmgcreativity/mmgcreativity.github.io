@@ -216,6 +216,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .nav-subdrawer::before{ content:''; position:absolute; left:-12px; top:0; width:12px; height:100%; }
   .nav-subwrap:hover > .nav-subdrawer, .nav-subwrap:focus-within > .nav-subdrawer{ opacity:1; transform:translateX(0); pointer-events:auto; }
+  /* Masaüstünde TIKLAMAYLA da açılsın (kullanıcı: "2. basamakta tıklama yapınca bir şey
+     olmuyor"). Önceden yalnızca hover/focus vardı; alt-menülü başlıklar data-target
+     taşımadığı için tıklama hiçbir şey yapmıyordu. Artık .open sınıfı masaüstünde de geçerli. */
+  .nav-subwrap.open > .nav-subdrawer{ opacity:1; transform:translateX(0); pointer-events:auto; }
+  .nav-subwrap > .nav-item{ cursor:pointer; }
+  .nav-subwrap.open > .nav-item .nav-drawer-chevron{ transform:rotate(90deg); }
+  .nav-subwrap > .nav-item .nav-drawer-chevron{ transition:transform .16s ease; }
   /* Mobil: flyout alt-menü (Krediler/Vade Hesapları) SAĞA açılan kutu yerine, ana başlığın
      ALTINDA girintili açılan liste olsun (çakışmayı önler; kullanıcı isteği). Başlığa dokununca açılır. */
   @media (max-width:860px){
@@ -2322,6 +2329,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   wireDrawerToggle('talimatlarAraclariToggle', 'talimatlarDrawer');
   wireDrawerToggle('sosyalToggle', 'sosyalDrawer');
   wireDrawerToggle('veriAnaliziToggle', 'veriAnaliziDrawer');
+
+  // 3. seviye alt-menüler ("Krediler", "Vade Hesapları") — TIKLAMAYLA AÇILMA.
+  // Bu başlıklar data-target taşımaz; openTarget() guard'ı yüzünden tıklama hiçbir şey
+  // yapmıyordu (kullanıcı: "2. basamakta tıklama yapınca bir şey olmuyor"). Artık başlığa
+  // tıklayınca alt kutu açılıp kapanıyor; masaüstündeki hover davranışı aynen duruyor.
+  document.querySelectorAll('.nav-subwrap').forEach(wrap => {
+    const head = wrap.querySelector(':scope > .nav-item');
+    if(!head) return;
+    head.addEventListener('click', (e) => {
+      // Yıldız (favori) tıklamasını yut — o kendi işini yapsın.
+      if(e.target.closest('.fav-star')) return;
+      e.stopPropagation();
+      const willOpen = !wrap.classList.contains('open');
+      // Aynı anda yalnızca bir alt-menü açık kalsın.
+      document.querySelectorAll('.nav-subwrap.open').forEach(w => { if(w !== wrap) w.classList.remove('open'); });
+      wrap.classList.toggle('open', willOpen);
+    });
+  });
+  // Alt-menü dışına tıklanınca ya da bir alt öge seçilince kapansın.
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.nav-subwrap.open').forEach(wrap => {
+      if(!wrap.contains(e.target) || e.target.closest('.nav-subdrawer .nav-item')){
+        wrap.classList.remove('open');
+      }
+    });
+  });
 
   // Flyout dışına tıklanınca ya da bir alt öge seçilince kapansın.
   document.addEventListener('click', (e) => {
