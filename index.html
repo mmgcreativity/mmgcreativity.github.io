@@ -573,6 +573,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
 
   .card-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(var(--dfa-card-w, 300px), 1fr)); align-items:start; gap:18px; max-width:1400px; position:relative; }
+  /* Kategori başlığı: ızgaranın tamamını kaplar, kartları gruplara ayırır.
+     Mobilde tek sütuna düşünce ana menü/alt menü karışıklığını bu başlıklar önler. */
+  .card-sec{
+    grid-column:1 / -1; display:flex; align-items:center; gap:12px;
+    margin:6px 0 -4px; font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:12px; letter-spacing:.10em; text-transform:uppercase; color:var(--muted);
+  }
+  .card-sec:first-of-type{ margin-top:0; }
+  .card-sec[hidden]{ display:none; }   /* display:flex, hidden'ı ezdiği için gerekli */
+  .card-sec::after{ content:''; flex:1 1 auto; height:1px; background:var(--hairline); }
+  .card-grid.edit-mode .card-sec, .card-grid.remove-mode .card-sec{ opacity:.5; }
+  @media (max-width:860px){ .card-sec{ margin:10px 0 0; font-size:11.5px; } }
   .card-grid.drag-over{ outline:2px dashed var(--brass); outline-offset:8px; border-radius:16px; background:rgba(198,161,91,0.05); }
   .desktop-toolbar{
     /* Sağ ÜST KÖŞEDE, ama fixed DEĞİL: sayfayla birlikte kayar, içeriğin üstünde yüzmez
@@ -727,10 +739,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .app-badge-text span{ font-size:9.5px; color:var(--muted); }
   .app-badge-text b{ font-family:'Space Grotesk',sans-serif; font-size:13px; }
   /* "Google Play" yazısının altındaki 5 yıldız — 5 puan vermeyi temsil eder.
-     Eski tek yıldız ikonu ~18px idi; bunlar onun yarısı kadar (9px). */
+     HİZA: metin sütunu (.app-badge-text) genişliğini en geniş çocuk, yani
+     "Google Play" belirler. Yıldız şeridi width:100% + space-between olduğu için
+     ilk yıldız G harfinin, son yıldız y harfinin tam hizasında biter.
+     BOYUT: "Google Play" 12.5–13px; yıldızlar onunla orantılı ~11px. */
   .app-badge-text .app-badge-stars{
-    font-size:9px; line-height:1; letter-spacing:1px; color:#FFC107; margin-top:2px;
+    display:flex; width:100%; justify-content:space-between;
+    font-size:11px; line-height:1; color:#FFC107; margin-top:3px;
   }
+  .app-badge-text .app-badge-stars i{ font-style:normal; }
 
   .legal-links{
     display:flex; flex-wrap:wrap; gap:18px;
@@ -1058,6 +1075,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_talimat:'Talimat', nav_rehber:'Rehber', nav_iletisim:'İletişim', nav_hesaplamaaraclari:'Hesaplama Araçları', nav_verigirisi:'Veri Girişi', nav_verigirisi_panel:'Veri Giriş Paneli', nav_label_araclar:'Araçlar',
       nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Keşfet', nav_label_verigirisi:'Veri Girişi', nav_label_verianalizi:'Veri Yönetimi',
       nav_talimatlar:'Talimatlar', nav_talimatlar_desc:'İşlemleri', nav_hazirmetin:'Hazır Metin Talimatları',
+      // 2026-08-02 yeni modüller
+      nav_tahsilat_makbuzu:'Tahsilat Makbuzu', nav_isletme:'İşletme Yönetimi',
+      nav_stok:'Stok Takip', nav_risk:'Risk Yönetimi', nav_portfoy:'Portföy',
       nav_budget:'Bütçeleme', nav_budget_desc:'Araçları', nav_panorama:'Günlük Panorama',
       hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
       hero_desc:'İşletmeler, Bankacılar ve Finans profesyonelleri için geliştirilmiş hepsi bir arada finans platformu',
@@ -1171,6 +1191,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_talimat:'Instructions', nav_rehber:'Guide', nav_iletisim:'Contact', nav_hesaplamaaraclari:'Calculation Tools', nav_verigirisi:'Data Entry', nav_verigirisi_panel:'Data Entry Panel', nav_label_araclar:'Tools',
       nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Explore', nav_label_verigirisi:'Data Entry', nav_label_verianalizi:'Data Management',
       nav_talimatlar:'Instructions', nav_talimatlar_desc:'Center', nav_hazirmetin:'Ready-made Text Instructions',
+      // 2026-08-02 new modules
+      nav_tahsilat_makbuzu:'Collection Receipt', nav_isletme:'Business Management',
+      nav_stok:'Inventory', nav_risk:'Risk Management', nav_portfoy:'Portfolio',
       nav_budget:'Budgeting', nav_budget_desc:'Tools', nav_panorama:'Daily Panorama',
       hero_title:'Digital Finance Assistant', hero_tagline:'Your digital partner for financial decisions',
       hero_desc:'An all-in-one finance platform built for businesses, bankers and finance professionals',
@@ -1593,6 +1616,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="fav-star" role="button" tabindex="0" data-fav-target="HazirMetinTalimatlari.html" data-fav-title="Hazır Metin Talimatları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_hazirmetin">Hazır Metin Talimatları</span></span>
       </button>
+      <button class="nav-item nav-subitem" data-target="Tahsilat_Makbuzu.html" data-title="Tahsilat Makbuzu">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Tahsilat_Makbuzu.html" data-fav-title="Tahsilat Makbuzu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_tahsilat_makbuzu">Tahsilat Makbuzu</span></span>
+      </button>
+    </div>
+    </div>
+
+    <!-- 2026-08-02: YENİ ANA MENÜ — İşletme Yönetimi (Stok / Risk / Portföy) -->
+    <div class="nav-drawer-wrap">
+    <button class="nav-item" id="isletmeToggle" data-drawer-toggle="true" data-title="İşletme Yönetimi" aria-expanded="false">
+      <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5-9 4.5-9-4.5Z"/><path d="M3 12l9 4.5L21 12"/><path d="M3 16.5 12 21l9-4.5"/></svg></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Stok_Takip.html" data-fav-title="İşletme Yönetimi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_isletme">İşletme Yönetimi</span></span>
+      <span class="nav-drawer-chevron" id="isletmeChevron">›</span>
+    </button>
+    <div class="nav-drawer" id="isletmeDrawer" hidden>
+      <button class="nav-item nav-subitem" data-target="Stok_Takip.html" data-title="Stok Takip">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Stok_Takip.html" data-fav-title="Stok Takip" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_stok">Stok Takip</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Risk_Yonetimi.html" data-title="Risk Yönetimi">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Risk_Yonetimi.html" data-fav-title="Risk Yönetimi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_risk">Risk Yönetimi</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Portfoy.html" data-title="Portföy">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Portfoy.html" data-fav-title="Portföy" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_portfoy">Portföy</span></span>
+      </button>
     </div>
     </div>
 
@@ -1906,88 +1957,178 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
       <div class="card-grid" id="cardGrid">
+
+        <!-- ===================================================================
+             2026-08-02 — MOBİL MENÜ DÜZELTMESİ
+             Önceden bu ızgara 12 kartlık DÜZ bir listeydi: ana kategori kartı
+             ("Hesaplama Araçları") ile tekil araç kartları ("Gelirler") yan
+             yana duruyor, üstelik 12 sayfa (Vade Sapma dâhil) hiç görünmüyordu.
+             Kullanıcı bildirimi: "mobilde menüler karışık geliyor, ana menü alt
+             menü bir arada, hatta bazı menüler hiç yok mesela vade sapma yok."
+             Artık kartlar sol menüdeki KATEGORİLERLE birebir aynı başlıklar
+             altında gruplanıyor ve menüdeki HER sayfanın bir kartı var.
+             =================================================================== -->
+        <div class="card-sec" data-sec="calc"><span>Hesaplama Araçları</span></div>
         <button class="app-card" data-target="Hesaplama_Araclari.html" data-title="Hesaplama Araçları">
           <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Hesaplama_Araclari.html" data-fav-title="Hesaplama Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3 data-i18n="nav_hesaplamaaraclari">Hesaplama Araçları</h3>
           <p data-i18n="card_calc_desc">Rotatif Kredi, Kredi Kartı Vade Farkı ve Ortalama Vade hesaplayıcılarının tümü tek sayfada, sekmeler arasında geçiş yaparak.</p>
         </button>
-
+        <button class="app-card" data-target="Rotatif_Kredi_Hesaplama.html" data-title="Rotatif Kredi">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Rotatif_Kredi_Hesaplama.html" data-fav-title="Rotatif Kredi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Rotatif Kredi</h3>
+          <p>Gün bazlı rotatif kredi faizi, BSMV ve toplam maliyet.</p>
+        </button>
+        <button class="app-card" data-target="aylik-taksitli-kredi-hesaplama.html" data-title="Taksitli Kredi">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="aylik-taksitli-kredi-hesaplama.html" data-fav-title="Taksitli Kredi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Taksitli Kredi</h3>
+          <p>Eşit taksitli kredi ödeme planı, faiz ve toplam geri ödeme.</p>
+        </button>
+        <button class="app-card" data-target="kredi-karsilastirma.html" data-title="Kredi Karşılaştırma">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="kredi-karsilastirma.html" data-fav-title="Kredi Karşılaştırma" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Kredi Karşılaştırma</h3>
+          <p>Farklı bankaların tekliflerini yan yana koyup en uygununu seçin.</p>
+        </button>
+        <button class="app-card" data-target="Ortalama_Vade_Hesaplama.html" data-title="Ortalama Vade">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Ortalama_Vade_Hesaplama.html" data-fav-title="Ortalama Vade" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Ortalama Vade</h3>
+          <p>Birden çok ödemenin ağırlıklı ortalama vadesini bulun.</p>
+        </button>
+        <button class="app-card" data-target="Vade_Sapma_Hesaplama.html" data-title="Vade Sapması">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Vade_Sapma_Hesaplama.html" data-fav-title="Vade Sapması" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Vade Sapması</h3>
+          <p>Faturaları tahsilatlarla eşleştirip kaç gün erken/geç ödendiğini görün.</p>
+        </button>
+        <button class="app-card" data-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-title="Kredi Kartı Vade Farkı">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Kredi_Karti_Vade_Farki_Hesaplama.html" data-fav-title="Kredi Kartı Vade Farkı" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Kredi Kartı Vade Farkı</h3>
+          <p>Taksitli kart satışında vade farkı ve net eline geçen tutar.</p>
+        </button>
+        <button class="app-card" data-target="vadeli-mevduat-faizi-hesaplama.html" data-title="Vadeli Mevduat Faizi">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="vadeli-mevduat-faizi-hesaplama.html" data-fav-title="Vadeli Mevduat Faizi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Vadeli Mevduat Faizi</h3>
+          <p>Brüt–net faiz, stopaj ve vade sonu bakiyesi.</p>
+        </button>
+        <button class="app-card" data-target="teminat-mektubu-komisyonu-hesaplama.html" data-title="Teminat Mektubu Komisyonu">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="teminat-mektubu-komisyonu-hesaplama.html" data-fav-title="Teminat Mektubu Komisyonu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Teminat Mektubu Komisyonu</h3>
+          <p>Dönemsel komisyon, BSMV ve toplam maliyet.</p>
+        </button>
+        <button class="app-card" data-target="cek-iskontosu-hesaplama.html" data-title="Çek İskontosu">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="cek-iskontosu-hesaplama.html" data-fav-title="Çek İskontosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Çek İskontosu</h3>
+          <p>Vadeli çekin bugünkü değeri, iskonto tutarı ve maliyeti.</p>
+        </button>
+        <div class="card-sec" data-sec="isletme"><span>İşletme Yönetimi</span></div>
+        <button class="app-card" data-target="Stok_Takip.html" data-title="Stok Takip">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Stok_Takip.html" data-fav-title="Stok Takip" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Stok Takip</h3>
+          <p>Ürün kartı, giriş–çıkış hareketleri, kritik stok uyarısı ve ağırlıklı ortalama maliyetle stok değeri.</p>
+        </button>
+        <button class="app-card" data-target="Risk_Yonetimi.html" data-title="Risk Yönetimi">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Risk_Yonetimi.html" data-fav-title="Risk Yönetimi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Risk Yönetimi</h3>
+          <p>Müşteri bazlı limit kullanımı, vadesi geçen alacak, yaşlandırma ve risk skoru.</p>
+        </button>
+        <button class="app-card" data-target="Portfoy.html" data-title="Portföy">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Portfoy.html" data-fav-title="Portföy" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Portföy</h3>
+          <p>Hisse alış–satışları, ortalama maliyet, gerçekleşen/gerçekleşmeyen kâr-zarar ve dönem ekstresi.</p>
+        </button>
+        <div class="card-sec" data-sec="butce"><span>Bütçeleme</span></div>
         <button class="app-card" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
           <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3 data-i18n="card_cashflow_title">Nakit Akış Tablosu</h3>
           <p data-i18n="card_cashflow_desc">Ay ay, gün gün gelir ve giderlerinizi girin; haftalık ve aylık durumunuzu, kategori dağılımınızı ve otomatik uyarılarınızı anında görün.</p>
         </button>
-
-        <button class="app-card" data-target="Giderler.html" data-title="Giderler">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-          <span class="card-arrow">↗</span>
-          <h3 data-i18n="nav_giderler">Giderler</h3>
-          <p data-i18n="card_expenses_desc">Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
-        </button>
-
         <button class="app-card" data-target="Gelirler.html" data-title="Gelirler">
           <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3 data-i18n="nav_gelirler">Gelirler</h3>
           <p data-i18n="card_income_desc">Nakit tahsilat, çek/senet tahsilatı, POS tahsilatı ve faiz gelirlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
         </button>
-
+        <button class="app-card" data-target="Giderler.html" data-title="Giderler">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3 data-i18n="nav_giderler">Giderler</h3>
+          <p data-i18n="card_expenses_desc">Faturalar, kredi kartları, teminat mektupları, komisyonlar ve kiralar gibi düzenli giderlerinizi kaydedin; vadesi geldiğinde Nakit Akış Tablosu'na otomatik işlensin.</p>
+        </button>
+        <div class="card-sec" data-sec="talimat"><span>Talimatlar & Belgeler</span></div>
         <button class="app-card" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
           <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3 data-i18n="nav_talimat_full">Talimat Hazırlama</h3>
           <p data-i18n="card_instructions_desc">Banka, müşteri, kurum ve şahıslara gönderilecek havale, çek, teminat mektubu ve serbest metin talimatlarınızı saniyeler içinde hazırlayın.</p>
         </button>
-
         <button class="app-card" data-target="HazirMetinTalimatlari.html" data-title="Hazır Metin Talimatları">
           <span class="fav-star-card" role="button" tabindex="0" data-fav-target="HazirMetinTalimatlari.html" data-fav-title="Hazır Metin Talimatları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3 data-i18n="nav_hazirmetin">Hazır Metin Talimatları</h3>
           <p data-i18n="card_hazirmetin_desc">Sık kullandığınız talimat metinlerini bir kez oluşturup kaydedin; sonraki seferlerde saniyeler içinde yeniden kullanın.</p>
         </button>
-
+        <button class="app-card" data-target="Tahsilat_Makbuzu.html" data-title="Tahsilat Makbuzu">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Tahsilat_Makbuzu.html" data-fav-title="Tahsilat Makbuzu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Tahsilat Makbuzu</h3>
+          <p>Seri–sıra numaralı tahsilat makbuzu; tutar yazıyla, yazdırılabilir ve PDF olarak kaydedilebilir.</p>
+        </button>
+        <div class="card-sec" data-sec="veri"><span>Veri Yönetimi</span></div>
         <button class="app-card" data-target="VeriGirisPaneli.html" data-title="Veri Girişi">
           <span class="fav-star-card" role="button" tabindex="0" data-fav-target="VeriGirisPaneli.html" data-fav-title="Veri Girişi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3 data-i18n="nav_label_verigirisi">Veri Girişi</h3>
           <p data-i18n="card_verigirisi_desc">Müşteri, tedarikçi, muhatap ve banka bilgilerinizi tek yerde toplayın; talimat ve mektup hazırlarken otomatik önerilsin.</p>
         </button>
-
         <button class="app-card" id="cardIstatistiklerBtn" data-target="Istatistikler.html" data-title="İstatistikler" data-gated="true" style="display:none;">
           <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Istatistikler.html" data-fav-title="İstatistikler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3 data-i18n="dropdown_stats">İstatistikler</h3>
           <p data-i18n="card_istatistikler_desc">Kategori dağılımlarınızı ve zaman içindeki eğilimlerinizi tek bakışta görün.</p>
         </button>
-
         <button class="app-card" id="cardReferansPaneliBtn" data-target="ReferansKoduYonetimi.html" data-title="Referans Paneli" data-gated="true" style="display:none;">
           <span class="fav-star-card" role="button" tabindex="0" data-fav-target="ReferansKoduYonetimi.html" data-fav-title="Referans Paneli" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3 data-i18n="dropdown_referral_admin">Referans Paneli</h3>
           <p data-i18n="card_referans_desc">Kendi referans kodunuzu paylaşın; kimlerin katıldığını ve komisyon oranınızı takip edin.</p>
         </button>
-
+        <div class="card-sec" data-sec="kesfet"><span>Keşfet</span></div>
         <button class="app-card" data-target="Forum.html" data-title="Forum">
           <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Forum.html" data-fav-title="Forum" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3 data-i18n="nav_forum">Forum</h3>
           <p data-i18n="card_forum_desc">Diğer kullanıcılarla sohbet edin, sorularınızı sorun ve deneyimlerinizi paylaşın.</p>
         </button>
-
         <button class="app-card" data-target="Blog.html" data-title="Blog">
           <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Blog.html" data-fav-title="Blog" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3 data-i18n="nav_blog">Blog</h3>
           <p data-i18n="card_blog_desc">Finans, bütçe ve kredi konularında güncel yazılarımızı okuyun.</p>
         </button>
-
         <button class="app-card" data-target="rehber.html" data-title="Rehber">
           <span class="fav-star-card" role="button" tabindex="0" data-fav-target="rehber.html" data-fav-title="Rehber" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
           <h3 data-i18n="nav_rehber">Rehber</h3>
           <p data-i18n="card_rehber_desc">Kredi, faiz, taksit ve bütçe planlaması gibi konularda sade dilde, pratik rehberler.</p>
+        </button>
+        <button class="app-card" data-target="finans-sozlugu.html" data-title="Finans Sözlüğü">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="finans-sozlugu.html" data-fav-title="Finans Sözlüğü" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Finans Sözlüğü</h3>
+          <p>Finans ve muhasebe terimlerinin sade Türkçe açıklamaları.</p>
         </button>
       </div>
     </section>
@@ -2038,8 +2179,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <b>Google Play</b>
               <!-- 2026-08-01: Sağdaki tek büyük yıldız kaldırıldı; yerine "Google Play"
                    yazısının ALTINA 5 yıldız kondu (5 yıldız vermeyi temsilen).
-                   Boyut: eski yıldızın yarısı kadar (~9px). -->
-              <span class="app-badge-stars" aria-label="5 yıldız verin">★★★★★</span>
+                   2026-08-02: Yıldızlar tek metin yerine 5 ayrı <i> oldu; böylece
+                   space-between ile "Google Play" yazısının TAM genişliğine yayılıp
+                   soldan ve sağdan birebir hizalanıyor (kullanıcı isteği). -->
+              <span class="app-badge-stars" aria-label="5 yıldız verin"><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></span>
             </span>
           </a>
           </div>
@@ -2358,6 +2501,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   wireDrawerToggle('hesaplamaAraclariToggle', 'hesaplamaDrawer');
   wireDrawerToggle('butcelemeAraclariToggle', 'butcelemeDrawer');
   wireDrawerToggle('talimatlarAraclariToggle', 'talimatlarDrawer');
+  wireDrawerToggle('isletmeToggle', 'isletmeDrawer');
   wireDrawerToggle('sosyalToggle', 'sosyalDrawer');
   wireDrawerToggle('veriAnaliziToggle', 'veriAnaliziDrawer');
 
@@ -2544,21 +2688,69 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
   }
 
+  /* 2026-08-02: Kartlar artık KATEGORİ BAŞLIKLARI (.card-sec) altında gruplu.
+     Eski sürüm bütün kartları grid'in sonuna appendChild ediyordu; bu, başlıkları
+     tepede öbekleyip grupları dağıtırdı. Yeni sürüm sıralamayı grup yapısını
+     bozmadan yapar: favoriler en üstte kendi "★ Favoriler" bölümünde toplanır,
+     favori olmayanlar kendi kategorisinde ve özgün sırasında kalır. */
   function sortCardGrid(){
     const grid = document.getElementById('cardGrid');
     if(!grid) return;
     const favs = getFavorites();
-    const cards = Array.from(grid.querySelectorAll('.app-card'));
-    cards.forEach((c, i)=>{ if(c.dataset.origIndex === undefined) c.dataset.origIndex = i; });
-    cards.sort((a,b)=>{
-      const fa = favs.indexOf(a.dataset.target);
-      const fb = favs.indexOf(b.dataset.target);
-      if(fa === -1 && fb === -1) return (+a.dataset.origIndex) - (+b.dataset.origIndex);
-      if(fa === -1) return 1;
-      if(fb === -1) return -1;
-      return fa - fb;
+
+    // İlk çağrıda özgün yapıyı (bölüm sırası + kartın hangi bölüme ait olduğu) sakla.
+    if(!grid.dataset.secIndexed){
+      let sec = null, idx = 0;
+      Array.from(grid.children).forEach(el => {
+        if(el.classList.contains('card-sec')){ sec = el.dataset.sec || ('s' + idx); el.dataset.sec = sec; }
+        else if(el.classList.contains('app-card')){ el.dataset.sec = sec || 'diger'; el.dataset.origIndex = idx; }
+        idx++;
+      });
+      grid.dataset.secIndexed = '1';
+    }
+
+    const basliklar = Array.from(grid.querySelectorAll('.card-sec:not([data-sec="favori"])'));
+    const kartlar = Array.from(grid.querySelectorAll('.app-card'));
+
+    // "★ Favoriler" başlığı: yalnızca favori varken görünür.
+    let favBaslik = grid.querySelector('.card-sec[data-sec="favori"]');
+    if(!favBaslik){
+      favBaslik = document.createElement('div');
+      favBaslik.className = 'card-sec';
+      favBaslik.dataset.sec = 'favori';
+      favBaslik.innerHTML = '<span>★ Favoriler</span>';
+      grid.insertBefore(favBaslik, grid.firstChild);
+    }
+    const favKartlar = favs.map(t => kartlar.find(c => c.dataset.target === t)).filter(Boolean);
+    favBaslik.hidden = favKartlar.length === 0;
+
+    // Yeniden diz: favori bölümü → sonra her kategori kendi kartlarıyla.
+    grid.appendChild(favBaslik);
+    favKartlar.forEach(c => grid.appendChild(c));
+    basliklar.forEach(h => {
+      const grup = kartlar
+        .filter(c => c.dataset.sec === h.dataset.sec && favs.indexOf(c.dataset.target) === -1)
+        .sort((a,b) => (+a.dataset.origIndex) - (+b.dataset.origIndex));
+      grid.appendChild(h);
+      // Bölümdeki tüm kartlar gizliyse (yetkiye bağlı kartlar) başlığı da gizle.
+      h.hidden = grup.length === 0 || grup.every(c => c.style.display === 'none');
+      grup.forEach(c => grid.appendChild(c));
     });
-    cards.forEach(c => grid.appendChild(c));
+
+    // Kullanıcının sonradan eklediği kısayol kartları hiçbir kategoriye ait değil;
+    // en sonda kendi başlığı altında toplanır (aksi halde başlıkların üstünde kalırlardı).
+    const ekstra = kartlar.filter(c => !c.dataset.sec && favs.indexOf(c.dataset.target) === -1);
+    let ekBaslik = grid.querySelector('.card-sec[data-sec="ekstra"]');
+    if(!ekBaslik){
+      ekBaslik = document.createElement('div');
+      ekBaslik.className = 'card-sec';
+      ekBaslik.dataset.sec = 'ekstra';
+      ekBaslik.innerHTML = '<span>Eklediklerim</span>';
+      grid.appendChild(ekBaslik);
+    }
+    grid.appendChild(ekBaslik);
+    ekBaslik.hidden = ekstra.length === 0;
+    ekstra.forEach(c => grid.appendChild(c));
   }
 
   function renderFavorites(){

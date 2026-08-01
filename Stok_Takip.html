@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{ var mode=localStorage.getItem('mmg_theme')||'dark'; document.documentElement.classList.toggle('theme-light', mode==='light'); }catch(e){}
+  window.addEventListener('message', function(ev){ if(ev&&ev.data&&ev.data.mmgTheme){ document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme==='light'); try{localStorage.setItem('mmg_theme',ev.data.mmgTheme);}catch(e2){} } });
+})();
+</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Stok Takip</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mmg-module.css">
+<style>
+  .tab-panel{ display:none; } .tab-panel.active{ display:block; }
+  .mono{ font-family:'IBM Plex Mono',monospace; font-size:12px; }
+  .row-crit{ background:rgba(226,84,75,0.07); }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <h1 class="title">Stok Takip</h1>
+    <p class="subtitle">Ürün kartı açın, giriş–çıkış hareketlerini işleyin; anlık stok, kritik seviye uyarısı ve <b>hareketli ağırlıklı ortalama maliyet</b> ile stok değeri otomatik hesaplansın.</p>
+  </div>
+  <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="ozet">Özet</button>
+    <button class="tab" data-tab="urun">Ürünler</button>
+    <button class="tab" data-tab="hareket">Hareketler</button>
+    <button class="tab" data-tab="ekstre">Ürün Ekstresi</button>
+  </div>
+
+  <!-- ================= ÖZET ================= -->
+  <div class="tab-panel active" id="tab-ozet">
+    <div class="kpis" id="oKpi"></div>
+    <div class="panel">
+      <div class="panel-title">Stok Durumu</div>
+      <div class="panel-desc">Maliyet, hareketli ağırlıklı ortalama yöntemiyle hesaplanır: her girişte ortalama maliyet yeniden hesaplanır, çıkışlar mevcut ortalama maliyetten düşülür.</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="oAra" type="text" placeholder="Kod veya ürün adı ara…" style="max-width:260px;">
+        <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted);">
+          <input type="checkbox" id="oSadeceKritik" style="width:auto; height:auto;"> Sadece kritik seviyedekiler
+        </label>
+        <button class="btn" id="btnStokExcel">Excel</button>
+        <button class="btn" id="btnStokPdf">PDF</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Kod</th><th>Ürün</th><th>Birim</th>
+            <th class="num">Giriş</th><th class="num">Çıkış</th><th class="num">Stok</th>
+            <th class="num">Ort. Maliyet</th><th class="num">Stok Değeri</th>
+            <th class="num">Kritik</th><th>Durum</th>
+          </tr></thead>
+          <tbody id="oListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ÜRÜNLER ================= -->
+  <div class="tab-panel" id="tab-urun">
+    <div class="panel">
+      <div class="panel-title">Yeni Ürün Kartı</div>
+      <div class="panel-desc">Ürün kodu benzersiz olmalıdır; hareketler bu kodla eşleşir.</div>
+      <div class="form-grid">
+        <div><label class="fl" for="uKod">Ürün Kodu *</label><input id="uKod" type="text" placeholder="STK-001"></div>
+        <div style="grid-column:span 2;"><label class="fl" for="uAd">Ürün Adı *</label><input id="uAd" type="text" placeholder="Ürün açıklaması"></div>
+        <div><label class="fl" for="uBirim">Birim</label>
+          <select id="uBirim"><option>Adet</option><option>Kg</option><option>Lt</option><option>Metre</option><option>M²</option><option>Paket</option><option>Koli</option><option>Saat</option></select>
+        </div>
+        <div><label class="fl" for="uKdv">KDV %</label><input id="uKdv" class="num" type="text" inputmode="decimal" value="20"></div>
+        <div><label class="fl" for="uAlis">Alış Fiyatı</label><input id="uAlis" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl" for="uSatis">Satış Fiyatı</label><input id="uSatis" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl" for="uKritik">Kritik Stok</label><input id="uKritik" class="num" type="text" inputmode="decimal" placeholder="0"></div>
+        <div><label class="fl" for="uDepo">Depo / Raf</label><input id="uDepo" type="text" placeholder="Ana Depo"></div>
+        <div><label class="fl" for="uBarkod">Barkod</label><input id="uBarkod" type="text" placeholder="opsiyonel"></div>
+        <div><button class="btn primary" id="btnUrunEkle" style="width:100%;">Ürünü Kaydet</button></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Ürün Listesi</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="uAra" type="text" placeholder="Ara…" style="max-width:240px;">
+        <button class="btn" id="btnUrunExcel">Excel</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Kod</th><th>Ürün</th><th>Birim</th><th class="num">KDV</th>
+            <th class="num">Alış</th><th class="num">Satış</th><th class="num">Kâr %</th>
+            <th class="num">Kritik</th><th>Depo</th><th>Barkod</th><th></th>
+          </tr></thead>
+          <tbody id="uListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= HAREKETLER ================= -->
+  <div class="tab-panel" id="tab-hareket">
+    <div class="panel">
+      <div class="panel-title">Stok Hareketi Ekle</div>
+      <div class="panel-desc"><b>Giriş</b> alım/iade girişi, <b>Çıkış</b> satış/sarf, <b>Sayım</b> fiili sayım sonucudur (stok doğrudan girilen değere eşitlenir).</div>
+      <div class="form-grid">
+        <div><label class="fl" for="hTarih">Tarih</label><input id="hTarih" type="date"></div>
+        <div style="grid-column:span 2;"><label class="fl" for="hUrun">Ürün *</label>
+          <select id="hUrun"></select>
+        </div>
+        <div><label class="fl" for="hTur">Hareket</label>
+          <select id="hTur"><option value="giris">Giriş</option><option value="cikis">Çıkış</option><option value="sayim">Sayım Düzeltme</option></select>
+        </div>
+        <div><label class="fl" for="hMiktar">Miktar *</label><input id="hMiktar" class="num" type="text" inputmode="decimal" placeholder="0"></div>
+        <div><label class="fl" for="hFiyat">Birim Fiyat</label><input id="hFiyat" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl" for="hBelge">Belge No</label><input id="hBelge" type="text" placeholder="Fatura / irsaliye"></div>
+        <div style="grid-column:span 2;"><label class="fl" for="hAciklama">Açıklama</label><input id="hAciklama" type="text" placeholder="Müşteri / tedarikçi, not"></div>
+        <div><button class="btn primary" id="btnHareketEkle" style="width:100%;">Hareketi İşle</button></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Hareket Listesi</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="hAra" type="text" placeholder="Ara…" style="max-width:220px;">
+        <input id="hBas" type="date" style="max-width:150px;" title="Başlangıç">
+        <input id="hBit" type="date" style="max-width:150px;" title="Bitiş">
+        <button class="btn" id="btnHareketExcel">Excel</button>
+        <button class="btn" id="btnHareketPdf">PDF</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tarih</th><th>Kod</th><th>Ürün</th><th>Hareket</th>
+            <th class="num">Miktar</th><th class="num">Birim Fiyat</th><th class="num">Tutar</th>
+            <th>Belge</th><th>Açıklama</th><th></th>
+          </tr></thead>
+          <tbody id="hListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= EKSTRE ================= -->
+  <div class="tab-panel" id="tab-ekstre">
+    <div class="panel">
+      <div class="panel-title">Ürün Ekstresi</div>
+      <div class="panel-desc">Seçilen ürünün tüm hareketleri, her satırda kalan stok ve o andaki ortalama maliyetle birlikte.</div>
+      <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+        <div style="grid-column:span 2;"><label class="fl" for="eUrun">Ürün</label><select id="eUrun"></select></div>
+        <div><button class="btn" id="btnEkstrePdf" style="width:100%;">PDF</button></div>
+      </div>
+      <div style="height:12px;"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tarih</th><th>Hareket</th><th class="num">Miktar</th><th class="num">Birim Fiyat</th>
+            <th class="num">Kalan Stok</th><th class="num">Ort. Maliyet</th><th class="num">Stok Değeri</th><th>Açıklama</th>
+          </tr></thead>
+          <tbody id="eListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script type="module" src="mmg-cloud-init.js"></script>
+<script src="mmg-store.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.MMGStore;
+  var urunStore = S('stok_urun');
+  var harStore  = S('stok_hareket');
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+
+  /* =========================================================================
+     ÇEKİRDEK: hareketlerden ürün bazında stok + ağırlıklı ortalama maliyet.
+
+     Muhasebesel yöntem — HAREKETLİ AĞIRLIKLI ORTALAMA (moving average):
+       Giriş:  yeniMaliyet = (mevcutMiktar*mevcutMaliyet + girenMiktar*girişFiyatı)
+                             / (mevcutMiktar + girenMiktar)
+       Çıkış:  ortalama maliyet DEĞİŞMEZ; satılan malın maliyeti (SMM) =
+               çıkanMiktar * ortalamaMaliyet
+       Sayım:  stok, sayılan miktara eşitlenir. Fazlalık girişse ve fiyat
+               verilmişse maliyet güncellenir; eksikse maliyet korunur.
+
+     Not: Negatif stoğa düşen çıkışlarda ortalama maliyet bozulmasın diye
+     maliyet sabit tutulur ve satır 'negatif' olarak işaretlenir.
+     ========================================================================= */
+  function hesapla(){
+    var urunler = urunStore.get();
+    var hars = harStore.get().slice().sort(function(a,b){
+      var c = String(a.tarih||'').localeCompare(String(b.tarih||''));
+      return c !== 0 ? c : (a.sira||0) - (b.sira||0);
+    });
+
+    var durum = {};   // kod → { miktar, maliyet, girisMiktar, cikisMiktar, smm, satirlar[] }
+    urunler.forEach(function(u){
+      durum[u.kod] = { miktar:0, maliyet:0, girisMiktar:0, cikisMiktar:0, smm:0, satirlar:[] };
+    });
+
+    hars.forEach(function(h){
+      var d = durum[h.kod];
+      if(!d){ // silinmiş ürüne ait hareket — yetim kayıt, yok sayılır ama kaybolmaz
+        d = durum[h.kod] = { miktar:0, maliyet:0, girisMiktar:0, cikisMiktar:0, smm:0, satirlar:[], yetim:true };
+      }
+      var m = Number(h.miktar) || 0, f = Number(h.fiyat) || 0;
+
+      if(h.tur === 'giris'){
+        var yeniMiktar = d.miktar + m;
+        if(yeniMiktar > 0 && f > 0){
+          d.maliyet = (Math.max(d.miktar,0) * d.maliyet + m * f) / (Math.max(d.miktar,0) + m);
+        } else if(d.miktar <= 0 && f > 0){
+          d.maliyet = f;
+        }
+        d.miktar = yeniMiktar;
+        d.girisMiktar += m;
+      } else if(h.tur === 'cikis'){
+        d.smm += m * d.maliyet;
+        d.miktar -= m;
+        d.cikisMiktar += m;
+      } else { // sayim
+        var fark = m - d.miktar;
+        if(fark > 0 && f > 0){
+          d.maliyet = (Math.max(d.miktar,0) * d.maliyet + fark * f) / (Math.max(d.miktar,0) + fark);
+        }
+        d.miktar = m;
+      }
+      d.satirlar.push({
+        tarih:h.tarih, tur:h.tur, miktar:m, fiyat:f,
+        kalan:d.miktar, maliyet:d.maliyet, deger:d.miktar * d.maliyet,
+        aciklama:h.aciklama, belge:h.belge, negatif: d.miktar < 0
+      });
+    });
+    return { urunler:urunler, durum:durum, hareketler:hars };
+  }
+
+  var TUR_AD = { giris:'Giriş', cikis:'Çıkış', sayim:'Sayım' };
+  var TUR_CLS = { giris:'ok', cikis:'warn', sayim:'mut' };
+
+  /* ---------------- Sekmeler ---------------- */
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      $('tab-' + t.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ---------------- Ürün ---------------- */
+  $('btnUrunEkle').addEventListener('click', function(){
+    var kod = $('uKod').value.trim().toUpperCase();
+    var ad  = $('uAd').value.trim();
+    if(!kod){ alert('Ürün kodu zorunlu.'); $('uKod').focus(); return; }
+    if(!ad){ alert('Ürün adı zorunlu.'); $('uAd').focus(); return; }
+    var mevcut = urunStore.get().filter(function(u){ return u.kod === kod; })[0];
+    var kayit = {
+      kod:kod, ad:ad, birim:$('uBirim').value,
+      kdv:S.parse($('uKdv').value), alis:S.parse($('uAlis').value),
+      satis:S.parse($('uSatis').value), kritik:S.parse($('uKritik').value),
+      depo:$('uDepo').value.trim(), barkod:$('uBarkod').value.trim()
+    };
+    if(mevcut){
+      if(!confirm(kod + ' kodlu ürün zaten var. Bilgileri güncellensin mi?')) return;
+      urunStore.update(mevcut.id, kayit);
+    } else {
+      kayit.id = S.uid();
+      urunStore.add(kayit);
+    }
+    ['uKod','uAd','uAlis','uSatis','uKritik','uBarkod'].forEach(function(id){ $(id).value=''; });
+    $('uKod').focus();
+  });
+
+  function urunSatir(u, kar){
+    return '<tr>' +
+      '<td class="mono">' + esc(u.kod) + '</td>' +
+      '<td>' + esc(u.ad) + '</td>' +
+      '<td>' + esc(u.birim) + '</td>' +
+      '<td class="num">%' + S.fmt(u.kdv, 0) + '</td>' +
+      '<td class="num">' + S.fmt(u.alis) + '</td>' +
+      '<td class="num">' + S.fmt(u.satis) + '</td>' +
+      '<td class="num" style="color:' + (kar >= 0 ? 'var(--teal)' : 'var(--red)') + ';">' +
+        (isFinite(kar) ? '%' + S.fmt(kar,1) : '—') + '</td>' +
+      '<td class="num">' + S.fmt(u.kritik, 0) + '</td>' +
+      '<td>' + esc(u.depo) + '</td>' +
+      '<td class="mono">' + esc(u.barkod) + '</td>' +
+      '<td><button class="icon-btn" data-usil="' + u.id + '" title="Sil">✕</button></td>' +
+    '</tr>';
+  }
+
+  /* ---------------- Hareket ---------------- */
+  $('btnHareketEkle').addEventListener('click', function(){
+    var kod = $('hUrun').value;
+    if(!kod){ alert('Önce bir ürün kartı açmalısınız.'); return; }
+    var m = S.parse($('hMiktar').value);
+    if(!(m > 0)){ alert('Miktar sıfırdan büyük olmalı.'); $('hMiktar').focus(); return; }
+    var tur = $('hTur').value;
+    if(tur === 'cikis'){
+      var d = hesapla().durum[kod];
+      if(d && m > d.miktar){
+        if(!confirm('Bu çıkış stoğu negatife düşürüyor (mevcut: ' + S.fmt(d.miktar,2) + '). Yine de işlensin mi?')) return;
+      }
+    }
+    harStore.add({
+      id:S.uid(), sira:Date.now(),
+      tarih: $('hTarih').value || S.today(), kod:kod, tur:tur,
+      miktar:m, fiyat:S.parse($('hFiyat').value),
+      belge:$('hBelge').value.trim(), aciklama:$('hAciklama').value.trim()
+    });
+    ['hMiktar','hFiyat','hBelge','hAciklama'].forEach(function(id){ $(id).value=''; });
+    $('hMiktar').focus();
+  });
+
+  // Ürün seçilince alış fiyatı öneri olarak gelsin (giriş hareketinde)
+  $('hUrun').addEventListener('change', function(){
+    var u = urunStore.get().filter(function(x){ return x.kod === $('hUrun').value; })[0];
+    if(!u) return;
+    if(!$('hFiyat').value){
+      $('hFiyat').value = S.fmt($('hTur').value === 'cikis' ? u.satis : u.alis);
+    }
+  });
+
+  /* ---------------- Render ---------------- */
+  function urunOpsiyon(sel){
+    var list = urunStore.get().slice().sort(function(a,b){ return a.kod.localeCompare(b.kod,'tr'); });
+    var onceki = sel.value;
+    sel.innerHTML = list.length
+      ? list.map(function(u){ return '<option value="' + esc(u.kod) + '">' + esc(u.kod + ' — ' + u.ad) + '</option>'; }).join('')
+      : '<option value="">— ürün yok —</option>';
+    if(onceki) sel.value = onceki;
+  }
+
+  function render(){
+    var R = hesapla();
+    urunOpsiyon($('hUrun')); urunOpsiyon($('eUrun'));
+
+    /* --- ÖZET --- */
+    var q = ($('oAra').value || '').toLocaleLowerCase('tr');
+    var sadeceKritik = $('oSadeceKritik').checked;
+    var toplamDeger = 0, kritikSayi = 0, negatifSayi = 0;
+    var satirlar = [];
+
+    R.urunler.slice().sort(function(a,b){ return a.kod.localeCompare(b.kod,'tr'); }).forEach(function(u){
+      var d = R.durum[u.kod] || { miktar:0, maliyet:0, girisMiktar:0, cikisMiktar:0 };
+      var deger = d.miktar * d.maliyet;
+      toplamDeger += deger;
+      var kritik = u.kritik > 0 && d.miktar <= u.kritik;
+      if(kritik) kritikSayi++;
+      if(d.miktar < 0) negatifSayi++;
+      if(sadeceKritik && !kritik) return;
+      if(q && (u.kod + ' ' + u.ad).toLocaleLowerCase('tr').indexOf(q) === -1) return;
+
+      var durumRozet = d.miktar < 0 ? '<span class="badge bad">Negatif</span>'
+                     : kritik       ? '<span class="badge warn">Kritik</span>'
+                     : d.miktar === 0 ? '<span class="badge mut">Tükendi</span>'
+                     : '<span class="badge ok">Yeterli</span>';
+
+      satirlar.push('<tr class="' + (kritik ? 'row-crit' : '') + '">' +
+        '<td class="mono">' + esc(u.kod) + '</td>' +
+        '<td>' + esc(u.ad) + '</td>' +
+        '<td>' + esc(u.birim) + '</td>' +
+        '<td class="num">' + S.fmt(d.girisMiktar, 2) + '</td>' +
+        '<td class="num">' + S.fmt(d.cikisMiktar, 2) + '</td>' +
+        '<td class="num" style="color:' + (d.miktar < 0 ? 'var(--red)' : 'inherit') + ';">' + S.fmt(d.miktar, 2) + '</td>' +
+        '<td class="num">' + S.fmt(d.maliyet) + '</td>' +
+        '<td class="num">' + S.fmt(deger) + '</td>' +
+        '<td class="num">' + S.fmt(u.kritik, 0) + '</td>' +
+        '<td>' + durumRozet + '</td>' +
+      '</tr>');
+    });
+
+    $('oListe').innerHTML = satirlar.length ? satirlar.join('')
+      : '<tr><td colspan="10" class="empty">Ürün bulunamadı. "Ürünler" sekmesinden ürün kartı açın.</td></tr>';
+
+    $('oKpi').innerHTML =
+      '<div class="kpi"><div class="k">Ürün Çeşidi</div><div class="v">' + R.urunler.length + '</div></div>' +
+      '<div class="kpi"><div class="k">Toplam Stok Değeri</div><div class="v good">' + S.fmt(toplamDeger) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Kritik Seviyede</div><div class="v ' + (kritikSayi ? 'warn' : '') + '">' + kritikSayi + '</div></div>' +
+      '<div class="kpi"><div class="k">Negatif Stok</div><div class="v ' + (negatifSayi ? 'bad' : '') + '">' + negatifSayi + '</div></div>' +
+      '<div class="kpi"><div class="k">Hareket Sayısı</div><div class="v">' + R.hareketler.length + '</div></div>';
+
+    /* --- ÜRÜN LİSTESİ --- */
+    var uq = ($('uAra').value || '').toLocaleLowerCase('tr');
+    var ul = R.urunler.filter(function(u){
+      return !uq || (u.kod + ' ' + u.ad + ' ' + (u.barkod||'')).toLocaleLowerCase('tr').indexOf(uq) > -1;
+    }).sort(function(a,b){ return a.kod.localeCompare(b.kod,'tr'); });
+    $('uListe').innerHTML = ul.length ? ul.map(function(u){
+      var kar = u.alis > 0 ? ((u.satis - u.alis) / u.alis) * 100 : NaN;
+      return urunSatir(u, kar);
+    }).join('') : '<tr><td colspan="11" class="empty">Henüz ürün eklenmedi.</td></tr>';
+
+    /* --- HAREKETLER --- */
+    var hq = ($('hAra').value || '').toLocaleLowerCase('tr');
+    var bas = $('hBas').value, bit = $('hBit').value;
+    var adMap = {}; R.urunler.forEach(function(u){ adMap[u.kod] = u.ad; });
+    var hl = R.hareketler.slice().reverse().filter(function(h){
+      if(bas && String(h.tarih) < bas) return false;
+      if(bit && String(h.tarih) > bit) return false;
+      if(hq && (h.kod + ' ' + (adMap[h.kod]||'') + ' ' + (h.belge||'') + ' ' + (h.aciklama||''))
+               .toLocaleLowerCase('tr').indexOf(hq) === -1) return false;
+      return true;
+    });
+    $('hListe').innerHTML = hl.length ? hl.map(function(h){
+      return '<tr>' +
+        '<td>' + esc(S.trDate(h.tarih)) + '</td>' +
+        '<td class="mono">' + esc(h.kod) + '</td>' +
+        '<td>' + esc(adMap[h.kod] || '<silinmiş ürün>') + '</td>' +
+        '<td><span class="badge ' + TUR_CLS[h.tur] + '">' + TUR_AD[h.tur] + '</span></td>' +
+        '<td class="num">' + S.fmt(h.miktar, 2) + '</td>' +
+        '<td class="num">' + S.fmt(h.fiyat) + '</td>' +
+        '<td class="num">' + S.fmt((h.miktar||0) * (h.fiyat||0)) + '</td>' +
+        '<td>' + esc(h.belge) + '</td>' +
+        '<td style="color:var(--muted);">' + esc(h.aciklama) + '</td>' +
+        '<td><button class="icon-btn" data-hsil="' + h.id + '" title="Sil">✕</button></td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="10" class="empty">Bu filtreye uyan hareket yok.</td></tr>';
+
+    /* --- EKSTRE --- */
+    var ekod = $('eUrun').value;
+    var d = R.durum[ekod];
+    $('eListe').innerHTML = (d && d.satirlar.length) ? d.satirlar.map(function(s){
+      return '<tr>' +
+        '<td>' + esc(S.trDate(s.tarih)) + '</td>' +
+        '<td><span class="badge ' + TUR_CLS[s.tur] + '">' + TUR_AD[s.tur] + '</span></td>' +
+        '<td class="num">' + (s.tur === 'cikis' ? '−' : '') + S.fmt(s.miktar, 2) + '</td>' +
+        '<td class="num">' + S.fmt(s.fiyat) + '</td>' +
+        '<td class="num" style="color:' + (s.negatif ? 'var(--red)' : 'inherit') + ';">' + S.fmt(s.kalan, 2) + '</td>' +
+        '<td class="num">' + S.fmt(s.maliyet) + '</td>' +
+        '<td class="num">' + S.fmt(s.deger) + '</td>' +
+        '<td style="color:var(--muted);">' + esc(s.aciklama) + '</td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="8" class="empty">Bu ürüne ait hareket yok.</td></tr>';
+  }
+
+  /* ---------------- Silme ---------------- */
+  $('uListe').addEventListener('click', function(e){
+    var b = e.target.closest('[data-usil]'); if(!b) return;
+    var u = urunStore.get().filter(function(x){ return x.id === b.dataset.usil; })[0];
+    if(!u) return;
+    var harSayi = harStore.get().filter(function(h){ return h.kod === u.kod; }).length;
+    var msg = harSayi
+      ? u.kod + ' ürününe ait ' + harSayi + ' hareket var. Ürün silinsin mi? (Hareketler korunur, ürün adı boş görünür.)'
+      : u.kod + ' ürünü silinsin mi?';
+    if(confirm(msg)) urunStore.remove(u.id);
+  });
+  $('hListe').addEventListener('click', function(e){
+    var b = e.target.closest('[data-hsil]'); if(!b) return;
+    if(confirm('Bu hareket silinsin mi? Stok ve maliyet yeniden hesaplanır.')) harStore.remove(b.dataset.hsil);
+  });
+
+  /* ---------------- Filtre olayları ---------------- */
+  ['oAra','uAra','hAra','hBas','hBit'].forEach(function(id){ $(id).addEventListener('input', render); });
+  $('oSadeceKritik').addEventListener('change', render);
+  $('eUrun').addEventListener('change', render);
+
+  /* ---------------- Dışa aktarım ---------------- */
+  function stokRows(){
+    var R = hesapla();
+    return R.urunler.map(function(u){
+      var d = R.durum[u.kod] || { miktar:0, maliyet:0, girisMiktar:0, cikisMiktar:0 };
+      return {
+        'Kod':u.kod, 'Ürün':u.ad, 'Birim':u.birim,
+        'Giriş':d.girisMiktar, 'Çıkış':d.cikisMiktar, 'Stok':d.miktar,
+        'Ort. Maliyet':d.maliyet, 'Stok Değeri':d.miktar * d.maliyet,
+        'Kritik':u.kritik, 'Depo':u.depo
+      };
+    });
+  }
+  function xls(rows, sheet, file){
+    if(!window.XLSX){ alert('Excel bileşeni yüklenemedi.'); return; }
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), sheet);
+    XLSX.writeFile(wb, file);
+  }
+  function pdf(title, head, body, file, landscape){
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
+    var d = new J({ orientation: landscape ? 'landscape' : 'portrait' });
+    d.setFontSize(14); d.text(title, 14, 14);
+    d.autoTable({ startY:20, styles:{ fontSize:8 }, head:[head], body:body });
+    d.save(file);
+  }
+
+  $('btnStokExcel').addEventListener('click', function(){ xls(stokRows(), 'Stok', 'stok-durumu.xlsx'); });
+  $('btnUrunExcel').addEventListener('click', function(){
+    xls(urunStore.get().map(function(u){
+      return { 'Kod':u.kod,'Ürün':u.ad,'Birim':u.birim,'KDV':u.kdv,'Alış':u.alis,'Satış':u.satis,'Kritik':u.kritik,'Depo':u.depo,'Barkod':u.barkod };
+    }), 'Ürünler', 'urun-listesi.xlsx');
+  });
+  $('btnHareketExcel').addEventListener('click', function(){
+    var adMap = {}; urunStore.get().forEach(function(u){ adMap[u.kod] = u.ad; });
+    xls(harStore.get().map(function(h){
+      return { 'Tarih':S.trDate(h.tarih),'Kod':h.kod,'Ürün':adMap[h.kod]||'','Hareket':TUR_AD[h.tur],
+               'Miktar':h.miktar,'Birim Fiyat':h.fiyat,'Tutar':(h.miktar||0)*(h.fiyat||0),
+               'Belge':h.belge,'Açıklama':h.aciklama };
+    }), 'Hareketler', 'stok-hareketleri.xlsx');
+  });
+  $('btnStokPdf').addEventListener('click', function(){
+    pdf('Stok Durumu', ['Kod','Urun','Birim','Stok','Ort.Maliyet','Deger','Kritik'],
+      stokRows().map(function(r){
+        return [r['Kod'], r['Ürün'], r['Birim'], S.fmt(r['Stok'],2), S.fmt(r['Ort. Maliyet']), S.fmt(r['Stok Değeri']), S.fmt(r['Kritik'],0)];
+      }), 'stok-durumu.pdf', true);
+  });
+  $('btnHareketPdf').addEventListener('click', function(){
+    pdf('Stok Hareketleri', ['Tarih','Kod','Hareket','Miktar','Fiyat','Tutar','Belge'],
+      harStore.get().map(function(h){
+        return [S.trDate(h.tarih), h.kod, TUR_AD[h.tur], S.fmt(h.miktar,2), S.fmt(h.fiyat), S.fmt((h.miktar||0)*(h.fiyat||0)), h.belge||''];
+      }), 'stok-hareketleri.pdf', true);
+  });
+  $('btnEkstrePdf').addEventListener('click', function(){
+    var R = hesapla(), kod = $('eUrun').value, d = R.durum[kod];
+    if(!d){ alert('Ürün seçili değil.'); return; }
+    pdf('Urun Ekstresi — ' + kod, ['Tarih','Hareket','Miktar','Fiyat','Kalan','Ort.Maliyet','Deger'],
+      d.satirlar.map(function(s){
+        return [S.trDate(s.tarih), TUR_AD[s.tur], S.fmt(s.miktar,2), S.fmt(s.fiyat),
+                S.fmt(s.kalan,2), S.fmt(s.maliyet), S.fmt(s.deger)];
+      }), 'urun-ekstresi-' + kod + '.pdf', true);
+  });
+
+  /* ---------------- Başlat ---------------- */
+  urunStore.onChange(render);
+  harStore.onChange(render);
+  $('hTarih').value = S.today();
+  urunStore.load();
+  harStore.load();
+  render();
+  try{ gtag('event', 'tool_used', { tool_name: 'stok_takip' }); }catch(e){}
+})();
+</script>
+<script src="mmg-doviz-widget.js"></script>
+<script src="mmg-calc-widget.js"></script>
+<script src="mmg-widget-menu.js"></script>
+</body>
+</html>

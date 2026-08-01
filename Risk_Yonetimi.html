@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{ var mode=localStorage.getItem('mmg_theme')||'dark'; document.documentElement.classList.toggle('theme-light', mode==='light'); }catch(e){}
+  window.addEventListener('message', function(ev){ if(ev&&ev.data&&ev.data.mmgTheme){ document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme==='light'); try{localStorage.setItem('mmg_theme',ev.data.mmgTheme);}catch(e2){} } });
+})();
+</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Risk Yönetimi</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mmg-module.css">
+<style>
+  .tab-panel{ display:none; } .tab-panel.active{ display:block; }
+  .bar{ height:7px; border-radius:999px; background:var(--surface-2); overflow:hidden; min-width:70px; }
+  .bar > i{ display:block; height:100%; border-radius:999px; }
+  .müs-detay{ background:var(--surface-2); }
+  .yas-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; }
+  .yas{ background:var(--surface-2); border:1px solid var(--hairline); border-radius:9px; padding:9px 11px; }
+  .yas .k{ font-size:10px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .yas .v{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:14px; margin-top:2px; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <h1 class="title">Risk Yönetimi</h1>
+    <p class="subtitle">Müşteri bazında açık hesap, çek, senet, DBS ve teminat risklerinizi tek ekranda görün. Limit kullanımı, vadesi geçen tutar ve ödeme geçmişinden <b>risk skoru</b> hesaplanır.</p>
+  </div>
+  <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="ozet">Risk Özeti</button>
+    <button class="tab" data-tab="musteri">Müşteriler</button>
+    <button class="tab" data-tab="kalem">Risk Kalemleri</button>
+    <button class="tab" data-tab="yaslandirma">Yaşlandırma</button>
+  </div>
+
+  <!-- ============ ÖZET ============ -->
+  <div class="tab-panel active" id="tab-ozet">
+    <div class="kpis" id="rKpi"></div>
+    <div class="panel">
+      <div class="panel-title">Müşteri Risk Tablosu</div>
+      <div class="panel-desc">Risk skoru 0–100 arasıdır; yükseldikçe risk artar. Hesaplama: limit kullanımı %40, vadesi geçen tutar oranı %35, karşılıksız/protesto geçmişi %25 ağırlıkla.</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="rAra" type="text" placeholder="Müşteri ara…" style="max-width:240px;">
+        <select id="rSirala" style="max-width:200px;">
+          <option value="skor">Sırala: Risk skoru</option>
+          <option value="risk">Sırala: Toplam risk</option>
+          <option value="gecik">Sırala: Vadesi geçen</option>
+          <option value="ad">Sırala: Ünvan</option>
+        </select>
+        <button class="btn" id="btnRiskExcel">Excel</button>
+        <button class="btn" id="btnRiskPdf">PDF</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Müşteri</th><th class="num">Limit</th><th class="num">Toplam Risk</th>
+            <th style="width:120px;">Limit Kullanımı</th><th class="num">Boşta Limit</th>
+            <th class="num">Vadesi Geçen</th><th class="num">En Eski Gecikme</th>
+            <th class="num">Risk Skoru</th><th>Değerlendirme</th>
+          </tr></thead>
+          <tbody id="rListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MÜŞTERİ ============ -->
+  <div class="tab-panel" id="tab-musteri">
+    <div class="panel">
+      <div class="panel-title">Müşteri Kartı</div>
+      <div class="panel-desc">Risk limiti, o müşteriye aynı anda verebileceğiniz azami açık riski ifade eder.</div>
+      <div class="form-grid">
+        <div style="grid-column:span 2;"><label class="fl" for="mAd">Ünvan *</label><input id="mAd" type="text" placeholder="Müşteri / firma ünvanı"></div>
+        <div><label class="fl" for="mLimit">Risk Limiti</label><input id="mLimit" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl" for="mVadeGun">Tanınan Vade (gün)</label><input id="mVadeGun" class="num" type="text" inputmode="numeric" placeholder="60"></div>
+        <div><label class="fl" for="mTel">Telefon</label><input id="mTel" type="text" placeholder="opsiyonel"></div>
+        <div><label class="fl" for="mVergi">Vergi No</label><input id="mVergi" type="text" placeholder="opsiyonel"></div>
+        <div style="grid-column:span 2;"><label class="fl" for="mNot">Not</label><input id="mNot" type="text" placeholder="Örn. teminat mektubu alındı"></div>
+        <div><button class="btn primary" id="btnMusteriEkle" style="width:100%;">Kaydet</button></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Müşteri Listesi</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ünvan</th><th class="num">Limit</th><th class="num">Vade</th><th>Telefon</th><th>Vergi No</th><th>Not</th><th></th></tr></thead>
+          <tbody id="mListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RİSK KALEMLERİ ============ -->
+  <div class="tab-panel" id="tab-kalem">
+    <div class="panel">
+      <div class="panel-title">Risk Kalemi Ekle</div>
+      <div class="panel-desc">Açık hesap bakiyesi, portföydeki çek/senet, DBS limiti veya verdiğiniz teminat — hepsi risk kalemidir.</div>
+      <div class="form-grid">
+        <div style="grid-column:span 2;"><label class="fl" for="kMusteri">Müşteri *</label><select id="kMusteri"></select></div>
+        <div><label class="fl" for="kTur">Tür</label>
+          <select id="kTur">
+            <option>Açık Hesap</option><option>Çek</option><option>Senet</option>
+            <option>DBS</option><option>Teminat Mektubu</option><option>Fatura</option>
+          </select>
+        </div>
+        <div><label class="fl" for="kBelge">Belge No</label><input id="kBelge" type="text" placeholder="opsiyonel"></div>
+        <div><label class="fl" for="kTutar">Tutar *</label><input id="kTutar" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl" for="kVade">Vade Tarihi</label><input id="kVade" type="date"></div>
+        <div><label class="fl" for="kDurum">Durum</label>
+          <select id="kDurum">
+            <option value="acik">Açık</option>
+            <option value="tahsil">Tahsil Edildi</option>
+            <option value="karsiliksiz">Karşılıksız / Protesto</option>
+          </select>
+        </div>
+        <div style="grid-column:span 2;"><label class="fl" for="kAciklama">Açıklama</label><input id="kAciklama" type="text" placeholder="opsiyonel"></div>
+        <div><button class="btn primary" id="btnKalemEkle" style="width:100%;">Ekle</button></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Risk Kalemleri</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="kAra" type="text" placeholder="Ara…" style="max-width:220px;">
+        <select id="kFiltreDurum" style="max-width:180px;">
+          <option value="">Tüm durumlar</option>
+          <option value="acik">Açık</option>
+          <option value="gecikmis">Vadesi geçmiş</option>
+          <option value="tahsil">Tahsil edilen</option>
+          <option value="karsiliksiz">Karşılıksız</option>
+        </select>
+        <button class="btn" id="btnKalemExcel">Excel</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Müşteri</th><th>Tür</th><th>Belge</th><th class="num">Tutar</th>
+            <th>Vade</th><th class="num">Kalan Gün</th><th>Durum</th><th>Açıklama</th><th></th>
+          </tr></thead>
+          <tbody id="kListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ YAŞLANDIRMA ============ -->
+  <div class="tab-panel" id="tab-yaslandirma">
+    <div class="panel">
+      <div class="panel-title">Alacak Yaşlandırma</div>
+      <div class="panel-desc">Açık kalemler vade tarihine göre gruplanır. Gecikme büyüdükçe tahsil edilebilirlik düşer.</div>
+      <div class="yas-grid" id="yTop"></div>
+      <div style="height:14px;"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Müşteri</th><th class="num">Vadesi Gelmedi</th><th class="num">1–30 gün</th>
+            <th class="num">31–60 gün</th><th class="num">61–90 gün</th><th class="num">90+ gün</th><th class="num">Toplam</th>
+          </tr></thead>
+          <tbody id="yListe"></tbody>
+        </table>
+      </div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn" id="btnYasExcel">Excel</button>
+        <button class="btn" id="btnYasPdf">PDF</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script type="module" src="mmg-cloud-init.js"></script>
+<script src="mmg-store.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.MMGStore;
+  var musStore = S('risk_musteri');
+  var kalStore = S('risk_kalem');
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+
+  /* Gün farkı — saat/yaz saati kaymasından etkilenmesin diye UTC gün serisi. */
+  function gunSerisi(iso){
+    if(!iso) return null;
+    var p = String(iso).split('-');
+    if(p.length !== 3) return null;
+    return Math.floor(Date.UTC(+p[0], +p[1]-1, +p[2]) / 86400000);
+  }
+  function bugunSeri(){
+    var d = new Date();
+    return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+  }
+
+  /* =========================================================================
+     RİSK SKORU (0–100, yükseldikçe kötü)
+
+       A) Limit kullanımı        → ağırlık 40
+          kullanım = açık risk / limit.  %100'ü aşarsa 40 puanın tamamı.
+          Limit girilmemişse bu bileşen ölçülemez; ağırlığı diğerlerine
+          dağıtmak yerine 40 üzerinden 20 (nötr) verilir ve tabloda
+          "limit tanımsız" uyarısı gösterilir — çünkü limitsiz çalışmak
+          başlı başına bir risktir.
+
+       B) Vadesi geçen oranı     → ağırlık 35
+          gecikmiş tutar / toplam açık risk.
+
+       C) Ödeme geçmişi          → ağırlık 25
+          karşılıksız/protesto tutarı / (tahsil + karşılıksız) toplamı.
+          Hiç geçmiş yoksa 0 (temiz kabul edilir).
+
+     Ayrıca en eski gecikme 90 günü aştıysa skora +10 (tavan 100) eklenir;
+     çok eski alacak, tutar küçük olsa bile tahsilat sorununa işaret eder.
+     ========================================================================= */
+  function skorHesapla(m, k){
+    var A;
+    if(m.limit > 0){
+      A = Math.min(k.acikRisk / m.limit, 1.25) / 1.25 * 40;
+    } else {
+      A = 20;
+    }
+    var B = k.acikRisk > 0 ? (k.gecikmis / k.acikRisk) * 35 : 0;
+    var gecmis = k.tahsilToplam + k.karsiliksizToplam;
+    var C = gecmis > 0 ? (k.karsiliksizToplam / gecmis) * 25 : 0;
+    var skor = A + B + C;
+    if(k.enEskiGecikme > 90) skor += 10;
+    return Math.max(0, Math.min(100, skor));
+  }
+  function skorRozet(s, limitYok){
+    var cls = s < 25 ? 'ok' : s < 50 ? 'warn' : s < 75 ? 'bad' : 'bad';
+    var ad  = s < 25 ? 'Düşük' : s < 50 ? 'Orta' : s < 75 ? 'Yüksek' : 'Kritik';
+    return '<span class="badge ' + cls + '">' + ad + '</span>' +
+           (limitYok ? ' <span class="badge mut" title="Risk limiti tanımlanmamış">limitsiz</span>' : '');
+  }
+  function barRenk(oran){
+    return oran < 0.6 ? 'var(--teal)' : oran < 0.9 ? 'var(--amber)' : 'var(--red)';
+  }
+
+  /* ---- Müşteri bazında toplama ---- */
+  function hesapla(){
+    var bugun = bugunSeri();
+    var musteriler = musStore.get();
+    var kalemler = kalStore.get();
+    var map = {};
+    musteriler.forEach(function(m){
+      map[m.id] = {
+        musteri:m, acikRisk:0, gecikmis:0, vadesiGelmemis:0,
+        tahsilToplam:0, karsiliksizToplam:0, enEskiGecikme:0,
+        yas:{ gelmemis:0, g30:0, g60:0, g90:0, g90p:0 }, kalemler:[]
+      };
+    });
+    kalemler.forEach(function(k){
+      var g = map[k.musteriId];
+      if(!g) return;                       // silinmiş müşteri — özet dışı
+      var tutar = Number(k.tutar) || 0;
+      if(k.durum === 'tahsil'){ g.tahsilToplam += tutar; g.kalemler.push(k); return; }
+      if(k.durum === 'karsiliksiz'){
+        g.karsiliksizToplam += tutar;
+        g.acikRisk += tutar;               // karşılıksız kıymet hâlâ tahsil edilmemiştir
+        g.gecikmis += tutar;
+        g.yas.g90p += tutar;
+        g.kalemler.push(k);
+        return;
+      }
+      // durum === 'acik'
+      g.acikRisk += tutar;
+      var vs = gunSerisi(k.vade);
+      var gecikme = (vs === null) ? 0 : (bugun - vs);
+      if(gecikme > 0){
+        g.gecikmis += tutar;
+        if(gecikme > g.enEskiGecikme) g.enEskiGecikme = gecikme;
+        if(gecikme <= 30) g.yas.g30 += tutar;
+        else if(gecikme <= 60) g.yas.g60 += tutar;
+        else if(gecikme <= 90) g.yas.g90 += tutar;
+        else g.yas.g90p += tutar;
+      } else {
+        g.vadesiGelmemis += tutar;
+        g.yas.gelmemis += tutar;
+      }
+      g.kalemler.push(k);
+    });
+    Object.keys(map).forEach(function(id){
+      var g = map[id];
+      g.skor = skorHesapla(g.musteri, g);
+      g.bostaLimit = (g.musteri.limit || 0) - g.acikRisk;
+      g.kullanim = g.musteri.limit > 0 ? g.acikRisk / g.musteri.limit : null;
+    });
+    return { map:map, musteriler:musteriler, kalemler:kalemler, bugun:bugun };
+  }
+
+  /* ---------------- Sekmeler ---------------- */
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      $('tab-' + t.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ---------------- Müşteri ---------------- */
+  $('btnMusteriEkle').addEventListener('click', function(){
+    var ad = $('mAd').value.trim();
+    if(!ad){ alert('Ünvan zorunlu.'); $('mAd').focus(); return; }
+    var mevcut = musStore.get().filter(function(m){
+      return m.ad.toLocaleLowerCase('tr') === ad.toLocaleLowerCase('tr');
+    })[0];
+    var kayit = {
+      ad:ad, limit:S.parse($('mLimit').value), vadeGun:S.parse($('mVadeGun').value),
+      tel:$('mTel').value.trim(), vergi:$('mVergi').value.trim(), not:$('mNot').value.trim()
+    };
+    if(mevcut){
+      if(!confirm('"' + ad + '" zaten kayıtlı. Bilgileri güncellensin mi?')) return;
+      musStore.update(mevcut.id, kayit);
+    } else {
+      kayit.id = S.uid();
+      musStore.add(kayit);
+    }
+    ['mAd','mLimit','mVadeGun','mTel','mVergi','mNot'].forEach(function(id){ $(id).value=''; });
+    $('mAd').focus();
+  });
+
+  /* ---------------- Kalem ---------------- */
+  $('btnKalemEkle').addEventListener('click', function(){
+    var mid = $('kMusteri').value;
+    if(!mid){ alert('Önce "Müşteriler" sekmesinden müşteri kaydı açın.'); return; }
+    var t = S.parse($('kTutar').value);
+    if(!(t > 0)){ alert('Tutar sıfırdan büyük olmalı.'); $('kTutar').focus(); return; }
+    kalStore.add({
+      id:S.uid(), musteriId:mid, tur:$('kTur').value, belge:$('kBelge').value.trim(),
+      tutar:t, vade:$('kVade').value, durum:$('kDurum').value,
+      aciklama:$('kAciklama').value.trim()
+    });
+    ['kBelge','kTutar','kAciklama'].forEach(function(id){ $(id).value=''; });
+    $('kTutar').focus();
+  });
+
+  var DURUM_AD = { acik:'Açık', tahsil:'Tahsil Edildi', karsiliksiz:'Karşılıksız' };
+
+  /* ---------------- Render ---------------- */
+  function render(){
+    var R = hesapla();
+
+    /* -- müşteri seçici -- */
+    var sel = $('kMusteri'), onceki = sel.value;
+    var sirali = R.musteriler.slice().sort(function(a,b){ return a.ad.localeCompare(b.ad,'tr'); });
+    sel.innerHTML = sirali.length
+      ? sirali.map(function(m){ return '<option value="' + m.id + '">' + esc(m.ad) + '</option>'; }).join('')
+      : '<option value="">— müşteri yok —</option>';
+    if(onceki) sel.value = onceki;
+
+    /* -- KPI -- */
+    var top = { risk:0, gecik:0, limit:0, kritik:0 };
+    Object.keys(R.map).forEach(function(id){
+      var g = R.map[id];
+      top.risk += g.acikRisk; top.gecik += g.gecikmis; top.limit += (g.musteri.limit || 0);
+      if(g.skor >= 50) top.kritik++;
+    });
+    var doluluk = top.limit > 0 ? (top.risk / top.limit) * 100 : 0;
+    $('rKpi').innerHTML =
+      '<div class="kpi"><div class="k">Müşteri Sayısı</div><div class="v">' + R.musteriler.length + '</div></div>' +
+      '<div class="kpi"><div class="k">Toplam Açık Risk</div><div class="v">' + S.fmt(top.risk) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Vadesi Geçen</div><div class="v ' + (top.gecik > 0 ? 'bad' : 'good') + '">' + S.fmt(top.gecik) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Toplam Limit</div><div class="v">' + S.fmt(top.limit) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Limit Doluluğu</div><div class="v ' + (doluluk > 90 ? 'bad' : doluluk > 60 ? 'warn' : 'good') + '">%' + S.fmt(doluluk,1) + '</div></div>' +
+      '<div class="kpi"><div class="k">Yüksek Riskli Müşteri</div><div class="v ' + (top.kritik ? 'bad' : 'good') + '">' + top.kritik + '</div></div>';
+
+    /* -- risk tablosu -- */
+    var q = ($('rAra').value || '').toLocaleLowerCase('tr');
+    var sirt = $('rSirala').value;
+    var satirlar = Object.keys(R.map).map(function(id){ return R.map[id]; })
+      .filter(function(g){ return !q || g.musteri.ad.toLocaleLowerCase('tr').indexOf(q) > -1; })
+      .sort(function(a,b){
+        if(sirt === 'ad')    return a.musteri.ad.localeCompare(b.musteri.ad,'tr');
+        if(sirt === 'risk')  return b.acikRisk - a.acikRisk;
+        if(sirt === 'gecik') return b.gecikmis - a.gecikmis;
+        return b.skor - a.skor;
+      });
+
+    $('rListe').innerHTML = satirlar.length ? satirlar.map(function(g){
+      var oran = g.kullanim === null ? 0 : Math.min(g.kullanim, 1);
+      return '<tr>' +
+        '<td><b>' + esc(g.musteri.ad) + '</b>' +
+          (g.musteri.not ? '<div style="font-size:11px; color:var(--muted);">' + esc(g.musteri.not) + '</div>' : '') + '</td>' +
+        '<td class="num">' + (g.musteri.limit > 0 ? S.fmt(g.musteri.limit) : '—') + '</td>' +
+        '<td class="num">' + S.fmt(g.acikRisk) + '</td>' +
+        '<td><div class="bar"><i style="width:' + (oran*100).toFixed(1) + '%; background:' + barRenk(oran) + ';"></i></div>' +
+          '<div style="font-size:10.5px; color:var(--muted); margin-top:3px;">' +
+            (g.kullanim === null ? 'limit yok' : '%' + S.fmt(g.kullanim*100, 1)) + '</div></td>' +
+        '<td class="num" style="color:' + (g.bostaLimit < 0 ? 'var(--red)' : 'inherit') + ';">' +
+          (g.musteri.limit > 0 ? S.fmt(g.bostaLimit) : '—') + '</td>' +
+        '<td class="num" style="color:' + (g.gecikmis > 0 ? 'var(--red)' : 'inherit') + ';">' + S.fmt(g.gecikmis) + '</td>' +
+        '<td class="num">' + (g.enEskiGecikme > 0 ? g.enEskiGecikme + ' gün' : '—') + '</td>' +
+        '<td class="num">' + S.fmt(g.skor, 0) + '</td>' +
+        '<td>' + skorRozet(g.skor, !(g.musteri.limit > 0)) + '</td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="9" class="empty">Müşteri bulunamadı. "Müşteriler" sekmesinden ekleyin.</td></tr>';
+
+    /* -- müşteri listesi -- */
+    $('mListe').innerHTML = sirali.length ? sirali.map(function(m){
+      return '<tr>' +
+        '<td>' + esc(m.ad) + '</td>' +
+        '<td class="num">' + (m.limit > 0 ? S.fmt(m.limit) : '—') + '</td>' +
+        '<td class="num">' + (m.vadeGun > 0 ? S.fmt(m.vadeGun,0) + ' gün' : '—') + '</td>' +
+        '<td>' + esc(m.tel) + '</td><td>' + esc(m.vergi) + '</td>' +
+        '<td style="color:var(--muted);">' + esc(m.not) + '</td>' +
+        '<td><button class="icon-btn" data-msil="' + m.id + '" title="Sil">✕</button></td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="7" class="empty">Henüz müşteri eklenmedi.</td></tr>';
+
+    /* -- kalem listesi -- */
+    var adMap = {}; R.musteriler.forEach(function(m){ adMap[m.id] = m.ad; });
+    var kq = ($('kAra').value || '').toLocaleLowerCase('tr');
+    var kf = $('kFiltreDurum').value;
+    var kl = R.kalemler.filter(function(k){
+      var vs = gunSerisi(k.vade);
+      var gecikmis = k.durum === 'acik' && vs !== null && (R.bugun - vs) > 0;
+      if(kf === 'gecikmis' && !gecikmis) return false;
+      if(kf && kf !== 'gecikmis' && k.durum !== kf) return false;
+      if(kq && ((adMap[k.musteriId]||'') + ' ' + (k.belge||'') + ' ' + (k.aciklama||'') + ' ' + k.tur)
+               .toLocaleLowerCase('tr').indexOf(kq) === -1) return false;
+      return true;
+    }).sort(function(a,b){ return String(a.vade||'9999').localeCompare(String(b.vade||'9999')); });
+
+    $('kListe').innerHTML = kl.length ? kl.map(function(k){
+      var vs = gunSerisi(k.vade);
+      var kalan = vs === null ? null : (vs - R.bugun);
+      var kalanTxt, kalanCls = '';
+      if(kalan === null) kalanTxt = '—';
+      else if(kalan < 0){ kalanTxt = Math.abs(kalan) + ' gün geçti'; kalanCls = 'color:var(--red);'; }
+      else if(kalan === 0){ kalanTxt = 'bugün'; kalanCls = 'color:var(--amber);'; }
+      else { kalanTxt = kalan + ' gün'; }
+      var dcls = k.durum === 'tahsil' ? 'ok' : k.durum === 'karsiliksiz' ? 'bad'
+               : (kalan !== null && kalan < 0) ? 'bad' : 'warn';
+      return '<tr>' +
+        '<td>' + esc(adMap[k.musteriId] || '(silinmiş müşteri)') + '</td>' +
+        '<td><span class="badge mut">' + esc(k.tur) + '</span></td>' +
+        '<td class="mono">' + esc(k.belge) + '</td>' +
+        '<td class="num">' + S.fmt(k.tutar) + '</td>' +
+        '<td>' + esc(S.trDate(k.vade)) + '</td>' +
+        '<td class="num" style="' + kalanCls + '">' + kalanTxt + '</td>' +
+        '<td><span class="badge ' + dcls + '">' + DURUM_AD[k.durum] + '</span></td>' +
+        '<td style="color:var(--muted);">' + esc(k.aciklama) + '</td>' +
+        '<td style="white-space:nowrap;">' +
+          (k.durum === 'acik' ? '<button class="icon-btn" data-ktahsil="' + k.id + '" title="Tahsil edildi olarak işaretle" style="color:var(--teal);">✓</button>' : '') +
+          '<button class="icon-btn" data-ksil="' + k.id + '" title="Sil">✕</button>' +
+        '</td></tr>';
+    }).join('') : '<tr><td colspan="9" class="empty">Bu filtreye uyan risk kalemi yok.</td></tr>';
+
+    /* -- yaşlandırma -- */
+    var yt = { gelmemis:0, g30:0, g60:0, g90:0, g90p:0 };
+    var ySat = satirlar.slice().sort(function(a,b){ return b.acikRisk - a.acikRisk; }).map(function(g){
+      yt.gelmemis += g.yas.gelmemis; yt.g30 += g.yas.g30; yt.g60 += g.yas.g60;
+      yt.g90 += g.yas.g90; yt.g90p += g.yas.g90p;
+      var tp = g.yas.gelmemis + g.yas.g30 + g.yas.g60 + g.yas.g90 + g.yas.g90p;
+      if(tp === 0) return '';
+      return '<tr>' +
+        '<td>' + esc(g.musteri.ad) + '</td>' +
+        '<td class="num">' + S.fmt(g.yas.gelmemis) + '</td>' +
+        '<td class="num">' + S.fmt(g.yas.g30) + '</td>' +
+        '<td class="num">' + S.fmt(g.yas.g60) + '</td>' +
+        '<td class="num">' + S.fmt(g.yas.g90) + '</td>' +
+        '<td class="num" style="color:' + (g.yas.g90p > 0 ? 'var(--red)' : 'inherit') + ';">' + S.fmt(g.yas.g90p) + '</td>' +
+        '<td class="num"><b>' + S.fmt(tp) + '</b></td>' +
+      '</tr>';
+    }).filter(Boolean);
+
+    $('yListe').innerHTML = ySat.length ? ySat.join('')
+      : '<tr><td colspan="7" class="empty">Açık risk kalemi yok.</td></tr>';
+    $('yTop').innerHTML =
+      '<div class="yas"><div class="k">Vadesi Gelmedi</div><div class="v" style="color:var(--teal);">' + S.fmt(yt.gelmemis) + ' ₺</div></div>' +
+      '<div class="yas"><div class="k">1–30 gün</div><div class="v" style="color:var(--amber);">' + S.fmt(yt.g30) + ' ₺</div></div>' +
+      '<div class="yas"><div class="k">31–60 gün</div><div class="v" style="color:var(--amber);">' + S.fmt(yt.g60) + ' ₺</div></div>' +
+      '<div class="yas"><div class="k">61–90 gün</div><div class="v" style="color:var(--red);">' + S.fmt(yt.g90) + ' ₺</div></div>' +
+      '<div class="yas"><div class="k">90+ gün</div><div class="v" style="color:var(--red);">' + S.fmt(yt.g90p) + ' ₺</div></div>';
+  }
+
+  /* ---------------- Etkileşim ---------------- */
+  $('mListe').addEventListener('click', function(e){
+    var b = e.target.closest('[data-msil]'); if(!b) return;
+    var say = kalStore.get().filter(function(k){ return k.musteriId === b.dataset.msil; }).length;
+    if(confirm(say ? 'Bu müşterinin ' + say + ' risk kalemi var. Müşteri silinsin mi?' : 'Müşteri silinsin mi?')){
+      musStore.remove(b.dataset.msil);
+    }
+  });
+  $('kListe').addEventListener('click', function(e){
+    var t = e.target.closest('[data-ktahsil]'), s = e.target.closest('[data-ksil]');
+    if(t) kalStore.update(t.dataset.ktahsil, { durum:'tahsil' });
+    if(s && confirm('Bu risk kalemi silinsin mi?')) kalStore.remove(s.dataset.ksil);
+  });
+  ['rAra','kAra'].forEach(function(id){ $(id).addEventListener('input', render); });
+  ['rSirala','kFiltreDurum'].forEach(function(id){ $(id).addEventListener('change', render); });
+
+  /* ---------------- Dışa aktarım ---------------- */
+  function riskRows(){
+    var R = hesapla();
+    return Object.keys(R.map).map(function(id){
+      var g = R.map[id];
+      return {
+        'Müşteri':g.musteri.ad, 'Limit':g.musteri.limit, 'Açık Risk':g.acikRisk,
+        'Limit Kullanımı %': g.kullanim === null ? '' : +(g.kullanim*100).toFixed(1),
+        'Boşta Limit':g.bostaLimit, 'Vadesi Geçen':g.gecikmis,
+        'En Eski Gecikme (gün)':g.enEskiGecikme, 'Risk Skoru':Math.round(g.skor)
+      };
+    }).sort(function(a,b){ return b['Risk Skoru'] - a['Risk Skoru']; });
+  }
+  function xls(rows, sheet, file){
+    if(!window.XLSX){ alert('Excel bileşeni yüklenemedi.'); return; }
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), sheet);
+    XLSX.writeFile(wb, file);
+  }
+  function pdf(title, head, body, file){
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
+    var d = new J({ orientation:'landscape' });
+    d.setFontSize(14); d.text(title, 14, 14);
+    d.autoTable({ startY:20, styles:{ fontSize:8 }, head:[head], body:body });
+    d.save(file);
+  }
+  $('btnRiskExcel').addEventListener('click', function(){ xls(riskRows(), 'Risk', 'musteri-risk.xlsx'); });
+  $('btnRiskPdf').addEventListener('click', function(){
+    pdf('Musteri Risk Tablosu', ['Musteri','Limit','Acik Risk','Kullanim %','Vadesi Gecen','Skor'],
+      riskRows().map(function(r){
+        return [r['Müşteri'], S.fmt(r['Limit']), S.fmt(r['Açık Risk']),
+                r['Limit Kullanımı %'] === '' ? '-' : r['Limit Kullanımı %'],
+                S.fmt(r['Vadesi Geçen']), r['Risk Skoru']];
+      }), 'musteri-risk.pdf');
+  });
+  $('btnKalemExcel').addEventListener('click', function(){
+    var adMap = {}; musStore.get().forEach(function(m){ adMap[m.id] = m.ad; });
+    xls(kalStore.get().map(function(k){
+      return { 'Müşteri':adMap[k.musteriId]||'', 'Tür':k.tur, 'Belge':k.belge, 'Tutar':k.tutar,
+               'Vade':S.trDate(k.vade), 'Durum':DURUM_AD[k.durum], 'Açıklama':k.aciklama };
+    }), 'Kalemler', 'risk-kalemleri.xlsx');
+  });
+  function yasRows(){
+    var R = hesapla();
+    return Object.keys(R.map).map(function(id){
+      var g = R.map[id];
+      return { 'Müşteri':g.musteri.ad, 'Vadesi Gelmedi':g.yas.gelmemis, '1-30':g.yas.g30,
+               '31-60':g.yas.g60, '61-90':g.yas.g90, '90+':g.yas.g90p,
+               'Toplam':g.yas.gelmemis+g.yas.g30+g.yas.g60+g.yas.g90+g.yas.g90p };
+    }).filter(function(r){ return r['Toplam'] > 0; });
+  }
+  $('btnYasExcel').addEventListener('click', function(){ xls(yasRows(), 'Yaşlandırma', 'alacak-yaslandirma.xlsx'); });
+  $('btnYasPdf').addEventListener('click', function(){
+    pdf('Alacak Yaslandirma', ['Musteri','Vadesi Gelmedi','1-30','31-60','61-90','90+','Toplam'],
+      yasRows().map(function(r){
+        return [r['Müşteri'], S.fmt(r['Vadesi Gelmedi']), S.fmt(r['1-30']), S.fmt(r['31-60']),
+                S.fmt(r['61-90']), S.fmt(r['90+']), S.fmt(r['Toplam'])];
+      }), 'alacak-yaslandirma.pdf');
+  });
+
+  /* ---------------- Başlat ---------------- */
+  musStore.onChange(render);
+  kalStore.onChange(render);
+  $('kVade').value = S.today();
+  musStore.load();
+  kalStore.load();
+  render();
+  try{ gtag('event', 'tool_used', { tool_name: 'risk_yonetimi' }); }catch(e){}
+})();
+</script>
+<script src="mmg-doviz-widget.js"></script>
+<script src="mmg-calc-widget.js"></script>
+<script src="mmg-widget-menu.js"></script>
+</body>
+</html>

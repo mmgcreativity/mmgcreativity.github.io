@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{ var mode=localStorage.getItem('mmg_theme')||'dark'; document.documentElement.classList.toggle('theme-light', mode==='light'); }catch(e){}
+  window.addEventListener('message', function(ev){ if(ev&&ev.data&&ev.data.mmgTheme){ document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme==='light'); try{localStorage.setItem('mmg_theme',ev.data.mmgTheme);}catch(e2){} } });
+})();
+</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Portföy</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mmg-module.css">
+<style>
+  .tab-panel{ display:none; } .tab-panel.active{ display:block; }
+  .mono{ font-family:'IBM Plex Mono',monospace; }
+  .sym{ font-family:'IBM Plex Mono',monospace; font-weight:600; letter-spacing:.04em; }
+  .pos{ color:var(--teal); } .neg{ color:var(--red); }
+  input.fiyat-inline{ height:26px; width:96px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:12px; padding:0 7px; }
+  .uyari{ background:rgba(227,162,60,0.10); border:1px solid rgba(227,162,60,0.35); border-radius:9px; padding:9px 12px; font-size:12px; color:var(--amber); margin-bottom:12px; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <h1 class="title">Portföy</h1>
+    <p class="subtitle">Hisse alış–satışlarınızı elle girin; ortalama maliyet, güncel değer, gerçekleşen ve gerçekleşmeyen kâr/zarar otomatik hesaplansın. İstediğiniz tarih aralığı için kâr/zarar ekstresi alın.</p>
+  </div>
+  <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="portfoy">Portföy</button>
+    <button class="tab" data-tab="islem">İşlemler</button>
+    <button class="tab" data-tab="ekstre">Kâr/Zarar Ekstresi</button>
+  </div>
+
+  <!-- ============ PORTFÖY ============ -->
+  <div class="tab-panel active" id="tab-portfoy">
+    <div class="kpis" id="pKpi"></div>
+    <div class="panel">
+      <div class="panel-title">Açık Pozisyonlar</div>
+      <div class="panel-desc">Güncel fiyat alanına piyasadaki son fiyatı yazdığınızda gerçekleşmemiş kâr/zarar anında hesaplanır. Fiyatlar bu cihazda saklanır.</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Sembol</th><th class="num">Adet</th><th class="num">Ort. Maliyet</th><th class="num">Toplam Maliyet</th>
+            <th class="num">Güncel Fiyat</th><th class="num">Piyasa Değeri</th>
+            <th class="num">Gerçekleşmemiş K/Z</th><th class="num">Getiri %</th><th class="num">Portföy Payı</th>
+          </tr></thead>
+          <tbody id="pListe"></tbody>
+        </table>
+      </div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn" id="btnPortExcel">Excel</button>
+        <button class="btn" id="btnPortPdf">PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ İŞLEMLER ============ -->
+  <div class="tab-panel" id="tab-islem">
+    <div class="panel">
+      <div class="panel-title">İşlem Ekle</div>
+      <div class="panel-desc">Komisyon; alışta maliyete eklenir, satışta hasılattan düşülür — yani kâr/zarar net olarak hesaplanır.</div>
+      <div class="form-grid">
+        <div><label class="fl" for="iTarih">Tarih</label><input id="iTarih" type="date"></div>
+        <div><label class="fl" for="iSembol">Sembol *</label><input id="iSembol" type="text" placeholder="THYAO" style="text-transform:uppercase;"></div>
+        <div><label class="fl" for="iTur">İşlem</label>
+          <select id="iTur">
+            <option value="alis">Alış</option>
+            <option value="satis">Satış</option>
+            <option value="temettu">Temettü</option>
+          </select>
+        </div>
+        <div><label class="fl" for="iAdet">Adet *</label><input id="iAdet" class="num" type="text" inputmode="decimal" placeholder="0"></div>
+        <div><label class="fl" for="iFiyat">Birim Fiyat *</label><input id="iFiyat" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl" for="iKomisyon">Komisyon</label><input id="iKomisyon" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div style="grid-column:span 2;"><label class="fl" for="iAciklama">Açıklama</label><input id="iAciklama" type="text" placeholder="opsiyonel"></div>
+        <div><button class="btn primary" id="btnIslemEkle" style="width:100%;">İşlemi Kaydet</button></div>
+      </div>
+      <div style="height:10px;"></div>
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <label class="fl" style="margin:0;">Maliyet Yöntemi</label>
+        <select id="iYontem" style="max-width:280px;">
+          <option value="fifo">FIFO — İlk giren ilk çıkar (vergi uygulamasında yaygın)</option>
+          <option value="ortalama">Ağırlıklı Ortalama Maliyet</option>
+        </select>
+        <span style="font-size:11.5px; color:var(--muted);">Yöntem değişince tüm geçmiş yeniden hesaplanır.</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">İşlem Geçmişi</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="iAra" type="text" placeholder="Sembol ara…" style="max-width:200px;">
+        <button class="btn" id="btnIslemExcel">Excel</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tarih</th><th>Sembol</th><th>İşlem</th><th class="num">Adet</th><th class="num">Fiyat</th>
+            <th class="num">Komisyon</th><th class="num">Tutar</th><th class="num">Gerçekleşen K/Z</th><th>Açıklama</th><th></th>
+          </tr></thead>
+          <tbody id="iListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ EKSTRE ============ -->
+  <div class="tab-panel" id="tab-ekstre">
+    <div class="panel">
+      <div class="panel-title">Kâr/Zarar Ekstresi</div>
+      <div class="panel-desc">Seçilen tarih aralığında <b>gerçekleşen</b> (satışı yapılmış) kâr/zarar ve tahsil edilen temettüler listelenir.</div>
+      <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
+        <div><label class="fl" for="eBas">Başlangıç</label><input id="eBas" type="date"></div>
+        <div><label class="fl" for="eBit">Bitiş</label><input id="eBit" type="date"></div>
+        <div><label class="fl" for="eSembol">Sembol</label><select id="eSembol"><option value="">Tümü</option></select></div>
+        <div><button class="btn" id="btnEkstreExcel" style="width:100%;">Excel</button></div>
+        <div><button class="btn" id="btnEkstrePdf" style="width:100%;">PDF</button></div>
+      </div>
+      <div style="height:12px;"></div>
+      <div class="kpis" id="eKpi"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tarih</th><th>Sembol</th><th>İşlem</th><th class="num">Adet</th>
+            <th class="num">Satış Fiyatı</th><th class="num">Maliyet</th><th class="num">Hasılat</th>
+            <th class="num">Komisyon</th><th class="num">Net K/Z</th><th class="num">Getiri %</th>
+          </tr></thead>
+          <tbody id="eListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script type="module" src="mmg-cloud-init.js"></script>
+<script src="mmg-store.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.MMGStore;
+  var islemStore = S('portfoy_islem');
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+
+  var FIYAT_KEY = 'mmg_portfoy_fiyat';       // sembol → güncel fiyat
+  var YONTEM_KEY = 'mmg_portfoy_yontem';
+  function fiyatlar(){ try{ return JSON.parse(localStorage.getItem(FIYAT_KEY) || '{}'); }catch(e){ return {}; } }
+  function fiyatYaz(sym, v){
+    var f = fiyatlar(); f[sym] = v;
+    try{ localStorage.setItem(FIYAT_KEY, JSON.stringify(f)); }catch(e){}
+  }
+  function yontem(){ try{ return localStorage.getItem(YONTEM_KEY) || 'fifo'; }catch(e){ return 'fifo'; } }
+
+  /* =========================================================================
+     ÇEKİRDEK HESAP — işlemleri kronolojik işleyip pozisyon ve gerçekleşen K/Z.
+
+     İki maliyet yöntemi:
+       FIFO      : Alış partileri sırayla tüketilir. Türkiye'de menkul kıymet
+                   satışında maliyet tespiti için yaygın kabul gören yöntemdir.
+       ORTALAMA  : Her alışta ağırlıklı ortalama maliyet güncellenir; satışta
+                   bu ortalama maliyet esas alınır.
+
+     Komisyon muhasebesi:
+       Alışta komisyon MALİYETE eklenir (edinme bedeli),
+       satışta komisyon HASILATTAN düşülür.
+       Net K/Z = (satış adedi × satış fiyatı − satış komisyonu) − eşleşen maliyet
+
+     Temettü, pozisyonu değiştirmez; ayrı gelir olarak ekstreye yansır.
+     ========================================================================= */
+  function hesapla(){
+    var y = yontem();
+    var list = islemStore.get().slice().sort(function(a,b){
+      var c = String(a.tarih||'').localeCompare(String(b.tarih||''));
+      return c !== 0 ? c : (a.sira||0) - (b.sira||0);
+    });
+
+    var poz = {};          // sembol → { partiler:[{adet,maliyet}], adet, toplamMaliyet }
+    var gercek = [];       // gerçekleşen satış satırları
+    var temettuler = [];
+    var uyarilar = [];
+
+    list.forEach(function(t){
+      var sym = (t.sembol || '').toUpperCase();
+      if(!poz[sym]) poz[sym] = { partiler:[], adet:0, toplamMaliyet:0 };
+      var p = poz[sym];
+      var adet = Number(t.adet) || 0, fiyat = Number(t.fiyat) || 0, kom = Number(t.komisyon) || 0;
+
+      if(t.tur === 'temettu'){
+        temettuler.push({ id:t.id, tarih:t.tarih, sembol:sym, adet:adet,
+                          tutar:(adet * fiyat) - kom, aciklama:t.aciklama });
+        return;
+      }
+
+      if(t.tur === 'alis'){
+        var birimMaliyet = adet > 0 ? (adet * fiyat + kom) / adet : 0;
+        p.partiler.push({ adet:adet, maliyet:birimMaliyet });
+        p.adet += adet;
+        p.toplamMaliyet += adet * birimMaliyet;
+        t._kz = null;
+        return;
+      }
+
+      /* ---- SATIŞ ---- */
+      if(adet > p.adet + 1e-9){
+        uyarilar.push(S.trDate(t.tarih) + ' — ' + sym + ': elde ' + S.fmt(p.adet,2) +
+                      ' adet varken ' + S.fmt(adet,2) + ' adet satış girilmiş.');
+      }
+      var kalan = adet, maliyetToplam = 0;
+      if(y === 'fifo'){
+        while(kalan > 1e-9 && p.partiler.length){
+          var parti = p.partiler[0];
+          var al = Math.min(kalan, parti.adet);
+          maliyetToplam += al * parti.maliyet;
+          parti.adet -= al; kalan -= al;
+          if(parti.adet <= 1e-9) p.partiler.shift();
+        }
+      } else {
+        var ort = p.adet > 0 ? p.toplamMaliyet / p.adet : 0;
+        var al2 = Math.min(kalan, p.adet);
+        maliyetToplam += al2 * ort;
+        kalan -= al2;
+        // ortalama yöntemde partileri tek bir havuz gibi küçültüyoruz
+        var kalanAdet = p.adet - al2;
+        p.partiler = kalanAdet > 0 ? [{ adet:kalanAdet, maliyet:ort }] : [];
+      }
+      // Karşılığı bulunamayan adetler (açığa satış / eksik veri) maliyetsiz sayılır.
+      var eslesenAdet = adet - kalan;
+      p.adet = Math.max(0, p.adet - eslesenAdet);
+      p.toplamMaliyet = p.partiler.reduce(function(s,x){ return s + x.adet * x.maliyet; }, 0);
+
+      var hasilat = adet * fiyat - kom;
+      var kz = hasilat - maliyetToplam;
+      t._kz = kz;
+      gercek.push({
+        id:t.id, tarih:t.tarih, sembol:sym, adet:adet, fiyat:fiyat, komisyon:kom,
+        maliyet:maliyetToplam, hasilat:hasilat, kz:kz,
+        getiri: maliyetToplam > 0 ? (kz / maliyetToplam) * 100 : null,
+        aciklama:t.aciklama
+      });
+    });
+
+    // Açık pozisyonlar
+    var f = fiyatlar();
+    var pozisyonlar = Object.keys(poz).filter(function(s){ return poz[s].adet > 1e-9; }).map(function(s){
+      var p = poz[s];
+      var ortMaliyet = p.adet > 0 ? p.toplamMaliyet / p.adet : 0;
+      var guncel = Number(f[s]);
+      if(!isFinite(guncel) || guncel <= 0) guncel = 0;
+      var deger = guncel > 0 ? p.adet * guncel : 0;
+      return {
+        sembol:s, adet:p.adet, ortMaliyet:ortMaliyet, toplamMaliyet:p.toplamMaliyet,
+        guncel:guncel, deger:deger,
+        kz: guncel > 0 ? deger - p.toplamMaliyet : null,
+        getiri: (guncel > 0 && p.toplamMaliyet > 0) ? ((deger - p.toplamMaliyet) / p.toplamMaliyet) * 100 : null
+      };
+    }).sort(function(a,b){ return b.toplamMaliyet - a.toplamMaliyet; });
+
+    return { islemler:list, pozisyonlar:pozisyonlar, gercek:gercek, temettuler:temettuler, uyarilar:uyarilar };
+  }
+
+  /* ---------------- Sekmeler ---------------- */
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      $('tab-' + t.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ---------------- İşlem ekleme ---------------- */
+  $('btnIslemEkle').addEventListener('click', function(){
+    var sym = $('iSembol').value.trim().toUpperCase();
+    if(!sym){ alert('Sembol zorunlu.'); $('iSembol').focus(); return; }
+    var adet = S.parse($('iAdet').value), fiyat = S.parse($('iFiyat').value);
+    if(!(adet > 0)){ alert('Adet sıfırdan büyük olmalı.'); $('iAdet').focus(); return; }
+    if(!(fiyat > 0) && $('iTur').value !== 'temettu'){ alert('Fiyat sıfırdan büyük olmalı.'); $('iFiyat').focus(); return; }
+    islemStore.add({
+      id:S.uid(), sira:Date.now(),
+      tarih:$('iTarih').value || S.today(), sembol:sym, tur:$('iTur').value,
+      adet:adet, fiyat:fiyat, komisyon:S.parse($('iKomisyon').value),
+      aciklama:$('iAciklama').value.trim()
+    });
+    ['iAdet','iFiyat','iKomisyon','iAciklama'].forEach(function(id){ $(id).value=''; });
+    $('iAdet').focus();
+  });
+
+  $('iYontem').addEventListener('change', function(){
+    try{ localStorage.setItem(YONTEM_KEY, $('iYontem').value); }catch(e){}
+    render();
+  });
+
+  var TUR_AD = { alis:'Alış', satis:'Satış', temettu:'Temettü' };
+  var TUR_CLS = { alis:'ok', satis:'warn', temettu:'mut' };
+  function kzHucre(v, ek){
+    if(v === null || v === undefined) return '<td class="num" style="color:var(--muted);">—</td>';
+    return '<td class="num ' + (v >= 0 ? 'pos' : 'neg') + '">' + (v >= 0 ? '+' : '−') +
+           S.fmt(Math.abs(v)) + (ek || '') + '</td>';
+  }
+
+  /* ---------------- Render ---------------- */
+  function render(){
+    var R = hesapla();
+
+    /* --- PORTFÖY --- */
+    var toplamMaliyet = 0, toplamDeger = 0, fiyatEksik = 0;
+    R.pozisyonlar.forEach(function(p){
+      toplamMaliyet += p.toplamMaliyet;
+      if(p.guncel > 0) toplamDeger += p.deger; else { toplamDeger += p.toplamMaliyet; fiyatEksik++; }
+    });
+    var gerceklesmemis = toplamDeger - toplamMaliyet;
+    var gerceklesen = R.gercek.reduce(function(s,g){ return s + g.kz; }, 0);
+    var temettuToplam = R.temettuler.reduce(function(s,t){ return s + t.tutar; }, 0);
+
+    $('pKpi').innerHTML =
+      '<div class="kpi"><div class="k">Pozisyon Sayısı</div><div class="v">' + R.pozisyonlar.length + '</div></div>' +
+      '<div class="kpi"><div class="k">Toplam Maliyet</div><div class="v">' + S.fmt(toplamMaliyet) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Piyasa Değeri</div><div class="v">' + S.fmt(toplamDeger) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Gerçekleşmemiş K/Z</div><div class="v ' + (gerceklesmemis >= 0 ? 'good' : 'bad') + '">' +
+        (gerceklesmemis >= 0 ? '+' : '−') + S.fmt(Math.abs(gerceklesmemis)) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Gerçekleşen K/Z</div><div class="v ' + (gerceklesen >= 0 ? 'good' : 'bad') + '">' +
+        (gerceklesen >= 0 ? '+' : '−') + S.fmt(Math.abs(gerceklesen)) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Temettü Geliri</div><div class="v">' + S.fmt(temettuToplam) + ' ₺</div></div>';
+
+    var uyariHtml = '';
+    if(fiyatEksik > 0){
+      uyariHtml += '<div class="uyari">' + fiyatEksik + ' pozisyonda güncel fiyat girilmemiş; ' +
+                   'bu satırlar piyasa değeri hesabında maliyet bedeliyle sayıldı.</div>';
+    }
+    if(R.uyarilar.length){
+      uyariHtml += '<div class="uyari"><b>Veri uyarısı:</b><br>' + R.uyarilar.map(esc).join('<br>') + '</div>';
+    }
+
+    var eskiUyari = document.getElementById('pUyari');
+    if(eskiUyari) eskiUyari.remove();
+    if(uyariHtml){
+      var box = document.createElement('div');
+      box.id = 'pUyari'; box.innerHTML = uyariHtml;
+      $('pKpi').parentNode.insertBefore(box, $('pKpi').nextSibling);
+    }
+
+    $('pListe').innerHTML = R.pozisyonlar.length ? R.pozisyonlar.map(function(p){
+      var pay = toplamDeger > 0 ? ((p.guncel > 0 ? p.deger : p.toplamMaliyet) / toplamDeger) * 100 : 0;
+      return '<tr>' +
+        '<td class="sym">' + esc(p.sembol) + '</td>' +
+        '<td class="num">' + S.fmt(p.adet, 2) + '</td>' +
+        '<td class="num">' + S.fmt(p.ortMaliyet, 4) + '</td>' +
+        '<td class="num">' + S.fmt(p.toplamMaliyet) + '</td>' +
+        '<td class="num"><input class="fiyat-inline" data-fiyat="' + esc(p.sembol) + '" type="text" inputmode="decimal" value="' +
+          (p.guncel > 0 ? S.fmt(p.guncel, 4) : '') + '" placeholder="—"></td>' +
+        '<td class="num">' + (p.guncel > 0 ? S.fmt(p.deger) : '—') + '</td>' +
+        kzHucre(p.kz, ' ₺') +
+        (p.getiri === null ? '<td class="num" style="color:var(--muted);">—</td>'
+          : '<td class="num ' + (p.getiri >= 0 ? 'pos' : 'neg') + '">' + (p.getiri >= 0 ? '+' : '−') + S.fmt(Math.abs(p.getiri),2) + '%</td>') +
+        '<td class="num">%' + S.fmt(pay, 1) + '</td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="9" class="empty">Açık pozisyon yok. "İşlemler" sekmesinden alış girin.</td></tr>';
+
+    /* --- İŞLEM GEÇMİŞİ --- */
+    var q = ($('iAra').value || '').toLocaleLowerCase('tr');
+    var kzMap = {}; R.gercek.forEach(function(g){ kzMap[g.id] = g.kz; });
+    var il = R.islemler.slice().reverse().filter(function(t){
+      return !q || ((t.sembol||'') + ' ' + (t.aciklama||'')).toLocaleLowerCase('tr').indexOf(q) > -1;
+    });
+    $('iListe').innerHTML = il.length ? il.map(function(t){
+      var tutar = (Number(t.adet)||0) * (Number(t.fiyat)||0);
+      return '<tr>' +
+        '<td>' + esc(S.trDate(t.tarih)) + '</td>' +
+        '<td class="sym">' + esc(t.sembol) + '</td>' +
+        '<td><span class="badge ' + TUR_CLS[t.tur] + '">' + TUR_AD[t.tur] + '</span></td>' +
+        '<td class="num">' + S.fmt(t.adet, 2) + '</td>' +
+        '<td class="num">' + S.fmt(t.fiyat, 4) + '</td>' +
+        '<td class="num">' + S.fmt(t.komisyon) + '</td>' +
+        '<td class="num">' + S.fmt(tutar) + '</td>' +
+        (t.tur === 'satis' ? kzHucre(kzMap[t.id] === undefined ? null : kzMap[t.id], ' ₺')
+                           : '<td class="num" style="color:var(--muted);">—</td>') +
+        '<td style="color:var(--muted);">' + esc(t.aciklama) + '</td>' +
+        '<td><button class="icon-btn" data-isil="' + t.id + '" title="Sil">✕</button></td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="10" class="empty">Henüz işlem girilmedi.</td></tr>';
+
+    /* --- EKSTRE --- */
+    var semboller = {};
+    R.islemler.forEach(function(t){ semboller[(t.sembol||'').toUpperCase()] = 1; });
+    var esel = $('eSembol'), eonceki = esel.value;
+    esel.innerHTML = '<option value="">Tümü</option>' +
+      Object.keys(semboller).sort().map(function(s){ return '<option value="' + esc(s) + '">' + esc(s) + '</option>'; }).join('');
+    esel.value = eonceki;
+
+    var bas = $('eBas').value, bit = $('eBit').value, esym = esel.value;
+    function aralikta(tarih){
+      if(bas && String(tarih) < bas) return false;
+      if(bit && String(tarih) > bit) return false;
+      return true;
+    }
+    var eSatis = R.gercek.filter(function(g){ return aralikta(g.tarih) && (!esym || g.sembol === esym); });
+    var eTem  = R.temettuler.filter(function(t){ return aralikta(t.tarih) && (!esym || t.sembol === esym); });
+
+    var kar = eSatis.filter(function(g){ return g.kz > 0; }).reduce(function(s,g){ return s + g.kz; }, 0);
+    var zarar = eSatis.filter(function(g){ return g.kz < 0; }).reduce(function(s,g){ return s + g.kz; }, 0);
+    var netKz = kar + zarar;
+    var temTop = eTem.reduce(function(s,t){ return s + t.tutar; }, 0);
+    var toplamMal = eSatis.reduce(function(s,g){ return s + g.maliyet; }, 0);
+
+    $('eKpi').innerHTML =
+      '<div class="kpi"><div class="k">Satış İşlemi</div><div class="v">' + eSatis.length + '</div></div>' +
+      '<div class="kpi"><div class="k">Toplam Kâr</div><div class="v good">+' + S.fmt(kar) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Toplam Zarar</div><div class="v bad">−' + S.fmt(Math.abs(zarar)) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Net Kâr/Zarar</div><div class="v ' + (netKz >= 0 ? 'good' : 'bad') + '">' +
+        (netKz >= 0 ? '+' : '−') + S.fmt(Math.abs(netKz)) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Temettü</div><div class="v">' + S.fmt(temTop) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Dönem Getirisi</div><div class="v ' + (netKz >= 0 ? 'good' : 'bad') + '">' +
+        (toplamMal > 0 ? (netKz >= 0 ? '+' : '−') + S.fmt(Math.abs(netKz / toplamMal * 100), 2) + '%' : '—') + '</div></div>';
+
+    var eRows = eSatis.map(function(g){
+      return '<tr>' +
+        '<td>' + esc(S.trDate(g.tarih)) + '</td>' +
+        '<td class="sym">' + esc(g.sembol) + '</td>' +
+        '<td><span class="badge warn">Satış</span></td>' +
+        '<td class="num">' + S.fmt(g.adet, 2) + '</td>' +
+        '<td class="num">' + S.fmt(g.fiyat, 4) + '</td>' +
+        '<td class="num">' + S.fmt(g.maliyet) + '</td>' +
+        '<td class="num">' + S.fmt(g.hasilat) + '</td>' +
+        '<td class="num">' + S.fmt(g.komisyon) + '</td>' +
+        kzHucre(g.kz, ' ₺') +
+        (g.getiri === null ? '<td class="num" style="color:var(--muted);">—</td>'
+          : '<td class="num ' + (g.getiri >= 0 ? 'pos' : 'neg') + '">' + (g.getiri >= 0 ? '+' : '−') + S.fmt(Math.abs(g.getiri),2) + '%</td>') +
+      '</tr>';
+    }).concat(eTem.map(function(t){
+      return '<tr>' +
+        '<td>' + esc(S.trDate(t.tarih)) + '</td>' +
+        '<td class="sym">' + esc(t.sembol) + '</td>' +
+        '<td><span class="badge mut">Temettü</span></td>' +
+        '<td class="num">' + S.fmt(t.adet, 2) + '</td>' +
+        '<td class="num">—</td><td class="num">—</td>' +
+        '<td class="num">' + S.fmt(t.tutar) + '</td>' +
+        '<td class="num">—</td>' +
+        '<td class="num pos">+' + S.fmt(t.tutar) + ' ₺</td>' +
+        '<td class="num">—</td>' +
+      '</tr>';
+    }));
+
+    $('eListe').innerHTML = eRows.length ? eRows.join('')
+      : '<tr><td colspan="10" class="empty">Bu aralıkta gerçekleşen işlem yok.</td></tr>';
+  }
+
+  /* ---------------- Etkileşim ---------------- */
+  $('pListe').addEventListener('change', function(e){
+    var inp = e.target.closest('[data-fiyat]'); if(!inp) return;
+    fiyatYaz(inp.dataset.fiyat, S.parse(inp.value));
+    render();
+  });
+  $('pListe').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); e.target.blur(); }
+  });
+  $('iListe').addEventListener('click', function(e){
+    var b = e.target.closest('[data-isil]'); if(!b) return;
+    if(confirm('Bu işlem silinsin mi? Sonraki tüm hesaplar yeniden yapılır.')) islemStore.remove(b.dataset.isil);
+  });
+  ['iAra'].forEach(function(id){ $(id).addEventListener('input', render); });
+  ['eBas','eBit','eSembol'].forEach(function(id){ $(id).addEventListener('change', render); });
+
+  /* ---------------- Dışa aktarım ---------------- */
+  function xls(rows, sheet, file){
+    if(!window.XLSX){ alert('Excel bileşeni yüklenemedi.'); return; }
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), sheet);
+    XLSX.writeFile(wb, file);
+  }
+  function pdf(title, head, body, file){
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
+    var d = new J({ orientation:'landscape' });
+    d.setFontSize(14); d.text(title, 14, 14);
+    d.autoTable({ startY:20, styles:{ fontSize:8 }, head:[head], body:body });
+    d.save(file);
+  }
+  $('btnPortExcel').addEventListener('click', function(){
+    xls(hesapla().pozisyonlar.map(function(p){
+      return { 'Sembol':p.sembol, 'Adet':p.adet, 'Ort. Maliyet':p.ortMaliyet, 'Toplam Maliyet':p.toplamMaliyet,
+               'Güncel Fiyat':p.guncel || '', 'Piyasa Değeri':p.guncel > 0 ? p.deger : '',
+               'K/Z':p.kz === null ? '' : p.kz, 'Getiri %':p.getiri === null ? '' : +p.getiri.toFixed(2) };
+    }), 'Portföy', 'portfoy.xlsx');
+  });
+  $('btnPortPdf').addEventListener('click', function(){
+    pdf('Portfoy', ['Sembol','Adet','Ort.Maliyet','Toplam Maliyet','Guncel','Deger','K/Z'],
+      hesapla().pozisyonlar.map(function(p){
+        return [p.sembol, S.fmt(p.adet,2), S.fmt(p.ortMaliyet,4), S.fmt(p.toplamMaliyet),
+                p.guncel > 0 ? S.fmt(p.guncel,4) : '-', p.guncel > 0 ? S.fmt(p.deger) : '-',
+                p.kz === null ? '-' : S.fmt(p.kz)];
+      }), 'portfoy.pdf');
+  });
+  $('btnIslemExcel').addEventListener('click', function(){
+    var R = hesapla(), kzMap = {}; R.gercek.forEach(function(g){ kzMap[g.id] = g.kz; });
+    xls(R.islemler.map(function(t){
+      return { 'Tarih':S.trDate(t.tarih), 'Sembol':t.sembol, 'İşlem':TUR_AD[t.tur], 'Adet':t.adet,
+               'Fiyat':t.fiyat, 'Komisyon':t.komisyon, 'Tutar':(t.adet||0)*(t.fiyat||0),
+               'Gerçekleşen K/Z': kzMap[t.id] === undefined ? '' : +kzMap[t.id].toFixed(2),
+               'Açıklama':t.aciklama };
+    }), 'İşlemler', 'portfoy-islemler.xlsx');
+  });
+  function ekstreRows(){
+    var R = hesapla();
+    var bas = $('eBas').value, bit = $('eBit').value, esym = $('eSembol').value;
+    return R.gercek.filter(function(g){
+      if(bas && String(g.tarih) < bas) return false;
+      if(bit && String(g.tarih) > bit) return false;
+      if(esym && g.sembol !== esym) return false;
+      return true;
+    }).map(function(g){
+      return { 'Tarih':S.trDate(g.tarih), 'Sembol':g.sembol, 'Adet':g.adet, 'Satış Fiyatı':g.fiyat,
+               'Maliyet':+g.maliyet.toFixed(2), 'Hasılat':+g.hasilat.toFixed(2),
+               'Komisyon':g.komisyon, 'Net K/Z':+g.kz.toFixed(2),
+               'Getiri %': g.getiri === null ? '' : +g.getiri.toFixed(2) };
+    });
+  }
+  $('btnEkstreExcel').addEventListener('click', function(){ xls(ekstreRows(), 'Ekstre', 'kar-zarar-ekstresi.xlsx'); });
+  $('btnEkstrePdf').addEventListener('click', function(){
+    pdf('Kar/Zarar Ekstresi', ['Tarih','Sembol','Adet','Satis Fiyati','Maliyet','Hasilat','Net K/Z'],
+      ekstreRows().map(function(r){
+        return [r['Tarih'], r['Sembol'], S.fmt(r['Adet'],2), S.fmt(r['Satış Fiyatı'],4),
+                S.fmt(r['Maliyet']), S.fmt(r['Hasılat']), S.fmt(r['Net K/Z'])];
+      }), 'kar-zarar-ekstresi.pdf');
+  });
+
+  /* ---------------- Başlat ---------------- */
+  islemStore.onChange(render);
+  $('iTarih').value = S.today();
+  $('iYontem').value = yontem();
+  islemStore.load();
+  render();
+  try{ gtag('event', 'tool_used', { tool_name: 'portfoy' }); }catch(e){}
+})();
+</script>
+<script src="mmg-doviz-widget.js"></script>
+<script src="mmg-calc-widget.js"></script>
+<script src="mmg-widget-menu.js"></script>
+</body>
+</html>

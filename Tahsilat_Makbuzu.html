@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{ var mode=localStorage.getItem('mmg_theme')||'dark'; document.documentElement.classList.toggle('theme-light', mode==='light'); }catch(e){}
+  window.addEventListener('message', function(ev){ if(ev&&ev.data&&ev.data.mmgTheme){ document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme==='light'); try{localStorage.setItem('mmg_theme',ev.data.mmgTheme);}catch(e2){} } });
+})();
+</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Tahsilat Makbuzu</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mmg-module.css">
+<style>
+  /* ---- Makbuz önizleme: ekranda da baskıda da AYNI görünsün diye beyaz zemin ---- */
+  .mkb{
+    background:#fff; color:#111; width:100%; max-width:760px; margin:0 auto;
+    border:1px solid #ccc; border-radius:8px; padding:22px 24px; font-family:'Inter',sans-serif;
+  }
+  .mkb .m-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; border-bottom:2px solid #111; padding-bottom:10px; }
+  .mkb .m-firma{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px; }
+  .mkb .m-firma small{ display:block; font-weight:400; font-size:11px; color:#555; margin-top:3px; white-space:pre-line; }
+  .mkb .m-tip{ text-align:right; }
+  .mkb .m-tip b{ font-family:'Space Grotesk',sans-serif; font-size:15px; letter-spacing:.04em; }
+  .mkb .m-tip span{ display:block; font-family:'IBM Plex Mono',monospace; font-size:12px; color:#444; margin-top:4px; }
+  .mkb .m-rows{ margin-top:14px; }
+  .mkb .m-row{ display:flex; gap:10px; padding:6px 0; border-bottom:1px dotted #ccc; font-size:13px; }
+  .mkb .m-row .k{ flex:0 0 150px; color:#555; font-weight:600; font-size:12px; }
+  .mkb .m-row .v{ flex:1 1 auto; font-weight:600; word-break:break-word; }
+  .mkb .m-tutar{ margin-top:16px; border:2px solid #111; border-radius:6px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .mkb .m-tutar .t-lbl{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:#555; font-weight:700; }
+  .mkb .m-tutar .t-val{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:26px; }
+  .mkb .m-yazi{ margin-top:8px; font-size:12px; font-style:italic; color:#333; }
+  .mkb .m-not{ margin-top:12px; font-size:12px; color:#333; white-space:pre-line; }
+  .mkb .m-imza{ margin-top:26px; display:flex; justify-content:space-between; gap:20px; }
+  .mkb .m-imza div{ flex:1 1 0; text-align:center; font-size:11.5px; color:#555; }
+  .mkb .m-imza div .line{ border-top:1px solid #111; margin-bottom:5px; height:44px; }
+  .mkb .m-foot{ margin-top:16px; border-top:1px solid #ccc; padding-top:8px; font-size:10.5px; color:#666; text-align:center; }
+
+  .cols2{ display:grid; grid-template-columns:minmax(0,420px) minmax(0,1fr); gap:16px; align-items:start; }
+  @media (max-width:900px){ .cols2{ grid-template-columns:1fr; } }
+
+  @media print{
+    body{ background:#fff !important; padding:0 !important; }
+    header.masthead, .no-print, #mmgDovizBtn, #mmgCalcBtn, #mmgChatBubble{ display:none !important; }
+    main{ padding:0 !important; max-width:none !important; }
+    .cols2{ display:block !important; }
+    .panel{ border:none !important; background:none !important; padding:0 !important; margin:0 !important; }
+    .mkb{ border:none; max-width:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <h1 class="title">Tahsilat Makbuzu</h1>
+    <p class="subtitle">Nakit, havale, çek, senet ve DBS tahsilatları için seri–sıra numaralı makbuz düzenleyin. Tutar otomatik olarak yazıyla yazılır, makbuz yazdırılabilir veya PDF olarak kaydedilebilir.</p>
+  </div>
+  <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
+</header>
+
+<main>
+  <div class="cols2">
+
+    <!-- ================= SOL: FORM ================= -->
+    <div>
+      <div class="panel no-print">
+        <div class="panel-title">Makbuz Bilgileri</div>
+        <div class="panel-desc">Alanları doldurdukça sağdaki makbuz anında güncellenir.</div>
+
+        <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+          <div>
+            <label class="fl" for="mSeri">Seri</label>
+            <input id="mSeri" type="text" maxlength="6" placeholder="A" value="A">
+          </div>
+          <div>
+            <label class="fl" for="mSira">Sıra No</label>
+            <input id="mSira" class="num" type="text" inputmode="numeric" placeholder="000001">
+          </div>
+          <div>
+            <label class="fl" for="mTarih">Tarih</label>
+            <input id="mTarih" type="date">
+          </div>
+          <div>
+            <label class="fl" for="mTur">Tahsilat Türü</label>
+            <select id="mTur">
+              <option>Nakit</option>
+              <option>Havale / EFT</option>
+              <option>Çek</option>
+              <option>Senet</option>
+              <option>DBS</option>
+              <option>Kredi Kartı</option>
+              <option>Mahsup</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="height:10px;"></div>
+        <label class="fl" for="mOdeyen">Tahsil Edilen (Ödeyen)</label>
+        <input id="mOdeyen" type="text" placeholder="Müşteri / firma adı">
+
+        <div style="height:10px;"></div>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+          <div>
+            <label class="fl" for="mTutar">Tutar</label>
+            <input id="mTutar" class="num" type="text" inputmode="decimal" placeholder="0,00">
+          </div>
+          <div>
+            <label class="fl" for="mPara">Para Birimi</label>
+            <select id="mPara">
+              <option value="TL">TL — Türk Lirası</option>
+              <option value="USD">USD — Dolar</option>
+              <option value="EUR">EUR — Euro</option>
+              <option value="GBP">GBP — Sterlin</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Çek/senet/DBS seçilince açılan ek alanlar -->
+        <div id="mKiymetBox" style="display:none;">
+          <div style="height:10px;"></div>
+          <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+            <div>
+              <label class="fl" for="mBanka">Banka / Şube</label>
+              <input id="mBanka" type="text" placeholder="Örn. Ziraat / Kadıköy">
+            </div>
+            <div>
+              <label class="fl" for="mKiymetNo">Çek / Senet No</label>
+              <input id="mKiymetNo" type="text" placeholder="0000000">
+            </div>
+            <div>
+              <label class="fl" for="mVade">Vade Tarihi</label>
+              <input id="mVade" type="date">
+            </div>
+            <div>
+              <label class="fl" for="mKeside">Keşideci</label>
+              <input id="mKeside" type="text" placeholder="Keşideci adı">
+            </div>
+          </div>
+        </div>
+
+        <div style="height:10px;"></div>
+        <label class="fl" for="mAciklama">Açıklama</label>
+        <textarea id="mAciklama" rows="2" placeholder="Örn. 12.05.2026 tarihli 4521 nolu faturaya istinaden"></textarea>
+
+        <div style="height:10px;"></div>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+          <div>
+            <label class="fl" for="mDuzenleyen">Düzenleyen</label>
+            <input id="mDuzenleyen" type="text" placeholder="Ad Soyad">
+          </div>
+          <div>
+            <label class="fl" for="mFirma">Firma Ünvanı</label>
+            <input id="mFirma" type="text" placeholder="Firma adı">
+          </div>
+        </div>
+
+        <div style="height:10px;"></div>
+        <label class="fl" for="mFirmaBilgi">Firma Bilgileri (adres / vergi no / telefon)</label>
+        <textarea id="mFirmaBilgi" rows="2" placeholder="Adres&#10;VD: ... / VKN: ...&#10;Tel: ..."></textarea>
+
+        <div style="height:14px;"></div>
+        <div class="btn-row">
+          <button class="btn primary" id="btnKaydet">Kaydet</button>
+          <button class="btn" id="btnYazdir">Yazdır</button>
+          <button class="btn" id="btnPdf">PDF</button>
+          <button class="btn" id="btnYeni">Yeni Makbuz</button>
+        </div>
+        <p class="panel-desc" style="margin:10px 0 0;">Firma bilgileri bir kez girildiğinde sonraki makbuzlarda otomatik gelir.</p>
+      </div>
+    </div>
+
+    <!-- ================= SAĞ: ÖNİZLEME ================= -->
+    <div>
+      <div class="panel">
+        <div class="panel-title no-print">Makbuz Önizleme</div>
+        <div class="panel-desc no-print">Yazdırıldığında yalnızca aşağıdaki makbuz basılır.</div>
+        <div class="mkb" id="mkbOnizleme"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= KAYITLI MAKBUZLAR ================= -->
+  <div class="panel no-print">
+    <div class="panel-title">Kayıtlı Makbuzlar</div>
+    <div class="panel-desc">Kaydedilen makbuzlar bu cihazda saklanır ve giriş yapıldıysa hesabınızla eşitlenir.</div>
+    <div class="btn-row" style="margin-bottom:10px;">
+      <input id="mAra" type="text" placeholder="Ara: müşteri, makbuz no, açıklama…" style="max-width:280px;">
+      <button class="btn" id="btnExcel">Excel</button>
+      <button class="btn" id="btnListePdf">PDF Liste</button>
+    </div>
+    <div class="kpis" id="mKpi"></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Makbuz No</th><th>Tarih</th><th>Ödeyen</th><th>Tür</th>
+            <th class="num">Tutar</th><th>Açıklama</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="mListe"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script type="module" src="mmg-cloud-init.js"></script>
+<script src="mmg-store.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.MMGStore, store = S('makbuz');
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* ---------------------------------------------------------------
+     TUTARI YAZIYLA — makbuzun hukuken en kritik alanı. Rakam tahrif
+     edilse bile yazı ile tutar delil olur, bu yüzden doğru üretilmeli.
+     0 → "SIFIR", kuruş varsa "… TL … KR" biçiminde yazılır.
+     --------------------------------------------------------------- */
+  var BIR = ['','BİR','İKİ','ÜÇ','DÖRT','BEŞ','ALTI','YEDİ','SEKİZ','DOKUZ'];
+  var ON  = ['','ON','YİRMİ','OTUZ','KIRK','ELLİ','ALTMIŞ','YETMİŞ','SEKSEN','DOKSAN'];
+  var BAS = ['','BİN','MİLYON','MİLYAR','TRİLYON'];
+
+  function ucBasamak(n){
+    var s = '';
+    var y = Math.floor(n/100), o = Math.floor((n%100)/10), b = n%10;
+    if(y > 0) s += (y === 1 ? '' : BIR[y]) + 'YÜZ';
+    if(o > 0) s += ON[o];
+    if(b > 0) s += BIR[b];
+    return s;
+  }
+  function sayiyiYaz(n){
+    n = Math.floor(Math.abs(n));
+    if(n === 0) return 'SIFIR';
+    var gruplar = [];
+    while(n > 0){ gruplar.push(n % 1000); n = Math.floor(n/1000); }
+    var out = '';
+    for(var i = gruplar.length - 1; i >= 0; i--){
+      var g = gruplar[i];
+      if(g === 0) continue;
+      // "BİRBİN" değil "BİN" yazılır (Türkçe kuralı)
+      if(i === 1 && g === 1) out += 'BİN';
+      else out += ucBasamak(g) + BAS[i];
+    }
+    return out;
+  }
+  var PARA_AD = { TL:['TL','KR'], USD:['USD','CENT'], EUR:['EUR','CENT'], GBP:['GBP','PENI'] };
+  function tutarYazi(v, para){
+    var ad = PARA_AD[para] || ['TL','KR'];
+    // Kuruşu yuvarlarken kayan nokta hatasını önlemek için önce tam kuruşa çeviriyoruz.
+    var kurus = Math.round(Math.abs(v) * 100);
+    var tam = Math.floor(kurus / 100), kus = kurus % 100;
+    var s = sayiyiYaz(tam) + ' ' + ad[0];
+    if(kus > 0) s += ' ' + sayiyiYaz(kus) + ' ' + ad[1];
+    return '# ' + s + ' #';
+  }
+
+  /* ---- Yardımcılar ---- */
+  function makbuzNo(r){ return (r.seri || 'A') + '-' + String(r.sira || '').padStart(6,'0'); }
+  function paraSim(p){ return ({TL:'₺', USD:'$', EUR:'€', GBP:'£'})[p] || '₺'; }
+
+  /* ---- Firma bilgisi hatırlansın ---- */
+  var FIRMA_KEY = 'mmg_makbuz_firma';
+  function firmaYukle(){
+    try{
+      var f = JSON.parse(localStorage.getItem(FIRMA_KEY) || '{}');
+      if(f.ad) $('mFirma').value = f.ad;
+      if(f.bilgi) $('mFirmaBilgi').value = f.bilgi;
+      if(f.duzenleyen) $('mDuzenleyen').value = f.duzenleyen;
+    }catch(e){}
+  }
+  function firmaKaydet(){
+    try{
+      localStorage.setItem(FIRMA_KEY, JSON.stringify({
+        ad: $('mFirma').value, bilgi: $('mFirmaBilgi').value, duzenleyen: $('mDuzenleyen').value
+      }));
+    }catch(e){}
+  }
+
+  /* ---- Formdan makbuz nesnesi ---- */
+  function formOku(){
+    return {
+      seri: $('mSeri').value.trim().toUpperCase() || 'A',
+      sira: $('mSira').value.trim(),
+      tarih: $('mTarih').value,
+      tur: $('mTur').value,
+      odeyen: $('mOdeyen').value.trim(),
+      tutar: S.parse($('mTutar').value),
+      para: $('mPara').value,
+      banka: $('mBanka').value.trim(),
+      kiymetNo: $('mKiymetNo').value.trim(),
+      vade: $('mVade').value,
+      keside: $('mKeside').value.trim(),
+      aciklama: $('mAciklama').value.trim(),
+      duzenleyen: $('mDuzenleyen').value.trim(),
+      firma: $('mFirma').value.trim(),
+      firmaBilgi: $('mFirmaBilgi').value.trim()
+    };
+  }
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];
+    });
+  }
+
+  /* ---- Önizleme ---- */
+  function onizle(){
+    var r = formOku();
+    var kiymetli = (r.tur === 'Çek' || r.tur === 'Senet' || r.tur === 'DBS');
+    $('mKiymetBox').style.display = kiymetli ? '' : 'none';
+
+    var satir = function(k, v){
+      if(!v) return '';
+      return '<div class="m-row"><div class="k">' + esc(k) + '</div><div class="v">' + esc(v) + '</div></div>';
+    };
+
+    $('mkbOnizleme').innerHTML =
+      '<div class="m-head">' +
+        '<div class="m-firma">' + esc(r.firma || 'FİRMA ÜNVANI') +
+          '<small>' + esc(r.firmaBilgi || '') + '</small></div>' +
+        '<div class="m-tip"><b>TAHSİLAT MAKBUZU</b>' +
+          '<span>No: ' + esc(makbuzNo(r)) + '</span>' +
+          '<span>Tarih: ' + esc(S.trDate(r.tarih)) + '</span></div>' +
+      '</div>' +
+      '<div class="m-rows">' +
+        satir('Tahsil Edilen', r.odeyen) +
+        satir('Tahsilat Türü', r.tur) +
+        (kiymetli ? satir('Banka / Şube', r.banka) + satir('Çek / Senet No', r.kiymetNo) +
+                    satir('Vade Tarihi', S.trDate(r.vade)) + satir('Keşideci', r.keside) : '') +
+      '</div>' +
+      '<div class="m-tutar">' +
+        '<span class="t-lbl">Tahsil Edilen Tutar</span>' +
+        '<span class="t-val">' + S.fmt(r.tutar) + ' ' + paraSim(r.para) + '</span>' +
+      '</div>' +
+      '<div class="m-yazi">Yazı ile: ' + esc(tutarYazi(r.tutar, r.para)) + '</div>' +
+      (r.aciklama ? '<div class="m-not">' + esc(r.aciklama) + '</div>' : '') +
+      '<div class="m-imza">' +
+        '<div><div class="line"></div>Teslim Eden<br>' + esc(r.odeyen || '') + '</div>' +
+        '<div><div class="line"></div>Tahsil Eden<br>' + esc(r.duzenleyen || '') + '</div>' +
+      '</div>' +
+      '<div class="m-foot">Bu makbuz, yukarıda belirtilen tutarın tahsil edildiğini gösterir. ' +
+        'Çek / senet ile yapılan tahsilatlarda ödeme, kıymetin bedeli tahsil edildiğinde gerçekleşmiş sayılır.</div>';
+  }
+
+  /* ---- Sıra numarası: son kaydın bir fazlası ---- */
+  function sonrakiSira(){
+    var list = store.get();
+    var max = 0;
+    list.forEach(function(r){
+      var n = parseInt(r.sira, 10);
+      if(isFinite(n) && n > max) max = n;
+    });
+    return String(max + 1).padStart(6, '0');
+  }
+
+  /* ---- Liste ---- */
+  function render(){
+    var q = ($('mAra').value || '').toLocaleLowerCase('tr');
+    var list = store.get().slice().sort(function(a,b){
+      return String(b.tarih || '').localeCompare(String(a.tarih || '')) ||
+             (parseInt(b.sira,10) || 0) - (parseInt(a.sira,10) || 0);
+    });
+    var f = q ? list.filter(function(r){
+      return (makbuzNo(r) + ' ' + (r.odeyen||'') + ' ' + (r.aciklama||'') + ' ' + (r.tur||''))
+             .toLocaleLowerCase('tr').indexOf(q) > -1;
+    }) : list;
+
+    // KPI'lar yalnızca TL kayıtlardan hesaplanır; karışık para birimi toplanmaz.
+    var tl = list.filter(function(r){ return (r.para || 'TL') === 'TL'; });
+    var toplam = tl.reduce(function(s,r){ return s + (r.tutar||0); }, 0);
+    var ay = new Date().toISOString().slice(0,7);
+    var buAy = tl.filter(function(r){ return String(r.tarih||'').slice(0,7) === ay; })
+                 .reduce(function(s,r){ return s + (r.tutar||0); }, 0);
+
+    $('mKpi').innerHTML =
+      '<div class="kpi"><div class="k">Makbuz Adedi</div><div class="v">' + list.length + '</div></div>' +
+      '<div class="kpi"><div class="k">Toplam Tahsilat (TL)</div><div class="v good">' + S.fmt(toplam) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Bu Ay (TL)</div><div class="v">' + S.fmt(buAy) + ' ₺</div></div>';
+
+    $('mListe').innerHTML = f.length ? f.map(function(r){
+      return '<tr>' +
+        '<td style="font-family:\'IBM Plex Mono\',monospace;">' + esc(makbuzNo(r)) + '</td>' +
+        '<td>' + esc(S.trDate(r.tarih)) + '</td>' +
+        '<td>' + esc(r.odeyen) + '</td>' +
+        '<td><span class="badge mut">' + esc(r.tur) + '</span></td>' +
+        '<td class="num">' + S.fmt(r.tutar) + ' ' + paraSim(r.para) + '</td>' +
+        '<td style="color:var(--muted);">' + esc(r.aciklama) + '</td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button class="icon-btn" data-yukle="' + r.id + '" title="Formda aç" style="color:var(--brass);">↧</button>' +
+          '<button class="icon-btn" data-sil="' + r.id + '" title="Sil">✕</button>' +
+        '</td></tr>';
+    }).join('') : '<tr><td colspan="7" class="empty">Henüz makbuz kaydedilmedi.</td></tr>';
+  }
+
+  /* ---- Olaylar ---- */
+  ['mSeri','mSira','mTarih','mTur','mOdeyen','mTutar','mPara','mBanka','mKiymetNo','mVade',
+   'mKeside','mAciklama','mDuzenleyen','mFirma','mFirmaBilgi'].forEach(function(id){
+    var el = $(id);
+    el.addEventListener('input', onizle);
+    el.addEventListener('change', onizle);
+  });
+
+  $('btnKaydet').addEventListener('click', function(){
+    var r = formOku();
+    if(!r.odeyen){ alert('Tahsil edilen (ödeyen) alanı boş olamaz.'); $('mOdeyen').focus(); return; }
+    if(!(r.tutar > 0)){ alert('Tutar sıfırdan büyük olmalı.'); $('mTutar').focus(); return; }
+    if(!r.tarih){ alert('Tarih seçilmedi.'); $('mTarih').focus(); return; }
+    // Aynı seri-sıra ikinci kez kaydedilmesin (mükerrer makbuz muhasebede ciddi hata).
+    var varOlan = store.get().filter(function(x){
+      return x.seri === r.seri && String(x.sira) === String(r.sira);
+    })[0];
+    if(varOlan){
+      if(!confirm(makbuzNo(r) + ' numaralı makbuz zaten var. Üzerine yazılsın mı?')) return;
+      store.update(varOlan.id, r);
+    } else {
+      r.id = S.uid();
+      store.add(r);
+    }
+    firmaKaydet();
+    $('mSira').value = sonrakiSira();
+    onizle();
+  });
+
+  $('btnYazdir').addEventListener('click', function(){ window.print(); });
+
+  $('btnYeni').addEventListener('click', function(){
+    ['mOdeyen','mTutar','mBanka','mKiymetNo','mKeside','mAciklama'].forEach(function(id){ $(id).value = ''; });
+    $('mVade').value = '';
+    $('mTarih').value = S.today();
+    $('mSira').value = sonrakiSira();
+    onizle();
+    $('mOdeyen').focus();
+  });
+
+  $('mListe').addEventListener('click', function(e){
+    var y = e.target.closest('[data-yukle]'), s = e.target.closest('[data-sil]');
+    if(y){
+      var r = store.get().filter(function(x){ return x.id === y.dataset.yukle; })[0];
+      if(!r) return;
+      $('mSeri').value = r.seri; $('mSira').value = r.sira; $('mTarih').value = r.tarih || '';
+      $('mTur').value = r.tur; $('mOdeyen').value = r.odeyen || '';
+      $('mTutar').value = S.fmt(r.tutar); $('mPara').value = r.para || 'TL';
+      $('mBanka').value = r.banka || ''; $('mKiymetNo').value = r.kiymetNo || '';
+      $('mVade').value = r.vade || ''; $('mKeside').value = r.keside || '';
+      $('mAciklama').value = r.aciklama || ''; $('mDuzenleyen').value = r.duzenleyen || '';
+      if(r.firma) $('mFirma').value = r.firma;
+      if(r.firmaBilgi) $('mFirmaBilgi').value = r.firmaBilgi;
+      onizle();
+      window.scrollTo({ top:0, behavior:'smooth' });
+    }
+    if(s){
+      if(confirm('Bu makbuz kaydı silinsin mi?')) store.remove(s.dataset.sil);
+    }
+  });
+
+  $('mAra').addEventListener('input', render);
+
+  /* ---- Dışa aktarım ---- */
+  $('btnExcel').addEventListener('click', function(){
+    if(!window.XLSX){ alert('Excel bileşeni yüklenemedi.'); return; }
+    var rows = store.get().map(function(r){
+      return {
+        'Makbuz No': makbuzNo(r), 'Tarih': S.trDate(r.tarih), 'Ödeyen': r.odeyen,
+        'Tür': r.tur, 'Tutar': r.tutar, 'Para': r.para,
+        'Banka': r.banka, 'Çek/Senet No': r.kiymetNo, 'Vade': S.trDate(r.vade),
+        'Keşideci': r.keside, 'Açıklama': r.aciklama, 'Düzenleyen': r.duzenleyen
+      };
+    });
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Makbuzlar');
+    XLSX.writeFile(wb, 'tahsilat-makbuzlari.xlsx');
+  });
+
+  $('btnListePdf').addEventListener('click', function(){
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
+    var d = new J({ orientation:'landscape' });
+    d.setFontSize(14); d.text('Tahsilat Makbuzlari', 14, 14);
+    d.autoTable({
+      startY: 20, styles:{ fontSize:8 },
+      head: [['Makbuz No','Tarih','Odeyen','Tur','Tutar','Aciklama']],
+      body: store.get().map(function(r){
+        return [makbuzNo(r), S.trDate(r.tarih), r.odeyen || '', r.tur || '',
+                S.fmt(r.tutar) + ' ' + (r.para || 'TL'), r.aciklama || ''];
+      })
+    });
+    d.save('tahsilat-makbuzlari.pdf');
+  });
+
+  // Tek makbuzun PDF'i: yazdırma penceresi kullanıcıya "PDF olarak kaydet"i sunar;
+  // böylece Türkçe karakterler jsPDF'in gömülü fontlarına takılmadan doğru çıkar.
+  $('btnPdf').addEventListener('click', function(){ window.print(); });
+
+  /* ---- Başlat ---- */
+  // Sıra numarası kullanıcı elle değiştirmediyse veri geldikçe tazelenir
+  // (bulut senkronu yerelden sonra geldiği için mükerrer numara oluşmasın).
+  var siraElle = false;
+  $('mSira').addEventListener('input', function(){ siraElle = true; });
+  store.onChange(function(){
+    render();
+    if(!siraElle) $('mSira').value = sonrakiSira();
+  });
+  firmaYukle();
+  $('mTarih').value = S.today();
+  store.load();
+  $('mSira').value = sonrakiSira();
+  onizle();
+  try{ gtag('event', 'tool_used', { tool_name: 'tahsilat_makbuzu' }); }catch(e){}
+})();
+</script>
+<script src="mmg-doviz-widget.js"></script>
+<script src="mmg-calc-widget.js"></script>
+<script src="mmg-widget-menu.js"></script>
+</body>
+</html>
