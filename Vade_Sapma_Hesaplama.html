@@ -1251,12 +1251,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           const g = e.gun;
           const cls = g > 0 ? 'cs-gec' : (g < 0 ? 'cs-erken' : 'cs-tam');
           const txt = g > 0 ? (g + ' gün geç') : (g < 0 ? (Math.abs(g) + ' gün erken') : 'tam gününde');
-          // Tutar YAZILMAZ — soldaki kutuda zaten görünüyor (kullanıcı isteği:
-          // "Fatura #1 yazman yeterli, tutarını yazmana gerek yok").
-          // Kalan/eşleşmeyen kısım ayrı satırda zaten bildiriliyor.
+          // Kutu genişledikten sonra tutar da yazılıyor (kullanıcı: "yeterince boşluk oldu,
+          // 1. Fatura'dan sonra tutarını da yazabilirsin") — hangi faturaya ne kadar
+          // gittiği özellikle bölünmüş kapamalarda gerekli bilgi.
           return '<div class="cs-satir">' +
                    '<span class="cs-badge ' + cls + '">' + txt + '</span>' +
-                   '<span class="cs-detay">' + e.faturaNo + '. Fatura</span>' +
+                   '<span class="cs-detay">' + e.faturaNo + '. Fatura · ' + fmtTR(e.miktar) + ' ₺</span>' +
                  '</div>';
         }).join('');
         const artan = t.kalan > 0 ? '<div class="cs-satir"><span class="cs-detay cs-artan">kalan ' + fmtTR(t.kalan) + ' ₺ eşleşmedi</span></div>' : '';
