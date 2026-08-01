@@ -48,8 +48,9 @@
 
   function inject(){
     if(document.getElementById('mmgDovizBtn')) return; // tek örnek
-    // Kullanıcı widget'ları kapattıysa hiç basma (sağ tık menüsünden açılıp kapanır).
-    try{ if(localStorage.getItem('mmg_widget_kur_hidden') === '1') return; }catch(e){}
+    // NOT: Gizleme burada DEĞİL, mmg-widget-menu.js içinde CSS ile yapılır. Widget her
+    // zaman oluşturulur; böylece sağ tık menüsünden açılıp kapanması ANINDA olur
+    // (kullanıcı: "tıklayınca çok geç yüklüyor" — eskiden yeniden yükleme gerekiyordu).
 
     // --- Buton (Hesap Makinesi butonunun hemen soluna) ---
     const btn = document.createElement('button');

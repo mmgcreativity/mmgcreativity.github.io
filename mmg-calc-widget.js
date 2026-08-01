@@ -11,7 +11,7 @@
 (function(){
   'use strict';
   if(document.getElementById('mmgCalcBtn')) return;                 // tek ornek
-  try{ if(localStorage.getItem('mmg_widget_calc_hidden') === '1') return; }catch(e){}
+  // NOT: Gizleme mmg-widget-menu.js içinde CSS ile yapılır (anında etki için).
 
   var style = document.createElement('style');
   style.textContent = `  #mmgCalcBtn{
