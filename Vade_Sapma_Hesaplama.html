@@ -792,13 +792,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       statFarkEl.className = 'v';
     }
 
+    // Ortalama vadeler BAĞIMSIZ gösterilir: kullanıcı yalnız faturaları girdiğinde de
+    // "Fatura Ort. Vadesi" hemen görünsün (kullanıcı bildirdi: toplam geliyor ama ortalama
+    // gelmiyordu — eskiden iki taraf da dolmadan ikisi birden '—' kalıyordu).
+    statFaturaVadeEl.textContent = faturaAgirlikToplam > 0
+      ? fmtDateTR(new Date(Math.round(faturaAgirlikliTop / faturaAgirlikToplam) * 86400000)) : '—';
+    statCekVadeEl.textContent = cekAgirlikToplam > 0
+      ? fmtDateTR(new Date(Math.round(cekAgirlikliTop / cekAgirlikToplam) * 86400000)) : '—';
+
+    // Sapma için İKİ taraf da gerekir (fatura + tahsilat).
     if(faturaAgirlikToplam <= 0 || cekAgirlikToplam <= 0){
       devValueEl.textContent = '—';
       devValueEl.className = 'deviation-value neutral';
       devSubEl.textContent = LBL.enterDataHint;
       devSubEl.className = 'deviation-sub';
-      statFaturaVadeEl.textContent = '—';
-      statCekVadeEl.textContent = '—';
       document.querySelectorAll('#cekRows .c-sonuc').forEach(el => { el.hidden = true; });
       return;
     }
