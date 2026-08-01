@@ -89,7 +89,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   main{ max-width:1180px; margin:0 auto; padding:28px 24px 24px; }
 
-  .cols{ display:grid; grid-template-columns:1.55fr 1fr; gap:24px; align-items:start; }
+  .cols{ display:grid; grid-template-columns:1.18fr 1fr; gap:24px; align-items:start; }
   @media (max-width:940px){ .cols{ grid-template-columns:1fr; } }
 
   .panel{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:22px; }
@@ -113,9 +113,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     font-weight:700; white-space:nowrap;
   }
   .tbl-head .th.f-tarih-wrap{ flex:0 0 106px; }
-  .tbl-head .th.f-yontem-wrap{ flex:0 0 118px; }
-  .tbl-head .th.f-gun-wrap{ flex:0 0 78px; }
-  .tbl-head .th.f-tutar-wrap{ flex:1 1 132px; min-width:132px; }
+  .tbl-head .th.f-yontem-wrap{ flex:0 0 100px; }
+  .tbl-head .th.f-gun-wrap{ flex:0 0 64px; }
+  .tbl-head .th.f-tutar-wrap{ flex:0 0 122px; }
   .tbl-head .th.f-due-wrap{ flex:0 0 92px; }
   .tbl-head .th.f-del-wrap{ flex:0 0 auto; }
   .tbl-head .th.c-tarih-wrap{ flex:0 0 106px; }
@@ -127,6 +127,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     border-radius:0; padding:2px 0;
   }
   .entry-row:last-child{ border-bottom:none; }
+  /* Tahsilat satirlari sarmalidir: kapama sonucu (.c-sonuc) satirin SAGINA degil
+     ALTINA, kendi satirina iner (kullanici: "sagdaki bilgiler satir olarak altina gelsin"). */
+  .entry-row.cek-row{ flex-wrap:wrap; }
   .entry-row:hover{ background:rgba(255,255,255,0.015); }
   @media (max-width:720px){
     .entry-row{ flex-wrap:wrap; }
@@ -159,9 +162,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   /* Calisma Sekli kutusu: 210px'lik genis alan icerigi (Fatura + / Ay sonu +) cok astigi icin,
      kutu metnin sonuna hizali ve derli toplu olacak sekilde daraltildi; bosalan yer esnek
      Fatura Tutari kolonuna akar. Diger sabit kolonlarin hizasi degismez. */
-  .f-field.f-yontem-wrap{ flex:0 0 118px; }
-  .f-field.f-gun-wrap{ flex:0 0 78px; }
-  .f-field.f-tutar-wrap{ flex:1 1 132px; min-width:132px; }
+  .f-field.f-yontem-wrap{ flex:0 0 100px; }
+  .f-field.f-gun-wrap{ flex:0 0 64px; }
+  .f-field.f-tutar-wrap{ flex:0 0 122px; }   /* 99.999.999,00 tam sığar */
   .f-field.f-due-wrap{ flex:0 0 92px; }
   .f-field.f-del-wrap{ flex:0 0 auto; }
   .f-field.c-tarih-wrap{ flex:0 0 106px; }
@@ -219,9 +222,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   /* ---- Tahsilat satırı kapama sonucu (kaç gün erken/geç + neyi kapattı) ---- */
   .c-sonuc{
-    flex:1 1 100%; display:flex; flex-wrap:wrap; align-items:center; gap:6px;
-    margin-top:6px; padding-top:7px; border-top:1px dashed var(--hairline); font-size:11.5px;
+    flex:1 1 100%; width:100%; display:flex; flex-direction:column; gap:3px;
+    margin:4px 0 6px; padding-top:6px; border-top:1px dashed var(--hairline); font-size:11.5px;
   }
+  .cs-satir{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
   .c-sonuc[hidden]{ display:none; }
   .cs-badge{
     flex:0 0 auto; font-size:10.5px; font-weight:700; letter-spacing:.02em;
@@ -331,7 +335,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- ÇEK PANELİ -->
     <div class="panel">
       <div class="panel-head">
-        <div class="panel-title cek" data-i18n="checks_title">🧾 Tahsilat (Çek/Senet/DBS vs.)</div>
+        <div class="panel-title cek" data-i18n="checks_title">🧾 Tahsilatlar (Çek/Senet/DBS vs.)</div>
       </div>
       <div class="panel-desc" data-i18n="checks_desc">Tahsil ettiğiniz çek, senet, DBS vb. ödemelerin vade tarihi ve tutarlarını girin.</div>
       <div class="tbl-head tbl-head-cek"><span class="th c-tarih-wrap">Vade</span><span class="th c-tutar-wrap">Tutar</span><span class="th f-del-wrap"></span></div><div class="row-table" id="cekRows"></div>
@@ -373,19 +377,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="ka-row">
           <label class="ka-label" for="kapamaYontem">Kapama sırası</label>
           <select id="kapamaYontem" class="ka-select">
-            <option value="fifo" selected>FIFO — en eski faturadan başla</option>
-            <option value="lifo">LIFO — en yeni faturadan başla</option>
-            <option value="kumulatif">Kümülatif — eşleştirme yapma, ortalama vadeleri karşılaştır</option>
+            <option value="fifo" selected>FIFO — en eskiden başla</option>
+            <option value="lifo">LIFO — en yeniden başla</option>
+            <option value="kumulatif">Kümülatif — ortalama vadeler</option>
           </select>
         </div>
         <div class="ka-row" id="kapamaBolmeRow">
           <label class="ka-label" for="kapamaBolme">Tahsilat bölünsün mü?</label>
           <select id="kapamaBolme" class="ka-select">
-            <option value="bol" selected>Bölünsün — bir tahsilat birden fazla faturayı kapatabilir</option>
-            <option value="bolme">Bölünmesin — bir tahsilat yalnızca tek faturaya yazılır</option>
+            <option value="bol" selected>Bölünsün — çok faturaya dağıt</option>
+            <option value="bolme">Bölünmesin — tek faturaya</option>
           </select>
         </div>
-        <div class="ka-hint" id="kapamaHint">Sapma, kapatılan tutarlarla ağırlıklandırılarak hesaplanır.</div>
+        <div class="ka-hint" id="kapamaHint">Sapma, kapatılan tutarlarla ağırlıklandırılır.</div>
       </div>
 
     <div class="flag" data-i18n="deviation_flag">⚠ Vade sapması, fatura ve çek tutarlarına göre ağırlıklı ortalama tarihler üzerinden hesaplanır. Negatif (−) değer vadenin geçtiğini / gecikmeyi, sıfır veya pozitif (+) değer erken ya da tam vadesinde ödemeyi gösterir.</div>
@@ -443,19 +447,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     return intPart;
   }
+  // Tutar üst sınırı: 99.999.999,00 (kullanıcı isteği — kutu bu sayıya göre boyutlandı).
+  const MAX_TUTAR = 99999999;
+  function capTutar(el){
+    const v = parseTR(el.value);
+    if(v > MAX_TUTAR){
+      el.value = MAX_TUTAR.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+      return true;
+    }
+    return false;
+  }
   function attachTRFormatting(el){
     el.addEventListener('focus', ()=>{ el.select(); });
     el.addEventListener('input', ()=>{
       const pos = el.selectionStart;
       const before = el.value;
       el.value = formatTRLive(el.value);
+      if(capTutar(el)){ recalc(); return; }
       const diff = el.value.length - before.length;
       const newPos = Math.max(0, (pos||0) + diff);
       try { el.setSelectionRange(newPos, newPos); } catch(e){}
       recalc();
     });
     el.addEventListener('blur', ()=>{
-      const v = parseTR(el.value);
+      const v = Math.min(parseTR(el.value), MAX_TUTAR);
       el.value = v.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
     });
   }
@@ -629,6 +644,80 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   ['kapamaYontem','kapamaBolme'].forEach(function(id){
     const el = document.getElementById(id);
     if(el) el.addEventListener('change', recalc);
+  });
+
+  // ---------- GERİ AL (Ctrl+Z / "Geri Al" butonu) DESTEĞİ ----------
+  // mmg-undo.js eski değeri kutuya yazıp 'input' + 'change' olayları gönderir.
+  // Satır alanlarının kendi dinleyicileri recalc'ı yalnızca BLUR'da çağırdığı için
+  // geri alma sonrası ekrandaki toplam/vade/sapma güncellenmiyordu — kullanıcıya
+  // "geri al çalışmıyor" gibi görünüyordu. Delege dinleyici ile satırlardaki her
+  // programatik değişiklikte de yeniden hesaplıyoruz.
+  ['input','change'].forEach(function(evt){
+    document.addEventListener(evt, function(e){
+      const t = e.target;
+      if(!t || !t.closest) return;
+      if(t.closest('#faturaRows, #cekRows')){
+        // Tarih kutuları metin maskeli input olduğundan onların da veri modeline
+        // yansıması gerekir; wireDateBox'ın kendi 'input' dinleyicisi zaten çalışır,
+        // burada yalnızca sonucu tazeliyoruz.
+        recalc();
+      }
+    }, true);
+  });
+
+  // ---------- OK TUŞLARIYLA HÜCRELER ARASI HAREKET (Excel gibi) ----------
+  // Kullanıcı isteği: "kutular arasında oklarla hareket etmek istiyorum".
+  //   ↑ / ↓  → aynı sütunda bir üst / bir alt satıra geç
+  //   ← / →  → imleç kutunun başında/sonundayken komşu sütuna geç
+  //            (aksi halde imleç metin içinde normal hareket eder — yazı düzenlemeyi bozmaz)
+  // <select> içinde ↑/↓ seçenek değiştirir; oraya karışmıyoruz.
+  function satirHucreleri(row){
+    return Array.prototype.filter.call(
+      row.querySelectorAll('input, select'),
+      function(x){ return !x.disabled && x.offsetParent !== null; }
+    );
+  }
+  document.addEventListener('keydown', function(e){
+    const el = e.target;
+    if(!el || !el.closest) return;
+    const row = el.closest('.entry-row');
+    if(!row) return;                                  // yalnızca tablo satırlarında
+    const yon = e.key;
+    if(yon !== 'ArrowUp' && yon !== 'ArrowDown' && yon !== 'ArrowLeft' && yon !== 'ArrowRight') return;
+
+    const hucreler = satirHucreleri(row);
+    const i = hucreler.indexOf(el);
+    if(i === -1) return;
+
+    // --- Yatay: yalnızca imleç uçtayken sütun değiştir ---
+    if(yon === 'ArrowLeft' || yon === 'ArrowRight'){
+      if(el.tagName === 'SELECT') return;             // select'te ok tuşu seçenek değiştirir
+      const uzunluk = (el.value || '').length;
+      const bas = (typeof el.selectionStart === 'number') ? el.selectionStart : 0;
+      const son = (typeof el.selectionEnd === 'number') ? el.selectionEnd : 0;
+      if(bas !== son) return;                         // seçim varsa karışma
+      if(yon === 'ArrowLeft'  && bas !== 0) return;    // imleç başta değilse normal davran
+      if(yon === 'ArrowRight' && son !== uzunluk) return;
+      const hedef = hucreler[i + (yon === 'ArrowRight' ? 1 : -1)];
+      if(!hedef) return;
+      e.preventDefault();
+      hedef.focus();
+      if(hedef.select){ try{ hedef.select(); }catch(_){} }
+      return;
+    }
+
+    // --- Dikey: aynı sütunda üst/alt satır ---
+    if(el.tagName === 'SELECT') return;               // select'te ↑↓ seçenek değiştirir
+    const satirlar = Array.prototype.slice.call(row.parentElement.querySelectorAll('.entry-row'));
+    const r = satirlar.indexOf(row);
+    const hedefSatir = satirlar[r + (yon === 'ArrowDown' ? 1 : -1)];
+    if(!hedefSatir) return;
+    const hedefHucreler = satirHucreleri(hedefSatir);
+    const hedef = hedefHucreler[i] || hedefHucreler[hedefHucreler.length - 1];
+    if(!hedef) return;
+    e.preventDefault();
+    hedef.focus();
+    if(hedef.select){ try{ hedef.select(); }catch(_){} }
   });
 
   // ---------- ENTER = TAB ----------
@@ -851,9 +940,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if(!t || !t.eslesme.length){
           if(t && t.kalan > 0 && t.tutar > 0){
             el.hidden = false;
-            el.innerHTML = '<span class="cs-badge cs-none">eşleşmedi</span>' +
+            el.innerHTML = '<div class="cs-satir"><span class="cs-badge cs-none">eşleşmedi</span>' +
                            '<span class="cs-detay">Kapatacak uygun fatura bulunamadı' +
-                           (bolme === 'bolme' ? ' (bölünmesin seçili — tam sığan fatura yok)' : '') + '</span>';
+                           (bolme === 'bolme' ? ' (bölünmesin seçili — tam sığan fatura yok)' : '') + '</span></div>';
           } else { el.hidden = true; }
           return;
         }
@@ -862,10 +951,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           const g = e.gun;
           const cls = g > 0 ? 'cs-gec' : (g < 0 ? 'cs-erken' : 'cs-tam');
           const txt = g > 0 ? (g + ' gün geç') : (g < 0 ? (Math.abs(g) + ' gün erken') : 'tam gününde');
-          return '<span class="cs-badge ' + cls + '">' + txt + '</span>' +
-                 '<span class="cs-detay">Fatura #' + e.faturaNo + ' · ' + fmtTR(e.miktar) + ' ₺</span>';
-        }).join('<span class="cs-ayrac">•</span>');
-        const artan = t.kalan > 0 ? '<span class="cs-ayrac">•</span><span class="cs-detay cs-artan">kalan ' + fmtTR(t.kalan) + ' ₺ eşleşmedi</span>' : '';
+          return '<div class="cs-satir">' +
+                   '<span class="cs-badge ' + cls + '">' + txt + '</span>' +
+                   '<span class="cs-detay">Fatura #' + e.faturaNo + ' · ' + fmtTR(e.miktar) + ' ₺</span>' +
+                 '</div>';
+        }).join('');
+        const artan = t.kalan > 0 ? '<div class="cs-satir"><span class="cs-detay cs-artan">kalan ' + fmtTR(t.kalan) + ' ₺ eşleşmedi</span></div>' : '';
         el.innerHTML = parcalar + artan;
       });
 
@@ -967,7 +1058,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       reset_btn:'Sıfırla', back_home:'← Ana Sayfa',
       invoices_title:'📄 Faturalar', invoices_desc:'Fatura tarihi, çalışma koşulu (<b>vade faturanın tarihine mi, ay sonuna mı</b>) ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.',
       add_invoice:'+ Fatura Ekle', total_invoice_amount:'Toplam Fatura Tutarı',
-      checks_title:'🧾 Tahsilat (Çek/Senet/DBS vs.)', checks_desc:'Tahsil ettiğiniz çek, senet, DBS vb. ödemelerin vade tarihi ve tutarlarını girin.',
+      checks_title:'🧾 Tahsilatlar (Çek/Senet/DBS vs.)', checks_desc:'Tahsil ettiğiniz çek, senet, DBS vb. ödemelerin vade tarihi ve tutarlarını girin.',
       add_check:'+ Tahsilat Ekle', total_check_amount:'Toplam Tahsilat Tutarı',
       deviation_label:'Vade Sapması', deviation_sub:'Hesaplamak için fatura ve çek bilgilerini girin',
       stat_invoice_avg:'Fatura Ort. Vadesi', stat_check_avg:'Tahsilat Ort. Vadesi', stat_coverage:'Karşılama Oranı', stat_uncovered:'Karşılanmayan Tutar',

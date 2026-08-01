@@ -94,8 +94,16 @@
       // "onceki deger"i geri yuklenen degere esitle.
       prevValues.set(el, readState(el));
       try { el.focus({ preventScroll: false }); } catch (e) {}
+      // Sayfalarin hesaplama mantigi farkli olaylara bagli olabilir:
+      //   - bazilari 'input'ta hesaplar
+      //   - COGU 'blur' (veya 'change') aninda recalc() cagirir
+      // Eskiden yalnizca input+change gonderiliyordu; blur'da hesaplayan sayfalarda
+      // kutunun degeri geri geliyor ama TOPLAM/SONUC guncellenmiyordu -> kullaniciya
+      // "geri al calismiyor" gibi gorunuyordu. Artik blur da gonderiliyor.
+      // (isUndoing bayragi acik oldugu icin bu olaylar yigina tekrar itilmez.)
       dispatch(el, 'input');
       dispatch(el, 'change');
+      dispatch(el, 'blur');
     } finally {
       isUndoing = false;
     }
