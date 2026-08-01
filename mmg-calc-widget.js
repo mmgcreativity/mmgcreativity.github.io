@@ -11,7 +11,7 @@
 (function(){
   'use strict';
   if(document.getElementById('mmgCalcBtn')) return;                 // tek ornek
-  try{ if(localStorage.getItem('mmg_widgets_hidden') === '1') return; }catch(e){}
+  try{ if(localStorage.getItem('mmg_widget_calc_hidden') === '1') return; }catch(e){}
 
   var style = document.createElement('style');
   style.textContent = `  #mmgCalcBtn{

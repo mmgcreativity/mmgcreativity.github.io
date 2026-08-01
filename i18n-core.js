@@ -146,13 +146,7 @@
   try {
     if (window.self !== window.top) {
       var st = document.createElement('style');
-      // KUR + Hesap Makinesi: masaüstü kabuğunda (index.html) artık ORTAK olarak
-      // yükleniyorlar. Araç sayfasının kendi kopyaları iframe içinde kalırsa hem
-      // MÜKERRER olur hem de iframe'in sağ üstüne sabitlenip içerikle çakışırlar
-      // (kullanıcı: "aşağı geldi kaydırınca"). Bu yüzden iframe'de gizleniyorlar;
-      // sayfa bağımsız/mobil açıldığında kendi widget'ları KALIR.
-      st.textContent = '.back-link, a[href="index.html"][target="_top"]{ display:none !important; }' +
-        '#mmgCalcBtn, #mmgCalcPanel, #mmgDovizBtn, #mmgDovizPanel{ display:none !important; }';
+      st.textContent = '.back-link, a[href="index.html"][target="_top"]{ display:none !important; }';
       (document.head || document.documentElement).appendChild(st);
     }
   } catch (e) { /* cross-origin erişim engellenirse sessizce geç */ }
