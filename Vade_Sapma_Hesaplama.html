@@ -293,7 +293,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="panel-head">
         <div class="panel-title fatura" data-i18n="invoices_title">📄 Faturalar</div>
       </div>
-      <div class="panel-desc" data-i18n-html="invoices_desc">Fatura tarihi, çalışma koşulu ve vade gün sayısını girin, vade tarihi otomatik hesaplanır.</div>
+      <div class="panel-desc" data-i18n-html="invoices_desc">Fatura tarihi, çalışma koşulu (<b>vade faturanın tarihine mi, ay sonuna mı</b>) ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.</div>
       <div class="row-table" id="faturaRows"></div>
       <button type="button" class="add-btn fatura" id="addFaturaBtn" data-i18n="add_invoice">+ Fatura Ekle</button>
       <div class="subtotal-line"><span data-i18n="total_invoice_amount">Toplam Fatura Tutarı</span><b id="faturaToplam" class="mono">0,00</b></div>
@@ -328,8 +328,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
       <div class="row-table" id="cekRows"></div>
-      <button type="button" class="add-btn cek" id="addCekBtn" data-i18n="add_check">+ Çek Ekle</button>
-      <div class="subtotal-line"><span data-i18n="total_check_amount">Toplam Çek Tutarı</span><b id="cekToplam" class="mono">0,00</b></div>
+      <button type="button" class="add-btn cek" id="addCekBtn" data-i18n="add_check">+ Tahsilat Ekle</button>
+      <div class="subtotal-line"><span data-i18n="total_check_amount">Toplam Tahsilat Tutarı</span><b id="cekToplam" class="mono">0,00</b></div>
     </div>
 
   </div>
@@ -347,7 +347,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="v brass" id="statFaturaVade">—</div>
       </div>
       <div class="stat-card">
-        <div class="l" data-i18n="stat_check_avg">Çek Ort. Vadesi</div>
+        <div class="l" data-i18n="stat_check_avg">Tahsilat Ort. Vadesi</div>
         <div class="v brass" id="statCekVade">—</div>
       </div>
       <div class="stat-card">
@@ -930,12 +930,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       page_title:'Vade Sapma Hesaplama',
       page_subtitle:'Fatura vadeleriniz ile tahsil ettiğiniz çeklerin vadelerini karşılaştırın; ortalama kaç gün sapma olduğunu ve karşılama oranını görün.',
       reset_btn:'Sıfırla', back_home:'← Ana Sayfa',
-      invoices_title:'📄 Faturalar', invoices_desc:'Fatura tarihi, çalışma koşulu ve vade gün sayısını girin, vade tarihi otomatik hesaplanır.',
+      invoices_title:'📄 Faturalar', invoices_desc:'Fatura tarihi, çalışma koşulu (<b>vade faturanın tarihine mi, ay sonuna mı</b>) ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.',
       add_invoice:'+ Fatura Ekle', total_invoice_amount:'Toplam Fatura Tutarı',
       checks_title:'🧾 Tahsilat (Çek/Senet/DBS vs.)', checks_desc:'Tahsil ettiğiniz çek, senet, DBS vb. ödemelerin vade tarihi ve tutarlarını girin.',
-      add_check:'+ Çek Ekle', total_check_amount:'Toplam Çek Tutarı',
+      add_check:'+ Tahsilat Ekle', total_check_amount:'Toplam Tahsilat Tutarı',
       deviation_label:'Vade Sapması', deviation_sub:'Hesaplamak için fatura ve çek bilgilerini girin',
-      stat_invoice_avg:'Fatura Ort. Vadesi', stat_check_avg:'Çek Ort. Vadesi', stat_coverage:'Karşılama Oranı', stat_uncovered:'Karşılanmayan Tutar',
+      stat_invoice_avg:'Fatura Ort. Vadesi', stat_check_avg:'Tahsilat Ort. Vadesi', stat_coverage:'Karşılama Oranı', stat_uncovered:'Karşılanmayan Tutar',
       deviation_flag:'⚠ Vade sapması, fatura ve çek tutarlarına göre ağırlıklı ortalama tarihler üzerinden hesaplanır. Negatif (−) değer vadenin geçtiğini / gecikmeyi, sıfır veya pozitif (+) değer erken ya da tam vadesinde ödemeyi gösterir.'
     },
     en: {
