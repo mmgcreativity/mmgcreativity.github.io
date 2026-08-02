@@ -1689,6 +1689,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="fav-star" role="button" tabindex="0" data-fav-target="Faturalar.html#cari" data-fav-title="Cari Özeti" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
             <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_fat_ozet">Cari Özeti</span></span>
           </button>
+          <button class="nav-item nav-subitem" data-target="Stok_Takip.html" data-title="Stok Takip">
+            <span class="fav-star" role="button" tabindex="0" data-fav-target="Stok_Takip.html" data-fav-title="Stok Takip" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+            <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_stok">Stok Takip</span></span>
+          </button>
         </div>
       </div>
         <!-- 2026-08-02: Banka Yönetimi grup oldu; alt başlıklar modülün sekmelerini
@@ -1713,10 +1717,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </button>
         </div>
       </div>
-        <button class="nav-item nav-subitem" data-target="Stok_Takip.html" data-title="Stok Takip">
-          <span class="fav-star" role="button" tabindex="0" data-fav-target="Stok_Takip.html" data-fav-title="Stok Takip" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-          <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_stok">Stok Takip</span></span>
-        </button>
       
     </div>
     </div>
@@ -2427,7 +2427,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // Bir araç için iframe'i (yoksa) oluşturur ve döndürür; varsa mevcut olanı verir.
   // İframe kaldırılmadıkça sayfa AÇIK ve durumu korunmuş kalır.
   function mmgEnsureFrame(target){
-    if(mmgFrames[target]) return mmgFrames[target];
+    if(mmgFrames[target]){
+      // 2026-08-02 (kullanıcı: "hamburgerde Hazır Metin Talimatlar seçilince yine
+      // ilk ekran gelmeli, burada son ekran geliyor"):
+      // Bazı araçlar iframe İÇİNDE başka bir sayfaya gidiyor (ör. Hazır Metin
+      // Talimatları → Talimat_Hazirlama.html). Sekme hâlâ eski hedefle kayıtlı
+      // olduğu için menüden tekrar tıklandığında, o sekmede DURAN son sayfa
+      // görünüyordu. Iframe'in gerçek adresi hedeften saptıysa hedefe döndürülür.
+      try{
+        const f0 = mmgFrames[target];
+        const suan = f0.contentWindow ? f0.contentWindow.location.pathname.split('/').pop() : null;
+        const olmasiGereken = String(target).split('#')[0].split('/').pop();
+        if(suan && olmasiGereken && suan !== olmasiGereken) f0.src = target;
+      }catch(e){ /* farklı köken vb. — dokunma */ }
+      return mmgFrames[target];
+    }
     const f = document.createElement('iframe');
     f.dataset.target = target;
     f.src = target;
