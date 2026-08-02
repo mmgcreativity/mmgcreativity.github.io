@@ -40,6 +40,46 @@ Son güncelleme: **2026-08-02 (11. oturum — `muham` bilgisayarı, 4 yeni modü
 4. **Muhtemel sıradaki istekler:** KUR/hesap-makinesi üst ikonlarının görsel stili (ışıldak) netleşmedi; Personeller sekmesine Excel toplu yükleme; Talimat'ta personel kullanımı.
 5. Çalışma tarzı: `mmg-site-deploy` skill — sormadan, kuyruk bitene kadar; kapanışta HER ZAMAN (1) yayınlananlar (2) bekleyenler listesi ver ("bekleyen yok" deme hatası kullanıcıyı kızdırdı). **En kritik değişiklik: service worker NETWORK-FIRST** (4. oturum). Şifre sıfırlama maili TAM çalışır (Resend canlı).
 
+## 🟢 2026-08-02 (11. OTURUM — 2. bölüm) — İŞLETME MODÜLLERİ ZİNCİRİ + RAPORLAR MENÜSÜ (commit 532)
+
+**Sürüm:** `2026-08-02-isletme-raporlar`
+
+### Mimari karar — TEK KAYNAK İLKESİ
+Kullanıcı: *"müşteriler zaten veri girişinden yapılıyor… işletme yönetiminde sadece listeleri gelebilir"* ve *"risk yönetimi sadece rapor ekranı olacak, verileri diğer modüllerden çekecek."*
+
+| Veri | TEK KAYNAK | Okuyanlar |
+|---|---|---|
+| Müşteri / tedarikçi + **risk limiti, tanınan vade, vergi no, telefon, not** | `VeriGirisPaneli.html` → `customers` koleksiyonu | Risk, Çek/Senet, Teminat |
+| **Firmalarım** (YAŞAR CİHAN, ADERANS…) | `Banka_Yonetimi.html` → Tanımlar sekmesi (`mmgModules/firmalar`) | Çek/Senet, Teminat, Banka, Abonelik |
+| Çek / senet / DBS | `Cek_Senet.html` | Risk, Banka (portföydeki çekler) |
+| Teminat mektupları | `Teminat_Mektubu.html` | Risk (alınan → riski düşürür, verilen → banka riski) |
+| Banka limit / risk / bakiye | `Banka_Yonetimi.html` | Risk (Banka Riski sekmesi) |
+
+Ortak yardımcılar `mmg-store.js`'e eklendi: `MMGStore.cariler(kind)`, `cariDoldur()`, `firmalar()`, `firmaDoldur()`.
+⚠️ Cari eşleştirme **ünvan metnine göre** (büyük/küçük harf duyarsız) yapılır. Veri Girişi'nde kayıtlı olmayan cariler raporda "Veri Girişi'nde kayıtlı değil" uyarısıyla yine gösterilir — **hiçbir tutar rapordan düşmez**.
+
+### Yeni modüller
+1. **`Cek_Senet.html`** — Portföy + **pivot rapor** (satır: tahsil tarihi / hafta / ay, sütun: firmalar, hücre: tutar; kullanıcının Excel'indeki tabloyla aynı). Tipler: müşteri çeki/senedi, DBS, kendi çekimiz/senedimiz. Durum: portföyde / teminatta / ciro / tahsil / karşılıksız. Yalnızca **açık** kıymetler takvime girer.
+2. **`Teminat_Mektubu.html`** — Verilen + alınan + **iade süreçleri**. Excel'deki tüm sütunlar (banka, no, firma, mektup sınıfı, muhatap, konu, oran, taksit, kullanım tarihi, vade, tutar) + **firma bazlı ve genel toplam**. Vade **SÜRESİZ** olabilir. Yıllık tahmini komisyon = Tutar × Oran% × Taksit. ⚠️ Vadesi geçen mektup otomatik düşmez — banka fiilen iade almadıkça risk sürer.
+3. **`Banka_Yonetimi.html`** — 4 sekme:
+   - **Limit & Risk**: çek karşılığı ve kefalet için limit/risk/kalan; **konsolide veya firma bazında** görünüm; bir bankada firma ayrımı yoksa "çatı limit" işaretlenir. Açıklamalar tablosu ayrı.
+   - **Bakiyeler**: banka × firma × **her döviz** (TL/USD/EUR/GBP); hücrelere doğrudan yazılır; "PORTFÖYDEKİ ÇEKLER" satırı Çek/Senet modülünden **otomatik**.
+   - **İletişim**: şube + müdür / portföy yöneticisi / müşteri temsilcisi (ad-tel-mail). **Kısmi paylaşım**: istenen bankalar + istenen roller + istenen alanlar seçilip Kopyala / WhatsApp / E-posta / PDF.
+   - **Tanımlar**: Firmalarım ve Bankalar (tüm modüllerin ortak listesi).
+4. **`Abonelik_Faturalari.html`** — Elektrik/su/internet gibi düzenli faturalar; Excel'deki sütunlar (tür, tedarikçi, abone-firma, santral, sözleşme no, abone no, ödeme günü, banka, tutar). Ödeme takvimi + firma bazlı aylık yük. **"Giderler'e Aktar"** düğmesi kayıtları `mmg_odemeler_list`'e aylık tekrarlı olarak yazar → Nakit Akış Tablosu'na da düşer (mükerrer kayıt kontrolü var).
+
+### `Risk_Yonetimi.html` YENİDEN YAZILDI — artık SALT RAPOR
+Manuel müşteri kartı ve manuel risk kalemi girişi **kaldırıldı**. 4 sekme: Müşteri Riski · Yaşlandırma · Banka Riski · Risk Kalemleri (birleşik). Üstte "kaynak şeridi" her modülden kaç kayıt geldiğini gösterir ve modüle link verir.
+Yeni hesap: **Net risk = açık risk − o cariden alınan teminat mektubu.** Skor bu net risk üzerinden hesaplanır.
+
+### Menü
+Yeni ana menü **Raporlar** (Risk Yönetimi, Çek/Senet Raporu, Banka Limit & Risk, İstatistikler). İşletme Yönetimi artık: Çek/Senet · Teminat Mektupları · Banka Yönetimi · Abonelik/Fatura · Stok Takip · Portföy. Ana sayfa kartları 26 → 30, bölüm sayısı 7.
+
+### ⏳ BU BÖLÜMDEN KALAN
+- Alış/satış **faturası** modülü yapılmadı — kullanıcı son mesajında faturayı *abonelik/düzenli gider* olarak tarifledi ("faturalar yine raporlara veriyi giderlerden çekecek"), o yüzden `Abonelik_Faturalari.html` yapıldı. Klasik cari hesap faturası (fatura no + vade + tahsilat eşleştirme) isteniyorsa AYRI modül gerekir; Risk'teki "açık hesap" kalemi şu an yalnızca çek/senetten besleniyor.
+- Tahsilat Makbuzu henüz cari ile ilişkilendirilmedi (kendi cari alanı serbest metin).
+- Modüllerin hiçbiri gerçek veriyle kullanıcı tarafından test edilmedi.
+
 ## 🟢 2026-08-02 (11. OTURUM — `muham` bilgisayarı) — 4 YENİ MODÜL + MOBİL MENÜ DÜZELTMESİ (commit 527)
 
 **Yayınlanan sürüm:** `SW_VERSION = '2026-08-02-yeni-moduller'` (app-version.json ile aynı). Canlıda doğrulandı.
