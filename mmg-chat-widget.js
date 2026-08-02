@@ -91,7 +91,7 @@ import {
   let notificationsMap = {};  // notifId -> genel bildirim (davet/referans/hatırlatma) verisi
   let unsubNotifications = null;
   let notificationsFirstSnapshot = true;
-  let activeTab = 'friends'; // friends | requests | groups | admin | notifications
+  let activeTab = 'contacts'; // contacts | friends(sohbetler) | groups | requests | admin | notifications
   let mainView = 'sohbet';   // sohbet | bildirim  (üstteki iki ana başlık)
 
   // ---- Kullanıcı Kodu -> görünen ad önbelleği ----
@@ -149,7 +149,7 @@ import {
     delete pendingNameFetches[code];
     try{
       if(openChatId) refreshOpenChatTitle();
-      else if(activeTab === 'friends') renderTab();
+      else if(activeTab === 'friends' || activeTab === 'contacts') renderTab();
     }catch(e){}
   }
   function refreshOpenChatTitle(){
@@ -499,9 +499,13 @@ import {
     </div>
     <div id="mmgChatCodeBox" class="mmg-chat-code-box"></div>
     <div class="mmg-chat-tabs" id="mmgChatTabs">
-      <div class="mmg-chat-tab active" data-tab="friends">Kişilerim</div>
-      <div class="mmg-chat-tab" data-tab="groups">Grup</div>
-      <div class="mmg-chat-tab" data-tab="requests">İstek<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
+      <!-- 2026-08-02 (kullanıcı isteği): sıra 1 Kişiler, 2 Sohbetler, 3 Gruplar, 4 İstekler.
+           "Kişiler" ARTIK yalnızca kişi listesidir (son mesaj önizlemesi yok);
+           yazışmalar "Sohbetler" sekmesinde durur. -->
+      <div class="mmg-chat-tab active" data-tab="contacts">Kişiler</div>
+      <div class="mmg-chat-tab" data-tab="friends">Sohbetler</div>
+      <div class="mmg-chat-tab" data-tab="groups">Gruplar</div>
+      <div class="mmg-chat-tab" data-tab="requests">İstekler<span class="mmg-chat-dot" id="mmgChatReqDot" hidden></span></div>
     </div>
     <div class="mmg-chat-body" id="mmgChatBody"></div>
     <button type="button" id="mmgChatNewBtn" class="mmg-chat-fab" aria-label="Yeni sohbet" title="Yeni sohbet başlat" hidden>+</button>
@@ -638,7 +642,7 @@ import {
       els.bellBtn.addEventListener('click', () => {
         closeOpenChat(false);
         if(activeTab === 'notifications'){
-          activeTab = 'friends'; friendsSubView = 'list';
+          activeTab = 'contacts'; friendsSubView = 'list';
         } else {
           activeTab = 'notifications';
         }
@@ -1084,7 +1088,7 @@ import {
       if(!chatsFirstSnapshot) detectNewMessagesAndToast(newChatsMap, chatsMap, 'chats');
       chatsMap = newChatsMap;
       chatsFirstSnapshot = false;
-      if(activeTab === 'friends' && friendsSubView === 'list') renderTab();
+      if(activeTab === 'contacts' || (activeTab === 'friends' && friendsSubView === 'list')) renderTab();
       if(openChatId && chatsMap[openChatId]) updateOpenChatHeaderIfNeeded();
       updateBadge();
     }, (err) => console.error('mmg-chat-widget chats onSnapshot:', err));
@@ -1235,13 +1239,15 @@ import {
     syncMainView();
     // "+" butonu: Kişilerim listesinde "yeni sohbet", Grup listesinde "yeni grup oluştur".
     if(els.newBtn){
+      const onContacts = activeTab === 'contacts';
       const onFriends = activeTab === 'friends' && friendsSubView === 'list';
       const onGroups  = activeTab === 'groups'  && groupsSubView  === 'list';
-      els.newBtn.hidden = !(currentUser && (onFriends || onGroups) && mainView !== 'bildirim');
-      els.newBtn.title = onGroups ? 'Yeni grup oluştur' : 'Yeni sohbet başlat';
+      els.newBtn.hidden = !(currentUser && (onContacts || onFriends || onGroups) && mainView !== 'bildirim');
+      els.newBtn.title = onGroups ? 'Yeni grup oluştur' : (onContacts ? 'Kişi ekle' : 'Yeni sohbet başlat');
       els.newBtn.setAttribute('aria-label', els.newBtn.title);
     }
     if(activeTab === 'admin') return renderAdminTab();
+    if(activeTab === 'contacts') return renderContactsTab();
     if(activeTab === 'friends') return renderFriendsTab();
     if(activeTab === 'groups') return renderGroupsTab();
     if(activeTab === 'requests') return renderRequestsTab();
@@ -1540,6 +1546,60 @@ import {
         : 'Sohbet açılamadı, lütfen tekrar deneyin.';
       els.body.innerHTML = `<div class="mmg-chat-empty" style="color:var(--red,#E2544B);">${esc(hint)}</div>`;
     }
+  }
+
+  /* KİŞİLER sekmesi (2026-08-02) — yalnızca kişi listesi.
+     Sohbetler sekmesinden farkı: son mesaj/okunmadı bilgisi YOKTUR, liste ada göre
+     alfabetiktir. Amaç "kimlerle bağlantım var" sorusuna tek bakışta cevap vermek.
+     Satıra tıklanınca o kişiyle olan sohbet açılır. */
+  function renderContactsTab(){
+    els.title.textContent = 'Kişiler';
+
+    const kisiler = [];
+    Object.keys(chatsMap).forEach(id => {
+      const c = chatsMap[id];
+      if(c.isAdminChat) return;
+      const otherUid = (c.participants || []).find(u => u !== currentUser.uid);
+      if(!otherUid || myBlockedUids.includes(otherUid)) return;
+      const info = (c.participantInfo && c.participantInfo[otherUid]) || {};
+      const label = labelForCode(info.code);
+      kisiler.push({ id, label, otherUid, avatarLetter: avatarLetterFromLabel(label) });
+    });
+    kisiler.sort((a, b) => String(a.label).localeCompare(String(b.label), 'tr'));
+
+    els.body.innerHTML = kisiler.length ? kisiler.map(r => `
+      <div class="mmg-chat-list-item" data-chat-id="${esc(r.id)}" data-label="${esc(r.label)}" data-other-uid="${esc(r.otherUid)}">
+        <div class="mmg-chat-avatar">${esc(r.avatarLetter)}</div>
+        <div class="mmg-chat-list-main">
+          <div class="mmg-chat-list-name">${esc(r.label)}</div>
+        </div>
+        <button type="button" class="mmg-chat-list-delete" data-delete-chat-id="${esc(r.id)}" data-delete-label="${esc(r.label)}" title="Kişiyi sil" aria-label="Kişiyi sil">🗑</button>
+      </div>`).join('')
+      : `<div class="mmg-chat-empty">Henüz kayıtlı kişiniz yok.<br>Sağ alttaki <b>+</b> ile kullanıcı kodu girerek kişi ekleyebilirsiniz.</div>`;
+
+    els.body.querySelectorAll('.mmg-chat-list-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const label = btn.dataset.deleteLabel || 'Bu kişi';
+        if(confirm(label + ' silinsin mi? Bu kişiyle olan tüm sohbet geçmişi kaybolacak.')){
+          deleteChat(btn.dataset.deleteChatId);
+        }
+      });
+    });
+    els.body.querySelectorAll('.mmg-chat-list-item[data-chat-id]').forEach(row => {
+      row.addEventListener('click', () => {
+        // Kullanıcı isteği (2026-08-02): "kişilerimdeki kişiye tıklayınca sohbetlerimde
+        // o kişiyle olan sohbeti açsın, sohbet yoksa yenisini açsın."
+        // Sohbet kimliği iki kullanıcının uid'sinden ÜRETİLİR (pairChatId), yani kayıt
+        // henüz yoksa bile aynı kimlik çıkar; ilk mesaj gönderildiğinde belge oluşur.
+        // activeTab'i 'friends' yapıyoruz ki sohbetten geri dönünce Sohbetler listesine düşsün.
+        const otherUid = row.dataset.otherUid;
+        const chatId = row.dataset.chatId || (otherUid ? pairChatId(currentUser.uid, otherUid) : null);
+        if(!chatId) return;
+        activeTab = 'friends'; friendsSubView = 'list';
+        openChat(chatId, { title: row.dataset.label, isAdminChat: false, otherUid: otherUid, collection: 'chats' });
+      });
+    });
   }
 
   function renderFriendsTab(){
