@@ -607,7 +607,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     excelReadError:'Excel dosyası okunamadı: '
   };
   const CAT_LABELS_EN = {
-    'Nakit':'Cash', 'Fatura':'Bill', 'Kredi Kartı':'Credit Card', 'Kredi':'Loan', 'Kira':'Rent',
+    'Nakit':'Cash', 'Cari Ödeme':'Account Payment', 'Fatura':'Bill', 'Kredi Kartı':'Credit Card', 'Kredi':'Loan', 'Kira':'Rent',
     'Vergi/SGK':'Tax/Social Security', 'Personel Ücreti':'Staff Salary', 'Tedarikçi Ödemesi':'Supplier Payment',
     'Komisyon':'Commission', 'Faiz':'Interest', 'Diğer':'Other'
   };
@@ -795,7 +795,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   var CATS = window.MMG_PAYMENT_CATEGORIES || [
     { id:'nakit', icon:'💵', label:catLabelTxt('Nakit') },
-    { id:'fatura', icon:'🧾', label:catLabelTxt('Fatura') },
+    { id:'fatura', icon:'🧾', label:catLabelTxt('Cari Ödeme') },   /* id eski kayıtlar için 'fatura' kalır */
     { id:'kredi-karti', icon:'💳', label:catLabelTxt('Kredi Kartı') },
     { id:'kredi', icon:'🏦', label:catLabelTxt('Kredi') },
     { id:'kira', icon:'🏠', label:catLabelTxt('Kira') },
