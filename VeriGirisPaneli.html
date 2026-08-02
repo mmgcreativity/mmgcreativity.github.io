@@ -149,7 +149,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      tek satıra sığar, ekran şişiyor"): IBAN formu tek satır. Genişlikler alanın
      GERÇEK içeriğine göre: banka adı ~18 karakter, IBAN 32 karakter (TR + gruplu),
      döviz 3 harf, açıklama kalan yer, en sonda Ekle. */
-  .field-row-iban{ grid-template-columns:170px 300px 78px minmax(140px,1fr) 92px; gap:10px; align-items:end; }
+  .field-row-iban{ grid-template-columns:170px 290px 78px minmax(110px,1fr) 128px 92px; gap:10px; align-items:end; }
   .field-row-iban .auth-field{ margin:0; }
   .field-row-iban label{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .field-row-iban #bankIbanInput{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:0; }
@@ -663,6 +663,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <input type="text" id="bankNoteInput" data-i18n-placeholder="bank_note_ph" placeholder="ör. Yozgat şubesi / merkez">
           </div>
           <div class="auth-field">
+            <label title="Bu IBAN'ı kimler görebilsin? Sahipliği değiştirmez.">Görünürlük</label>
+            <select id="bankVisibilitySelect">
+              <option value="grup">Tüm grup</option>
+              <option value="sahibi">Sadece bu firma</option>
+            </select>
+          </div>
+          <div class="auth-field">
             <label>&nbsp;</label>
             <button type="button" class="auth-submit" id="addBankBtn" data-i18n="add_bank_btn" style="width:100%; margin:0;">Ekle</button>
           </div>
@@ -775,7 +782,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     bankRequired:'Please add at least one bank before entering data.',
     bulkNoFile:'Please choose a file first.', bulkParseError:'The file could not be read, please check the format.',
     bulkNoRows:'No valid rows found in the file.', bulkTypeCol:'Type', bulkNameCol:'Name', bulkIdCol:'TC/Tax No',
-    bulkBankCol:'Bank', bulkIbanCol:'IBAN', bulkCurrencyCol:'Currency', bulkNoteCol:'Description', bulkFirmaCodeCol:'Company Code', bulkSummaryText:'{n} rows found, grouped into {p} records.',
+    bulkBankCol:'Bank', bulkIbanCol:'IBAN', bulkCurrencyCol:'Currency', bulkNoteCol:'Description', bulkFirmaCodeCol:'Company Code', bulkVisibilityCol:'Visibility', bulkSummaryText:'{n} rows found, grouped into {p} records.',
     bulkSaving:'Saving…', bulkDone:'{n} records saved successfully.', bulkTypeCustomer:'Customer', bulkTypeSupplier:'Supplier',
     templateDownloaded:'Template downloaded.', templateError:'Template could not be created.',
     bankListAdded:'Bank added.', bankListSaved:'Saved ✓', bankListSaveFailed:'Could not be saved, please try again.',
@@ -801,7 +808,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     bankRequired:'Veri girmeden önce en az bir banka eklemelisiniz.',
     bulkNoFile:'Önce bir dosya seçmelisiniz.', bulkParseError:'Dosya okunamadı, formatını kontrol edin.',
     bulkNoRows:'Dosyada geçerli satır bulunamadı.', bulkTypeCol:'Tip', bulkNameCol:'Ünvan', bulkIdCol:'TC/Vergi No',
-    bulkBankCol:'Banka', bulkIbanCol:'IBAN', bulkCurrencyCol:'Döviz', bulkNoteCol:'Açıklama', bulkFirmaCodeCol:'Firma Kodu', bulkSummaryText:'{n} satır bulundu, {p} kayıda gruplandı.',
+    bulkBankCol:'Banka', bulkIbanCol:'IBAN', bulkCurrencyCol:'Döviz', bulkNoteCol:'Açıklama', bulkFirmaCodeCol:'Firma Kodu', bulkVisibilityCol:'Görünürlük', bulkSummaryText:'{n} satır bulundu, {p} kayıda gruplandı.',
     bulkSaving:'Kaydediliyor…', bulkDone:'{n} kayıt başarıyla kaydedildi.', bulkTypeCustomer:'Müşteri', bulkTypeSupplier:'Tedarikçi',
     templateDownloaded:'Şablon indirildi.', templateError:'Şablon oluşturulamadı.',
     bankListAdded:'Banka eklendi.', bankListSaved:'Kaydedildi ✓', bankListSaveFailed:'Kaydedilemedi, lütfen tekrar deneyin.',
@@ -1126,7 +1133,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       return '<div class="party-scope-badge">🏢 TÜM GRUP</div>';
     }
     const names = members.map(m => (String(m.code || '').trim() ? m.code + ' ' : '') + m.name);
-    return '<div class="party-scope-badge">🏢 ' + escapeHtml(names.join(', ')) + '</div>';
+    // 2026-08-02: Rozet artık ÇİFT YÖNLÜ. Kısıtlı bir kayda tıklayınca kısıtlama kalkar
+    // → gruptaki tüm firmalar görür. (Eskiden yalnızca "TÜM GRUP" rozeti tıklanabiliyordu,
+    // bir kere kısıtlanan IBAN'ı arayüzden tekrar tüm gruba açmanın yolu yoktu.)
+    return '<button type="button" class="party-scope-badge scope-openable" data-open-id="' + escapeHtml(record.id || '') +
+           '" style="cursor:pointer; font:inherit;" title="Bu kayıt yalnızca bu firma(lar)da görünür. Tıkla: gruptaki TÜM firmalara aç.">🏢 ' +
+           escapeHtml(names.join(', ')) + ' ▾</button>';
   }
 
   // Grup üyeliği checkbox listesi: ana firma her zaman işaretli ve kilitli görünür;
@@ -1454,7 +1466,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }catch(e){ showMsg('banks_msg', LBL.deleteFailed, true); }
       });
     });
-    // "🏢 tüm firmalar" rozetine tıklayınca: bu IBAN'ı AKTİF firmaya ata → artık diğer
+    // Kısıtlı rozete tıklayınca: görünürlük kısıtlaması KALDIRILIR → tüm grup görür.
+    // SAHİPLİK (sahipFirmaId) değişmez; 1. sütundaki firma adı aynı kalır.
+    listEl.querySelectorAll('.scope-openable').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.openId;
+        if(!id) return;
+        if(!confirm('Bu IBAN gruptaki TÜM firmalarda görünsün mü?\n\n(Sahibi değişmez — listede yine kendi firmasının adıyla görünür.)')) return;
+        try{
+          await setDoc(docRef('banks', id), { appliesToFirmaIds: [] }, { merge: true });
+          await loadBanks();
+        }catch(err){ showMsg('banks_msg', 'Güncellenemedi.', true); }
+      });
+    });
+    // "🏢 TÜM GRUP" rozetine tıklayınca: bu IBAN'ı AKTİF firmaya ata → artık diğer
     // firmalarda görünmez (kullanıcının en çok uğraştığı "tüm gruba ait IBAN geliyor" sorunu).
     listEl.querySelectorAll('.scope-assignable').forEach(btn => {
       btn.addEventListener('click', async (e) => {
@@ -1510,11 +1536,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       // formdaki firma seçimi YOK SAYILIYORDU. Kullanıcı tüm firmaları işaretlese bile kayıt
       // tek firmaya gidiyor, başka firmadayken IBAN'lar "kaybolmuş" gibi görünüyordu.
       // Artık seçim dikkate alınır; HEPSİ işaretliyse kısıtlama yazılmaz = TÜM GRUP.
-      // GÖRÜNÜRLÜK: seçim varsa o firmalar, hepsi seçiliyse kısıtlama yok (tüm grup).
-      const bankAppliesTo = collectFirmaSelection('bank_firmaSelect');
-      if(bankAppliesTo) docData.appliesToFirmaIds = bankAppliesTo;
-      // SAHİPLİK: IBAN tek bir firmaya aittir. Seçimde tek firma varsa o, yoksa aktif firma.
-      docData.sahipFirmaId = (bankAppliesTo && bankAppliesTo.length === 1) ? bankAppliesTo[0] : scopeId;
+      // SAHİPLİK: elle eklemede IBAN her zaman AKTİF firmaya aittir.
+      docData.sahipFirmaId = scopeId;
+      // GÖRÜNÜRLÜK: formdaki "Görünürlük" kutusundan (kullanıcı isteği 2026-08-02).
+      //   "Tüm grup"        → appliesToFirmaIds hiç yazılmaz  → herkes görür
+      //   "Sadece bu firma" → yalnızca aktif firma görür
+      const visSel = document.getElementById('bankVisibilitySelect');
+      if(visSel && visSel.value === 'sahibi') docData.appliesToFirmaIds = [scopeId];
       await setDoc(docRef('banks', id), docData);
       select.value = ''; ibanInput.value = ''; curInput.value = 'TRY'; noteInput.value = '';
       showMsg('banks_msg', LBL.saved, false);
@@ -2106,19 +2134,51 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   document.getElementById('downloadBanksTemplateBtn').addEventListener('click', () => {
     try{
       // Firma ADI sütunu kaldırıldı (kullanıcı isteği): eşleştirme YALNIZCA Firma Kodu ile yapılır.
-      const header = [LBL.bulkFirmaCodeCol, LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol, LBL.bulkNoteCol];
-      const example1 = ['1000', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY', 'Yozgat şubesi'];
-      const example2 = ['1001', 'Akbank', 'TR111111111111111111111111', 'USD', 'Kars şubesi'];
-      const note = [MMG_LANG==='en' ? '"Company Code" is REQUIRED: enter the code of the company this IBAN belongs to (shown in the User Management Panel, e.g. 1000). Rows with a missing or unmatched code are SKIPPED — nothing gets mixed into the wrong company.' : '"Firma Kodu" ZORUNLUDUR: IBAN\'ın ait olduğu firmanın kodunu yazın (Kullanıcı Yönetim Paneli\'nde görünür, örn. 1000). Kodu boş ya da eşleşmeyen satırlar KAYDEDİLMEZ — hiçbir kayıt yanlış firmaya karışmaz.'];
-      const rows = [header, example1, example2, [], note];
+      // 2026-08-02 (kullanıcı: "tüm grup firmalarında görülsün istiyorsam yükleme
+      // şablonunda hangi firmalarda görülsün diye bir sütun mu olsa" → EVET).
+      // SAHİPLİK ile GÖRÜNÜRLÜK ayrı iki şeydir:
+      //   Firma Kodu  → IBAN'ın SAHİBİ (parası kimin) — listede 1. sütunda görünür
+      //   Görünürlük  → bu kaydı KİMLER görebilir
+      const header = [LBL.bulkFirmaCodeCol, LBL.bulkBankCol, LBL.bulkIbanCol, LBL.bulkCurrencyCol, LBL.bulkNoteCol, LBL.bulkVisibilityCol];
+      const example1 = ['1000', 'Ziraat Bankası', 'TR000000000000000000000000', 'TRY', 'Yozgat şubesi', 'TÜM GRUP'];
+      const example2 = ['1001', 'Akbank',         'TR111111111111111111111111', 'USD', 'Kars şubesi',    'SAHİBİ'];
+      const example3 = ['1002', 'Anadolubank',    'TR222222222222222222222222', 'TRY', '',               '1000, 1002'];
+      const note1 = [MMG_LANG==='en'
+        ? '"Company Code" is REQUIRED: the code of the company that OWNS this IBAN (see User Management Panel, e.g. 1000). Rows with a missing/unmatched code are SKIPPED.'
+        : '"Firma Kodu" ZORUNLUDUR: IBAN\'ın SAHİBİ olan firmanın kodu (Kullanıcı Yönetim Paneli\'nde görünür, örn. 1000). Kodu boş/eşleşmeyen satırlar KAYDEDİLMEZ.'];
+      const note2 = [MMG_LANG==='en'
+        ? '"Visibility" is OPTIONAL — who can SEE this IBAN:   empty or "ALL" = every company in the group   |   "OWNER" = only the owning company   |   "1000, 1002" = only those company codes.'
+        : '"Görünürlük" sütunu SEÇİMLİKTİR — bu IBAN\'ı KİMLER görecek:   boş ya da "TÜM GRUP" = gruptaki tüm firmalar   |   "SAHİBİ" = yalnızca sahibi olan firma   |   "1000, 1002" = yalnızca o firma kodları.'];
+      const note3 = [MMG_LANG==='en'
+        ? 'Note: visibility does NOT change ownership. An IBAN visible to the whole group still belongs to the company in the "Company Code" column.'
+        : 'Not: Görünürlük SAHİPLİĞİ değiştirmez. Tüm grupta görünen bir IBAN yine "Firma Kodu" sütunundaki firmaya aittir.'];
+      const rows = [header, example1, example2, example3, [], note1, note2, note3];
       const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols'] = [{wch:14},{wch:24},{wch:30},{wch:10},{wch:22}];
+      ws['!cols'] = [{wch:14},{wch:24},{wch:30},{wch:10},{wch:22},{wch:18}];
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, MMG_LANG==='en' ? 'Template' : 'Şablon');
       XLSX.writeFile(wb, 'iban-sablon.xlsx');
       showMsg('banksBulkMsg', LBL.templateDownloaded, false);
     } catch(e){ showMsg('banksBulkMsg', LBL.templateError, true); }
   });
+
+  /* Excel'deki "Görünürlük" hücresini firma id listesine çevirir.
+       null döner  → kısıtlama YOK (gruptaki tüm firmalar görür)
+       [id, …]     → yalnızca bu firmalar görür
+     Kabul edilenler: boş / "TÜM GRUP" / "TUMU" / "HEPSİ" / "ALL"  → null
+                      "SAHİBİ" / "KENDİ" / "OWNER" / "SADECE"      → [sahipId]
+                      "1000, 1002"  (firma kodları, virgül/;/ ile ayrılabilir) */
+  function bulkGorunurlukCoz(ifade, sahipId, codeToId){
+    const t = String(ifade || '').trim().toLocaleUpperCase('tr');
+    if(!t) return null;
+    if(/^(TÜM GRUP|TUM GRUP|TÜMÜ|TUMU|HEPSİ|HEPSI|TÜM|TUM|ALL|GROUP)$/.test(t)) return null;
+    if(/^(SAHİBİ|SAHIBI|KENDİ|KENDI|SADECE|OWNER|OWN|SELF)$/.test(t)) return sahipId ? [sahipId] : null;
+    const idler = t.split(/[,;/|]+/).map(x => x.trim()).filter(Boolean)
+      .map(kod => codeToId[kod]).filter(Boolean);
+    if(!idler.length) return null;              // hiçbiri eşleşmediyse kısıtlama yazma
+    if(sahipId && idler.indexOf(sahipId) === -1) idler.push(sahipId);  // sahibi kendi kaydını hep görsün
+    return Array.from(new Set(idler));
+  }
 
   let pendingBanksBulkRows = null;
   document.getElementById('importBanksExcelBtn').addEventListener('click', () => {
@@ -2142,8 +2202,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         const iban = String(row['IBAN'] ?? '').trim().toUpperCase().replace(/\s+/g, '');
         const currency = String(row['Döviz'] ?? row['Doviz'] ?? row['Currency'] ?? '').trim().toUpperCase() || 'TRY';
         const note = String(row['Açıklama'] ?? row['Aciklama'] ?? row['Note'] ?? row['Description'] ?? '').trim();
+        const visibility = String(row['Görünürlük'] ?? row['Gorunurluk'] ?? row['Visibility'] ?? '').trim();
         if(!bank && !iban) continue;
-        rows.push({ firmaName, firmaCode, bank, iban, currency, note });
+        rows.push({ firmaName, firmaCode, bank, iban, currency, note, visibility });
       }
 
       if(!rows.length){ showMsg('banksBulkMsg', LBL.bulkNoRows, true); return; }
@@ -2158,8 +2219,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   function renderBanksBulkPreview(rows){
     const wrap = document.getElementById('banksBulkPreviewWrap');
     const table = document.getElementById('banksBulkPreviewTable');
-    const trs = rows.map(r => '<tr><td>' + escapeHtml(r.firmaName||'—') + '</td><td>' + escapeHtml(r.firmaCode||'—') + '</td><td>' + escapeHtml(r.bank||'—') + '</td><td>' + escapeHtml(r.iban||'—') + '</td><td>' + escapeHtml(r.currency||'TRY') + '</td><td>' + escapeHtml(r.note||'') + '</td></tr>');
-    table.innerHTML = '<thead><tr><th>Firma</th><th>' + LBL.bulkFirmaCodeCol + '</th><th>' + LBL.bulkBankCol + '</th><th>' + LBL.bulkIbanCol + '</th><th>' + LBL.bulkCurrencyCol + '</th><th>' + LBL.bulkNoteCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
+    const trs = rows.map(r => '<tr><td>' + escapeHtml(r.firmaName||'—') + '</td><td>' + escapeHtml(r.firmaCode||'—') + '</td><td>' + escapeHtml(r.bank||'—') + '</td><td>' + escapeHtml(r.iban||'—') + '</td><td>' + escapeHtml(r.currency||'TRY') + '</td><td>' + escapeHtml(r.note||'') + '</td><td>' + escapeHtml(r.visibility || (MMG_LANG==='en'?'ALL':'TÜM GRUP')) + '</td></tr>');
+    table.innerHTML = '<thead><tr><th>Firma</th><th>' + LBL.bulkFirmaCodeCol + '</th><th>' + LBL.bulkBankCol + '</th><th>' + LBL.bulkIbanCol + '</th><th>' + LBL.bulkCurrencyCol + '</th><th>' + LBL.bulkNoteCol + '</th><th>' + LBL.bulkVisibilityCol + '</th></tr></thead><tbody>' + trs.join('') + '</tbody>';
     document.getElementById('banksBulkSummary').textContent = fmt(LBL.bulkSummaryText, { n: rows.length, p: rows.length });
     mmgBulkModalShow(wrap);
   }
@@ -2183,7 +2244,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       if(scopeCollection === 'firmaAccounts'){
         const targetIds = new Set();
         pendingBanksBulkRows.forEach(r => { const tf = r.firmaCode ? codeToId[r.firmaCode] : null; if(tf) targetIds.add(tf); });
-        const oldOnes = targetIds.size ? banksList.filter(b => Array.isArray(b.appliesToFirmaIds) && b.appliesToFirmaIds.some(id => targetIds.has(id))) : [];
+        // 2026-08-02: Artık SAHİPLİĞE bakılır. Görünürlüğü "tüm grup" olan (appliesToFirmaIds
+        // boş) kayıtlar eskiden bu filtreye takılmıyor, "değiştir" seçilse bile silinmeyip
+        // mükerrer kalıyordu.
+        const oldOnes = targetIds.size ? banksList.filter(b =>
+          (b.sahipFirmaId && targetIds.has(b.sahipFirmaId)) ||
+          (Array.isArray(b.appliesToFirmaIds) && b.appliesToFirmaIds.some(id => targetIds.has(id)))
+        ) : [];
         if(oldOnes.length){
           const n = oldOnes.length, m = pendingBanksBulkRows.length;
           const answer = await mmgAsk(
@@ -2244,7 +2311,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         seenIbans.add(ibanKey);
         const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7) + '_' + count;
         const docData = { name: r.bank, iban: r.iban, currency: r.currency || 'TRY', note: r.note || '', createdAt: serverTimestamp() };
-        if(fid) docData.appliesToFirmaIds = [fid];
+        // SAHİPLİK: her zaman "Firma Kodu" sütunundaki firma (listede 1. sütun).
+        if(fid) docData.sahipFirmaId = fid;
+        // GÖRÜNÜRLÜK: "Görünürlük" sütunundan. Boş/"TÜM GRUP" ise alan hiç yazılmaz
+        // → kayıt gruptaki tüm firmalarda görünür. (Eskiden burada koşulsuz
+        // appliesToFirmaIds=[fid] yazılıyordu; bu yüzden HER IBAN tek firmaya kilitleniyordu.)
+        const gorunur = bulkGorunurlukCoz(r.visibility, fid, codeToId);
+        if(gorunur) docData.appliesToFirmaIds = gorunur;
         await setDoc(docRef('banks', id), docData);
         count++;
       }
