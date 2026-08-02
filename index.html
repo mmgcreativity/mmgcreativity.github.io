@@ -3471,9 +3471,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       return '<button type="button" class="desktop-add-menu-item" data-add-target="' + c.target + '" data-add-title="' + c.title + '">' + c.title + '</button>';
     }).join('');
     Array.prototype.forEach.call(addMenu.querySelectorAll('[data-add-target]'), function(btn){
-      btn.addEventListener('click', function(){
+      btn.addEventListener('click', function(ev){
+        // 2026-08-02 (kullanıcı: "kaleme basınca bu ilk kısayolu seçtiğinde kayboluyor;
+        // kalsın, kaleme geri basınca gitsin"): Menü artık ilk seçimde KAPANMIYOR.
+        // Arka arkaya birkaç kısayol eklenebilsin diye açık kalır ve yalnızca eklenen
+        // öge listeden düşürülür. Kapanış: kalem düğmesi, Esc ya da dışarı tıklama.
+        ev.stopPropagation();
         addShortcutToDesktop(btn.dataset.addTarget, btn.dataset.addTitle);
-        closeAddMenu();
+        buildAddMenu();          // eklenen kısayol listeden çıksın
       });
     });
   }

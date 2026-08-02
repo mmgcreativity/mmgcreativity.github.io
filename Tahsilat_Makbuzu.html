@@ -107,7 +107,11 @@
 
         <div style="height:10px;"></div>
         <label class="fl" for="mOdeyen">Tahsil Edilen (Ödeyen)</label>
-        <input id="mOdeyen" type="text" placeholder="Müşteri / firma adı">
+        <!-- 2026-08-02: Veri Girişi'ndeki müşteri/tedarikçi listesi öneri olarak gelir
+             (kullanıcı: "kullanıcı listesi gelse kod ve isim listesi oradan seç").
+             Alan serbest metin kalır — listede olmayan birine de makbuz kesilebilir. -->
+        <input id="mOdeyen" type="text" placeholder="Müşteri / firma adı — yazın ya da listeden seçin" list="mCariListesi" autocomplete="off">
+        <datalist id="mCariListesi"></datalist>
 
         <div style="height:10px;"></div>
         <div class="form-grid" style="grid-template-columns:1fr 1fr;">
@@ -389,6 +393,25 @@
   }
 
   /* ---- Liste ---- */
+  /* Veri Girişi > Müşteriler + Tedarikçiler → ödeyen önerileri */
+  var cariler = [];
+  async function carileriYukle(){
+    try{
+      var m = await S.cariler('customers');
+      var t = await S.cariler('suppliers');
+      var hepsi = (m || []).concat(t || []);
+      var gorulen = {};
+      cariler = hepsi.filter(function(c){
+        var ad = (c && c.ad || '').trim();
+        if(!ad || gorulen[ad]) return false;
+        gorulen[ad] = true; return true;
+      }).sort(function(a, b){ return a.ad.localeCompare(b.ad, 'tr'); });
+    }catch(e){ cariler = []; }
+    var dl = $('mCariListesi');
+    if(dl) dl.innerHTML = cariler.map(function(c){
+      return '<option value="' + esc(c.ad) + '"></option>'; }).join('');
+  }
+
   function render(){
     var q = ($('mAra').value || '').toLocaleLowerCase('tr');
     var list = store.get().slice().sort(function(a,b){
@@ -558,6 +581,8 @@
   $('mSira').addEventListener('input', function(){ siraElle = true; });
   store.onChange(function(){
     render();
+  carileriYukle();
+  document.addEventListener('mmg-scope-ready', carileriYukle);
     if(!siraElle) $('mSira').value = sonrakiSira();
   });
   firmaYukle();

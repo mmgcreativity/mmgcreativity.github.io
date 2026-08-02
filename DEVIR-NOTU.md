@@ -819,3 +819,72 @@ firebase functions:log --only publishToBlogger   # blog hatasını görmek için
 - [ ] Taksitli Kredi: 100.000 / %3,29 / 12 ay → Aylık Taksit 10.827,17 TL
 - [ ] Tablet yatay dönüyor mu; başlıklar kırılmıyor mu
 - [ ] Entegrasyon sayfası + menü linki açılıyor mu
+
+---
+
+# 12. OTURUM — 2 Ağustos 2026
+
+## Yeni modül
+- **`Kredi_Kartlari.html`** (Nakit Yönetimi altında). Üç ayrı store:
+  `krediKartlari` (banka, ad, son4, limit, **kesimGun**, **odemeGun**, para, firmaId),
+  `krediKartiHarcamalari` (kartId, tarih, tutar, **taksit**, kategori, açıklama),
+  `krediKartiOdemeleri` (yalnız "bu dönem ödendi" işareti).
+  **Ödeme planı TÜRETİLİR, elle girilmez** (`planUret()`): her harcama taksitlerine
+  bölünür; harcama günü ≤ kesim günü ise o ayın, değilse ertesi ayın ekstresine girer;
+  i. taksit → ilk dönem + i ay. Kuruş farkı son taksite bindirilir.
+  Son ödeme = dönem ayının kesim günü (kısa ayda kırpılır) + `odemeGun`.
+  Ödenmemiş TL dönemler `kk_<kartId>_<donem>` id'siyle nakit akışa yazılır.
+- Giderler'deki `kredi-karti` kategorisi **silinmedi, `gizli:true` yapıldı** — eski
+  kayıtların etiketi ve modülün yazdığı satırların kategorisi bozulmasın diye.
+
+## KRİTİK DÜZELTME — firma kapsamı (veri sızıntısı)
+`mmg_odemeler_list` / `mmg_gelirler_list` **tek global localStorage anahtarındaydı**;
+nakit akış önbelleği kapsam bazlıydı ama listenin kendisi değildi → A firmasında girilen
+kayıt B firmasında da görünüyordu.
+- `mmg-odemeler-sync.js` → `mmgScopedListAPI(base)`: anahtar `base__<col>:<id>`.
+  Eski global anahtar yalnız kişisel/misafir kapsama BİR KEZ taşınır.
+- `MMGStore.akisAnahtar(base)` eklendi; Çek/Senet ve Kredi Kartları bunu kullanır.
+- Gelirler'de bulut kayıtları yerel listeyle **birleştiriliyordu** (kayıtlar birikiyordu)
+  → artık **yerine yazılıyor**.
+- Gelir/Gider ekranlarına **"Grup Göster"** onay kutusu ve her satıra 🏢 firma rozeti.
+  Grup modunda başka firmanın kaydı 🔒 ile kilitli.
+
+## IBAN (VeriGirisPaneli)
+- **Satır bozuktu, üç ayrı hata:** ızgara 5 sütun / satırda 6 öge (✕ alt satıra taşıyordu),
+  IBAN'a 46px düşüyordu (kırpılıyordu), `.bank-chip button` kuralı kapsam rozetini de
+  20×20 daireye zorluyordu (yazı para birimiyle çakışıyordu).
+  Çözüm: `--iban-grid` CSS değişkeni — başlık/filtre/satır **aynı sabit sütunları** kullanır.
+- Sütun başlıkları + **sütun bazlı filtre** (Firma ve Banka açılır liste, tam eşleşme).
+- **Sahiplik ≠ Görünürlük** artık uçtan uca ayrı:
+  `sahipFirmaId` = 1. sütun (kimin parası), `appliesToFirmaIds` = kim görebilir (boş = tüm grup).
+  Toplu yükleme **koşulsuz `appliesToFirmaIds=[fid]` yazıyordu** — her IBAN tek firmaya
+  kilitleniyordu; düzeltildi. Excel şablonuna **"Görünürlük"** sütunu eklendi
+  (boş/`TÜM GRUP` · `SAHİBİ` · `1000, 1002`). Formda "Görünürlük" seçimi, listede rozet
+  **çift yönlü** (kısıtla ↔ tüm gruba aç).
+
+## Menü / arayüz
+- Sohbet sekmeleri: **Kişiler · Sohbetler · Gruplar · İstekler**. Kişiler yalnız kişi
+  listesi (son mesaj yok, alfabetik); tıklayınca `pairChatId` ile sohbet açılır.
+- Stok Takip → **Stok Yönetimi**, Cari Yönetimi altından İşletme Yönetimi'ne çıktı.
+- Risk Yönetimi Raporlar'da en üste; Yatırım Portföyü Nakit Yönetimi'nde en alta.
+- Çek/Senet başlıkları → **Çek / Senet / DBS**. Giderler'de "Fatura" → **"Cari Ödeme"**
+  (id `fatura` korundu).
+- Hero şeridinde Forum → İşletme Yönetimi; kelime öbekleri **bölünmez boşlukla** birleşti.
+- Play rozeti yıldızları 14px → **28px**.
+- **Yeni Fatura ekranı kaldırıldı**; ekleme formu Satış ve Alış listelerinin üstünde,
+  vade *çalışma şekli (Fatura+/Ay Sonu+) + gün* ile hesaplanıp nakit akışa gidiyor.
+- Cari Hesap Özeti: sütun sıralama (2. tıkta ters) + sütun arama (sayıda `<` üst sınır).
+- Talimat Hazırlama: sol panel **430px** (IBAN genişliği), önizleme büyüdü, yatay kaydırma
+  kapandı; Hazır Metin'den gelince "← Hazır Metin Talimatları" butonu; Grup dışı seçilince
+  **Açıklama satırı** (önizleme + PDF).
+- `mmgEnsureFrame`: sekmenin iframe'i başka sayfaya kaydıysa hedefe döndürülür
+  (Hazır Metin'e tekrar tıklayınca son ekran geliyordu).
+- Kalem (düzenle) menüsü ilk seçimde **kapanmıyor** artık; eklenen kısayol listeden düşer.
+- Tahsilat Makbuzu: Ödeyen alanına Veri Girişi cari listesi **datalist** olarak öneri.
+
+## BEKLEYEN — KULLANICI TARAFINDA
+1. **`firebase deploy --only firestore:rules`** — `companies` alt koleksiyon yazma kuralı,
+   misafir blog okuma ve bekleyen firma kuralı bu olmadan devrede DEĞİL.
+2. **Play Store mağaza kaydı** — metinler `web/PLAY-STORE-ACIKLAMA.md` dosyasında hazır;
+   Play Console'a kopyalanacak + yeni ekran görüntüleri.
+3. `html/_SILINECEK/` klasörü (700 KB, eski zip/yedekler) silinebilir.
