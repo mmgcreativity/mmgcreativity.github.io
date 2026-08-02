@@ -63,8 +63,14 @@
           <option value="gecikmis">Vadesi geçmiş</option>
           <option value="kapali">Kapandı</option>
         </select>
-        <input id="sBas" type="date" style="max-width:145px;" title="Başlangıç">
-        <input id="sBit" type="date" style="max-width:145px;" title="Bitiş">
+        <!-- 2026-08-02: iki tarih kutusunun ne olduğu belli değildi (kullanıcı bildirdi);
+             başına görünür etiket kondu. Bunlar FATURA TARİHİNE göre süzer. -->
+        <span style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); white-space:nowrap;">
+          Fatura tarihi:
+          <input id="sBas" type="date" style="max-width:142px;" title="Başlangıç tarihi">
+          <span>–</span>
+          <input id="sBit" type="date" style="max-width:142px;" title="Bitiş tarihi">
+        </span>
         <button class="btn" id="btnSExcel">Excel</button>
         <button class="btn" id="btnSPdf">PDF</button>
         <button class="btn primary" id="btnSAktar">Nakit Akış'a Aktar</button>
@@ -153,7 +159,17 @@
         </div>
         <div><label class="fl" for="fNo">Fatura No *</label><input id="fNo" class="mono" type="text" placeholder="ABC2026000001234"></div>
         <div><label class="fl" for="fTarih">Fatura Tarihi *</label><input id="fTarih" type="date"></div>
-        <div><label class="fl" for="fVadeGun">Vade (gün)</label><input id="fVadeGun" class="num" type="text" inputmode="numeric" placeholder="60"></div>
+        <!-- 2026-08-02: Vade Sapma ekranındaki "çalışma şekli" mantığı buraya da eklendi.
+             Fatura + : vade, fatura TARİHİNE gün eklenerek bulunur.
+             Ay Sonu + : vade, faturanın ayının SON GÜNÜNE gün eklenerek bulunur
+                         (piyasada çok yaygın: "ay sonu + 60 gün"). -->
+        <div><label class="fl" for="fYontem">Çalışma Şekli</label>
+          <select id="fYontem" title="Vade, faturanın tarihine mi (Fatura +) yoksa ayının sonuna mı (Ay Sonu +) eklenecek?">
+            <option value="fatura">Fatura +</option>
+            <option value="aysonu">Ay Sonu +</option>
+          </select>
+        </div>
+        <div><label class="fl" for="fVadeGun">Gün</label><input id="fVadeGun" class="num" type="text" inputmode="numeric" placeholder="60"></div>
         <div><label class="fl" for="fVade">Vade Tarihi *</label><input id="fVade" type="date"></div>
         <div style="grid-column:span 2;"><label class="fl" for="fCari">Cari *</label>
           <select id="fCari"></select>
@@ -270,19 +286,34 @@
     $(id).addEventListener('input', formHesapla);
     $(id).addEventListener('change', formHesapla);
   });
-  /* Vade günü girilince vade tarihi otomatik; vade tarihi elle değişirse gün geri hesaplanır. */
+  /* ---- VADE HESABI ----
+     Vade Sapma ekranıyla AYNI mantık:
+       Fatura +  → fatura tarihi + gün
+       Ay Sonu + → faturanın ayının son günü + gün
+     Vade tarihi elle değiştirilirse gün sayısı geriye doğru hesaplanır. */
+  function ayinSonu(iso){
+    var p = String(iso).split('-');
+    // ay+1'in 0. günü = bu ayın son günü (UTC ile saat kaymasından etkilenmez)
+    return new Date(Date.UTC(+p[0], +p[1], 0));
+  }
   function vadeGunden(){
     var t = $('fTarih').value, g = parseInt(S.parse($('fVadeGun').value), 10);
     if(!t || !(g >= 0)) return;
-    var d = new Date(t + 'T00:00:00Z');
+    var d = $('fYontem').value === 'aysonu' ? ayinSonu(t) : new Date(t + 'T00:00:00Z');
     d.setUTCDate(d.getUTCDate() + g);
     $('fVade').value = d.toISOString().slice(0,10);
   }
   $('fVadeGun').addEventListener('input', vadeGunden);
   $('fTarih').addEventListener('change', vadeGunden);
+  $('fYontem').addEventListener('change', vadeGunden);
   $('fVade').addEventListener('change', function(){
-    var a = gunSerisi($('fTarih').value), b = gunSerisi($('fVade').value);
-    if(a !== null && b !== null) $('fVadeGun').value = (b - a);
+    var t = $('fTarih').value, v = $('fVade').value;
+    if(!t || !v) return;
+    var baz = $('fYontem').value === 'aysonu'
+      ? Math.floor(ayinSonu(t).getTime() / 86400000)
+      : gunSerisi(t);
+    var b = gunSerisi(v);
+    if(baz !== null && b !== null) $('fVadeGun').value = (b - baz);
   });
   /* Cari seçilince o carinin "tanınan vade"si öneri gelsin (Veri Girişi'nden). */
   $('fCari').addEventListener('change', function(){
