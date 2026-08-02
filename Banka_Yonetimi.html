@@ -177,7 +177,7 @@
 
     <div class="panel">
       <div class="panel-title">Bankalar</div>
-      <div class="panel-desc">Limit, bakiye ve iletişim ekranlarının tamamı bu listeyi kullanır.</div>
+      <div class="panel-desc">Bu liste <b>Veri Girişi → Çalıştığım Bankalar</b>'dan otomatik gelir; oraya eklediğiniz bankalar burada da belirir. Buradan elle de ekleyebilirsiniz. Revizyon tarihi, grup limiti ve çatı limit işaretleri bankaya özel olarak burada tutulur.</div>
       <div class="btn-row" style="margin-bottom:10px;">
         <input id="nAd" type="text" placeholder="Banka adı (ör. AKBANK)" style="max-width:250px;">
         <input id="nRev" type="date" style="max-width:160px;" title="Revizyon tarihi">
@@ -808,11 +808,47 @@
     xls(rows, 'İletişim', 'banka-iletisim.xlsx');
   });
 
+  /* =========================================================================
+     BANKA LİSTESİ — TEK KAYNAK: Veri Giriş Paneli → "Çalıştığım Bankalar"
+     Kullanıcı isteği (2026-08-02): "veri girişinden çalıştığım bankalardan çek veriyi."
+     Orada liste tek bir dokümanda tutuluyor: {kapsam}/{id}/settings/bankList → { names:[] }
+     Buradaki yerel kayıt yalnızca bankanın EK BİLGİLERİNİ taşır (revizyon tarihi,
+     grup limiti, çatı limit işaretleri, açıklama). Ad eşleşmesiyle bağlanır.
+     ⚠️ Veri Girişi'nden bir banka silinirse buradaki limit/bakiye verisi SİLİNMEZ —
+     sessiz veri kaybı olmasın diye kayıt durur, sadece listeye yeni ad eklenmez.
+     ========================================================================= */
+  async function bankalariVeriGirisindenCek(){
+    var C = window.mmgCloud;
+    if(!C || !C.currentUser || !C.scopeId) return;
+    var adlar = [];
+    try{
+      var snap = await C.getDoc(C.doc(C.db, C.scopeCollection, C.scopeId, 'settings', 'bankList'));
+      adlar = (snap.exists() && Array.isArray(snap.data().names)) ? snap.data().names : [];
+    }catch(e){ return; }
+    if(!adlar.length) return;
+
+    var mevcut = {};
+    bankaStore.get().forEach(function(b){ mevcut[String(b.ad).toLocaleUpperCase('tr')] = true; });
+    var eklenecek = [];
+    adlar.forEach(function(ad){
+      var t = String(ad || '').trim();
+      if(!t) return;
+      if(mevcut[t.toLocaleUpperCase('tr')]) return;
+      mevcut[t.toLocaleUpperCase('tr')] = true;
+      eklenecek.push({ id:S.uid(), ad:t.toLocaleUpperCase('tr'), rev:'', grupLimit:0,
+                       cekCati:false, kefaletCati:false, aciklama:'' });
+    });
+    if(eklenecek.length) bankaStore.set(bankaStore.get().concat(eklenecek));
+  }
+
   /* ================= BAŞLAT ================= */
   [bankaStore, limitStore, bakiyeStore, iletisimStore, cekStore, firmaStore].forEach(function(s){ s.onChange(render); });
   bankaStore.load(); limitStore.load(); bakiyeStore.load();
   iletisimStore.load(); cekStore.load();
   render();
+  // Kapsam (kullanıcı/firma) belli olunca banka listesini Veri Girişi'nden senkronla
+  document.addEventListener('mmg-scope-ready', function(){ bankalariVeriGirisindenCek(); });
+  if(window.mmgCloud && window.mmgCloud.ready) bankalariVeriGirisindenCek();
   try{ gtag('event', 'tool_used', { tool_name: 'banka_yonetimi' }); }catch(e){}
 })();
 </script>
