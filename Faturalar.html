@@ -68,14 +68,10 @@
           <option value="gecikmis">Vadesi geçmiş</option>
           <option value="kapali">Kapandı</option>
         </select>
-        <!-- 2026-08-02: iki tarih kutusunun ne olduğu belli değildi (kullanıcı bildirdi);
-             başına görünür etiket kondu. Bunlar FATURA TARİHİNE göre süzer. -->
-        <span style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); white-space:nowrap;">
-          Fatura tarihi:
-          <input id="sBas" type="date" style="max-width:142px;" title="Başlangıç tarihi">
-          <span>–</span>
-          <input id="sBit" type="date" style="max-width:142px;" title="Bitiş tarihi">
-        </span>
+        <!-- 2026-08-02: Tarih aralığı filtresi KALDIRILDI (kullanıcı: "iki farklı tarih var,
+             ne işe yaradığı belli değil"). Kod tarafında gizli kalıyor ki filtre mantığı
+             bozulmasın; ihtiyaç olursa tekrar görünür yapılabilir. -->
+        <input id="sBas" type="hidden"><input id="sBit" type="hidden">
         <button class="btn" id="btnSExcel">Excel</button>
         <button class="btn" id="btnSPdf">PDF</button>
         <button class="btn primary" id="btnSAktar">Nakit Akış'a Aktar</button>
