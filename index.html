@@ -582,6 +582,29 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .card-sec:first-of-type{ margin-top:0; }
   .card-sec[hidden]{ display:none; }   /* display:flex, hidden'ı ezdiği için gerekli */
+  .card-sec .sec-sayi{ font-size:11px; font-weight:600; color:var(--muted); letter-spacing:0; }
+  .card-sec .sec-ok{ display:none; }
+  /* ---- MOBİL AKORDİYON (2026-08-02) ----
+     Kullanıcı: "ana başlık olsun, tıklayınca alt başlıkları görünsün."
+     Masaüstünde başlıklar sadece ayraçtır; mobilde ise tıklanabilir kapak olur ve
+     altındaki kartlar varsayılan olarak KAPALI gelir. Böylece telefonda 30 kartlık
+     düz liste yerine 7 satırlık kısa bir menü görünür. */
+  @media (max-width:860px){
+    .card-sec{
+      background:var(--surface); border:1px solid var(--hairline); border-radius:11px;
+      padding:13px 14px; margin:0; cursor:pointer; color:var(--text);
+      font-size:13px; letter-spacing:.04em; -webkit-tap-highlight-color:transparent;
+    }
+    .card-sec::after{ display:none; }
+    .card-sec .sec-ok{
+      display:block; margin-left:auto; font-size:15px; line-height:1; color:var(--muted);
+      transition:transform .18s ease;
+    }
+    .card-sec.acik{ border-color:var(--brass-dim); color:var(--brass); }
+    .card-sec.acik .sec-ok{ transform:rotate(90deg); color:var(--brass); }
+    .app-card.mobil-kapali{ display:none !important; }
+    .card-grid{ gap:9px; }
+  }
   .card-sec::after{ content:''; flex:1 1 auto; height:1px; background:var(--hairline); }
   .card-grid.edit-mode .card-sec, .card-grid.remove-mode .card-sec{ opacity:.5; }
   @media (max-width:860px){ .card-sec{ margin:10px 0 0; font-size:11.5px; } }
@@ -2837,7 +2860,73 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     grid.appendChild(ekBaslik);
     ekBaslik.hidden = ekstra.length === 0;
     ekstra.forEach(c => grid.appendChild(c));
+
+    mobilAkordiyon();
   }
+
+  /* ==========================================================================
+     MOBİL AKORDİYON — kart ızgarası telefonda açılır/kapanır menü olur.
+     Kullanıcı isteği (2026-08-02): "mobilde ana başlıklar böyle gelmiş, böyle
+     bir şey istemedim; ana başlık olsun, tıklayınca alt başlıkları görünsün."
+     Masaüstünde hiçbir şey değişmez — orada başlıklar yalnızca ayraçtır.
+     Açık bölümler localStorage'da saklanır ki her girişte yeniden açılmasın.
+     ========================================================================== */
+  const MOBIL_SEC_KEY = 'mmg_mobil_acik_bolumler';
+  function acikBolumler(){
+    try{ return JSON.parse(localStorage.getItem(MOBIL_SEC_KEY) || '["favori"]') || ['favori']; }
+    catch(e){ return ['favori']; }
+  }
+  function acikYaz(list){ try{ localStorage.setItem(MOBIL_SEC_KEY, JSON.stringify(list)); }catch(e){} }
+  function mobilMi(){ return window.matchMedia('(max-width:860px)').matches; }
+
+  function mobilAkordiyon(){
+    const grid = document.getElementById('cardGrid');
+    if(!grid) return;
+    const acik = acikBolumler();
+
+    grid.querySelectorAll('.card-sec').forEach(h => {
+      const sec = h.dataset.sec;
+      // Başlık içine sayı ve ok ekle (bir kez)
+      let etiket = h.querySelector('span');
+      if(etiket && !h.querySelector('.sec-ok')){
+        const sayi = document.createElement('span');
+        sayi.className = 'sec-sayi';
+        etiket.after(sayi);
+        const ok = document.createElement('span');
+        ok.className = 'sec-ok';
+        ok.textContent = '›';
+        h.appendChild(ok);
+        h.setAttribute('role', 'button');
+        h.setAttribute('tabindex', '0');
+      }
+      const kartlar = Array.from(grid.querySelectorAll('.app-card'))
+        .filter(c => c.dataset.sec === sec && c.style.display !== 'none');
+      const sayiEl = h.querySelector('.sec-sayi');
+      if(sayiEl) sayiEl.textContent = mobilMi() ? '(' + kartlar.length + ')' : '';
+
+      const buAcik = !mobilMi() || acik.indexOf(sec) > -1;
+      h.classList.toggle('acik', buAcik && mobilMi());
+      h.setAttribute('aria-expanded', String(buAcik));
+      kartlar.forEach(c => c.classList.toggle('mobil-kapali', !buAcik));
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    const h = e.target.closest('.card-sec');
+    if(!h || !mobilMi()) return;
+    const sec = h.dataset.sec;
+    let acik = acikBolumler();
+    acik = acik.indexOf(sec) > -1 ? acik.filter(x => x !== sec) : acik.concat([sec]);
+    acikYaz(acik);
+    mobilAkordiyon();
+  });
+  document.addEventListener('keydown', (e) => {
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    const h = document.activeElement && document.activeElement.closest
+            ? document.activeElement.closest('.card-sec') : null;
+    if(h){ e.preventDefault(); h.click(); }
+  });
+  window.addEventListener('resize', mobilAkordiyon);
 
   function renderFavorites(){
     // Menü (nav) scroll konumunu koru: favorileme DOM'u değiştirdiğinde sayfa yukarı ZIPLAMASIN.
