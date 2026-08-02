@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{ var mode=localStorage.getItem('mmg_theme')||'dark'; document.documentElement.classList.toggle('theme-light', mode==='light'); }catch(e){}
+  window.addEventListener('message', function(ev){ if(ev&&ev.data&&ev.data.mmgTheme){ document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme==='light'); try{localStorage.setItem('mmg_theme',ev.data.mmgTheme);}catch(e2){} } });
+})();
+</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Kredi Kartları</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mmg-module.css">
+<style>
+  .tab-panel{ display:none; } .tab-panel.active{ display:block; }
+  .tabs{ display:none; }   /* her ekran sol menüden ayrı açılıyor */
+  .mono{ font-family:'IBM Plex Mono',monospace; font-size:12px; }
+  tfoot td{ border-top:2px solid var(--brass-dim); font-weight:700; font-family:'JetBrains Mono',monospace; }
+  /* Limit doluluk çubuğu */
+  .bar{ height:6px; border-radius:4px; background:var(--surface-2); overflow:hidden; min-width:70px; }
+  .bar > i{ display:block; height:100%; background:var(--teal); }
+  .bar.uyari > i{ background:var(--amber); }
+  .bar.dolu  > i{ background:var(--red); }
+  .kart-alt{ color:var(--muted); font-size:11px; font-family:'IBM Plex Mono',monospace; }
+  .ozet-kutu{ display:flex; flex-wrap:wrap; gap:14px; align-items:center; background:var(--bg);
+              border:1px solid var(--hairline); border-radius:9px; padding:10px 13px; margin-top:10px; font-size:12.5px; }
+  .ozet-kutu b{ font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--text); }
+  .ozet-kutu span{ color:var(--muted); }
+  tr.donem-satiri td{ background:var(--surface-2); font-weight:700; }
+  .taksit-rozet{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--brass);
+                 border:1px solid var(--brass-dim); border-radius:999px; padding:1px 7px; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <h1 class="title">Kredi Kartları</h1>
+    <p class="subtitle">Kartın <b>limitini</b>, <b>hesap kesim gününü</b> ve <b>son ödeme gün farkını</b> bir kez tanımlayın; sonra harcamaları (tarih, tutar, <b>taksit</b>) girin. Taksitler doğru ekstre dönemlerine dağıtılır ve her dönemin borcu <b>son ödeme tarihinde</b> Nakit Akış Tablosu'na otomatik düşer.</p>
+  </div>
+  <div class="top-actions">
+    <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+  </div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="kartlar">Kartlarım</button>
+    <button class="tab" data-tab="harcama">Harcamalar</button>
+    <button class="tab" data-tab="plan">Ödeme Planı</button>
+  </div>
+
+  <!-- ================= KARTLAR ================= -->
+  <div class="tab-panel active" id="tab-kartlar">
+    <div class="kpis" id="kKpi"></div>
+
+    <div class="panel">
+      <div class="panel-title">Yeni Kart</div>
+      <div class="panel-desc">
+        <b>Hesap kesim günü</b>: ekstrenin kesildiği ayın günü (örn. 20).
+        <b>Son ödeme (gün)</b>: kesimden kaç gün sonra ödeneceği (örn. 10 → ayın 30'u).
+        Bu ikisi girildiğinde her dönemin son ödeme tarihi otomatik hesaplanır.
+      </div>
+      <div class="form-grid">
+        <div><label class="fl" for="kBanka">Banka *</label><select id="kBanka"></select></div>
+        <div><label class="fl" for="kAd">Kart Adı</label><input id="kAd" type="text" placeholder="ör. Şirket Bonus"></div>
+        <div><label class="fl" for="kSon4">Son 4 Hane</label><input id="kSon4" class="mono" type="text" inputmode="numeric" maxlength="4" placeholder="1234"></div>
+        <div><label class="fl" for="kFirma">Firma</label><select id="kFirma"></select></div>
+        <div><label class="fl" for="kLimit">Limit *</label><input id="kLimit" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl" for="kKesim">Hesap Kesim Günü *</label><input id="kKesim" class="num" type="text" inputmode="numeric" placeholder="20"></div>
+        <div><label class="fl" for="kOdemeGun">Son Ödeme (gün sonra) *</label><input id="kOdemeGun" class="num" type="text" inputmode="numeric" placeholder="10"></div>
+        <div><label class="fl" for="kPara">Para</label>
+          <select id="kPara"><option>TL</option><option>USD</option><option>EUR</option></select>
+        </div>
+        <div style="grid-column:span 2;"><label class="fl" for="kNot">Not</label><input id="kNot" type="text" placeholder="opsiyonel"></div>
+        <div><button class="btn primary" id="btnKartEkle" style="width:100%;">Kartı Kaydet</button></div>
+      </div>
+      <div class="ozet-kutu" id="kOnizleme"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Kartlarım</div>
+      <div class="panel-desc">Açık borç = henüz ödenmemiş dönemlerin toplamı (gelecek taksitler dahil). Kullanılabilir limit = Limit − açık borç.</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="kAra" type="text" placeholder="Banka, kart adı ara…" style="max-width:240px;">
+        <select id="kFirmaFiltre" style="max-width:180px;"></select>
+        <button class="btn" id="btnKExcel">Excel</button>
+        <button class="btn" id="btnKPdf">PDF</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Banka / Kart</th><th>Firma</th><th class="num">Limit</th>
+            <th class="num">Açık Borç</th><th class="num">Kullanılabilir</th><th>Doluluk</th>
+            <th>Kesim</th><th>Son Ödeme</th><th></th>
+          </tr></thead>
+          <tbody id="kListe"></tbody>
+          <tfoot id="kAlt"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= HARCAMALAR ================= -->
+  <div class="tab-panel" id="tab-harcama">
+    <div class="panel">
+      <div class="panel-title">Yeni Harcama</div>
+      <div class="panel-desc">
+        Harcama tarihi kartın kesim gününden <b>önceyse bu ayın</b>, <b>sonraysa gelecek ayın</b> ekstresine girer.
+        Taksitli harcamada her taksit sonraki dönemlere dağıtılır.
+      </div>
+      <div class="form-grid">
+        <div style="grid-column:span 2;"><label class="fl" for="hKart">Kart *</label><select id="hKart"></select></div>
+        <div><label class="fl" for="hTarih">Harcama Tarihi *</label><input id="hTarih" type="date"></div>
+        <div><label class="fl" for="hTutar">Tutar *</label><input id="hTutar" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl" for="hTaksit">Taksit *</label><input id="hTaksit" class="num" type="text" inputmode="numeric" value="1" placeholder="1"></div>
+        <div><label class="fl" for="hKategori">Kategori</label>
+          <select id="hKategori">
+            <option value="">— seçin —</option>
+            <option>Akaryakıt</option><option>Market</option><option>Yemek</option>
+            <option>Ulaşım / Uçak</option><option>Konaklama</option><option>Ofis / Kırtasiye</option>
+            <option>Yazılım / Abonelik</option><option>Bakım / Onarım</option><option>Diğer</option>
+          </select>
+        </div>
+        <div style="grid-column:span 2;"><label class="fl" for="hAciklama">Açıklama</label><input id="hAciklama" type="text" placeholder="ör. Shell — filo yakıt"></div>
+        <div><button class="btn primary" id="btnHarcamaEkle" style="width:100%;">Harcamayı Kaydet</button></div>
+      </div>
+      <div class="ozet-kutu" id="hOnizleme"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Harcamalar</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="hAra" type="text" placeholder="Açıklama, kategori ara…" style="max-width:230px;">
+        <select id="hKartFiltre" style="max-width:220px;"></select>
+        <input id="hBas" type="date" style="max-width:150px;" title="Başlangıç tarihi">
+        <input id="hBit" type="date" style="max-width:150px;" title="Bitiş tarihi">
+        <button class="btn" id="btnHExcel">Excel</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tarih</th><th>Banka / Kart</th><th>Açıklama</th><th>Kategori</th>
+            <th class="num">Tutar</th><th>Taksit</th><th class="num">Taksit Tutarı</th>
+            <th>İlk Dönem</th><th></th>
+          </tr></thead>
+          <tbody id="hListe"></tbody>
+          <tfoot id="hAlt"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ÖDEME PLANI ================= -->
+  <div class="tab-panel" id="tab-plan">
+    <div class="panel">
+      <div class="panel-title">Ödeme Planı (Dönem Borçları)</div>
+      <div class="panel-desc">
+        Harcamalardan <b>otomatik üretilir</b>. Her satır bir kartın bir dönemine ait toplam borçtur ve
+        <b>son ödeme tarihiyle</b> Nakit Akış Tablosu'na gider olarak işlenir. "Ödendi" işaretlenen dönem nakit akıştan çıkar.
+      </div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <select id="pKartFiltre" style="max-width:220px;"></select>
+        <select id="pDurumFiltre" style="max-width:170px;">
+          <option value="">Tüm durumlar</option>
+          <option value="acik">Ödenmedi</option>
+          <option value="gecikmis">Vadesi geçmiş</option>
+          <option value="odendi">Ödendi</option>
+        </select>
+        <button class="btn" id="btnPExcel">Excel</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Dönem</th><th>Banka / Kart</th><th>Firma</th><th>Son Ödeme</th>
+            <th class="num">Kalan Gün</th><th class="num">Kalem</th><th class="num">Tutar</th><th>Durum</th><th></th>
+          </tr></thead>
+          <tbody id="pListe"></tbody>
+          <tfoot id="pAlt"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="module" src="mmg-cloud-init.js"></script>
+<script src="mmg-store.js"></script>
+<script>
+(function(){
+  'use strict';
+  /* =========================================================================
+     KREDİ KARTLARI MODÜLÜ — 2026-08-02
+     Kullanıcı isteği:
+       "kredi kartları modülü koyup giderlerden kaldıralım. o modülde de hangi
+        banka, hangi kart, limit ne, hesap kesimi ne, son ödemesi kaç gün sonra
+        bilgileri girilip nakit akışa son ödeme gününü getir."
+       "kişi kredi kartı ile yaptığı harcamaları yazacak (hangi kartla, ne zaman,
+        ne kadar, kaç taksit vs.) sonra bu borçlar son ödeme tarihinde nakit akış
+        tablosuna gelecek."
+
+     VERİ MODELİ (üç ayrı store):
+       kartlar[]     → banka, ad, son4, limit, kesimGun, odemeGun, para, firmaId
+       harcamalar[]  → kartId, tarih, tutar, taksit, kategori, aciklama
+       odemeler[]    → kartId, donem  (yalnızca "bu dönem ÖDENDİ" işareti)
+
+     ÖDEME PLANI TÜRETİLİR, ELLE GİRİLMEZ:
+       Her harcama `taksit` parçaya bölünür. Harcamanın gireceği İLK dönem,
+       harcama günü kesim gününden küçük/eşitse O AY, büyükse ERTESİ AY'dır.
+       i. taksit → ilk dönem + i ay.  Dönem borcu = o döneme düşen taksitlerin toplamı.
+       Son ödeme = dönem ayının kesim günü + odemeGun (kısa aylarda gün kırpılır).
+
+     NAKİT AKIŞ: Yalnızca ÖDENMEMİŞ ve TL dönemler, son ödeme tarihiyle Giderler
+     listesine ('mmg_odemeler_list', KAPSAM BAZLI anahtar) yazılır. Satır id'leri
+     'kk_' ile başlar; kullanıcının elle girdiği satırlara dokunulmaz.
+     ========================================================================= */
+  var S = window.MMGStore;
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(x){ return String(x == null ? '' : x).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function pad2(n){ return String(n).padStart(2, '0'); }
+
+  var kartStore     = new S('krediKartlari');
+  var harcamaStore  = new S('krediKartiHarcamalari');
+  var odemeStore    = new S('krediKartiOdemeleri');
+
+  /* ---------------- Tarih yardımcıları ---------------- */
+  function bugunSeri(){ return Math.floor(Date.now() / 86400000); }
+  function gunSerisi(iso){
+    if(!iso) return null;
+    var p = String(iso).split('-');
+    if(p.length < 3) return null;
+    return Math.floor(Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000);
+  }
+  function ayinGunSayisi(yil, ay){ return new Date(Date.UTC(yil, ay, 0)).getUTCDate(); }
+  function donemKaydir(donem, ayFarki){
+    var p = String(donem).split('-');
+    var yil = +p[0], ay = +p[1] + ayFarki;
+    yil += Math.floor((ay - 1) / 12);
+    ay = ((ay - 1) % 12 + 12) % 12 + 1;
+    return yil + '-' + pad2(ay);
+  }
+  /* donem 'YYYY-MM' + kesimGun + odemeGun → son ödeme 'YYYY-MM-DD' */
+  function sonOdemeHesapla(donem, kesimGun, odemeGun){
+    if(!donem) return '';
+    var p = String(donem).split('-');
+    var yil = +p[0], ay = +p[1];
+    if(!(yil > 0) || !(ay >= 1 && ay <= 12)) return '';
+    var kg = parseInt(kesimGun, 10);
+    if(!(kg >= 1)) return '';
+    // Şubat gibi kısa aylarda 31'inci gün yoktur → ayın son gününe kırpılır.
+    var d = new Date(Date.UTC(yil, ay - 1, Math.min(kg, ayinGunSayisi(yil, ay))));
+    d.setUTCDate(d.getUTCDate() + (parseInt(odemeGun, 10) || 0));
+    return d.toISOString().slice(0, 10);
+  }
+  /* Harcamanın gireceği İLK ekstre dönemi.
+     Kesim gününde veya öncesinde yapılan harcama O AYIN ekstresine girer;
+     kesimden sonraki harcama bir sonraki ayın ekstresine kalır. */
+  function ilkDonem(tarih, kesimGun){
+    if(!tarih) return '';
+    var p = String(tarih).split('-');
+    var yil = +p[0], ay = +p[1], gun = +p[2];
+    var kg = parseInt(kesimGun, 10) || 1;
+    var donem = yil + '-' + pad2(ay);
+    return gun <= Math.min(kg, ayinGunSayisi(yil, ay)) ? donem : donemKaydir(donem, 1);
+  }
+
+  /* ---------------- Ortak erişimciler ---------------- */
+  function kart(id){ return kartStore.get().filter(function(k){ return k.id === id; })[0] || null; }
+  function kartAdi(k){
+    if(!k) return '(silinmiş kart)';
+    return k.banka + (k.ad ? ' · ' + k.ad : '') + (k.son4 ? ' (*' + k.son4 + ')' : '');
+  }
+  function firmaAdi(id){
+    if(!id) return '—';
+    var f = S.firmalar().filter(function(x){ return x.id === id; })[0];
+    return f ? f.ad : '—';
+  }
+  function odendiMi(kartId, donem){
+    return odemeStore.get().some(function(o){ return o.kartId === kartId && o.donem === donem; });
+  }
+
+  /* ---------------- ÖDEME PLANI (türetilmiş) ---------------- */
+  /* Tüm harcamaları taksitlerine bölüp kart+dönem bazında toplar.
+     Döner: [{ kartId, donem, tutar, kalem, sonOdeme, odendi }] */
+  function planUret(){
+    var kova = {};
+    harcamaStore.get().forEach(function(h){
+      var k = kart(h.kartId);
+      if(!k || !h.tarih || !(h.tutar > 0)) return;
+      var n = Math.max(1, parseInt(h.taksit, 10) || 1);
+      var basla = ilkDonem(h.tarih, k.kesimGun);
+      // Kuruş farkı son taksite bindirilir; taksitlerin toplamı harcama tutarına EŞİTTİR.
+      var taban = Math.round((h.tutar / n) * 100) / 100;
+      for(var i = 0; i < n; i++){
+        var donem = donemKaydir(basla, i);
+        var tutar = (i === n - 1) ? Math.round((h.tutar - taban * (n - 1)) * 100) / 100 : taban;
+        var anahtar = h.kartId + '|' + donem;
+        if(!kova[anahtar]) kova[anahtar] = { kartId: h.kartId, donem: donem, tutar: 0, kalem: 0 };
+        kova[anahtar].tutar += tutar;
+        kova[anahtar].kalem += 1;
+      }
+    });
+    return Object.keys(kova).map(function(a){
+      var r = kova[a];
+      var k = kart(r.kartId);
+      r.sonOdeme = sonOdemeHesapla(r.donem, k.kesimGun, k.odemeGun);
+      r.odendi = odendiMi(r.kartId, r.donem);
+      return r;
+    }).sort(function(a, b){
+      return String(a.sonOdeme).localeCompare(String(b.sonOdeme)) ||
+             kartAdi(kart(a.kartId)).localeCompare(kartAdi(kart(b.kartId)), 'tr');
+    });
+  }
+  function planDurumu(r){
+    if(r.odendi) return 'odendi';
+    var s = gunSerisi(r.sonOdeme);
+    return (s !== null && s < bugunSeri()) ? 'gecikmis' : 'acik';
+  }
+  var DURUM_ETIKET = {
+    acik:     { ad:'Ödenmedi',      cls:'warn' },
+    gecikmis: { ad:'Vadesi geçmiş', cls:'bad'  },
+    odendi:   { ad:'Ödendi',        cls:'good' }
+  };
+  /* Kartın açık borcu = ödenmemiş dönemlerinin toplamı (gelecek taksitler dahil) */
+  function acikBorc(kartId, plan){
+    return (plan || planUret()).reduce(function(t, r){
+      return t + ((r.kartId === kartId && !r.odendi) ? r.tutar : 0); }, 0);
+  }
+
+  /* ---------------- Banka listesi ---------------- */
+  function bankalariDoldur(){
+    var sec = $('kBanka');
+    var eski = sec.value;
+    var adlar = [];
+    try{ (window.MMG_BANK_NAMES || []).forEach(function(n){ if(adlar.indexOf(n) === -1) adlar.push(n); }); }catch(e){}
+    if(!adlar.length){
+      adlar = ['Akbank','Anadolubank','DenizBank','Garanti BBVA','Halkbank','ING','QNB',
+               'Şekerbank','TEB','Vakıfbank','Yapı Kredi','Ziraat Bankası','İş Bankası','Diğer'];
+    }
+    sec.innerHTML = '<option value="">— seçin —</option>' +
+      adlar.map(function(n){ return '<option value="' + esc(n) + '">' + esc(n) + '</option>'; }).join('');
+    sec.value = eski;
+  }
+
+  /* ---------------- Kart formu ---------------- */
+  function kartOnizleme(){
+    var kesim = parseInt(S.parse($('kKesim').value), 10);
+    var odeme = parseInt(S.parse($('kOdemeGun').value), 10);
+    var el = $('kOnizleme');
+    if(!(kesim >= 1) || !(odeme >= 0)){
+      el.innerHTML = '<span>Kesim günü ve son ödeme gün farkını girin — örnek son ödeme tarihi burada görünür.</span>';
+      return;
+    }
+    var d = new Date();
+    var donem = d.getFullYear() + '-' + pad2(d.getMonth() + 1);
+    el.innerHTML = '<span>Bu ayın kesimi</span><b>ayın ' + kesim + '.</b>' +
+                   '<span>Son ödeme</span><b style="color:var(--brass);">' +
+                   esc(S.trDate(sonOdemeHesapla(donem, kesim, odeme))) + '</b>';
+  }
+  ['kKesim','kOdemeGun'].forEach(function(id){ $(id).addEventListener('input', kartOnizleme); });
+
+  $('btnKartEkle').addEventListener('click', function(){
+    var banka = $('kBanka').value;
+    var limit = S.parse($('kLimit').value);
+    var kesim = parseInt(S.parse($('kKesim').value), 10);
+    var odeme = parseInt(S.parse($('kOdemeGun').value), 10);
+    if(!banka){ alert('Banka seçin.'); $('kBanka').focus(); return; }
+    if(!(limit > 0)){ alert('Limit sıfırdan büyük olmalı.'); $('kLimit').focus(); return; }
+    if(!(kesim >= 1 && kesim <= 31)){ alert('Hesap kesim günü 1–31 arasında olmalı.'); $('kKesim').focus(); return; }
+    if(!(odeme >= 0 && odeme <= 60)){ alert('Son ödeme gün farkı 0–60 arasında olmalı.'); $('kOdemeGun').focus(); return; }
+
+    kartStore.add({
+      id: S.uid(), banka: banka, ad: $('kAd').value.trim(),
+      son4: $('kSon4').value.replace(/\D/g, '').slice(0, 4),
+      firmaId: $('kFirma').value, limit: limit,
+      kesimGun: kesim, odemeGun: odeme,
+      para: $('kPara').value, not: $('kNot').value.trim()
+    });
+    ['kAd','kSon4','kLimit','kNot'].forEach(function(id){ $(id).value = ''; });
+    $('kBanka').focus();
+  });
+
+  /* ---------------- Harcama formu ---------------- */
+  function kartSecicileriDoldur(){
+    var kartlar = kartStore.get().slice().sort(function(a, b){
+      return kartAdi(a).localeCompare(kartAdi(b), 'tr'); });
+    [['hKart', null], ['hKartFiltre', 'Tüm kartlar'], ['pKartFiltre', 'Tüm kartlar']].forEach(function(par){
+      var el = $(par[0]); if(!el) return;
+      var eski = el.value;
+      el.innerHTML = (par[1] ? '<option value="">' + par[1] + '</option>' : '<option value="">— seçin —</option>') +
+        kartlar.map(function(k){ return '<option value="' + esc(k.id) + '">' + esc(kartAdi(k)) + '</option>'; }).join('');
+      el.value = eski;
+    });
+  }
+  /* Kullanıcı kaydetmeden ÖNCE taksitlerin hangi dönemlere düşeceğini görsün. */
+  function harcamaOnizleme(){
+    var el = $('hOnizleme');
+    var k = kart($('hKart').value);
+    var tarih = $('hTarih').value;
+    var tutar = S.parse($('hTutar').value);
+    var n = Math.max(1, parseInt(S.parse($('hTaksit').value), 10) || 1);
+    if(!k || !tarih || !(tutar > 0)){
+      el.innerHTML = '<span>Kart, tarih ve tutar girin — taksitlerin hangi dönemlere düşeceği burada görünür.</span>';
+      return;
+    }
+    var basla = ilkDonem(tarih, k.kesimGun);
+    var taksitTutar = Math.round((tutar / n) * 100) / 100;
+    var ilkSonOdeme = sonOdemeHesapla(basla, k.kesimGun, k.odemeGun);
+    var sonSonOdeme = sonOdemeHesapla(donemKaydir(basla, n - 1), k.kesimGun, k.odemeGun);
+    el.innerHTML =
+      '<span>Taksit</span><b>' + n + ' × ' + S.fmt(taksitTutar) + '</b>' +
+      '<span>İlk dönem</span><b>' + esc(basla) + '</b>' +
+      '<span>İlk ödeme</span><b style="color:var(--brass);">' + esc(S.trDate(ilkSonOdeme)) + '</b>' +
+      (n > 1 ? '<span>Son ödeme</span><b style="color:var(--brass);">' + esc(S.trDate(sonSonOdeme)) + '</b>' : '');
+  }
+  ['hKart','hTarih','hTutar','hTaksit'].forEach(function(id){
+    $(id).addEventListener('input', harcamaOnizleme);
+    $(id).addEventListener('change', harcamaOnizleme);
+  });
+
+  $('btnHarcamaEkle').addEventListener('click', function(){
+    var kartId = $('hKart').value;
+    var tarih = $('hTarih').value;
+    var tutar = S.parse($('hTutar').value);
+    var n = parseInt(S.parse($('hTaksit').value), 10) || 1;
+    if(!kartId){ alert('Kart seçin.'); $('hKart').focus(); return; }
+    if(!tarih){ alert('Harcama tarihi zorunlu.'); $('hTarih').focus(); return; }
+    if(!(tutar > 0)){ alert('Tutar sıfırdan büyük olmalı.'); $('hTutar').focus(); return; }
+    if(!(n >= 1 && n <= 36)){ alert('Taksit sayısı 1–36 arasında olmalı.'); $('hTaksit').focus(); return; }
+
+    harcamaStore.add({
+      id: S.uid(), kartId: kartId, tarih: tarih, tutar: tutar, taksit: n,
+      kategori: $('hKategori').value, aciklama: $('hAciklama').value.trim()
+    });
+    ['hTutar','hAciklama'].forEach(function(id){ $(id).value = ''; });
+    $('hTaksit').value = '1';
+    harcamaOnizleme();
+    $('hTutar').focus();
+  });
+
+  /* ---------------- Nakit Akış'a aktarım ---------------- */
+  var AKIS_ANAHTAR = 'mmg_odemeler_list';
+  function akisaYaz(plan){
+    var satirlar = [];
+    plan.forEach(function(r){
+      var k = kart(r.kartId);
+      if(!k) return;
+      if((k.para || 'TL') !== 'TL') return;   // nakit akış TL tablosudur
+      if(r.odendi) return;                    // ödenmiş dönem nakit çıkışı yaratmaz
+      if(!r.sonOdeme || !(r.tutar > 0)) return;
+      satirlar.push({
+        id: 'kk_' + r.kartId + '_' + r.donem,
+        desc: 'Kredi Kartı · ' + kartAdi(k) + ' (' + r.donem + ' dönemi, ' + r.kalem + ' kalem)',
+        amount: Math.round(r.tutar * 100) / 100,
+        dueDate: r.sonOdeme,
+        recurrence: 'yok',
+        category: 'kredi-karti',
+        paused: false
+      });
+    });
+
+    var anahtar = S.akisAnahtar ? S.akisAnahtar(AKIS_ANAHTAR) : AKIS_ANAHTAR;
+    var mevcut = [];
+    try{ mevcut = JSON.parse(localStorage.getItem(anahtar) || '[]') || []; }catch(e){ mevcut = []; }
+    // Kendi eski satırlarımızı at, kullanıcının elle girdiklerine DOKUNMA.
+    var digerleri = mevcut.filter(function(x){ return String(x && x.id || '').indexOf('kk_') !== 0; });
+    var eskiler = {};
+    mevcut.forEach(function(x){ if(String(x && x.id || '').indexOf('kk_') === 0) eskiler[x.id] = x; });
+    var yeni = satirlar.map(function(k){
+      var e = eskiler[k.id];
+      // Tutar/vade aynıysa aktarım işaretini koru; değiştiyse SIFIRLA (yeniden işlensin).
+      if(e && e.amount === k.amount && e.dueDate === k.dueDate && e.lastTransferredDate){
+        k.lastTransferredDate = e.lastTransferredDate;
+      }
+      return k;
+    });
+    try{ localStorage.setItem(anahtar, JSON.stringify(digerleri.concat(yeni))); }
+    catch(e){ console.warn('[kredi-karti] nakit akış yazılamadı:', e && e.message); }
+  }
+
+  /* ---------------- Render ---------------- */
+  function render(){
+    bankalariDoldur();
+    kartSecicileriDoldur();
+    S.firmaDoldur($('kFirma'), null);
+    S.firmaDoldur($('kFirmaFiltre'), 'Tüm firmalar');
+    kartOnizleme();
+    harcamaOnizleme();
+
+    var plan = planUret();
+
+    /* ---- Kartlar ---- */
+    var ara = ($('kAra').value || '').toLocaleLowerCase('tr');
+    var fFirma = $('kFirmaFiltre').value;
+    var kartlar = kartStore.get().filter(function(k){
+      if(fFirma && k.firmaId !== fFirma) return false;
+      if(ara && kartAdi(k).toLocaleLowerCase('tr').indexOf(ara) === -1) return false;
+      return true;
+    }).sort(function(a, b){ return kartAdi(a).localeCompare(kartAdi(b), 'tr'); });
+
+    var T = { limit:0, borc:0, kalan:0 };
+    $('kListe').innerHTML = kartlar.length ? kartlar.map(function(k){
+      var borc = acikBorc(k.id, plan);
+      var kalan = (k.limit || 0) - borc;
+      var oran = k.limit > 0 ? Math.min(100, Math.round(borc / k.limit * 100)) : 0;
+      T.limit += k.limit || 0; T.borc += borc; T.kalan += kalan;
+      var cls = oran >= 90 ? 'dolu' : (oran >= 70 ? 'uyari' : '');
+      return '<tr>' +
+        '<td><b>' + esc(k.banka) + '</b>' + (k.ad || k.son4 ?
+            '<div class="kart-alt">' + esc(k.ad || '') + (k.son4 ? ' *' + esc(k.son4) : '') + '</div>' : '') + '</td>' +
+        '<td>' + esc(firmaAdi(k.firmaId)) + '</td>' +
+        '<td class="num">' + S.fmt(k.limit) + '</td>' +
+        '<td class="num" style="color:' + (borc > 0 ? 'var(--text)' : 'var(--muted)') + ';">' + S.fmt(borc) + '</td>' +
+        '<td class="num" style="color:' + (kalan < 0 ? 'var(--red)' : 'var(--teal)') + ';"><b>' + S.fmt(kalan) + '</b></td>' +
+        '<td><div class="bar ' + cls + '" title="%' + oran + ' kullanıldı"><i style="width:' + oran + '%;"></i></div></td>' +
+        '<td class="mono">ayın ' + esc(k.kesimGun) + '.</td>' +
+        '<td class="mono">kesim +' + esc(k.odemeGun) + ' gün</td>' +
+        '<td><button class="btn danger" data-kart-sil="' + esc(k.id) + '">Sil</button></td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="9" class="empty">Henüz kart tanımlanmadı.</td></tr>';
+
+    $('kAlt').innerHTML = kartlar.length
+      ? '<tr><td colspan="2">TOPLAM</td><td class="num">' + S.fmt(T.limit) + '</td>' +
+        '<td class="num">' + S.fmt(T.borc) + '</td><td class="num">' + S.fmt(T.kalan) + '</td>' +
+        '<td colspan="4"></td></tr>' : '';
+
+    var yakin = plan.filter(function(r){
+      if(r.odendi) return false;
+      var s = gunSerisi(r.sonOdeme);
+      return s !== null && s >= bugunSeri() && s <= bugunSeri() + 30;
+    }).reduce(function(t, r){ return t + r.tutar; }, 0);
+
+    $('kKpi').innerHTML =
+      '<div class="kpi"><div class="k">Kart Adedi</div><div class="v">' + kartStore.get().length + '</div></div>' +
+      '<div class="kpi"><div class="k">Toplam Limit</div><div class="v">' + S.fmt(T.limit) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Açık Borç</div><div class="v ' + (T.borc > 0 ? 'warn' : 'good') + '">' + S.fmt(T.borc) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Kullanılabilir</div><div class="v good">' + S.fmt(T.kalan) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">30 Gün İçinde</div><div class="v warn">' + S.fmt(yakin) + ' ₺</div></div>';
+
+    /* ---- Harcamalar ---- */
+    var hAra = ($('hAra').value || '').toLocaleLowerCase('tr');
+    var hKartF = $('hKartFiltre').value, hBas = $('hBas').value, hBit = $('hBit').value;
+    var harcamalar = harcamaStore.get().filter(function(h){
+      if(hKartF && h.kartId !== hKartF) return false;
+      if(hBas && String(h.tarih) < hBas) return false;
+      if(hBit && String(h.tarih) > hBit) return false;
+      if(hAra && ((h.aciklama || '') + ' ' + (h.kategori || '')).toLocaleLowerCase('tr').indexOf(hAra) === -1) return false;
+      return true;
+    }).sort(function(a, b){ return String(b.tarih).localeCompare(String(a.tarih)); });
+
+    var HT = 0;
+    $('hListe').innerHTML = harcamalar.length ? harcamalar.map(function(h){
+      var k = kart(h.kartId);
+      var n = Math.max(1, parseInt(h.taksit, 10) || 1);
+      HT += h.tutar || 0;
+      return '<tr>' +
+        '<td>' + esc(S.trDate(h.tarih)) + '</td>' +
+        '<td>' + esc(kartAdi(k)) + '</td>' +
+        '<td>' + esc(h.aciklama || '—') + '</td>' +
+        '<td>' + esc(h.kategori || '—') + '</td>' +
+        '<td class="num"><b>' + S.fmt(h.tutar) + '</b></td>' +
+        '<td>' + (n > 1 ? '<span class="taksit-rozet">' + n + ' taksit</span>' : '<span style="color:var(--muted);">peşin</span>') + '</td>' +
+        '<td class="num">' + S.fmt(h.tutar / n) + '</td>' +
+        '<td class="mono">' + esc(k ? ilkDonem(h.tarih, k.kesimGun) : '—') + '</td>' +
+        '<td><button class="btn danger" data-harcama-sil="' + esc(h.id) + '">Sil</button></td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="9" class="empty">Harcama kaydı yok.</td></tr>';
+
+    $('hAlt').innerHTML = harcamalar.length
+      ? '<tr><td colspan="4">TOPLAM</td><td class="num">' + S.fmt(HT) + '</td><td colspan="4"></td></tr>' : '';
+
+    /* ---- Ödeme planı ---- */
+    var pKartF = $('pKartFiltre').value, pDurumF = $('pDurumFiltre').value;
+    var planF = plan.filter(function(r){
+      if(pKartF && r.kartId !== pKartF) return false;
+      if(pDurumF && planDurumu(r) !== pDurumF) return false;
+      return true;
+    });
+
+    var PT = 0;
+    $('pListe').innerHTML = planF.length ? planF.map(function(r){
+      var k = kart(r.kartId);
+      var d = planDurumu(r);
+      if(d !== 'odendi') PT += r.tutar;
+      var s = gunSerisi(r.sonOdeme);
+      var kg = s === null ? null : s - bugunSeri();
+      var kgTxt = d === 'odendi' ? '—'
+                : kg === null ? '—'
+                : kg < 0 ? Math.abs(kg) + ' gün geçti'
+                : kg === 0 ? 'bugün' : kg + ' gün';
+      var kgStil = (d === 'gecikmis') ? 'color:var(--red);' : (d !== 'odendi' && kg === 0) ? 'color:var(--amber);' : '';
+      return '<tr>' +
+        '<td class="mono">' + esc(r.donem) + '</td>' +
+        '<td>' + esc(kartAdi(k)) + '</td>' +
+        '<td>' + esc(firmaAdi(k && k.firmaId)) + '</td>' +
+        '<td>' + esc(S.trDate(r.sonOdeme)) + '</td>' +
+        '<td class="num" style="' + kgStil + '">' + kgTxt + '</td>' +
+        '<td class="num" style="color:var(--muted);">' + r.kalem + '</td>' +
+        '<td class="num"><b>' + S.fmt(r.tutar) + '</b></td>' +
+        '<td><span class="badge ' + DURUM_ETIKET[d].cls + '">' + DURUM_ETIKET[d].ad + '</span></td>' +
+        '<td style="white-space:nowrap;">' +
+          (r.odendi
+            ? '<button class="btn" data-plan-ac="' + esc(r.kartId) + '|' + esc(r.donem) + '">Geri Al</button>'
+            : '<button class="btn" data-plan-ode="' + esc(r.kartId) + '|' + esc(r.donem) + '">Ödendi</button>') +
+        '</td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="9" class="empty">Harcama girildikçe ödeme planı burada otomatik oluşur.</td></tr>';
+
+    $('pAlt').innerHTML = planF.length
+      ? '<tr><td colspan="6">ÖDENECEK TOPLAM</td><td class="num">' + S.fmt(PT) + '</td><td colspan="2"></td></tr>' : '';
+
+    akisaYaz(plan);
+  }
+
+  /* ---------------- Etkileşim ---------------- */
+  document.addEventListener('click', function(ev){
+    var ks = ev.target.closest('[data-kart-sil]');
+    var hs = ev.target.closest('[data-harcama-sil]');
+    var po = ev.target.closest('[data-plan-ode]');
+    var pa = ev.target.closest('[data-plan-ac]');
+    if(ks){
+      var kid = ks.dataset.kartSil;
+      var bagli = harcamaStore.get().filter(function(x){ return x.kartId === kid; }).length;
+      var msg = bagli ? 'Bu kartın ' + bagli + ' harcama kaydı da silinecek. Devam edilsin mi?' : 'Kart silinsin mi?';
+      if(!confirm(msg)) return;
+      harcamaStore.get().filter(function(x){ return x.kartId === kid; })
+                        .forEach(function(x){ harcamaStore.remove(x.id); });
+      odemeStore.get().filter(function(x){ return x.kartId === kid; })
+                      .forEach(function(x){ odemeStore.remove(x.id); });
+      kartStore.remove(kid);
+    }
+    else if(hs){ if(confirm('Harcama silinsin mi?')) harcamaStore.remove(hs.dataset.harcamaSil); }
+    else if(po){
+      var a = po.dataset.planOde.split('|');
+      if(!odendiMi(a[0], a[1])) odemeStore.add({ id: S.uid(), kartId: a[0], donem: a[1] });
+    }
+    else if(pa){
+      var b = pa.dataset.planAc.split('|');
+      odemeStore.get().filter(function(o){ return o.kartId === b[0] && o.donem === b[1]; })
+                      .forEach(function(o){ odemeStore.remove(o.id); });
+    }
+  });
+
+  ['kAra','kFirmaFiltre','hAra','hKartFiltre','hBas','hBit','pKartFiltre','pDurumFiltre'].forEach(function(id){
+    $(id).addEventListener('input', render);
+    $(id).addEventListener('change', render);
+  });
+
+  /* ---------------- Dışa aktarım (kütüphaneler ilk kullanımda yüklenir) ---------------- */
+  $('btnKExcel').addEventListener('click', async function(){
+    await S.libYukle('xlsx');
+    var plan = planUret();
+    var rows = [['Banka','Kart','Son 4','Firma','Limit','Açık Borç','Kullanılabilir','Kesim Günü','Son Ödeme (gün)']];
+    kartStore.get().forEach(function(k){
+      var b = acikBorc(k.id, plan);
+      rows.push([k.banka, k.ad || '', k.son4 || '', firmaAdi(k.firmaId), k.limit, b, (k.limit||0) - b, k.kesimGun, k.odemeGun]);
+    });
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Kredi Kartları');
+    XLSX.writeFile(wb, 'kredi-kartlari.xlsx');
+  });
+  $('btnHExcel').addEventListener('click', async function(){
+    await S.libYukle('xlsx');
+    var rows = [['Tarih','Banka / Kart','Açıklama','Kategori','Tutar','Taksit','Taksit Tutarı','İlk Dönem']];
+    harcamaStore.get().forEach(function(h){
+      var k = kart(h.kartId);
+      var n = Math.max(1, parseInt(h.taksit, 10) || 1);
+      rows.push([h.tarih, kartAdi(k), h.aciklama || '', h.kategori || '', h.tutar, n, h.tutar / n,
+                 k ? ilkDonem(h.tarih, k.kesimGun) : '']);
+    });
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Harcamalar');
+    XLSX.writeFile(wb, 'kredi-karti-harcamalari.xlsx');
+  });
+  $('btnPExcel').addEventListener('click', async function(){
+    await S.libYukle('xlsx');
+    var rows = [['Dönem','Banka / Kart','Firma','Son Ödeme','Kalem','Tutar','Durum']];
+    planUret().forEach(function(r){
+      var k = kart(r.kartId);
+      rows.push([r.donem, kartAdi(k), firmaAdi(k && k.firmaId), r.sonOdeme, r.kalem, r.tutar, DURUM_ETIKET[planDurumu(r)].ad]);
+    });
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Ödeme Planı');
+    XLSX.writeFile(wb, 'kredi-karti-odeme-plani.xlsx');
+  });
+  $('btnKPdf').addEventListener('click', async function(){
+    await S.libYukle('pdf');
+    var plan = planUret();
+    var doc = new window.jspdf.jsPDF({ orientation:'landscape' });
+    doc.text('Kredi Kartları', 14, 14);
+    doc.autoTable({
+      startY: 20,
+      head: [['Banka / Kart','Firma','Limit','Açık Borç','Kullanılabilir','Kesim','Son Ödeme']],
+      body: kartStore.get().map(function(k){
+        var b = acikBorc(k.id, plan);
+        return [kartAdi(k), firmaAdi(k.firmaId), S.fmt(k.limit), S.fmt(b), S.fmt((k.limit||0) - b),
+                'ayın ' + k.kesimGun + '.', '+' + k.odemeGun + ' gün'];
+      })
+    });
+    doc.save('kredi-kartlari.pdf');
+  });
+
+  /* ---------------- Sekmeler (hash ile derin bağlantı) ---------------- */
+  var BASLIK = { kartlar:'Kredi Kartları', harcama:'Kredi Kartı Harcamaları', plan:'Kredi Kartı Ödeme Planı' };
+  function sekmeAc(ad){
+    document.querySelectorAll('.tab-panel').forEach(function(p){
+      p.classList.toggle('active', p.id === 'tab-' + ad); });
+    document.querySelectorAll('.tab').forEach(function(t){
+      t.classList.toggle('active', t.dataset.tab === ad); });
+    document.querySelector('.title').textContent = BASLIK[ad] || BASLIK.kartlar;
+  }
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){ location.hash = t.dataset.tab; });
+  });
+  function adrestenAc(){
+    var h = (location.hash || '').replace('#', '');
+    sekmeAc(BASLIK[h] ? h : 'kartlar');
+  }
+  window.addEventListener('hashchange', adrestenAc);
+  adrestenAc();
+
+  /* ---------------- Başlat ---------------- */
+  kartStore.onChange(render);
+  harcamaStore.onChange(render);
+  odemeStore.onChange(render);
+  kartStore.load();
+  harcamaStore.load();
+  odemeStore.load();
+  $('hTarih').value = S.today();
+  render();
+  document.addEventListener('mmg-scope-ready', render);
+  try{ gtag('event', 'tool_used', { tool_name: 'kredi_kartlari' }); }catch(e){}
+})();
+</script>
+<script src="mmg-doviz-widget.js" defer></script>
+<script src="mmg-widget-menu.js"></script>
+</body>
+</html>

@@ -209,6 +209,18 @@
     if(!firmaStore){ firmaStore = MMGStore('firmalar').load(); }
     return firmaStore;
   };
+  /* =========================================================================
+     NAKİT AKIŞ BESLEME ANAHTARI (2026-08-02)
+     Gelirler/Giderler listeleri artık KAPSAM BAZLI localStorage anahtarlarında
+     tutuluyor (mmg_gelirler_list__firmaAccounts:<id> gibi). Çek/Senet, Kredi
+     Kartları vb. modüller nakit akışa satır yazarken bu anahtarı kullanmalı;
+     aksi halde yazdıkları satırlar aktif firmanın listesinde görünmez.
+     ========================================================================= */
+  MMGStore.akisAnahtar = function(base){
+    var C = window.mmgCloud || {};
+    return base + '__' + ((C.scopeCollection || 'guest') + ':' + (C.scopeId || 'guest'));
+  };
+
   MMGStore.firmalar = function(){ return MMGStore.firmaStore().get(); };
   MMGStore.firmaDoldur = function(sel, hepsiEtiketi){
     if(!sel) return;

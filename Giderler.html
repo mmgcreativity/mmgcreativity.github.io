@@ -796,7 +796,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var CATS = window.MMG_PAYMENT_CATEGORIES || [
     { id:'nakit', icon:'💵', label:catLabelTxt('Nakit') },
     { id:'fatura', icon:'🧾', label:catLabelTxt('Cari Ödeme') },   /* id eski kayıtlar için 'fatura' kalır */
-    { id:'kredi-karti', icon:'💳', label:catLabelTxt('Kredi Kartı') },
+    // 2026-08-02: Kredi Kartı girişi ARTIK Kredi Kartları modülünde (Nakit Yönetimi >
+    // Kredi Kartları). Kategori silinmedi, yalnızca listeden gizlendi — eski kayıtların
+    // etiketi ve modülün nakit akışa yazdığı satırların kategorisi bozulmasın.
+    { id:'kredi-karti', icon:'💳', gizli:true, label:catLabelTxt('Kredi Kartı') },
     { id:'kredi', icon:'🏦', label:catLabelTxt('Kredi') },
     { id:'kira', icon:'🏠', label:catLabelTxt('Kira') },
     { id:'vergi-sgk', icon:'📋', label:catLabelTxt('Vergi/SGK') },
@@ -939,7 +942,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function turMenuleriniYenile(){
     // 1) Üstteki filtre menüsü — ilk eleman ("Tüm kategoriler") korunur
     while(catFilterMenu.children.length > 1) catFilterMenu.removeChild(catFilterMenu.lastChild);
-    CATS.filter(function(){ return true; }).forEach(function(c){
+    CATS.filter(function(c){ return !c.gizli; }).forEach(function(c){
       catFilterMenu.appendChild(buildDropdownItem(c.icon, c.label, c.id, function(id, icon, label){
         activeCat = id;
         catFilterTrigger.innerHTML = icon + ' ' + label + ' <span class="chev">▾</span>';
@@ -951,7 +954,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
     // 2) Form içindeki tür menüsü + en altta "Tür Ekle"
     typeChipMenu.innerHTML = '';
-    CATS.filter(function(c){ return c.label !== 'Teminat Mektubu'; }).forEach(function(c){
+    CATS.filter(function(c){ return !c.gizli && c.label !== 'Teminat Mektubu'; }).forEach(function(c){
       var it = buildDropdownItem(c.icon, c.label, c.id, function(id){
         chooseType(id);
         typeChipMenu.hidden = true;

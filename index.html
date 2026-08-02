@@ -778,7 +778,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      BOYUT: "Google Play" 12.5–13px; yıldızlar onunla orantılı ~11px. */
   .app-badge-text .app-badge-stars{
     display:flex; width:100%; justify-content:space-between;
-    font-size:14px; line-height:1; color:#FFC107; margin-top:4px;
+    font-size:28px; line-height:1; color:#FFC107; margin-top:6px;   /* 2026-08-02: 14px → 28px (iki katı) */
   }
   .app-badge-text .app-badge-stars i{ font-style:normal; }
 
@@ -1116,10 +1116,10 @@ nav_fat_satis:'Satış Faturaları', nav_fat_alis:'Alış Faturaları', nav_fat_
       nav_cari_yonetimi:'Cari Yönetimi', nav_cari_kart:'Cari Kartları (Veri Girişi)',
       nav_faturalar:'Alış / Satış Faturaları',
       nav_cek_senet:'Çek / Senet / DBS', nav_teminat_mektubu:'Teminat Mektupları', nav_banka:'Banka Yönetimi',
-      nav_abonelik:'Abonelik / Fatura', nav_raporlar:'Raporlar',
+      nav_abonelik:'Abonelik / Fatura', nav_kredi_karti:'Kredi Kartları', nav_raporlar:'Raporlar',
       nav_cek_rapor:'Çek/Senet Raporu', nav_banka_rapor:'Banka Limit & Risk',
       nav_tahsilat_makbuzu:'Tahsilat Makbuzu', nav_isletme:'İşletme Yönetimi',
-      nav_stok:'Stok Takip', nav_risk:'Risk Yönetimi', nav_portfoy:'Yatırım Portföyü',
+      nav_stok:'Stok Yönetimi', nav_risk:'Risk Yönetimi', nav_portfoy:'Yatırım Portföyü',
       nav_budget:'Bütçeleme', nav_budget_desc:'Araçları', nav_panorama:'Günlük Panorama',
       hero_title:'Dijital Finans Asistanı', hero_tagline:'Finansal kararlarınızın dijital iş ortağı',
       hero_desc:'İşletmeler, Bankacılar ve Finans profesyonelleri için geliştirilmiş hepsi bir arada finans platformu',
@@ -1241,7 +1241,7 @@ nav_fat_satis:'Sales Invoices', nav_fat_alis:'Purchase Invoices', nav_fat_ozet:'
       nav_cari_yonetimi:'Account Management', nav_cari_kart:'Account Cards (Data Entry)',
       nav_faturalar:'Sales / Purchase Invoices',
       nav_cek_senet:'Cheques / Notes / DDS', nav_teminat_mektubu:'Letters of Guarantee', nav_banka:'Bank Management',
-      nav_abonelik:'Subscriptions / Bills', nav_raporlar:'Reports',
+      nav_abonelik:'Subscriptions / Bills', nav_kredi_karti:'Credit Cards', nav_raporlar:'Reports',
       nav_cek_rapor:'Cheque Report', nav_banka_rapor:'Bank Limit & Risk',
       nav_tahsilat_makbuzu:'Collection Receipt', nav_isletme:'Business Management',
       nav_stok:'Inventory', nav_risk:'Risk Management', nav_portfoy:'Investment Portfolio',
@@ -1658,6 +1658,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="fav-star" role="button" tabindex="0" data-fav-target="Cek_Senet.html" data-fav-title="Çek / Senet / DBS" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
             <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_cek_senet">Çek / Senet / DBS</span></span>
           </button>
+        <!-- 2026-08-02 (kullanıcı): "kredi kartları modülü koyup giderlerden kaldıralım" -->
+        <button class="nav-item nav-subitem" data-target="Kredi_Kartlari.html" data-title="Kredi Kartları">
+          <span class="fav-star" role="button" tabindex="0" data-fav-target="Kredi_Kartlari.html" data-fav-title="Kredi Kartları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_kredi_karti">Kredi Kartları</span></span>
+        </button>
           <button class="nav-item nav-subitem" data-target="Abonelik_Faturalari.html" data-title="Abonelik / Fatura">
           <span class="fav-star" role="button" tabindex="0" data-fav-target="Abonelik_Faturalari.html" data-fav-title="Abonelik / Fatura" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_abonelik">Abonelik / Fatura</span></span>
@@ -1689,10 +1694,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="fav-star" role="button" tabindex="0" data-fav-target="Faturalar.html#cari" data-fav-title="Cari Özeti" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
             <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_fat_ozet">Cari Özeti</span></span>
           </button>
-          <button class="nav-item nav-subitem" data-target="Stok_Takip.html" data-title="Stok Takip">
-            <span class="fav-star" role="button" tabindex="0" data-fav-target="Stok_Takip.html" data-fav-title="Stok Takip" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-            <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_stok">Stok Takip</span></span>
-          </button>
         </div>
       </div>
         <!-- 2026-08-02: Banka Yönetimi grup oldu; alt başlıklar modülün sekmelerini
@@ -1717,6 +1718,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </button>
         </div>
       </div>
+      <!-- 2026-08-02 (kullanıcı): "stok takibin adını stok yönetimi yap ve bir üst
+           menüye taşı" — Cari Yönetimi'nin altından çıkıp İşletme Yönetimi'nin
+           doğrudan alt başlığı oldu. -->
+      <button class="nav-item nav-subitem" data-target="Stok_Takip.html" data-title="Stok Yönetimi">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Stok_Takip.html" data-fav-title="Stok Yönetimi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_stok">Stok Yönetimi</span></span>
+      </button>
       
     </div>
     </div>
@@ -1764,14 +1772,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span class="nav-drawer-chevron" id="raporlarChevron">›</span>
     </button>
     <div class="nav-drawer" id="raporlarDrawer" hidden>
-      <button class="nav-item nav-subitem" data-target="Teminat_Mektubu.html" data-title="Teminat Mektupları">
-          <span class="fav-star" role="button" tabindex="0" data-fav-target="Teminat_Mektubu.html" data-fav-title="Teminat Mektupları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-          <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_teminat_mektubu">Teminat Mektupları</span></span>
-        </button>
       <button class="nav-item nav-subitem" data-target="Risk_Yonetimi.html" data-title="Risk Yönetimi">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Risk_Yonetimi.html" data-fav-title="Risk Yönetimi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_risk">Risk Yönetimi</span></span>
       </button>
+      <button class="nav-item nav-subitem" data-target="Teminat_Mektubu.html" data-title="Teminat Mektupları">
+          <span class="fav-star" role="button" tabindex="0" data-fav-target="Teminat_Mektubu.html" data-fav-title="Teminat Mektupları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_teminat_mektubu">Teminat Mektupları</span></span>
+        </button>
       <button class="nav-item nav-subitem" id="navIstatistiklerRaporBtn" data-target="Istatistikler.html" data-title="İstatistikler" data-gated="true" style="display:none;">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Istatistikler.html" data-fav-title="İstatistikler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_istatistikler">İstatistikler</span></span>
@@ -2162,10 +2170,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <p>Vadeli çekin bugünkü değeri, iskonto tutarı ve maliyeti.</p>
         </button>
         <div class="card-sec" data-sec="isletme"><span>İşletme Yönetimi</span></div>
-        <button class="app-card" data-target="Stok_Takip.html" data-title="Stok Takip">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Stok_Takip.html" data-fav-title="Stok Takip" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <button class="app-card" data-target="Stok_Takip.html" data-title="Stok Yönetimi">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Stok_Takip.html" data-fav-title="Stok Yönetimi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
-          <h3>Stok Takip</h3>
+          <h3>Stok Yönetimi</h3>
           <p>Ürün kartı, giriş–çıkış hareketleri, kritik stok uyarısı ve ağırlıklı ortalama maliyetle stok değeri.</p>
         </button>
         <button class="app-card" data-target="Portfoy.html" data-title="Yatırım Portföyü">
@@ -2174,11 +2182,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <h3>Yatırım Portföyü</h3>
           <p>Hisse alış–satışları, ortalama maliyet, gerçekleşen/gerçekleşmeyen kâr-zarar ve dönem ekstresi.</p>
         </button>
-        <button class="app-card" data-target="Cek_Senet.html" data-title="Çek / Senet">
-          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Cek_Senet.html" data-fav-title="Çek / Senet" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <button class="app-card" data-target="Cek_Senet.html" data-title="Çek / Senet / DBS">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Cek_Senet.html" data-fav-title="Çek / Senet / DBS" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="card-arrow">↗</span>
-          <h3>Çek / Senet</h3>
+          <h3>Çek / Senet / DBS</h3>
           <p>Portföydeki çek, senet ve DBS'leri firma ve cari bazında izleyin; tahsil takvimi raporu alın.</p>
+        </button>
+        <button class="app-card" data-target="Kredi_Kartlari.html" data-title="Kredi Kartları">
+          <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Kredi_Kartlari.html" data-fav-title="Kredi Kartları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+          <span class="card-arrow">↗</span>
+          <h3>Kredi Kartları</h3>
+          <p>Kart limiti, hesap kesim günü ve son ödeme farkını tanımlayın; harcamaları taksitleriyle girin, borç son ödeme tarihinde nakit akışa düşsün.</p>
         </button>
         <button class="app-card" data-target="Teminat_Mektubu.html" data-title="Teminat Mektupları">
           <span class="fav-star-card" role="button" tabindex="0" data-fav-target="Teminat_Mektubu.html" data-fav-title="Teminat Mektupları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>

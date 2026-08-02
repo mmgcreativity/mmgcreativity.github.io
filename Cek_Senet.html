@@ -503,7 +503,9 @@
     });
 
     Object.keys(AKIS).forEach(function(yon){
-      var anahtar = AKIS[yon].anahtar;
+      // 2026-08-02: anahtar KAPSAM BAZLI (aktif firmanın listesi). Eskiden global
+      // anahtara yazılıyordu; firma değişince çek satırları kaybolmuş görünüyordu.
+      var anahtar = S.akisAnahtar ? S.akisAnahtar(AKIS[yon].anahtar) : AKIS[yon].anahtar;
       var mevcut = [];
       try{ mevcut = JSON.parse(localStorage.getItem(anahtar) || '[]') || []; }catch(e){ mevcut = []; }
       // Kendi eski satırlarımızı at, kullanıcının kendi girdiklerini koru
