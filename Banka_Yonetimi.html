@@ -248,15 +248,33 @@
     return t;
   }
 
-  /* ---------------- Sekmeler ---------------- */
+  /* ---------------- Sekmeler ----------------
+     2026-08-02: Sekmeler ARTIK MENÜDEN DOĞRUDAN AÇILABİLİYOR.
+     Sol menüde "Banka Yönetimi" bir grup oldu; alt başlıkları (Limit & Risk,
+     Bakiyeler, İletişim, Tanımlar) bu sayfayı #limit / #bakiye / #iletisim /
+     #tanim adresiyle açar. Sekme değişince adres de güncellenir, böylece
+     sayfa yenilenince aynı sekmede kalınır ve bağlantı paylaşılabilir. */
+  function sekmeAc(ad, adresYaz){
+    var t = document.querySelector('.tab[data-tab="' + ad + '"]');
+    if(!t) return false;
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+    document.querySelectorAll('.tab-panel').forEach(function(x){ x.classList.remove('active'); });
+    t.classList.add('active');
+    $('tab-' + ad).classList.add('active');
+    if(adresYaz){
+      try{ history.replaceState(null, '', '#' + ad); }catch(e){}
+    }
+    return true;
+  }
   document.querySelectorAll('.tab').forEach(function(t){
-    t.addEventListener('click', function(){
-      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
-      document.querySelectorAll('.tab-panel').forEach(function(x){ x.classList.remove('active'); });
-      t.classList.add('active');
-      $('tab-' + t.dataset.tab).classList.add('active');
-    });
+    t.addEventListener('click', function(){ sekmeAc(t.dataset.tab, true); });
   });
+  function adrestenAc(){
+    var ad = (location.hash || '').replace('#', '').trim();
+    if(ad) sekmeAc(ad, false);
+  }
+  window.addEventListener('hashchange', adrestenAc);
+  adrestenAc();
 
   /* ================= TANIMLAR ================= */
   $('btnFEkle').addEventListener('click', function(){

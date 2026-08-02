@@ -1099,6 +1099,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Keşfet', nav_label_verigirisi:'Veri Girişi', nav_label_verianalizi:'Veri Yönetimi',
       nav_talimatlar:'Talimatlar', nav_talimatlar_desc:'İşlemleri', nav_hazirmetin:'Hazır Metin Talimatları',
       // 2026-08-02 yeni modüller
+      nav_banka_limit:'Limit & Risk', nav_banka_bakiye:'Bakiyeler',
+      nav_banka_iletisim:'İletişim', nav_banka_tanim:'Tanımlar',
       nav_nakit_yonetimi:'Nakit Yönetimi',
       nav_cari_yonetimi:'Cari Yönetimi', nav_cari_kart:'Cari Kartları (Veri Girişi)',
       nav_faturalar:'Alış / Satış Faturaları',
@@ -1221,6 +1223,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_blog:'Blog', nav_forum:'Forum', nav_label_sosyal:'Explore', nav_label_verigirisi:'Data Entry', nav_label_verianalizi:'Data Management',
       nav_talimatlar:'Instructions', nav_talimatlar_desc:'Center', nav_hazirmetin:'Ready-made Text Instructions',
       // 2026-08-02 new modules
+      nav_banka_limit:'Limit & Risk', nav_banka_bakiye:'Balances',
+      nav_banka_iletisim:'Contacts', nav_banka_tanim:'Definitions',
       nav_nakit_yonetimi:'Cash Management',
       nav_cari_yonetimi:'Account Management', nav_cari_kart:'Account Cards (Data Entry)',
       nav_faturalar:'Sales / Purchase Invoices',
@@ -1609,57 +1613,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <div class="nav-drawer-wrap">
-    <button class="nav-item" id="butcelemeAraclariToggle" data-drawer-toggle="true" data-title="Bütçeleme Araçları" aria-expanded="false">
-      <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M15 12h4"/><circle cx="15.5" cy="12" r="0.4" fill="currentColor"/></svg></span>
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Bütçeleme Araçları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-      <span class="nav-text-wrap">
-        <span class="nav-title" data-i18n="nav_budget">Bütçeleme</span>
-      </span>
-      <span class="nav-drawer-chevron" id="butcelemeChevron">›</span>
-    </button>
-    <div class="nav-drawer" id="butcelemeDrawer" hidden>
-      <button class="nav-item nav-subitem" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_nakitakis">Nakit Akış Tablosu</span></span>
-      </button>
-      <button class="nav-item nav-subitem" data-target="Gelirler.html" data-title="Gelirler">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_gelirler">Gelirler</span></span>
-      </button>
-      <button class="nav-item nav-subitem" data-target="Giderler.html" data-title="Giderler">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_giderler">Giderler</span></span>
-      </button>
-    </div>
-    </div>
-
-    <div class="nav-drawer-wrap">
-    <button class="nav-item" id="talimatlarAraclariToggle" data-drawer-toggle="true" data-title="Talimatlar" aria-expanded="false">
-      <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v4h4M9 12h6M9 16h4"/></svg></span>
-      <span class="fav-star" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-      <span class="nav-text-wrap">
-        <span class="nav-title" data-i18n="nav_talimatlar">Talimatlar</span>
-      </span>
-      <span class="nav-drawer-chevron" id="talimatlarChevron">›</span>
-    </button>
-    <div class="nav-drawer" id="talimatlarDrawer" hidden>
-      <button class="nav-item nav-subitem" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_talimat_full">Talimat Hazırlama</span></span>
-      </button>
-      <button class="nav-item nav-subitem" data-target="HazirMetinTalimatlari.html" data-title="Hazır Metin Talimatları">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="HazirMetinTalimatlari.html" data-fav-title="Hazır Metin Talimatları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_hazirmetin">Hazır Metin Talimatları</span></span>
-      </button>
-      <button class="nav-item nav-subitem" data-target="Tahsilat_Makbuzu.html" data-title="Tahsilat Makbuzu">
-        <span class="fav-star" role="button" tabindex="0" data-fav-target="Tahsilat_Makbuzu.html" data-fav-title="Tahsilat Makbuzu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_tahsilat_makbuzu">Tahsilat Makbuzu</span></span>
-      </button>
-    </div>
-    </div>
-
-    <!-- 2026-08-02: YENİ ANA MENÜ — İşletme Yönetimi (Stok / Risk / Portföy) -->
-    <div class="nav-drawer-wrap">
     <button class="nav-item" id="isletmeToggle" data-drawer-toggle="true" data-title="İşletme Yönetimi" aria-expanded="false">
       <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5-9 4.5-9-4.5Z"/><path d="M3 12l9 4.5L21 12"/><path d="M3 16.5 12 21l9-4.5"/></svg></span>
       <span class="fav-star" role="button" tabindex="0" data-fav-target="Stok_Takip.html" data-fav-title="İşletme Yönetimi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
@@ -1686,10 +1639,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </button>
         </div>
       </div>
-        <button class="nav-item nav-subitem" data-target="Banka_Yonetimi.html" data-title="Banka Yönetimi">
-          <span class="fav-star" role="button" tabindex="0" data-fav-target="Banka_Yonetimi.html" data-fav-title="Banka Yönetimi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <!-- 2026-08-02: Banka Yönetimi grup oldu; alt başlıklar modülün sekmelerini
+           doğrudan açar (#limit / #bakiye / #iletisim / #tanim). -->
+      <div class="nav-subwrap">
+        <button type="button" class="nav-item nav-subitem" style="width:100%;" aria-haspopup="true">
           <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_banka">Banka Yönetimi</span></span>
+          <span class="nav-drawer-chevron">›</span>
         </button>
+        <div class="nav-subdrawer">
+          <button class="nav-item nav-subitem" data-target="Banka_Yonetimi.html#limit" data-title="Limit & Risk">
+            <span class="fav-star" role="button" tabindex="0" data-fav-target="Banka_Yonetimi.html#limit" data-fav-title="Limit & Risk" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+            <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_banka_limit">Limit & Risk</span></span>
+          </button>
+          <button class="nav-item nav-subitem" data-target="Banka_Yonetimi.html#bakiye" data-title="Bakiyeler">
+            <span class="fav-star" role="button" tabindex="0" data-fav-target="Banka_Yonetimi.html#bakiye" data-fav-title="Bakiyeler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+            <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_banka_bakiye">Bakiyeler</span></span>
+          </button>
+          <button class="nav-item nav-subitem" data-target="Banka_Yonetimi.html#iletisim" data-title="İletişim">
+            <span class="fav-star" role="button" tabindex="0" data-fav-target="Banka_Yonetimi.html#iletisim" data-fav-title="İletişim" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+            <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_banka_iletisim">İletişim</span></span>
+          </button>
+          <button class="nav-item nav-subitem" data-target="Banka_Yonetimi.html#tanim" data-title="Tanımlar">
+            <span class="fav-star" role="button" tabindex="0" data-fav-target="Banka_Yonetimi.html#tanim" data-fav-title="Tanımlar" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+            <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_banka_tanim">Tanımlar</span></span>
+          </button>
+        </div>
+      </div>
       <div class="nav-subwrap">
         <button type="button" class="nav-item nav-subitem" style="width:100%;" aria-haspopup="true">
           <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_nakit_yonetimi">Nakit Yönetimi</span></span>
@@ -1718,8 +1693,61 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span class="fav-star" role="button" tabindex="0" data-fav-target="Stok_Takip.html" data-fav-title="Stok Takip" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
           <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_stok">Stok Takip</span></span>
         </button>
+      <!-- 2026-08-02: Bütçeleme, İşletme Yönetimi altına 3. seviye grup olarak taşındı. -->
+      <div class="nav-subwrap">
+        <button type="button" class="nav-item nav-subitem" style="width:100%;" aria-haspopup="true">
+          <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_butceleme">Bütçeleme</span></span>
+          <span class="nav-drawer-chevron">›</span>
+        </button>
+        <div class="nav-subdrawer">
+    <button class="nav-item nav-subitem" data-target="Nakit_Akis_Tablosu.html" data-title="Nakit Akış Tablosu">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Nakit_Akis_Tablosu.html" data-fav-title="Nakit Akış Tablosu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_nakitakis">Nakit Akış Tablosu</span></span>
+      </button>
+    <button class="nav-item nav-subitem" data-target="Gelirler.html" data-title="Gelirler">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Gelirler.html" data-fav-title="Gelirler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_gelirler">Gelirler</span></span>
+      </button>
+    <button class="nav-item nav-subitem" data-target="Giderler.html" data-title="Giderler">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Giderler.html" data-fav-title="Giderler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_giderler">Giderler</span></span>
+      </button>
+        </div>
+      </div>
     </div>
     </div>
+
+    <div class="nav-drawer-wrap">
+    <button class="nav-item" id="talimatlarAraclariToggle" data-drawer-toggle="true" data-title="Talimatlar" aria-expanded="false">
+      <span class="nav-icon-badge"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v4h4M9 12h6M9 16h4"/></svg></span>
+      <span class="fav-star" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+      <span class="nav-text-wrap">
+        <span class="nav-title" data-i18n="nav_talimatlar">Talimatlar</span>
+      </span>
+      <span class="nav-drawer-chevron" id="talimatlarChevron">›</span>
+    </button>
+    <div class="nav-drawer" id="talimatlarDrawer" hidden>
+      <button class="nav-item nav-subitem" data-target="Talimat_Hazirlama.html" data-title="Talimat Hazırlama">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Talimat_Hazirlama.html" data-fav-title="Talimat Hazırlama" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_talimat_full">Talimat Hazırlama</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="HazirMetinTalimatlari.html" data-title="Hazır Metin Talimatları">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="HazirMetinTalimatlari.html" data-fav-title="Hazır Metin Talimatları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_hazirmetin">Hazır Metin Talimatları</span></span>
+      </button>
+      <button class="nav-item nav-subitem" data-target="Tahsilat_Makbuzu.html" data-title="Tahsilat Makbuzu">
+        <span class="fav-star" role="button" tabindex="0" data-fav-target="Tahsilat_Makbuzu.html" data-fav-title="Tahsilat Makbuzu" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
+        <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_tahsilat_makbuzu">Tahsilat Makbuzu</span></span>
+      </button>
+    </div>
+    </div>
+
+    
+
+    
+
+    <!-- 2026-08-02: YENİ ANA MENÜ — İşletme Yönetimi (Stok / Risk / Portföy) -->
+    
 
     <!-- 2026-08-02: RAPORLAR ana menüsü. Kullanıcı isteği: "raporlar sekmesi açıp
          raporları altına koyalım, risk yönetimi dahil". Bu menüdeki ekranlar VERİ
@@ -1736,7 +1764,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Risk_Yonetimi.html" data-fav-title="Risk Yönetimi" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_risk">Risk Yönetimi</span></span>
       </button>
-      <button class="nav-item nav-subitem" data-target="Istatistikler.html" data-title="İstatistikler">
+      <button class="nav-item nav-subitem" id="navIstatistiklerRaporBtn" data-target="Istatistikler.html" data-title="İstatistikler" data-gated="true" style="display:none;">
         <span class="fav-star" role="button" tabindex="0" data-fav-target="Istatistikler.html" data-fav-title="İstatistikler" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
         <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_istatistikler">İstatistikler</span></span>
       </button>
@@ -3920,12 +3948,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   onAuthStateChanged(auth, async (user) => {
     const adminBtn = document.getElementById('navReferansPaneliBtn');
-    const begenBtn = document.getElementById('navIstatistiklerBtn');
+    // 2026-08-02: İstatistikler menüde iki yerde (Veri Yönetimi + Raporlar) duruyor.
+    // Tek id yerine HEPSİNİ birden yönetiyoruz — yoksa kopyalardan biri admin olmayan
+    // kullanıcıya görünüp "bu sayfayı görüntüleme yetkiniz yok" ekranı çıkıyordu.
+    const begenBtnler = Array.prototype.slice.call(
+      document.querySelectorAll('#navIstatistiklerBtn, #navIstatistiklerRaporBtn'));
+    const begenBtn = begenBtnler[0] || null;
+    const begenGoster = (goster) => begenBtnler.forEach(b => { b.style.display = goster ? 'flex' : 'none'; });
     const adminCard = document.getElementById('cardReferansPaneliBtn');
     const begenCard = document.getElementById('cardIstatistiklerBtn');
     if(!user){
       if(adminBtn) adminBtn.style.display = 'none';
-      if(begenBtn) begenBtn.style.display = 'none';
+      begenGoster(false);
       if(adminCard) adminCard.style.display = 'none';
       if(begenCard) begenCard.style.display = 'none';
       mmgStopWatchingSession();
@@ -4041,7 +4075,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           }catch(e){ adminBtn.style.display = 'none'; if(adminCard) adminCard.style.display = 'none'; }
         }
       }
-      if(begenBtn) begenBtn.style.display = data.isAdmin ? 'flex' : 'none';
+      begenGoster(!!data.isAdmin);
       if(begenCard) begenCard.style.display = data.isAdmin ? '' : 'none';
       const verifyWrap = document.getElementById('mmgVerifyEmailWrap');
       if(verifyWrap) verifyWrap.style.display = (user.email && !user.emailVerified) ? 'block' : 'none';
