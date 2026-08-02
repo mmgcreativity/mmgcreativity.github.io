@@ -246,6 +246,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   .bank-chip-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
   .bank-chip-list{ max-width:860px; }  /* düzenli, ortada bir sütun */
+  .bank-chip .bc-firma{ font-weight:700; color:var(--brass); min-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .bank-chip{
     display:grid; grid-template-columns:180px minmax(0,1fr) 46px auto 26px; align-items:center; gap:12px;
     width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--hairline);
@@ -1224,7 +1225,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   async function loadBanks(){
     const snap = await getDocs(colRef('banks'));
     banksList = [];
-    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '', iban: d.data().iban || '', currency: d.data().currency || '', note: d.data().note || '', appliesToFirmaIds: d.data().appliesToFirmaIds || null, createdAt: d.data().createdAt || null }));
+    snap.forEach(d => banksList.push({ id: d.id, name: d.data().name || '', iban: d.data().iban || '', currency: d.data().currency || '', note: d.data().note || '', appliesToFirmaIds: d.data().appliesToFirmaIds || null, sahipFirmaId: d.data().sahipFirmaId || null, createdAt: d.data().createdAt || null }));
     await dedupeBanks();
     banksList.sort((a,b) => a.name.localeCompare(b.name, 'tr'));
     renderBanks();
@@ -1254,11 +1255,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     banksList = banksList.filter(b => dupIds.indexOf(b.id) === -1);
     try{ showMsg('banks_msg', (LBL.bankDupsCleaned||'{n}').replace('{n}', dupIds.length), false); }catch(e){}
   }
+  // IBAN'ın SAHİBİ firmanın adı (kod + ünvan). Kayıtlı değilse aktif firmayı varsayar.
+  function sahipFirmaAdi(b){
+    const id = b && b.sahipFirmaId;
+    const m = groupFirmaMembers.find(f => f.id === (id || scopeId));
+    if(!m) return id ? '—' : '';
+    return (String(m.code || '').trim() ? m.code + ' ' : '') + m.name;
+  }
+
   function renderBanks(){
     const listEl = document.getElementById('banksChipList');
     const visibleBanks = banksList.filter(visibleForActiveFirma);
     listEl.innerHTML = visibleBanks.length ? visibleBanks.map(b =>
       '<span class="bank-chip">' +
+        // 1. SÜTUN — IBAN'IN SAHİBİ FİRMA. Görünürlükten bağımsızdır: IBAN tüm grupta
+        // görünse bile parası TEK firmaya aittir, kullanıcının görmesi gereken bilgi budur.
+        '<span class="bc-firma" title="Bu IBAN\'ın ait olduğu firma">' + escapeHtml(sahipFirmaAdi(b)) + '</span>' +
         '<span class="bc-bank" title="' + escapeHtml(b.name + (b.note ? ' — ' + b.note : '')) + '">' + escapeHtml(b.name) + '</span>' +
         '<span class="bc-iban" title="' + escapeHtml(b.iban || '') + '">' + escapeHtml(b.iban || '—') + '</span>' +
         '<span class="bc-cur">' + escapeHtml(b.currency || '') + '</span>' +
@@ -1329,8 +1341,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       // formdaki firma seçimi YOK SAYILIYORDU. Kullanıcı tüm firmaları işaretlese bile kayıt
       // tek firmaya gidiyor, başka firmadayken IBAN'lar "kaybolmuş" gibi görünüyordu.
       // Artık seçim dikkate alınır; HEPSİ işaretliyse kısıtlama yazılmaz = TÜM GRUP.
+      // GÖRÜNÜRLÜK: seçim varsa o firmalar, hepsi seçiliyse kısıtlama yok (tüm grup).
       const bankAppliesTo = collectFirmaSelection('bank_firmaSelect');
       if(bankAppliesTo) docData.appliesToFirmaIds = bankAppliesTo;
+      // SAHİPLİK: IBAN tek bir firmaya aittir. Seçimde tek firma varsa o, yoksa aktif firma.
+      docData.sahipFirmaId = (bankAppliesTo && bankAppliesTo.length === 1) ? bankAppliesTo[0] : scopeId;
       await setDoc(docRef('banks', id), docData);
       select.value = ''; ibanInput.value = ''; curInput.value = 'TRY'; noteInput.value = '';
       showMsg('banks_msg', LBL.saved, false);
