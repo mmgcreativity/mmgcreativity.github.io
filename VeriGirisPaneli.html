@@ -149,12 +149,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      tek satıra sığar, ekran şişiyor"): IBAN formu tek satır. Genişlikler alanın
      GERÇEK içeriğine göre: banka adı ~18 karakter, IBAN 32 karakter (TR + gruplu),
      döviz 3 harf, açıklama kalan yer, en sonda Ekle. */
-  .field-row-iban{ grid-template-columns:170px 290px 78px minmax(110px,1fr) 128px 92px; gap:10px; align-items:end; }
-  .field-row-iban .auth-field{ margin:0; }
-  .field-row-iban label{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .field-row-iban #bankIbanInput{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:0; }
+  .field-row-iban{ grid-template-columns:var(--iban-grid-form); gap:12px; align-items:end;
+                   max-width:var(--iban-genislik); padding:0 12px; }
+  .field-row-iban .auth-field{ margin:0; min-width:0; }
+  .field-row-iban label{
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); font-family:'IBM Plex Mono',monospace; margin-bottom:4px;
+  }
+  /* Tüm kutular AYNI yükseklik ve AYNI yazı boyutunda — görsel dağınıklığın sebebi buydu. */
+  .field-row-iban input, .field-row-iban select{
+    height:38px; padding:0 10px; font-size:12.5px; border-radius:8px;
+  }
+  .field-row-iban #bankIbanInput{ font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0; }
   .field-row-iban #bankCurInput{ text-align:center; }
-  @media (max-width:1000px){ .field-row-iban{ grid-template-columns:1fr 1fr; } }
+  .field-row-iban #addBankBtn{ height:38px; padding:0 14px; font-size:13px; border-radius:8px; }
+  @media (max-width:1000px){ .field-row-iban{ grid-template-columns:1fr 1fr; padding:0; } }
   @media (max-width:560px){ .field-row-iban{ grid-template-columns:1fr; } }
 
   .iban-editor{ background:var(--surface-2); border:1px dashed var(--hairline); border-radius:10px; padding:12px; margin-bottom:12px; }
@@ -268,8 +278,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   /* Sütun genişlikleri TEK yerden yönetilir; üç ızgara da (başlık / filtre / satır)
      bunu kullandığı için hizalama hiçbir koşulda kaymaz. */
   :root{
-    --iban-grid: 220px 130px 300px 46px 200px 24px;
-    --iban-genislik: 1010px;
+    --iban-grid:      220px 130px 320px 46px 130px 24px;   /* liste: firma banka iban para görünürlük sil */
+    --iban-grid-form: 220px 320px  46px 130px 130px 74px;   /* form:  banka iban para açıklama görünürlük ekle */
+    --iban-genislik: 960px;
   }
   .bank-chip-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; max-width:var(--iban-genislik); }
   .bank-chip{
@@ -308,6 +319,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .bank-chip-filtre select.dolu{ border-color:var(--brass); color:var(--brass); }
   .bank-chip-filtre input:focus{ outline:none; border-color:var(--brass); }
   .bank-chip-filtre .b-sayac{ font-size:11px; color:var(--muted); }
+  .bank-chip-head .b-sayac{
+    font-size:10px; font-weight:600; letter-spacing:0; text-transform:none;
+    color:var(--brass); opacity:.85; margin-left:6px;
+  }
+  /* Silme butonu, arama kutularıyla AYNI yükseklik ve hizada */
+  .bank-chip-filtre #deleteAllBanksBtn{
+    height:27px; box-sizing:border-box; padding:0 10px;
+    background:transparent; border:1px solid rgba(226,84,75,0.5); color:var(--red,#E2544B);
+    border-radius:7px; font-weight:600; font-size:11px; cursor:pointer; white-space:nowrap;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .bank-chip-filtre #deleteAllBanksBtn:hover{ background:rgba(226,84,75,0.12); }
   .bank-chip-list{ margin-top:6px; }
   .bank-chip .bc-firma{ font-weight:700; color:var(--brass); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12px; }
   .bank-chip .bc-bank{ font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -318,7 +341,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     justify-self:stretch; white-space:nowrap; font-size:11px; line-height:1.6; margin-top:0 !important;
     width:100% !important; height:auto !important; border-radius:999px !important;
     display:inline-flex !important; align-items:center; justify-content:center;
-    overflow:hidden; text-overflow:ellipsis; box-sizing:border-box;
+    overflow:hidden; text-overflow:ellipsis; box-sizing:border-box; padding:2px 10px;
   }
   #bank_firmaSelect{ display:none; }  /* IBAN tek firmaya (aktif) aittir — çoklu-firma seçimi mantıksız, gizlendi */
   /* Sil butonu — YALNIZCA bu seçiciye uygulanır, kapsam rozetine bulaşmaz. */
@@ -675,16 +698,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </div>
         </div>
         <div id="bank_firmaSelect"></div>
-        <div style="display:flex; justify-content:flex-end;">
-          <button type="button" id="deleteAllBanksBtn" style="background:transparent; border:1px solid rgba(226,84,75,0.5); color:var(--red,#E2544B); border-radius:8px; padding:5px 12px; font-weight:600; font-size:12px; cursor:pointer;">🗑 Tüm IBAN'ları Sil</button>
-        </div>
         <!-- 2026-08-02 (kullanıcı: "sütunların başına koy arama filtrelemeyi"):
              Tek bir genel arama kutusu yerine, listeyle AYNI ızgarayı kullanan
              sütun başlıkları ve her sütunun altında kendi arama kutusu. -->
         <div class="bank-chip-head" id="banksChipHead">
           <span data-bsort="firma">Firma</span>
           <span data-bsort="banka">Banka</span>
-          <span data-bsort="iban">IBAN</span>
+          <span data-bsort="iban">IBAN <span class="b-sayac" id="banksChipCount"></span></span>
           <span data-bsort="para" style="text-align:right;">Para</span>
           <span data-bsort="kapsam" style="text-align:center;">Görünürlük</span>
           <span></span>
@@ -694,8 +714,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <select class="b-filtre b-filtre-sec" data-alan="banka" id="bFiltreBanka"><option value="">Tüm bankalar</option></select>
           <input class="b-filtre" data-alan="iban"  type="search" placeholder="IBAN / açıklama ara…" autocomplete="off">
           <input class="b-filtre" data-alan="para"  type="search" placeholder="TL…" autocomplete="off">
-          <span class="b-sayac" id="banksChipCount" style="text-align:center;"></span>
-          <span></span>
+          <!-- 2026-08-02 (kullanıcı: "tüm IBAN'ları sil butonu çakışmış, arama kutularının
+               hizasına koy"): buton artık filtre satırının SON HÜCRESİNDE, arama
+               kutularıyla aynı yatay hizada; iki sütunu kaplar. -->
+          <button type="button" id="deleteAllBanksBtn" style="grid-column:5 / span 2;">🗑 Tüm IBAN'ları Sil</button>
         </div>
         <div class="bank-chip-list" id="banksChipList"></div>
         <div class="form-msg" id="banks_msg"></div>
@@ -1132,13 +1154,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     if(groupFirmaMembers.length > 1 && ids.length >= groupFirmaMembers.length){
       return '<div class="party-scope-badge">🏢 TÜM GRUP</div>';
     }
-    const names = members.map(m => (String(m.code || '').trim() ? m.code + ' ' : '') + m.name);
+    // 2026-08-02 (kullanıcı: "görünürlükte firma adının yazmasına gerek yok, sadece kod
+    // yazsın"): Firma adı zaten 1. sütunda duruyor; rozette YALNIZCA firma kodu yazılır.
+    // Kodu olmayan (eski) firmalarda ada düşülür, boş rozet çıkmasın diye.
+    const names = members.map(m => String(m.code || '').trim() || m.name);
     // 2026-08-02: Rozet artık ÇİFT YÖNLÜ. Kısıtlı bir kayda tıklayınca kısıtlama kalkar
     // → gruptaki tüm firmalar görür. (Eskiden yalnızca "TÜM GRUP" rozeti tıklanabiliyordu,
     // bir kere kısıtlanan IBAN'ı arayüzden tekrar tüm gruba açmanın yolu yoktu.)
+    const tamAdlar = members.map(m => (String(m.code || '').trim() ? m.code + ' ' : '') + m.name).join(', ');
     return '<button type="button" class="party-scope-badge scope-openable" data-open-id="' + escapeHtml(record.id || '') +
-           '" style="cursor:pointer; font:inherit;" title="Bu kayıt yalnızca bu firma(lar)da görünür. Tıkla: gruptaki TÜM firmalara aç.">🏢 ' +
-           escapeHtml(names.join(', ')) + ' ▾</button>';
+           '" style="cursor:pointer; font:inherit;" title="Yalnızca şu firmalarda görünür: ' + escapeHtml(tamAdlar) +
+           '\nTıkla: gruptaki TÜM firmalara aç.">🏢 ' + escapeHtml(names.join(', ')) + ' ▾</button>';
   }
 
   // Grup üyeliği checkbox listesi: ana firma her zaman işaretli ve kilitli görünür;
