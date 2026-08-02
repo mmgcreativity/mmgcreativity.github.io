@@ -142,5 +142,86 @@
     return p.length === 3 ? (p[2] + '.' + p[1] + '.' + p[0]) : iso;
   };
 
+  /* ==========================================================================
+     CARİ (müşteri / tedarikçi) LİSTESİ — TEK KAYNAK: Veri Giriş Paneli
+     Kullanıcı isteği (2026-08-02): "müşteriler zaten veri girişinden yapılıyor…
+     işletme yönetiminde sadece listeleri gelebilir."
+     Yani yeni modüller KENDİ müşteri kartını TUTMAZ; hepsi buradan okur.
+     Yol: {users|firmaAccounts|companies}/{scopeId}/customers  (ve /suppliers)
+     Müşteri dokümanı: { name, ibans[], riskLimit, vadeGun, vergiNo, telefon, not }
+     ========================================================================== */
+  var cariCache = { customers:null, suppliers:null };
+
+  MMGStore.cariler = async function(kind){
+    kind = kind || 'customers';
+    if(cariCache[kind]) return cariCache[kind].slice();
+    var C = window.mmgCloud;
+    if(!C || !C.currentUser || !C.scopeId) return [];
+    try{
+      var snap = await C.getDocs(C.collection(C.db, C.scopeCollection, C.scopeId, kind));
+      var list = [];
+      snap.forEach(function(d){
+        var x = d.data() || {};
+        list.push({
+          id: d.id, ad: x.name || '', ibans: x.ibans || [],
+          limit: Number(x.riskLimit) || 0, vadeGun: Number(x.vadeGun) || 0,
+          vergi: x.vergiNo || '', tel: x.telefon || '', not: x.not || ''
+        });
+      });
+      list.sort(function(a,b){ return a.ad.localeCompare(b.ad, 'tr'); });
+      cariCache[kind] = list;
+      return list.slice();
+    }catch(e){ return []; }
+  };
+  MMGStore.cariTazele = function(){ cariCache = { customers:null, suppliers:null }; };
+
+  /* Cari seçici <select>'i doldurur. Kapsam hazır olmadan çağrılırsa
+     'mmg-scope-ready' olayını bekler; böylece sayfa açılışında boş kalmaz. */
+  MMGStore.cariDoldur = function(sel, kind, onHazir){
+    if(!sel) return;
+    var doldur = async function(){
+      var list = await MMGStore.cariler(kind);
+      var onceki = sel.value;
+      sel.innerHTML = list.length
+        ? '<option value="">— seçin —</option>' + list.map(function(c){
+            return '<option value="' + c.id + '">' +
+              String(c.ad).replace(/[&<>"]/g, function(ch){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]; }) +
+            '</option>';
+          }).join('')
+        : '<option value="">— Veri Girişi\'nden müşteri ekleyin —</option>';
+      if(onceki) sel.value = onceki;
+      if(onHazir) onHazir(list);
+    };
+    if(window.mmgCloud && window.mmgCloud.ready) doldur();
+    else document.addEventListener('mmg-scope-ready', doldur);
+  };
+
+  /* ==========================================================================
+     FİRMALARIM — kullanıcının KENDİ şirketleri (YAŞAR CİHAN, ADERANS, CİHANTAŞ…)
+     Banka limitleri, teminat mektupları ve bakiyeler firma bazında ayrıldığı için
+     bu liste de TEK KAYNAK olmalı. Banka Yönetimi ekranındaki "Firmalarım"
+     sekmesinden yönetilir, diğer modüller buradan okur.
+     ⚠️ Bu, Firestore'daki `firmaAccounts` (ekip/hesap paylaşımı) ile AYNI ŞEY DEĞİL;
+     o erişim yönetimi, bu ise muhasebe/raporlama kırılımı.
+     ========================================================================== */
+  var firmaStore = null;
+  MMGStore.firmaStore = function(){
+    if(!firmaStore){ firmaStore = MMGStore('firmalar').load(); }
+    return firmaStore;
+  };
+  MMGStore.firmalar = function(){ return MMGStore.firmaStore().get(); };
+  MMGStore.firmaDoldur = function(sel, hepsiEtiketi){
+    if(!sel) return;
+    var list = MMGStore.firmalar().slice().sort(function(a,b){ return a.ad.localeCompare(b.ad,'tr'); });
+    var onceki = sel.value;
+    sel.innerHTML = (hepsiEtiketi ? '<option value="">' + hepsiEtiketi + '</option>' : '<option value="">— seçin —</option>') +
+      list.map(function(f){
+        return '<option value="' + f.id + '">' +
+          String(f.ad).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }) +
+        '</option>';
+      }).join('');
+    sel.value = onceki;
+  };
+
   window.MMGStore = MMGStore;
 })();

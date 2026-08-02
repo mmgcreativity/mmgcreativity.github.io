@@ -148,6 +148,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   .iban-editor{ background:var(--surface-2); border:1px dashed var(--hairline); border-radius:10px; padding:12px; margin-bottom:12px; }
   .iban-editor-label{ font-size:11.5px; color:var(--muted); font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:.03em; }
+  /* 2026-08-02: müşteri kartındaki ticari bilgiler (risk limiti, vade…) ızgarası */
+  .cari-grid{ display:grid; gap:10px; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); }
+  .cari-grid .auth-field label{ font-size:11px; }
   .iban-row{ display:grid; grid-template-columns: minmax(150px,1fr) minmax(230px,1.7fr) 84px auto; gap:8px; margin-bottom:8px; align-items:center; }
   @media (max-width:640px){ .iban-row{ grid-template-columns:1fr 1fr; } }
   .iban-row input{
@@ -461,6 +464,35 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <div class="iban-editor-label" data-i18n="iban_editor_label">IBAN Bilgileri</div>
           <div id="cust_ibanRows"></div>
           <button type="button" class="iban-add-btn" data-add-iban="customers" data-i18n="add_iban_btn">+ IBAN Ekle</button>
+        </div>
+        <!-- 2026-08-02: TİCARİ BİLGİLER — müşteriler tek yerden (burada) tanımlansın,
+             Risk Yönetimi / Fatura / Teminat Mektubu modülleri bu kaydı OKUSUN diye
+             risk limiti ve tanınan vade buraya taşındı (kullanıcı isteği:
+             "müşteriler zaten veri girişinden yapılıyor, bu verilerin de istenmesi lazım"). -->
+        <div class="iban-editor">
+          <div class="iban-editor-label">Ticari Bilgiler (Risk Yönetimi için)</div>
+          <div class="cari-grid">
+            <div class="auth-field" style="margin:0;">
+              <label>Risk Limiti</label>
+              <input type="text" id="cust_riskLimit" inputmode="decimal" placeholder="0,00">
+            </div>
+            <div class="auth-field" style="margin:0;">
+              <label>Tanınan Vade (gün)</label>
+              <input type="text" id="cust_vadeGun" inputmode="numeric" placeholder="60">
+            </div>
+            <div class="auth-field" style="margin:0;">
+              <label>Vergi No / TCKN</label>
+              <input type="text" id="cust_vergiNo" placeholder="opsiyonel">
+            </div>
+            <div class="auth-field" style="margin:0;">
+              <label>Telefon</label>
+              <input type="text" id="cust_telefon" placeholder="opsiyonel">
+            </div>
+            <div class="auth-field" style="margin:0; grid-column:1 / -1;">
+              <label>Not</label>
+              <input type="text" id="cust_not" placeholder="Örn. teminat mektubu alındı">
+            </div>
+          </div>
         </div>
         <div id="cust_firmaSelect"></div>
         <button type="button" class="auth-submit" data-save="customers" data-i18n="save_party_btn">Müşteriyi Kaydet</button>
@@ -1511,6 +1543,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     try{
       const id = kind[0] + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
       const docData = { name, ibans, createdAt: serverTimestamp() };
+
+      // 2026-08-02 — TİCARİ BİLGİLER (yalnızca müşteride). Risk Yönetimi bu alanları
+      // okuyup limit kullanımını hesaplar; boş bırakılabilir, o zaman "limitsiz" sayılır.
+      if(kind === 'customers'){
+        const num = (id) => {
+          const el = document.getElementById(id);
+          if(!el) return 0;
+          let t = String(el.value || '').trim().replace(/\s/g, '');
+          if(!t) return 0;
+          if(t.includes(',') && t.includes('.')){
+            t = t.lastIndexOf(',') > t.lastIndexOf('.') ? t.replace(/\./g,'').replace(',','.') : t.replace(/,/g,'');
+          } else if(t.includes(',')){ t = t.replace(/\./g,'').replace(',','.'); }
+          const v = parseFloat(t);
+          return isFinite(v) ? v : 0;
+        };
+        const txt = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+        docData.riskLimit = num('cust_riskLimit');
+        docData.vadeGun   = num('cust_vadeGun');
+        docData.vergiNo   = txt('cust_vergiNo');
+        docData.telefon   = txt('cust_telefon');
+        docData.not       = txt('cust_not');
+      }
       // Elle eklemede kayıt HER ZAMAN bir firmaya atanır: seçim yapılmadıysa/hepsi seçiliyse
       // otomatik AKTİF firmaya (kullanıcı isteği — atanmamış "global" kayıt hiç oluşmasın).
       if(appliesTo) docData.appliesToFirmaIds = appliesTo;
@@ -1518,6 +1572,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       await setDoc(docRef(kind, id), docData);
       nameEl.value = '';
       clearIbanRows(prefix);
+      ['cust_riskLimit','cust_vadeGun','cust_vergiNo','cust_telefon','cust_not']
+        .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
       resetFirmaSelect(prefix + '_firmaSelect');
       showMsg(kind + '_msg', LBL.saved, false);
       await loadParties(kind);

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{ var mode=localStorage.getItem('mmg_theme')||'dark'; document.documentElement.classList.toggle('theme-light', mode==='light'); }catch(e){}
+  window.addEventListener('message', function(ev){ if(ev&&ev.data&&ev.data.mmgTheme){ document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme==='light'); try{localStorage.setItem('mmg_theme',ev.data.mmgTheme);}catch(e2){} } });
+})();
+</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Abonelik / Fatura Takibi</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mmg-module.css">
+<style>
+  .tab-panel{ display:none; } .tab-panel.active{ display:block; }
+  .mono{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; }
+  tr.tur-baslik td{ background:var(--surface-2); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; }
+  tfoot td{ border-top:2px solid var(--brass-dim); font-weight:700; font-family:'JetBrains Mono',monospace; }
+  .gun-rozet{ display:inline-block; min-width:26px; text-align:center; padding:2px 6px; border-radius:6px;
+              background:var(--surface-2); font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11.5px; }
+  .gun-rozet.yakin{ background:rgba(227,162,60,0.18); color:var(--amber); }
+  .gun-rozet.bugun{ background:rgba(226,84,75,0.18); color:var(--red); }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <h1 class="title">Abonelik / Fatura Takibi</h1>
+    <p class="subtitle">Elektrik, su, internet, doğalgaz gibi düzenli faturalarınızı abone ve sözleşme numaralarıyla birlikte tek listede tutun; ödeme günü yaklaşanları görün ve tutarları Giderler'e aktarın.</p>
+  </div>
+  <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="liste">Abonelik Listesi</button>
+    <button class="tab" data-tab="takvim">Ödeme Takvimi</button>
+    <button class="tab" data-tab="ekle">Yeni Kayıt</button>
+  </div>
+
+  <!-- ================= LİSTE ================= -->
+  <div class="tab-panel active" id="tab-liste">
+    <div class="kpis" id="lKpi"></div>
+    <div class="panel">
+      <div class="panel-title">Abonelikler</div>
+      <div class="panel-desc">Tutarlar "yaklaşık" veya "sabit" olarak işaretlenebilir. Sabit tutarlı abonelikler aylık gider tahmininde birebir, yaklaşık olanlar tahmini olarak sayılır.</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="lAra" type="text" placeholder="Tedarikçi, santral, abone no ara…" style="max-width:250px;">
+        <select id="lTur" style="max-width:160px;"></select>
+        <select id="lFirma" style="max-width:170px;"></select>
+        <select id="lBanka" style="max-width:160px;"><option value="">Tüm bankalar</option></select>
+        <button class="btn" id="btnExcel">Excel</button>
+        <button class="btn" id="btnPdf">PDF</button>
+        <button class="btn primary" id="btnGidereAktar">Giderler'e Aktar</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="num">#</th><th>Tür</th><th>Tedarikçi</th><th>Abone (Firma)</th><th>Santral / Lokasyon</th>
+            <th>Sözleşme No</th><th>Abone No</th><th class="num">Ödeme Günü</th><th>Banka</th>
+            <th class="num">Tutar</th><th>Açıklama</th><th></th>
+          </tr></thead>
+          <tbody id="lListe"></tbody>
+          <tfoot id="lAlt"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAKVİM ================= -->
+  <div class="tab-panel" id="tab-takvim">
+    <div class="panel">
+      <div class="panel-title">Aylık Ödeme Takvimi</div>
+      <div class="panel-desc">Ayın hangi günü hangi faturaların ödeneceği. Bugüne yakın olanlar renkli işaretlenir.</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num" style="width:80px;">Gün</th><th class="num" style="width:150px;">Toplam</th><th>Faturalar</th></tr></thead>
+          <tbody id="tListe"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Firma Bazlı Aylık Yük</div>
+      <div class="table-wrap">
+        <table>
+          <thead id="fBaslik"></thead>
+          <tbody id="fGovde"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= YENİ KAYIT ================= -->
+  <div class="tab-panel" id="tab-ekle">
+    <div class="panel">
+      <div class="panel-title">Yeni Abonelik / Fatura</div>
+      <div class="form-grid">
+        <div><label class="fl" for="aTur">Tür *</label>
+          <input id="aTur" type="text" list="turListesi" placeholder="ELEKTRİK">
+          <datalist id="turListesi">
+            <option value="ELEKTRİK"><option value="SU"><option value="DOĞALGAZ"><option value="İNTERNET">
+            <option value="TELEFON"><option value="KİRA"><option value="SİGORTA"><option value="YAZILIM"><option value="DİĞER">
+          </datalist>
+        </div>
+        <div><label class="fl" for="aTedarikci">Tedarikçi</label><input id="aTedarikci" type="text" placeholder="ULUDAĞ / BUSKİ / TTNET"></div>
+        <div><label class="fl" for="aFirma">Abone (Firma)</label><select id="aFirma"></select></div>
+        <div style="grid-column:span 2;"><label class="fl" for="aSantral">Santral / Lokasyon</label><input id="aSantral" type="text" placeholder="KARACABEY / MERKEZ"></div>
+        <div><label class="fl" for="aSozlesme">Sözleşme No</label><input id="aSozlesme" class="mono" type="text" placeholder="13760011"></div>
+        <div><label class="fl" for="aAboneNo">Abone No</label><input id="aAboneNo" class="mono" type="text" placeholder="00099177670"></div>
+        <div><label class="fl" for="aGun">Ödeme Günü (ayın kaçı)</label><input id="aGun" class="num" type="text" inputmode="numeric" placeholder="13"></div>
+        <div><label class="fl" for="aBanka">Banka</label><input id="aBanka" type="text" list="bankaListesi" placeholder="AKBANK / KENDİSİ"><datalist id="bankaListesi"></datalist></div>
+        <div><label class="fl" for="aTutar">Tutar</label><input id="aTutar" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl" for="aPara">Para</label>
+          <select id="aPara"><option>TL</option><option>USD</option><option>EUR</option><option>GBP</option></select>
+        </div>
+        <div><label class="fl" for="aTip">Tutar Tipi</label>
+          <select id="aTip"><option value="yaklasik">Yaklaşık</option><option value="sabit">Sabit</option></select>
+        </div>
+        <div style="grid-column:span 2;"><label class="fl" for="aNot">Açıklama</label><input id="aNot" type="text" placeholder="opsiyonel"></div>
+        <div><button class="btn primary" id="btnEkle" style="width:100%;">Kaydet</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script type="module" src="mmg-cloud-init.js"></script>
+<script src="mmg-store.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.MMGStore;
+  var store = S('abonelik'), firmaStore = S.firmaStore(), bankaStore = S('banka');
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+  function firmaAdi(id){ var f = S.firmalar().filter(function(x){ return x.id === id; })[0]; return f ? f.ad : ''; }
+
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      $('tab-' + t.dataset.tab).classList.add('active');
+    });
+  });
+
+  $('btnEkle').addEventListener('click', function(){
+    var tur = $('aTur').value.trim().toUpperCase();
+    if(!tur){ alert('Tür zorunlu.'); $('aTur').focus(); return; }
+    var gun = parseInt(S.parse($('aGun').value), 10);
+    if(gun && (gun < 1 || gun > 31)){ alert('Ödeme günü 1–31 arasında olmalı.'); $('aGun').focus(); return; }
+    store.add({
+      id:S.uid(), tur:tur, tedarikci:$('aTedarikci').value.trim().toUpperCase(),
+      firmaId:$('aFirma').value, santral:$('aSantral').value.trim().toUpperCase(),
+      sozlesme:$('aSozlesme').value.trim(), aboneNo:$('aAboneNo').value.trim(),
+      gun: gun || 0, banka:$('aBanka').value.trim().toUpperCase(),
+      tutar:S.parse($('aTutar').value), para:$('aPara').value,
+      tip:$('aTip').value, not:$('aNot').value.trim()
+    });
+    ['aSantral','aSozlesme','aAboneNo','aTutar','aNot'].forEach(function(id){ $(id).value = ''; });
+    $('aSantral').focus();
+  });
+
+  function filtreli(){
+    var q = ($('lAra').value || '').toLocaleLowerCase('tr');
+    var ft = $('lTur').value, ff = $('lFirma').value, fb = $('lBanka').value;
+    return store.get().filter(function(r){
+      if(ft && r.tur !== ft) return false;
+      if(ff && r.firmaId !== ff) return false;
+      if(fb && r.banka !== fb) return false;
+      if(q && (r.tur + ' ' + r.tedarikci + ' ' + r.santral + ' ' + r.sozlesme + ' ' + r.aboneNo + ' ' + (r.not||''))
+              .toLocaleLowerCase('tr').indexOf(q) === -1) return false;
+      return true;
+    });
+  }
+
+  function render(){
+    var list = store.get();
+    S.firmaDoldur($('aFirma'), null);
+    S.firmaDoldur($('lFirma'), 'Tüm firmalar');
+
+    // tür ve banka seçicileri
+    var turler = [], bankalarL = [];
+    list.forEach(function(r){
+      if(r.tur && turler.indexOf(r.tur) === -1) turler.push(r.tur);
+      if(r.banka && bankalarL.indexOf(r.banka) === -1) bankalarL.push(r.banka);
+    });
+    turler.sort(); bankalarL.sort();
+    var ts = $('lTur'), tsO = ts.value;
+    ts.innerHTML = '<option value="">Tüm türler</option>' + turler.map(function(t){ return '<option>' + esc(t) + '</option>'; }).join('');
+    ts.value = tsO;
+    var bs = $('lBanka'), bsO = bs.value;
+    bs.innerHTML = '<option value="">Tüm bankalar</option>' + bankalarL.map(function(b){ return '<option>' + esc(b) + '</option>'; }).join('');
+    bs.value = bsO;
+    $('bankaListesi').innerHTML = bankaStore.get().map(function(b){ return '<option value="' + esc(b.ad) + '">'; }).join('') +
+      '<option value="KENDİSİ">';
+
+    /* ---- LİSTE (tür bazlı gruplu, Excel'deki gibi) ---- */
+    var f = filtreli().sort(function(a,b){
+      return (a.tur||'').localeCompare(b.tur||'','tr') ||
+             (a.tedarikci||'').localeCompare(b.tedarikci||'','tr') ||
+             (a.santral||'').localeCompare(b.santral||'','tr');
+    });
+    var bugunGun = new Date().getDate();
+    var sira = 0, oncekiTur = null, html = [], toplam = 0;
+    f.forEach(function(r){
+      if(r.tur !== oncekiTur){
+        oncekiTur = r.tur;
+        html.push('<tr class="tur-baslik"><td colspan="12">' + esc(r.tur) + '</td></tr>');
+      }
+      sira++;
+      if((r.para || 'TL') === 'TL') toplam += (r.tutar || 0);
+      var cls = r.gun === bugunGun ? 'bugun' : (r.gun && r.gun - bugunGun > 0 && r.gun - bugunGun <= 3 ? 'yakin' : '');
+      html.push('<tr>' +
+        '<td class="num" style="color:var(--muted);">' + sira + '</td>' +
+        '<td>' + esc(r.tur) + '</td>' +
+        '<td>' + esc(r.tedarikci) + '</td>' +
+        '<td>' + esc(firmaAdi(r.firmaId)) + '</td>' +
+        '<td>' + esc(r.santral) + '</td>' +
+        '<td class="mono">' + esc(r.sozlesme) + '</td>' +
+        '<td class="mono">' + esc(r.aboneNo) + '</td>' +
+        '<td class="num">' + (r.gun ? '<span class="gun-rozet ' + cls + '">' + r.gun + '</span>' : '—') + '</td>' +
+        '<td>' + esc(r.banka) + '</td>' +
+        '<td class="num">' + (r.tutar ? S.fmt(r.tutar) + ' ' + (r.para === 'TL' ? '₺' : r.para) : '—') + '</td>' +
+        '<td><span class="badge ' + (r.tip === 'sabit' ? 'ok' : 'mut') + '">' + (r.tip === 'sabit' ? 'SABİT' : 'YAKLAŞIK') + '</span>' +
+          (r.not ? ' <span style="color:var(--muted); font-size:11.5px;">' + esc(r.not) + '</span>' : '') + '</td>' +
+        '<td><button class="icon-btn" data-sil="' + r.id + '" title="Sil">✕</button></td>' +
+      '</tr>');
+    });
+    $('lListe').innerHTML = html.length ? html.join('')
+      : '<tr><td colspan="12" class="empty">Kayıt yok. "Yeni Kayıt" sekmesinden ekleyin.</td></tr>';
+    $('lAlt').innerHTML = f.length
+      ? '<tr><td colspan="9" style="text-align:right;">AYLIK TOPLAM (TL)</td><td class="num">' + S.fmt(toplam) + ' ₺</td><td colspan="2"></td></tr>'
+      : '';
+
+    var sabit = list.filter(function(r){ return r.tip === 'sabit' && (r.para||'TL')==='TL'; })
+                    .reduce(function(s,r){ return s + (r.tutar||0); }, 0);
+    var yaklasik = list.filter(function(r){ return r.tip !== 'sabit' && (r.para||'TL')==='TL'; })
+                       .reduce(function(s,r){ return s + (r.tutar||0); }, 0);
+    var yakinda = list.filter(function(r){ return r.gun && r.gun >= bugunGun && r.gun - bugunGun <= 7; });
+    $('lKpi').innerHTML =
+      '<div class="kpi"><div class="k">Abonelik Adedi</div><div class="v">' + list.length + '</div></div>' +
+      '<div class="kpi"><div class="k">Aylık Toplam (TL)</div><div class="v">' + S.fmt(sabit + yaklasik) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Sabit Tutarlı</div><div class="v good">' + S.fmt(sabit) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Yaklaşık</div><div class="v warn">' + S.fmt(yaklasik) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">7 Gün İçinde</div><div class="v ' + (yakinda.length ? 'warn' : '') + '">' + yakinda.length + '</div></div>';
+
+    /* ---- TAKVİM ---- */
+    var gunler = {};
+    list.forEach(function(r){ if(r.gun) (gunler[r.gun] = gunler[r.gun] || []).push(r); });
+    var gk = Object.keys(gunler).map(Number).sort(function(a,b){ return a - b; });
+    $('tListe').innerHTML = gk.length ? gk.map(function(g){
+      var grp = gunler[g];
+      var t = grp.reduce(function(s,r){ return s + ((r.para||'TL')==='TL' ? (r.tutar||0) : 0); }, 0);
+      var cls = g === bugunGun ? 'bugun' : (g - bugunGun > 0 && g - bugunGun <= 3 ? 'yakin' : '');
+      return '<tr>' +
+        '<td class="num"><span class="gun-rozet ' + cls + '">' + g + '</span></td>' +
+        '<td class="num">' + S.fmt(t) + ' ₺</td>' +
+        '<td style="font-size:12px;">' + grp.map(function(r){
+          return esc(r.tur + ' · ' + r.tedarikci + (r.santral ? ' (' + r.santral + ')' : ''));
+        }).join(' &nbsp;·&nbsp; ') + '</td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="3" class="empty">Ödeme günü girilmiş abonelik yok.</td></tr>';
+
+    /* ---- FİRMA BAZLI ---- */
+    var fl = S.firmalar().slice().sort(function(a,b){ return a.ad.localeCompare(b.ad,'tr'); });
+    $('fBaslik').innerHTML = '<tr><th>Tür</th>' +
+      fl.map(function(x){ return '<th class="num">' + esc(x.ad) + '</th>'; }).join('') + '<th class="num">Toplam</th></tr>';
+    var turSet = {};
+    list.forEach(function(r){
+      if((r.para||'TL') !== 'TL') return;
+      if(!turSet[r.tur]) turSet[r.tur] = {};
+      turSet[r.tur][r.firmaId || '_yok'] = (turSet[r.tur][r.firmaId || '_yok'] || 0) + (r.tutar || 0);
+    });
+    var sutunT = {}, genelT = 0;
+    var frows = Object.keys(turSet).sort().map(function(t){
+      var rt = 0;
+      var tds = fl.map(function(x){
+        var v = turSet[t][x.id] || 0;
+        rt += v; sutunT[x.id] = (sutunT[x.id] || 0) + v;
+        return '<td class="num">' + (v ? S.fmt(v) : '–') + '</td>';
+      }).join('');
+      genelT += rt;
+      return '<tr><td><b>' + esc(t) + '</b></td>' + tds + '<td class="num"><b>' + S.fmt(rt) + '</b></td></tr>';
+    });
+    if(frows.length){
+      frows.push('<tr style="border-top:2px solid var(--brass-dim);"><td><b>TOPLAM</b></td>' +
+        fl.map(function(x){ return '<td class="num"><b>' + (sutunT[x.id] ? S.fmt(sutunT[x.id]) : '–') + '</b></td>'; }).join('') +
+        '<td class="num"><b>' + S.fmt(genelT) + '</b></td></tr>');
+    }
+    $('fGovde').innerHTML = frows.length ? frows.join('')
+      : '<tr><td colspan="' + (fl.length + 2) + '" class="empty">Veri yok.</td></tr>';
+  }
+
+  /* ---- Giderler'e aktarım ----
+     Giderler sayfası kayıtları localStorage'daki 'mmg_odemeler_list' üzerinde tutar;
+     buraya {desc, amount, dueDate, recurrence:'monthly', category} biçiminde ekliyoruz.
+     Böylece abonelikler Nakit Akış Tablosu'na da otomatik düşer. */
+  $('btnGidereAktar').addEventListener('click', function(){
+    var f = filtreli().filter(function(r){ return r.gun && r.tutar > 0 && (r.para||'TL') === 'TL'; });
+    if(!f.length){ alert('Aktarılacak (ödeme günü ve tutarı girilmiş) abonelik yok.'); return; }
+    if(!confirm(f.length + ' abonelik Giderler listesine AYLIK TEKRARLI olarak eklenecek. Devam edilsin mi?')) return;
+    var d = new Date(), yil = d.getFullYear(), ay = d.getMonth() + 1;
+    var mevcut = [];
+    try{ mevcut = JSON.parse(localStorage.getItem('mmg_odemeler_list') || '[]') || []; }catch(e){}
+    var eklenen = 0;
+    f.forEach(function(r){
+      var gun = Math.min(r.gun, 28);   // 29-31 olmayan aylarda kaymasın
+      var iso = yil + '-' + String(ay).padStart(2,'0') + '-' + String(gun).padStart(2,'0');
+      var baslik = r.tur + ' · ' + r.tedarikci + (r.santral ? ' (' + r.santral + ')' : '');
+      // Aynı başlık + aynı gün varsa mükerrer kayıt oluşturma
+      if(mevcut.some(function(x){ return x.desc === baslik && String(x.dueDate||'').slice(8) === String(gun).padStart(2,'0'); })) return;
+      mevcut.push({
+        id: 'ab_' + r.id, desc: baslik, amount: r.tutar, dueDate: iso,
+        recurrence: 'monthly', category: 'diger', paused: false
+      });
+      eklenen++;
+    });
+    try{ localStorage.setItem('mmg_odemeler_list', JSON.stringify(mevcut)); }catch(e){
+      alert('Kaydedilemedi (depolama dolu olabilir).'); return;
+    }
+    alert(eklenen + ' kayıt Giderler listesine eklendi.' + (eklenen < f.length ? '\n' + (f.length - eklenen) + ' kayıt zaten vardı.' : '') +
+          '\n\nGiderler sayfasını açıp "Senkronize Et" derseniz Nakit Akış Tablosu\'na da işlenir.');
+  });
+
+  $('lListe').addEventListener('click', function(e){
+    var s = e.target.closest('[data-sil]');
+    if(s && confirm('Bu abonelik silinsin mi?')) store.remove(s.dataset.sil);
+  });
+  $('lAra').addEventListener('input', render);
+  ['lTur','lFirma','lBanka'].forEach(function(id){ $(id).addEventListener('change', render); });
+
+  function xls(rows, sheet, file){
+    if(!window.XLSX){ alert('Excel bileşeni yüklenemedi.'); return; }
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), sheet);
+    XLSX.writeFile(wb, file);
+  }
+  $('btnExcel').addEventListener('click', function(){
+    xls(filtreli().map(function(r, i){
+      return { 'No':i+1, 'Tür':r.tur, 'Tedarikçi':r.tedarikci, 'Abone':firmaAdi(r.firmaId),
+               'Santral':r.santral, 'Sözleşme No':r.sozlesme, 'Abone No':r.aboneNo,
+               'Ödeme Günü':r.gun, 'Banka':r.banka, 'Tutar':r.tutar, 'Para':r.para,
+               'Açıklama':(r.tip === 'sabit' ? 'SABİT' : 'YAKLAŞIK') + (r.not ? ' — ' + r.not : '') };
+    }), 'Abonelikler', 'abonelik-faturalari.xlsx');
+  });
+  $('btnPdf').addEventListener('click', function(){
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
+    var d = new J({ orientation:'landscape' });
+    d.setFontSize(14); d.text('Abonelik / Fatura Listesi', 14, 14);
+    d.autoTable({ startY:20, styles:{ fontSize:8 },
+      head:[['Tur','Tedarikci','Abone','Santral','Sozlesme No','Abone No','Odeme Gunu','Banka','Tutar']],
+      body: filtreli().map(function(r){
+        return [r.tur, r.tedarikci, firmaAdi(r.firmaId), r.santral, r.sozlesme, r.aboneNo,
+                r.gun || '-', r.banka, S.fmt(r.tutar)];
+      }) });
+    d.save('abonelik-faturalari.pdf');
+  });
+
+  store.onChange(render);
+  firmaStore.onChange(render);
+  bankaStore.onChange(render);
+  store.load(); bankaStore.load();
+  render();
+  try{ gtag('event', 'tool_used', { tool_name: 'abonelik_faturalari' }); }catch(e){}
+})();
+</script>
+<script src="mmg-doviz-widget.js"></script>
+<script src="mmg-calc-widget.js"></script>
+<script src="mmg-widget-menu.js"></script>
+</body>
+</html>

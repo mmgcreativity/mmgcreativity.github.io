@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{ var mode=localStorage.getItem('mmg_theme')||'dark'; document.documentElement.classList.toggle('theme-light', mode==='light'); }catch(e){}
+  window.addEventListener('message', function(ev){ if(ev&&ev.data&&ev.data.mmgTheme){ document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme==='light'); try{localStorage.setItem('mmg_theme',ev.data.mmgTheme);}catch(e2){} } });
+})();
+</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Teminat Mektupları</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mmg-module.css">
+<style>
+  .tab-panel{ display:none; } .tab-panel.active{ display:block; }
+  .mono{ font-family:'IBM Plex Mono',monospace; }
+  tr.firma-baslik td{
+    background:var(--surface-2); font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:12px; letter-spacing:.04em; border-bottom:1px solid var(--hairline);
+  }
+  tr.firma-toplam td{ border-top:1px solid var(--brass-dim); font-weight:700; }
+  .süresiz{ color:var(--violet); font-weight:700; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <h1 class="title">Teminat Mektupları</h1>
+    <p class="subtitle">Verdiğiniz ve aldığınız teminat mektuplarını firma bazında takip edin; vade, komisyon oranı, taksit ve iade süreci tek ekranda. Toplamlar firma bazlı ve genel olarak ayrı ayrı hesaplanır.</p>
+  </div>
+  <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="verilen">Verilen Mektuplar</button>
+    <button class="tab" data-tab="alinan">Alınan Mektuplar</button>
+    <button class="tab" data-tab="iade">İade Süreçleri</button>
+    <button class="tab" data-tab="ekle">Yeni Kayıt</button>
+  </div>
+
+  <!-- ================= VERİLEN ================= -->
+  <div class="tab-panel active" id="tab-verilen">
+    <div class="kpis" id="vKpi"></div>
+    <div class="panel">
+      <div class="panel-title">Verilen Teminat Mektupları Listesi</div>
+      <div class="panel-desc">Bankanızın sizin adınıza muhataba verdiği mektuplar. Bunlar bankadaki <b>gayrinakdi kredi riskinizi</b> oluşturur.</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="vAra" type="text" placeholder="Banka, firma, muhatap, no ara…" style="max-width:260px;">
+        <select id="vFirma" style="max-width:190px;"><option value="">Tüm firmalar</option></select>
+        <select id="vDurum" style="max-width:180px;">
+          <option value="">Tüm durumlar</option>
+          <option value="acik">Yürürlükte</option>
+          <option value="yakin">Vadesi yaklaşan (60 gün)</option>
+          <option value="gecmis">Vadesi geçmiş</option>
+          <option value="suresiz">Süresiz</option>
+          <option value="iade">İade edildi</option>
+        </select>
+        <button class="btn" id="btnVExcel">Excel</button>
+        <button class="btn" id="btnVPdf">PDF</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Banka</th><th>No</th><th>Firma</th><th>Mektup Sınıfı</th><th>Muhatap</th><th>Konu</th>
+            <th class="num">Oran</th><th class="num">Taksit</th><th>Kull. Tarihi</th><th>Vade</th>
+            <th class="num">Tutar</th><th>Durum</th><th></th>
+          </tr></thead>
+          <tbody id="vListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ALINAN ================= -->
+  <div class="tab-panel" id="tab-alinan">
+    <div class="kpis" id="aKpi"></div>
+    <div class="panel">
+      <div class="panel-title">Alınan Teminat Mektupları Listesi</div>
+      <div class="panel-desc">Müşterilerinizin/yüklenicilerin size verdiği mektuplar. Bunlar sizin <b>alacak riskinizi azaltan teminatlardır</b> — Risk Yönetimi ekranında müşterinin riskinden düşülür.</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="aAra" type="text" placeholder="Banka, veren, konu ara…" style="max-width:260px;">
+        <select id="aDurum" style="max-width:180px;">
+          <option value="">Tüm durumlar</option>
+          <option value="acik">Yürürlükte</option>
+          <option value="yakin">Vadesi yaklaşan (60 gün)</option>
+          <option value="gecmis">Vadesi geçmiş</option>
+          <option value="suresiz">Süresiz</option>
+          <option value="iade">İade edildi</option>
+        </select>
+        <button class="btn" id="btnAExcel">Excel</button>
+        <button class="btn" id="btnAPdf">PDF</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Banka</th><th>No</th><th>Firma</th><th>Veren (Cari)</th><th>Konu</th>
+            <th>Kull. Tarihi</th><th>Vade</th><th class="num">Tutar</th><th>Durum</th><th></th>
+          </tr></thead>
+          <tbody id="aListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= İADE ================= -->
+  <div class="tab-panel" id="tab-iade">
+    <div class="panel">
+      <div class="panel-title">Teminat Mektubu İade Süreçleri</div>
+      <div class="panel-desc">İadeye çıkarılan mektupların takibi. Bir mektup fiilen iade edilene kadar banka riskiniz DEVAM EDER — bu yüzden süreç ayrı izlenir.</div>
+      <div class="kpis" id="iKpi"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tür</th><th>Banka</th><th>No</th><th>Firma</th><th>Muhatap / Veren</th>
+            <th class="num">Tutar</th><th>Vade</th><th>İade Talep</th><th>İade Tarihi</th>
+            <th>Durum</th><th>Not</th><th></th>
+          </tr></thead>
+          <tbody id="iListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= YENİ KAYIT ================= -->
+  <div class="tab-panel" id="tab-ekle">
+    <div class="panel">
+      <div class="panel-title">Yeni Teminat Mektubu</div>
+      <div class="panel-desc">"Verilen" = banka sizin adınıza muhataba verdi. "Alınan" = bir cari size teminat olarak verdi.</div>
+      <div class="form-grid">
+        <div><label class="fl" for="mTur">Tür *</label>
+          <select id="mTur"><option value="verilen">Verilen</option><option value="alinan">Alınan</option></select>
+        </div>
+        <div><label class="fl" for="mBanka">Banka *</label><input id="mBanka" type="text" placeholder="Garanti / Yapı Kredi…"></div>
+        <div><label class="fl" for="mNo">Mektup No *</label><input id="mNo" class="mono" type="text" placeholder="2648806"></div>
+        <div><label class="fl" for="mFirma">Firma (kendi firmanız)</label><input id="mFirma" type="text" list="firmaListesi" placeholder="YAŞAR CİHAN"><datalist id="firmaListesi"></datalist></div>
+        <div><label class="fl" for="mSinif">Mektup Sınıfı</label>
+          <select id="mSinif">
+            <option>Kesin Teminat</option><option>Geçici Teminat</option><option>Avans Teminat</option>
+            <option>Mahkeme Teminat</option><option>Gümrük Teminat</option><option>Serbest Konulu</option>
+          </select>
+        </div>
+        <div style="grid-column:span 2;"><label class="fl" for="mMuhatap">Muhatap / Veren *</label>
+          <input id="mMuhatap" type="text" list="cariListesi" placeholder="İçdaş Dış Ticaret A.Ş.">
+          <datalist id="cariListesi"></datalist>
+        </div>
+        <div style="grid-column:span 2;"><label class="fl" for="mKonu">Konu</label><input id="mKonu" type="text" placeholder="Mal Alımı / İzin bedeli / ruhsat no…"></div>
+        <div><label class="fl" for="mOran">Komisyon Oranı %</label><input id="mOran" class="num" type="text" inputmode="decimal" placeholder="0,9"></div>
+        <div><label class="fl" for="mTaksit">Taksit (dönem/yıl)</label><input id="mTaksit" class="num" type="text" inputmode="numeric" placeholder="4"></div>
+        <div><label class="fl" for="mKullanim">Kullanım Tarihi</label><input id="mKullanim" type="date"></div>
+        <div><label class="fl" for="mVade">Vade</label><input id="mVade" type="date"></div>
+        <div style="display:flex; align-items:center; gap:7px; padding-bottom:6px;">
+          <input type="checkbox" id="mSuresiz" style="width:auto; height:auto;">
+          <label for="mSuresiz" style="font-size:12.5px; color:var(--muted); cursor:pointer;">Süresiz</label>
+        </div>
+        <div><label class="fl" for="mTutar">Tutar *</label><input id="mTutar" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl" for="mPara">Para Birimi</label>
+          <select id="mPara"><option>TL</option><option>USD</option><option>EUR</option><option>GBP</option></select>
+        </div>
+        <div style="grid-column:span 2;"><label class="fl" for="mNot">Not</label><input id="mNot" type="text" placeholder="opsiyonel"></div>
+        <div><button class="btn primary" id="btnEkle" style="width:100%;">Kaydet</button></div>
+      </div>
+      <p class="panel-desc" style="margin:12px 0 0;">Komisyon: <b>Tutar × Oran% × Taksit</b> formülüyle yıllık tahmini maliyet olarak gösterilir. Kesin tutar için bankanızın dekontunu esas alın.</p>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script type="module" src="mmg-cloud-init.js"></script>
+<script src="mmg-store.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.MMGStore, store = S('teminat');
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+
+  function gunSerisi(iso){
+    if(!iso) return null;
+    var p = String(iso).split('-');
+    return p.length === 3 ? Math.floor(Date.UTC(+p[0], +p[1]-1, +p[2]) / 86400000) : null;
+  }
+  function bugunSeri(){
+    var d = new Date();
+    return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+  }
+  function paraSim(p){ return ({TL:'₺', USD:'$', EUR:'€', GBP:'£'})[p] || '₺'; }
+
+  /* ---- Durum: mektubun bugünkü hâli ----
+     iade edilmişse 'iade'; süresizse 'suresiz'; vadesi geçmişse 'gecmis';
+     60 günden az kaldıysa 'yakin'; değilse 'acik'.
+     ⚠️ Vadesi geçmiş mektup OTOMATİK düşmez — banka fiilen iade almadıkça risk sürer. */
+  function durumu(r){
+    if(r.iadeTarihi) return 'iade';
+    if(r.suresiz) return 'suresiz';
+    var vs = gunSerisi(r.vade);
+    if(vs === null) return 'suresiz';
+    var kalan = vs - bugunSeri();
+    if(kalan < 0) return 'gecmis';
+    if(kalan <= 60) return 'yakin';
+    return 'acik';
+  }
+  var DURUM = {
+    acik:    { ad:'Yürürlükte',    cls:'ok'   },
+    yakin:   { ad:'Vade yaklaştı', cls:'warn' },
+    gecmis:  { ad:'Vadesi geçti',  cls:'bad'  },
+    suresiz: { ad:'Süresiz',       cls:'mut'  },
+    iade:    { ad:'İade edildi',   cls:'mut'  }
+  };
+  function vadeYaz(r){
+    if(r.suresiz || !r.vade) return '<span class="süresiz">SÜRESİZ</span>';
+    return esc(S.trDate(r.vade));
+  }
+  /* Yıllık tahmini komisyon: Tutar × Oran% × Taksit */
+  function komisyon(r){ return (r.tutar || 0) * ((r.oran || 0) / 100) * (r.taksit || 1); }
+
+  /* ---------------- Sekmeler ---------------- */
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      $('tab-' + t.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ---------------- Kayıt ---------------- */
+  $('mSuresiz').addEventListener('change', function(){
+    $('mVade').disabled = this.checked;
+    if(this.checked) $('mVade').value = '';
+  });
+
+  $('btnEkle').addEventListener('click', function(){
+    var banka = $('mBanka').value.trim();
+    var no = $('mNo').value.trim();
+    var muhatap = $('mMuhatap').value.trim();
+    var tutar = S.parse($('mTutar').value);
+    if(!banka){ alert('Banka zorunlu.'); $('mBanka').focus(); return; }
+    if(!no){ alert('Mektup no zorunlu.'); $('mNo').focus(); return; }
+    if(!muhatap){ alert('Muhatap / veren zorunlu.'); $('mMuhatap').focus(); return; }
+    if(!(tutar > 0)){ alert('Tutar sıfırdan büyük olmalı.'); $('mTutar').focus(); return; }
+
+    var mevcut = store.get().filter(function(x){
+      return x.no === no && x.banka.toLocaleLowerCase('tr') === banka.toLocaleLowerCase('tr');
+    })[0];
+    var kayit = {
+      tur: $('mTur').value, banka:banka, no:no,
+      firma: $('mFirma').value.trim(), sinif: $('mSinif').value,
+      muhatap:muhatap, konu: $('mKonu').value.trim(),
+      oran: S.parse($('mOran').value), taksit: S.parse($('mTaksit').value),
+      kullanim: $('mKullanim').value, vade: $('mVade').value,
+      suresiz: $('mSuresiz').checked, tutar:tutar, para: $('mPara').value,
+      not: $('mNot').value.trim(),
+      iadeTalep: '', iadeTarihi: ''
+    };
+    if(mevcut){
+      if(!confirm(banka + ' / ' + no + ' numaralı mektup zaten kayıtlı. Güncellensin mi?')) return;
+      store.update(mevcut.id, kayit);
+    } else {
+      kayit.id = S.uid();
+      store.add(kayit);
+    }
+    ['mNo','mMuhatap','mKonu','mTutar','mNot'].forEach(function(id){ $(id).value = ''; });
+    $('mNo').focus();
+    alert('Kaydedildi.');
+  });
+
+  /* ---------------- Render ---------------- */
+  function render(){
+    var list = store.get();
+    var bugun = bugunSeri();
+
+    /* --- firma seçici --- */
+    var firmalar = [];
+    list.forEach(function(r){ if(r.firma && firmalar.indexOf(r.firma) === -1) firmalar.push(r.firma); });
+    firmalar.sort(function(a,b){ return a.localeCompare(b,'tr'); });
+    $('firmaListesi').innerHTML = firmalar.map(function(f){ return '<option value="' + esc(f) + '">'; }).join('');
+    var fs = $('vFirma'), fsOnce = fs.value;
+    fs.innerHTML = '<option value="">Tüm firmalar</option>' +
+      firmalar.map(function(f){ return '<option value="' + esc(f) + '">' + esc(f) + '</option>'; }).join('');
+    fs.value = fsOnce;
+
+    /* ================= VERİLEN ================= */
+    var ver = list.filter(function(r){ return r.tur === 'verilen'; });
+    var q = ($('vAra').value || '').toLocaleLowerCase('tr');
+    var fFirma = $('vFirma').value, fDurum = $('vDurum').value;
+    var vf = ver.filter(function(r){
+      if(fFirma && r.firma !== fFirma) return false;
+      if(fDurum && durumu(r) !== fDurum) return false;
+      if(q && (r.banka + ' ' + r.no + ' ' + r.firma + ' ' + r.muhatap + ' ' + r.konu + ' ' + r.sinif)
+              .toLocaleLowerCase('tr').indexOf(q) === -1) return false;
+      return true;
+    });
+
+    // Excel'deki gibi FİRMA BAZLI grup + firma toplamı, en sonda genel toplam.
+    var grup = {};
+    vf.forEach(function(r){ (grup[r.firma || '(firma girilmemiş)'] = grup[r.firma || '(firma girilmemiş)'] || []).push(r); });
+    var satirlar = [], genelToplam = 0, genelKomisyon = 0;
+    Object.keys(grup).sort(function(a,b){ return a.localeCompare(b,'tr'); }).forEach(function(f){
+      var g = grup[f].slice().sort(function(a,b){ return (a.banka||'').localeCompare(b.banka||'','tr'); });
+      var ft = 0;
+      satirlar.push('<tr class="firma-baslik"><td colspan="13">' + esc(f) + '</td></tr>');
+      g.forEach(function(r){
+        var d = durumu(r);
+        // Genel toplama YALNIZCA TL ve iade edilmemişler girer (karışık kur toplanmaz).
+        if(d !== 'iade' && (r.para || 'TL') === 'TL'){ ft += r.tutar; genelKomisyon += komisyon(r); }
+        satirlar.push('<tr>' +
+          '<td>' + esc(r.banka) + '</td>' +
+          '<td class="mono">' + esc(r.no) + '</td>' +
+          '<td>' + esc(r.firma) + '</td>' +
+          '<td>' + esc(r.sinif) + '</td>' +
+          '<td>' + esc(r.muhatap) + '</td>' +
+          '<td style="color:var(--muted);">' + esc(r.konu) + '</td>' +
+          '<td class="num">' + (r.oran ? S.fmt(r.oran, 1) : '—') + '</td>' +
+          '<td class="num">' + (r.taksit ? S.fmt(r.taksit, 0) : '—') + '</td>' +
+          '<td>' + esc(S.trDate(r.kullanim)) + '</td>' +
+          '<td>' + vadeYaz(r) + '</td>' +
+          '<td class="num">' + S.fmt(r.tutar) + ' ' + paraSim(r.para) + '</td>' +
+          '<td><span class="badge ' + DURUM[d].cls + '">' + DURUM[d].ad + '</span></td>' +
+          '<td style="white-space:nowrap;">' +
+            (d !== 'iade' ? '<button class="icon-btn" data-iade="' + r.id + '" title="İade sürecine al" style="color:var(--teal);">↩</button>' : '') +
+            '<button class="icon-btn" data-sil="' + r.id + '" title="Sil">✕</button>' +
+          '</td></tr>');
+      });
+      genelToplam += ft;
+      satirlar.push('<tr class="firma-toplam"><td colspan="10" style="text-align:right; color:var(--muted);">' +
+        esc(f) + ' — Firma Bazlı Toplam</td><td class="num">' + S.fmt(ft) + ' ₺</td><td colspan="2"></td></tr>');
+    });
+    $('vListe').innerHTML = satirlar.length ? satirlar.join('')
+      : '<tr><td colspan="13" class="empty">Bu filtreye uyan verilen mektup yok.</td></tr>';
+
+    var yakinSayi = ver.filter(function(r){ return durumu(r) === 'yakin'; }).length;
+    var gecmisSayi = ver.filter(function(r){ return durumu(r) === 'gecmis'; }).length;
+    $('vKpi').innerHTML =
+      '<div class="kpi"><div class="k">Mektup Adedi</div><div class="v">' + ver.filter(function(r){ return durumu(r) !== 'iade'; }).length + '</div></div>' +
+      '<div class="kpi"><div class="k">Toplam Risk (TL)</div><div class="v">' + S.fmt(genelToplam) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Yıllık Tahmini Komisyon</div><div class="v warn">' + S.fmt(genelKomisyon) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Vadesi Yaklaşan</div><div class="v ' + (yakinSayi ? 'warn' : '') + '">' + yakinSayi + '</div></div>' +
+      '<div class="kpi"><div class="k">Vadesi Geçen</div><div class="v ' + (gecmisSayi ? 'bad' : '') + '">' + gecmisSayi + '</div></div>';
+
+    /* ================= ALINAN ================= */
+    var al = list.filter(function(r){ return r.tur === 'alinan'; });
+    var aq = ($('aAra').value || '').toLocaleLowerCase('tr');
+    var aFd = $('aDurum').value;
+    var af = al.filter(function(r){
+      if(aFd && durumu(r) !== aFd) return false;
+      if(aq && (r.banka + ' ' + r.no + ' ' + r.firma + ' ' + r.muhatap + ' ' + r.konu)
+               .toLocaleLowerCase('tr').indexOf(aq) === -1) return false;
+      return true;
+    }).sort(function(a,b){ return (a.muhatap||'').localeCompare(b.muhatap||'','tr'); });
+
+    var aToplam = 0;
+    $('aListe').innerHTML = af.length ? af.map(function(r){
+      var d = durumu(r);
+      if(d !== 'iade' && (r.para || 'TL') === 'TL') aToplam += r.tutar;
+      return '<tr>' +
+        '<td>' + esc(r.banka) + '</td>' +
+        '<td class="mono">' + esc(r.no) + '</td>' +
+        '<td>' + esc(r.firma) + '</td>' +
+        '<td><b>' + esc(r.muhatap) + '</b></td>' +
+        '<td style="color:var(--muted);">' + esc(r.konu) + '</td>' +
+        '<td>' + esc(S.trDate(r.kullanim)) + '</td>' +
+        '<td>' + vadeYaz(r) + '</td>' +
+        '<td class="num">' + S.fmt(r.tutar) + ' ' + paraSim(r.para) + '</td>' +
+        '<td><span class="badge ' + DURUM[d].cls + '">' + DURUM[d].ad + '</span></td>' +
+        '<td style="white-space:nowrap;">' +
+          (d !== 'iade' ? '<button class="icon-btn" data-iade="' + r.id + '" title="İade sürecine al" style="color:var(--teal);">↩</button>' : '') +
+          '<button class="icon-btn" data-sil="' + r.id + '" title="Sil">✕</button>' +
+        '</td></tr>';
+    }).join('') : '<tr><td colspan="10" class="empty">Bu filtreye uyan alınan mektup yok.</td></tr>';
+
+    $('aKpi').innerHTML =
+      '<div class="kpi"><div class="k">Mektup Adedi</div><div class="v">' + al.filter(function(r){ return durumu(r) !== 'iade'; }).length + '</div></div>' +
+      '<div class="kpi"><div class="k">Elimizdeki Teminat (TL)</div><div class="v good">' + S.fmt(aToplam) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Vadesi Yaklaşan</div><div class="v ' + (al.filter(function(r){ return durumu(r)==='yakin'; }).length ? 'warn' : '') + '">' +
+        al.filter(function(r){ return durumu(r)==='yakin'; }).length + '</div></div>';
+
+    /* ================= İADE ================= */
+    var iade = list.filter(function(r){ return r.iadeTalep || r.iadeTarihi; })
+      .sort(function(a,b){ return String(a.iadeTalep||'').localeCompare(String(b.iadeTalep||'')); });
+    var bekleyen = iade.filter(function(r){ return !r.iadeTarihi; });
+    var bekleyenTutar = bekleyen.reduce(function(s,r){ return s + ((r.para||'TL')==='TL' ? r.tutar : 0); }, 0);
+
+    $('iKpi').innerHTML =
+      '<div class="kpi"><div class="k">İade Sürecinde</div><div class="v ' + (bekleyen.length ? 'warn' : '') + '">' + bekleyen.length + '</div></div>' +
+      '<div class="kpi"><div class="k">Bekleyen Tutar (TL)</div><div class="v warn">' + S.fmt(bekleyenTutar) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Tamamlanan İade</div><div class="v good">' + iade.filter(function(r){ return r.iadeTarihi; }).length + '</div></div>';
+
+    $('iListe').innerHTML = iade.length ? iade.map(function(r){
+      var tamam = !!r.iadeTarihi;
+      return '<tr>' +
+        '<td><span class="badge mut">' + (r.tur === 'verilen' ? 'Verilen' : 'Alınan') + '</span></td>' +
+        '<td>' + esc(r.banka) + '</td>' +
+        '<td class="mono">' + esc(r.no) + '</td>' +
+        '<td>' + esc(r.firma) + '</td>' +
+        '<td>' + esc(r.muhatap) + '</td>' +
+        '<td class="num">' + S.fmt(r.tutar) + ' ' + paraSim(r.para) + '</td>' +
+        '<td>' + vadeYaz(r) + '</td>' +
+        '<td>' + esc(S.trDate(r.iadeTalep)) + '</td>' +
+        '<td><input type="date" data-iadetarih="' + r.id + '" value="' + esc(r.iadeTarihi || '') + '" style="height:27px; font-size:12px;"></td>' +
+        '<td><span class="badge ' + (tamam ? 'ok' : 'warn') + '">' + (tamam ? 'Tamamlandı' : 'Bekliyor') + '</span></td>' +
+        '<td><input type="text" data-iadenot="' + r.id + '" value="' + esc(r.not || '') + '" placeholder="not" style="height:27px; font-size:12px; min-width:130px;"></td>' +
+        '<td><button class="icon-btn" data-iadegeri="' + r.id + '" title="İade sürecinden çıkar">↺</button></td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="12" class="empty">İade sürecinde mektup yok. Listelerden ↩ tuşuyla ekleyin.</td></tr>';
+  }
+
+  /* ---------------- Etkileşim ---------------- */
+  function tikla(e){
+    var iade = e.target.closest('[data-iade]');
+    var sil  = e.target.closest('[data-sil]');
+    var geri = e.target.closest('[data-iadegeri]');
+    if(iade){
+      var t = prompt('İade talep tarihi (GG.AA.YYYY veya boş = bugün):', '');
+      var iso = S.today();
+      if(t){
+        var p = t.trim().split('.');
+        if(p.length === 3) iso = p[2] + '-' + p[1].padStart(2,'0') + '-' + p[0].padStart(2,'0');
+      }
+      store.update(iade.dataset.iade, { iadeTalep: iso });
+    }
+    if(sil && confirm('Bu mektup kaydı silinsin mi?')) store.remove(sil.dataset.sil);
+    if(geri && confirm('İade sürecinden çıkarılsın mı? (Mektup listede kalır)')){
+      store.update(geri.dataset.iadegeri, { iadeTalep:'', iadeTarihi:'' });
+    }
+  }
+  $('vListe').addEventListener('click', tikla);
+  $('aListe').addEventListener('click', tikla);
+  $('iListe').addEventListener('click', tikla);
+  $('iListe').addEventListener('change', function(e){
+    var d = e.target.closest('[data-iadetarih]'), n = e.target.closest('[data-iadenot]');
+    if(d) store.update(d.dataset.iadetarih, { iadeTarihi: d.value });
+    if(n) store.update(n.dataset.iadenot, { not: n.value });
+  });
+  ['vAra','aAra'].forEach(function(id){ $(id).addEventListener('input', render); });
+  ['vFirma','vDurum','aDurum'].forEach(function(id){ $(id).addEventListener('change', render); });
+
+  /* ---------------- Dışa aktarım ---------------- */
+  function rows(tur){
+    return store.get().filter(function(r){ return r.tur === tur; }).map(function(r){
+      return {
+        'Banka':r.banka, 'No':r.no, 'Firma':r.firma, 'Mektup Sınıfı':r.sinif,
+        'Muhatap':r.muhatap, 'Konu':r.konu, 'Oran':r.oran, 'Taksit':r.taksit,
+        'Kull. Tarihi':S.trDate(r.kullanim), 'Vade': r.suresiz ? 'SÜRESİZ' : S.trDate(r.vade),
+        'Tutar':r.tutar, 'Para':r.para, 'Durum':DURUM[durumu(r)].ad,
+        'Yıllık Komisyon': +komisyon(r).toFixed(2)
+      };
+    });
+  }
+  function xls(list, sheet, file){
+    if(!window.XLSX){ alert('Excel bileşeni yüklenemedi.'); return; }
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(list), sheet);
+    XLSX.writeFile(wb, file);
+  }
+  function pdf(title, head, body, file){
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
+    var d = new J({ orientation:'landscape' });
+    d.setFontSize(14); d.text(title, 14, 14);
+    d.autoTable({ startY:20, styles:{ fontSize:7 }, head:[head], body:body });
+    d.save(file);
+  }
+  $('btnVExcel').addEventListener('click', function(){ xls(rows('verilen'), 'Verilen', 'verilen-teminat-mektuplari.xlsx'); });
+  $('btnAExcel').addEventListener('click', function(){ xls(rows('alinan'), 'Alınan', 'alinan-teminat-mektuplari.xlsx'); });
+  $('btnVPdf').addEventListener('click', function(){
+    pdf('Verilen Teminat Mektuplari', ['Banka','No','Firma','Sinif','Muhatap','Vade','Tutar','Durum'],
+      rows('verilen').map(function(r){
+        return [r['Banka'], r['No'], r['Firma'], r['Mektup Sınıfı'], r['Muhatap'], r['Vade'], S.fmt(r['Tutar']), r['Durum']];
+      }), 'verilen-teminat-mektuplari.pdf');
+  });
+  $('btnAPdf').addEventListener('click', function(){
+    pdf('Alinan Teminat Mektuplari', ['Banka','No','Firma','Veren','Vade','Tutar','Durum'],
+      rows('alinan').map(function(r){
+        return [r['Banka'], r['No'], r['Firma'], r['Muhatap'], r['Vade'], S.fmt(r['Tutar']), r['Durum']];
+      }), 'alinan-teminat-mektuplari.pdf');
+  });
+
+  /* ---------------- Başlat ---------------- */
+  store.onChange(render);
+  $('mKullanim').value = S.today();
+  store.load();
+  render();
+  // Muhatap alanına Veri Girişi'ndeki müşteriler öneri olarak gelsin (tek kaynak ilkesi).
+  document.addEventListener('mmg-scope-ready', async function(){
+    var list = await S.cariler('customers');
+    $('cariListesi').innerHTML = list.map(function(c){ return '<option value="' + esc(c.ad) + '">'; }).join('');
+  });
+  try{ gtag('event', 'tool_used', { tool_name: 'teminat_mektubu' }); }catch(e){}
+})();
+</script>
+<script src="mmg-doviz-widget.js"></script>
+<script src="mmg-calc-widget.js"></script>
+<script src="mmg-widget-menu.js"></script>
+</body>
+</html>

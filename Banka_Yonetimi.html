@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{ var mode=localStorage.getItem('mmg_theme')||'dark'; document.documentElement.classList.toggle('theme-light', mode==='light'); }catch(e){}
+  window.addEventListener('message', function(ev){ if(ev&&ev.data&&ev.data.mmgTheme){ document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme==='light'); try{localStorage.setItem('mmg_theme',ev.data.mmgTheme);}catch(e2){} } });
+})();
+</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Banka Yönetimi</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mmg-module.css">
+<style>
+  .tab-panel{ display:none; } .tab-panel.active{ display:block; }
+  .mono{ font-family:'IBM Plex Mono',monospace; }
+  th.grp{ text-align:center; border-left:1px solid var(--hairline); }
+  td.grp-l{ border-left:1px solid var(--hairline); }
+  tfoot td{ border-top:2px solid var(--brass-dim); font-weight:700; font-family:'JetBrains Mono',monospace; }
+  tr.banka-alt td{ background:var(--surface-2); font-size:12px; }
+  .cati-not{ color:var(--violet); font-style:italic; font-size:11.5px; }
+  .inline-num{ height:26px; width:100%; min-width:92px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:11.5px; padding:0 6px; }
+  .kisi{ line-height:1.35; }
+  .kisi b{ display:block; font-size:12.5px; }
+  .kisi span{ color:var(--muted); font-size:11.5px; }
+  .kisi a{ color:var(--azure); text-decoration:none; font-size:11.5px; word-break:break-all; }
+  .paylas-kutu{ background:var(--bg); border:1px solid var(--hairline); border-radius:9px; padding:11px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; white-space:pre-wrap; max-height:290px; overflow:auto; }
+  .chk-row{ display:flex; flex-wrap:wrap; gap:12px; }
+  .chk-row label{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text); cursor:pointer; }
+  .chk-row input{ width:auto; height:auto; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <h1 class="title">Banka Yönetimi</h1>
+    <p class="subtitle">Banka limitleriniz, kullanılan riskiniz, tüm döviz cinsinden bakiyeleriniz ve banka yetkilisi iletişim bilgileri tek ekranda — hepsi firma bazında ayrılabilir.</p>
+  </div>
+  <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="limit">Limit &amp; Risk</button>
+    <button class="tab" data-tab="bakiye">Bakiyeler</button>
+    <button class="tab" data-tab="iletisim">İletişim</button>
+    <button class="tab" data-tab="tanim">Tanımlar</button>
+  </div>
+
+  <!-- ================= LİMİT & RİSK ================= -->
+  <div class="tab-panel active" id="tab-limit">
+    <div class="kpis" id="lKpi"></div>
+    <div class="panel">
+      <div class="panel-title">Bankalar Limit ve Risk Durumu</div>
+      <div class="panel-desc"><b>Kalan = Limit − Risk.</b> Bir bankada firma ayrımı yoksa "çatı limit" işaretleyin; o zaman limit tek satırda, riskler firmalardan toplanarak gösterilir.</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <select id="lGorunum" style="max-width:210px;">
+          <option value="konsolide">Görünüm: Konsolide</option>
+          <option value="firma">Görünüm: Firma bazında</option>
+        </select>
+        <select id="lFirma" style="max-width:180px;"></select>
+        <button class="btn" id="btnLExcel">Excel</button>
+        <button class="btn" id="btnLPdf">PDF</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead id="lBaslik"></thead>
+          <tbody id="lGovde"></tbody>
+          <tfoot id="lAlt"></tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Açıklamalar</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="width:200px;">Banka</th><th>Açıklama</th></tr></thead>
+          <tbody id="lAciklama"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= BAKİYELER ================= -->
+  <div class="tab-panel" id="tab-bakiye">
+    <div class="kpis" id="bKpi"></div>
+    <div class="panel">
+      <div class="panel-title">Banka Bakiyeleri</div>
+      <div class="panel-desc">Her banka için firma ve para birimi bazında bakiye girin. Hücrelere doğrudan yazabilirsiniz; toplamlar anında güncellenir. <b>Portföydeki çekler</b> satırı Çek/Senet modülünden otomatik gelir.</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <select id="bPara" style="max-width:150px;"></select>
+        <button class="btn" id="btnBExcel">Excel</button>
+        <button class="btn" id="btnBPdf">PDF</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead id="bBaslik"></thead>
+          <tbody id="bGovde"></tbody>
+          <tfoot id="bAlt"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= İLETİŞİM ================= -->
+  <div class="tab-panel" id="tab-iletisim">
+    <div class="panel">
+      <div class="panel-title">Banka İletişim Bilgileri</div>
+      <div class="panel-desc">Şube ve yetkili bilgileri. Aşağıdan istediğiniz bankaları ve rolleri seçip <b>kısmi ya da tüm</b> listeyi paylaşabilirsiniz.</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="iAra" type="text" placeholder="Banka, şube, kişi ara…" style="max-width:260px;">
+        <button class="btn" id="btnIEkle">+ Banka Ekle</button>
+        <button class="btn" id="btnIExcel">Excel</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th style="width:26px;"><input type="checkbox" id="iHepsi" style="width:auto;height:auto;" title="Tümünü seç"></th>
+            <th>Banka</th><th>Şube</th><th>Müdür</th><th>Portföy Yöneticisi</th><th>Müşteri Temsilcisi</th><th></th>
+          </tr></thead>
+          <tbody id="iListe"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Paylaş</div>
+      <div class="panel-desc">Seçili bankaların, seçtiğiniz rollerdeki kişilerini metne dönüştürür.</div>
+      <div class="chk-row" style="margin-bottom:10px;">
+        <label><input type="checkbox" class="rol" value="mudur" checked> Müdür</label>
+        <label><input type="checkbox" class="rol" value="portfoy" checked> Portföy Yöneticisi</label>
+        <label><input type="checkbox" class="rol" value="temsilci" checked> Müşteri Temsilcisi</label>
+        <span style="width:14px;"></span>
+        <label><input type="checkbox" class="alan" value="tel" checked> Telefon</label>
+        <label><input type="checkbox" class="alan" value="mail" checked> E-posta</label>
+        <label><input type="checkbox" class="alan" value="sube" checked> Şube</label>
+      </div>
+      <div class="paylas-kutu" id="paylasMetin">Paylaşmak için yukarıdan banka seçin.</div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn primary" id="btnKopyala">Kopyala</button>
+        <button class="btn" id="btnWhatsapp">WhatsApp</button>
+        <button class="btn" id="btnMail">E-posta</button>
+        <button class="btn" id="btnPaylasPdf">PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TANIMLAR ================= -->
+  <div class="tab-panel" id="tab-tanim">
+    <div class="panel">
+      <div class="panel-title">Firmalarım</div>
+      <div class="panel-desc">Buradaki firmalar <b>tüm işletme modüllerinde</b> (çek/senet, teminat mektubu, bakiye, limit) ortak kullanılır. Kendi şirketlerinizi girin.</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="fAd" type="text" placeholder="Firma ünvanı (ör. YAŞAR CİHAN)" style="max-width:280px;">
+        <input id="fKod" type="text" placeholder="Kısa kod (ops.)" style="max-width:150px;">
+        <button class="btn primary" id="btnFEkle">Ekle</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Firma</th><th>Kod</th><th class="num">Banka Bakiyesi (TL)</th><th class="num">Çek/Senet Alacağı</th><th></th></tr></thead>
+          <tbody id="fListe"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Bankalar</div>
+      <div class="panel-desc">Limit, bakiye ve iletişim ekranlarının tamamı bu listeyi kullanır.</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="nAd" type="text" placeholder="Banka adı (ör. AKBANK)" style="max-width:250px;">
+        <input id="nRev" type="date" style="max-width:160px;" title="Revizyon tarihi">
+        <button class="btn primary" id="btnNEkle">Ekle</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Banka</th><th>Rev. Tarihi</th><th class="num">Grup Limiti</th>
+            <th>Çatı Limit</th><th>Açıklama</th><th></th>
+          </tr></thead>
+          <tbody id="nListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script type="module" src="mmg-cloud-init.js"></script>
+<script src="mmg-store.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.MMGStore;
+  var bankaStore   = S('banka');          // { id, ad, rev, grupLimit, cekCati, kefaletCati, aciklama }
+  var limitStore   = S('banka_limit');    // { id, bankaId, firmaId, cekLimit, cekRisk, kefLimit, kefRisk }
+  var bakiyeStore  = S('banka_bakiye');   // { id, bankaId, firmaId, para, tutar }
+  var iletisimStore= S('banka_iletisim'); // { id, bankaId, sube, mudur:{ad,tel,mail}, portfoy:{...}, temsilci:{...} }
+  var cekStore     = S('cek_senet');      // salt-okunur: portföydeki çekler
+  var firmaStore   = S.firmaStore();
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+
+  var PARALAR = ['TL','USD','EUR','GBP'];
+  function firmalar(){ return S.firmalar().slice().sort(function(a,b){ return a.ad.localeCompare(b.ad,'tr'); }); }
+  function bankalar(){ return bankaStore.get().slice().sort(function(a,b){ return a.ad.localeCompare(b.ad,'tr'); }); }
+  function firmaAdi(id){ var f = S.firmalar().filter(function(x){ return x.id === id; })[0]; return f ? f.ad : '(firmasız)'; }
+
+  /* Bir (banka, firma) için limit satırını getir; yoksa boş nesne döndür. */
+  function lim(bankaId, firmaId){
+    return limitStore.get().filter(function(r){ return r.bankaId === bankaId && r.firmaId === firmaId; })[0] ||
+           { bankaId:bankaId, firmaId:firmaId, cekLimit:0, cekRisk:0, kefLimit:0, kefRisk:0 };
+  }
+  function limYaz(bankaId, firmaId, alan, deger){
+    var m = limitStore.get().filter(function(r){ return r.bankaId === bankaId && r.firmaId === firmaId; })[0];
+    if(m){ var p = {}; p[alan] = deger; limitStore.update(m.id, p); }
+    else {
+      var yeni = { id:S.uid(), bankaId:bankaId, firmaId:firmaId, cekLimit:0, cekRisk:0, kefLimit:0, kefRisk:0 };
+      yeni[alan] = deger;
+      limitStore.add(yeni);
+    }
+  }
+  /* Banka toplamı: çatı limitte limit banka satırında (firmaId:''), riskler firmalardan toplanır. */
+  function bankaToplam(b){
+    var fl = firmalar();
+    var t = { cekLimit:0, cekRisk:0, kefLimit:0, kefRisk:0 };
+    var cati = lim(b.id, '');
+    if(b.cekCati) t.cekLimit = cati.cekLimit || 0;
+    if(b.kefaletCati) t.kefLimit = cati.kefLimit || 0;
+    fl.forEach(function(f){
+      var r = lim(b.id, f.id);
+      if(!b.cekCati) t.cekLimit += (r.cekLimit || 0);
+      if(!b.kefaletCati) t.kefLimit += (r.kefLimit || 0);
+      t.cekRisk += (r.cekRisk || 0);
+      t.kefRisk += (r.kefRisk || 0);
+    });
+    // Çatı limitte riskler de doğrudan banka satırına girilmiş olabilir
+    t.cekRisk += (cati.cekRisk || 0);
+    t.kefRisk += (cati.kefRisk || 0);
+    return t;
+  }
+
+  /* ---------------- Sekmeler ---------------- */
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      $('tab-' + t.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ================= TANIMLAR ================= */
+  $('btnFEkle').addEventListener('click', function(){
+    var ad = $('fAd').value.trim();
+    if(!ad){ $('fAd').focus(); return; }
+    if(S.firmalar().some(function(f){ return f.ad.toLocaleLowerCase('tr') === ad.toLocaleLowerCase('tr'); })){
+      alert('Bu firma zaten kayıtlı.'); return;
+    }
+    firmaStore.add({ id:S.uid(), ad:ad, kod:$('fKod').value.trim().toUpperCase() });
+    $('fAd').value = ''; $('fKod').value = ''; $('fAd').focus();
+  });
+  $('btnNEkle').addEventListener('click', function(){
+    var ad = $('nAd').value.trim();
+    if(!ad){ $('nAd').focus(); return; }
+    if(bankaStore.get().some(function(b){ return b.ad.toLocaleLowerCase('tr') === ad.toLocaleLowerCase('tr'); })){
+      alert('Bu banka zaten kayıtlı.'); return;
+    }
+    bankaStore.add({ id:S.uid(), ad:ad.toUpperCase(), rev:$('nRev').value, grupLimit:0,
+                     cekCati:false, kefaletCati:false, aciklama:'' });
+    $('nAd').value = ''; $('nAd').focus();
+  });
+
+  /* ================= RENDER ================= */
+  function render(){
+    var fl = firmalar(), bl = bankalar();
+    S.firmaDoldur($('lFirma'), 'Tüm firmalar');
+    var ps = $('bPara'), psOnce = ps.value || 'TL';
+    ps.innerHTML = PARALAR.map(function(p){ return '<option value="' + p + '">' + p + '</option>'; }).join('');
+    ps.value = psOnce;
+
+    /* ---------- LİMİT & RİSK ---------- */
+    var gorunum = $('lGorunum').value, fFirma = $('lFirma').value;
+    var T = { grup:0, cekLimit:0, cekRisk:0, kefLimit:0, kefRisk:0 };
+
+    $('lBaslik').innerHTML =
+      '<tr>' +
+        '<th rowspan="2">Banka</th><th rowspan="2">Rev. Tarihi</th>' +
+        '<th rowspan="2" class="num">Grup Limiti</th><th rowspan="2" class="num">Toplam Risk</th>' +
+        '<th class="grp" colspan="3">ÇEK KARŞILIĞI</th>' +
+        '<th class="grp" colspan="3">KEFALET</th>' +
+      '</tr>' +
+      '<tr>' +
+        '<th class="num grp">Limit</th><th class="num">Risk</th><th class="num">Kalan</th>' +
+        '<th class="num grp">Limit</th><th class="num">Risk</th><th class="num">Kalan</th>' +
+      '</tr>';
+
+    function hucre(bId, fId, alan, deger, ilk){
+      return '<td class="num' + (ilk ? ' grp-l' : '') + '">' +
+        '<input class="inline-num" data-b="' + bId + '" data-f="' + fId + '" data-a="' + alan + '" ' +
+        'value="' + (deger ? S.fmt(deger, 0) : '') + '" placeholder="–"></td>';
+    }
+    function kalanHucre(limit, risk){
+      var k = (limit || 0) - (risk || 0);
+      var renk = k < 0 ? 'var(--red)' : k > 0 ? 'var(--teal)' : 'var(--muted)';
+      return '<td class="num" style="color:' + renk + ';">' + (k ? S.fmt(k, 0) : '–') + '</td>';
+    }
+
+    var satir = [];
+    bl.forEach(function(b){
+      var bt = bankaToplam(b);
+      T.grup += (b.grupLimit || 0);
+      T.cekLimit += bt.cekLimit; T.cekRisk += bt.cekRisk;
+      T.kefLimit += bt.kefLimit; T.kefRisk += bt.kefRisk;
+
+      satir.push('<tr>' +
+        '<td><b>' + esc(b.ad) + '</b>' +
+          ((b.cekCati || b.kefaletCati) ? '<div class="cati-not">' +
+            (b.cekCati ? 'çek: çatı limit ' : '') + (b.kefaletCati ? 'kefalet: çatı limit' : '') + '</div>' : '') +
+        '</td>' +
+        '<td>' + esc(S.trDate(b.rev)) + '</td>' +
+        '<td class="num">' + (b.grupLimit ? S.fmt(b.grupLimit, 0) : '–') + '</td>' +
+        '<td class="num">' + S.fmt(bt.cekRisk + bt.kefRisk, 0) + '</td>' +
+        '<td class="num grp-l">' + (bt.cekLimit ? S.fmt(bt.cekLimit, 0) : '–') + '</td>' +
+        '<td class="num">' + (bt.cekRisk ? S.fmt(bt.cekRisk, 0) : '–') + '</td>' +
+        kalanHucre(bt.cekLimit, bt.cekRisk) +
+        '<td class="num grp-l">' + (bt.kefLimit ? S.fmt(bt.kefLimit, 0) : '–') + '</td>' +
+        '<td class="num">' + (bt.kefRisk ? S.fmt(bt.kefRisk, 0) : '–') + '</td>' +
+        kalanHucre(bt.kefLimit, bt.kefRisk) +
+      '</tr>');
+
+      if(gorunum === 'firma'){
+        // Çatı limit satırı (firma ayrımı yok)
+        if(b.cekCati || b.kefaletCati){
+          var c = lim(b.id, '');
+          satir.push('<tr class="banka-alt"><td colspan="4" style="padding-left:22px; color:var(--violet);">↳ Çatı limit (firma ayrımı yok)</td>' +
+            (b.cekCati ? hucre(b.id, '', 'cekLimit', c.cekLimit, true) : '<td class="grp-l"></td>') +
+            (b.cekCati ? hucre(b.id, '', 'cekRisk', c.cekRisk) : '<td></td>') +
+            (b.cekCati ? kalanHucre(c.cekLimit, c.cekRisk) : '<td></td>') +
+            (b.kefaletCati ? hucre(b.id, '', 'kefLimit', c.kefLimit, true) : '<td class="grp-l"></td>') +
+            (b.kefaletCati ? hucre(b.id, '', 'kefRisk', c.kefRisk) : '<td></td>') +
+            (b.kefaletCati ? kalanHucre(c.kefLimit, c.kefRisk) : '<td></td>') +
+          '</tr>');
+        }
+        fl.filter(function(f){ return !fFirma || f.id === fFirma; }).forEach(function(f){
+          var r = lim(b.id, f.id);
+          satir.push('<tr class="banka-alt">' +
+            '<td colspan="4" style="padding-left:22px;">↳ ' + esc(f.ad) + '</td>' +
+            (b.cekCati ? '<td class="grp-l"></td>' : hucre(b.id, f.id, 'cekLimit', r.cekLimit, true)) +
+            hucre(b.id, f.id, 'cekRisk', r.cekRisk) +
+            (b.cekCati ? '<td></td>' : kalanHucre(r.cekLimit, r.cekRisk)) +
+            (b.kefaletCati ? '<td class="grp-l"></td>' : hucre(b.id, f.id, 'kefLimit', r.kefLimit, true)) +
+            hucre(b.id, f.id, 'kefRisk', r.kefRisk) +
+            (b.kefaletCati ? '<td></td>' : kalanHucre(r.kefLimit, r.kefRisk)) +
+          '</tr>');
+        });
+      }
+    });
+
+    $('lGovde').innerHTML = satir.length ? satir.join('')
+      : '<tr><td colspan="10" class="empty">Banka tanımlanmamış. "Tanımlar" sekmesinden ekleyin.</td></tr>';
+    $('lAlt').innerHTML = bl.length ? '<tr><td colspan="2">TOPLAM</td>' +
+      '<td class="num">' + S.fmt(T.grup, 0) + '</td>' +
+      '<td class="num">' + S.fmt(T.cekRisk + T.kefRisk, 0) + '</td>' +
+      '<td class="num grp-l">' + S.fmt(T.cekLimit, 0) + '</td>' +
+      '<td class="num">' + S.fmt(T.cekRisk, 0) + '</td>' +
+      '<td class="num">' + S.fmt(T.cekLimit - T.cekRisk, 0) + '</td>' +
+      '<td class="num grp-l">' + S.fmt(T.kefLimit, 0) + '</td>' +
+      '<td class="num">' + S.fmt(T.kefRisk, 0) + '</td>' +
+      '<td class="num">' + S.fmt(T.kefLimit - T.kefRisk, 0) + '</td></tr>' : '';
+
+    var toplamLimit = T.cekLimit + T.kefLimit, toplamRisk = T.cekRisk + T.kefRisk;
+    var doluluk = toplamLimit > 0 ? (toplamRisk / toplamLimit) * 100 : 0;
+    $('lKpi').innerHTML =
+      '<div class="kpi"><div class="k">Banka Sayısı</div><div class="v">' + bl.length + '</div></div>' +
+      '<div class="kpi"><div class="k">Toplam Limit</div><div class="v">' + S.fmt(toplamLimit, 0) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Kullanılan Risk</div><div class="v ' + (doluluk > 85 ? 'bad' : doluluk > 60 ? 'warn' : '') + '">' + S.fmt(toplamRisk, 0) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Kalan Limit</div><div class="v good">' + S.fmt(toplamLimit - toplamRisk, 0) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Limit Doluluğu</div><div class="v ' + (doluluk > 85 ? 'bad' : doluluk > 60 ? 'warn' : 'good') + '">%' + S.fmt(doluluk, 1) + '</div></div>';
+
+    $('lAciklama').innerHTML = bl.length ? bl.map(function(b){
+      return '<tr><td><b>' + esc(b.ad) + '</b></td>' +
+        '<td><input type="text" data-acik="' + b.id + '" value="' + esc(b.aciklama || '') + '" ' +
+        'placeholder="ör. 50 M\'nun 20\'si Taşıt Rehni, 30 İpotek…" style="height:28px; font-size:12.5px;"></td></tr>';
+    }).join('') : '<tr><td colspan="2" class="empty">Banka yok.</td></tr>';
+
+    /* ---------- BAKİYELER ---------- */
+    var para = $('bPara').value || 'TL';
+    $('bBaslik').innerHTML = '<tr><th>Banka</th>' +
+      fl.map(function(f){ return '<th class="num">' + esc(f.ad) + '</th>'; }).join('') +
+      '<th class="num">Toplam</th></tr>';
+
+    function bak(bankaId, firmaId, p){
+      var r = bakiyeStore.get().filter(function(x){
+        return x.bankaId === bankaId && x.firmaId === firmaId && x.para === p;
+      })[0];
+      return r ? (r.tutar || 0) : 0;
+    }
+    var sutunT = {}, genelT = 0;
+    var bsat = bl.map(function(b){
+      var rowT = 0;
+      var tds = fl.map(function(f){
+        var v = bak(b.id, f.id, para);
+        rowT += v; sutunT[f.id] = (sutunT[f.id] || 0) + v;
+        return '<td class="num"><input class="inline-num" data-bb="' + b.id + '" data-bf="' + f.id + '" ' +
+               'value="' + (v ? S.fmt(v) : '') + '" placeholder="–"></td>';
+      }).join('');
+      genelT += rowT;
+      return '<tr><td><b>' + esc(b.ad) + '</b></td>' + tds +
+             '<td class="num"><b>' + (rowT ? S.fmt(rowT) : '–') + '</b></td></tr>';
+    });
+
+    // Portföydeki çekler — Çek/Senet modülünden OTOMATİK (elle girilmez)
+    var cekSat = {}, cekTop = 0;
+    cekStore.get().forEach(function(r){
+      if((r.para || 'TL') !== para) return;
+      if(r.durum !== 'portfoyde' && r.durum !== 'teminatta') return;
+      if(r.tip !== 'musteri-cek' && r.tip !== 'musteri-senet' && r.tip !== 'dbs') return;
+      cekSat[r.firmaId] = (cekSat[r.firmaId] || 0) + r.tutar;
+      cekTop += r.tutar;
+    });
+    if(cekTop > 0){
+      bsat.push('<tr style="background:rgba(124,77,217,0.08);">' +
+        '<td><b>PORTFÖYDEKİ ÇEKLER</b><div class="cati-not">Çek/Senet modülünden otomatik</div></td>' +
+        fl.map(function(f){
+          var v = cekSat[f.id] || 0;
+          sutunT[f.id] = (sutunT[f.id] || 0) + v;
+          return '<td class="num">' + (v ? S.fmt(v) : '–') + '</td>';
+        }).join('') +
+        '<td class="num"><b>' + S.fmt(cekTop) + '</b></td></tr>');
+      genelT += cekTop;
+    }
+
+    $('bGovde').innerHTML = bsat.length ? bsat.join('')
+      : '<tr><td colspan="' + (fl.length + 2) + '" class="empty">Banka veya firma tanımlanmamış.</td></tr>';
+    $('bAlt').innerHTML = bl.length ? '<tr><td>TOPLAM</td>' +
+      fl.map(function(f){ return '<td class="num">' + (sutunT[f.id] ? S.fmt(sutunT[f.id]) : '–') + '</td>'; }).join('') +
+      '<td class="num">' + S.fmt(genelT) + '</td></tr>' : '';
+
+    // Tüm para birimlerinin özeti
+    var kpiPara = PARALAR.map(function(p){
+      var t = 0;
+      bakiyeStore.get().forEach(function(x){ if(x.para === p) t += (x.tutar || 0); });
+      return '<div class="kpi"><div class="k">' + p + ' Toplam</div><div class="v">' + S.fmt(t) + '</div></div>';
+    }).join('');
+    $('bKpi').innerHTML = kpiPara +
+      '<div class="kpi"><div class="k">Portföydeki Çekler (' + para + ')</div><div class="v good">' + S.fmt(cekTop) + '</div></div>';
+
+    /* ---------- İLETİŞİM ---------- */
+    var iq = ($('iAra').value || '').toLocaleLowerCase('tr');
+    var kisiHtml = function(k, rol){
+      k = k || {};
+      if(!k.ad && !k.tel && !k.mail) return '<span style="color:var(--muted);">—</span>';
+      return '<div class="kisi"><b>' + esc(k.ad || '—') + '</b>' +
+        (k.tel ? '<span>' + esc(k.tel) + '</span>' : '') +
+        (k.mail ? '<a href="mailto:' + esc(k.mail) + '">' + esc(k.mail) + '</a>' : '') + '</div>';
+    };
+    var il = iletisimStore.get().map(function(r){
+      var b = bankaStore.get().filter(function(x){ return x.id === r.bankaId; })[0];
+      return Object.assign({}, r, { bankaAd: b ? b.ad : '(silinmiş banka)' });
+    }).filter(function(r){
+      if(!iq) return true;
+      var s = r.bankaAd + ' ' + (r.sube||'') + ' ' +
+        ['mudur','portfoy','temsilci'].map(function(k){
+          var x = r[k] || {}; return (x.ad||'') + ' ' + (x.tel||'') + ' ' + (x.mail||'');
+        }).join(' ');
+      return s.toLocaleLowerCase('tr').indexOf(iq) > -1;
+    }).sort(function(a,b){ return a.bankaAd.localeCompare(b.bankaAd,'tr'); });
+
+    $('iListe').innerHTML = il.length ? il.map(function(r){
+      return '<tr>' +
+        '<td><input type="checkbox" class="isec" data-id="' + r.id + '" style="width:auto;height:auto;"></td>' +
+        '<td><b>' + esc(r.bankaAd) + '</b></td>' +
+        '<td>' + esc(r.sube) + '</td>' +
+        '<td>' + kisiHtml(r.mudur) + '</td>' +
+        '<td>' + kisiHtml(r.portfoy) + '</td>' +
+        '<td>' + kisiHtml(r.temsilci) + '</td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button class="icon-btn" data-iduzenle="' + r.id + '" title="Düzenle" style="color:var(--brass);">✎</button>' +
+          '<button class="icon-btn" data-isil="' + r.id + '" title="Sil">✕</button>' +
+        '</td></tr>';
+    }).join('') : '<tr><td colspan="7" class="empty">İletişim kaydı yok. "+ Banka Ekle" ile başlayın.</td></tr>';
+
+    /* ---------- TANIMLAR ---------- */
+    $('fListe').innerHTML = fl.length ? fl.map(function(f){
+      var bakT = 0;
+      bakiyeStore.get().forEach(function(x){ if(x.firmaId === f.id && x.para === 'TL') bakT += (x.tutar || 0); });
+      var cekT = 0;
+      cekStore.get().forEach(function(x){
+        if(x.firmaId === f.id && (x.para||'TL') === 'TL' &&
+           (x.durum === 'portfoyde' || x.durum === 'teminatta') &&
+           (x.tip === 'musteri-cek' || x.tip === 'musteri-senet' || x.tip === 'dbs')) cekT += x.tutar;
+      });
+      return '<tr><td><b>' + esc(f.ad) + '</b></td><td class="mono">' + esc(f.kod) + '</td>' +
+        '<td class="num">' + S.fmt(bakT) + '</td><td class="num">' + S.fmt(cekT) + '</td>' +
+        '<td><button class="icon-btn" data-fsil="' + f.id + '" title="Sil">✕</button></td></tr>';
+    }).join('') : '<tr><td colspan="5" class="empty">Firma eklenmedi.</td></tr>';
+
+    $('nListe').innerHTML = bl.length ? bl.map(function(b){
+      return '<tr>' +
+        '<td><b>' + esc(b.ad) + '</b></td>' +
+        '<td><input type="date" data-brev="' + b.id + '" value="' + esc(b.rev || '') + '" style="height:27px; font-size:12px;"></td>' +
+        '<td class="num"><input class="inline-num" data-bgrup="' + b.id + '" value="' + (b.grupLimit ? S.fmt(b.grupLimit,0) : '') + '" placeholder="–"></td>' +
+        '<td style="white-space:nowrap; font-size:12px;">' +
+          '<label style="margin-right:10px;"><input type="checkbox" data-bcek="' + b.id + '"' + (b.cekCati ? ' checked' : '') + ' style="width:auto;height:auto;"> çek</label>' +
+          '<label><input type="checkbox" data-bkef="' + b.id + '"' + (b.kefaletCati ? ' checked' : '') + ' style="width:auto;height:auto;"> kefalet</label>' +
+        '</td>' +
+        '<td style="color:var(--muted); font-size:12px;">' + esc((b.aciklama || '').slice(0, 60)) + '</td>' +
+        '<td><button class="icon-btn" data-bsil="' + b.id + '" title="Sil">✕</button></td></tr>';
+    }).join('') : '<tr><td colspan="6" class="empty">Banka eklenmedi.</td></tr>';
+
+    paylasGuncelle();
+  }
+
+  /* ================= ETKİLEŞİM ================= */
+  // Limit hücreleri
+  $('lGovde').addEventListener('change', function(e){
+    var i = e.target.closest('[data-a]'); if(!i) return;
+    limYaz(i.dataset.b, i.dataset.f, i.dataset.a, S.parse(i.value));
+  });
+  $('lAciklama').addEventListener('change', function(e){
+    var i = e.target.closest('[data-acik]'); if(!i) return;
+    bankaStore.update(i.dataset.acik, { aciklama: i.value });
+  });
+  // Bakiye hücreleri
+  $('bGovde').addEventListener('change', function(e){
+    var i = e.target.closest('[data-bb]'); if(!i) return;
+    var para = $('bPara').value, v = S.parse(i.value);
+    var m = bakiyeStore.get().filter(function(x){
+      return x.bankaId === i.dataset.bb && x.firmaId === i.dataset.bf && x.para === para;
+    })[0];
+    if(m) bakiyeStore.update(m.id, { tutar:v });
+    else bakiyeStore.add({ id:S.uid(), bankaId:i.dataset.bb, firmaId:i.dataset.bf, para:para, tutar:v });
+  });
+  // Banka tanımları
+  $('nListe').addEventListener('change', function(e){
+    var rev = e.target.closest('[data-brev]'), grup = e.target.closest('[data-bgrup]');
+    var cek = e.target.closest('[data-bcek]'), kef = e.target.closest('[data-bkef]');
+    if(rev) bankaStore.update(rev.dataset.brev, { rev: rev.value });
+    if(grup) bankaStore.update(grup.dataset.bgrup, { grupLimit: S.parse(grup.value) });
+    if(cek) bankaStore.update(cek.dataset.bcek, { cekCati: cek.checked });
+    if(kef) bankaStore.update(kef.dataset.bkef, { kefaletCati: kef.checked });
+  });
+  $('nListe').addEventListener('click', function(e){
+    var s = e.target.closest('[data-bsil]'); if(!s) return;
+    if(confirm('Banka ve ona ait limit/bakiye/iletişim kayıtları silinsin mi?')){
+      var id = s.dataset.bsil;
+      bankaStore.remove(id);
+      limitStore.set(limitStore.get().filter(function(r){ return r.bankaId !== id; }));
+      bakiyeStore.set(bakiyeStore.get().filter(function(r){ return r.bankaId !== id; }));
+      iletisimStore.set(iletisimStore.get().filter(function(r){ return r.bankaId !== id; }));
+    }
+  });
+  $('fListe').addEventListener('click', function(e){
+    var s = e.target.closest('[data-fsil]'); if(!s) return;
+    if(confirm('Firma silinsin mi? Bu firmaya bağlı limit ve bakiye kayıtları da silinir.')){
+      var id = s.dataset.fsil;
+      firmaStore.remove(id);
+      limitStore.set(limitStore.get().filter(function(r){ return r.firmaId !== id; }));
+      bakiyeStore.set(bakiyeStore.get().filter(function(r){ return r.firmaId !== id; }));
+    }
+  });
+
+  /* ---- İletişim düzenleme (basit prompt tabanlı — hızlı ve az yer kaplar) ---- */
+  function kisiSor(baslik, k){
+    k = k || {};
+    var ad = prompt(baslik + ' — Ad Soyad:', k.ad || '');
+    if(ad === null) return k;
+    var tel = prompt(baslik + ' — Telefon:', k.tel || '') || '';
+    var mail = prompt(baslik + ' — E-posta:', k.mail || '') || '';
+    return { ad:ad.trim(), tel:tel.trim(), mail:mail.trim() };
+  }
+  $('btnIEkle').addEventListener('click', function(){
+    var bl = bankalar();
+    if(!bl.length){ alert('Önce "Tanımlar" sekmesinden banka ekleyin.'); return; }
+    var ad = prompt('Hangi banka?\n\n' + bl.map(function(b,i){ return (i+1) + ') ' + b.ad; }).join('\n'), '1');
+    var idx = parseInt(ad, 10) - 1;
+    if(!(idx >= 0 && idx < bl.length)) return;
+    var b = bl[idx];
+    var sube = prompt('Şube:', '') || '';
+    iletisimStore.add({
+      id:S.uid(), bankaId:b.id, sube:sube.trim(),
+      mudur:kisiSor('Müdür'), portfoy:kisiSor('Portföy Yöneticisi'), temsilci:kisiSor('Müşteri Temsilcisi')
+    });
+  });
+  $('iListe').addEventListener('click', function(e){
+    var d = e.target.closest('[data-iduzenle]'), s = e.target.closest('[data-isil]');
+    if(d){
+      var r = iletisimStore.get().filter(function(x){ return x.id === d.dataset.iduzenle; })[0];
+      if(!r) return;
+      var sube = prompt('Şube:', r.sube || '');
+      if(sube === null) return;
+      iletisimStore.update(r.id, {
+        sube:sube.trim(),
+        mudur:kisiSor('Müdür', r.mudur),
+        portfoy:kisiSor('Portföy Yöneticisi', r.portfoy),
+        temsilci:kisiSor('Müşteri Temsilcisi', r.temsilci)
+      });
+    }
+    if(s && confirm('Bu iletişim kaydı silinsin mi?')) iletisimStore.remove(s.dataset.isil);
+  });
+  $('iListe').addEventListener('change', paylasGuncelle);
+  $('iHepsi').addEventListener('change', function(){
+    var v = this.checked;
+    document.querySelectorAll('.isec').forEach(function(c){ c.checked = v; });
+    paylasGuncelle();
+  });
+  document.querySelectorAll('.rol, .alan').forEach(function(c){ c.addEventListener('change', paylasGuncelle); });
+
+  /* ---- Paylaşım metni ---- */
+  var ROL_AD = { mudur:'Müdür', portfoy:'Portföy Yön.', temsilci:'Müşteri Tems.' };
+  function paylasMetni(){
+    var secili = Array.prototype.map.call(document.querySelectorAll('.isec:checked'), function(c){ return c.dataset.id; });
+    if(!secili.length) return '';
+    var roller = Array.prototype.map.call(document.querySelectorAll('.rol:checked'), function(c){ return c.value; });
+    var alanlar = Array.prototype.map.call(document.querySelectorAll('.alan:checked'), function(c){ return c.value; });
+    var out = [];
+    iletisimStore.get().filter(function(r){ return secili.indexOf(r.id) > -1; }).forEach(function(r){
+      var b = bankaStore.get().filter(function(x){ return x.id === r.bankaId; })[0];
+      var bas = (b ? b.ad : '') + (alanlar.indexOf('sube') > -1 && r.sube ? ' — ' + r.sube : '');
+      var sat = [bas];
+      roller.forEach(function(rol){
+        var k = r[rol] || {};
+        if(!k.ad && !k.tel && !k.mail) return;
+        var p = ['  • ' + ROL_AD[rol] + ': ' + (k.ad || '—')];
+        if(alanlar.indexOf('tel') > -1 && k.tel) p.push(k.tel);
+        if(alanlar.indexOf('mail') > -1 && k.mail) p.push(k.mail);
+        sat.push(p.join(' · '));
+      });
+      if(sat.length > 1) out.push(sat.join('\n'));
+    });
+    return out.join('\n\n');
+  }
+  function paylasGuncelle(){
+    var m = paylasMetni();
+    $('paylasMetin').textContent = m || 'Paylaşmak için yukarıdaki listeden banka seçin.';
+  }
+  $('btnKopyala').addEventListener('click', function(){
+    var m = paylasMetni();
+    if(!m){ alert('Önce banka seçin.'); return; }
+    navigator.clipboard.writeText(m).then(function(){ alert('Kopyalandı.'); },
+      function(){ alert('Kopyalanamadı — metni elle seçip kopyalayabilirsiniz.'); });
+  });
+  $('btnWhatsapp').addEventListener('click', function(){
+    var m = paylasMetni();
+    if(!m){ alert('Önce banka seçin.'); return; }
+    window.open('https://wa.me/?text=' + encodeURIComponent(m), '_blank');
+  });
+  $('btnMail').addEventListener('click', function(){
+    var m = paylasMetni();
+    if(!m){ alert('Önce banka seçin.'); return; }
+    window.location.href = 'mailto:?subject=' + encodeURIComponent('Banka İletişim Bilgileri') +
+                           '&body=' + encodeURIComponent(m);
+  });
+  $('btnPaylasPdf').addEventListener('click', function(){
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
+    var secili = Array.prototype.map.call(document.querySelectorAll('.isec:checked'), function(c){ return c.dataset.id; });
+    if(!secili.length){ alert('Önce banka seçin.'); return; }
+    var roller = Array.prototype.map.call(document.querySelectorAll('.rol:checked'), function(c){ return c.value; });
+    var d = new J({ orientation:'landscape' });
+    d.setFontSize(14); d.text('Banka Iletisim Bilgileri', 14, 14);
+    var body = [];
+    iletisimStore.get().filter(function(r){ return secili.indexOf(r.id) > -1; }).forEach(function(r){
+      var b = bankaStore.get().filter(function(x){ return x.id === r.bankaId; })[0];
+      roller.forEach(function(rol){
+        var k = r[rol] || {};
+        if(!k.ad && !k.tel && !k.mail) return;
+        body.push([b ? b.ad : '', r.sube || '', ROL_AD[rol], k.ad || '', k.tel || '', k.mail || '']);
+      });
+    });
+    d.autoTable({ startY:20, styles:{ fontSize:8 },
+      head:[['Banka','Sube','Rol','Ad Soyad','Telefon','E-posta']], body:body });
+    d.save('banka-iletisim.pdf');
+  });
+
+  ['lGorunum','lFirma','bPara'].forEach(function(id){ $(id).addEventListener('change', render); });
+  $('iAra').addEventListener('input', render);
+
+  /* ================= DIŞA AKTARIM ================= */
+  function xls(rows, sheet, file){
+    if(!window.XLSX){ alert('Excel bileşeni yüklenemedi.'); return; }
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), sheet);
+    XLSX.writeFile(wb, file);
+  }
+  $('btnLExcel').addEventListener('click', function(){
+    xls(bankalar().map(function(b){
+      var t = bankaToplam(b);
+      return { 'Banka':b.ad, 'Rev. Tarihi':S.trDate(b.rev), 'Grup Limiti':b.grupLimit || 0,
+               'Toplam Risk':t.cekRisk + t.kefRisk,
+               'Çek Limit':t.cekLimit, 'Çek Risk':t.cekRisk, 'Çek Kalan':t.cekLimit - t.cekRisk,
+               'Kefalet Limit':t.kefLimit, 'Kefalet Risk':t.kefRisk, 'Kefalet Kalan':t.kefLimit - t.kefRisk,
+               'Açıklama':b.aciklama || '' };
+    }), 'Limit-Risk', 'banka-limit-risk.xlsx');
+  });
+  $('btnLPdf').addEventListener('click', function(){
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
+    var d = new J({ orientation:'landscape' });
+    d.setFontSize(14); d.text('Bankalar Limit ve Risk Durumu', 14, 14);
+    d.autoTable({ startY:20, styles:{ fontSize:8 },
+      head:[['Banka','Grup Limiti','Toplam Risk','Cek Limit','Cek Risk','Cek Kalan','Kefalet Limit','Kefalet Risk','Kefalet Kalan']],
+      body: bankalar().map(function(b){
+        var t = bankaToplam(b);
+        return [b.ad, S.fmt(b.grupLimit||0,0), S.fmt(t.cekRisk+t.kefRisk,0),
+                S.fmt(t.cekLimit,0), S.fmt(t.cekRisk,0), S.fmt(t.cekLimit-t.cekRisk,0),
+                S.fmt(t.kefLimit,0), S.fmt(t.kefRisk,0), S.fmt(t.kefLimit-t.kefRisk,0)];
+      }) });
+    d.save('banka-limit-risk.pdf');
+  });
+  $('btnBExcel').addEventListener('click', function(){
+    var fl = firmalar(), para = $('bPara').value;
+    xls(bankalar().map(function(b){
+      var o = { 'Banka':b.ad }, t = 0;
+      fl.forEach(function(f){
+        var r = bakiyeStore.get().filter(function(x){
+          return x.bankaId === b.id && x.firmaId === f.id && x.para === para; })[0];
+        var v = r ? (r.tutar || 0) : 0;
+        o[f.ad] = v; t += v;
+      });
+      o['Toplam'] = t;
+      return o;
+    }), 'Bakiyeler-' + para, 'banka-bakiyeleri-' + para + '.xlsx');
+  });
+  $('btnBPdf').addEventListener('click', function(){
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
+    var fl = firmalar(), para = $('bPara').value;
+    var d = new J({ orientation:'landscape' });
+    d.setFontSize(14); d.text('Banka Bakiyeleri (' + para + ')', 14, 14);
+    d.autoTable({ startY:20, styles:{ fontSize:8 },
+      head:[['Banka'].concat(fl.map(function(f){ return f.ad; })).concat(['Toplam'])],
+      body: bankalar().map(function(b){
+        var t = 0;
+        var r = fl.map(function(f){
+          var x = bakiyeStore.get().filter(function(y){
+            return y.bankaId === b.id && y.firmaId === f.id && y.para === para; })[0];
+          var v = x ? (x.tutar || 0) : 0; t += v;
+          return v ? S.fmt(v) : '-';
+        });
+        return [b.ad].concat(r).concat([S.fmt(t)]);
+      }) });
+    d.save('banka-bakiyeleri.pdf');
+  });
+  $('btnIExcel').addEventListener('click', function(){
+    var rows = [];
+    iletisimStore.get().forEach(function(r){
+      var b = bankaStore.get().filter(function(x){ return x.id === r.bankaId; })[0];
+      ['mudur','portfoy','temsilci'].forEach(function(rol){
+        var k = r[rol] || {};
+        if(!k.ad && !k.tel && !k.mail) return;
+        rows.push({ 'Banka':b?b.ad:'', 'Şube':r.sube||'', 'Rol':ROL_AD[rol],
+                    'Ad Soyad':k.ad||'', 'Telefon':k.tel||'', 'E-posta':k.mail||'' });
+      });
+    });
+    xls(rows, 'İletişim', 'banka-iletisim.xlsx');
+  });
+
+  /* ================= BAŞLAT ================= */
+  [bankaStore, limitStore, bakiyeStore, iletisimStore, cekStore, firmaStore].forEach(function(s){ s.onChange(render); });
+  bankaStore.load(); limitStore.load(); bakiyeStore.load();
+  iletisimStore.load(); cekStore.load();
+  render();
+  try{ gtag('event', 'tool_used', { tool_name: 'banka_yonetimi' }); }catch(e){}
+})();
+</script>
+<script src="mmg-doviz-widget.js"></script>
+<script src="mmg-calc-widget.js"></script>
+<script src="mmg-widget-menu.js"></script>
+</body>
+</html>

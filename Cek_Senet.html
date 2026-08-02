@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="i18n-core.js"></script>
+<script>
+(function(){
+  try{ var mode=localStorage.getItem('mmg_theme')||'dark'; document.documentElement.classList.toggle('theme-light', mode==='light'); }catch(e){}
+  window.addEventListener('message', function(ev){ if(ev&&ev.data&&ev.data.mmgTheme){ document.documentElement.classList.toggle('theme-light', ev.data.mmgTheme==='light'); try{localStorage.setItem('mmg_theme',ev.data.mmgTheme);}catch(e2){} } });
+})();
+</script>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-TVBZ8M9Q');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mmgcreativity — Çek / Senet</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1420">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mmg-module.css">
+<style>
+  .tab-panel{ display:none; } .tab-panel.active{ display:block; }
+  .mono{ font-family:'IBM Plex Mono',monospace; }
+  table.pivot tbody td:first-child{ white-space:nowrap; font-family:'IBM Plex Mono',monospace; }
+  table.pivot tfoot td{ border-top:2px solid var(--brass-dim); font-weight:700; font-family:'JetBrains Mono',monospace; }
+  tr.ay-baslik td{ background:var(--surface-2); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; }
+  .sifir{ color:var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <h1 class="title">Çek / Senet</h1>
+    <p class="subtitle">Portföydeki ve verilen çek–senetleri firma ve cari bazında takip edin. Rapor sekmesinde tahsil tarihine göre firma bazlı nakit takvimi çıkarılır; bu veriler Risk Yönetimi ekranını da besler.</p>
+  </div>
+  <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="rapor">Rapor</button>
+    <button class="tab" data-tab="portfoy">Portföy Listesi</button>
+    <button class="tab" data-tab="ekle">Yeni Kayıt</button>
+  </div>
+
+  <!-- ================= RAPOR ================= -->
+  <div class="tab-panel active" id="tab-rapor">
+    <div class="kpis" id="rKpi"></div>
+    <div class="panel">
+      <div class="panel-title">Tahsil Takvimi — Firma Bazlı</div>
+      <div class="panel-desc">Satırlar tahsil (vade) tarihi, sütunlar firmalarınız. Yalnızca <b>henüz tahsil edilmemiş</b> (portföyde/teminatta) kıymetler sayılır — tahsil edilenler nakit akışına zaten geçmiştir.</div>
+      <div class="btn-row" style="margin-bottom:12px;">
+        <select id="rTip" style="max-width:190px;"><option value="">Tüm tipler</option></select>
+        <select id="rKirilim" style="max-width:170px;">
+          <option value="gun">Günlük</option>
+          <option value="hafta">Haftalık</option>
+          <option value="ay">Aylık</option>
+        </select>
+        <input id="rBas" type="date" style="max-width:150px;" title="Başlangıç">
+        <input id="rBit" type="date" style="max-width:150px;" title="Bitiş">
+        <button class="btn" id="btnRExcel">Excel</button>
+        <button class="btn" id="btnRPdf">PDF</button>
+      </div>
+      <div class="table-wrap">
+        <table class="pivot">
+          <thead id="rBaslik"></thead>
+          <tbody id="rGovde"></tbody>
+          <tfoot id="rAlt"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PORTFÖY ================= -->
+  <div class="tab-panel" id="tab-portfoy">
+    <div class="panel">
+      <div class="panel-title">Çek / Senet Portföyü</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <input id="pAra" type="text" placeholder="Cari, banka, çek no ara…" style="max-width:250px;">
+        <select id="pFirma" style="max-width:170px;"></select>
+        <select id="pTip" style="max-width:180px;"><option value="">Tüm tipler</option></select>
+        <select id="pDurum" style="max-width:170px;">
+          <option value="">Tüm durumlar</option>
+          <option value="portfoyde">Portföyde</option>
+          <option value="teminatta">Teminatta</option>
+          <option value="ciro">Ciro Edildi</option>
+          <option value="tahsil">Tahsil Edildi</option>
+          <option value="karsiliksiz">Karşılıksız</option>
+        </select>
+        <button class="btn" id="btnPExcel">Excel</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tip</th><th>Firma</th><th>Cari</th><th>Banka</th><th>Çek/Senet No</th>
+            <th>Keşideci</th><th>Tahsil Tarihi</th><th class="num">Kalan Gün</th>
+            <th class="num">Tutar</th><th>Durum</th><th></th>
+          </tr></thead>
+          <tbody id="pListe"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= YENİ KAYIT ================= -->
+  <div class="tab-panel" id="tab-ekle">
+    <div class="panel">
+      <div class="panel-title">Yeni Çek / Senet</div>
+      <div class="panel-desc"><b>Müşteri Çeki/Senedi</b> alacağınızı, <b>Kendi Çekimiz/Senedimiz</b> borcunuzu temsil eder. Cari listesi Veri Girişi panelinden gelir.</div>
+      <div class="form-grid">
+        <div><label class="fl" for="cTip">Tip *</label>
+          <select id="cTip">
+            <option value="musteri-cek">Müşteri Çeki</option>
+            <option value="musteri-senet">Müşteri Senedi</option>
+            <option value="dbs">DBS</option>
+            <option value="kendi-cek">Kendi Çekimiz</option>
+            <option value="kendi-senet">Kendi Senedimiz</option>
+          </select>
+        </div>
+        <div><label class="fl" for="cFirma">Firma</label><select id="cFirma"></select></div>
+        <div style="grid-column:span 2;"><label class="fl" for="cCari">Cari (müşteri/tedarikçi)</label>
+          <input id="cCari" type="text" list="cariListesi" placeholder="Veri Girişi'ndeki müşterilerden seçin veya yazın">
+          <datalist id="cariListesi"></datalist>
+        </div>
+        <div><label class="fl" for="cBanka">Banka</label><input id="cBanka" type="text" placeholder="Garanti"></div>
+        <div><label class="fl" for="cNo">Çek / Senet No</label><input id="cNo" class="mono" type="text" placeholder="0000000"></div>
+        <div><label class="fl" for="cKeside">Keşideci</label><input id="cKeside" type="text" placeholder="opsiyonel"></div>
+        <div><label class="fl" for="cVade">Tahsil Tarihi *</label><input id="cVade" type="date"></div>
+        <div><label class="fl" for="cTutar">Tutar *</label><input id="cTutar" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl" for="cPara">Para</label>
+          <select id="cPara"><option>TL</option><option>USD</option><option>EUR</option><option>GBP</option></select>
+        </div>
+        <div><label class="fl" for="cDurum">Durum</label>
+          <select id="cDurum">
+            <option value="portfoyde">Portföyde</option>
+            <option value="teminatta">Teminatta</option>
+            <option value="ciro">Ciro Edildi</option>
+            <option value="tahsil">Tahsil Edildi</option>
+            <option value="karsiliksiz">Karşılıksız</option>
+          </select>
+        </div>
+        <div style="grid-column:span 2;"><label class="fl" for="cNot">Not</label><input id="cNot" type="text" placeholder="opsiyonel"></div>
+        <div><button class="btn primary" id="btnEkle" style="width:100%;">Kaydet</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script type="module" src="mmg-cloud-init.js"></script>
+<script src="mmg-store.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.MMGStore, store = S('cek_senet'), firmaStore = S.firmaStore();
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+
+  var TIP = {
+    'musteri-cek':   { ad:'Müşteri Çeki',    alacak:true  },
+    'musteri-senet': { ad:'Müşteri Senedi',  alacak:true  },
+    'dbs':           { ad:'DBS',             alacak:true  },
+    'kendi-cek':     { ad:'Kendi Çekimiz',   alacak:false },
+    'kendi-senet':   { ad:'Kendi Senedimiz', alacak:false }
+  };
+  var DURUM = {
+    portfoyde:   { ad:'Portföyde',    cls:'ok',   acik:true  },
+    teminatta:   { ad:'Teminatta',    cls:'warn', acik:true  },
+    ciro:        { ad:'Ciro Edildi',  cls:'mut',  acik:false },
+    tahsil:      { ad:'Tahsil Edildi',cls:'mut',  acik:false },
+    karsiliksiz: { ad:'Karşılıksız',  cls:'bad',  acik:true  }
+  };
+
+  function gunSerisi(iso){
+    if(!iso) return null;
+    var p = String(iso).split('-');
+    return p.length === 3 ? Math.floor(Date.UTC(+p[0], +p[1]-1, +p[2]) / 86400000) : null;
+  }
+  function bugunSeri(){
+    var d = new Date();
+    return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+  }
+  /* Haftanın PAZARTESİ'si (TR takvimi) — haftalık kırılım için */
+  function haftaBasi(iso){
+    var p = String(iso).split('-');
+    var d = new Date(Date.UTC(+p[0], +p[1]-1, +p[2]));
+    var g = d.getUTCDay();                 // 0=Pazar
+    d.setUTCDate(d.getUTCDate() - ((g + 6) % 7));
+    return d.toISOString().slice(0,10);
+  }
+  function firmaAdi(id){
+    var f = S.firmalar().filter(function(x){ return x.id === id; })[0];
+    return f ? f.ad : '';
+  }
+
+  /* ---------------- Sekmeler ---------------- */
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      $('tab-' + t.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ---------------- Kayıt ---------------- */
+  $('btnEkle').addEventListener('click', function(){
+    var tutar = S.parse($('cTutar').value);
+    if(!$('cVade').value){ alert('Tahsil tarihi zorunlu.'); $('cVade').focus(); return; }
+    if(!(tutar > 0)){ alert('Tutar sıfırdan büyük olmalı.'); $('cTutar').focus(); return; }
+    store.add({
+      id:S.uid(), tip:$('cTip').value, firmaId:$('cFirma').value,
+      cari:$('cCari').value.trim(), banka:$('cBanka').value.trim(), no:$('cNo').value.trim(),
+      keside:$('cKeside').value.trim(), vade:$('cVade').value, tutar:tutar,
+      para:$('cPara').value, durum:$('cDurum').value, not:$('cNot').value.trim()
+    });
+    ['cCari','cNo','cKeside','cTutar','cNot'].forEach(function(id){ $(id).value = ''; });
+    $('cCari').focus();
+  });
+
+  /* ---------------- Rapor (pivot) ---------------- */
+  function pivotHesapla(){
+    var firmalar = S.firmalar().slice().sort(function(a,b){ return a.ad.localeCompare(b.ad,'tr'); });
+    var kirilim = $('rKirilim').value, tip = $('rTip').value;
+    var bas = $('rBas').value, bit = $('rBit').value;
+
+    var satirlar = {};   // anahtar → { firmaId → tutar, toplam }
+    var sutunToplam = {}, genelToplam = 0;
+    var firmasiz = false;
+
+    store.get().forEach(function(r){
+      if(!DURUM[r.durum] || !DURUM[r.durum].acik) return;    // tahsil/ciro edilmiş → takvimde yok
+      if((r.para || 'TL') !== 'TL') return;                  // karışık kur toplanmaz
+      if(tip && r.tip !== tip) return;
+      if(!r.vade) return;
+      if(bas && r.vade < bas) return;
+      if(bit && r.vade > bit) return;
+
+      var anahtar = kirilim === 'ay'    ? r.vade.slice(0,7)
+                  : kirilim === 'hafta' ? haftaBasi(r.vade)
+                  : r.vade;
+      if(!satirlar[anahtar]) satirlar[anahtar] = { hucre:{}, toplam:0 };
+      var fid = r.firmaId || '_yok';
+      if(fid === '_yok') firmasiz = true;
+      satirlar[anahtar].hucre[fid] = (satirlar[anahtar].hucre[fid] || 0) + r.tutar;
+      satirlar[anahtar].toplam += r.tutar;
+      sutunToplam[fid] = (sutunToplam[fid] || 0) + r.tutar;
+      genelToplam += r.tutar;
+    });
+
+    var kolonlar = firmalar.map(function(f){ return { id:f.id, ad:f.ad }; });
+    if(firmasiz) kolonlar.push({ id:'_yok', ad:'(firmasız)' });
+    return {
+      kolonlar:kolonlar, satirlar:satirlar, sutunToplam:sutunToplam,
+      genelToplam:genelToplam, kirilim:kirilim
+    };
+  }
+
+  function anahtarYaz(k, kirilim){
+    if(kirilim === 'ay'){
+      var AY = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+      var p = k.split('-');
+      return AY[+p[1]-1] + ' ' + p[0];
+    }
+    if(kirilim === 'hafta') return S.trDate(k) + ' haftası';
+    return S.trDate(k);
+  }
+
+  function raporCiz(){
+    var P = pivotHesapla();
+    var anahtarlar = Object.keys(P.satirlar).sort();
+
+    $('rBaslik').innerHTML = '<tr><th>' +
+      (P.kirilim === 'ay' ? 'Ay' : P.kirilim === 'hafta' ? 'Hafta' : 'Tahsil Tarihi') + '</th>' +
+      P.kolonlar.map(function(k){ return '<th class="num">' + esc(k.ad) + '</th>'; }).join('') +
+      '<th class="num">Genel Toplam</th></tr>';
+
+    if(!anahtarlar.length){
+      $('rGovde').innerHTML = '<tr><td colspan="' + (P.kolonlar.length + 2) + '" class="empty">Bu filtreye uyan, henüz tahsil edilmemiş kıymet yok.</td></tr>';
+      $('rAlt').innerHTML = '';
+    } else {
+      var bugun = bugunSeri(), oncekiAy = null, html = [];
+      anahtarlar.forEach(function(a){
+        // Günlük kırılımda ay değişince araya ay başlığı koy (uzun listede okunurluk).
+        if(P.kirilim === 'gun'){
+          var ay = a.slice(0,7);
+          if(ay !== oncekiAy){
+            oncekiAy = ay;
+            html.push('<tr class="ay-baslik"><td colspan="' + (P.kolonlar.length + 2) + '">' +
+              anahtarYaz(ay, 'ay') + '</td></tr>');
+          }
+        }
+        var s = P.satirlar[a];
+        var gecmis = P.kirilim === 'gun' && gunSerisi(a) !== null && gunSerisi(a) < bugun;
+        html.push('<tr>' +
+          '<td' + (gecmis ? ' style="color:var(--red);"' : '') + '>' + anahtarYaz(a, P.kirilim) +
+            (gecmis ? ' ⚠' : '') + '</td>' +
+          P.kolonlar.map(function(k){
+            var v = s.hucre[k.id];
+            return '<td class="num' + (v ? '' : ' sifir') + '">' + (v ? S.fmt(v) : '–') + '</td>';
+          }).join('') +
+          '<td class="num"><b>' + S.fmt(s.toplam) + '</b></td>' +
+        '</tr>');
+      });
+      $('rGovde').innerHTML = html.join('');
+      $('rAlt').innerHTML = '<tr><td>TOPLAM</td>' +
+        P.kolonlar.map(function(k){
+          var v = P.sutunToplam[k.id];
+          return '<td class="num">' + (v ? S.fmt(v) : '–') + '</td>';
+        }).join('') +
+        '<td class="num">' + S.fmt(P.genelToplam) + '</td></tr>';
+    }
+    return P;
+  }
+
+  /* ---------------- Render ---------------- */
+  function render(){
+    // tip seçicileri
+    ['rTip','pTip'].forEach(function(id){
+      var sel = $(id), onceki = sel.value;
+      sel.innerHTML = '<option value="">Tüm tipler</option>' +
+        Object.keys(TIP).map(function(k){ return '<option value="' + k + '">' + TIP[k].ad + '</option>'; }).join('');
+      sel.value = onceki;
+    });
+    S.firmaDoldur($('cFirma'), null);
+    S.firmaDoldur($('pFirma'), 'Tüm firmalar');
+
+    var P = raporCiz();
+
+    /* --- KPI --- */
+    var list = store.get();
+    var acik = list.filter(function(r){ return DURUM[r.durum] && DURUM[r.durum].acik && (r.para||'TL')==='TL'; });
+    var alacak = acik.filter(function(r){ return TIP[r.tip] && TIP[r.tip].alacak; });
+    var borc   = acik.filter(function(r){ return TIP[r.tip] && !TIP[r.tip].alacak; });
+    var bugun = bugunSeri();
+    var gecikmis = alacak.filter(function(r){ var v = gunSerisi(r.vade); return v !== null && v < bugun; });
+    var karsiliksiz = list.filter(function(r){ return r.durum === 'karsiliksiz'; });
+    var top = function(l){ return l.reduce(function(s,r){ return s + r.tutar; }, 0); };
+
+    $('rKpi').innerHTML =
+      '<div class="kpi"><div class="k">Portföydeki Alacak</div><div class="v good">' + S.fmt(top(alacak)) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Ödenecek (Kendi)</div><div class="v bad">' + S.fmt(top(borc)) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Net Pozisyon</div><div class="v ' + (top(alacak)-top(borc) >= 0 ? 'good' : 'bad') + '">' +
+        S.fmt(top(alacak) - top(borc)) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Vadesi Geçen Alacak</div><div class="v ' + (gecikmis.length ? 'bad' : '') + '">' + S.fmt(top(gecikmis)) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Karşılıksız</div><div class="v ' + (karsiliksiz.length ? 'bad' : '') + '">' + S.fmt(top(karsiliksiz)) + ' ₺</div></div>' +
+      '<div class="kpi"><div class="k">Kıymet Adedi</div><div class="v">' + acik.length + '</div></div>';
+
+    /* --- PORTFÖY LİSTESİ --- */
+    var q = ($('pAra').value || '').toLocaleLowerCase('tr');
+    var ff = $('pFirma').value, ft = $('pTip').value, fd = $('pDurum').value;
+    var pl = list.filter(function(r){
+      if(ff && r.firmaId !== ff) return false;
+      if(ft && r.tip !== ft) return false;
+      if(fd && r.durum !== fd) return false;
+      if(q && ((r.cari||'') + ' ' + (r.banka||'') + ' ' + (r.no||'') + ' ' + (r.keside||''))
+              .toLocaleLowerCase('tr').indexOf(q) === -1) return false;
+      return true;
+    }).sort(function(a,b){ return String(a.vade||'').localeCompare(String(b.vade||'')); });
+
+    $('pListe').innerHTML = pl.length ? pl.map(function(r){
+      var vs = gunSerisi(r.vade), kalan = vs === null ? null : vs - bugun;
+      var kalanTxt, kalanStil = '';
+      if(kalan === null) kalanTxt = '—';
+      else if(kalan < 0){ kalanTxt = Math.abs(kalan) + ' gün geçti'; kalanStil = 'color:var(--red);'; }
+      else if(kalan === 0){ kalanTxt = 'bugün'; kalanStil = 'color:var(--amber);'; }
+      else kalanTxt = kalan + ' gün';
+      var d = DURUM[r.durum] || DURUM.portfoyde;
+      return '<tr>' +
+        '<td><span class="badge ' + (TIP[r.tip] && TIP[r.tip].alacak ? 'ok' : 'warn') + '">' +
+          (TIP[r.tip] ? TIP[r.tip].ad : r.tip) + '</span></td>' +
+        '<td>' + esc(firmaAdi(r.firmaId)) + '</td>' +
+        '<td>' + esc(r.cari) + '</td>' +
+        '<td>' + esc(r.banka) + '</td>' +
+        '<td class="mono">' + esc(r.no) + '</td>' +
+        '<td>' + esc(r.keside) + '</td>' +
+        '<td>' + esc(S.trDate(r.vade)) + '</td>' +
+        '<td class="num" style="' + kalanStil + '">' + kalanTxt + '</td>' +
+        '<td class="num">' + S.fmt(r.tutar) + '</td>' +
+        '<td>' +
+          '<select data-durum="' + r.id + '" style="height:26px; font-size:11.5px; min-width:120px;">' +
+            Object.keys(DURUM).map(function(k){
+              return '<option value="' + k + '"' + (k === r.durum ? ' selected' : '') + '>' + DURUM[k].ad + '</option>';
+            }).join('') +
+          '</select>' +
+        '</td>' +
+        '<td><button class="icon-btn" data-sil="' + r.id + '" title="Sil">✕</button></td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="11" class="empty">Bu filtreye uyan kıymet yok.</td></tr>';
+  }
+
+  /* ---------------- Etkileşim ---------------- */
+  $('pListe').addEventListener('change', function(e){
+    var d = e.target.closest('[data-durum]');
+    if(d) store.update(d.dataset.durum, { durum: d.value });
+  });
+  $('pListe').addEventListener('click', function(e){
+    var s = e.target.closest('[data-sil]');
+    if(s && confirm('Bu kayıt silinsin mi?')) store.remove(s.dataset.sil);
+  });
+  ['pAra'].forEach(function(id){ $(id).addEventListener('input', render); });
+  ['rTip','rKirilim','rBas','rBit','pFirma','pTip','pDurum'].forEach(function(id){ $(id).addEventListener('change', render); });
+
+  /* ---------------- Dışa aktarım ---------------- */
+  function xls(rows, sheet, file){
+    if(!window.XLSX){ alert('Excel bileşeni yüklenemedi.'); return; }
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), sheet);
+    XLSX.writeFile(wb, file);
+  }
+  $('btnPExcel').addEventListener('click', function(){
+    xls(store.get().map(function(r){
+      return { 'Tip':TIP[r.tip]?TIP[r.tip].ad:r.tip, 'Firma':firmaAdi(r.firmaId), 'Cari':r.cari,
+               'Banka':r.banka, 'No':r.no, 'Keşideci':r.keside, 'Tahsil Tarihi':S.trDate(r.vade),
+               'Tutar':r.tutar, 'Para':r.para, 'Durum':(DURUM[r.durum]||{}).ad || r.durum, 'Not':r.not };
+    }), 'Portföy', 'cek-senet-portfoy.xlsx');
+  });
+  $('btnRExcel').addEventListener('click', function(){
+    var P = pivotHesapla();
+    var rows = Object.keys(P.satirlar).sort().map(function(a){
+      var o = {}; o[P.kirilim === 'ay' ? 'Ay' : P.kirilim === 'hafta' ? 'Hafta' : 'Tahsil Tarihi'] = anahtarYaz(a, P.kirilim);
+      P.kolonlar.forEach(function(k){ o[k.ad] = P.satirlar[a].hucre[k.id] || 0; });
+      o['Genel Toplam'] = P.satirlar[a].toplam;
+      return o;
+    });
+    var t = { }; t[P.kirilim === 'ay' ? 'Ay' : P.kirilim === 'hafta' ? 'Hafta' : 'Tahsil Tarihi'] = 'TOPLAM';
+    P.kolonlar.forEach(function(k){ t[k.ad] = P.sutunToplam[k.id] || 0; });
+    t['Genel Toplam'] = P.genelToplam;
+    rows.push(t);
+    xls(rows, 'Tahsil Takvimi', 'cek-senet-tahsil-takvimi.xlsx');
+  });
+  $('btnRPdf').addEventListener('click', function(){
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
+    var P = pivotHesapla();
+    var d = new J({ orientation:'landscape' });
+    d.setFontSize(14); d.text('Cek/Senet Tahsil Takvimi', 14, 14);
+    d.autoTable({
+      startY:20, styles:{ fontSize:8 },
+      head: [[P.kirilim === 'ay' ? 'Ay' : P.kirilim === 'hafta' ? 'Hafta' : 'Tarih']
+              .concat(P.kolonlar.map(function(k){ return k.ad; })).concat(['Toplam'])],
+      body: Object.keys(P.satirlar).sort().map(function(a){
+        return [anahtarYaz(a, P.kirilim)]
+          .concat(P.kolonlar.map(function(k){ var v = P.satirlar[a].hucre[k.id]; return v ? S.fmt(v) : '-'; }))
+          .concat([S.fmt(P.satirlar[a].toplam)]);
+      }),
+      foot: [['TOPLAM'].concat(P.kolonlar.map(function(k){ var v = P.sutunToplam[k.id]; return v ? S.fmt(v) : '-'; }))
+              .concat([S.fmt(P.genelToplam)])]
+    });
+    d.save('cek-senet-tahsil-takvimi.pdf');
+  });
+
+  /* ---------------- Başlat ---------------- */
+  store.onChange(render);
+  firmaStore.onChange(render);
+  $('cVade').value = S.today();
+  store.load();
+  render();
+  document.addEventListener('mmg-scope-ready', async function(){
+    var list = await S.cariler('customers');
+    $('cariListesi').innerHTML = list.map(function(c){ return '<option value="' + esc(c.ad) + '">'; }).join('');
+  });
+  try{ gtag('event', 'tool_used', { tool_name: 'cek_senet' }); }catch(e){}
+})();
+</script>
+<script src="mmg-doviz-widget.js"></script>
+<script src="mmg-calc-widget.js"></script>
+<script src="mmg-widget-menu.js"></script>
+</body>
+</html>
