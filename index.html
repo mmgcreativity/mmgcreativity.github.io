@@ -573,10 +573,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
 
   .card-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(var(--dfa-card-w, 300px), 1fr)); align-items:start; gap:18px; max-width:1400px; position:relative; }
-  /* Kategori başlığı: ızgaranın tamamını kaplar, kartları gruplara ayırır.
-     Mobilde tek sütuna düşünce ana menü/alt menü karışıklığını bu başlıklar önler. */
+  /* Kategori başlığı — YALNIZCA MOBİLDE görünür.
+     2026-08-02: Kullanıcı masaüstünde bu başlıkları istemedi ("ben böyle bir üst
+     başlık istemedim"). Masaüstünde kartlar eskisi gibi düz ızgara olarak durur;
+     başlıklar DOM'da kalır (sıralama ve mobil akordiyon onlara bağlı) ama gizlenir. */
   .card-sec{
-    grid-column:1 / -1; display:flex; align-items:center; gap:12px;
+    display:none;
+    grid-column:1 / -1; align-items:center; gap:12px;
     margin:6px 0 -4px; font-family:'Space Grotesk',sans-serif; font-weight:700;
     font-size:12px; letter-spacing:.10em; text-transform:uppercase; color:var(--muted);
   }
@@ -591,10 +594,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      düz liste yerine 7 satırlık kısa bir menü görünür. */
   @media (max-width:860px){
     .card-sec{
+      display:flex;   /* masaüstünde gizli, mobilde açılır-kapanır kapak olarak görünür */
       background:var(--surface); border:1px solid var(--hairline); border-radius:11px;
       padding:13px 14px; margin:0; cursor:pointer; color:var(--text);
       font-size:13px; letter-spacing:.04em; -webkit-tap-highlight-color:transparent;
     }
+    .card-sec[hidden]{ display:none; }
     .card-sec::after{ display:none; }
     .card-sec .sec-ok{
       display:block; margin-left:auto; font-size:15px; line-height:1; color:var(--muted);
@@ -1104,7 +1109,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_nakit_yonetimi:'Nakit Yönetimi',
       nav_cari_yonetimi:'Cari Yönetimi', nav_cari_kart:'Cari Kartları (Veri Girişi)',
       nav_faturalar:'Alış / Satış Faturaları',
-      nav_cek_senet:'Çek / Senet / DBS', nav_teminat:'Teminat Mektupları', nav_banka:'Banka Yönetimi',
+      nav_cek_senet:'Çek / Senet / DBS', nav_teminat_mektubu:'Teminat Mektupları', nav_banka:'Banka Yönetimi',
       nav_abonelik:'Abonelik / Fatura', nav_raporlar:'Raporlar',
       nav_cek_rapor:'Çek/Senet Raporu', nav_banka_rapor:'Banka Limit & Risk',
       nav_tahsilat_makbuzu:'Tahsilat Makbuzu', nav_isletme:'İşletme Yönetimi',
@@ -1228,7 +1233,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       nav_nakit_yonetimi:'Cash Management',
       nav_cari_yonetimi:'Account Management', nav_cari_kart:'Account Cards (Data Entry)',
       nav_faturalar:'Sales / Purchase Invoices',
-      nav_cek_senet:'Cheques / Notes / DDS', nav_teminat:'Letters of Guarantee', nav_banka:'Bank Management',
+      nav_cek_senet:'Cheques / Notes / DDS', nav_teminat_mektubu:'Letters of Guarantee', nav_banka:'Bank Management',
       nav_abonelik:'Subscriptions / Bills', nav_raporlar:'Reports',
       nav_cek_rapor:'Cheque Report', nav_banka_rapor:'Bank Limit & Risk',
       nav_tahsilat_makbuzu:'Collection Receipt', nav_isletme:'Business Management',
@@ -1696,7 +1701,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
         <button class="nav-item nav-subitem" data-target="Teminat_Mektubu.html" data-title="Teminat Mektupları">
           <span class="fav-star" role="button" tabindex="0" data-fav-target="Teminat_Mektubu.html" data-fav-title="Teminat Mektupları" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
-          <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_teminat">Teminat Mektupları</span></span>
+          <span class="nav-text-wrap"><span class="nav-title" data-i18n="nav_teminat_mektubu">Teminat Mektupları</span></span>
         </button>
         <button class="nav-item nav-subitem" data-target="Abonelik_Faturalari.html" data-title="Abonelik / Fatura">
           <span class="fav-star" role="button" tabindex="0" data-fav-target="Abonelik_Faturalari.html" data-fav-title="Abonelik / Fatura" title="Favorilere ekle/çıkar" aria-label="Favorilere ekle/çıkar" data-i18n-title="fav_toggle" data-i18n-aria="fav_toggle"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7-5.4-4.7 7.1-.6z"/></svg></span>
