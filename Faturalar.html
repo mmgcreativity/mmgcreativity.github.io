@@ -39,7 +39,6 @@
     <p class="subtitle">Fatura no, vade ve KDV'siyle birlikte cari hesap takibi. Kısmi tahsilat/ödeme girilebilir; kalan tutar <b>açık hesap</b> olarak Risk Yönetimi'ne, vadesi ise Nakit Akış Tablosu'na aktarılır.</p>
   </div>
   <div class="top-actions" style="display:flex; gap:8px; align-items:center;">
-    <button type="button" id="btnYeniFatura" class="back-link" style="cursor:pointer; font-family:'IBM Plex Mono',monospace;">+ Yeni Fatura</button>
     <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
   </div>
 </header>
@@ -49,12 +48,39 @@
     <button class="tab active" data-tab="satis">Satış Faturaları</button>
     <button class="tab" data-tab="alis">Alış Faturaları</button>
     <button class="tab" data-tab="cari">Cari Özeti</button>
-    <button class="tab" data-tab="ekle">Yeni Fatura</button>
   </div>
 
   <!-- ================= SATIŞ ================= -->
   <div class="tab-panel active" id="tab-satis">
     <div class="kpis" id="sKpi"></div>
+    <!-- 2026-08-02: Ekleme formu artık AYRI EKRAN DEĞİL, listenin üstünde satır içi
+         (kullanıcı: "yeni fatura modülüne gerek yok, alış/satış faturalarında ekleme olsun").
+         Vade, Vade Sapma ekranındaki gibi ÇALIŞMA ŞEKLİ + GÜN ile hesaplanır. -->
+    <div class="panel">
+      <div class="panel-title">Yeni Satış Faturası</div>
+      <div class="panel-desc">Fatura tarihi, çalışma şekli ve vade gün sayısını girin — vade tarihi otomatik hesaplanır ve o vadeyle Nakit Akış Tablosu'na gider.</div>
+      <div class="form-grid">
+        <div style="grid-column:span 2;"><label class="fl">Müşteri *</label><select id="seCari"></select></div>
+        <div><label class="fl">Fatura No *</label><input id="seNo" class="mono" type="text" placeholder="ABC2026000001234"></div>
+        <div><label class="fl">Fatura Tarihi *</label><input id="seTarih" type="date"></div>
+        <div><label class="fl">Çalışma Şekli</label>
+          <select id="seYontem" title="Vade, fatura TARİHİNE mi (Fatura +) yoksa ayının SONUNA mı (Ay Sonu +) eklenecek?">
+            <option value="fatura">Fatura +</option>
+            <option value="aysonu">Ay Sonu +</option>
+          </select>
+        </div>
+        <div><label class="fl">Gün</label><input id="seGun" class="num" type="text" inputmode="numeric" placeholder="60"></div>
+        <div><label class="fl">Vade Tarihi *</label><input id="seVade" type="date"></div>
+        <div><label class="fl">Firma</label><select id="seEkFirma"></select></div>
+        <div><label class="fl">Matrah</label><input id="seMatrah" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl">KDV %</label>
+          <select id="seKdv"><option>20</option><option>10</option><option>1</option><option>0</option></select>
+        </div>
+        <div><label class="fl">Toplam</label><input id="seToplam" class="num" type="text" inputmode="decimal" placeholder="0,00" readonly></div>
+        <div style="grid-column:span 2;"><label class="fl">Açıklama</label><input id="seAciklama" type="text" placeholder="opsiyonel"></div>
+        <div><button class="btn primary" id="seEkle" style="width:100%;">Faturayı Ekle</button></div>
+      </div>
+    </div>
     <div class="panel">
       <div class="panel-title">Satış Faturaları (Alacaklarım)</div>
       <div class="panel-desc">Kapanmamış faturaların kalan tutarı, o müşterinin <b>açık hesap riskidir</b> — Risk Yönetimi ekranında çek/senet riskiyle birlikte gösterilir.</div>
@@ -94,6 +120,34 @@
   <!-- ================= ALIŞ ================= -->
   <div class="tab-panel" id="tab-alis">
     <div class="kpis" id="aKpi"></div>
+    <!-- 2026-08-02: Ekleme formu artık AYRI EKRAN DEĞİL, listenin üstünde satır içi
+         (kullanıcı: "yeni fatura modülüne gerek yok, alış/satış faturalarında ekleme olsun").
+         Vade, Vade Sapma ekranındaki gibi ÇALIŞMA ŞEKLİ + GÜN ile hesaplanır. -->
+    <div class="panel">
+      <div class="panel-title">Yeni Alış Faturası</div>
+      <div class="panel-desc">Fatura tarihi, çalışma şekli ve vade gün sayısını girin — vade tarihi otomatik hesaplanır ve o vadeyle Nakit Akış Tablosu'na gider.</div>
+      <div class="form-grid">
+        <div style="grid-column:span 2;"><label class="fl">Tedarikçi *</label><select id="aeCari"></select></div>
+        <div><label class="fl">Fatura No *</label><input id="aeNo" class="mono" type="text" placeholder="ABC2026000001234"></div>
+        <div><label class="fl">Fatura Tarihi *</label><input id="aeTarih" type="date"></div>
+        <div><label class="fl">Çalışma Şekli</label>
+          <select id="aeYontem" title="Vade, fatura TARİHİNE mi (Fatura +) yoksa ayının SONUNA mı (Ay Sonu +) eklenecek?">
+            <option value="fatura">Fatura +</option>
+            <option value="aysonu">Ay Sonu +</option>
+          </select>
+        </div>
+        <div><label class="fl">Gün</label><input id="aeGun" class="num" type="text" inputmode="numeric" placeholder="60"></div>
+        <div><label class="fl">Vade Tarihi *</label><input id="aeVade" type="date"></div>
+        <div><label class="fl">Firma</label><select id="aeEkFirma"></select></div>
+        <div><label class="fl">Matrah</label><input id="aeMatrah" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
+        <div><label class="fl">KDV %</label>
+          <select id="aeKdv"><option>20</option><option>10</option><option>1</option><option>0</option></select>
+        </div>
+        <div><label class="fl">Toplam</label><input id="aeToplam" class="num" type="text" inputmode="decimal" placeholder="0,00" readonly></div>
+        <div style="grid-column:span 2;"><label class="fl">Açıklama</label><input id="aeAciklama" type="text" placeholder="opsiyonel"></div>
+        <div><button class="btn primary" id="aeEkle" style="width:100%;">Faturayı Ekle</button></div>
+      </div>
+    </div>
     <div class="panel">
       <div class="panel-title">Alış Faturaları (Borçlarım)</div>
       <div class="panel-desc">Ödenmemiş alış faturaları nakit çıkış planınızı oluşturur. "Nakit Akış'a Aktar" ile vadesine göre tabloya işlenir.</div>
@@ -149,50 +203,6 @@
     </div>
   </div>
 
-  <!-- ================= YENİ FATURA ================= -->
-  <div class="tab-panel" id="tab-ekle">
-    <div class="panel">
-      <div class="panel-title">Yeni Fatura</div>
-      <div class="panel-desc">Matrah ve KDV oranını girin, toplam otomatik hesaplanır. Toplamı doğrudan yazmak isterseniz "Toplamdan gir" seçeneğini kullanın.</div>
-      <div class="form-grid">
-        <div><label class="fl" for="fTur">Fatura Türü *</label>
-          <select id="fTur"><option value="satis">Satış (alacak)</option><option value="alis">Alış (borç)</option></select>
-        </div>
-        <div><label class="fl" for="fNo">Fatura No *</label><input id="fNo" class="mono" type="text" placeholder="ABC2026000001234"></div>
-        <div><label class="fl" for="fTarih">Fatura Tarihi *</label><input id="fTarih" type="date"></div>
-        <!-- 2026-08-02: Vade Sapma ekranındaki "çalışma şekli" mantığı buraya da eklendi.
-             Fatura + : vade, fatura TARİHİNE gün eklenerek bulunur.
-             Ay Sonu + : vade, faturanın ayının SON GÜNÜNE gün eklenerek bulunur
-                         (piyasada çok yaygın: "ay sonu + 60 gün"). -->
-        <div><label class="fl" for="fYontem">Çalışma Şekli</label>
-          <select id="fYontem" title="Vade, faturanın tarihine mi (Fatura +) yoksa ayının sonuna mı (Ay Sonu +) eklenecek?">
-            <option value="fatura">Fatura +</option>
-            <option value="aysonu">Ay Sonu +</option>
-          </select>
-        </div>
-        <div><label class="fl" for="fVadeGun">Gün</label><input id="fVadeGun" class="num" type="text" inputmode="numeric" placeholder="60"></div>
-        <div><label class="fl" for="fVade">Vade Tarihi *</label><input id="fVade" type="date"></div>
-        <div style="grid-column:span 2;"><label class="fl" for="fCari">Cari *</label>
-          <select id="fCari"></select>
-        </div>
-        <div><label class="fl" for="fFirma">Firma (kendi)</label><select id="fFirma"></select></div>
-        <div><label class="fl" for="fGiris">Giriş Şekli</label>
-          <select id="fGiris"><option value="matrah">Matrahtan gir</option><option value="toplam">Toplamdan gir</option></select>
-        </div>
-        <div><label class="fl" for="fMatrah">Matrah</label><input id="fMatrah" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
-        <div><label class="fl" for="fKdvOran">KDV %</label>
-          <select id="fKdvOran"><option>20</option><option>10</option><option>1</option><option>0</option></select>
-        </div>
-        <div><label class="fl" for="fToplam">Toplam</label><input id="fToplam" class="num" type="text" inputmode="decimal" placeholder="0,00"></div>
-        <div><label class="fl" for="fPara">Para</label>
-          <select id="fPara"><option>TL</option><option>USD</option><option>EUR</option><option>GBP</option></select>
-        </div>
-        <div style="grid-column:span 2;"><label class="fl" for="fAciklama">Açıklama</label><input id="fAciklama" type="text" placeholder="Mal alımı / hizmet…"></div>
-        <div><button class="btn primary" id="btnEkle" style="width:100%;">Faturayı Kaydet</button></div>
-      </div>
-      <div class="kdv-ozet" id="fOnizleme"></div>
-    </div>
-  </div>
 </main>
 
 <script type="module" src="mmg-cloud-init.js"></script>
@@ -284,110 +294,6 @@
   window.addEventListener('hashchange', adrestenAc);
   adrestenAc();
   if(!location.hash) baslikYaz('satis');
-  // "Yeni Fatura" sol menüde listelenmiyor; buradan açılır.
-  $('btnYeniFatura').addEventListener('click', function(){
-    var acik = $('tab-ekle').classList.contains('active');
-    sekmeAc(acik ? 'satis' : 'ekle', true);
-    $('btnYeniFatura').textContent = acik ? '+ Yeni Fatura' : '↩ Listeye Dön';
-  });
-
-  /* ---------------- Form: matrah ↔ toplam ---------------- */
-  function formHesapla(){
-    var oran = parseFloat($('fKdvOran').value) || 0;
-    var yon = $('fGiris').value;
-    var matrah, kdv, toplam;
-    if(yon === 'toplam'){
-      toplam = S.parse($('fToplam').value);
-      matrah = toplam / (1 + oran/100);
-      kdv = toplam - matrah;
-      $('fMatrah').value = matrah ? S.fmt(matrah) : '';
-      $('fMatrah').readOnly = true; $('fToplam').readOnly = false;
-    } else {
-      matrah = S.parse($('fMatrah').value);
-      kdv = matrah * oran / 100;
-      toplam = matrah + kdv;
-      $('fToplam').value = toplam ? S.fmt(toplam) : '';
-      $('fToplam').readOnly = true; $('fMatrah').readOnly = false;
-    }
-    $('fOnizleme').innerHTML =
-      '<span>Matrah</span><b>' + S.fmt(matrah) + '</b>' +
-      '<span>KDV (%' + oran + ')</span><b>' + S.fmt(kdv) + '</b>' +
-      '<span>Toplam</span><b style="color:var(--brass);">' + S.fmt(toplam) + ' ' + $('fPara').value + '</b>';
-    return { matrah:matrah, kdv:kdv, toplam:toplam, oran:oran };
-  }
-  ['fMatrah','fToplam','fKdvOran','fGiris','fPara'].forEach(function(id){
-    $(id).addEventListener('input', formHesapla);
-    $(id).addEventListener('change', formHesapla);
-  });
-  /* ---- VADE HESABI ----
-     Vade Sapma ekranıyla AYNI mantık:
-       Fatura +  → fatura tarihi + gün
-       Ay Sonu + → faturanın ayının son günü + gün
-     Vade tarihi elle değiştirilirse gün sayısı geriye doğru hesaplanır. */
-  function ayinSonu(iso){
-    var p = String(iso).split('-');
-    // ay+1'in 0. günü = bu ayın son günü (UTC ile saat kaymasından etkilenmez)
-    return new Date(Date.UTC(+p[0], +p[1], 0));
-  }
-  function vadeGunden(){
-    var t = $('fTarih').value, g = parseInt(S.parse($('fVadeGun').value), 10);
-    if(!t || !(g >= 0)) return;
-    var d = $('fYontem').value === 'aysonu' ? ayinSonu(t) : new Date(t + 'T00:00:00Z');
-    d.setUTCDate(d.getUTCDate() + g);
-    $('fVade').value = d.toISOString().slice(0,10);
-  }
-  $('fVadeGun').addEventListener('input', vadeGunden);
-  $('fTarih').addEventListener('change', vadeGunden);
-  $('fYontem').addEventListener('change', vadeGunden);
-  $('fVade').addEventListener('change', function(){
-    var t = $('fTarih').value, v = $('fVade').value;
-    if(!t || !v) return;
-    var baz = $('fYontem').value === 'aysonu'
-      ? Math.floor(ayinSonu(t).getTime() / 86400000)
-      : gunSerisi(t);
-    var b = gunSerisi(v);
-    if(baz !== null && b !== null) $('fVadeGun').value = (b - baz);
-  });
-  /* Cari seçilince o carinin "tanınan vade"si öneri gelsin (Veri Girişi'nden). */
-  $('fCari').addEventListener('change', function(){
-    var c = cariler.filter(function(x){ return x.id === $('fCari').value; })[0];
-    if(c && c.vadeGun > 0 && !$('fVadeGun').value){
-      $('fVadeGun').value = c.vadeGun;
-      vadeGunden();
-    }
-  });
-
-  /* ---------------- Kayıt ---------------- */
-  $('btnEkle').addEventListener('click', function(){
-    var no = $('fNo').value.trim();
-    var cari = $('fCari').value;
-    var h = formHesapla();
-    if(!no){ alert('Fatura no zorunlu.'); $('fNo').focus(); return; }
-    if(!cari){ alert('Cari seçilmedi. Müşteri/tedarikçi Veri Girişi panelinden eklenir.'); $('fCari').focus(); return; }
-    if(!$('fTarih').value){ alert('Fatura tarihi zorunlu.'); $('fTarih').focus(); return; }
-    if(!$('fVade').value){ alert('Vade tarihi zorunlu.'); $('fVade').focus(); return; }
-    if(!(h.toplam > 0)){ alert('Tutar sıfırdan büyük olmalı.'); return; }
-
-    var tur = $('fTur').value;
-    var mevcut = store.get().filter(function(x){ return x.no === no && x.tur === tur; })[0];
-    var kayit = {
-      tur:tur, no:no, tarih:$('fTarih').value, vade:$('fVade').value,
-      cariId:cari, firmaId:$('fFirma').value,
-      matrah:h.matrah, kdvOran:h.oran, kdv:h.kdv, toplam:h.toplam,
-      para:$('fPara').value, aciklama:$('fAciklama').value.trim()
-    };
-    if(mevcut){
-      if(!confirm(no + ' numaralı fatura zaten kayıtlı. Güncellensin mi? (Tahsilat kayıtları korunur)')) return;
-      store.update(mevcut.id, kayit);
-    } else {
-      kayit.id = S.uid(); kayit.odemeler = [];
-      store.add(kayit);
-    }
-    ['fNo','fMatrah','fToplam','fAciklama'].forEach(function(id){ $(id).value = ''; });
-    formHesapla();
-    $('fNo').focus();
-  });
-
   /* ---------------- Satır çizimi ---------------- */
   function satir(r, acikSatir){
     var d = durumu(r), vs = gunSerisi(r.vade), kg = vs === null ? null : vs - bugunSeri();
@@ -474,18 +380,100 @@
     return { list:list, T:T };
   }
 
+
+  /* =========================================================================
+     SATIR İÇİ FATURA EKLEME (2026-08-02)
+     Ayrı "Yeni Fatura" ekranı kaldırıldı; ekleme formu Satış ve Alış
+     ekranlarının içinde. Vade Vade Sapma'daki gibi hesaplanır:
+       Fatura +  → fatura tarihi + gün
+       Ay Sonu + → faturanın ayının son günü + gün
+     Kaydedilen fatura, KALAN tutarıyla ve bu vadeyle Nakit Akış'a aktarılır.
+     ========================================================================= */
+  function ayinSonuTarih(iso){
+    var p = String(iso).split('-');
+    return new Date(Date.UTC(+p[0], +p[1], 0));   // ay+1'in 0. günü = bu ayın sonu
+  }
+  function ekleFormuKur(on, tur){
+    var el = function(x){ return document.getElementById(on + x); };
+    function vadeHesapla(){
+      var t = el('Tarih').value, g = parseInt(S.parse(el('Gun').value), 10);
+      if(!t || !(g >= 0)) return;
+      var d = el('Yontem').value === 'aysonu' ? ayinSonuTarih(t) : new Date(t + 'T00:00:00Z');
+      d.setUTCDate(d.getUTCDate() + g);
+      el('Vade').value = d.toISOString().slice(0, 10);
+    }
+    function tutarHesapla(){
+      var matrah = S.parse(el('Matrah').value);
+      var oran = parseFloat(el('Kdv').value) || 0;
+      el('Toplam').value = matrah ? S.fmt(matrah * (1 + oran / 100)) : '';
+    }
+    ['Gun','Tarih','Yontem'].forEach(function(x){
+      el(x).addEventListener('input', vadeHesapla); el(x).addEventListener('change', vadeHesapla);
+    });
+    el('Vade').addEventListener('change', function(){
+      var t = el('Tarih').value, v = el('Vade').value;
+      if(!t || !v) return;
+      var baz = el('Yontem').value === 'aysonu'
+        ? Math.floor(ayinSonuTarih(t).getTime() / 86400000) : gunSerisi(t);
+      el('Gun').value = gunSerisi(v) - baz;
+    });
+    ['Matrah','Kdv'].forEach(function(x){
+      el(x).addEventListener('input', tutarHesapla); el(x).addEventListener('change', tutarHesapla);
+    });
+    // Cari seçilince o carinin tanınan vadesi öneri olarak gelsin
+    el('Cari').addEventListener('change', function(){
+      var c = cariler.filter(function(x){ return x.id === el('Cari').value; })[0];
+      if(c && c.vadeGun > 0 && !el('Gun').value){ el('Gun').value = c.vadeGun; vadeHesapla(); }
+    });
+    el('Tarih').value = S.today();
+
+    el('Ekle').addEventListener('click', function(){
+      var no = el('No').value.trim(), cari = el('Cari').value;
+      var matrah = S.parse(el('Matrah').value), oran = parseFloat(el('Kdv').value) || 0;
+      var toplam = matrah * (1 + oran / 100);
+      if(!no){ alert('Fatura no zorunlu.'); el('No').focus(); return; }
+      if(!cari){ alert('Cari seçilmedi. Müşteri/tedarikçi Veri Girişi panelinden eklenir.'); el('Cari').focus(); return; }
+      if(!el('Tarih').value){ alert('Fatura tarihi zorunlu.'); el('Tarih').focus(); return; }
+      if(!el('Vade').value){ alert('Vade tarihi hesaplanmadı — gün sayısını girin.'); el('Gun').focus(); return; }
+      if(!(toplam > 0)){ alert('Matrah sıfırdan büyük olmalı.'); el('Matrah').focus(); return; }
+
+      var mevcut = store.get().filter(function(x){ return x.no === no && x.tur === tur; })[0];
+      var kayit = {
+        tur: tur, no: no, tarih: el('Tarih').value, vade: el('Vade').value,
+        cariId: cari, firmaId: el('EkFirma').value,
+        matrah: matrah, kdvOran: oran, kdv: toplam - matrah, toplam: toplam,
+        para: 'TL', aciklama: el('Aciklama').value.trim()
+      };
+      if(mevcut){
+        if(!confirm(no + ' numaralı fatura zaten kayıtlı. Güncellensin mi? (Tahsilatlar korunur)')) return;
+        store.update(mevcut.id, kayit);
+      } else {
+        kayit.id = S.uid(); kayit.odemeler = [];
+        store.add(kayit);
+      }
+      ['No','Matrah','Toplam','Aciklama'].forEach(function(x){ el(x).value = ''; });
+      el('No').focus();
+    });
+  }
+  ekleFormuKur('se', 'satis');
+  ekleFormuKur('ae', 'alis');
+
   /* ---------------- Render ---------------- */
   function render(){
-    S.firmaDoldur($('fFirma'), null);
     S.firmaDoldur($('sFirma'), 'Tüm firmalar');
     S.firmaDoldur($('aFirma'), 'Tüm firmalar');
+    S.firmaDoldur($('seEkFirma'), null);
+    S.firmaDoldur($('aeEkFirma'), null);
 
-    var cs = $('fCari'), csO = cs.value;
-    cs.innerHTML = cariler.length
-      ? '<option value="">— seçin —</option>' + cariler.map(function(c){
-          return '<option value="' + c.id + '">' + esc(c.ad) + '</option>'; }).join('')
-      : '<option value="">— Veri Girişi\'nden müşteri ekleyin —</option>';
-    cs.value = csO;
+    ['seCari','aeCari'].forEach(function(id){
+      var e = $(id); if(!e) return;
+      var o = e.value;
+      e.innerHTML = cariler.length
+        ? '<option value="">— seçin —</option>' + cariler.map(function(c){
+            return '<option value="' + c.id + '">' + esc(c.ad) + '</option>'; }).join('')
+        : '<option value="">— Veri Girişi\'nden cari ekleyin —</option>';
+      e.value = o;
+    });
 
     var Sat = tabloCiz('satis'), Al = tabloCiz('alis');
     var bugun = bugunSeri();
@@ -711,11 +699,7 @@
   /* ---------------- Başlat ---------------- */
   store.onChange(render);
   firmaStore.onChange(render);
-  $('fTarih').value = S.today();
-  $('fVade').value = S.today();
-  $('fToplam').readOnly = true;
   store.load();
-  formHesapla();
   render();
   document.addEventListener('mmg-scope-ready', async function(){
     cariler = await S.cariler('customers');

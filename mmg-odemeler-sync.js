@@ -64,15 +64,77 @@
     return occ.length ? occ[occ.length - 1] : null;
   };
 
-  // ---- Yerel ödeme listesi API'si ----
-  window.mmgLocalPaymentsAPI = window.mmgLocalPaymentsAPI || {
-    load: function () {
-      try { var raw = localStorage.getItem("mmg_odemeler_list"); return raw ? JSON.parse(raw) : []; }
-      catch (e) { return []; }
-    },
-    save: function (list) {
-      try { localStorage.setItem("mmg_odemeler_list", JSON.stringify(list || [])); } catch (e) {}
+  /* ---- Yerel ödeme listesi API'si — KAPSAM BAZLI (2026-08-02) ----
+     HATA: Liste tek bir global anahtarda ("mmg_odemeler_list") tutuluyordu. Nakit akış
+     önbelleği kapsam bazlıydı ama LİSTENİN KENDİSİ değildi; bu yüzden A firmasında
+     girilen bir gider, B firmasına geçildiğinde de ekranda görünüyordu
+     (kullanıcı: "grup seçmediğim halde Yaşar Cihan'da Aderans'ın ödemesi geliyor").
+     ÇÖZÜM: anahtar artık aktif kapsamı içerir → mmg_odemeler_list__firmaAccounts:<id>
+     Eski global anahtar, yalnızca misafir/kişisel kapsama BİR KEZ taşınır; üye
+     kapsamlarında doğru kaynak zaten buluttur ({scope}/odemeler). */
+  function scopeKeyPart() {
+    var c = window.mmgCloud || {};
+    return (c.scopeCollection || "guest") + ":" + (c.scopeId || "guest");
+  }
+  function scopedListKey(base) { return base + "__" + scopeKeyPart(); }
+  function makeScopedListAPI(base) {
+    return {
+      key: function () { return scopedListKey(base); },
+      load: function () {
+        var k = scopedListKey(base);
+        try {
+          var raw = localStorage.getItem(k);
+          if (raw === null) {
+            // Tek seferlik devir: sürüm öncesi global liste, kişisel/misafir kapsama taşınır.
+            var c = window.mmgCloud || {};
+            var kisisel = !c.scopeCollection || c.scopeCollection === "users";
+            var eskiRaw = localStorage.getItem(base);
+            if (kisisel && eskiRaw) { localStorage.setItem(k, eskiRaw); raw = eskiRaw; }
+          }
+          return raw ? (JSON.parse(raw) || []) : [];
+        } catch (e) { return []; }
+      },
+      save: function (list) {
+        try { localStorage.setItem(scopedListKey(base), JSON.stringify(list || [])); } catch (e) {}
+      }
+    };
+  }
+  window.mmgScopedListAPI = makeScopedListAPI;
+  window.mmgLocalPaymentsAPI = makeScopedListAPI("mmg_odemeler_list");
+  window.mmgLocalIncomeAPI = window.mmgLocalIncomeAPI || makeScopedListAPI("mmg_gelirler_list");
+
+  /* Buluttaki {scope}/<col> kayıtlarını yerel kapsam listesine indirir.
+     Ekranda gösterilen liste böylece HER ZAMAN aktif firmaya ait olur. */
+  window.mmgPullScopeList = async function (colName, api) {
+    var cloud = window.mmgCloud;
+    if (!cloud || !cloud.currentUser || !cloud.scopeId || !cloud.db) return null;
+    try {
+      var snap = await cloud.getDocs(cloud.collection(cloud.db, cloud.scopeCollection, cloud.scopeId, colName));
+      var items = [];
+      snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+      api.save(items);
+      return items;
+    } catch (e) { return null; }
+  };
+
+  /* Grup görünümü: kullanıcının üye olduğu TÜM firmaların kayıtlarını,
+     her kayda _firmaAd etiketi ekleyerek birleştirir (salt okunur). */
+  window.mmgPullGroupList = async function (colName) {
+    var cloud = window.mmgCloud;
+    if (!cloud || !cloud.currentUser || !cloud.db) return [];
+    var firmalar = [];
+    try { firmalar = JSON.parse(localStorage.getItem("mmg_firma_uyelikler") || "[]") || []; } catch (e) {}
+    if (!firmalar.length) return [];
+    var hepsi = [];
+    for (var i = 0; i < firmalar.length; i++) {
+      try {
+        var snap = await cloud.getDocs(cloud.collection(cloud.db, "firmaAccounts", firmalar[i].id, colName));
+        snap.forEach(function (d) {
+          hepsi.push(Object.assign({ id: d.id, _firmaAd: firmalar[i].name, _firmaId: firmalar[i].id }, d.data()));
+        });
+      } catch (e) { /* okunamayan firmayı atla */ }
     }
+    return hepsi;
   };
 
   // Bir gider kaydını, verilen ay-veri nesnesine (monthData) belirtilen günde ekler.
@@ -142,10 +204,6 @@
   }
 
   // ---- MİSAFİR / yerel senkron ----
-  function scopeKeyPart() {
-    var c = window.mmgCloud || {};
-    return (c.scopeCollection || "guest") + ":" + (c.scopeId || "guest");
-  }
   function localCashflowKey(mk) { return "mmg_nat_scope_" + scopeKeyPart() + "_" + mk; }
 
   window.mmgRunPaymentSync = function () {
