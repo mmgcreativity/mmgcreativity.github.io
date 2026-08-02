@@ -1013,12 +1013,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     // atanmamışsa uyarı renginde "🏢 tüm firmalar" (kullanıcı hangi IBAN'ı firmaya
     // bağlaması gerektiğini görsün).
     if(!ids.length){
-      return '<button type="button" class="party-scope-badge scope-assignable" data-assign-id="' + escapeHtml(record.id || '') + '" style="color:var(--amber,#E3A23C); background:transparent; border:1px solid rgba(227,162,60,0.5); border-radius:999px; cursor:pointer; font:inherit; padding:2px 9px;" title="Tıkla: bu kaydı AKTİF firmaya ata — böylece diğer firmalarda görünmez.">🏢 tüm firmalar ▾</button>';
+      return '<button type="button" class="party-scope-badge scope-assignable" data-assign-id="' + escapeHtml(record.id || '') + '" style="color:var(--teal,#3FB68A); background:transparent; border:1px solid rgba(63,182,138,0.5); border-radius:999px; cursor:pointer; font:inherit; padding:2px 9px;" title="Bu kayıt gruptaki TÜM firmalarda geçerli. Tıkla: yalnızca aktif firmaya ata.">🏢 TÜM GRUP ▾</button>';
     }
     // Rozette de kod adın BAŞINDA (kullanıcı isteği 2026-07-31) ve firmalar kod sırasında.
     const members = ids
       .map(id => groupFirmaMembers.find(f => f.id === id) || { id, name: id, code: '' })
       .sort(mmgFirmaCodeSort);
+    // Kullanıcı isteği: gruptaki firmaların hepsi seçiliyse uzun listeyi yazma, "TÜM GRUP" yeter
+    // — tek satıra sığar. (Az sayıda firma seçiliyse adları yazmaya devam eder.)
+    if(groupFirmaMembers.length > 1 && ids.length >= groupFirmaMembers.length){
+      return '<div class="party-scope-badge">🏢 TÜM GRUP</div>';
+    }
     const names = members.map(m => (String(m.code || '').trim() ? m.code + ' ' : '') + m.name);
     return '<div class="party-scope-badge">🏢 ' + escapeHtml(names.join(', ')) + '</div>';
   }
@@ -1320,9 +1325,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     try{
       const id = 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
       const docData = { name, iban, currency, note, createdAt: serverTimestamp() };
-      // IBAN HER ZAMAN TEK firmaya (aktif firma) aittir — bir IBAN birden fazla firmaya tanımlanamaz
-      // (kullanıcı: "IBAN bellidir, mantık dışı"). Çoklu-firma seçimi IBAN formunda kaldırıldı.
-      if(scopeCollection === 'firmaAccounts' && scopeId) docData.appliesToFirmaIds = [scopeId];
+      // 2026-08-02 DÜZELTME: Eskiden IBAN koşulsuz olarak O AN AKTİF firmaya damgalanıyor,
+      // formdaki firma seçimi YOK SAYILIYORDU. Kullanıcı tüm firmaları işaretlese bile kayıt
+      // tek firmaya gidiyor, başka firmadayken IBAN'lar "kaybolmuş" gibi görünüyordu.
+      // Artık seçim dikkate alınır; HEPSİ işaretliyse kısıtlama yazılmaz = TÜM GRUP.
+      const bankAppliesTo = collectFirmaSelection('bank_firmaSelect');
+      if(bankAppliesTo) docData.appliesToFirmaIds = bankAppliesTo;
       await setDoc(docRef('banks', id), docData);
       select.value = ''; ibanInput.value = ''; curInput.value = 'TRY'; noteInput.value = '';
       showMsg('banks_msg', LBL.saved, false);
@@ -1565,10 +1573,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         docData.telefon   = txt('cust_telefon');
         docData.not       = txt('cust_not');
       }
-      // Elle eklemede kayıt HER ZAMAN bir firmaya atanır: seçim yapılmadıysa/hepsi seçiliyse
-      // otomatik AKTİF firmaya (kullanıcı isteği — atanmamış "global" kayıt hiç oluşmasın).
+      // 2026-08-02: HEPSİ seçiliyse kısıtlama YAZILMAZ → kayıt TÜM GRUP için geçerlidir.
       if(appliesTo) docData.appliesToFirmaIds = appliesTo;
-      else if(scopeCollection === 'firmaAccounts' && scopeId) docData.appliesToFirmaIds = [scopeId];
       await setDoc(docRef(kind, id), docData);
       nameEl.value = '';
       clearIbanRows(prefix);
@@ -1656,9 +1662,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const id = 'pr_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
       // Görev/Not alanı TC Kimlik No oldu (kullanıcı isteği) → 'tc' alanına yazılır.
       const docData = { name, tc: notesEl.value.trim(), createdAt: serverTimestamp() };
-      // Elle eklemede kayıt HER ZAMAN bir firmaya atanır (seçim yoksa aktif firma).
+      // 2026-08-02: HEPSİ seçiliyse kısıtlama YAZILMAZ → kayıt TÜM GRUP için geçerlidir.
       if(appliesTo) docData.appliesToFirmaIds = appliesTo;
-      else if(scopeCollection === 'firmaAccounts' && scopeId) docData.appliesToFirmaIds = [scopeId];
       await setDoc(docRef('personnel', id), docData);
       nameEl.value = ''; notesEl.value = '';
       resetFirmaSelect('pr_firmaSelect');
@@ -1759,9 +1764,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       const id = 'cp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
       const vknEl = document.getElementById('cp_vkn');
       const docData = { name, idNumber: (vknEl ? vknEl.value.trim() : ''), notes: notesEl.value.trim(), createdAt: serverTimestamp() };
-      // Elle eklemede kayıt HER ZAMAN bir firmaya atanır (seçim yoksa aktif firma).
+      // 2026-08-02: HEPSİ seçiliyse kısıtlama YAZILMAZ → kayıt TÜM GRUP için geçerlidir.
       if(appliesTo) docData.appliesToFirmaIds = appliesTo;
-      else if(scopeCollection === 'firmaAccounts' && scopeId) docData.appliesToFirmaIds = [scopeId];
       await setDoc(docRef('counterparties', id), docData);
       nameEl.value = ''; notesEl.value = '';
       resetFirmaSelect('cp_firmaSelect');

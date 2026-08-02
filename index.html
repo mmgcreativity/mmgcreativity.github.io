@@ -2926,54 +2926,72 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
      Masaüstünde hiçbir şey değişmez — orada başlıklar yalnızca ayraçtır.
      Açık bölümler localStorage'da saklanır ki her girişte yeniden açılmasın.
      ========================================================================== */
-  const MOBIL_SEC_KEY = 'mmg_mobil_acik_bolumler';
-  function acikBolumler(){
-    try{ return JSON.parse(localStorage.getItem(MOBIL_SEC_KEY) || '["favori"]') || ['favori']; }
-    catch(e){ return ['favori']; }
-  }
-  function acikYaz(list){ try{ localStorage.setItem(MOBIL_SEC_KEY, JSON.stringify(list)); }catch(e){} }
+  /* ==========================================================================
+     MOBİL ANA EKRAN — HAMBURGER MENÜ GİBİ İÇERİ GİREN (drill-down) YAPI
+     Kullanıcı: "mobilde neden hamburger'daki gibi tıkladıkça alt menüye geçen
+     bir tasarım olmuyor?"  → Akordiyon (yerinde açılıp uzayan liste) kaldırıldı.
+     Artık:
+       • Başlangıçta YALNIZCA kategori başlıkları görünür — kısa bir menü.
+       • Bir kategoriye dokununca o kategorinin kartları AÇILIR, diğer tüm
+         kategoriler GİZLENİR; üstte "‹ Kategori adı" geri çubuğu kalır.
+       • Geri çubuğuna dokununca ana listeye dönülür.
+     Masaüstünde bu kodun hiçbir etkisi yoktur (.card-sec zaten gizli).
+     ========================================================================== */
+  const MOBIL_SEC_KEY = 'mmg_mobil_acik_bolum';
+  function acikBolum(){ try{ return localStorage.getItem(MOBIL_SEC_KEY) || ''; }catch(e){ return ''; } }
+  function acikYaz(sec){ try{ sec ? localStorage.setItem(MOBIL_SEC_KEY, sec) : localStorage.removeItem(MOBIL_SEC_KEY); }catch(e){} }
   function mobilMi(){ return window.matchMedia('(max-width:860px)').matches; }
 
   function mobilAkordiyon(){
     const grid = document.getElementById('cardGrid');
     if(!grid) return;
-    const acik = acikBolumler();
+    const acik = acikBolum();
+    const mobil = mobilMi();
 
     grid.querySelectorAll('.card-sec').forEach(h => {
       const sec = h.dataset.sec;
-      // Başlık içine sayı ve ok ekle (bir kez)
-      let etiket = h.querySelector('span');
+
+      // Başlık iskeleti (sayı + ok) bir kez kurulur
+      const etiket = h.querySelector('span');
       if(etiket && !h.querySelector('.sec-ok')){
+        etiket.classList.add('sec-ad');
         const sayi = document.createElement('span');
         sayi.className = 'sec-sayi';
         etiket.after(sayi);
         const ok = document.createElement('span');
         ok.className = 'sec-ok';
-        ok.textContent = '›';
         h.appendChild(ok);
         h.setAttribute('role', 'button');
         h.setAttribute('tabindex', '0');
       }
+
       const kartlar = Array.from(grid.querySelectorAll('.app-card'))
         .filter(c => c.dataset.sec === sec && c.style.display !== 'none');
-      const sayiEl = h.querySelector('.sec-sayi');
-      if(sayiEl) sayiEl.textContent = mobilMi() ? '(' + kartlar.length + ')' : '';
 
-      const buAcik = !mobilMi() || acik.indexOf(sec) > -1;
-      h.classList.toggle('acik', buAcik && mobilMi());
+      const sayiEl = h.querySelector('.sec-sayi');
+      const okEl = h.querySelector('.sec-ok');
+      const buAcik = mobil && acik === sec;
+
+      if(sayiEl) sayiEl.textContent = mobil && !buAcik ? '(' + kartlar.length + ')' : '';
+      if(okEl) okEl.textContent = buAcik ? '‹' : '›';
+
+      // Bir kategori açıkken diğer başlıklar tamamen gizlenir → içeri girmiş hissi
+      h.classList.toggle('acik', buAcik);
+      h.classList.toggle('gizle', mobil && acik && !buAcik);
       h.setAttribute('aria-expanded', String(buAcik));
-      kartlar.forEach(c => c.classList.toggle('mobil-kapali', !buAcik));
+
+      // Kartlar: mobilde YALNIZCA açık kategorininkiler görünür
+      kartlar.forEach(c => c.classList.toggle('mobil-kapali', mobil && !buAcik));
     });
   }
 
   document.addEventListener('click', (e) => {
     const h = e.target.closest('.card-sec');
     if(!h || !mobilMi()) return;
-    const sec = h.dataset.sec;
-    let acik = acikBolumler();
-    acik = acik.indexOf(sec) > -1 ? acik.filter(x => x !== sec) : acik.concat([sec]);
-    acikYaz(acik);
+    // Açık olana tekrar dokunmak = geri; başkasına dokunmak = o kategoriye gir
+    acikYaz(acikBolum() === h.dataset.sec ? '' : h.dataset.sec);
     mobilAkordiyon();
+    try{ h.scrollIntoView({ block:'start', behavior:'smooth' }); }catch(e2){}
   });
   document.addEventListener('keydown', (e) => {
     if(e.key !== 'Enter' && e.key !== ' ') return;
