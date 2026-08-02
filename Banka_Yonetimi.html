@@ -259,9 +259,23 @@
      Bakiyeler, İletişim, Tanımlar) bu sayfayı #limit / #bakiye / #iletisim /
      #tanim adresiyle açar. Sekme değişince adres de güncellenir, böylece
      sayfa yenilenince aynı sekmede kalınır ve bağlantı paylaşılabilir. */
+  var EKRAN_BASLIK = {
+    limit:    ['Banka Limit Risk Durumu', 'Banka bazında limit, kullanılan risk ve kalan limit — firma bazında ayrılabilir. <b>Kalan = Limit − Risk.</b>'],
+    bakiye:   ['Banka Bakiyeleri', 'Banka × firma × para birimi bazında bakiyeleriniz. Portföydeki çekler Çek/Senet modülünden otomatik gelir.'],
+    iletisim: ['Banka İletişim Bilgileri', 'Şube ve yetkili bilgileri; istediğiniz bankaları ve rolleri seçip kısmi ya da tüm listeyi paylaşabilirsiniz.'],
+    tanim:    ['Tanımlar', 'Firmalarınız ve bankalarınız — tüm işletme modülleri bu listeleri ortak kullanır.']
+  };
+  function baslikYaz(ad){
+    var b = EKRAN_BASLIK[ad]; if(!b) return;
+    var h = document.querySelector('h1.title'), p = document.querySelector('p.subtitle');
+    if(h) h.textContent = b[0];
+    if(p) p.innerHTML = b[1];
+    try{ document.title = 'mmgcreativity — ' + b[0]; }catch(e){}
+  }
   function sekmeAc(ad, adresYaz){
     var t = document.querySelector('.tab[data-tab="' + ad + '"]');
     if(!t) return false;
+    baslikYaz(ad);
     document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
     document.querySelectorAll('.tab-panel').forEach(function(x){ x.classList.remove('active'); });
     t.classList.add('active');
@@ -280,6 +294,7 @@
   }
   window.addEventListener('hashchange', adrestenAc);
   adrestenAc();
+  if(!location.hash) baslikYaz('limit');
   // Firma/banka tanımları sol menüde listelenmiyor; buradan açılır.
   $('btnTanimlar').addEventListener('click', function(){
     sekmeAc($('tab-tanim').classList.contains('active') ? 'limit' : 'tanim', true);

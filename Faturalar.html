@@ -257,9 +257,23 @@
      2026-08-02: Sekmeler sol menüden doğrudan açılabiliyor (Banka Yönetimi'yle
      aynı desen). Cari Yönetimi altındaki "Satış Faturaları / Alış Faturaları /
      Cari Özeti" bu sayfayı #satis / #alis / #cari adresiyle açar. */
+  var EKRAN_BASLIK = {
+    satis: ['Satış Faturaları', 'Alacaklarınız. Kapanmamış faturaların kalan tutarı, o müşterinin <b>açık hesap riskidir</b> ve Risk Yönetimi ekranına gider.'],
+    alis:  ['Alış Faturaları', 'Borçlarınız. Ödenmemiş alış faturaları nakit çıkış planınızı oluşturur.'],
+    cari:  ['Cari Hesap Özeti', 'Her cari için satış (alacak) ve alış (borç) faturalarının kalan bakiyeleri. Pozitif bakiye sizin alacağınızdır.'],
+    ekle:  ['Yeni Fatura', 'Fatura tarihi, çalışma şekli ve vade gün sayısını girin — vade tarihi otomatik hesaplanır.']
+  };
+  function baslikYaz(ad){
+    var b = EKRAN_BASLIK[ad]; if(!b) return;
+    var h = document.querySelector('h1.title'), p = document.querySelector('p.subtitle');
+    if(h) h.textContent = b[0];
+    if(p) p.innerHTML = b[1];
+    try{ document.title = 'mmgcreativity — ' + b[0]; }catch(e){}
+  }
   function sekmeAc(ad, adresYaz){
     var t = document.querySelector('.tab[data-tab="' + ad + '"]');
     if(!t) return false;
+    baslikYaz(ad);
     document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
     document.querySelectorAll('.tab-panel').forEach(function(x){ x.classList.remove('active'); });
     t.classList.add('active');
@@ -276,6 +290,7 @@
   }
   window.addEventListener('hashchange', adrestenAc);
   adrestenAc();
+  if(!location.hash) baslikYaz('satis');
   // "Yeni Fatura" sol menüde listelenmiyor; buradan açılır.
   $('btnYeniFatura').addEventListener('click', function(){
     var acik = $('tab-ekle').classList.contains('active');
