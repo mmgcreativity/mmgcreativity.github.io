@@ -244,25 +244,77 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .pt-del{ text-align:right; }
   .empty-note{ color:var(--muted); font-size:13px; padding:16px 2px; text-align:center; }
 
-  .bank-chip-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
-  .bank-chip-list{ max-width:860px; }  /* düzenli, ortada bir sütun */
-  .bank-chip .bc-firma{ font-weight:700; color:var(--brass); min-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* =========================================================================
+     IBAN SATIRI — 2026-08-02 DÜZELTME
+     Önceki hâlde satır bozuktu, üç ayrı hataydı:
+       1) Izgara 5 sütun tanımlıydı ama satırda 6 öge vardı (firma, banka, IBAN,
+          para, kapsam rozeti, sil) → altıncı öge ALT SATIRA taşıyordu.
+       2) IBAN'a 46px'lik sütun düşüyordu; bu yüzden "TR25…" diye kırpılıyordu.
+       3) `.bank-chip button` kuralı kapsam rozetini de 20×20 daireye zorluyordu;
+          "TÜM GRUP" yazısı taşıp para birimiyle ÜST ÜSTE biniyordu.
+     Şimdi: 6 sütun, IBAN'a tam genişlik, sil butonu kuralı yalnız kendisine.
+     ========================================================================= */
+  .bank-chip-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; max-width:980px; }
   .bank-chip{
-    display:grid; grid-template-columns:180px minmax(0,1fr) 46px auto 26px; align-items:center; gap:12px;
+    display:grid;
+    grid-template-columns:minmax(120px,170px) minmax(90px,130px) minmax(250px,1fr) 42px auto 24px;
+    align-items:center; gap:12px;
     width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--hairline);
-    border-radius:10px; padding:9px 12px; font-size:13px; font-weight:600;
+    border-radius:10px; padding:8px 12px; font-size:13px; font-weight:600; min-height:0;
   }
+  .bank-chip > *{ min-width:0; }
+  /* Başlık + sütun filtre satırları listeyle AYNI ızgarayı kullanır ki hizalar tutsun. */
+  .bank-chip-head{
+    display:grid;
+    grid-template-columns:minmax(120px,170px) minmax(90px,130px) minmax(250px,1fr) 42px auto 24px;
+    align-items:center; gap:12px; width:100%; max-width:980px; box-sizing:border-box;
+    padding:0 12px; margin-top:14px;
+    font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); font-family:'IBM Plex Mono',monospace;
+  }
+  .bank-chip-head [data-bsort]{ cursor:pointer; user-select:none; white-space:nowrap; }
+  .bank-chip-head [data-bsort]:hover{ color:var(--brass); }
+  .bank-chip-head [data-bsort].sirali{ color:var(--brass); }
+  .bank-chip-filtre{ margin-top:5px; margin-bottom:2px; }
+  .bank-chip-filtre input{
+    width:100%; box-sizing:border-box; padding:5px 8px; font-size:11px;
+    background:var(--surface-2); color:var(--text); border:1px solid var(--hairline);
+    border-radius:7px; font-family:'IBM Plex Mono',monospace; -webkit-appearance:none;
+  }
+  .bank-chip-filtre input:focus{ outline:none; border-color:var(--brass); }
+  .bank-chip-filtre .b-sayac{ font-size:11px; color:var(--muted); }
+  .bank-chip-list{ margin-top:6px; }
+  .bank-chip .bc-firma{ font-weight:700; color:var(--brass); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .bank-chip .bc-bank{ font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .bank-chip .bc-iban{ font-family:'IBM Plex Mono',monospace; letter-spacing:.02em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .bank-chip .bc-cur{ color:var(--muted); text-align:right; }
-  .bank-chip .party-scope-badge, .bank-chip .scope-assignable{ justify-self:end; white-space:nowrap; }
-  .bank-chip > button{ justify-self:end; flex-shrink:0; }
-  #bank_firmaSelect{ display:none; }  /* IBAN tek firmaya (aktif) aittir — çoklu-firma seçimi mantıksız, gizlendi */
-  .bank-chip button{
-    background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; width:20px; height:20px;
-    border-radius:50%; display:flex; align-items:center; justify-content:center;
+  /* IBAN tam görünsün: 26 haneli TR IBAN gruplu yazımda ~32 karakter. */
+  .bank-chip .bc-iban{ font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0; white-space:nowrap; }
+  .bank-chip .bc-cur{ color:var(--muted); text-align:right; font-size:12px; }
+  .bank-chip .party-scope-badge, .bank-chip .scope-assignable{
+    justify-self:end; white-space:nowrap; font-size:11px; line-height:1.6; margin-top:0 !important;
+    width:auto !important; height:auto !important; border-radius:999px !important;
+    display:inline-flex !important; align-items:center;
   }
-  .bank-chip button:hover{ color:var(--red); background:rgba(226,84,75,0.1); }
+  #bank_firmaSelect{ display:none; }  /* IBAN tek firmaya (aktif) aittir — çoklu-firma seçimi mantıksız, gizlendi */
+  /* Sil butonu — YALNIZCA bu seçiciye uygulanır, kapsam rozetine bulaşmaz. */
+  .bank-chip > button[data-remove-bank]{
+    justify-self:end; flex-shrink:0;
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; width:20px; height:20px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  .bank-chip > button[data-remove-bank]:hover{ color:var(--red); background:rgba(226,84,75,0.1); }
+  /* Dar ekranda tek satır sığmaz; okunur biçimde iki satıra bölünür. */
+  @media (max-width:820px){
+    .bank-chip-head{ display:none; }
+    .bank-chip-filtre{ display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:0; }
+    .bank-chip-filtre span{ display:none; }
+    .bank-chip{ grid-template-columns:1fr auto 24px; row-gap:3px; }
+    .bank-chip .bc-firma{ grid-column:1; }
+    .bank-chip .bc-bank{ grid-column:2; justify-self:end; color:var(--muted); font-weight:600; }
+    .bank-chip .bc-iban{ grid-column:1 / span 2; }
+    .bank-chip .bc-cur{ grid-column:1; text-align:left; }
+    .bank-chip .party-scope-badge, .bank-chip .scope-assignable{ grid-column:2; }
+    .bank-chip > button[data-remove-bank]{ grid-column:3; grid-row:1; }
+  }
   .inline-add-row{ display:flex; gap:8px; }
   .inline-add-row input{ flex:1; }
 
@@ -589,6 +641,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
           <button type="button" class="auth-submit" id="addBankBtn" data-i18n="add_bank_btn" style="width:auto; flex:0 0 auto; margin:0;">Ekle</button>
           <button type="button" id="deleteAllBanksBtn" style="margin-left:auto; background:transparent; border:1px solid rgba(226,84,75,0.5); color:var(--red,#E2544B); border-radius:9px; padding:9px 16px; font-weight:600; cursor:pointer;">🗑 Tüm IBAN'ları Sil</button>
+        </div>
+        <!-- 2026-08-02 (kullanıcı: "sütunların başına koy arama filtrelemeyi"):
+             Tek bir genel arama kutusu yerine, listeyle AYNI ızgarayı kullanan
+             sütun başlıkları ve her sütunun altında kendi arama kutusu. -->
+        <div class="bank-chip-head" id="banksChipHead">
+          <span data-bsort="firma">Firma</span>
+          <span data-bsort="banka">Banka</span>
+          <span data-bsort="iban">IBAN</span>
+          <span data-bsort="para">Para</span>
+          <span data-bsort="kapsam" style="justify-self:end;">Görünürlük</span>
+          <span></span>
+        </div>
+        <div class="bank-chip-head bank-chip-filtre" id="banksChipFilters">
+          <input class="b-filtre" data-alan="firma" type="search" placeholder="firma ara…" autocomplete="off">
+          <input class="b-filtre" data-alan="banka" type="search" placeholder="banka ara…" autocomplete="off">
+          <input class="b-filtre" data-alan="iban"  type="search" placeholder="IBAN / açıklama ara…" autocomplete="off">
+          <input class="b-filtre" data-alan="para"  type="search" placeholder="TL…" autocomplete="off">
+          <span class="b-sayac" id="banksChipCount" style="justify-self:end;"></span>
+          <span></span>
         </div>
         <div class="bank-chip-list" id="banksChipList"></div>
         <div class="form-msg" id="banks_msg"></div>
@@ -1263,9 +1334,58 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     return (String(m.code || '').trim() ? m.code + ' ' : '') + m.name;
   }
 
+  /* IBAN listesi: sütun bazlı arama + başlığa tıklayarak sıralama (2026-08-02) */
+  const bFiltre = { firma:'', banka:'', iban:'', para:'' };
+  let bSirala = { alan:'firma', yon:1 };
+  function bNorm(x){ return String(x || '').toLocaleLowerCase('tr').replace(/\s+/g, ''); }
+  function bGecer(b){
+    if(bFiltre.firma && bNorm(sahipFirmaAdi(b)).indexOf(bNorm(bFiltre.firma)) === -1) return false;
+    if(bFiltre.banka && bNorm(b.name).indexOf(bNorm(bFiltre.banka)) === -1) return false;
+    if(bFiltre.iban  && bNorm((b.iban || '') + ' ' + (b.note || '')).indexOf(bNorm(bFiltre.iban)) === -1) return false;
+    if(bFiltre.para  && bNorm(b.currency).indexOf(bNorm(bFiltre.para)) === -1) return false;
+    return true;
+  }
+  function bDeger(b, alan){
+    if(alan === 'firma')  return sahipFirmaAdi(b) || '';
+    if(alan === 'banka')  return b.name || '';
+    if(alan === 'iban')   return b.iban || '';
+    if(alan === 'para')   return b.currency || '';
+    if(alan === 'kapsam') return (b.appliesToFirmaIds && b.appliesToFirmaIds.length) ? '1' : '0';
+    return '';
+  }
+  function bBasliklariIsaretle(){
+    document.querySelectorAll('#banksChipHead [data-bsort]').forEach(th => {
+      const aktif = th.dataset.bsort === bSirala.alan;
+      th.classList.toggle('sirali', aktif);
+      th.textContent = th.textContent.replace(/ [▲▼]$/, '') + (aktif ? (bSirala.yon === 1 ? ' ▲' : ' ▼') : '');
+    });
+  }
+  function bTabloKur(){
+    document.querySelectorAll('#banksChipHead [data-bsort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const alan = th.dataset.bsort;
+        if(bSirala.alan === alan) bSirala.yon = -bSirala.yon;   // ikinci tık → ters sırala
+        else bSirala = { alan: alan, yon: 1 };
+        renderBanks();
+      });
+    });
+    document.querySelectorAll('.b-filtre').forEach(inp => {
+      inp.addEventListener('input', () => { bFiltre[inp.dataset.alan] = inp.value; renderBanks(); });
+    });
+  }
+
+  bTabloKur();
+
   function renderBanks(){
     const listEl = document.getElementById('banksChipList');
-    const visibleBanks = banksList.filter(visibleForActiveFirma);
+    const tumu = banksList.filter(visibleForActiveFirma);
+    const visibleBanks = tumu.filter(bGecer).sort((a, b) =>
+      bDeger(a, bSirala.alan).localeCompare(bDeger(b, bSirala.alan), 'tr', { numeric:true }) * bSirala.yon);
+    const sayacEl = document.getElementById('banksChipCount');
+    if(sayacEl) sayacEl.textContent = tumu.length
+      ? (visibleBanks.length === tumu.length ? String(tumu.length) : visibleBanks.length + ' / ' + tumu.length)
+      : '';
+    bBasliklariIsaretle();
     listEl.innerHTML = visibleBanks.length ? visibleBanks.map(b =>
       '<span class="bank-chip">' +
         // 1. SÜTUN — IBAN'IN SAHİBİ FİRMA. Görünürlükten bağımsızdır: IBAN tüm grupta
@@ -1276,7 +1396,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         '<span class="bc-cur">' + escapeHtml(b.currency || '') + '</span>' +
         scopeBadgeHtml(b) +
         '<button type="button" data-remove-bank="' + b.id + '" title="' + LBL.delete + '">✕</button></span>'
-    ).join('') : '<div class="empty-note">' + LBL.noRecordsYet + '</div>';
+    ).join('') : '<div class="empty-note">' +
+      (tumu.length ? 'Aramanıza uyan IBAN yok.' : LBL.noRecordsYet) + '</div>';
     listEl.querySelectorAll('[data-remove-bank]').forEach(btn => {
       btn.addEventListener('click', async () => {
         try{
@@ -2533,7 +2654,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   function mmgWireAllListSearches(){
     const en = MMG_LANG === 'en';
-    mmgAttachListSearch('banksChipList',        en ? 'Search IBANs (bank, IBAN, note…)' : 'IBAN ara (banka, IBAN, açıklama…)');
+    // banksChipList'te genel arama YOK — sütun bazlı filtreler kullanılıyor (2026-08-02).
     mmgAttachListSearch('customersList',        en ? 'Search customers…'                : 'Müşteri ara…');
     mmgAttachListSearch('suppliersList',        en ? 'Search suppliers…'                : 'Tedarikçi ara…');
     mmgAttachListSearch('counterpartiesList',   en ? 'Search counterparties…'           : 'Muhatap ara…');
