@@ -18,9 +18,12 @@
      mmg_active_data_scope = 'personal'  → users/{uid}
      mmg_active_data_scope = <firmaId>   → firmaAccounts/{firmaId}
      hiç seçim yoksa ve users/{uid}.companyId varsa → companies/{companyId}
-       ⚠️ ESKİ SİSTEM. firestore.rules companies/{id} altına 'members' dışında
-       yazmaya izin VERMİYOR; bu yol yalnızca geriye dönük okuma içindir.
-       Yeni modüller companies kapsamında BULUT'a yazmaz, yerelde çalışır.
+       ℹ️ ESKİ (companies) sistem — hâlâ canlı, çünkü index.html "Firma Oluştur"
+       akışı users/{uid}.companyId yazmaya devam ediyor. 2026-08-02'de
+       firestore.rules'a companies/{id}/{col}/** için üye-bazlı okuma/yazma
+       kuralı eklendi; artık bu kapsamda da buluta yazılabiliyor.
+       ⚠️ Kural CANLIYA ANCAK `firebase deploy --only firestore:rules`
+       çalıştırıldıktan sonra geçer.
 
    iframe notu: masaüstü kabuğunda araçlar iframe'de açılır. Üst pencerede
    (index.html) zaten bir Auth örneği vardır; ikinci bir örnek açmak IndexedDB
@@ -59,8 +62,10 @@ window.mmgCloud = {
   currentUser: null, currentUserName: null,
   scopeCollection: 'users', scopeId: null,
   ready: false,
-  /* Yazma güvenli mi? companies (eski sistem) kapsamında rules izin vermiyor. */
-  canWrite(){ return !!(this.currentUser && this.scopeId && this.scopeCollection !== 'companies'); }
+  /* Yazma güvenli mi? Üç kapsam da (users / firmaAccounts / companies) rules tarafından
+     destekleniyor; tek şart giriş yapılmış ve kapsam belli olması. Giriş yoksa modüller
+     yalnızca yerelde (localStorage) çalışır — veri kaybolmaz, sadece eşitlenmez. */
+  canWrite(){ return !!(this.currentUser && this.scopeId); }
 };
 
 onAuthStateChanged(auth, async (user) => {

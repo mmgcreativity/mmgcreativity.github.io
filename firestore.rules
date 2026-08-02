@@ -258,6 +258,21 @@ service cloud.firestore {
           get(/databases/$(database)/documents/companies/$(companyId)).data.ownerUid == request.auth.uid
         );
       }
+
+      // ---- 2026-08-02: VERİ ALT KOLEKSİYONLARI (gelirler, giderler, nakitAkis, mmgModules …) ----
+      // GERÇEK VE SESSİZ BİR HATA DÜZELTİLİYOR: index.html'deki "Firma Oluştur" akışı hâlâ
+      // users/{uid}.companyId yazıyor; o kullanıcı bilinçli bir "Veri Kaynağı" seçmediyse
+      // Gelirler/Giderler/Nakit Akış gibi sayfalar verisini companies/{id} ALTINA yazmaya
+      // çalışıyor. Oysa buraya yazma kuralı HİÇ YOKTU → yazmalar sessizce reddediliyor,
+      // kullanıcı "verim kayboldu" diyordu. Kural: firmanın ÜYESİ olan herkes okur/yazar.
+      // (Firma sahibi de kurulum sırasında members/{uid} altına yazıldığı için kapsanır;
+      //  böylece companies dokümanı için ayrı bir get() yapmaya gerek kalmıyor.)
+      // 'members' HARİÇ — onun kendi, daha sıkı kuralları yukarıda.
+      match /{col}/{docId=**} {
+        allow read, write: if request.auth != null
+          && col != 'members'
+          && exists(/databases/$(database)/documents/companies/$(companyId)/members/$(request.auth.uid));
+      }
     }
     // ESKİ e-posta tabanlı davet (companies sistemi). Artık davetler KOD tabanlı yapılıyor
     // (firmaInvites/{kod}, firmaAdminInvites/{kod}) ve bu koleksiyona hiçbir yer YAZMIYOR.
@@ -317,10 +332,14 @@ service cloud.firestore {
     // ---- Blog (adminin yazıları direkt yayında; diğer kullanıcılarınki admin onayına düşer) ----
     // status: 'published' (herkese görünür) | 'pending' (sadece yazan kişi + admin görebilir).
     match /blogPosts/{postId} {
-      allow read: if request.auth != null && (
-        resource.data.status == 'published' ||
-        resource.data.authorUid == request.auth.uid ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+      // 2026-08-01 (kullanıcı isteği: "misafir modunda da blog okunabilsin"):
+      // YAYINDA olan yazılar GİRİŞ YAPMADAN da okunabilir. Taslak/onay bekleyen
+      // yazılar yalnızca yazarına ve site yöneticisine görünür.
+      allow read: if resource.data.status == 'published' || (
+        request.auth != null && (
+          resource.data.authorUid == request.auth.uid ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+        )
       );
       allow create: if request.auth != null &&
         request.resource.data.authorUid == request.auth.uid &&
