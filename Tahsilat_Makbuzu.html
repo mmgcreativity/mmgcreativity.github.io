@@ -214,9 +214,6 @@
   </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script type="module" src="mmg-cloud-init.js"></script>
 <script src="mmg-store.js"></script>
 <script>
@@ -517,7 +514,8 @@
   $('mAra').addEventListener('input', render);
 
   /* ---- Dışa aktarım ---- */
-  $('btnExcel').addEventListener('click', function(){
+  $('btnExcel').addEventListener('click', async function(){
+    await S.libYukle('xlsx');
     if(!window.XLSX){ alert('Excel bileşeni yüklenemedi.'); return; }
     var rows = store.get().map(function(r){
       return {
@@ -532,7 +530,8 @@
     XLSX.writeFile(wb, 'tahsilat-makbuzlari.xlsx');
   });
 
-  $('btnListePdf').addEventListener('click', function(){
+  $('btnListePdf').addEventListener('click', async function(){
+    await S.libYukle('pdf');
     var J = window.jspdf && window.jspdf.jsPDF;
     if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
     var d = new J({ orientation:'landscape' });

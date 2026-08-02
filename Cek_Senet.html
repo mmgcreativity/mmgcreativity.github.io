@@ -146,9 +146,6 @@
   </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script type="module" src="mmg-cloud-init.js"></script>
 <script src="mmg-store.js"></script>
 <script>
@@ -404,7 +401,8 @@
   ['rTip','rKirilim','rBas','rBit','pFirma','pTip','pDurum'].forEach(function(id){ $(id).addEventListener('change', render); });
 
   /* ---------------- Dışa aktarım ---------------- */
-  function xls(rows, sheet, file){
+  async function xls(rows, sheet, file){
+    await S.libYukle('xlsx');
     if(!window.XLSX){ alert('Excel bileşeni yüklenemedi.'); return; }
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), sheet);
@@ -431,7 +429,8 @@
     rows.push(t);
     xls(rows, 'Tahsil Takvimi', 'cek-senet-tahsil-takvimi.xlsx');
   });
-  $('btnRPdf').addEventListener('click', function(){
+  $('btnRPdf').addEventListener('click', async function(){
+    await S.libYukle('pdf');
     var J = window.jspdf && window.jspdf.jsPDF;
     if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
     var P = pivotHesapla();

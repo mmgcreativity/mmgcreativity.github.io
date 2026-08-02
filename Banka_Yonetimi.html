@@ -196,9 +196,6 @@
   </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script type="module" src="mmg-cloud-init.js"></script>
 <script src="mmg-store.js"></script>
 <script>
@@ -703,7 +700,8 @@
     window.location.href = 'mailto:?subject=' + encodeURIComponent('Banka İletişim Bilgileri') +
                            '&body=' + encodeURIComponent(m);
   });
-  $('btnPaylasPdf').addEventListener('click', function(){
+  $('btnPaylasPdf').addEventListener('click', async function(){
+    await S.libYukle('pdf');
     var J = window.jspdf && window.jspdf.jsPDF;
     if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
     var secili = Array.prototype.map.call(document.querySelectorAll('.isec:checked'), function(c){ return c.dataset.id; });
@@ -729,7 +727,8 @@
   $('iAra').addEventListener('input', render);
 
   /* ================= DIŞA AKTARIM ================= */
-  function xls(rows, sheet, file){
+  async function xls(rows, sheet, file){
+    await S.libYukle('xlsx');
     if(!window.XLSX){ alert('Excel bileşeni yüklenemedi.'); return; }
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), sheet);
@@ -745,7 +744,8 @@
                'Açıklama':b.aciklama || '' };
     }), 'Limit-Risk', 'banka-limit-risk.xlsx');
   });
-  $('btnLPdf').addEventListener('click', function(){
+  $('btnLPdf').addEventListener('click', async function(){
+    await S.libYukle('pdf');
     var J = window.jspdf && window.jspdf.jsPDF;
     if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
     var d = new J({ orientation:'landscape' });
@@ -774,7 +774,8 @@
       return o;
     }), 'Bakiyeler-' + para, 'banka-bakiyeleri-' + para + '.xlsx');
   });
-  $('btnBPdf').addEventListener('click', function(){
+  $('btnBPdf').addEventListener('click', async function(){
+    await S.libYukle('pdf');
     var J = window.jspdf && window.jspdf.jsPDF;
     if(!J){ alert('PDF bileşeni yüklenemedi.'); return; }
     var fl = firmalar(), para = $('bPara').value;

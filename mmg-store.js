@@ -223,5 +223,37 @@
     sel.value = onceki;
   };
 
+  /* ==========================================================================
+     TEMBEL KÜTÜPHANE YÜKLEYİCİ (2026-08-02 — açılış hızı)
+     Excel (xlsx ~900 KB) ve PDF (jsPDF + autotable ~400 KB) kütüphaneleri her
+     modülün <head>'inde bloklayarak yükleniyordu; modüller ~2 sn geç açılıyordu
+     (kullanıcı bildirdi). Bu kütüphaneler YALNIZCA "Excel/PDF" düğmesine
+     basılınca gerekiyor. Artık ilk kullanımda indiriliyor, sonra önbellekten.
+     ========================================================================== */
+  var _lib = {};
+  function _script(url){
+    return new Promise(function(res, rej){
+      var s = document.createElement('script');
+      s.src = url; s.async = true;
+      s.onload = res;
+      s.onerror = function(){ rej(new Error('yüklenemedi: ' + url)); };
+      document.head.appendChild(s);
+    });
+  }
+  MMGStore.libYukle = function(ad){
+    if(_lib[ad]) return _lib[ad];
+    if(ad === 'xlsx'){
+      _lib[ad] = window.XLSX ? Promise.resolve()
+        : _script('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+    } else if(ad === 'pdf'){
+      _lib[ad] = (window.jspdf && window.jspdf.jsPDF) ? Promise.resolve()
+        : _script('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+            .then(function(){ return _script('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js'); });
+    } else {
+      _lib[ad] = Promise.reject(new Error('bilinmeyen kütüphane: ' + ad));
+    }
+    return _lib[ad];
+  };
+
   window.MMGStore = MMGStore;
 })();
