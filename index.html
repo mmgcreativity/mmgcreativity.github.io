@@ -470,6 +470,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     padding:6px 10px 0; background:var(--surface); border-bottom:1px solid var(--hairline);
     overflow-x:auto; overflow-y:hidden; scrollbar-width:thin;
   }
+  /* 2026-08-02: Hiç sekme açık değilken şerit yalnızca "tümünü kapat" düğmesini
+     taşıyor ve 7px'lik boş bir bant + alt çizgi bırakıyordu. Hero'nun hemen altında
+     ikinci bir yatay çizgi olarak görünüyordu (kullanıcı bildirdi). Gerçek sekme
+     yoksa şerit tamamen gizlenir. */
+  .mmg-tabbar:not(:has(.mmg-tab:not(.mmg-tab-closeall))){ display:none; }
   .mmg-tabbar::-webkit-scrollbar{ height:6px; }
   .mmg-tabbar::-webkit-scrollbar-thumb{ background:var(--hairline); border-radius:6px; }
   .mmg-tab{

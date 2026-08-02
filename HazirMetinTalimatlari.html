@@ -638,7 +638,17 @@
       document.getElementById('modalCat').insertAdjacentElement('afterend', delBtn);
     }
     const fieldsEl = document.getElementById('modalFields');
-    fieldsEl.innerHTML = tpl.fields.map(function(f){
+    // 2026-08-02 (kullanıcı isteği): "tüm hazır metin talimatlarda ÖNCE FİRMA sorulacak".
+    // Şablonların alan sırası birbirinden farklıydı (kimisinde firma 2., kimisinde 3. sıradaydı).
+    // Şablon tanımlarını tek tek değiştirmek yerine gösterim sırasını burada düzenliyoruz:
+    // firma alanı her zaman en üste çıkar, diğerlerinin kendi sırası korunur.
+    const FIRMA_ANAHTARLARI = ['firma', 'firmaAdi', 'gonderen', 'gonderenFirma'];
+    const siraliAlanlar = tpl.fields.slice().sort(function(a, b){
+      const af = FIRMA_ANAHTARLARI.indexOf(a.key) > -1 ? 0 : 1;
+      const bf = FIRMA_ANAHTARLARI.indexOf(b.key) > -1 ? 0 : 1;
+      return af - bf;   // kararlı sıralama: yalnızca firma öne alınır
+    });
+    fieldsEl.innerHTML = siraliAlanlar.map(function(f){
       if(f.type === 'select'){
         return '<div class="modal-field"><label>' + f.label + '</label><select data-key="' + f.key + '">' +
           '<option value="">— Seçiniz —</option>' +
