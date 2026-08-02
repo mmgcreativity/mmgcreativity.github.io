@@ -265,10 +265,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           "TÜM GRUP" yazısı taşıp para birimiyle ÜST ÜSTE biniyordu.
      Şimdi: 6 sütun, IBAN'a tam genişlik, sil butonu kuralı yalnız kendisine.
      ========================================================================= */
-  .bank-chip-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; max-width:980px; }
+  /* Sütun genişlikleri TEK yerden yönetilir; üç ızgara da (başlık / filtre / satır)
+     bunu kullandığı için hizalama hiçbir koşulda kaymaz. */
+  :root{
+    --iban-grid: 220px 130px 300px 46px 200px 24px;
+    --iban-genislik: 1010px;
+  }
+  .bank-chip-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; max-width:var(--iban-genislik); }
   .bank-chip{
     display:grid;
-    grid-template-columns:minmax(120px,170px) minmax(90px,130px) minmax(250px,1fr) 42px auto 24px;
+    grid-template-columns:var(--iban-grid);
     align-items:center; gap:12px;
     width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--hairline);
     border-radius:10px; padding:8px 12px; font-size:13px; font-weight:600; min-height:0;
@@ -277,9 +283,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   /* Başlık + sütun filtre satırları listeyle AYNI ızgarayı kullanır ki hizalar tutsun. */
   .bank-chip-head{
     display:grid;
-    grid-template-columns:minmax(120px,170px) minmax(90px,130px) minmax(250px,1fr) 42px auto 24px;
-    align-items:center; gap:12px; width:100%; max-width:980px; box-sizing:border-box;
-    padding:0 12px; margin-top:14px;
+    grid-template-columns:var(--iban-grid);
+    align-items:center; gap:12px; width:100%; max-width:var(--iban-genislik); box-sizing:border-box;
+    padding:0 13px; margin-top:14px;   /* satırdaki 1px kenarlığı telafi eder */
     font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
     color:var(--muted); font-family:'IBM Plex Mono',monospace;
   }
@@ -292,18 +298,27 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     background:var(--surface-2); color:var(--text); border:1px solid var(--hairline);
     border-radius:7px; font-family:'IBM Plex Mono',monospace; -webkit-appearance:none;
   }
+  .bank-chip-filtre select{
+    width:100%; box-sizing:border-box; padding:5px 8px; font-size:11px;
+    background:var(--surface-2); color:var(--text); border:1px solid var(--hairline);
+    border-radius:7px; font-family:'IBM Plex Mono',monospace; cursor:pointer;
+  }
+  .bank-chip-filtre select:focus{ outline:none; border-color:var(--brass); }
+  /* Seçim yapılmışsa kutu vurgulansın ki filtre açık olduğu gözden kaçmasın. */
+  .bank-chip-filtre select.dolu{ border-color:var(--brass); color:var(--brass); }
   .bank-chip-filtre input:focus{ outline:none; border-color:var(--brass); }
   .bank-chip-filtre .b-sayac{ font-size:11px; color:var(--muted); }
   .bank-chip-list{ margin-top:6px; }
-  .bank-chip .bc-firma{ font-weight:700; color:var(--brass); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bank-chip .bc-firma{ font-weight:700; color:var(--brass); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12px; }
   .bank-chip .bc-bank{ font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   /* IBAN tam görünsün: 26 haneli TR IBAN gruplu yazımda ~32 karakter. */
   .bank-chip .bc-iban{ font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0; white-space:nowrap; }
   .bank-chip .bc-cur{ color:var(--muted); text-align:right; font-size:12px; }
   .bank-chip .party-scope-badge, .bank-chip .scope-assignable{
-    justify-self:end; white-space:nowrap; font-size:11px; line-height:1.6; margin-top:0 !important;
-    width:auto !important; height:auto !important; border-radius:999px !important;
-    display:inline-flex !important; align-items:center;
+    justify-self:stretch; white-space:nowrap; font-size:11px; line-height:1.6; margin-top:0 !important;
+    width:100% !important; height:auto !important; border-radius:999px !important;
+    display:inline-flex !important; align-items:center; justify-content:center;
+    overflow:hidden; text-overflow:ellipsis; box-sizing:border-box;
   }
   #bank_firmaSelect{ display:none; }  /* IBAN tek firmaya (aktif) aittir — çoklu-firma seçimi mantıksız, gizlendi */
   /* Sil butonu — YALNIZCA bu seçiciye uygulanır, kapsam rozetine bulaşmaz. */
@@ -663,16 +678,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <span data-bsort="firma">Firma</span>
           <span data-bsort="banka">Banka</span>
           <span data-bsort="iban">IBAN</span>
-          <span data-bsort="para">Para</span>
-          <span data-bsort="kapsam" style="justify-self:end;">Görünürlük</span>
+          <span data-bsort="para" style="text-align:right;">Para</span>
+          <span data-bsort="kapsam" style="text-align:center;">Görünürlük</span>
           <span></span>
         </div>
         <div class="bank-chip-head bank-chip-filtre" id="banksChipFilters">
-          <input class="b-filtre" data-alan="firma" type="search" placeholder="firma ara…" autocomplete="off">
-          <input class="b-filtre" data-alan="banka" type="search" placeholder="banka ara…" autocomplete="off">
+          <select class="b-filtre b-filtre-sec" data-alan="firma" id="bFiltreFirma"><option value="">Tüm firmalar</option></select>
+          <select class="b-filtre b-filtre-sec" data-alan="banka" id="bFiltreBanka"><option value="">Tüm bankalar</option></select>
           <input class="b-filtre" data-alan="iban"  type="search" placeholder="IBAN / açıklama ara…" autocomplete="off">
           <input class="b-filtre" data-alan="para"  type="search" placeholder="TL…" autocomplete="off">
-          <span class="b-sayac" id="banksChipCount" style="justify-self:end;"></span>
+          <span class="b-sayac" id="banksChipCount" style="text-align:center;"></span>
           <span></span>
         </div>
         <div class="bank-chip-list" id="banksChipList"></div>
@@ -1353,8 +1368,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   let bSirala = { alan:'firma', yon:1 };
   function bNorm(x){ return String(x || '').toLocaleLowerCase('tr').replace(/\s+/g, ''); }
   function bGecer(b){
-    if(bFiltre.firma && bNorm(sahipFirmaAdi(b)).indexOf(bNorm(bFiltre.firma)) === -1) return false;
-    if(bFiltre.banka && bNorm(b.name).indexOf(bNorm(bFiltre.banka)) === -1) return false;
+    // Firma ve Banka artık açılır listeden seçiliyor → TAM eşleşme aranır.
+    if(bFiltre.firma && bNorm(sahipFirmaAdi(b)) !== bNorm(bFiltre.firma)) return false;
+    if(bFiltre.banka && bNorm(b.name) !== bNorm(bFiltre.banka)) return false;
     if(bFiltre.iban  && bNorm((b.iban || '') + ' ' + (b.note || '')).indexOf(bNorm(bFiltre.iban)) === -1) return false;
     if(bFiltre.para  && bNorm(b.currency).indexOf(bNorm(bFiltre.para)) === -1) return false;
     return true;
@@ -1384,7 +1400,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       });
     });
     document.querySelectorAll('.b-filtre').forEach(inp => {
-      inp.addEventListener('input', () => { bFiltre[inp.dataset.alan] = inp.value; renderBanks(); });
+      const uygula = () => { bFiltre[inp.dataset.alan] = inp.value; renderBanks(); };
+      inp.addEventListener('input', uygula);
+      inp.addEventListener('change', uygula);   // <select> için 'change' şart
     });
   }
 
@@ -1395,6 +1413,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const tumu = banksList.filter(visibleForActiveFirma);
     const visibleBanks = tumu.filter(bGecer).sort((a, b) =>
       bDeger(a, bSirala.alan).localeCompare(bDeger(b, bSirala.alan), 'tr', { numeric:true }) * bSirala.yon);
+    // Açılır filtreleri mevcut kayıtlardan doldur; kullanıcının seçimi korunur.
+    [['bFiltreFirma', 'firma', sahipFirmaAdi, 'Tüm firmalar'],
+     ['bFiltreBanka', 'banka', b => b.name,   'Tüm bankalar']].forEach(([id, alan, al, hepsi]) => {
+      const sel = document.getElementById(id);
+      if(!sel) return;
+      const secili = sel.value;
+      const degerler = Array.from(new Set(tumu.map(b => (al(b) || '').trim()).filter(Boolean)))
+        .sort((x, y) => x.localeCompare(y, 'tr', { numeric:true }));
+      sel.innerHTML = '<option value="">' + hepsi + '</option>' +
+        degerler.map(v => '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>').join('');
+      // Seçili değer artık listede yoksa (kayıt silindi vb.) filtre sıfırlanır.
+      if(secili && degerler.indexOf(secili) === -1){ bFiltre[alan] = ''; sel.value = ''; }
+      else sel.value = secili;
+      sel.classList.toggle('dolu', !!sel.value);
+    });
+
     const sayacEl = document.getElementById('banksChipCount');
     if(sayacEl) sayacEl.textContent = tumu.length
       ? (visibleBanks.length === tumu.length ? String(tumu.length) : visibleBanks.length + ' / ' + tumu.length)
