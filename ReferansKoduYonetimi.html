@@ -246,7 +246,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="panel-sub" id="mmgAssignDesc">Bu referans kodunun ait olacağı kişinin kullanıcı kodunu girin.</div>
     <div class="auth-field">
       <label id="mmgAssignUserCodeLabel">Kullanıcı Kodu</label>
-      <input type="text" id="mmgAssignUserCode" inputmode="numeric" placeholder="ör. 1018">
+      <!-- 2026-08-02: kod yazılırken isim otomatik sorgulanır; ayrıca listeden seçilebilir. -->
+      <div style="display:flex; gap:7px; align-items:stretch;">
+        <input type="text" id="mmgAssignUserCode" inputmode="numeric" placeholder="ör. 1018" style="flex:1 1 auto;">
+        <button type="button" id="mmgAssignPickBtn"
+          style="flex:0 0 auto; padding:0 13px; border-radius:9px; border:1px solid var(--hairline,#2A3448);
+                 background:var(--surface-2,#1B2536); color:var(--text,#EAEDF3); font-weight:600;
+                 font-size:12.5px; cursor:pointer; white-space:nowrap;">Listeden Seç</button>
+      </div>
+      <div id="mmgAssignWho" style="min-height:17px; margin-top:6px; font-size:12px; line-height:1.35;"></div>
+    </div>
+
+    <!-- Kullanıcı seçici -->
+    <div id="mmgAssignPicker" style="display:none; margin:-4px 0 12px;">
+      <input type="text" id="mmgAssignSearch" placeholder="Kod, ad veya e-posta ara…" style="margin-bottom:7px;">
+      <div id="mmgAssignList" style="max-height:210px; overflow:auto; border:1px solid var(--hairline,#2A3448);
+           border-radius:9px; background:var(--bg,#0D1420);"></div>
     </div>
     <div class="auth-field">
       <label id="mmgAssignCommissionLabel">Komisyon Yüzdesi</label>
@@ -493,6 +508,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     mmgAssignSaveBtn.textContent = LBL.assignSaveBtn;
     mmgAssignOverlay.classList.add('open');
     mmgAssignUserCode.focus();
+    // Kayıtlı bir kod varsa kimin olduğunu hemen göster (2026-08-02)
+    if(typeof kodSorgula === 'function'){
+      document.getElementById('mmgAssignPicker').style.display = 'none';
+      document.getElementById('mmgAssignWho').innerHTML = '';
+      if(ownerCode) kodSorgula();
+    }
   }
 
   function closeAssignModal(){
@@ -502,6 +523,100 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   document.getElementById('mmgAssignCancelBtn').addEventListener('click', closeAssignModal);
   mmgAssignOverlay.addEventListener('click', (e) => { if(e.target === mmgAssignOverlay) closeAssignModal(); });
+
+  /* ==========================================================================
+     KULLANICI KODU → İSİM (2026-08-02, kullanıcı isteği: "kodu sorgula ismi getir
+     ya da kullanıcı listesi gelsin, kod ve isim listesi, oradan seç")
+
+     Kaynak: userDirectory/{kod} = { uid, username, email }. Bu koleksiyon
+     firestore.rules'ta giriş yapmış herkese OKUMAYA açık; ayrıca kod değişince
+     KullaniciYonetimi.html tarafından güncelleniyor, yani her zaman günceldir.
+     users koleksiyonunu tarayan where() sorgusuna göre çok daha ucuz ve hızlı.
+     ========================================================================== */
+  const mmgAssignWho    = document.getElementById('mmgAssignWho');
+  const mmgAssignPicker = document.getElementById('mmgAssignPicker');
+  const mmgAssignList   = document.getElementById('mmgAssignList');
+  const mmgAssignSearch = document.getElementById('mmgAssignSearch');
+  let mmgDizin = null;          // [{ kod, ad, email }] — bir kez çekilip önbelleklenir
+  let mmgWhoTimer = null;
+
+  function whoYaz(html, renk){
+    mmgAssignWho.innerHTML = html;
+    mmgAssignWho.style.color = renk || 'var(--muted,#8D96AC)';
+  }
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  }
+
+  async function kodSorgula(){
+    const kod = mmgAssignUserCode.value.trim();
+    if(!kod){ whoYaz(''); return; }
+    whoYaz('Sorgulanıyor…');
+    try{
+      const snap = await getDoc(doc(db, 'userDirectory', kod));
+      if(!snap.exists()){
+        whoYaz('✕ Bu koda ait kullanıcı bulunamadı.', 'var(--red,#e2544b)');
+        return;
+      }
+      const d = snap.data() || {};
+      whoYaz('✓ <b>' + esc(d.username || '(isim yok)') + '</b>' +
+             (d.email ? ' · <span style="opacity:.8;">' + esc(d.email) + '</span>' : ''),
+             'var(--teal,#3FB68A)');
+    }catch(e){
+      whoYaz('Sorgulanamadı (bağlantı?).', 'var(--amber,#E3A23C)');
+    }
+  }
+  mmgAssignUserCode.addEventListener('input', () => {
+    clearTimeout(mmgWhoTimer);
+    mmgWhoTimer = setTimeout(kodSorgula, 350);   // her tuşta sorgu atmasın
+  });
+
+  async function dizinYukle(){
+    if(mmgDizin) return mmgDizin;
+    const snap = await getDocs(collection(db, 'userDirectory'));
+    const list = [];
+    snap.forEach(d => {
+      const x = d.data() || {};
+      list.push({ kod: d.id, ad: x.username || '', email: x.email || '' });
+    });
+    list.sort((a, b) => (parseInt(a.kod, 10) || 0) - (parseInt(b.kod, 10) || 0));
+    mmgDizin = list;
+    return list;
+  }
+  function listeCiz(){
+    const q = (mmgAssignSearch.value || '').toLocaleLowerCase('tr');
+    const f = (mmgDizin || []).filter(u =>
+      !q || (u.kod + ' ' + u.ad + ' ' + u.email).toLocaleLowerCase('tr').includes(q));
+    mmgAssignList.innerHTML = f.length ? f.map(u =>
+      '<div class="mmg-dizin-satir" data-kod="' + esc(u.kod) + '" style="display:flex; gap:10px; align-items:baseline;' +
+        ' padding:8px 11px; cursor:pointer; border-bottom:1px solid var(--hairline,#2A3448);">' +
+        '<span style="font-family:\'IBM Plex Mono\',monospace; font-weight:700; color:var(--brass,#C6A15B); min-width:46px;">' +
+          esc(u.kod) + '</span>' +
+        '<span style="flex:1 1 auto; font-size:12.5px;">' + esc(u.ad || '(isim yok)') + '</span>' +
+        '<span style="font-size:11px; color:var(--muted,#8D96AC); max-width:45%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' +
+          esc(u.email) + '</span>' +
+      '</div>').join('')
+      : '<div style="padding:14px; text-align:center; color:var(--muted,#8D96AC); font-size:12.5px;">Eşleşen kullanıcı yok.</div>';
+  }
+  document.getElementById('mmgAssignPickBtn').addEventListener('click', async () => {
+    const acik = mmgAssignPicker.style.display !== 'none';
+    if(acik){ mmgAssignPicker.style.display = 'none'; return; }
+    mmgAssignPicker.style.display = 'block';
+    mmgAssignList.innerHTML = '<div style="padding:14px; text-align:center; color:var(--muted,#8D96AC); font-size:12.5px;">Yükleniyor…</div>';
+    try{ await dizinYukle(); listeCiz(); mmgAssignSearch.focus(); }
+    catch(e){
+      mmgAssignList.innerHTML = '<div style="padding:14px; text-align:center; color:var(--red,#e2544b); font-size:12.5px;">Kullanıcı listesi okunamadı.</div>';
+    }
+  });
+  mmgAssignSearch.addEventListener('input', listeCiz);
+  mmgAssignList.addEventListener('click', (e) => {
+    const s = e.target.closest('.mmg-dizin-satir');
+    if(!s) return;
+    mmgAssignUserCode.value = s.dataset.kod;
+    mmgAssignPicker.style.display = 'none';
+    mmgAssignSearch.value = '';
+    kodSorgula();
+  });
 
   mmgAssignSaveBtn.addEventListener('click', async () => {
     if(!mmgAssignTargetCode) return;
