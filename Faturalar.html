@@ -19,6 +19,8 @@
 <link rel="stylesheet" href="mmg-module.css">
 <style>
   .tab-panel{ display:none; } .tab-panel.active{ display:block; }
+  /* 2026-08-02: sekme şeridi gizlendi — her ekran sol menüden ayrı ayrı açılıyor. */
+  .tabs{ display:none; }
   .mono{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; }
   tfoot td{ border-top:2px solid var(--brass-dim); font-weight:700; font-family:'JetBrains Mono',monospace; }
   tr.cari-baslik td{ background:var(--surface-2); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; }
@@ -36,7 +38,10 @@
     <h1 class="title">Alış / Satış Faturaları</h1>
     <p class="subtitle">Fatura no, vade ve KDV'siyle birlikte cari hesap takibi. Kısmi tahsilat/ödeme girilebilir; kalan tutar <b>açık hesap</b> olarak Risk Yönetimi'ne, vadesi ise Nakit Akış Tablosu'na aktarılır.</p>
   </div>
-  <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
+  <div class="top-actions" style="display:flex; gap:8px; align-items:center;">
+    <button type="button" id="btnYeniFatura" class="back-link" style="cursor:pointer; font-family:'IBM Plex Mono',monospace;">+ Yeni Fatura</button>
+    <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+  </div>
 </header>
 
 <main>
@@ -271,6 +276,12 @@
   }
   window.addEventListener('hashchange', adrestenAc);
   adrestenAc();
+  // "Yeni Fatura" sol menüde listelenmiyor; buradan açılır.
+  $('btnYeniFatura').addEventListener('click', function(){
+    var acik = $('tab-ekle').classList.contains('active');
+    sekmeAc(acik ? 'satis' : 'ekle', true);
+    $('btnYeniFatura').textContent = acik ? '+ Yeni Fatura' : '↩ Listeye Dön';
+  });
 
   /* ---------------- Form: matrah ↔ toplam ---------------- */
   function formHesapla(){

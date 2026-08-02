@@ -19,6 +19,8 @@
 <link rel="stylesheet" href="mmg-module.css">
 <style>
   .tab-panel{ display:none; } .tab-panel.active{ display:block; }
+  /* 2026-08-02: sekme şeridi gizlendi — her ekran sol menüden ayrı ayrı açılıyor. */
+  .tabs{ display:none; }
   .mono{ font-family:'IBM Plex Mono',monospace; }
   th.grp{ text-align:center; border-left:1px solid var(--hairline); }
   td.grp-l{ border-left:1px solid var(--hairline); }
@@ -43,7 +45,10 @@
     <h1 class="title">Banka Yönetimi</h1>
     <p class="subtitle">Banka limitleriniz, kullanılan riskiniz, tüm döviz cinsinden bakiyeleriniz ve banka yetkilisi iletişim bilgileri tek ekranda — hepsi firma bazında ayrılabilir.</p>
   </div>
-  <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
+  <div class="top-actions" style="display:flex; gap:8px; align-items:center;">
+    <button type="button" id="btnTanimlar" class="back-link" style="cursor:pointer; font-family:'IBM Plex Mono',monospace;">⚙ Tanımlar</button>
+    <a href="index.html" target="_top" class="back-link">← Ana Sayfa</a>
+  </div>
 </header>
 
 <main>
@@ -275,6 +280,11 @@
   }
   window.addEventListener('hashchange', adrestenAc);
   adrestenAc();
+  // Firma/banka tanımları sol menüde listelenmiyor; buradan açılır.
+  $('btnTanimlar').addEventListener('click', function(){
+    sekmeAc($('tab-tanim').classList.contains('active') ? 'limit' : 'tanim', true);
+    $('btnTanimlar').textContent = $('tab-tanim').classList.contains('active') ? '↩ Geri' : '⚙ Tanımlar';
+  });
 
   /* ================= TANIMLAR ================= */
   $('btnFEkle').addEventListener('click', function(){
