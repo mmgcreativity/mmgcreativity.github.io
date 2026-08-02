@@ -1922,6 +1922,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <select id="fAliciBanka_${idx}"></select>
           <button type="button" class="xcell-savebtn remove-alici-row" id="removeAliciRowBtn_${idx}" title="Satırı kaldır" style="color:var(--red);">✕</button>
         </div>
+        <!-- 2026-08-02 (kullanıcı: "grup dışı seçilince açıklama satırı gelsin"):
+             Grup dışı carilere yapılan transferlerde bankanın dekonta yazacağı
+             açıklama gerekir (fatura no, sözleşme vb.). Grup içi transferlerde
+             gerekmediği için satır yalnız "Grup dışı (Cari)" modunda görünür. -->
+        <div class="xcell xcell-full alici-aciklama-satiri" style="display:none;">
+          <span class="xcell-label">AÇIKLAMA</span>
+          <input type="text" id="fAliciAciklama_${idx}" placeholder="Ödeme açıklaması (örn. 2026/145 nolu fatura bedeli)" autocomplete="off">
+        </div>
         <div class="xcell xcell-full">
           <span class="xcell-label">IBAN</span>
           <input type="text" id="fAliciIban_${idx}" placeholder="TR__ ____ ____ ____ ____ ____ __" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
@@ -2011,6 +2019,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         wrap.querySelectorAll('.alici-mode-btn').forEach(b => b.classList.toggle('active', b === btn));
         populateAliciFirmaSaved(document.getElementById(`fAliciFirmaSaved_${idx}`));
         adiEl.placeholder = btn.dataset.mode === 'ici' ? 'Grup firması seçin / yazın…' : 'İsim yazın (örn. ASTEL)…';
+        // Açıklama satırı yalnız grup dışı (cari) modunda görünür.
+        const acikSatir = wrap.querySelector('.alici-aciklama-satiri');
+        if(acikSatir){
+          const disi = btn.dataset.mode === 'disi';
+          acikSatir.style.display = disi ? '' : 'none';
+          if(!disi){
+            const inp = wrap.querySelector('[id^="fAliciAciklama_"]');
+            if(inp) inp.value = '';   // gizlenince değeri de temizle ki önizlemede kalmasın
+          }
+          renderPreview();
+        }
         closeList();
         // Kullanıcı isteği (güncel): "Grup içi" seçilince tek firma otomatik DOLMASIN; alıcı adı
         // boşsa TÜM grup firmaları listede görünsün, kullanıcı seçsin. Bu yüzden burada listeyi açıyoruz.
@@ -2040,6 +2059,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const ibanEl = document.getElementById(`fAliciIban_${idx}`);
     attachIbanFormatting(ibanEl);
     ibanEl.addEventListener('input', renderPreview);
+
+    const aciklamaEl = document.getElementById(`fAliciAciklama_${idx}`);
+    if(aciklamaEl) aciklamaEl.addEventListener('input', renderPreview);
 
     document.getElementById(`fAliciBanka_${idx}`).addEventListener('change', renderPreview);
     document.getElementById(`fAliciBanka_${idx}`).addEventListener('change', () => refreshIbanSelectForFirma(`fAliciIbanSaved_${idx}`, `fAliciAdi_${idx}`, `fAliciBanka_${idx}`));
@@ -2875,10 +2897,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       const bankaEl = document.getElementById(`fAliciBanka_${idx}`);
       const ibanEl = document.getElementById(`fAliciIban_${idx}`);
       if(!adiEl) return;
+      const aciklamaEl = document.getElementById(`fAliciAciklama_${idx}`);
       rows.push({
         adi: adiEl.value.trim() || '—',
         banka: bankaEl.value || '—',
         iban: ibanEl.value.trim() || '—',
+        aciklama: (block.dataset.mode === 'disi' && aciklamaEl) ? aciklamaEl.value.trim() : '',
         tutar: gonderenTutar
       });
     });
@@ -2900,7 +2924,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.getElementById('docBody').textContent =
       gonderenIban + ' IBAN nolu ' + gonderenFirma + ' hesabından aşağıda detayı verilen para transferi işleminin yapılmasını rica ederiz.';
     document.getElementById('docTableBody').innerHTML = aliciRows.length
-      ? aliciRows.map(r => `<tr><td>${r.adi}</td><td>${r.banka}</td><td>${r.iban}</td><td>${fmtTR(r.tutar,2)} ${pb}</td></tr>`).join('')
+      ? aliciRows.map(r => `<tr><td>${r.adi}${r.aciklama ? `<br><span style="font-size:.85em; opacity:.75;">${r.aciklama}</span>` : ''}</td><td>${r.banka}</td><td>${r.iban}</td><td>${fmtTR(r.tutar,2)} ${pb}</td></tr>`).join('')
       : `<tr><td>—</td><td>—</td><td>—</td><td>0,00 ${pb}</td></tr>`;
     document.getElementById('docTotal').textContent = 'TOPLAM: ' + fmtTR(toplam,2) + ' ' + pb;
     document.getElementById('docGonderenFirmaLabel').textContent = gonderenFirma;
@@ -3284,7 +3308,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     doc.autoTable({
       startY: tableStartY,
       head: [['ALICI', 'BANKA', 'IBAN NO', 'TUTAR']],
-      body: aliciRows.length ? aliciRows.map(r => [r.adi, r.banka, r.iban, fmtTR(r.tutar,2) + ' ' + pb]) : [['—','—','—','0,00 ' + pb]],
+      // Grup dışı (cari) satırlarda AÇIKLAMA, alıcı adının altına ikinci satır olarak yazılır
+      // (kullanıcı isteği 2026-08-02). Boşsa hiç eklenmez, tablo düzeni bozulmaz.
+      body: aliciRows.length
+        ? aliciRows.map(r => [r.aciklama ? (r.adi + '\n' + r.aciklama) : r.adi, r.banka, r.iban, fmtTR(r.tutar,2) + ' ' + pb])
+        : [['—','—','—','0,00 ' + pb]],
       theme: 'grid',
       margin: { left: 14, right: 14 },
       tableWidth: 182,

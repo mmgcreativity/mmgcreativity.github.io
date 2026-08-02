@@ -29,6 +29,19 @@
              border:1px solid var(--hairline); border-radius:9px; padding:10px 13px; margin-top:10px; font-size:12.5px; }
   .kdv-ozet b{ font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--text); }
   .kdv-ozet span{ color:var(--muted); }
+  /* Sıralanabilir başlıklar + sütun arama satırı */
+  th[data-sort]{ cursor:pointer; user-select:none; white-space:nowrap; }
+  th[data-sort]:hover{ color:var(--brass); }
+  th[data-sort] .ok{ opacity:.35; font-size:10px; margin-left:4px; }
+  th[data-sort].sirali .ok{ opacity:1; color:var(--brass); }
+  tr.filtre-satiri th{ padding:4px 6px; border-top:none; }
+  tr.filtre-satiri input{
+    width:100%; box-sizing:border-box; padding:4px 7px; font-size:11px;
+    background:var(--bg); color:var(--text); border:1px solid var(--hairline); border-radius:6px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  tr.filtre-satiri input.num{ text-align:right; }
+  tr.filtre-satiri input:focus{ outline:none; border-color:var(--brass); }
 </style>
 </head>
 <body>
@@ -187,11 +200,32 @@
       <div class="panel-desc">Her cari için satış (alacak) ve alış (borç) faturalarının kalan bakiyeleri. Pozitif bakiye sizin alacağınızdır.</div>
       <div class="table-wrap">
         <table>
-          <thead><tr>
-            <th>Cari</th><th class="num">Satış Toplam</th><th class="num">Tahsil Edilen</th><th class="num">Alacak Kalan</th>
-            <th class="num">Alış Toplam</th><th class="num">Ödenen</th><th class="num">Borç Kalan</th>
-            <th class="num">Net Bakiye</th><th class="num">Vadesi Geçen Alacak</th>
-          </tr></thead>
+          <!-- 2026-08-02 (kullanıcı isteği): sütun başlıklarına tıklayınca sıralama
+               (ikinci tıkta ters), altlarında sütun bazlı arama kutuları. -->
+          <thead>
+            <tr id="cBaslik">
+              <th data-sort="ad" data-tip="metin">Cari</th>
+              <th class="num" data-sort="sT">Satış Toplam</th>
+              <th class="num" data-sort="sO">Tahsil Edilen</th>
+              <th class="num" data-sort="sK">Alacak Kalan</th>
+              <th class="num" data-sort="aT">Alış Toplam</th>
+              <th class="num" data-sort="aO">Ödenen</th>
+              <th class="num" data-sort="aK">Borç Kalan</th>
+              <th class="num" data-sort="net">Net Bakiye</th>
+              <th class="num" data-sort="gecik">Vadesi Geçen Alacak</th>
+            </tr>
+            <tr class="filtre-satiri">
+              <th><input class="c-filtre" data-alan="ad" type="text" placeholder="ara…"></th>
+              <th><input class="c-filtre num" data-alan="sT" type="text" placeholder="≥"></th>
+              <th><input class="c-filtre num" data-alan="sO" type="text" placeholder="≥"></th>
+              <th><input class="c-filtre num" data-alan="sK" type="text" placeholder="≥"></th>
+              <th><input class="c-filtre num" data-alan="aT" type="text" placeholder="≥"></th>
+              <th><input class="c-filtre num" data-alan="aO" type="text" placeholder="≥"></th>
+              <th><input class="c-filtre num" data-alan="aK" type="text" placeholder="≥"></th>
+              <th><input class="c-filtre num" data-alan="net" type="text" placeholder="≥"></th>
+              <th><input class="c-filtre num" data-alan="gecik" type="text" placeholder="≥"></th>
+            </tr>
+          </thead>
           <tbody id="cListe"></tbody>
           <tfoot id="cAlt"></tfoot>
         </table>
@@ -458,6 +492,64 @@
   ekleFormuKur('se', 'satis');
   ekleFormuKur('ae', 'alis');
 
+  /* ============ CARİ ÖZETİ: sütun sıralama + sütun arama (2026-08-02) ============
+     Kullanıcı isteği: "sütunlara arama çubuğu ve tıklayınca o sütunun verisine göre
+     sıralama koy; iki kere tıklayınca sıralamayı tersine çevir."
+     - Metin sütunu (Cari) içerir-araması yapar.
+     - Sayı sütunlarında yazılan değer ALT SINIR olarak çalışır (">= x"), başına
+       "<" yazılırsa üst sınır olur (ör. "<5000"). Türkçe sayı biçimi kabul edilir.
+     ============================================================================= */
+  var cSirala = { alan: 'net', yon: -1 };   // varsayılan: net bakiyeye göre azalan
+  var cFiltre = {};
+
+  function cSayiEsle(deger, ifade){
+    ifade = String(ifade || '').trim();
+    if(!ifade) return true;
+    var kucuk = ifade.charAt(0) === '<';
+    var sinir = S.parse(ifade.replace(/^[<>=]+/, ''));
+    if(!isFinite(sinir)) return true;
+    return kucuk ? (deger <= sinir) : (deger >= sinir);
+  }
+  function cSatirGecer(o){
+    for(var alan in cFiltre){
+      var ifade = cFiltre[alan];
+      if(!ifade) continue;
+      if(alan === 'ad'){
+        if(String(o.ad).toLocaleLowerCase('tr').indexOf(String(ifade).toLocaleLowerCase('tr')) === -1) return false;
+      } else if(!cSayiEsle(o[alan], ifade)) return false;
+    }
+    return true;
+  }
+  function cBasliklariIsaretle(){
+    var tr = $('cBaslik'); if(!tr) return;
+    Array.prototype.forEach.call(tr.querySelectorAll('th[data-sort]'), function(th){
+      var aktif = th.dataset.sort === cSirala.alan;
+      th.classList.toggle('sirali', aktif);
+      var ok = th.querySelector('.ok');
+      if(!ok){ ok = document.createElement('span'); ok.className = 'ok'; th.appendChild(ok); }
+      ok.textContent = aktif ? (cSirala.yon === 1 ? '▲' : '▼') : '↕';
+    });
+  }
+  function cTabloKur(){
+    var tr = $('cBaslik'); if(!tr) return;
+    Array.prototype.forEach.call(tr.querySelectorAll('th[data-sort]'), function(th){
+      th.addEventListener('click', function(){
+        var alan = th.dataset.sort;
+        // Aynı sütuna ikinci tık → yön tersine döner. Yeni sütun → metin A→Z, sayı büyükten küçüğe.
+        if(cSirala.alan === alan) cSirala.yon = -cSirala.yon;
+        else { cSirala.alan = alan; cSirala.yon = (alan === 'ad') ? 1 : -1; }
+        render();
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.c-filtre'), function(inp){
+      inp.addEventListener('input', function(){
+        cFiltre[inp.dataset.alan] = inp.value;
+        render();
+      });
+    });
+    cBasliklariIsaretle();
+  }
+
   /* ---------------- Render ---------------- */
   function render(){
     S.firmaDoldur($('sFirma'), 'Tüm firmalar');
@@ -526,11 +618,18 @@
       }
     });
     var CT = { sT:0, sO:0, sK:0, aT:0, aO:0, aK:0, gecik:0 };
-    var crows = Object.keys(ozet).map(function(k){ return ozet[k]; })
-      .sort(function(a,b){ return (b.sK - b.aK) - (a.sK - a.aK); })
+    var csatirlar = Object.keys(ozet).map(function(k){
+      var o = ozet[k]; o.net = o.sK - o.aK; return o;
+    }).filter(cSatirGecer);
+    csatirlar.sort(function(a, b){
+      var av = a[cSirala.alan], bv = b[cSirala.alan];
+      if(cSirala.alan === 'ad') return String(av).localeCompare(String(bv), 'tr') * cSirala.yon;
+      return ((av || 0) - (bv || 0)) * cSirala.yon;
+    });
+    var crows = csatirlar
       .map(function(o){
         Object.keys(CT).forEach(function(x){ CT[x] += o[x]; });
-        var net = o.sK - o.aK;
+        var net = o.net;
         return '<tr>' +
           '<td><b>' + esc(o.ad) + '</b></td>' +
           '<td class="num">' + S.fmt(o.sT) + '</td>' +
@@ -545,7 +644,9 @@
         '</tr>';
       });
     $('cListe').innerHTML = crows.length ? crows.join('')
-      : '<tr><td colspan="9" class="empty">Fatura kaydı yok.</td></tr>';
+      : '<tr><td colspan="9" class="empty">' +
+        (Object.keys(ozet).length ? 'Aramanıza uyan cari yok.' : 'Fatura kaydı yok.') + '</td></tr>';
+    cBasliklariIsaretle();
     $('cAlt').innerHTML = crows.length ? '<tr><td>TOPLAM</td>' +
       ['sT','sO','sK','aT','aO','aK'].map(function(x){ return '<td class="num">' + S.fmt(CT[x]) + '</td>'; }).join('') +
       '<td class="num">' + S.fmt(CT.sK - CT.aK) + '</td>' +
@@ -699,6 +800,7 @@
   /* ---------------- Başlat ---------------- */
   store.onChange(render);
   firmaStore.onChange(render);
+  cTabloKur();
   store.load();
   render();
   document.addEventListener('mmg-scope-ready', async function(){
