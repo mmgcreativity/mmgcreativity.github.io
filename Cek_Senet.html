@@ -31,7 +31,7 @@
 <header class="masthead">
   <div>
     <h1 class="title">Çek / Senet</h1>
-    <p class="subtitle">Portföydeki ve verilen çek–senetleri firma ve cari bazında takip edin. Rapor sekmesinde tahsil tarihine göre firma bazlı nakit takvimi çıkarılır; bu veriler Risk Yönetimi ekranını da besler.</p>
+    <p class="subtitle">Portföydeki ve verilen çek–senetleri firma ve cari bazında takip edin. Kayıtlar <b>vadesine göre Nakit Akış Tablosu'na otomatik aktarılır</b>; ayrıca Risk Yönetimi ekranını besler. Çek/senet artık Gelirler ekranından girilmez, tek yer burasıdır.</p>
   </div>
   <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
 </header>
@@ -452,7 +452,81 @@
     d.save('cek-senet-tahsil-takvimi.pdf');
   });
 
+  /* =========================================================================
+     NAKİT AKIŞINA OTOMATİK AKTARIM (2026-08-02)
+
+     Kullanıcı isteği: "gelirlerdeki çek girişini kaldıracağız; çek giriş
+     ekranından girilen çek, vadesine göre Nakit Akış Tablosu'na otomatik
+     aktarılacak."
+
+     Nasıl çalışıyor: Gelirler ve Giderler sayfaları kendi listelerini
+     localStorage'da tutar (mmg_gelirler_list / mmg_odemeler_list) ve oradan
+     Nakit Akış Tablosu'na işler. Biz de her kayıt değişiminde bu listelere
+     'cek_<id>' kimliğiyle satır yazıyoruz. Böylece ayrı bir "aktar" düğmesine
+     gerek kalmıyor; ekleme, tutar/vade düzeltme ve silme anında yansıyor.
+
+     Hangi kayıt gider:
+       • SADECE açık kıymetler (portföyde / teminatta).
+         Tahsil edilen, ciro edilen veya karşılıksız çıkanlar listeden ÇIKARILIR —
+         çünkü artık vade günü nakit doğurmazlar.
+       • Müşteri çeki/senedi/DBS → GELİR tarafına (alacak)
+       • Kendi çekimiz/senedimiz  → GİDER tarafına (borç)
+       • Yalnızca TL (nakit akış tablosu tek para birimiyle çalışıyor)
+
+     Kullanıcının Gelirler/Giderler'e elle girdiği satırlara DOKUNULMAZ;
+     yalnızca 'cek_' önekli kendi yazdıklarımızı yönetiriz.
+     ========================================================================= */
+  var AKIS = {
+    alacak: { anahtar:'mmg_gelirler_list', kategori:'diger' },
+    borc:   { anahtar:'mmg_odemeler_list', kategori:'diger' }
+  };
+
+  function akisaYaz(){
+    var kayitlar = { alacak:[], borc:[] };
+    store.get().forEach(function(r){
+      var tip = TIP[r.tip];
+      if(!tip) return;
+      if((r.para || 'TL') !== 'TL') return;
+      if(!r.vade || !(r.tutar > 0)) return;
+      var d = DURUM[r.durum];
+      if(!d || !d.acik) return;                       // tahsil/ciro edilmiş → nakit akışta yeri yok
+      if(r.durum === 'karsiliksiz') return;           // karşılıksız çek vade günü nakit getirmez
+      var yon = tip.alacak ? 'alacak' : 'borc';
+      kayitlar[yon].push({
+        id: 'cek_' + r.id,
+        desc: tip.ad + (r.cari ? ' · ' + r.cari : '') + (r.no ? ' (No: ' + r.no + ')' : ''),
+        amount: r.tutar,
+        dueDate: r.vade,
+        recurrence: 'once',
+        category: AKIS[yon].kategori,
+        paused: false
+      });
+    });
+
+    Object.keys(AKIS).forEach(function(yon){
+      var anahtar = AKIS[yon].anahtar;
+      var mevcut = [];
+      try{ mevcut = JSON.parse(localStorage.getItem(anahtar) || '[]') || []; }catch(e){ mevcut = []; }
+      // Kendi eski satırlarımızı at, kullanıcının kendi girdiklerini koru
+      var digerleri = mevcut.filter(function(x){ return String(x && x.id || '').indexOf('cek_') !== 0; });
+      // Aktarım tarihini koru: daha önce nakit akışa işlenmişse tekrar işlenmesin
+      var eskiler = {};
+      mevcut.forEach(function(x){ if(String(x && x.id || '').indexOf('cek_') === 0) eskiler[x.id] = x; });
+      var yeni = kayitlar[yon].map(function(k){
+        var e = eskiler[k.id];
+        // Tutar veya vade değiştiyse aktarım işaretini SIFIRLA (yeniden işlensin)
+        if(e && e.amount === k.amount && e.dueDate === k.dueDate && e.lastTransferredDate){
+          k.lastTransferredDate = e.lastTransferredDate;
+        }
+        return k;
+      });
+      try{ localStorage.setItem(anahtar, JSON.stringify(digerleri.concat(yeni))); }
+      catch(e){ console.warn('[cek-senet] nakit akış yazılamadı:', e && e.message); }
+    });
+  }
+
   /* ---------------- Başlat ---------------- */
+  store.onChange(akisaYaz);
   store.onChange(render);
   firmaStore.onChange(render);
   $('cVade').value = S.today();

@@ -701,8 +701,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   const CATS = window.MMG_INCOME_CATEGORIES || [
     { id:'nakit-tahsilat', icon:'💵', label:catLabelTxt('Nakit Tahsilat') },
-    { id:'cek-tahsilat', icon:'🧾', label:catLabelTxt('Çek Tahsilatı') },
-    { id:'senet-tahsilat', icon:'📝', label:catLabelTxt('Senet Tahsilatı') },
+    // 2026-08-02 — ÇEK/SENET ARTIK BURADAN GİRİLMİYOR.
+    // Kullanıcı isteği: "gelirlerdeki bu çek girişini kaldıracağız; çek giriş
+    // ekranından girilen çek, vadesine göre Nakit Akış Tablosu'na otomatik aktarılacak."
+    // Kayıtlar Çek/Senet modülünde tutulur ve oradan otomatik aktarılır.
+    // Kategoriler SİLİNMEDİ, yalnızca 'gizli' işaretlendi — böylece eskiden bu
+    // kategoriyle girilmiş kayıtların etiketi bozulmadan görünmeye devam eder.
+    { id:'cek-tahsilat', icon:'🧾', gizli:true, label:catLabelTxt('Çek Tahsilatı') },
+    { id:'senet-tahsilat', icon:'📝', gizli:true, label:catLabelTxt('Senet Tahsilatı') },
     { id:'pos-tahsilat', icon:'💳', label:catLabelTxt('POS Tahsilatı') },
     { id:'faiz', icon:'🏦', label:catLabelTxt('Faiz Geliri') },
     { id:'kira-geliri', icon:'🏠', label:catLabelTxt('Kira Geliri') },
@@ -737,7 +743,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     resetWizard();
     renderAll();
   }));
-  CATS.forEach(c => {
+  CATS.filter(c => !c.gizli).forEach(c => {
     catFilterMenu.appendChild(buildDropdownItem(c.icon, c.label, c.id, (id, icon, label) => {
       activeCat = id;
       catFilterTrigger.innerHTML = icon + ' ' + label + ' <span class="chev">▾</span>';
@@ -901,7 +907,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const selectedTypeBadge = document.getElementById('selectedTypeBadge');
 
   // "Teminat Mektubu" bu listede gösterilmiyor (henüz ayrı bir akışı yok)
-  CATS.filter(c => c.label !== 'Teminat Mektubu').forEach(c => {
+  CATS.filter(c => !c.gizli && c.label !== 'Teminat Mektubu').forEach(c => {
     typeChipMenu.appendChild(buildDropdownItem(c.icon, c.label, c.id, (id) => {
       chooseType(id);
       typeChipMenu.hidden = true;
@@ -1306,7 +1312,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     try{
       const header = [LBL.descriptionCol, MMGI18N.t('category_col'), MMGI18N.t('amount_col'), MMGI18N.t('due_date_col'), MMGI18N.t('recurrence_col')];
       const example = [LBL.descPlaceholderTemplate, CATS[0].label, 1000000, todayKey(), LBL.doNotRepeat];
-      const catList = CATS.map(c => c.label);
+      const catList = CATS.filter(c => !c.gizli).map(c => c.label);
       const recList = String(LBL.recurrenceOptionsList || '').split('/').map(s => s.trim()).filter(Boolean);
 
       // Tercih: ExcelJS ile gerçek açılır liste (veri doğrulama). Kategori ve Tekrar
