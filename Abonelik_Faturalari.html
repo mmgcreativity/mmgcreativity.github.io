@@ -33,7 +33,7 @@
 <header class="masthead">
   <div>
     <h1 class="title">Abonelik / Fatura Takibi</h1>
-    <p class="subtitle">Elektrik, su, internet, doğalgaz gibi düzenli faturalarınızı abone ve sözleşme numaralarıyla birlikte tek listede tutun; ödeme günü yaklaşanları görün ve tutarları Giderler'e aktarın.</p>
+    <p class="subtitle">Elektrik, su, internet, doğalgaz gibi düzenli faturalarınızı abone ve sözleşme numaralarıyla birlikte tek listede tutun; ödeme günü yaklaşanları görün ve tutarları Nakit Akış Tablosu'na aktarın.</p>
   </div>
   <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
 </header>
@@ -58,7 +58,7 @@
         <select id="lBanka" style="max-width:160px;"><option value="">Tüm bankalar</option></select>
         <button class="btn" id="btnExcel">Excel</button>
         <button class="btn" id="btnPdf">PDF</button>
-        <button class="btn primary" id="btnGidereAktar">Giderler'e Aktar</button>
+        <button class="btn primary" id="btnGidereAktar">Nakit Akış'a Aktar</button>
       </div>
       <div class="table-wrap">
         <table>
@@ -308,7 +308,7 @@
   $('btnGidereAktar').addEventListener('click', function(){
     var f = filtreli().filter(function(r){ return r.gun && r.tutar > 0 && (r.para||'TL') === 'TL'; });
     if(!f.length){ alert('Aktarılacak (ödeme günü ve tutarı girilmiş) abonelik yok.'); return; }
-    if(!confirm(f.length + ' abonelik Giderler listesine AYLIK TEKRARLI olarak eklenecek. Devam edilsin mi?')) return;
+    if(!confirm(f.length + ' abonelik, ödeme gününe göre AYLIK TEKRARLI olarak Nakit Akış Tablosu\'na aktarılacak. Devam edilsin mi?')) return;
     var d = new Date(), yil = d.getFullYear(), ay = d.getMonth() + 1;
     var mevcut = [];
     try{ mevcut = JSON.parse(localStorage.getItem('mmg_odemeler_list') || '[]') || []; }catch(e){}
@@ -328,8 +328,8 @@
     try{ localStorage.setItem('mmg_odemeler_list', JSON.stringify(mevcut)); }catch(e){
       alert('Kaydedilemedi (depolama dolu olabilir).'); return;
     }
-    alert(eklenen + ' kayıt Giderler listesine eklendi.' + (eklenen < f.length ? '\n' + (f.length - eklenen) + ' kayıt zaten vardı.' : '') +
-          '\n\nGiderler sayfasını açıp "Senkronize Et" derseniz Nakit Akış Tablosu\'na da işlenir.');
+    alert(eklenen + ' kayıt Nakit Akış Tablosu\'na aktarıldı.' +
+          (eklenen < f.length ? '\n' + (f.length - eklenen) + ' kayıt zaten aktarılmıştı.' : ''));
   });
 
   $('lListe').addEventListener('click', function(e){

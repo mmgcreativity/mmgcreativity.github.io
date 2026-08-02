@@ -34,7 +34,7 @@
 <header class="masthead">
   <div>
     <h1 class="title">Alış / Satış Faturaları</h1>
-    <p class="subtitle">Fatura no, vade ve KDV'siyle birlikte cari hesap takibi. Kısmi tahsilat/ödeme girilebilir; kalan tutar <b>açık hesap</b> olarak Risk Yönetimi'ne, vadesi ise Gelirler/Giderler üzerinden Nakit Akış Tablosu'na gider.</p>
+    <p class="subtitle">Fatura no, vade ve KDV'siyle birlikte cari hesap takibi. Kısmi tahsilat/ödeme girilebilir; kalan tutar <b>açık hesap</b> olarak Risk Yönetimi'ne, vadesi ise Nakit Akış Tablosu'na aktarılır.</p>
   </div>
   <div class="top-actions"><a href="index.html" target="_top" class="back-link">← Ana Sayfa</a></div>
 </header>
@@ -67,7 +67,7 @@
         <input id="sBit" type="date" style="max-width:145px;" title="Bitiş">
         <button class="btn" id="btnSExcel">Excel</button>
         <button class="btn" id="btnSPdf">PDF</button>
-        <button class="btn primary" id="btnSAktar">Gelirler'e Aktar</button>
+        <button class="btn primary" id="btnSAktar">Nakit Akış'a Aktar</button>
       </div>
       <div class="table-wrap">
         <table>
@@ -89,7 +89,7 @@
     <div class="kpis" id="aKpi"></div>
     <div class="panel">
       <div class="panel-title">Alış Faturaları (Borçlarım)</div>
-      <div class="panel-desc">Ödenmemiş alış faturaları nakit çıkış planınızı oluşturur. "Giderler'e Aktar" ile Nakit Akış Tablosu'na işlenir.</div>
+      <div class="panel-desc">Ödenmemiş alış faturaları nakit çıkış planınızı oluşturur. "Nakit Akış'a Aktar" ile vadesine göre tabloya işlenir.</div>
       <div class="btn-row" style="margin-bottom:10px;">
         <input id="aAra" type="text" placeholder="Cari, fatura no ara…" style="max-width:240px;">
         <select id="aFirma" style="max-width:165px;"></select>
@@ -102,7 +102,7 @@
         </select>
         <button class="btn" id="btnAExcel">Excel</button>
         <button class="btn" id="btnAPdf">PDF</button>
-        <button class="btn primary" id="btnAAktar">Giderler'e Aktar</button>
+        <button class="btn primary" id="btnAAktar">Nakit Akış'a Aktar</button>
       </div>
       <div class="table-wrap">
         <table>
@@ -547,12 +547,13 @@
      Aynı fatura ikinci kez aktarılırsa tutarı GÜNCELLENİR (mükerrer satır oluşmaz). */
   function aktar(tur){
     var anahtar = tur === 'satis' ? 'mmg_gelirler_list' : 'mmg_odemeler_list';
-    var etiket  = tur === 'satis' ? 'Gelirler' : 'Giderler';
+    var etiket  = tur === 'satis' ? 'tahsilat (gelir)' : 'ödeme (gider)';
     var list = store.get().filter(function(r){
       return r.tur === tur && (r.para||'TL') === 'TL' && kalan(r) > 0 && r.vade;
     });
     if(!list.length){ alert('Aktarılacak açık fatura yok.'); return; }
-    if(!confirm(list.length + ' faturanın KALAN tutarı ' + etiket + ' listesine yazılacak. Devam edilsin mi?')) return;
+    if(!confirm(list.length + ' faturanın KALAN tutarı, vadesine göre Nakit Akış Tablosu\'na ' + etiket +
+                ' olarak yazılacak. Devam edilsin mi?')) return;
 
     var mevcut = [];
     try{ mevcut = JSON.parse(localStorage.getItem(anahtar) || '[]') || []; }catch(e){}
@@ -571,8 +572,7 @@
     });
     try{ localStorage.setItem(anahtar, JSON.stringify(Object.keys(byId).map(function(k){ return byId[k]; }))); }
     catch(e){ alert('Kaydedilemedi (depolama dolu olabilir).'); return; }
-    alert(yeni + ' yeni kayıt eklendi, ' + guncel + ' kayıt güncellendi.\n\n' +
-          etiket + ' sayfasını açıp "Senkronize Et" derseniz Nakit Akış Tablosu\'na işlenir.');
+    alert(yeni + ' yeni kayıt Nakit Akış Tablosu\'na aktarıldı, ' + guncel + ' kayıt güncellendi.');
   }
   $('btnSAktar').addEventListener('click', function(){ aktar('satis'); });
   $('btnAAktar').addEventListener('click', function(){ aktar('alis'); });
